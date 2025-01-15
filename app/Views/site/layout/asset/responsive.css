@@ -1,0 +1,96 @@
+@media (max-width: 1680px){
+
+	.violator .violator-logo {
+	    height: auto;
+	}
+	.violator .violator-logo {
+	    width: auto;
+	    z-index: 999;
+	    position: absolute;
+	    right: 0px;
+	    margin-top: 20px;
+	    margin-right: 10px;
+	}
+
+}
+
+@media (max-width: 1366px){
+
+}
+
+@media (max-width: 1280px){
+
+}
+
+@media (max-width: 1024px){
+
+	.violator > .violator-img{
+        height: 125px !important;
+    }
+
+}
+
+@media (max-width: 768px){
+
+	.violator > .violator-img{
+        height: 85px !important;
+    }
+
+	.violator .violator-logo {
+	    height: auto;
+	}
+	.violator .violator-logo {
+	    width: auto;
+	    z-index: 999;
+	    position: absolute;
+	    right: 0px;
+	    margin-top: 20px;
+	    margin-right: 10px;
+	}
+}
+
+@media (max-width: 767px) {
+	#notificationModal .modal-dialog {
+		left: -10px !important;
+		bottom: 0px !important;
+	}
+}
+
+@media (max-width: 640px){
+
+	.violator > .violator-img{
+        height: 110px !important;
+    }
+    .violator > a > img{
+        margin: 0 !important;
+        padding: 6px 3px 0px 0px;
+        width: 8% !important;
+    }	
+
+}
+
+@media (max-width: 480px){
+
+	.violator > .violator-img{
+        height: 104px !important;
+    }
+    .violator > a > img{
+        margin: 0 !important;
+        padding: 3px 0px 0px 0px;
+        width: 8% !important;
+    } 
+
+}
+
+@media (max-width: 320px){
+
+	.violator > .violator-img{
+        height: 80px !important;
+    }
+    .violator > a > img{
+        margin: 0 !important;
+        padding: 3px 0px 0px 0px;
+        width: 10% !important;
+    }  
+
+}

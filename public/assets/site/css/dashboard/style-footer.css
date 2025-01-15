@@ -1,0 +1,44 @@
+.uifooter{
+	padding: 1em 1.5em;
+	background-color: #301311;
+	color: #fff;
+}
+.uifooter .row{
+	display: flex;
+	align-items: center;
+	font-size: 0.8em;
+}
+.uifooter .lmilogo{
+	max-width: 12em;
+	width: 80%;
+	float: right;
+}
+
+
+@media only screen and (max-width : 1500px) {
+
+}
+
+@media only screen and (max-width : 1200px) {
+
+}
+
+@media only screen and (max-width : 991px) {
+
+}
+
+@media only screen and (max-width : 767px) {
+
+}
+
+@media only screen and (max-width : 576px) {
+
+	.uifooter .row{
+		text-align: center;
+	}
+	.uifooter .lmilogo{
+		float: none;
+		margin-top: 1em;
+	}
+
+}

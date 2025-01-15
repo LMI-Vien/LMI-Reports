@@ -1,0 +1,230 @@
+header{
+    border-bottom: 1px solid #EFF1F9;
+    background-color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #fff;
+    z-index: 999;
+}
+.navbar{
+    padding: 0;
+    justify-content: space-between;
+    z-index: 999;
+}
+.navbar-toggler{
+    color: #301311;
+}
+.navbar-brand{
+    display: inline-block !important;
+    margin: 0;
+    padding: 1em 1em .5em 1em;
+}
+.uilogo{
+    width: 15em;
+    display: block;
+}
+.navbar-expand-md .navbar-nav .nav-link{
+    padding: .5em;
+    margin: 0 1em;
+    font-size: 0.9em;
+    border-bottom: 5px solid transparent;
+    color: #301311;
+    font-weight: 400;
+}
+.navbar-expand-md .navbar-nav .nav-link:hover{
+    border-color: #301311;
+    color: #301311;
+}
+.navbar-expand-md .navbar-nav .nav-link.active{
+    border-color: #ffc107;
+    color: #ffc107;
+}
+.navbar-expand-md .navbar-nav .nav-link i{
+    margin-right: 0.5em;
+}
+.uiuserbox{
+    padding: 1em;
+    position: relative;
+}
+.uiusertoggle{
+    border: 0;
+    background: none;
+    height: auto;
+    padding: 0;
+}
+.uiuser{
+    display: flex;
+    color: #301311;
+    align-items: center;
+}
+.uiuser i{
+    margin-left: 0.5em;
+    font-size: 0.8em;
+}
+.uiuseravatarcontainer{
+    width: 3em;
+    height: 3em;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
+.uiavatar{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    object-fit: contain;
+    object-position: center;
+}
+.uiusername{
+    margin-left: 1em;
+    text-align: left;
+}
+.uiname{
+    font-size: 1em;
+    font-weight: 400;
+}
+.uiday{
+    font-size: 0.8em;
+    font-weight: 400;
+}
+.dropdown-toggle::after{
+    content: '';
+    border: 0;
+    display: none;
+}
+.uiusertoggle:focus {
+    outline: 0;
+}
+.uiuserbox .dropdown-menu{
+    border-radius: 1em;
+    border: 0;
+    background-color: #fff;
+    padding: 1em;
+    box-shadow: 0 2px 6px rgba(0, 21, 64, 0.03), 0 10px 20px rgba(0, 21, 64, 0.03);
+    width: 100%;
+    font-size: 1em;
+}
+.uiuserbox .dropdown-menu ui{
+    font-size: 1.5em;
+}
+.uiuserbox .dropdown-menu i{
+    color: #301311;
+    margin-right: 0.5em;
+}
+.uiuserbox .dropdown-menu a{
+    color: #301311;
+}
+.uiuserbox .dropdown-menu a:hover{
+    color: #301311;
+    text-decoration: none;
+}
+.uilogoutmobile{
+    display: none;
+}
+#home .navbar-nav{
+    display: none;
+}
+#home header{
+    border-bottom: 0;
+}
+.scrolled .uioptiongroup{
+    background-color: #fff;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    position: fixed;
+    z-index: 998;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-bottom: 1px solid #EFF1F9;
+}
+@media only screen and (max-width : 1500px) {
+    .uilogo{
+        max-width: 12em;
+    }
+
+}
+
+@media only screen and (max-width : 1200px) {
+
+}
+
+@media only screen and (max-width : 991px) {
+
+}
+
+@media only screen and (max-width : 767px) {
+    .uiuser .uiusername,
+    .uiuser i{
+        display: none;
+    }
+    header .navbar-collapse{
+        display: block;
+        position: absolute;
+        width: 100%;
+        background-color: #301311;
+        top: 85px;
+        left: 0;
+        z-index: 1000;
+    }
+    header .navbar-nav{
+        padding: 1em 0em;
+    }
+    .navbar-brand{
+        padding: 0.5em;
+    }
+    .uilogo {
+        max-width: 12em;
+        width: 100%;
+    }
+    .navbar-toggler{
+        height: 100%;
+        border-radius: 0;
+        font-size: 1em;
+        margin: 0;
+        padding: 1.5em;
+    }
+    .uiheaderright{
+        display: flex;
+        align-items: center;
+    }
+    .navbar-expand-md .navbar-nav .nav-link{
+        border: 0;
+        margin: 0;
+        padding: 1em 1.5em;
+        color: #fff;
+    }
+    .navbar-expand-md .navbar-nav .nav-link i{
+        margin-right: 1.5em;
+    }
+    .uiusertoggle{
+        pointer-events: none;
+    }
+    .navbar-expand-md .navbar-nav .nav-link.uilogoutmobile{
+        display: block;
+        border-top: 1px solid rgba(0,0,0,0.2);
+        margin-top: 1em;
+        padding-top: 1.5em;
+    }
+    #home .navbar-nav{
+        display: block;
+    }
+
+}
+
+@media only screen and (max-width : 576px) {
+    header .navbar-collapse{
+        top: 70px;
+    }
+    .uilogo{
+        max-width: 10em;
+    }
+    .uiuserbox{
+        font-size: 0.8em;
+    }
+}
