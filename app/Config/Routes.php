@@ -8,6 +8,11 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Login::login');
 $routes->get('/dashboard', 'Dashboard::index');
 
+
+//sample API 
+$routes->get('/api/send_system_info', 'Dashboard::send_system_info');
+$routes->get('/api/get_users', 'Dashboard::get_users');
+
 $routes->group('login/', static function ($routes) {
     $routes->get('/', 'Login::login');
     $routes->post('auth', 'Login::auth');
@@ -18,7 +23,9 @@ $routes->group('login/', static function ($routes) {
 // ============================CMS START=========================================
 $routes->group('cms/', static function ($routes) { 
 	$routes->get('/', 'Cms\Login::login');
-
+    $routes->get('home', 'Cms\Home::index');
+    $routes->get('users', 'Cms\User::index');
+    $routes->get('sample', 'Cms\Roles::index');    
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');
         $routes->get('forgot', 'Cms\Login::forgot');
@@ -29,7 +36,7 @@ $routes->group('cms/', static function ($routes) {
     });
 
     $routes->group('/', ['filter' => 'middleware_dynamic'], static function ($routes) {
-        $routes->get('home', 'Cms\Home::index');
+
         $routes->group('Error_logs/', static function ($routes) {
             $routes->get('/', 'Cms\Error_logs::index');
         });

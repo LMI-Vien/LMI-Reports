@@ -1,4 +1,3 @@
-
 <style>
 .main-sidebar {
   background-color: #301311;
@@ -32,7 +31,7 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-yellow elevation-4">
   <!-- Brand Logo -->
-  <a href="<?= base_url('cms/dashboard')?>" class="brand-link">
+  <a href="<?= base_url('cms/home')?>" class="brand-link">
     <img src="<?= base_url();?>assets/img/lmi_logo_box.png" alt="AdminLTE Logo" class="brand-image" style="opacity: .8">
     <span class="brand-text font-weight-light">LMI Portal</span>
   </a>
@@ -53,18 +52,18 @@
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
         <li class="nav-item">
-          <a href="/" target="_blank" class="nav-link">
+          <a href="<?= base_url('cms/users')?>" class="nav-link active">
             <i class="nav-icon fas fa-globe"></i>
             <p>
-              Sales
+              Users
             </p>
           </a>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
+          <a href="<?= base_url('cms/sample');?>" class="nav-link <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
             <i class="nav-icon fas fa-home"></i>
             <p>
-              Trade
+              Roles
             </p>
           </a>
         </li>
@@ -77,15 +76,30 @@
           </a>
         </li>
 
- 
-          <li class="nav-item">
-            <a href="#" class="nav-link <?= ($page ?? '') === 'users' ? 'active' : '' ?>">
-              <i class="nav-icon fas fa-users"></i>
-              <p>
-                Users
-              </p>
-            </a>
-          </li>
+        <!-- Users Menu with Submenu -->
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link <?= ($page ?? '') === 'users' ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-users"></i>
+            <p>
+              Users
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="<?= base_url('cms/users/subuser1') ?>" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Sub User 1</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?= base_url('cms/users/subuser2') ?>" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Sub User 2</p>
+              </a>
+            </li>
+          </ul>
+        </li>
       </ul>
     </nav>
     <!-- /.sidebar-menu -->

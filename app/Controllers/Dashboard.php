@@ -2,22 +2,38 @@
 
 namespace App\Controllers;
 
-use App\Libraries\Recaptha;
-use CodeIgniter\Exceptions\PageNotFoundException;
-use CodeIgniter\Files\Exceptions\FileNotFoundException;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\ResourceController;
+use Config\Database;
 
 class Dashboard extends BaseController
 {
     protected $session;
-
+    use ResponseTrait;
+    private $auth_token;
+    protected $db;
     public function __construct()
 	{
 	    $this->session = session();
+	    $this->auth_token = getenv('API_AUTH_TOKEN');
+        helper('url');
+        $this->db = Database::connect('application1');
 	    if (!$this->session->get('sess_site_uid')) {
 	        redirect()->to(base_url('login'))->send();
 	        exit;
 	    }
 	}
+
+    private function check_token()
+    {
+        $request_token = $this->request->getHeaderLine('Authorization');
+
+        if ($request_token !== $this->auth_token) {
+            return $this->failUnauthorized('Invalid or missing token.');
+        }
+
+        return true;
+    }
 
 	public function index()
 	{
@@ -45,5 +61,37 @@ class Dashboard extends BaseController
 			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
+	}
+
+    public function send_system_info()
+    {
+        // if ($this->check_token() !== true) {
+        //     return;
+        // }
+
+        $php_version = phpversion();
+
+        $mysql_version = null;
+        $db = Database::connect('application1');
+        if ($db->connect_errno) {
+            $mysql_version = 'Unable to connect to MySQL: ' . $db->connect_error;
+        } else {
+            $mysql_version = $db->getVersion();
+        }
+
+        $data = [
+            'php_version' => $php_version,
+            'mysql_version' => $mysql_version
+        ];
+
+        return $this->respond($data);
+    }
+
+	public function get_users()
+	{
+	    $builder = $this->db->table('cms_users');
+	    $users = $builder->get()->getResult();
+
+	    return $this->respond($users);
 	}
 }

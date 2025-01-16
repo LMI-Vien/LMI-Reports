@@ -5,8 +5,10 @@ namespace App\Controllers\Cms;
 use App\Controllers\BaseController;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\ResourceController;
 
-class Home extends BaseController
+class User extends BaseController
 {
     protected $session;
 
@@ -26,9 +28,9 @@ class Home extends BaseController
 			"description"   =>  "LMI CMS Portal Wep application",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Home";
-		$data['PageName'] = 'Home';
-		$data['content'] = "cms/home/home.php";
+		$data['title'] = "User";
+		$data['PageName'] = 'User';
+		$data['content'] = "cms/user/user.php";
 
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
@@ -38,14 +40,14 @@ class Home extends BaseController
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
-        		"assets/css/all.min.css",
         		"assets/site/css/login/login_style.css",
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);
 		// return view('cms/home', [
 		// 	'page' => 'home'
-		// ]);			
+		// ]);		
+		return $this->respond($data);	
 	}
 
 }
