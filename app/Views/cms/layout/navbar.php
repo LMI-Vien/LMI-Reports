@@ -2,6 +2,8 @@
 .main-sidebar {
   background-color: #301311;
 }
+
+
 </style>
 <nav class="main-header navbar navbar-expand navbar-white elevation-2">
   <!-- Left navbar links -->
@@ -9,11 +11,7 @@
     <li class="nav-item">
       <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
     </li>
-    <li class="nav-item d-none d-sm-inline-block <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
-      <a href="" class="nav-link">Dashboard</a>
-    </li>
-    <li class="nav-item d-none d-sm-inline-block <?= ($page ?? '') === 'profile' ? 'active' : '' ?>">
-      <!-- <a href="/user/profile/" class="nav-link">Edit Profile</a> -->
+    <li class="nav-item d-none d-sm-inline-block <?= ($PageUrl ?? '') === 'home' ? 'active' : '' ?>">
     </li>
   </ul>
 
@@ -39,7 +37,7 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <!-- Sidebar user panel (optional) -->
-    <div class="user-panel my-3 py-2 d-flex rounded-lg <?= ($page ?? '') === 'profile' ? 'bg-yellow' : '' ?>">
+    <div class="user-panel my-3 py-2 d-flex rounded-lg <?= ($PageUrl ?? '') === 'profile' ? 'bg-yellow' : '' ?>">
       <div class="image">
         <img src="" alt="">
       </div>
@@ -51,35 +49,10 @@
     <!-- Sidebar Menu -->
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-        <li class="nav-item">
-          <a href="<?= base_url('cms/users')?>" class="nav-link active">
-            <i class="nav-icon fas fa-globe"></i>
-            <p>
-              Users
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="<?= base_url('cms/sample');?>" class="nav-link <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
-            <i class="nav-icon fas fa-home"></i>
-            <p>
-              Roles
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link <?= ($page ?? '') === 'article' ? 'active' : '' ?>">
-            <i class="nav-icon fas fa-scroll"></i>
-            <p>
-              Sell In
-            </p>
-          </a>
-        </li>
-
         <!-- Users Menu with Submenu -->
-        <li class="nav-item has-treeview">
-          <a href="#" class="nav-link <?= ($page ?? '') === 'users' ? 'active' : '' ?>">
-            <i class="nav-icon fas fa-users"></i>
+        <li class="nav-item has-treeview <?= in_array($PageUrl ?? '', ['Users', 'Roles']) ? 'menu-open' : '' ?> <?= in_array($PageUrl ?? '', ['Users', 'Roles']) ? 'active' : '' ?>">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-user"></i>
             <p>
               Users
               <i class="right fas fa-angle-left"></i>
@@ -87,21 +60,80 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="<?= base_url('cms/users/subuser1') ?>" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Sub User 1</p>
+              <a href="<?= base_url('cms/users') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Users' ? 'active' : '' ?>">
+                <i class="far fa-user nav-icon"></i>
+                <p>User</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="<?= base_url('cms/users/subuser2') ?>" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Sub User 2</p>
+              <a href="<?= base_url('cms/roles') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Roles' ? 'active' : '' ?>">
+                <i class="fas fa-user-tag nav-icon"></i>
+                <p>Role</p>
               </a>
             </li>
           </ul>
         </li>
+        
+        <!-- Masterfile Menu with Submenu -->
+        <li class="nav-item has-treeview <?= ($PageUrl ?? '') === 'Masterfile' ? 'menu-open' : '' ?>">
+          <a href="#" class="nav-link <?= ($PageUrl ?? '') === 'Masterfile' ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-file"></i>
+            <p>
+              Masterfile
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="<?= base_url('cms/agency') ?>" class="nav-link">
+                <i class="fas fa-building nav-icon"></i>
+                <p>Agency</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?= base_url('cms/area') ?>" class="nav-link">
+                <i class="fas fa-map-marker-alt nav-icon"></i>
+                <p>Area</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?= base_url('cms/area-sales-coordinator') ?>" class="nav-link">
+                <i class="fas fa-users-cog nav-icon"></i>
+                <p>Area Sales Coordinator</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?= base_url('cms/brand-ambassador') ?>" class="nav-link">
+                <i class="fas fa-user-tie nav-icon"></i>
+                <p>Brand Ambassador</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?= base_url('cms/store-branch') ?>" class="nav-link">
+                <i class="fas fa-store nav-icon"></i>
+                <p>Store/Branch</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?= base_url('cms/team') ?>" class="nav-link">
+                <i class="fas fa-users nav-icon"></i>
+                <p>Team</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('cms/site-menu') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Site Menu' ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-bars"></i>
+            <p>
+              Site Menu
+            </p>
+          </a>
+        </li>
       </ul>
     </nav>
+
+
     <!-- /.sidebar-menu -->
   </div>
   <!-- /.sidebar -->

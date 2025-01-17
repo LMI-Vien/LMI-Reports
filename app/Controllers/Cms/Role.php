@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Roles extends BaseController
+class Role extends BaseController
 {
     protected $session;
 
@@ -27,7 +27,9 @@ class Roles extends BaseController
 		);
 		$data['title'] = "Roles";
 		$data['PageName'] = 'Roles';
+		$data['PageUrl'] = 'Roles';
 		$data['content'] = "cms/roles/roles.php";
+		$data['buttons'] = ['add', 'search'];
 
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
@@ -37,6 +39,7 @@ class Roles extends BaseController
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
+        		"assets/css/all.min.css",
         		"assets/site/css/login/login_style.css",
         		"assets/css/style.css"
                     );

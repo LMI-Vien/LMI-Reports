@@ -8,10 +8,46 @@
                     <div class="collapse navbar-collapse" id="navbarCollapse">
                         <div class="navbar-nav">
                             <!-- GET THE SITE MENU HERE -->
-                            <a href="#" class="nav-item nav-link active"><i class="fas fa-briefcase"></i>Report 1</a>
-                            <a href="#" class="nav-item nav-link"><i class="fas fa-briefcase"></i>Report 2</a>
-                            <a href="#" class="nav-item nav-link"><i class="fas fa-briefcase"></i>Report 3</a>
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" id="dashboardMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-dashboard"></i> Dashboard
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dashboardMenu">
+                                    <a class="dropdown-item" href="#">Overview</a>
+                                    <a class="dropdown-item" href="#">Analytics</a>
+                                    <a class="dropdown-item" href="#">Reports</a>
+                                </div>
+                            </div>
+                            
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" id="watsonsMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-dashboard"></i> Watsons Sell Through Report
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="watsonsMenu">
+                                    <a class="dropdown-item" href="#">By Brand Overall</a>
+                                    <a class="dropdown-item" href="#">By Brand Category</a>
+                                    <a class="dropdown-item" href="#">By Brand SKU</a>
+                                    <a class="dropdown-item" href="#">Report Overall Category</a>
+                                </div>
+                            </div>
+                            
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" id="salesTargetMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-dashboard"></i> Sales Target
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="salesTargetMenu">
+                                    <a class="dropdown-item" href="#">By Account Overall</a>
+                                    <a class="dropdown-item" href="#">By Brand Overall</a>
+                                    <a class="dropdown-item" href="#">By Brand Category</a>
+                                    <a class="dropdown-item" href="#">Report</a>
+                                    <a class="dropdown-item" href="#">Channel Account Sales Report</a>
+                                </div>
+                            </div>
+
+                            <a href="#" class="nav-item nav-link"><i class="fa fa-dashboard"></i>BA</a>
+                            <a href="#" class="nav-item nav-link"><i class="fa fa-dashboard"></i>ASC</a>
                         </div>
+
                     </div>
                 </div>
                 <div class="uiuserbox">

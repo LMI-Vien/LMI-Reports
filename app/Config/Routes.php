@@ -25,8 +25,11 @@ $routes->group('cms/', static function ($routes) {
 	$routes->get('/', 'Cms\Login::login');
     $routes->get('registration', 'Cms\Login::registration');
     $routes->get('home', 'Cms\Home::index');
-    $routes->get('users', 'Cms\User::index');
-    $routes->get('sample', 'Cms\Roles::index');    
+    $routes->get('users', 'Cms\User::index'); 
+    $routes->get('sample', 'Cms\Roles::index'); //testing only
+    $routes->get('site-menu', 'Cms\Site_menu::index');
+    $routes->get('roles', 'Cms\Role::index');
+
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');
         $routes->get('forgot', 'Cms\Login::forgot');
@@ -42,4 +45,6 @@ $routes->group('cms/', static function ($routes) {
             $routes->get('/', 'Cms\Error_logs::index');
         });
 	});
+
+    $routes->post('global_controller', 'cms\Global_controller::index');
 });

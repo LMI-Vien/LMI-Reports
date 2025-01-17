@@ -1259,7 +1259,7 @@
 
                             echo '<script>';
                             echo '      $(document).ready(function(){';
-                            echo '          var url ="' . base_url("dynamic/global_controller/captcha_ci") . '";';
+                            echo '          var url ="' . base_url("cms/global_controller/captcha_ci") . '";';
                             echo '          aJax.get(url,function(result){';
                             echo '              var obj = isJson(result);';
                             echo '              $(".captcha_ci_input").attr("cpt-val",obj.cpt_val);';
@@ -1267,7 +1267,7 @@
                             echo '          });';
                             echo '      });';
                             echo '      $(document).on("click",".captcha_ci_refresh", function(e){';
-                            echo '          var url ="' . base_url("dynamic/global_controller/captcha_ci") . '";';
+                            echo '          var url ="' . base_url("cms/global_controller/captcha_ci") . '";';
                             echo '          aJax.get(url,function(result){';
                             echo '              var obj = isJson(result);';
                             echo '              $(".captcha_ci_input").attr("cpt-val",obj.cpt_val);';

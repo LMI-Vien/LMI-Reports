@@ -32,7 +32,7 @@ $(document).on('click','#btn_login',()=>{
     }
      else {
      //  user pass based login
-        $.post(base_url + 'login/auth', {data: formData},
+        $.post(base_url + 'cms/login/validate_log', {data: formData},
         (response) => {
             var result = response.trim();
             if(result === 'valid') {

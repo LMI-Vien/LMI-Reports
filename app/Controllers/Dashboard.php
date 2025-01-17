@@ -65,10 +65,6 @@ class Dashboard extends BaseController
 
     public function send_system_info()
     {
-        // if ($this->check_token() !== true) {
-        //     return;
-        // }
-
         $php_version = phpversion();
 
         $mysql_version = null;

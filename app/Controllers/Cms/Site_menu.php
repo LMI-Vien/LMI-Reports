@@ -8,7 +8,7 @@ use CodeIgniter\Files\Exceptions\FileNotFoundException;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\ResourceController;
 
-class User extends BaseController
+class Site_menu extends BaseController
 {
     protected $session;
 
@@ -24,16 +24,16 @@ class User extends BaseController
 	public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "LMI CMS Portal test",
-			"description"   =>  "LMI CMS Portal Wep application",
+			"title"         =>  "Site Menu",
+			"description"   =>  "Site Menu",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Users";
-		$data['PageName'] = 'Users';
-		$data['PageUrl'] = 'Users';
+		$data['title'] = "Site Menu";
+		$data['PageName'] = 'Site Menu';
+		$data['PageUrl'] = 'Site Menu';
 		$data['buttons'] = ['add', 'search'];
-		$data['content'] = "cms/User/User.php";
-
+		$data['content'] = "cms/sitemenu/menus.php";
+		
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
@@ -47,7 +47,7 @@ class User extends BaseController
         		"assets/site/css/login/login_style.css",
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);	
+		return view("cms/layout/template", $data);
 	}
 
 }

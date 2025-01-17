@@ -575,29 +575,6 @@ class Custom_model extends Model
         return $result->getResult();
     }
 
-    public function get_default_promo_barcode($site_id) {
-        $builder = $this->db->table('site_promo_barcode')
-                            ->select('id')
-                            ->where('site_id', $site_id)
-                            ->where('promo_barcode_is_default', 1);
-        return $builder->get()->getRow('id');
-    }
-
-    public function get_default_wtb_promo_barcode($site_id) {
-        $builder = $this->db->table('site_promo_barcode')
-                            ->select('id')
-                            ->where('site_id', $site_id)
-                            ->where('promo_barcode_is_default', 2);
-        return $builder->get()->getRow('id');
-    }
-        
-    public function purge_si_platform($si_id) {
-        $return = $this->db
-			 	->table('site_information_platform')
-				->where("site_information_id", $si_id)
-				->delete();
-        return true;	
-    }
 
     public function get_list_fields($table){
         $db_fields = $this->db->getFieldNames($table);

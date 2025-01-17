@@ -440,96 +440,78 @@ var validate = {
 var modal = {
 	success : function(message){
 		html = '<center><i class="text-success fa fa-5x fa-check-circle"></i><br><h2>'+message+'</h2></center>';
-		bootbox.alert({
-			closeButton: false,
-				message: html,
-				callback: function(){
-					location.reload()
-				}
-		});
+		// bootbox.alert({
+		// 	closeButton: false,
+		// 		message: html,
+		// 		callback: function(){
+		// 			location.reload()
+		// 		}
+		// });
 	},
 	standard_confirm : function(message,btn,cb){
-		bootbox.confirm({
-		   	message: message,
-		   	buttons: {
-			   	confirm: {
-				   label: btn,
-				   className: 'btn-primary'
-			   	},
-			   	cancel: {
-				   label: 'Cancel',
-				   className: 'btn-default'
-			   	}
-		   	},
-		   	callback: cb
-		});
+		// bootbox.confirm({
+		//    	message: message,
+		//    	buttons: {
+		// 	   	confirm: {
+		// 		   label: btn,
+		// 		   className: 'btn-primary'
+		// 	   	},
+		// 	   	cancel: {
+		// 		   label: 'Cancel',
+		// 		   className: 'btn-default'
+		// 	   	}
+		//    	},
+		//    	callback: cb
+		// });
 	},
 	confirm : function(message,cb){
-		bootbox.confirm({
-		   	message: message,
-		   	buttons: {
-			   	confirm: {
-				   label: 'Yes',
-				   className: 'btn-primary'
-			   	},
-			   	cancel: {
-				   label: 'No',
-				   className: 'btn-default'
-			   	}
-		   	},
-		   	callback: cb
-		});
+		// bootbox.confirm({
+		//    	message: message,
+		//    	buttons: {
+		// 	   	confirm: {
+		// 		   label: 'Yes',
+		// 		   className: 'btn-primary'
+		// 	   	},
+		// 	   	cancel: {
+		// 		   label: 'No',
+		// 		   className: 'btn-default'
+		// 	   	}
+		//    	},
+		//    	callback: cb
+		// });
 	},
 	alert : function(message, cb){
-		bootbox.alert({
-		    message: message,
-		    callback: cb
-		});
+		// bootbox.alert({
+		//     message: message,
+		//     callback: cb
+		// });
 	},
 	show : function(message, size, cb){
-		bootbox.alert({
-		    message: message,
-		    size: size,
-		    callback: cb
-		});
+		// bootbox.alert({
+		//     message: message,
+		//     size: size,
+		//     callback: cb
+		// });
 	},
 	input : function(message,type, cb){
-		bootbox.prompt({
-		    title: message,
-		    inputType: type,
-		    callback: cb
-		});
+		// bootbox.prompt({
+		//     title: message,
+		//     inputType: type,
+		//     callback: cb
+		// });
 	},
 	custom : function(modal, action){
 		$(modal).modal(action);
 	},
 	loading : function(isloading){
 		if(isloading){
-			bootbox.dialog({ 
-				message: '<center><i class="fa fa-spinner fa-spin" style="font-size:54px"></i><h2>Loading...</h2></center>', 
-				closeButton: false 
-			});
+			// bootbox.dialog({ 
+			// 	message: '<center><i class="fa fa-spinner fa-spin" style="font-size:54px"></i><h2>Loading...</h2></center>', 
+			// 	closeButton: false 
+			// });
 		} else {
 			$('.bootbox').modal('hide');
 		}
-	},
-	image_view : function(src){
-		var body = "<img src='"+src+"' style='width: 100%;' />"
-		bootbox.alert({
-		    message: body
-		});
-	},
-	video_view : function(src){
-		var body = '<video style="width: 100%;"  controls>';
-		body += '	<source src="'+src+'" type="video/mp4">';
-		body += '</video>';
-		bootbox.alert({
-		    message: body
-		});
-	},
-	file_manager :function(element){
-		$('#ckeditor_filemanager_modal').modal("show");
-    	$('.btn_insert').attr("identifier",element);
 	}
 }
 
@@ -570,8 +552,8 @@ var pagination = {
 			htm += '  <button type="button" class="btn btn-default first-page">First</button>';
 			htm += '  <button type="button" class="btn btn-default prev-page">Prev</button>';
 			htm += '  <div class="btn-group dropup">';
-			htm += '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">';
-			htm += '      <span class="pager_no">Page 1</span>';
+		//	htm += '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">';
+		//	htm += '      <span class="pager_no">Page 1</span>';
 			htm += '      <span class="glyphicon glyphicon-menu-down"></span>';
 			htm += '    </button>';
 			htm += '    <ul class="dropdown-menu" style="max-height: 200px; overflow: auto"">';
@@ -584,26 +566,20 @@ var pagination = {
 			htm += '  <button type="button" class="btn btn-default next-page">Next</button>';
 			htm += '  <button type="button" class="btn btn-default last-page">Last</button>';
 			htm += '</div></center>';
-
+			//htm += '<div><span class="">Page 1</span>';
 			htm += '<select class="form-control pager_number input-sm hidden" style="width: 70px;">';
 			for(var x =1; x<=total_page; x++){
 				var pgno = x;
 				htm += "<option value='" + pgno + "'>" + pgno + "</option>";
 			}
-			htm += '</select>';
+			htm += '</select></div>';
 			$(element).html(htm);
-
-			// console.log(total_page);
-			// if(total_page < 2){
-			//   $(element).hide();
-			// } else {
-			//   $(element).show();
-			// }
 	},
 	onchange : function(cb){
 		$(document).on('change','.pager_number', cb);
 	}
 }
+
 var offset = 1;
 $(document).on('change','.pager_number', function() {
 	var page_number = parseInt($(this).val());

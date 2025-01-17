@@ -18,16 +18,18 @@ class Login extends BaseController
 
 	public function index()
 	{
+
 		$this->request = \Config\Services::request();
-        if (!isset($this->session->sess_uid)) {
+        if (!$this->session->get('sess_site_uid')) {
             return redirect()->to(base_url("login")); 
-            exit;
+           exit;
+        //	echo "test";
         }
 	}
 
 	public function login()
 	{
-		if (isset($this->session->sess_uid)) {
+		if ($this->session->get('sess_site_uid')) {
             return redirect()->to(base_url('dashboard'))->send();
         }
 		$data['meta'] = array(

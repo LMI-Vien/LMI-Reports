@@ -42,10 +42,7 @@ class Home extends BaseController
         		"assets/site/css/login/login_style.css",
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);
-		// return view('cms/home', [
-		// 	'page' => 'home'
-		// ]);			
+		return view("cms/layout/template", $data);		
 	}
 
 }
