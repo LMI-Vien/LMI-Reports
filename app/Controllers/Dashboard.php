@@ -17,7 +17,7 @@ class Dashboard extends BaseController
 	    $this->session = session();
 	    $this->auth_token = getenv('API_AUTH_TOKEN');
         helper('url');
-        $this->db = Database::connect('application1');
+        // $this->db = Database::connect('application1');
 	    if (!$this->session->get('sess_site_uid')) {
 	        redirect()->to(base_url('login'))->send();
 	        exit;
@@ -87,11 +87,11 @@ class Dashboard extends BaseController
         return $this->respond($data);
     }
 
-	public function get_users()
-	{
-	    $builder = $this->db->table('cms_users');
-	    $users = $builder->get()->getResult();
+	// public function get_users()
+	// {
+	//     $builder = $this->db->table('cms_users');
+	//     $users = $builder->get()->getResult();
 
-	    return $this->respond($users);
-	}
+	//     return $this->respond($users);
+	// }
 }

@@ -49,8 +49,9 @@ class Login extends BaseController
         		"assets/css/adminlte.min.css",
         		"assets/site/css/login/codemirror.min.css",
         		"assets/site/css/login/summernote.min.css",
-        		"assets/site/css/login/login_style.css",
-        		"assets/css/style.css"
+        		// "assets/site/css/login/login_style.css",
+        		"assets/css/style.css",
+				"assets/site/css/login/login.css",
                     );
 		return view("site/layout/template_login", $data);
 		
@@ -58,6 +59,7 @@ class Login extends BaseController
 
 	public function auth() {
 	    $data = $this->request->getPost('data');
+		// print_r($data); die();
 	    $email = $data['email'];
 	    $password = hash('sha256', $data['password']);
 	    $result = $this->Global_model->validate_log_report_user($email, $password);

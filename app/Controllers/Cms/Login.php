@@ -26,6 +26,33 @@ class Login extends BaseController
         }
 	}
 
+	public function registration ()	{
+		if (isset($this->session->sess_uid)) {
+            return redirect()->to(base_url('cms/home'))->send();
+        }
+		$data['meta'] = array(
+			"title"         =>  "LMI CMS Portal",
+			"description"   =>  "LMI CMS Portal Wep application",
+			"keyword"       =>  ""
+		);
+		$data['title'] = "Register";
+		$data['logout_data'] = '';
+		$data['PageName'] = 'Register';
+		$data['content'] = "cms/register.php";
+		$data['js'] = array(
+				"assets/js/bootstrap.min.js",
+				"assets/cms/js/login/login_js.js"
+                    );
+        $data['css'] = array(
+        		"assets/css/bootstrap.min.css",
+        		"assets/css/adminlte.min.css",
+        		// "assets/site/css/login/login_style.css",
+        		"assets/css/style.css",
+				"assets/css/login/login.css"
+                    );
+		return view("cms/layout/template_login", $data);
+	}
+
 	public function login()
 	{
 		if (isset($this->session->sess_uid)) {
@@ -47,8 +74,9 @@ class Login extends BaseController
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
-        		"assets/site/css/login/login_style.css",
-        		"assets/css/style.css"
+        		// "assets/site/css/login/login_style.css",
+        		"assets/css/style.css",
+				"assets/css/login/login.css"
                     );
 		return view("cms/layout/template_login", $data);
 		

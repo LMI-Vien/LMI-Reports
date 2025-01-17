@@ -23,6 +23,7 @@ $routes->group('login/', static function ($routes) {
 // ============================CMS START=========================================
 $routes->group('cms/', static function ($routes) { 
 	$routes->get('/', 'Cms\Login::login');
+    $routes->get('registration', 'Cms\Login::registration');
     $routes->get('home', 'Cms\Home::index');
     $routes->get('users', 'Cms\User::index');
     $routes->get('sample', 'Cms\Roles::index');    
