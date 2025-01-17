@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Site_menu extends BaseController
+class Agency extends BaseController
 {
     protected $session;
 
@@ -20,30 +20,28 @@ class Site_menu extends BaseController
 	public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "Site Menu",
-			"description"   =>  "Site Menu",
+			"title"         =>  "Agency",
+			"description"   =>  "Agency",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Site Menu";
-		$data['PageName'] = 'Site Menu';
-		$data['PageUrl'] = 'Site Menu';
+		$data['title'] = "Agency";
+		$data['PageName'] = 'Agency';
+		$data['PageUrl'] = 'Agency';
 		$data['buttons'] = ['add', 'search'];
-		$data['content'] = "cms/sitemenu/menus.php";
-		
+		$data['content'] = "cms/agency/agency.php";
+		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
-				"assets/js/moment.js",
-				"assets/cms/js/login/login_js.js"
+				"assets/js/moment.js"
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/site/css/login/login_style.css",
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);
+		return view("cms/layout/template", $data);	
 	}
 
 }

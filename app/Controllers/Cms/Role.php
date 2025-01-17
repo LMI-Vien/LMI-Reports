@@ -29,7 +29,7 @@ class Role extends BaseController
 		$data['PageName'] = 'Roles';
 		$data['PageUrl'] = 'Roles';
 		$data['content'] = "cms/roles/roles.php";
-		$data['buttons'] = ['add', 'search'];
+		$data['buttons'] = ['add', 'search', 'import'];
 
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",

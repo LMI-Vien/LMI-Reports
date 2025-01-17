@@ -465,6 +465,22 @@ var modal = {
 		// });
 	},
 	confirm : function(message,cb){
+		Swal.fire({
+		  title: message,
+		  icon: "question",
+		  iconHtml: "؟",
+		  confirmButtonText: "Yes",
+		  cancelButtonText: "No",
+		  showCancelButton: true,
+		  showCloseButton: true
+		}).then((result) => {
+		    // Check if the user clicked "Yes"
+		    if (result.isConfirmed) {
+		      cb(true); // Execute the callback with `true`
+		    } else {
+		      cb(false); // Execute the callback with `false` if "No" or close is clicked
+		    }
+		  });;
 		// bootbox.confirm({
 		//    	message: message,
 		//    	buttons: {

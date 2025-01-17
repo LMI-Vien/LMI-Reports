@@ -75,8 +75,8 @@
         </li>
         
         <!-- Masterfile Menu with Submenu -->
-        <li class="nav-item has-treeview <?= ($PageUrl ?? '') === 'Masterfile' ? 'menu-open' : '' ?>">
-          <a href="#" class="nav-link <?= ($PageUrl ?? '') === 'Masterfile' ? 'active' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array($PageUrl ?? '', ['Agency', 'Area']) ? 'menu-open' : '' ?> <?= in_array($PageUrl ?? '', ['Agency', 'Area']) ? 'active' : '' ?>">
+          <a href="#" class="nav-link">
             <i class="nav-icon fas fa-file"></i>
             <p>
               Masterfile
@@ -85,7 +85,7 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="<?= base_url('cms/agency') ?>" class="nav-link">
+              <a href="<?= base_url('cms/agency') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Agency' ? 'active' : '' ?>">
                 <i class="fas fa-building nav-icon"></i>
                 <p>Agency</p>
               </a>

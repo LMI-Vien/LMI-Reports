@@ -61,6 +61,9 @@
 				case 'export':
                       echo '<a href="#" id="btn_export" class="btn_export btn-sm btn btn-default cms-btn" ><span class="fas fa-file-export"></span> Export </a>';
                       break;
+                case 'import':
+                      echo '<a href="#" id="btn_import" class="btn_import btn-sm btn btn-default cms-btn" ><span class="fas fa-file-export"></span> Import </a>';
+                      break;
 
                 case 'date_range':
                       echo '<div class="form-group drange">

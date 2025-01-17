@@ -114,8 +114,6 @@ div#list-data {
         </div>
     </div>
 
-
-
 <script>
     var query = "status >= 0";
     var limit = 10; 
@@ -160,9 +158,9 @@ div#list-data {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content'>";
-                            html+="<a href='#' class='btn-sm btn edit' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                            html+="<a href='#' class='btn-sm btn edit' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a href='#' class='btn-sm btn edit' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="<a class='btn-sm btn edit' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            html+="<a class='btn-sm btn delete' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html+="<a class='btn-sm btn view' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
                         }
                         
@@ -216,5 +214,17 @@ div#list-data {
         modal.loading(true); 
         get_data();
         modal.loading(false);
+    });
+
+    
+    $("#7").on("click", function (e) {
+      // id = $(this).attr('id');
+      // alert('asd');
+      // alert(id);
+
+    });
+
+    $("#btn_export").on("click", function (e) {
+      alert("call ajax to controler");
     });
 </script>

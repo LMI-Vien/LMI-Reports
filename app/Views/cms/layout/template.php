@@ -2,6 +2,7 @@
 	<?php 
 		$uri = current_url(true); 
         $data['pageOption'] = ['10', '20', '30', '40', '50'];
+        //$session = session();
 	?>
 	<?= view("cms/layout/header", $meta); ?>
 	<body>

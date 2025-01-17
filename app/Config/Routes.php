@@ -29,6 +29,7 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('sample', 'Cms\Roles::index'); //testing only
     $routes->get('site-menu', 'Cms\Site_menu::index');
     $routes->get('roles', 'Cms\Role::index');
+    $routes->get('agency', 'Cms\Agency::index');
 
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');

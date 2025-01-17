@@ -3,10 +3,6 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
-use CodeIgniter\Exceptions\PageNotFoundException;
-use CodeIgniter\Files\Exceptions\FileNotFoundException;
-use CodeIgniter\API\ResponseTrait;
-use CodeIgniter\RESTful\ResourceController;
 
 class User extends BaseController
 {

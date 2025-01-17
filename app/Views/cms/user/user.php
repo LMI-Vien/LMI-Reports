@@ -186,7 +186,7 @@ div#list-data {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "u.username",
+            select : "u.id",
             query : query,
             offset : offset,
             limit : limit,

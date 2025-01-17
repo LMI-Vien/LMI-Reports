@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\API\ResponseTrait;
-use CodeIgniter\RESTful\ResourceController;
 use Config\Database;
 
 class Dashboard extends BaseController
