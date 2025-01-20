@@ -68,6 +68,19 @@ div#list-data {
 /*.hidden{
     display: none;
 }*/
+.button-spacing {
+  margin-right: 5px;
+}
+
+.btn-custom {
+  width: 80px; 
+  height: 40px;
+  line-height: 24px; 
+  text-align: center; 
+  display: inline-block; 
+  padding: 5px 10px; 
+}
+
 
 </style>
 
@@ -141,8 +154,8 @@ div#list-data {
                 <label class="form-check-label" for="status">Status</label>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="save_data">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </form>
           </div>
@@ -175,8 +188,42 @@ div#list-data {
                 <label class="form-check-label" for="status">Status</label>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="update_data" data-id="">Update</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="view_modal" tabindex="-1" aria-labelledby="update_modalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="update_modallLabel">View Record</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="code">Code</label>
+                <input type="text" class="form-control" id="code" aria-describedby="code" readonly>
+                <small id="code" class="form-text text-muted">add sample format here</small>
+              </div>
+              <div class="form-group">
+                <label for="agency">Agency</label>
+                <input type="text" class="form-control" id="agency" readonly>
+              </div>
+              <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="status" disabled>
+                <label class="form-check-label" for="status">Status</label>
+              </div>
+              <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-primary" id="update_data" data-id="">Update</button> -->
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </form>
           </div>
@@ -227,9 +274,9 @@ div#list-data {
                         html += "<td>" +status+ "</td>";
 
                         html+="<td class='center-content'>";
-                        html+="<a class='btn-sm btn edit' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                        html+="<a class='btn-sm btn delete_data' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                        html+="<a class='btn-sm btn view' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
+                        html+="<a class='btn-sm btn-success btn edit btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                        html+="<a class='btn-sm btn-danger btn delete_data btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                        html+="<a class='btn-sm btn-info btn view btn-custom' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
                         html+="</td>";
                         
                         
@@ -305,6 +352,12 @@ div#list-data {
 
     });
 
+    $(document).on('click', '.view', function() {
+      id = $(this).attr('id');
+      get_data_by_id_view(id);
+
+    });
+
     $(document).on('click', '#btn_add', function() {
         $('#save_modal').modal('show');
     });
@@ -369,12 +422,12 @@ div#list-data {
     }
 
     function update_data(id){
-        var status = $('#update_modal #status').val();
-        if(status == 'on'){
-            status = 1;
-        }else{
-            status = 0;
-        }
+        var status = $('#update_modal #status').prop('checked') ? 1 : 0;
+        // if(status == 'on'){
+        //     status = 1;
+        // }else{
+        //     status = 0;
+        // }
         modal.confirm("Are you sure you want to update this record?",function(result){
             if(result){ 
                 var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
@@ -469,6 +522,41 @@ div#list-data {
             
             $('#update_data').attr('data-id', id);
             $('#update_modal').modal('show');
+        });
+        return exists;
+    }
+
+    function get_data_by_id_view(id){
+        var query = "id = " + id;
+        var exists = 0;
+
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list", 
+            select : "id, code, agency, status",
+            query : query, 
+            table : "tbl_agency"
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            console.log(obj);
+            if(obj){
+                $.each(obj, function(x,y) {
+                    console.log(y);
+                    $('#view_modal #code').val(y.code);
+                    $('#view_modal #agency').val(y.agency);
+                    if(y.status == 1){
+                        $('#view_modal #status').prop('checked', true);
+                    }else{
+                        $('#view_modal #status').prop('checked', false);
+                    }
+
+                }); 
+            }
+            
+            // $('#update_data').attr('data-id', id);
+            $('#view_modal').modal('show');
         });
         return exists;
     }

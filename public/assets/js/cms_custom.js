@@ -565,8 +565,8 @@ var pagination = {
 	generate : function(total_page, element){
 			var htm = '<div class="clearfix"></div>';
 			htm += '<br><center><div class="btn-group">';
-			htm += '  <button type="button" class="btn btn-default first-page">First</button>';
-			htm += '  <button type="button" class="btn btn-default prev-page">Prev</button>';
+			htm += '  <button type="button" class="btn btn-default first-page"><i class="fas fa-angle-double-left"></i></button>';
+			htm += '  <button type="button" class="btn btn-default prev-page"><i class="fas fa-angle-left"></i></button>';
 			htm += '  <div class="btn-group dropup">';
 		//	htm += '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">';
 		//	htm += '      <span class="pager_no">Page 1</span>';
@@ -579,8 +579,8 @@ var pagination = {
 			}
 			htm += '    </ul>';
 			htm += '  </div>';
-			htm += '  <button type="button" class="btn btn-default next-page">Next</button>';
-			htm += '  <button type="button" class="btn btn-default last-page">Last</button>';
+			htm += '  <button type="button" class="btn btn-default next-page"><i class="fas fa-angle-right"></i></button>';
+			htm += '  <button type="button" class="btn btn-default last-page"><i class="fas fa-angle-double-right"></i></button>';
 			htm += '</div></center>';
 			//htm += '<div><span class="">Page 1</span>';
 			htm += '<select class="form-control pager_number input-sm hidden" style="width: 70px;">';

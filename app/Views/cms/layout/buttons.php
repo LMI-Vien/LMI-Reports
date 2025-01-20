@@ -5,11 +5,11 @@
 		foreach ($buttons as $key => $value) {
 			switch ($value) {
 				case 'add':
-					echo '<a href="#" id="btn_add" class="btn_add btn-sm btn btn-default cms-btn" ><span class="fa fa fa-plus "></span> Add</a>';
+					echo '<a href="#" id="btn_add" class="btn_add btn-sm btn btn-success cms-btn" ><span class="fa fa fa-plus "></span> Add</a>';
 					break;
 				
 				case 'update':
-					echo '<a href="#" id="btn_update" class="btn_update btn-sm btn btn-default cms-btn" ><span class="fa fa-floppy-o"></span> Update </a>';
+					echo '<a href="#" id="btn_update" class="btn_update btn-sm btn btn-primary cms-btn" ><span class="fa fa-floppy-o"></span> Update </a>';
 					break;
 
 				case 'save':
@@ -29,7 +29,7 @@
 					break;
 
                 case 'delete':
-                    echo '<a href="#" id="btn_delete" class="btn_delete btn-sm btn btn-default cms-btn" ><span class="fa fa-trash"></span> Delete </a>';
+                    echo '<a href="#" id="btn_delete" class="btn_delete btn-sm btn btn-danger cms-btn" ><span class="fa fa-trash"></span> Delete </a>';
                     break;
 
 				case 'sitemap':
@@ -62,7 +62,7 @@
                       echo '<a href="#" id="btn_export" class="btn_export btn-sm btn btn-default cms-btn" ><span class="fas fa-file-export"></span> Export </a>';
                       break;
                 case 'import':
-                      echo '<a href="#" id="btn_import" class="btn_import btn-sm btn btn-default cms-btn" ><span class="fas fa-file-export"></span> Import </a>';
+                      echo '<a href="#" id="btn_import" class="btn_import btn-sm btn btn-success cms-btn" ><span class="fas fa-file-export"></span> Import </a>';
                       break;
 
                 case 'date_range':
