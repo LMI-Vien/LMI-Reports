@@ -68,7 +68,18 @@ div#list-data {
 /*.hidden{
     display: none;
 }*/
+.button-spacing {
+  margin-right: 5px;
+}
 
+.btn-custom {
+  width: 80px; 
+  height: 40px;
+  line-height: 24px; 
+  text-align: center; 
+  display: inline-block; 
+  padding: 5px 10px; 
+}
 </style>
 
     <div class="content-wrapper p-4">
@@ -114,9 +125,93 @@ div#list-data {
         </div>
     </div>
 
+<!-- Add MODAL -->
+<div class="modal fade" id="save_user_role_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add User Role</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>User Role</label>
+                    <input type="text" class="form-control" id="user_role">
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input large-checkbox" id="status">
+                    <label class="form-check-label large-label" for="status">Active</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveBtn">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update MODAL -->
+<div class="modal fade" id="update_user_role_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Update User Role</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>User Role</label>
+                    <input type="text" class="form-control" id="user_role">
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input large-checkbox" id="status">
+                    <label class="form-check-label large-label" for="status">Active</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="updateBtn">Update</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View MODAL -->
+<div class="modal fade" id="view_user_role_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">View User Role</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>User Role</label>
+                    <input type="text" class="form-control" id="user_role" readonly>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input large-checkbox" id="status" disabled>
+                    <label class="form-check-label large-label" for="status">Active</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     var query = "status >= 0";
     var limit = 10; 
+    var user_id = '<?=$session->sess_uid;?>';
     $(document).ready(function() {
       get_data();
       get_pagination();
@@ -158,9 +253,9 @@ div#list-data {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content'>";
-                            html+="<a class='btn-sm btn edit' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                            html+="<a class='btn-sm btn delete' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="<a class='btn-sm btn-success btn edit btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            html+="<a class='btn-sm btn-danger btn delete_data btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html+="<a class='btn-sm btn-info btn view btn-custom' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
                         }
                         
@@ -227,4 +322,231 @@ div#list-data {
     $("#btn_export").on("click", function (e) {
       alert("call ajax to controler");
     });
+
+    $(document).ready(function () {
+        $(document).on('click', '#btn_add', function () {
+            $('#save_user_role_modal').modal('show');
+        });
+    });
+
+    $(document).on('click', '#saveBtn', function() {
+        save_data();
+        // console.log($('#user_role').val());
+        // console.log($('#status').val());
+    });
+
+    $(document).on('click', '#updateBtn', function() {
+        var id = $(this).attr('data-id');
+        update_data(id);
+    });
+
+    $(document).on('click', '.edit', function() {
+        id = $(this).attr('id');
+        get_data_by_id(id);
+    });
+
+    $(document).on('click', '.delete_data', function() {
+        var id = $(this).attr('id');
+        delete_data(id); 
+        // console.log('hello');
+    });
+
+    $(document).on('click', '.view', function() {
+        id = $(this).attr('id');
+        get_data_by_id_view(id);
+    });
+
+
+
+    function save_data() {
+        var status = $('#save_user_role_modal #status').val();
+        if(status == 'on'){
+            status = 1;
+        }else{
+            status = 0;
+        }
+        modal.confirm("Are you sure you want to save this record?",function(result){
+            if(result){ 
+                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                var data = {
+                    event : "insert", // list, insert, update, delete
+                    table : "cms_user_roles", //table
+                    data : {
+                            name : $('#save_user_role_modal #user_role').val(),
+                            status : $('#save_user_role_modal #status').val(),
+                            create_date : formatDate(new Date()),
+                            //update_date : formatDate(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+                            //to follow created data and created by
+                            created_by : user_id,
+                            status : status
+                    }  
+                }
+
+                aJax.post(url,data,function(result){
+                    var obj = is_json(result);
+                    // alert("pasok");
+                    location.reload();
+                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
+                    //    location.reload();
+                    // })
+                });
+            }
+
+        });
+    }
+
+    function update_data(id){
+        // var status = $('#update_user_role_modal #status').val();
+        var status = $('#update_user_role_modal #status').prop('checked') ? 1 : 0;
+        console.log(status);
+        // if(status == 'on'){
+        //     status = 1;
+        // }else{
+        //     status = 0;
+        // }
+        modal.confirm("Are you sure you want to update this record?",function(result){
+            console.log(result);
+            if(result){ 
+                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                var data = {
+                    event : "update", // list, insert, update, delete
+                    table : "cms_user_roles", //table
+                    field : "id",
+                    where : id, 
+                    data : {
+                            name : $('#update_user_role_modal #user_role').val(),
+                            status : $('#update_user_role_modal #status').val(),
+                            //created_date : formatDate(new Date()),
+                            update_date : formatDate(new Date()),
+                            //to follow created data and created by
+                            //created_by : user_id,
+                            updated_by : user_id,
+                            status : status
+                    }  
+                }
+
+                aJax.post(url,data,function(result){
+                    var obj = is_json(result);
+                    //alert("pasok");
+                    location.reload();
+                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
+                    //    location.reload();
+                    // })
+                });
+            }
+
+        });
+    }
+
+    function get_data_by_id(id){
+        var query = "id = " + id;
+        var exists = 0;
+
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list", 
+            select : "id, name, status, update_date",
+            query : query, 
+            table : "cms_user_roles"
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            console.log(obj);
+            if(obj){
+                $.each(obj, function(x,y) {
+                    console.log(y);
+                    $('#update_user_role_modal #user_role').val(y.name);
+                    
+                    if(y.status == 1){
+                        $('#update_user_role_modal #status').prop('checked', true);
+                    }else{
+                        $('#update_user_role_modal #status').prop('checked', false);
+                    }
+
+                }); 
+            }
+            
+            $('#updateBtn').attr('data-id', id);
+            $('#update_user_role_modal').modal('show');
+        });
+        return exists;
+    }
+
+    function delete_data(id){
+        
+        modal.confirm("Are you sure you want to delete this record?",function(result){
+            if(result){ 
+                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                var data = {
+                    event : "update", // list, insert, update, delete
+                    table : "cms_user_roles", //table
+                    field : "id",
+                    where : id, 
+                    data : {
+                            update_date : formatDate(new Date()),
+                            updated_by : user_id,
+                            status : -2
+                    }  
+                }
+
+                aJax.post(url,data,function(result){
+                    var obj = is_json(result);
+                    // alert("pasok");
+                    location.reload();
+                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
+                    //    location.reload();
+                    // })
+                });
+            }
+
+        });
+    }
+
+    function get_data_by_id_view(id){
+        var query = "id = " + id;
+        var exists = 0;
+
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list", 
+            select : "id, name, status, update_date",
+            query : query, 
+            table : "cms_user_roles"
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            console.log(obj);
+            if(obj){
+                $.each(obj, function(x,y) {
+                    console.log(y);
+                    $('#view_user_role_modal #user_role').val(y.name);
+                    
+                    if(y.status == 1){
+                        $('#view_user_role_modal #status').prop('checked', true);
+                    }else{
+                        $('#view_user_role_modal #status').prop('checked', false);
+                    }
+
+                }); 
+            }
+            
+            $('#view_user_role_modal').modal('show');
+        });
+        return exists;
+    }
+
+    function formatDate(date) {
+        // Get components of the date
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        // Combine into the desired format
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
 </script>

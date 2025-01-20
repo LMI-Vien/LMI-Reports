@@ -20,8 +20,8 @@ class User extends BaseController
 	public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "LMI CMS Portal test",
-			"description"   =>  "LMI CMS Portal Wep application",
+			"title"         =>  "User",
+			"description"   =>  "User",
 			"keyword"       =>  ""
 		);
 		$data['title'] = "Users";
@@ -29,7 +29,7 @@ class User extends BaseController
 		$data['PageUrl'] = 'Users';
 		$data['buttons'] = ['add', 'search'];
 		$data['content'] = "cms/User/User.php";
-
+		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",

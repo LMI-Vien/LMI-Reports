@@ -30,6 +30,7 @@ class Role extends BaseController
 		$data['PageUrl'] = 'Roles';
 		$data['content'] = "cms/roles/roles.php";
 		$data['buttons'] = ['add', 'search', 'import'];
+		$data['session'] = session(); //for frontend accessing the session data
 
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",

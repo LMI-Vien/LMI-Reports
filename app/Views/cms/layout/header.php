@@ -13,6 +13,10 @@
         <script type="text/javascript" src="<?= base_url();?>assets/js/jquery-3.7.1.min.js" ></script>
         <script type="text/javascript" src="<?= base_url();?>assets/js/cms_custom.js" ></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- Include Material Icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!-- Include basic styling -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
         <?php if(!empty($css)) : ?>
             <?php foreach($css as $path) : ?>
                 <link rel="stylesheet" type="text/css" href="<?= base_url() . $path?>">
