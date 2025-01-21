@@ -30,6 +30,8 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('site-menu', 'Cms\Site_menu::index');
     $routes->get('roles', 'Cms\Role::index');
     $routes->get('agency', 'Cms\Agency::index');
+    $routes->get('brand-ambassador', 'Cms\Brand_Ambassador::index');
+    $routes->get('team', 'Cms\Team::index');
 
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');

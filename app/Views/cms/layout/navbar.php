@@ -75,7 +75,7 @@
         </li>
         
         <!-- Masterfile Menu with Submenu -->
-        <li class="nav-item has-treeview <?= in_array($PageUrl ?? '', ['Agency', 'Area']) ? 'menu-open' : '' ?> <?= in_array($PageUrl ?? '', ['Agency', 'Area']) ? 'active' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array($PageUrl ?? '', ['Agency', 'Area', 'Brand Ambassador', 'Team']) ? 'menu-open' : '' ?> <?= in_array($PageUrl ?? '', ['Agency', 'Area', 'Brand Ambassador', 'Team']) ? 'active' : '' ?>">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-file"></i>
             <p>
@@ -103,7 +103,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="<?= base_url('cms/brand-ambassador') ?>" class="nav-link">
+              <a href="<?= base_url('cms/brand-ambassador') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Brand Ambassador' ? 'active' : '' ?>">
                 <i class="fas fa-user-tie nav-icon"></i>
                 <p>Brand Ambassador</p>
               </a>
@@ -115,7 +115,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="<?= base_url('cms/team') ?>" class="nav-link">
+              <a href="<?= base_url('cms/team') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Team' ? 'active' : '' ?>">
                 <i class="fas fa-users nav-icon"></i>
                 <p>Team</p>
               </a>
