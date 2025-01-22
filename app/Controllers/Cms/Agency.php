@@ -27,7 +27,7 @@ class Agency extends BaseController
 		$data['title'] = "Agency";
 		$data['PageName'] = 'Agency';
 		$data['PageUrl'] = 'Agency';
-		$data['buttons'] = ['add', 'search'];
+		$data['buttons'] = ['add', 'search', 'import'];
 		$data['content'] = "cms/agency/agency.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(

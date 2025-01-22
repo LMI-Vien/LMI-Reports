@@ -421,12 +421,13 @@ div#list-data {
     });
 
     function save_data() {
-        var status = $('#save_user_modal #status').val();
-        if(status == 'on'){
-            status = 1;
-        }else{
-            status = 0;
-        }
+        var status = $('#save_user_modal #status').prop('checked') ? 1 : 0;
+        // var status = $('#save_user_modal #status').val();
+        // if(status == 'on'){
+        //     status = 1;
+        // }else{
+        //     status = 0;
+        // }
         modal.confirm("Are you sure you want to save this record?",function(result){
             if(result){ 
                 var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
