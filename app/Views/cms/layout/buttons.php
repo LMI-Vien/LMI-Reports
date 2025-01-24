@@ -111,7 +111,7 @@
 	}
 
 	.form-search{
-	    position: fixed;
+	    position: absolute;
 	    right:6em;
 	}
 

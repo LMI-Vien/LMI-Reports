@@ -33,6 +33,8 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('brand-ambassador', 'Cms\Brand_Ambassador::index');
     $routes->get('team', 'Cms\Team::index');
 
+    $routes->get('store-branch', 'Cms\Store_Branch::index');
+
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');
         $routes->get('forgot', 'Cms\Login::forgot');

@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Agency extends BaseController
+class Store_Branch extends BaseController
 {
     protected $session;
 
@@ -19,16 +19,17 @@ class Agency extends BaseController
 
 	public function index()
 	{
+
 		$data['meta'] = array(
-			"title"         =>  "Agency",
-			"description"   =>  "Agency",
+			"title"         =>  "Store/Branch Masterfile",
+			"description"   =>  "Store/Branch Masterfile",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Agency";
-		$data['PageName'] = 'Agency';
-		$data['PageUrl'] = 'Agency';
+		$data['title'] = "Store/Branch";
+		$data['PageName'] = 'Store/Branch';
+		$data['PageUrl'] = 'Store/Branch';
+		$data['content'] = "cms/store-branch/store-branch.php";
 		$data['buttons'] = ['add', 'search', 'import'];
-		$data['content'] = "cms/agency/agency.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
@@ -41,7 +42,7 @@ class Agency extends BaseController
         		"assets/css/all.min.css",
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);	
+		return view("cms/layout/template", $data);		
 	}
 
 }
