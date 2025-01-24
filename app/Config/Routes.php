@@ -27,6 +27,7 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('home', 'Cms\Home::index');
     $routes->get('users', 'Cms\User::index'); 
     $routes->get('sample', 'Cms\Roles::index'); //testing only
+    // $routes->get('site-menu', 'Cms\Site_menu::index');
     $routes->group('site-menu/', static function ($routes) {
         $routes->get('/', 'Cms\Site_menu::index');
         $routes->get('menu/(:num)/(:any)', 'Cms\Site_menu::index/(:num)/(:any)');

@@ -280,7 +280,11 @@ thead{
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Import File</h5>
+                    <h4 class="modal-title" style="font-family: 'Courier New', Courier, monospace; font-size: large;">
+                        <b>
+                            I&nbsp;M&nbsp;P&nbsp;O&nbsp;R&nbsp;T&nbsp;&nbsp;&nbsp;F&nbsp;I&nbsp;L&nbsp;E
+                        </b>
+                    </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -289,7 +293,10 @@ thead{
                 <div class="modal-body">
                     <div class="card">
                         <div class="mb-3">
-                            <label for="import_files" style="padding-left: 10px; padding-top:10px;" class="form-label">Add files</label><br>
+                            <label class="text-center" for="import_files" style="padding: 10px;font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px; width: 100%" class="form-label">
+                                Add files
+                            </label>
+                            <br>
                             <input type="file" style="padding-left: 10px;" id="file" accept=".xls,.xlsx,.csv"  aria-describedby="import_files" onclick="clear_import_table()" onchange="read_xl_file()">
                             <small id="import_files" style="padding-left: 10px;" class="form-text text-muted">* required, select a file from your device</small>
                         </div>
@@ -908,7 +915,7 @@ thead{
                 select : "id, code, description, status",
                 query : query,
                 offset : 0,
-                limit : 1,
+                limit : 0,
                 table : "tbl_store",
             }
             jQuery.ajax({
@@ -919,6 +926,7 @@ thead{
                     successCallback(res);
                 }, error(e){
                     alert('alert', e)
+                    console.log(e)
                 }
             });
         }

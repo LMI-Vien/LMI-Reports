@@ -53,4 +53,62 @@ class Site_menu extends BaseController
 		return view("cms/layout/template", $data);
 	}
 
+	public function menu_add()
+	{
+		$data['meta'] = array(
+			"title"         =>  "Site Menu",
+			"description"   =>  "Site Menu",
+			"keyword"       =>  ""
+		);
+		$data['title'] = "Site Menu";
+		$data['PageName'] = 'Site Menu';
+		$data['PageUrl'] = 'Site Menu';
+		$data['buttons'] = ['add', 'search'];
+		$data['content'] = "cms/sitemenu/menus.php";
+		
+		$data['js'] = array(
+				"assets/js/bootstrap.min.js",
+				"assets/js/adminlte.min.js",
+				"assets/js/moment.js",
+				"assets/cms/js/login/login_js.js"
+                    );
+        $data['css'] = array(
+        		"assets/css/bootstrap.min.css",
+        		"assets/css/adminlte.min.css",
+        		"assets/css/all.min.css",
+        		"assets/site/css/login/login_style.css",
+        		"assets/css/style.css"
+                    );
+		return view("cms/layout/template", $data);
+	}
+
+	public function menu_update()
+	{
+		$data['meta'] = array(
+			"title"         =>  "Site Menu",
+			"description"   =>  "Site Menu",
+			"keyword"       =>  ""
+		);
+		$data['title'] = "Site Menu";
+		$data['PageName'] = 'Site Menu';
+		$data['PageUrl'] = 'Site Menu';
+		$data['buttons'] = ['add', 'search'];
+		$data['content'] = "cms/sitemenu/menus.php";
+		
+		$data['js'] = array(
+				"assets/js/bootstrap.min.js",
+				"assets/js/adminlte.min.js",
+				"assets/js/moment.js",
+				"assets/cms/js/login/login_js.js"
+                    );
+        $data['css'] = array(
+        		"assets/css/bootstrap.min.css",
+        		"assets/css/adminlte.min.css",
+        		"assets/css/all.min.css",
+        		"assets/site/css/login/login_style.css",
+        		"assets/css/style.css"
+                    );
+		return view("cms/layout/template", $data);
+	}
+
 }
