@@ -27,7 +27,12 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('home', 'Cms\Home::index');
     $routes->get('users', 'Cms\User::index'); 
     $routes->get('sample', 'Cms\Roles::index'); //testing only
-    $routes->get('site-menu', 'Cms\Site_menu::index');
+    $routes->group('site-menu/', static function ($routes) {
+        $routes->get('/', 'Cms\Site_menu::index');
+        $routes->get('menu/(:num)/(:any)', 'Cms\Site_menu::index/(:num)/(:any)');
+        $routes->get('menu_add/(:num)/(:any)', 'Cms\Site_menu::menu_add');
+        $routes->get('menu_update/(:num)', 'Cms\Site_menu::menu_update');
+    });
     $routes->get('roles', 'Cms\Role::index');
     $routes->get('agency', 'Cms\Agency::index');
     $routes->get('brand-ambassador', 'Cms\Brand_Ambassador::index');

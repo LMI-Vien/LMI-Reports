@@ -120,8 +120,19 @@ div#list-data {
 
 
 <script>    
+    var menu_id = "<?=$menu_id;?>";
     var query = "status >= 0";
-    var limit = 10; 
+    var limit = 10;
+    var sub_menu_id = 0;
+
+    if (menu_id) {
+        //$('.btn_close').show();
+        sub_menu_id  = menu_id;
+        add_data = "/<?=$menu_id;?>/<?=$menu_group;?>";
+    }
+    if(sub_menu_id){
+        query = " menu_parent_id = "+ sub_menu_id +" AND status >= 0";
+    }
     $(document).ready(function() {
       get_data();
       get_pagination();
@@ -158,9 +169,9 @@ div#list-data {
 
                         if (y.menu_type === "Group Menu") {
                             if (y.menu_type === "Buy Now") {
-                                html += '<td><a class="text-primary" href="<?= base_url('dynamic/Site_menu/shop_list');?>">'+y.menu_name+'</a></td>';
+                                html += '<td><a class="text-primary" href="<?= base_url('cms/site-menu/shop_list');?>">'+y.menu_name+'</a></td>';
                             } else {
-                                html += '<td><a class="text-primary" href="<?= base_url('dynamic/Site_menu/menu');?>/'+y.id+'/'+y.menu_name+'" >'+y.menu_name+'</a></td>';
+                                html += '<td><a class="text-primary" href="<?= base_url('cms/site-menu/menu');?>/'+y.id+'/'+y.menu_name+'" >'+y.menu_name+'</a></td>';
                             }
                         } else {
                             if (parseInt(y.default_menu) === 1) {
@@ -181,7 +192,7 @@ div#list-data {
                         }
 
                         html += '<td>'+status+'</td>';
-                        html += "<td class = 'center-align-format'><a href='<?= base_url()."dynamic/"?>Site_menu/menu_update/"+y.id+"' class='edit' title='edit'><span class='glyphicon glyphicon-pencil'></span></a></td>";
+                        html += "<td class = 'center-align-format'><a href='<?= base_url()."cms/"?>site-menu/menu_update/"+y.id+"' class='edit' title='edit'><span class='glyphicon glyphicon-pencil'></span></a></td>";
                         html += '</tr>';
                     });
                 } else {

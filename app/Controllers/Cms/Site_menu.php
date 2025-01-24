@@ -24,6 +24,13 @@ class Site_menu extends BaseController
 			"description"   =>  "Site Menu",
 			"keyword"       =>  ""
 		);
+		$data['menu_group'] = '';
+		$data['menu_id'] = '';
+		$uri = current_url(true);
+		$totalSegments = $uri->getTotalSegments();
+		$data['menu_id'] = ($totalSegments >= 4) ? $uri->getSegment(4) : '';
+		$data['menu_group'] = ($totalSegments >= 5) ? $uri->getSegment(5) : '';
+
 		$data['title'] = "Site Menu";
 		$data['PageName'] = 'Site Menu';
 		$data['PageUrl'] = 'Site Menu';
