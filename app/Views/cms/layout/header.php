@@ -26,4 +26,6 @@
 
     <script>
         var no_records = 'No records to show.';
+        var form_empty_error = "This is a required field.";
+        var form_script = "may script ka";
     </script>

@@ -39,6 +39,7 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('team', 'Cms\Team::index');
 
     $routes->get('store-branch', 'Cms\Store_Branch::index');
+    $routes->get('area', 'Cms\Area::index');
 
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');
