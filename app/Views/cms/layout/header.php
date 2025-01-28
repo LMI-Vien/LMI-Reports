@@ -28,4 +28,6 @@
         var no_records = 'No records to show.';
         var form_empty_error = "This is a required field.";
         var form_script = "may script ka";
+        var csrf_name = "<?= csrf_token(); ?>";
+        var csrf_hash = "<?= csrf_hash(); ?>";
     </script>

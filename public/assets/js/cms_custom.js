@@ -854,3 +854,27 @@ function sha1(msg) {
 	return temp.toLowerCase();
 }
 
+function is_exists(table, field, value, status){
+	var query = ""+ field +" = '" + value + "' AND "+status+" >= 0";
+    var exists = 0;
+    var url = base_url+"cms/global_controller";
+    var data = {
+        event : "list", 
+        select : ""+field+", "+status+"",
+        query : query, 
+        table : table,
+		[csrf_name]	: csrf_hash
+    }
+    aJax.post_async(url,data,function(result){
+        var obj = is_json(result);
+		console.log(obj, 'obj')
+        if(obj.length != 0){
+            exists = 1;
+        }
+        else{
+            exists = 0;
+        }
+
+    });
+    return exists;
+}

@@ -36,7 +36,7 @@ class Site_menu extends BaseController
 		$data['PageUrl'] = 'Site Menu';
 		$data['buttons'] = ['add', 'search'];
 		$data['content'] = "cms/sitemenu/menus.php";
-		
+		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
@@ -47,7 +47,6 @@ class Site_menu extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/site/css/login/login_style.css",
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);

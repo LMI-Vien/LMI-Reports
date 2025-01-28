@@ -83,7 +83,7 @@ div#list-data {
 }
 
 thead{
-    background-color: #1F2D3D;
+    background-color: #301311;
     color: white;
 }
 
@@ -97,7 +97,7 @@ thead{
     color:white; 
     border-radius:10px; 
     margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);    
+    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
 }
 .save:hover {
     color: white !important ; 
@@ -187,6 +187,21 @@ thead{
     padding-top: 0px;
 }
 
+input[type="file"] {
+    display: none;
+}
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.modal-title {
+    font-family: 'Courier New', Courier, monospace; 
+    font-size: large;
+}
+
 </style>
 
     <div class="content-wrapper p-4">
@@ -241,7 +256,9 @@ thead{
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Store/Branch</h5>
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -276,67 +293,13 @@ thead{
         </div>
     </div>
 
-    <div class="modal" tabindex="-1" id="import_modal">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" style="font-family: 'Courier New', Courier, monospace; font-size: large;">
-                        <b>
-                            I&nbsp;M&nbsp;P&nbsp;O&nbsp;R&nbsp;T&nbsp;&nbsp;&nbsp;F&nbsp;I&nbsp;L&nbsp;E
-                        </b>
-                    </h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="card">
-                        <div class="mb-3">
-                            <label class="text-center" for="import_files" style="padding: 10px;font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px; width: 100%" class="form-label">
-                                Add files
-                            </label>
-                            <br>
-                            <input type="file" style="padding-left: 10px;" id="file" accept=".xls,.xlsx,.csv"  aria-describedby="import_files" onclick="clear_import_table()" onchange="read_xl_file()">
-                            <small id="import_files" style="padding-left: 10px;" class="form-text text-muted">* required, select a file from your device</small>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="text-center" 
-                        style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px">
-                            <b>Extracted Data</b>
-                        </div>
-                        
-                        <div class="mb-3" style="overflow-x: auto; height: 350px; padding: 0px;">
-                            <table class= "table table-bordered listdata" style="margin-top:10px;">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content'>Line #</th>
-                                        <th class='center-content'>Code</th>
-                                        <th class='center-content'>Store/Branch</th>
-                                        <th class='center-content'>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="word_break import_table"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn save" onclick="proccess_xl_file()">Validate and Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="modal" tabindex="-1" id="view_modal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Store/Branch</h5>
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -372,7 +335,9 @@ thead{
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Store/Branch</h5>
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -408,6 +373,66 @@ thead{
         </div>
     </div>
 
+    <div class="modal" tabindex="-1" id="import_modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                            <div class="text-center"
+                            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
+                            >
+                                <b>Extracted Data</b>
+                            </div>
+
+                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
+                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                            </label>
+                            <input
+                                type="file"
+                                style="padding-left: 10px;"
+                                id="file"
+                                accept=".xls,.xlsx,.csv"
+                                aria-describedby="import_files"
+                                onclick="clear_import_table()"
+                            >
+
+                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                            </label>
+
+                            <table class= "table table-bordered listdata">
+                                <thead>
+                                    <tr>
+                                        <th class='center-content'>Line #</th>
+                                        <th class='center-content'>Code</th>
+                                        <th class='center-content'>Store/Branch</th>
+                                        <th class='center-content'>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="word_break import_table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn save" onclick="proccess_xl_file()">Validate and Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.3/xlsx.full.min.js"></script>
     <script>
         var query = "status >= 0";
@@ -431,7 +456,7 @@ thead{
                 'background-color':'#339933',
                 'color':'white',
                 'border-radius':'10px',
-            })
+            });
         });
 
         // uses function get_data(
@@ -448,6 +473,8 @@ thead{
         });
 
         $(document).on('click', '#btn_add', function() {
+            title = addNbsp('ADD STORE/BRANCH')
+            $("#save_modal").find('.modal-title').find('b').html(title)
             $("#save_modal").modal('show')
         });
 
@@ -458,6 +485,8 @@ thead{
         })
 
         $(document).on('click', '#btn_import ', function() {
+            title = addNbsp('IMPORT STORE/BRANCH')
+            $("#import_modal").find('.modal-title').find('b').html(title)
             $("#import_modal").modal('show')
             clear_import_table()
         });
@@ -467,9 +496,21 @@ thead{
         }
 
         function read_xl_file() {
+            $(".import_table").empty()
             var html = '';
-            // const file = document.getElementById("file").files[0];
             const file = $("#file")[0].files[0];
+            if (file === undefined) {
+                load_swal(
+                    '',
+                    '500px',
+                    'error',
+                    'Error!',
+                    'Please select a file to upload',
+                    false,
+                    true
+                )
+                return
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = e.target.result;
@@ -569,70 +610,62 @@ thead{
                 html_tr_count+=1;
             });
 
-            var temp_invalid = false;
+            var temp_invalid = invalid;
             var temp_err_msg = '';
             var temp_line_no = 0;
             var promises = [];
 
             import_array.forEach(row => {
-                // Wrap the check_current_db in a promise
-                var promise = new Promise((resolve, reject) => {
-                    check_current_db(function(result) {
-                        var parsedResult = JSON.parse(result);
-
-                        $.each(parsedResult, function(index, item) {
-                            if (item.code === row[0] && item.description === row[1]) {
-                                temp_invalid = true;
-                                temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-                            }
-                            else if (item.code === row[0]) {
-                                temp_invalid = true;
-                                temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-                            }
-                            else if (item.description === row[1]) {
-                                temp_invalid = true;
-                                temp_err_msg += "⚠️ Description already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-                            } else {
-                                
-                            }
-                        });
-                        temp_line_no+=1;
-                        resolve(); // Resolve if no issues are found
+                check_current_db(function(result) {
+                    var parsedResult = JSON.parse(result);
+    
+                    $.each(parsedResult, function(index, item) {
+                        if (item.code === row[0] && item.description === row[1]) {
+                            temp_invalid = true;
+                            temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
+                        }
+                        else if (item.code === row[0]) {
+                            temp_invalid = true;
+                            temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
+                        }
+                        else if (item.description === row[1]) {
+                            temp_invalid = true;
+                            temp_err_msg += "⚠️ Description already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
+                        } else {
+                            
+                        }
                     });
+                    temp_line_no+=1;
                 });
-                
-                promises.push(promise);
             });
+            
+            invalid = temp_invalid;
+            errmsg += temp_err_msg;
 
-            // Wait for all promises to be resolved
-            Promise.all(promises).then(() => {
-                invalid = temp_invalid;
-                errmsg += temp_err_msg;
-
-                if(invalid) {
-                    load_swal(
-                        '',
-                        '1000px',
-                        'error',
-                        'Error!',
-                        errmsg,
-                        false,
-                        true
-                    )
-                    $("#import_modal").modal('hide')
-                    return
+            if(invalid) {
+                load_swal(
+                    '',
+                    '1000px',
+                    'error',
+                    'Error!',
+                    errmsg,
+                    false,
+                    true
+                )
+                $("#import_modal").modal('hide')
+                return
+            }
+            import_array.forEach(row => {
+                var status_val = 0;
+                if (row[2] == 'active') {
+                    status_val = 1
+                } else {
+                    status_val = 0
                 }
-                alert('proceeded to saving')
-                import_array.forEach(row => {
-                    var status_val = 0;
-                    if (row[2] == 'active') {
-                        status_val = 1
-                    } else {
-                        status_val = 0
-                    }
-                    save_to_db(row[0], row[1], status_val)
-                })
-            });
+                save_to_db(row[0], row[1], status_val)
+            })
+
+            get_pagination();
         }
 
         // uses function update_data(
@@ -645,14 +678,13 @@ thead{
         // uses function get_data(
         $(document).on('keydown', '#search_query', function(event) {
             if (event.key == 'Enter') {
-                alert('alert')
+                search_input = $('#search_query').val();
+                offset = 1;
+                get_pagination();
+                new_query = query;
+                new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+                get_data(new_query);
             }
-            search_input = $('#search_query').val();
-            offset = 1;
-            get_pagination();
-            new_query = query;
-            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
-            get_data(new_query);
         });
 
         // used : 1 
@@ -847,7 +879,9 @@ thead{
         // uses function view_data(
         function edit_data(e_id) {
             // alert(code)
-            view_data(e_id, 'e_', 'edit_modal')
+            title = addNbsp('EDIT STORE/BRANCH')
+            $("#edit_modal").find('.modal-title').find('b').html(title)
+            view_data(e_id, 'e_', 'edit_modal', 'EDIT ')
         }
 
         // used : 1
@@ -879,7 +913,7 @@ thead{
         }
 
         // used : 2
-        function view_data(inp_id, prefix, modal_class) {
+        function view_data(inp_id, prefix, modal_class,action) {
             var query = "id = " + inp_id;
             var url = "<?= base_url('cms/global_controller');?>";
             var data = {
@@ -904,6 +938,8 @@ thead{
                 }
                 
                 $('#update_data').attr('data-id', inp_id);
+                title = addNbsp(action+'STORE/BRANCH')
+                $("#"+modal_class).find('.modal-title').find('b').html(title)
                 $('#'+modal_class).modal('show');
             });
         }
@@ -922,6 +958,7 @@ thead{
                 url: url,
                 type: 'post',
                 data: data,
+                async: false,
                 success: function (res) {
                     successCallback(res);
                 }, error(e){
@@ -962,7 +999,7 @@ thead{
             // check if the input exceeds the maximum allowed length for the database (50 characters).
             if (trim_desc.length > 50) {
                 invalid = true;
-                err_msg+="Description is too long. Maximum allowed is 25 characters.<br>";
+                err_msg+="Description is too long. Maximum allowed is 50 characters.<br>";
             }
 
             // if input is invalid (invalid = true) display alert to user
@@ -1053,7 +1090,7 @@ thead{
                                 html+="<td class='center-content' style='width: 25%'>";
                                 html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                                 html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                                html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"', 'v_', 'view_modal')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                                html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"', 'v_', 'view_modal', 'VIEW ')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                                 html+="</td>";
                             }
                             
@@ -1065,5 +1102,21 @@ thead{
                 }
                 $('.table_body').html(html);
             });
+        }
+
+        // addNbsp()™: A Truly Revolutionary Function
+        // This function is the epitome of laziness and brilliance combined. 
+        // Why manually type `&nbsp;` repeatedly when you can let JavaScript do the heavy lifting?
+        // With `addNbsp`, you can transform every character in a string into a spaced-out masterpiece,
+        // replacing regular spaces with double `&nbsp;&nbsp;` and adding `&nbsp;` after every other character. 
+        // It’s elegant. It’s lazy. It’s genius.
+        // Honestly, this function is not just a tool—it’s a lifestyle.
+        function addNbsp(inputString) {
+            return inputString.split('').map(char => {
+                if (char === ' ') {
+                return '&nbsp;&nbsp;';
+                }
+                return char + '&nbsp;';
+            }).join('');
         }
 </script>

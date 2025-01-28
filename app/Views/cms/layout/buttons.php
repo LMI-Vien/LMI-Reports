@@ -52,8 +52,19 @@
 				case 'search':
 					echo '<div id="form_search" class="form-search form-horizontal pull-right">
 							<div class="form-group has-feedback ">
-						        <input type="text" class="form-control search-query" id="search_query" placeholder="Search..."  >
-						        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+						        <div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">
+											<i class="fa fa-search"></i>
+										</span>
+									</div>
+									<input 
+										type="text" 
+										class="form-control search-query" 
+										id="search_query" 
+										placeholder="Search..."
+									>
+								</div>
 						      </div>
 						</div>';
 					break;

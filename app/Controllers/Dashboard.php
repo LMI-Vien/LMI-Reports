@@ -7,7 +7,7 @@ use Config\Database;
 class Dashboard extends BaseController
 {
     protected $session;
-    use ResponseTrait;
+    // use ResponseTrait;
     private $auth_token;
     protected $db;
     public function __construct()
