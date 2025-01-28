@@ -164,9 +164,7 @@ div#list-data {
                 </div>
                 <div class="form-group">
                 <label for="user_role">User Role</label>
-                    <select class="form-control" id="user_role">
-                        <option value="1">Admin</option>
-                        <option value="2">IT Admin</option>
+                    <select class="form-control user_role" id="user_role">
                     </select>
                 </div>
                 <div class="form-check">
@@ -207,9 +205,7 @@ div#list-data {
                 </div>
                 <div class="form-group">
                 <label for="user_role">User Role</label>
-                    <select class="form-control" id="user_role">
-                        <option value="1">Admin</option>
-                        <option value="2">IT Admin</option>
+                    <select class="form-control user_role" id="user_role">
                     </select>
                 </div>
                 <div class="form-check">
@@ -251,9 +247,7 @@ div#list-data {
                 </div>
                 <div class="form-group">
                 <label for="user_role">User Role</label>
-                    <select class="form-control" id="user_role" disabled>
-                        <option value="1">Admin</option>
-                        <option value="2">IT Admin</option>
+                    <select class="form-control user_role" id="user_role" disabled>
                     </select>
                 </div>
                 <div class="form-check">
@@ -278,6 +272,7 @@ div#list-data {
     $(document).ready(function() {
       get_data();
       get_pagination();
+      get_data_user_roles();
     });
 
     function get_data()
@@ -392,11 +387,6 @@ div#list-data {
 
     $(document).on('click', '#saveBtn', function() {
         save_data();
-        // console.log($('#name').val());
-        // console.log($('#username').val());
-        // console.log($('#email_address').val());
-        // console.log($('#user_role').val());
-        // console.log($('#status').val());
     });
 
     $(document).on('click', '#updateBtn', function() {
@@ -592,7 +582,6 @@ div#list-data {
             console.log(obj);
             if(obj){
                 $.each(obj, function(x,y) {
-                    console.log(y);
                     $('#view_user_modal #username').val(y.username);
                     $('#view_user_modal #email_address').val(y.email);
                     $('#view_user_modal #name').val(y.name);
@@ -611,6 +600,30 @@ div#list-data {
             $('#view_user_modal').modal('show');
         });
         return exists;
+    }
+
+    function get_data_user_roles(){
+        var query = "status > 0";
+
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list", 
+            select : "id, name, status, updated_date",
+            query : query, 
+            table : "cms_user_roles"
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            if (obj) {
+                var roles = obj;
+                $.each(roles, function(val, text) {
+                    $('.user_role').append(
+                        $('<option></option>').val(text.id).html(text.name)
+                    );
+                });
+            }
+        });
     }
 
     function formatDate(date) {

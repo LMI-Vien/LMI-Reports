@@ -139,18 +139,18 @@ div#list-data {
             </button>
           </div>
           <div class="modal-body">
-            <form>
+            <form id="form-save-modal">
               <div class="form-group">
                 <label for="code">Code</label>
-                <input type="text" class="form-control" id="code" aria-describedby="code">
+                <input type="text" class="form-control required" id="code" aria-describedby="code">
                 <small id="code" class="form-text text-muted">add sample format here</small>
               </div>
               <div class="form-group">
                 <label for="agency">Agency</label>
-                <input type="text" class="form-control" id="agency">
+                <input type="text" class="form-control required" id="agency">
               </div>
               <div class="form-group form-check">
-                <input type="checkbox" class="form-check-input" id="status">
+                <input type="checkbox" class="form-check-input required" id="status">
                 <label class="form-check-label" for="status">Status</label>
               </div>
               <div class="modal-footer">
@@ -363,7 +363,10 @@ div#list-data {
     });
 
     $(document).on('click', '#save_data', function() {
-        save_data();
+        if(validate.standard("form-save-modal")){
+
+        }
+        //save_data();
         // console.log($('#code').val());
         // console.log($('#agency').val());
         // console.log($('#status').val());
