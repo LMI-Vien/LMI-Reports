@@ -133,8 +133,7 @@ var validate = {
 					if(!pattern.test(email)){
 						counter++;
 						$(this).css('border-color','red');
-	          $("<span class='validate_error_message' style='color: red;'>Please enter a valid email address.<br></span>").insertAfter(this);
-					
+	          	$("<span class='validate_error_message' style='color: red;'>Please enter a valid email address.<br></span>").insertAfter(this);
 					}
 				});
 	    return counter;

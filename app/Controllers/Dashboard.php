@@ -42,6 +42,7 @@ class Dashboard extends BaseController
 		);
 		$data['title'] = "Dashboard";
 		$data['PageName'] = 'Dashboard';
+		$data['PageUrl'] = 'Dashboard';
 		$data['content'] = "site/dashboard/dashboard.php";
 		$data['js'] = array(
 			"assets/js/jquery-3.7.1.min.js",

@@ -9,7 +9,7 @@
                         <div class="navbar-nav">
                             <!-- GET THE SITE MENU HERE -->
                             <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle active" id="dashboardMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <a href="#" class="nav-link dropdown-toggle" id="dashboardMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-dashboard"></i> Dashboard
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="dashboardMenu">
@@ -44,8 +44,56 @@
                                 </div>
                             </div>
 
-                            <a href="#" class="nav-item nav-link"><i class="fa fa-dashboard"></i>BA</a>
-                            <a href="#" class="nav-item nav-link"><i class="fa fa-dashboard"></i>ASC</a>
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" id="BrandAmbassador" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-dashboard"></i>BA
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="BrandAmbassador">
+                                    <a class="dropdown-item" href="#">Qty of Slow Moving SKU</a>
+                                    <a class="dropdown-item" href="#">Overstock SKU</a>
+                                    <a class="dropdown-item" href="#">NPD</a>
+                                    <a class="dropdown-item" href="#">Hero SKU</a>
+                                </div>
+                            </div>
+
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" id="AreaSalesCoor" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-dashboard"></i>ASC
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="AreaSalesCoor">
+                                    <a class="dropdown-item" href="#">BA Sales Report Slow Moving SKU</a>
+                                    <a class="dropdown-item" href="#">Overstock SKU</a>
+                                    <a class="dropdown-item" href="#">NPD</a>
+                                    <a class="dropdown-item" href="#">Hero SKU</a>
+                                </div>
+                            </div>
+
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" id="ATMM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-dashboard"></i>ATMM
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="ATMM">
+                                    <a class="dropdown-item" href="#">Store Search Engine</a>
+                                    <a class="dropdown-item" href="#">Trade Report Info for KAM</a>
+                                    <a class="dropdown-item" href="#">Top Performing Watsons Store</a>
+                                    <a class="dropdown-item" href="#">Trade Report on ASC</a>
+                                    <a class="dropdown-item" href="#">Trade Report on BA</a>
+                                </div>
+                            </div>
+
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" id="KAMM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-dashboard"></i>KAM & Management
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="KAMM">
+                                    <a class="dropdown-item" href="#">Store Search Engine</a>
+                                    <a class="dropdown-item" href="#">Trade Report Info for KAM</a>
+                                    <a class="dropdown-item" href="#">Top Performing Watsons Store</a>
+                                    <a class="dropdown-item" href="#">Trade Report on ASC</a>
+                                    <a class="dropdown-item" href="#">Trade Report on BA</a>
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>
@@ -70,4 +118,22 @@
                 </div> 
             </nav>
         </div>
-    </header>   
+    </header>
+
+
+<script>
+    $(document).ready(function () {
+        $(".dropdown-item").on("click", function (e) {
+            e.preventDefault(); 
+
+            $(".dropdown-item").removeClass("active");
+
+            $(this).addClass("active");
+            
+            $(".nav-link").removeClass("active");
+
+            const parentMenu = $(this).closest(".dropdown").find(".nav-link");
+            parentMenu.addClass("active");
+        });
+    });
+</script>

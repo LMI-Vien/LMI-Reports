@@ -27,7 +27,7 @@ class Team extends BaseController
 		$data['title'] = "Team";
 		$data['PageName'] = 'Team';
 		$data['PageUrl'] = 'Team';
-		$data['buttons'] = ['add', 'search'];
+		$data['buttons'] = ['add', 'search', 'import'];
 		$data['content'] = "cms/team/team.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
