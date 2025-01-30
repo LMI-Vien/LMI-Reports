@@ -75,7 +75,7 @@
         </li>
         
         <!-- Masterfile Menu with Submenu -->
-        <li class="nav-item has-treeview <?= in_array($PageUrl ?? '', ['Agency', 'Area', 'Brand Ambassador', 'Team', 'Store/Branch']) ? 'menu-open' : '' ?> <?= in_array($PageUrl ?? '', ['Agency', 'Area', 'Brand Ambassador', 'Team', 'Store/Branch']) ? 'active' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array($PageUrl ?? '', ['Agency', 'Area', 'Brand Ambassador', 'Team', 'Store/Branch', 'Area Sales Coordinator']) ? 'menu-open' : '' ?> <?= in_array($PageUrl ?? '', ['Agency', 'Area', 'Brand Ambassador', 'Team', 'Store/Branch']) ? 'active' : '' ?>">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-file"></i>
             <p>
@@ -97,7 +97,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="<?= base_url('cms/area-sales-coordinator') ?>" class="nav-link">
+              <a href="<?= base_url('cms/asc') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Area Sales Coordinator' ? 'active' : '' ?>">
                 <i class="fas fa-users-cog nav-icon"></i>
                 <p>Area Sales Coordinator</p>
               </a>
