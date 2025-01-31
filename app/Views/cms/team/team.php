@@ -105,7 +105,7 @@
     }
 
     thead{
-        background-color: #1F2D3D;
+        background-color: #301311;
         color: white;
     }
 
@@ -239,53 +239,52 @@
 
 </style>
 
-    <div class="content-wrapper p-4">
-        <div class="card">
-            <div class="text-center" 
-                style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px">
-                <b>T E A M</b>
-            </div>
-                <div class="card-body text-center">
-                    <div class="box">
-                        <?php
-                        echo view("cms/layout/buttons",$buttons);
-
-                            $optionSet = '';
-                            foreach($pageOption as $pageOptionLoop) {
-                                $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
-                            }
-                        ?>
-
-                        <div class="box-body">
-                            <div class="col-md-12 list-data tbl-content" id="list-data">
-                                <table class= "table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                            <th class='center-content'>Code</th>
-                                            <th class='center-content'>Team Description</th>
-                                            <th class='center-content'>Status</th>
-                                            <th class='center-content'>Date Modified</th>
-                                            <th class='center-content'>Action</th>
-                                        </tr>  
-                                    </thead>
-                                    <tbody class="table_body word_break"></tbody>
-                                </table>
-                            </div>
-                            <div class="list_pagination"></div>
-                            <div class="form-group pull-right">
-                                <label>Show</label> 
-                                    <select class="record-entries">
-                                    <?= $optionSet;?>
-                                    </select>
-                                <label>Entries</label>
-                            </div>
-                        </div>   
-                    </div>
-                </div>
+<div class="content-wrapper p-4">
+    <div class="card">
+        <div class="text-center" 
+            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px">
+            <b>T E A M</b>
         </div>
-    </div>
+            <div class="card-body text-center">
+                <div class="box">
+                    <?php
+                    echo view("cms/layout/buttons",$buttons);
 
+                        $optionSet = '';
+                        foreach($pageOption as $pageOptionLoop) {
+                            $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
+                        }
+                    ?>
+
+                    <div class="box-body">
+                        <div class="col-md-12 list-data tbl-content" id="list-data">
+                            <table class= "table table-bordered listdata">
+                            <thead>
+                                <tr>
+                                    <th class='center-content'><input class ="selectall" type ="checkbox"></th>
+                                        <th class='center-content'>Code</th>
+                                        <th class='center-content'>Team Description</th>
+                                        <th class='center-content'>Status</th>
+                                        <th class='center-content'>Date Modified</th>
+                                        <th class='center-content'>Action</th>
+                                    </tr>  
+                                </thead>
+                                <tbody class="table_body word_break"></tbody>
+                            </table>
+                        </div>
+                        <div class="list_pagination"></div>
+                        <div class="form-group pull-right">
+                            <label>Show</label> 
+                                <select class="record-entries">
+                                <?= $optionSet;?>
+                                </select>
+                            <label>Entries</label>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+    </div>
+</div>
 
 <!-- Add MODAL -->
 <div class="modal fade" id="save_team_modal" tabindex="-1">
@@ -299,11 +298,13 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Code</label>
-                    <input type="text" class="form-control required" id="add_code">
+                    <input type="text" class="form-control required" maxlength="25" id="add_code">
+                    <small class ="text-muted">* Maximum length of Code is 25</small>
                 </div>
                 <div class="form-group">
                     <label>Team Description</label>
-                    <input type="text" class="form-control required" id="add_team_description">
+                    <input type="text" class="form-control required" maxlength="50" id="add_team_description">
+                    <small class ="text-muted">* Maximum length of Team Description is 50</small>
                 </div>
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input large-checkbox" id="add_status">
@@ -332,14 +333,14 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Code</label>
-                    <input type="text" class="form-control required" id="code">
+                    <input type="text" class="form-control required" id="e_code">
                 </div>
                 <div class="form-group">
                     <label>Team Description</label>
-                    <input type="text" class="form-control required" id="team_description">
+                    <input type="text" class="form-control required" id="e_team_description">
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input large-checkbox" id="status">
+                    <input type="checkbox" class="form-check-input large-checkbox" id="e_status">
                     <label class="form-check-label large-label" for="status">Active</label>
                 </div>
             </div>
@@ -408,14 +409,13 @@
                         <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
                             <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
                         </label>
-                        <!-- DI PA TAPOS VALIDATION NG IMPORT -->
                         <input
                             type="file"
                             style="display: none;"
                             id="file"
                             accept=".xls,.xlsx,.csv"
                             aria-describedby="import_files"
-                            onchange="handle_file_upload(event)"
+                            onchange="store_file(event)"
                             onclick="clear_import_table()"
                         >
 
@@ -470,8 +470,7 @@
         });
     });
 
-    function get_data(keyword = null)
-    {
+    function get_data(keyword = null) {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -521,8 +520,7 @@
         });
     }
 
-    function get_pagination()
-    {
+    function get_pagination() {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
@@ -590,9 +588,6 @@
         if(validate.standard("save_team_modal")){
             save_data();
         }
-        // console.log($('#add_code').val());
-        // console.log($('#add_team_description').val());
-        // console.log($('#add_status').val());
     });
 
     $(document).on('click', '#updateBtn', function() {
@@ -680,231 +675,269 @@
         reader.readAsBinaryString(file);
     }
 
-    // function proccess_xl_file() {
-    //     var extracted_data = $(".import_table");
-    //     var html_tr_count = 1;
-    //     var invalid = false;
-    //     var errmsg = '';
-    //     var unique_code = [];
-    //     var unique_team_description = [];
-    //     var import_array = [];
-    //     extracted_data.find('tr').each(function () {
-    //         var html_td_count = 1;
-    //         var temp = [];
-    //         $(this).find('td').each( function() {
-    //             var text_val = $(this).html().trim();
-    //             if (html_td_count != 1) {
-    //                 temp.push(text_val)
-    //             }
+    let storedFile = null;
 
-    //             if (html_td_count == 2) {
-    //                 if (unique_code.includes(text_val)) {
-    //                     invalid = true;
-    //                     errmsg += "⚠️ Duplicated Code at line #: <b>" + html_tr_count + "</b>⚠️<br>";
-    //                 } else {
-    //                     unique_code.push(text_val);
-    //                 }
-    //             }
-    //             if (html_td_count == 2 && text_val == '') {
-    //                 invalid = true;
-    //                 errmsg += "⚠️ Invalid Code at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-    //             }
-    //             if (html_td_count == 2 && text_val.length > 25) {
-    //                 invalid = true;
-    //                 errmsg += "⚠️ Code exceeds the set character limit(25) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-    //             }
+    function store_file(event) {
+        storedFile = event.target.files[0]; // Store the file but do nothing yet
+        console.log("File stored:", storedFile.name);
+    }
 
-    //             if (html_td_count == 3) {
-    //                 if (unique_team_description.includes(text_val)) {
-    //                     invalid = true;
-    //                     errmsg += "⚠️ Duplicated Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-    //                 }
-    //                 else {
-    //                     unique_team_description.push(text_val)
-    //                 }
-    //             }
-    //             if (html_td_count == 3 && text_val == '') {
-    //                 invalid = true;
-    //                 errmsg += "⚠️ Invalid Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-    //             }
-    //             if (html_td_count == 3 && text_val.length > 50) {
-    //                 invalid = true;
-    //                 errmsg += "⚠️ Description exceeds the set character limit(50) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-    //             }
-
-    //             if (html_td_count == 4 && text_val.toLowerCase() != 'active' && text_val.toLowerCase() != 'inactive') {
-    //                 invalid = true;
-    //                 errmsg += "⚠️ Invalid Status at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-    //             }
-
-    //             html_td_count+=1;
-    //         })
-
-    //         import_array.push(temp)
-    //         html_tr_count+=1;
-    //     });
-
-    //     var temp_invalid = invalid;
-    //     var temp_err_msg = '';
-    //     var temp_line_no = 0;
-    //     var promises = [];
-
-    //     import_array.forEach(row => {
-    //         check_current_db(function(result) {
-    //             var parsedResult = JSON.parse(result);
-
-    //             $.each(parsedResult, function(index, item) {
-    //                 if (item.code === row[0] && item.team_description === row[1]) {
-    //                     temp_invalid = true;
-    //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-    //                 }
-    //                 else if (item.code === row[0]) {
-    //                     temp_invalid = true;
-    //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-    //                 }
-    //                 else if (item.team_description === row[1]) {
-    //                     temp_invalid = true;
-    //                     temp_err_msg += "⚠️ Description already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-    //                 } else {
-                        
-    //                 }
-    //             });
-    //             temp_line_no+=1;
-    //         });
-    //     });
-        
-    //     invalid = temp_invalid;
-    //     errmsg += temp_err_msg;
-
-    //     if(invalid) {
-    //         load_swal(
-    //             '',
-    //             '1000px',
-    //             'error',
-    //             'Error!',
-    //             errmsg,
-    //             false,
-    //             true
-    //         )
-    //         $("#import_modal").modal('hide')
-    //         return
-    //     }
-    //     import_array.forEach(row => {
-    //         var status_val = 0;
-    //         if (row[2] == 'active') {
-    //             status_val = 1
-    //         } else {
-    //             status_val = 0
-    //         }
-    //         save_to_db(row[0], row[1], status_val)
-    //     })
-
-    //     get_pagination();
-    // }
-
-    function handle_file_upload(event) {
-        const file = event.target.files[0]; // Get the uploaded file
-        if (!file) {
-            alert('No file selected. Please upload a valid Excel file.');
+    function proccess_xl_file() {
+        if (!storedFile) {
+            alert("No file selected!");
             return;
         }
 
-        const reader = new FileReader();
-
-        // Read the file as an ArrayBuffer for SheetJS processing
+        let reader = new FileReader();
         reader.onload = function (e) {
-            const data = new Uint8Array(e.target.result); // Convert to Uint8Array
-            const workbook = XLSX.read(data, { type: 'array' }); // Read workbook
-            const sheetName = workbook.SheetNames[0]; // Use the first sheet
-            const sheet = workbook.Sheets[sheetName];
+            let data = new Uint8Array(e.target.result);
+            let workbook = XLSX.read(data, { type: "array" });
 
-            // Convert the sheet data to a 2D array
-            const parsedData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Header: 1 = array format
-            console.log("Parsed Data:", parsedData);
+            let sheetName = workbook.SheetNames[0];
+            let worksheet = workbook.Sheets[sheetName];
 
-            // Pass data to the processing function
-            proccess_xl_file(parsedData);
-        };
+            let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        reader.readAsArrayBuffer(file); // Trigger file reading
-    }
-
-    // Function to process the parsed Excel data
-    function proccess_xl_file(data) {
-        console.log("Processing Data:", data);
-
-        if (!Array.isArray(data) || !Array.isArray(data[0])) {
-            console.error("Invalid data format: Data must be a 2D array.");
-            return;
-        }
-
-        const headerRow = data[0]; // Optional: Capture the header row
-        const rows = data.slice(1); // Skip the header row
-
-        rows.forEach((row, index) => {
-            console.log(`Row ${index + 1}:`, row);
-
-            // Assuming columns are structured as follows:
-            const code = row[0]; // Column 1
-            const team_description = row[1]; // Column 2
-            const status_val = row[2]?.toLowerCase() === 'active' ? 1 : 0; // Column 3
-
-            // Pass each row's data to save_to_db
-            save_to_db(code, team_description, status_val);
-        });
-    }
-
-
-
-    function save_data() {
-        var status = $('#save_team_modal #status').prop('checked') ? 1 : 0;
-        modal.confirm("Are you sure you want to save this record?",function(result){
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-                var data = {
-                    event : "insert", // list, insert, update, delete
-                    table : "tbl_team", //table
-                    data : {
-                            code : $('#save_team_modal #add_code').val(),
-                            team_description : $('#save_team_modal #add_team_description').val(),
-                            status : $('#save_team_modal #add_status').val(),
-                            created_date : formatDate(new Date()),
-                            //update_date : formatDate(new Date()).format('YYYY-MM-DD HH:mm:ss'),
-                            //to follow created data and created by
-                            created_by : user_id,
-                            status : status
-                    }  
-                }
-
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    // alert("pasok");
-                    location.reload();
-                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-                    //    location.reload();
-                    // })
-                });
+            if (!Array.isArray(jsonData) || jsonData.length < 2) {
+                console.error("Invalid data format: No data rows found.");
+                alert("Invalid file format. Please upload a valid Excel file.");
+                return;
             }
 
+            console.log("Extracted Data:", jsonData);
+
+            let headers = jsonData[0];
+            let records = jsonData.slice(1);
+
+            let columnMapping = {
+                "code": "code",
+                "team description": "team_description",
+                "status": "status"
+            };
+
+            let statusMapping = {
+                "active": 1,
+                "inactive": 0
+            };
+
+            let existingRecords = [];
+            let invalidRecords = [];
+            let insertedRecords = 0;
+            let totalRecords = records.length;
+            let processedCount = 0;
+
+            records.forEach((row, rowIndex) => {
+                let dataObject = {};
+                let isValid = true;
+
+                headers.forEach((header, index) => {
+                    let dbColumn = columnMapping[header];
+                    if (dbColumn) {
+                        let value = row[index]?.trim() ?? null;
+                        dataObject[dbColumn] = value;
+                        if (!value) isValid = false;
+                    }
+                });
+
+                if (dataObject['status']) {
+                    dataObject['status'] = statusMapping[dataObject['status'].toLowerCase()] ?? 0;
+                }
+
+                dataObject['created_date'] = formatDate(new Date());
+                dataObject['created_by'] = user_id;
+
+                if (!dataObject.code || !dataObject.team_description || dataObject.status === null) {
+                    invalidRecords.push(`Row ${rowIndex + 2}`);
+                    processedCount++;
+                    checkCompletion();
+                    return;
+                }
+
+                check_if_exists(dataObject, function (exists) {
+                    console.log("Check if it exists:", exists);
+                    if (exists) {
+                        existingRecords.push(dataObject.code);
+                        processedCount++;
+                        checkCompletion();
+                    } else {
+                        save_to_db(dataObject, function (success) {
+                            if (success) {
+                                insertedRecords++;
+                                console.log(`Record inserted successfully: ${dataObject.code}`);
+                            }
+                            processedCount++;
+                            checkCompletion();
+                        });
+                    }
+                });
+            });
+
+            function checkCompletion() {
+                console.log(`Processed count: ${processedCount}, Total records: ${totalRecords}`);
+                if (processedCount === totalRecords) {
+                    if (invalidRecords.length > 0) {
+                        load_swal(
+                            'add_alert',
+                            '500px',
+                            "error",
+                            "Error!",
+                            `The following rows have missing values: ${invalidRecords.join(', ')}`,
+                            false,
+                            false
+                        );
+                    } else if (existingRecords.length > 0) {
+                        load_swal(
+                            'add_alert',
+                            '500px',
+                            "error",
+                            "Error!",
+                            `The following records already exist in the database: ${existingRecords.join(', ')}`,
+                            false,
+                            false
+                        );
+                    } else if (insertedRecords > 0) {
+                        load_swal(
+                            'add_alert',
+                            '500px',
+                            "success",
+                            "Success!",
+                            `${insertedRecords} records inserted successfully!`,
+                            false,
+                            false
+                        ).then(() => {
+                            location.reload();
+                        });
+                    }
+                }
+            }
+        };
+
+        reader.readAsArrayBuffer(storedFile);
+    }
+
+    // Function to check if record exists
+    function check_if_exists(dataObject, callback) {
+        var data = {
+            event: "list",
+            select: "id, code, team_description", // Adjust as needed for your schema
+            query: `code = '${dataObject.code}' OR team_description = '${dataObject.team_description}'`, // Query for existing data
+            offset: 0,
+            limit: 0,
+            table: "tbl_team"
+        };
+
+        console.log("Sending data to check_if_exists:", data); // Debugging
+
+        $.ajax({
+            url: "<?= base_url('cms/global_controller'); ?>", // URL of the controller
+            type: 'POST',
+            data: data,
+            success: function (result) {
+                console.log("Raw server response:", result); // Debugging
+
+                // Ensure the result is parsed as JSON
+                try {
+                    result = JSON.parse(result);
+                } catch (e) {
+                    console.error("Failed to parse response:", e);
+                    callback(false); // Exit early if response parsing fails
+                    return;
+                }
+
+                if (!Array.isArray(result)) {
+                    console.error("Expected an array, but received:", result); // Debugging invalid format
+                    callback(false); // Exit early if the response is not an array
+                    return;
+                }
+
+                // Log the result for further inspection
+                result.forEach(item => {
+                    console.log(`Checking item: code = ${item.code}, team_description = ${item.team_description}`);
+                });
+
+                // Check if any record has the same code or team description
+                let exists = result.some(item => {
+                    // Trim both fields and use case-insensitive comparison
+                    let itemCode = item.code;
+                    let itemTeamDesc = item.team_description;
+                    let dataCode = dataObject.code;
+                    let dataTeamDesc = dataObject.team_description;
+
+                    console.log(`Comparing: ${dataCode} === ${itemCode} || ${dataTeamDesc} === ${itemTeamDesc}`);
+
+                    return itemCode === dataCode || itemTeamDesc === dataTeamDesc;
+                });
+
+                console.log("Does record exist?", exists); // Debugging
+                callback(exists); // Pass the result to the callback
+            },
+            error: function (e) {
+                console.error("Error checking for existing record:", e);
+                callback(false); // If error occurs, assume the record doesn't exist
+            }
         });
     }
 
-    function save_to_db(code, team_description, status_val) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+    function save_to_db(dataObject) {
+        var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
         var data = {
-            event : "insert", // list, insert, update, delete
-            table : "tbl_team", //table
-            data : {
-                    code : code,
-                    team_description : team_description,
-                    created_date : formatDate(new Date()),
-                    created_by : user_id,
-                    status : status_val
-            }  
-        }
-        aJax.post(url,data,function(result){
+            event: "insert",
+            table: "tbl_team", // Table name
+            data: dataObject  // Pass the entire object dynamically
+        };
+
+        aJax.post(url, data, function (result) {
             var obj = is_json(result);
             location.reload();
+        });
+    }
+
+    function save_data() {
+        var code = $('#save_team_modal #add_code').val();
+        var description = $('#save_team_modal #add_team_description').val(); 
+        var status_val = $('#save_team_modal #add_status').prop('checked') ? 1 : 0; 
+
+        check_current_db(function(result) {
+            var err_msg = '';
+            var valid = true;
+            
+            var result = JSON.parse(result);
+
+            $.each(result, function(index, item) {
+                if (item.code === code) {
+                    valid = false;
+                    err_msg += "Code already exists in masterfile<br>";
+                }
+                if (item.team_description === description) {
+                    valid = false;
+                    err_msg += "Description already exists in masterfile<br>";
+                }
+            });
+
+            if (!valid) {
+                load_swal(
+                    'add_alert',
+                    '500px',
+                    "error",
+                    "Error!",
+                    err_msg,
+                    false,
+                    false
+                );
+            } else {
+                modal.confirm("Are you sure you want to save this record?", function(result) {
+                    if (result) {
+                        var dataObject = {
+                            code: code,
+                            team_description: description,
+                            status: status_val,
+                            created_date: formatDate(new Date()), 
+                            created_by: user_id
+                        };
+                        save_to_db(dataObject); 
+                    }
+                });
+            }
         });
     }
 
@@ -926,13 +959,13 @@
             if(obj){
                 $.each(obj, function(x,y) {
                     console.log(y);
-                    $('#update_team_modal #code').val(y.code);
-                    $('#update_team_modal #team_description').val(y.team_description);
+                    $('#update_team_modal #e_code').val(y.code);
+                    $('#update_team_modal #e_team_description').val(y.team_description);
                     
                     if(y.status == 1){
-                        $('#update_team_modal #status').prop('checked', true);
+                        $('#update_team_modal #e_status').prop('checked', true);
                     }else{
-                        $('#update_team_modal #status').prop('checked', false);
+                        $('#update_team_modal #e_status').prop('checked', false);
                     }
 
                 }); 
@@ -944,48 +977,70 @@
         return exists;
     }
 
-    function update_data(id){
-        var code = $('#code').val()
-        var team_desc = $('#team_description').val()
-        var status = $('#status').prop('checked')
+    function update_data(id) {
+        var code = $('#e_code').val();
+        var team_desc = $('#e_team_description').val();
+        var status = $('#status').prop('checked') ? 1 : 0; // Get the status as 1 or 0
 
+        // Check if the code or description already exists in the database before updating
+        check_current_db(function(result) {
+            var err_msg = '';
+            var valid = true;
 
-        var status = $('#update_team_modal #status').prop('checked') ? 1 : 0;
-        modal.confirm("Are you sure you want to update this record?",function(result){
-            console.log(result);
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-                var data = {
-                    event : "update", // list, insert, update, delete
-                    table : "tbl_team", //table
-                    field : "id",
-                    where : id, 
-                    data : {
-                            code : code,
-                            team_description : team_desc,
-                            status : $('#update_team_modal #status').val(),
-                            //created_date : formatDate(new Date()),
-                            updated_date : formatDate(new Date()),
-                            //to follow created data and created by
-                            //created_by : user_id,
-                            updated_by : user_id,
-                            status : status
-                    }  
+            // Parse the result (assuming it's JSON)
+            var result = JSON.parse(result);
+
+            // Iterate through result and check for code and description
+            $.each(result, function(index, item) {
+                if (item.code === code && item.id !== id) { // Exclude the current record being updated
+                    valid = false;
+                    err_msg += "Code already exists in masterfile<br>";
                 }
+                if (item.team_description === team_desc && item.id !== id) { // Exclude the current record being updated
+                    valid = false;
+                    err_msg += "Description already exists in masterfile<br>";
+                }
+            });
 
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    //alert("pasok");
-                    location.reload();
-                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-                    //    location.reload();
-                    // })
+            // If not valid, show error message
+            if (!valid) {
+                load_swal(
+                    'add_alert',
+                    '500px',
+                    "error",
+                    "Error!",
+                    err_msg,
+                    false,
+                    false
+                );
+            } else {
+                // If valid, confirm and update the record
+                modal.confirm("Are you sure you want to update this record?", function(result) {
+                    if (result) {
+                        var data = {
+                            event: "update", // Specify event type
+                            table: "tbl_team", // Table name
+                            field: "id",
+                            where: id, // Record to update
+                            data: {
+                                code: code,
+                                team_description: team_desc,
+                                status: status,
+                                updated_date: formatDate(new Date()),
+                                updated_by: user_id
+                            }
+                        };
+
+                        var url = "<?= base_url('cms/global_controller'); ?>"; // URL of the controller
+                        aJax.post(url, data, function(result) {
+                            var obj = is_json(result);
+                            location.reload();
+                        });
+                    }
                 });
             }
-
         });
     }
-
 
     function delete_data(id){
         
@@ -1051,7 +1106,6 @@
         });
         return exists;
     }
-
 
     function formatDate(date) {
         // Get components of the date

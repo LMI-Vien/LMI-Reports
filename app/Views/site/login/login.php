@@ -27,7 +27,7 @@
                 <hr>
                 <div class="google-sign-container">
                     <a href="">
-                        <img src="/assets/img/google-sign.webp" class="google-sign-img" alt="Sign in with Google">
+                        <img src="<?= base_url('/assets/img/google-sign.webp'); ?>" class="google-sign-img" alt="Sign in with Google">
                     </a>
                 </div>
             </div>
