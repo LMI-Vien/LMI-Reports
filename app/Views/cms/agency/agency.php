@@ -99,7 +99,7 @@ div#list-data {
 
                 <div class="box-body">
                     <div class="col-md-12 list-data tbl-content" id="list-data">
-                        <table class= "table table-bordered listdata">
+                        <table class= "table table-bordered listdata" style="background-image: url('your-image.jpg');">
                         <thead>
                             <tr>
                                 <th class='center-content'><input class ="selectall" type ="checkbox"></th>

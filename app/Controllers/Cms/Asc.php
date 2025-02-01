@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class ASC extends BaseController
+class Asc extends BaseController
 {
     protected $session;
 
