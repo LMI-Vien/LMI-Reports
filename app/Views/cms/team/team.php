@@ -454,7 +454,7 @@
     var url = "<?= base_url("cms/global_controller");?>";
 
     $(document).ready(function() {
-        get_data();
+        get_data(query);
         get_pagination();
         $('#btn_add').css({
             'border': '2px solid white', 
@@ -470,12 +470,12 @@
         });
     });
 
-    function get_data(keyword = null) {
+    function get_data(new_query) {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
             select : "id, code, team_description, status, updated_date",
-            query : query,
+            query : new_query,
             offset : offset,
             limit : limit,
             table : "tbl_team",
@@ -544,24 +544,50 @@
         });
     }
 
-    pagination.onchange(function(){
-        offset = $(this).val();
-        get_data();
-        $('.selectall').prop('checked', false);
-        $('.btn_status').hide();
-        $("#search_query").val("");
-    })
+    // uses function get_data
+    // $(document).on('keydown', '#search_query', function(event) {
+    //     if (event.key == 'Enter') {
+    //         search_input = $('#search_query').val();
+    //         offset = 1;
+    //         get_pagination();
+    //         new_query = query;
+    //         new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
+    //         get_data(new_query);
+    //         console.log("Key pressed:", search_input);
+    //         console.log(new_query);
+    //     }
+    // });
 
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
+    $(document).on('keydown', '#search_query', function(event) {
+        console.log("Key pressed:", event.key); // Log every key press to diagnose the issue
+
+        if (event.key === 'Enter') {
+            console.log("Enter key pressed"); // Log when 'Enter' key is detected
+
+            search_input = $('#search_query').val();
             offset = 1;
-            query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
-            get_data();
             get_pagination();
+            new_query = query;
+            new_query += " and code like '%" + search_input + "%' or " + query + " and team_description like '%" + search_input + "%'";
+            get_data(new_query);
+            console.log("Search Query:", search_input);
+            console.log("New Query:", new_query);
+        }
+
+        if (event.key === 'a') {
+            console.log("Key 'a' pressed and detected"); // Additional logging for 'a' key
         }
     });
 
+    // $(document).on('keydown', '#search_query', function(event) {
+    //     event.stopPropagation();
+    //     console.log("Key pressed:", event.key);
+    // });
+
+    pagination.onchange(function(){
+        offset = $(this).val();
+        get_data(query);
+    })
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
