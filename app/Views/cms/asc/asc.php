@@ -1,3 +1,348 @@
+<style>
+    .pull-right{
+        float:right;
+    }
+    .box-header.with-border {
+        margin-top: 5px;
+        display: flex;
+    }
+    .box-header:before,
+    .box-body:before,
+    .box-footer:before,
+    .box-header:after,
+    .box-body:after,
+    .box-footer:after {
+        content: " ";
+        display: table;
+    }
+    .box-header:after,
+    .box-body:after,
+    .box-footer:after {
+        clear: both;
+    }
+    .box-header {
+        color: #444;
+        display: block;
+        padding: 10px;
+        position: relative;
+    }
+    .box-header.with-border {
+        border-bottom: 1px solid #f4f4f4;
+    }
+    .collapsed-box .box-header.with-border {
+        border-bottom: none;
+    }
+
+    .tbl-content{
+        max-height: 530px;
+        overflow: auto;
+    }
+
+    div#list-data {
+        padding: 0;
+    }
+
+    .search-query {
+        height: 31px;
+        border-radius: 7px;
+    }
+    #form-search .has-feedback .form-control-feedback {
+        right: 0px !important;
+    }
+
+    #form-search  .form-group {
+        margin-right: 0px !important;
+        margin-left: 0px !important;
+    }
+
+    #form-search{
+        display: inline-block;
+        position: fixed;
+        right:2em;
+        width: 20%;
+        display: inline-block;
+    }
+    /*.hidden{
+        display: none;
+    }*/
+    .button-spacing {
+        margin-right: 5px;
+    }
+
+    .btn-custom {
+        width: 80px; 
+        height: 40px;
+        line-height: 24px; 
+        text-align: center; 
+        display: inline-block; 
+        padding: 5px 10px; 
+    }
+
+
+
+    /*for menu roles*/
+
+    th:first-child{
+        width:20px;   
+    }
+
+    th:last-child{
+        width: 30px;
+    }
+
+    td:last-child{
+        text-align: center;
+    }
+
+    .ta_c
+    {
+        text-align: center;
+    }
+
+    .module_content{
+        overflow: auto;
+        height: auto;
+    }
+    .menu_header_ul {
+        padding: 0;
+        display: block; 
+        vertical-align: middle;
+        margin: 0;
+        display: grid;
+        grid-template-columns: 52fr repeat(3, 16fr);
+    }
+    .menu_header_ul li{
+        display: inline-block;
+        text-align: left;
+    }
+
+    .menu_header_ul li:first-child {
+        text-align: left;
+    }
+
+    .menu_header_li span {
+        padding-left: 10px;
+    }
+
+    .module_header_container {
+    /*    position: absolute;*/
+        width: 100%;
+        padding: 9px 0px;
+        overflow: hidden;
+        background: #301311;
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        z-index: 1;
+    }
+    .module_body_container {
+    /*    padding-top: 40px;*/
+        width: 100%;
+        position: relative;
+    }
+
+    .module_col {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+    ul.parent_menu {
+        padding: 0;
+        display: block;
+        vertical-align: middle;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    ul.child_menu {
+        padding: 0;
+        display: block;
+        vertical-align: middle;
+        margin: 0;
+    }
+
+    .menu_title {
+        display: inline-block;
+        width: 52%;
+        background: rgba(44, 59, 65, 0.15);
+        color: #000;
+        font-weight: 500;
+        font-size : 17px;
+    }
+
+    .menu_title span {
+        padding-left: 10px;
+    }
+
+    .menu_chkbx {
+        display: inline-block;
+        width: 16%;
+        background: rgba(44, 59, 65, 0.15);
+        font-size: 17px;
+    }
+
+    .sub_menu_title {
+        display: inline-block;
+        width: 52%;
+    }
+
+    .sub_menu_title span {
+        padding-left: 20px;
+    }
+
+    .sub_menu_chkbx {
+        display: inline-block;
+        width: 16%;
+    }
+
+    .page-title {
+        padding: 10px; 
+        font-family: 'Courier New', Courier, monospace; 
+        font-size: large; 
+        background-color: #fdb92a; 
+        color: #333333; 
+        border: 1px solid #ffffff; 
+        border-radius: 10px
+    }
+
+    .modal-title {
+        font-family: 'Courier New', Courier, monospace; 
+        font-size: large;
+    }
+
+    .save {
+        border: 1px solid #267326; 
+        padding: 10px; 
+        min-width: 75px; 
+        max-height: 30px; 
+        line-height: 0.5; 
+        background-color: #339933; 
+        color:white; 
+        border-radius:10px; 
+        margin-right:5px;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+    .save:hover {
+        color: white !important ; 
+        background-color: #15C815 !important ; 
+        border: 0px solid #339933 !important ; 
+    }
+    .save:focus {
+        color: white !important ; 
+        background-color: #15C815 !important ; 
+        border: 0px solid #339933 !important ; 
+    }
+
+    .view {
+        border: 1px solid #143996; 
+        padding: 10px; 
+        min-width: 75px; 
+        max-height: 30px; 
+        line-height: 0.5; 
+        background-color: #1439a6; 
+        color:white; 
+        border-radius:10px; 
+        margin-right:5px;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+    .view:hover {
+        color: white; 
+        background-color: #1439FF; 
+        border: 0px solid #1439a6; 
+    }
+
+    .delete {
+        border: 1px solid #730000;
+        padding: 10px; 
+        min-width: 75px; 
+        max-height: 30px; 
+        line-height: 0.5; 
+        background-color: #990000; 
+        color: white; border-radius: 10px; 
+        margin-right: 2px; 
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+    .delete:hover {
+        color: white; 
+        background-color: #C80000; 
+        border: 0px solid #990000; 
+    }
+
+    .caution {
+        border: 2px solid #FE9900; 
+        padding: 10px; 
+        min-width: 75px; 
+        max-height: 30px; 
+        line-height: 0.5; 
+        background-color: #FE9900; 
+        color: white; 
+        border-radius:10px; 
+        margin-right:5px;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+    .caution:hover {
+        padding: 10px; 
+        color: white; 
+        background-color: #FFC14D; 
+        border: 0px solid #FE9900; 
+    }
+
+    .default {
+        border: 2px solid white; 
+        padding: 10px; 
+        min-width: 75px; 
+        max-height: 30px; 
+        line-height: 0.5; 
+        background-color:gray; 
+        color:white; 
+        border-radius:10px; 
+        margin-right:5px;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .even-row {
+        background-color: #FFFFFF;
+    }
+    .even-row:hover{
+        background-color: #b3e5fc;
+    }
+
+    .odd-row {
+        background-color: #DEDEDE;
+    }
+    .odd-row:hover{
+        background-color: #b3e5fc;
+    }
+
+    thead{
+        background-color: #301311;
+        color: white;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+    .custom-file-upload {
+        border: 1px solid #ccc;
+        display: inline-block;
+        padding: 6px 12px;
+        cursor: pointer;
+    }
+
+    .card {
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .card-body {
+        padding-top: 0px;
+    }
+</style>
 
 <div class="content-wrapper p-4">
     <div class="card">
@@ -144,9 +489,9 @@
                             <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
                         </label>
 
-                        <label for="preview" class="custom-file-upload save" id="nextButton" style="margin-top: 10px">
+                        <!-- <label for="preview" class="custom-file-upload save" id="nextButton" style="margin-top: 10px">
                             <i class="fa fa-sync" style="margin-right: 5px;"></i>Next
-                        </label>
+                        </label> -->
     
                         <table class= "table table-bordered listdata">
                             <thead>
@@ -773,10 +1118,6 @@
             var tr_counter = 0;
 
             jsonData.forEach(row => {
-                tr_counter += 1;
-            });
-
-            jsonData.forEach(row => {
                 var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
                 html += "<tr class=\""+rowClass+"\">";
                 html += "<td>";
@@ -813,23 +1154,79 @@
     }
     
     // Attach "Next" button event
-    $("#nextButton").click(function () {
-        alert('alert')
-    });
+    // $("#nextButton").click(function () {
+    //     alert('alert')
+    // });
 
     function proccess_xl_file() {
         var extracted_data = $(".import_table");
+
+        var code = '';
+        var description = '';
+        var status = '';
+        var deploy_date = '';
+        var area_id = '';
+
+        var invalid = false;
+        var errmsg = '';
+
+        var unique_code = [];
+        var unique_description = [];
+
+        var import_array = [];
+        tr_count = 0;
         extracted_data.find('tr').each(function () {
+            td_count = 0;
             $(this).find('td').each( function() {
                 var text_val = $(this).html().trim();
+
+                if (td_count === 1) {
+                    if (unique_code.includes(text_val)) {
+                        invalid = true;
+                        errmsg += "⚠️ Duplicated Code at line #: <b>" + html_tr_count + "</b>⚠️<br>";
+                    } else {
+                        unique_code.push(text_val);
+                    }
+                    code = text_val;
+                } else if (td_count === 2) {
+                    description = text_val;
+                } else if (td_count === 3) {
+                    if (text_val.toLowerCase() === 'active') {
+                        status = 1;
+                    } else {
+                        status = 0;
+                    }
+                } else if (td_count === 4) {
+                    if (isNaN(dateObj.getTime())) {
+                        return "Invalid Date";
+                    } else {
+                        deploy_date = readable_date_to_excel_date(text_val);
+                    }
+                } else if (td_count === 5) {
+                    area_id = text_val;
+                }
+
+                td_count += 1;
             });
+            tr_count += 1;
+            console.log(code, description, status, deploy_date, area_id);
         });
         alert('Processing file...');
     }
 
+    function readable_date_to_excel_date(readable_date) {
+        var dateObj = new Date(readable_date);
+        
+        var yyyy = dateObj.getFullYear();
+        var mm = String(dateObj.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        var dd = String(dateObj.getDate()).padStart(2, '0');
+        
+        var formattedDate = `${yyyy}-${mm}-${dd}`;
+
+        return formattedDate;
+    }
+
     function excel_date_to_readable_date(excel_date) {
-        // let jsDate = new Date((excelDate - 25569) * 86400 * 1000);
-        // let readableDate = jsDate.toLocaleDateString();
         var date = new Date((excel_date - (25567 + 1)) * 86400 * 1000);
         return date.toLocaleDateString("en-US", { 
             year: "numeric", 
