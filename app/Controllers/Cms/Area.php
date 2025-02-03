@@ -31,6 +31,7 @@ class Area extends BaseController
 		$data['content'] = "cms/area/area.php";
 		$data['buttons'] = ['add', 'search', 'import'];
 		$data['session'] = session(); //for frontend accessing the session data
+		$data['standard'] = config('Standard');
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
@@ -40,6 +41,7 @@ class Area extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
+        		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		

@@ -229,6 +229,60 @@ class Global_model extends Model
         return $q->getResult();
     }
 
+    function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false)
+    {
+        $builder = $this->db->table($table);
+        $builder->select($select);
+
+        if (!empty($conditions) && is_array($conditions)) {
+            $totalConditions = count($conditions);
+
+            $groupSize = max(1, $totalConditions - 2);
+            $groupedConditions = array_slice($conditions, 0, $groupSize);
+            $remainingConditions = array_slice($conditions, $groupSize);
+
+            if (!empty($groupedConditions)) {
+                $builder->groupStart();
+                foreach ($groupedConditions as $index => $condition) {
+                    if ($index === 0) {
+                        $builder->where($condition[0], $condition[1]);
+                    } else {
+                        if ($useOr == 'true') {
+                            $builder->orWhere($condition[0], $condition[1]);
+                        } else {
+                            $builder->where($condition[0], $condition[1]);
+                        }
+                    }
+                }
+                $builder->groupEnd();
+            }
+
+            foreach ($remainingConditions as $condition) {
+                $builder->where($condition[0], $condition[1]);
+            }
+        }
+        
+        if ($join != null) {
+            foreach ($join as $vl) {
+                $builder->join($vl['table'], $vl['query'], $vl['type']);
+            }
+        }
+
+        if ($order_field != null) {
+            $builder->orderBy($order_field, $order_type);
+        }
+
+        if ($group != null) {
+            $builder->groupBy($group);
+        }
+
+        $builder->limit($limit, $start);
+        $query = $builder->getCompiledSelect();
+        $q = $this->db->query($query, $params);
+
+        return $q->getResult();
+    }
+
     function get_data_list_count($select, $table, $query = null, $offset = 0, $join = null)
     {
         $builder = $this->db->table($table);

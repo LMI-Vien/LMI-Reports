@@ -39,6 +39,7 @@ class Team extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
+        		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);	

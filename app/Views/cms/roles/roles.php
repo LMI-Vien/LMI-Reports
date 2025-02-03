@@ -1,210 +1,9 @@
 
-
-<style>
-  .pull-right{
-    float:right;
-  }
-  .box-header.with-border {
-      margin-top: 5px;
-      display: flex;
-  }
-.box-header:before,
-.box-body:before,
-.box-footer:before,
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  content: " ";
-  display: table;
-}
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  clear: both;
-}
-.box-header {
-  color: #444;
-  display: block;
-  padding: 10px;
-  position: relative;
-}
-.box-header.with-border {
-  border-bottom: 1px solid #f4f4f4;
-}
-.collapsed-box .box-header.with-border {
-  border-bottom: none;
-}
-
-.tbl-content{
-  max-height: 530px;
-  overflow: auto;
-}
-
-div#list-data {
-    padding: 0;
-}
-
-.search-query {
-    height: 31px;
-    border-radius: 7px;
-
-}
-#form-search .has-feedback .form-control-feedback {
-     right: 0px !important;
-}
-
-#form-search  .form-group {
-     margin-right: 0px !important;
-     margin-left: 0px !important;
-}
-
-#form-search{
-    display: inline-block;
-    position: fixed;
-    right:2em;
-    width: 20%;
-    display: inline-block;
-}
-/*.hidden{
-    display: none;
-}*/
-.button-spacing {
-  margin-right: 5px;
-}
-
-.btn-custom {
-  width: 80px; 
-  height: 40px;
-  line-height: 24px; 
-  text-align: center; 
-  display: inline-block; 
-  padding: 5px 10px; 
-}
-
-
-
-/*for menu roles*/
-
-th:first-child{
-    width:20px;   
-}
-
-th:last-child{
-    width: 30px;
-}
-
-td:last-child{
-    text-align: center;
-}
-
-.ta_c
-{
-    text-align: center;
-}
-
-.module_content{
-    overflow: auto;
-    height: auto;
-}
-.menu_header_ul {
-    padding: 0;
-    display: block;
-    vertical-align: middle;
-    margin: 0;
-    display: grid;
-    grid-template-columns: 52fr repeat(3, 16fr);
-}
-.menu_header_ul li{
-    display: inline-block;
-    text-align: left;
-}
-
-.menu_header_ul li:first-child {
-    text-align: left;
-}
-
-.menu_header_li span {
-    padding-left: 10px;
-}
-
-.module_header_container {
-/*    position: absolute;*/
-    width: 100%;
-    padding: 9px 0px;
-    overflow: hidden;
-    background: #301311;
-    color: #fff;
-    font-weight: 600;
-    font-size: 15px;
-    z-index: 1;
-}
-.module_body_container {
-/*    padding-top: 40px;*/
-    width: 100%;
-    position: relative;
-}
-
-.module_col {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-}
-ul.parent_menu {
-    padding: 0;
-    display: block;
-    vertical-align: middle;
-    margin: 0;
-    font-size: 16px;
-}
-
-ul.child_menu {
-    padding: 0;
-    display: block;
-    vertical-align: middle;
-    margin: 0;
-}
-
-
-.menu_title {
-    display: inline-block;
-    width: 52%;
-    background: rgba(44, 59, 65, 0.15);
-    color: #000;
-    font-weight: 500;
-    font-size : 17px;
-}
-
-.menu_title span {
-    padding-left: 10px;
-}
-
-.menu_chkbx {
-    display: inline-block;
-    width: 16%;
-    background: rgba(44, 59, 65, 0.15);
-    font-size: 17px;
-}
-
-
-
-.sub_menu_title {
-    display: inline-block;
-    width: 52%;
-}
-
-.sub_menu_title span {
-    padding-left: 20px;
-}
-
-.sub_menu_chkbx {
-    display: inline-block;
-    width: 16%;
-}
-
-</style>
-
     <div class="content-wrapper p-4">
         <div class="card">
+            <div class="text-center page-title md-center">
+                <b> R O L E S </b>
+            </div>
           <div class="card-body text-center">
             <div class="box">
                 <?php
@@ -416,9 +215,9 @@ ul.child_menu {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content'>";
-                            html+="<a class='btn-sm btn-success btn edit btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                            html+="<a class='btn-sm btn-danger btn delete_data btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn-info btn view btn-custom' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
                         }
                         
@@ -451,7 +250,6 @@ ul.child_menu {
 
         aJax.post(url,data,function(result){
             var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
-            console.log(obj);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });

@@ -32,6 +32,7 @@ class Store_Branch extends BaseController
 		$data['buttons'] = ['add', 'search', 'import'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
+				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
 				"assets/js/moment.js"
@@ -40,6 +41,7 @@ class Store_Branch extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
+        		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		

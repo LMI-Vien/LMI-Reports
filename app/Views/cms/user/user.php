@@ -1,101 +1,8 @@
-
-
-<style>
-  .pull-right{
-    float:right;
-  }
-  .box-header.with-border {
-      margin-top: 5px;
-      display: flex;
-  }
-.box-header:before,
-.box-body:before,
-.box-footer:before,
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  content: " ";
-  display: table;
-}
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  clear: both;
-}
-.box-header {
-  color: #444;
-  display: block;
-  padding: 10px;
-  position: relative;
-}
-.box-header.with-border {
-  border-bottom: 1px solid #f4f4f4;
-}
-.collapsed-box .box-header.with-border {
-  border-bottom: none;
-}
-
-.tbl-content{
-  max-height: 530px;
-  overflow: auto;
-}
-
-div#list-data {
-    padding: 0;
-}
-
-.search-query {
-    height: 31px;
-    border-radius: 7px;
-
-}
-#form-search .has-feedback .form-control-feedback {
-     right: 0px !important;
-}
-
-#form-search  .form-group {
-     margin-right: 0px !important;
-     margin-left: 0px !important;
-}
-
-#form-search{
-    display: inline-block;
-    position: fixed;
-    right:2em;
-    width: 20%;
-    display: inline-block;
-}
-/*.hidden{
-    display: none;
-}*/
-
-.large-checkbox {
-    width: 20px;
-    height: 20px;
-}
-  
-.large-label {
-    font-size: 18px;
-    margin-left: 10px;
-}
-
-.button-spacing {
-  margin-right: 5px;
-}
-
-.btn-custom {
-  width: 80px; 
-  height: 40px;
-  line-height: 24px; 
-  text-align: center; 
-  display: inline-block; 
-  padding: 5px 10px; 
-}
-
-</style>
-
     <div class="content-wrapper p-4">
         <div class="card">
+            <div class="text-center page-title md-center">
+                <b>U S E R S</b>
+            </div>
           <div class="card-body text-center">
             <div class="box">
                 <?php
@@ -263,8 +170,6 @@ div#list-data {
     </div>
 </div>
 
-
-
 <script>
     var query = "u.status >= 0";
     var limit = 10; 
@@ -316,9 +221,9 @@ div#list-data {
                         html+="<td>"+y.role_name+"</a></p></td>";
                         html+="<td>"+status+"</a></td>";
                         html+="<td class='center-content'>";
-                        html+="<a href='#' class='btn-sm btn-success btn edit btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                        html+="<a href='#' class='btn-sm btn-danger btn delete_data btn-custom button-spacing' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                        html+="<a href='#' class='btn-sm btn-info btn view btn-custom' data-status='"+y.status+"' id='"+y.id+"' title='edit'><span class='glyphicon glyphicon-pencil'>View</span>";
+                        html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                        html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                         html+="</td>";
                         html+="</tr>";
                     });
@@ -452,14 +357,8 @@ div#list-data {
     }
 
     function update_data(id){
-        // var status = $('#update_user_modal #status').val();
         var status = $('#update_user_modal #status').prop('checked') ? 1 : 0;
-        console.log(status);
-        // if(status == 'on'){
-        //     status = 1;
-        // }else{
-        //     status = 0;
-        // }
+
         modal.confirm("Are you sure you want to update this record?",function(result){
             console.log(result);
             if(result){ 
@@ -511,10 +410,8 @@ div#list-data {
 
         aJax.post(url,data,function(result){
             var obj = is_json(result);
-            console.log(obj);
             if(obj){
                 $.each(obj, function(x,y) {
-                    console.log(y);
                     $('#update_user_modal #username').val(y.username);
                     $('#update_user_modal #email_address').val(y.email);
                     $('#update_user_modal #name').val(y.name);

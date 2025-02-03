@@ -1,155 +1,14 @@
-
-
 <style>
-  .pull-right{
-    float:right;
-  }
-  .box-header.with-border {
-      margin-top: 5px;
-      display: flex;
-  }
-.box-header:before,
-.box-body:before,
-.box-footer:before,
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  content: " ";
-  display: table;
+/*temp pa lang*/
+.hidden {
+display: none;
 }
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  clear: both;
-}
-.box-header {
-  color: #444;
-  display: block;
-  padding: 10px;
-  position: relative;
-}
-.box-header.with-border {
-  border-bottom: 1px solid #f4f4f4;
-}
-.collapsed-box .box-header.with-border {
-  border-bottom: none;
-}
-
-.tbl-content{
-  max-height: 530px;
-  overflow: auto;
-}
-
-div#list-data {
-    padding: 0;
-}
-
-.search-query {
-    height: 31px;
-    border-radius: 7px;
-
-}
-#form-search .has-feedback .form-control-feedback {
-     right: 0px !important;
-}
-
-#form-search  .form-group {
-     margin-right: 0px !important;
-     margin-left: 0px !important;
-}
-
-#form-search{
-    display: inline-block;
-    position: fixed;
-    right:2em;
-    width: 20%;
-    display: inline-block;
-}
-/* .hidden{
-    display: none;
-} */
-
-.save {
-    border: 1px solid #267326; 
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #339933; 
-    color:white; 
-    border-radius:10px; 
-    margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);    
-}
-.save:hover {
-    color: white !important ; 
-    background-color: #15C815 !important ; 
-    border: 0px solid #339933 !important ; 
-}
-.save:focus {
-    color: white !important ; 
-    background-color: #15C815 !important ; 
-    border: 0px solid #339933 !important ; 
-}
-
-.view {
-    border: 1px solid #143996; 
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #1439a6; 
-    color:white; 
-    border-radius:10px; 
-    margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-.view:hover {
-    color: white; 
-    background-color: #1439FF; 
-    border: 0px solid #1439a6; 
-}
-
-.delete {
-    border: 1px solid #730000;
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #990000; 
-    color: white; border-radius: 10px; 
-    margin-right: 2px; 
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-.delete:hover {
-    color: white; 
-    background-color: #C80000; 
-    border: 0px solid #990000; 
-}
-
-.caution {
-    border: 2px solid #FE9900; 
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #FE9900; 
-    color: white; 
-    border-radius:10px; 
-    margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-.caution:hover {
-    padding: 10px; 
-    color: white; 
-    background-color: #FFC14D; 
-    border: 0px solid #FE9900; 
-}
-
 </style>
-
     <div class="content-wrapper p-4">
         <div class="card">
+            <div class="text-center page-title md-center">
+                <b>S I T E - M E N U</b>
+            </div>
             <div class="card-body text-center">
                 <div class="box">
                     <?php
@@ -375,11 +234,15 @@ function get_data()
                     }
                     
                     html += '<td>'+status+'</td>';
-                    html+="<td class='center-content' style='width: 25%'>";
-                    html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                    html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                    html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"', 'v_', 'view_modal')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-                    html+="</td>";
+                        if (y.id == 0) {
+                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+                        } else {
+                            html+="<td class='center-content' style='width: 25%'>";
+                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="</td>";
+                        }
                     html += '</tr>';
                 });
             } else {

@@ -35,13 +35,12 @@ class Role extends BaseController
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
-				"assets/cms/js/login/login_js.js"
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/site/css/login/login_style.css",
+        		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		

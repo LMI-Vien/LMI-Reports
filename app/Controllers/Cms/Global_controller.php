@@ -90,6 +90,39 @@ class Global_controller extends BaseController
 	        		echo "Error displaying a list from database: " . $e->getMessage();
 				}
 			break;
+			case 'check_db_exist':
+			    try {
+			        $table = $_POST['table']; 
+			        $select = $_POST['select'];
+			        $limit = isset($_POST['limit']) ? $_POST['limit'] : 99999;
+			        $offset = isset($_POST['offset']) ? $_POST['offset'] : 1;
+			        $order_field = isset($_POST['order']['field']) ? $_POST['order']['field'] : null;
+			        $order_type = isset($_POST['order']['order']) ? $_POST['order']['order'] : null;
+			        $join = isset($_POST['join']) ? $_POST['join'] : null;
+			        $group = isset($_POST['group']) ? $_POST['group'] : null;
+			        $use_or = $_POST['use_or']; 
+
+			        if (strpos($select, '*') !== false) {
+			            echo json_encode(['message' => "Asterisk is not allowed!"]);
+			            break;
+			        }
+			        $conditions = [];
+			        if (!empty($_POST['query'])) {
+			            $conditions = $_POST['query'];
+			        }
+
+			        if (isset($_POST['params'])) {
+			            $params = $_POST['params'];
+			        } else {
+			            $params = [];
+			        }
+
+			        $result_data = $this->Global_model->check_db_exist($table, $conditions, $limit, ($offset - 1) * $limit, $select, $order_field, $order_type, $join, $group, $params, $use_or);
+			        echo json_encode($result_data);
+			    } catch (Error $e) {
+			        echo json_encode(["error" => "Error displaying a list from database: " . $e->getMessage()]);
+			    }
+			    break;
 			case 'insert':
 				try { 
 					$table = $_POST['table'];

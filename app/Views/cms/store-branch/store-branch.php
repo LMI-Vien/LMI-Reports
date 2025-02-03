@@ -1,213 +1,7 @@
 
-
-<style>
-  .pull-right{
-    float:right;
-  }
-  .box-header.with-border {
-      margin-top: 5px;
-      display: flex;
-  }
-.box-header:before,
-.box-body:before,
-.box-footer:before,
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  content: " ";
-  display: table;
-}
-.box-header:after,
-.box-body:after,
-.box-footer:after {
-  clear: both;
-}
-.box-header {
-  color: #444;
-  display: block;
-  padding: 10px;
-  position: relative;
-}
-.box-header.with-border {
-  border-bottom: 1px solid #f4f4f4;
-}
-.collapsed-box .box-header.with-border {
-  border-bottom: none;
-}
-
-.tbl-content{
-  max-height: 530px;
-  overflow: auto;
-}
-
-div#list-data {
-    padding: 0;
-}
-
-.search-query {
-    height: 31px;
-    border-radius: 7px;
-
-}
-#form-search .has-feedback .form-control-feedback {
-     right: 0px !important;
-}
-
-#form-search  .form-group {
-     margin-right: 0px !important;
-     margin-left: 0px !important;
-}
-
-#form-search{
-    display: inline-block;
-    position: fixed;
-    right:2em;
-    width: 20%;
-    display: inline-block;
-}
-/*.hidden{
-    display: none;
-}*/
-.even-row {
-    background-color: #FFFFFF;
-}
-.even-row:hover{
-    background-color: #b3e5fc;
-}
-
-.odd-row {
-    background-color: #DEDEDE;
-}
-.odd-row:hover{
-    background-color: #b3e5fc;
-}
-
-thead{
-    background-color: #301311;
-    color: white;
-}
-
-.save {
-    border: 1px solid #267326; 
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #339933; 
-    color:white; 
-    border-radius:10px; 
-    margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-.save:hover {
-    color: white !important ; 
-    background-color: #15C815 !important ; 
-    border: 0px solid #339933 !important ; 
-}
-.save:focus {
-    color: white !important ; 
-    background-color: #15C815 !important ; 
-    border: 0px solid #339933 !important ; 
-}
-
-.view {
-    border: 1px solid #143996; 
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #1439a6; 
-    color:white; 
-    border-radius:10px; 
-    margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-.view:hover {
-    color: white; 
-    background-color: #1439FF; 
-    border: 0px solid #1439a6; 
-}
-
-.delete {
-    border: 1px solid #730000;
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #990000; 
-    color: white; border-radius: 10px; 
-    margin-right: 2px; 
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-.delete:hover {
-    color: white; 
-    background-color: #C80000; 
-    border: 0px solid #990000; 
-}
-
-.caution {
-    border: 2px solid #FE9900; 
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color: #FE9900; 
-    color: white; 
-    border-radius:10px; 
-    margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-.caution:hover {
-    padding: 10px; 
-    color: white; 
-    background-color: #FFC14D; 
-    border: 0px solid #FE9900; 
-}
-
-.default {
-    border: 2px solid white; 
-    padding: 10px; 
-    min-width: 75px; 
-    max-height: 30px; 
-    line-height: 0.5; 
-    background-color:gray; 
-    color:white; 
-    border-radius:10px; 
-    margin-right:5px;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-}
-
-.card {
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-.card-body {
-    padding-top: 0px;
-}
-
-input[type="file"] {
-    display: none;
-}
-.custom-file-upload {
-    border: 1px solid #ccc;
-    display: inline-block;
-    padding: 6px 12px;
-    cursor: pointer;
-}
-
-.modal-title {
-    font-family: 'Courier New', Courier, monospace; 
-    font-size: large;
-}
-
-</style>
-
     <div class="content-wrapper p-4">
         <div class="card">
-            <div class="text-center" 
-            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px">
+            <div class="text-center page-title md-center">
                 <b>S T O R E / B R A N C H</b>
             </div>
             <div class="card-body text-center">
@@ -433,33 +227,18 @@ input[type="file"] {
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.3/xlsx.full.min.js"></script>
     <script>
         var query = "status >= 0";
         var limit = 10; 
         var user_id = '<?=$session->sess_uid;?>';
         var url = "<?= base_url("cms/global_controller");?>";
 
-        // uses function get_data(
-        // uses function get_pagination(
+
         $(document).ready(function() {
             get_data(query);
             get_pagination();
-            $('#btn_add').css({
-                'border': '2px solid white', 
-                'background-color':'#339933',
-                'color':'white',
-                'border-radius':'10px',
-            });
-            $('#btn_import').css({
-                'border': '2px solid white', 
-                'background-color':'#339933',
-                'color':'white',
-                'border-radius':'10px',
-            });
         });
 
-        // uses function get_data(
         $(document).on("change", ".record-entries", function(e) {
             $(".record-entries option").removeAttr("selected");
             $(".record-entries").val($(this).val());
@@ -478,7 +257,6 @@ input[type="file"] {
             $("#save_modal").modal('show')
         });
 
-        // uses function save_data(
         $(document).on('click', '#save_data', function(e){
             save_data(e)
             $("#save_modal").modal('hide')
@@ -514,7 +292,7 @@ input[type="file"] {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = e.target.result;
-                // convert the data to a workbook
+
                 const workbook = XLSX.read(data, {type: "binary"});
                 // get the first sheet
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -768,13 +546,11 @@ input[type="file"] {
             }
         }
 
-        // used : 1
-        // uses function formatDate(
         function save_to_db(inp_code, inp_description, status_val) {
-            var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+            var url = "<?= base_url('cms/global_controller');?>";
             var data = {
-                event : "insert", // list, insert, update, delete
-                table : "tbl_store", //table
+                event : "insert", 
+                table : "tbl_store",
                 data : {
                         code : inp_code,
                         description : inp_description,
@@ -790,11 +566,6 @@ input[type="file"] {
             });
         }
 
-        // used : 1
-        // uses function client_validate_data(
-        // uses function check_current_db(
-        // uses function load_swal(
-        // uses function formatDate(
         function update_data(id) {
             var inp_id = $('#e_id').val()
             var inp_code = $('#e_code').val()

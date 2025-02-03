@@ -25,9 +25,25 @@
     </head>
 
     <script>
-        var no_records = 'No records to show.';
-        var form_empty_error = "This is a required field.";
-        var form_script = "may script ka";
+        var no_records = '<?= dialog("no_records");?>';
+        var form_empty_error = "<?= dialog("form_empty");?>";
+        var data_exist = '<?= dialog("data_exist");?>';
+        var form_script = "<?= dialog("form_script");?>";
+        var confirm_add_message = '<?= confirm("confirm_add"); ?>';
+        var confirm_save_message = '<?= confirm("confirm_save"); ?>';
+        var success_save_message = '<?= dialog("add_success"); ?>'; 
+        var confirm_update_message = '<?= confirm("confirm_update"); ?>';
+        var confirm_cancel_message = '<?= confirm("confirm_cancel"); ?>';
+        var success_update_message = '<?= dialog("update_success"); ?>';
+        var success_unpublish_message = '<?= dialog("unpublish_success"); ?>';
+        var confirm_publish_message = '<?= confirm("confirm_publish"); ?>';
+        var success_publish_message = '<?= dialog("publish_success"); ?>';
+        var confirm_delete_message = '<?= confirm("confirm_delete"); ?>';
+        var success_delete_message = '<?= dialog("delete_success"); ?>';
+        var confirm_unblock_message = '<?= confirm("confirm_unblock"); ?>';
+        var success_unblock_message = "<?= dialog("unblock_success"); ?>";
+        var confirm_unpublish_message = '<?= confirm("confirm_unpublish"); ?>';
+        var failed_transaction_message = '<?= dialog("failed_transaction"); ?>';
         var csrf_name = "<?= csrf_token(); ?>";
         var csrf_hash = "<?= csrf_hash(); ?>";
     </script>

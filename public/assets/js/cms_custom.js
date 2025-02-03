@@ -438,97 +438,79 @@ var validate = {
 
 //modals
 var modal = {
-	success : function(message){
-		html = '<center><i class="text-success fa fa-5x fa-check-circle"></i><br><h2>'+message+'</h2></center>';
-		// bootbox.alert({
-		// 	closeButton: false,
-		// 		message: html,
-		// 		callback: function(){
-		// 			location.reload()
-		// 		}
-		// });
-	},
-	standard_confirm : function(message,btn,cb){
-		// bootbox.confirm({
-		//    	message: message,
-		//    	buttons: {
-		// 	   	confirm: {
-		// 		   label: btn,
-		// 		   className: 'btn-primary'
-		// 	   	},
-		// 	   	cancel: {
-		// 		   label: 'Cancel',
-		// 		   className: 'btn-default'
-		// 	   	}
-		//    	},
-		//    	callback: cb
-		// });
-	},
-	confirm : function(message,cb){
-		Swal.fire({
-		  title: message,
-		  icon: "question",
-		  iconHtml: "؟",
-		  confirmButtonText: "Yes",
-		  cancelButtonText: "No",
-		  showCancelButton: true,
-		  showCloseButton: true
+	confirm : function(data,cb){
+			var mdl_data = is_json(data);
+			Swal.fire({
+			title: mdl_data.message,
+			icon: "question",
+			iconHtml: "?",
+			cancelButtonColor: "#FE9900",
+			confirmButtonColor: "#339933",
+			confirmButtonText: mdl_data.confirm,
+			cancelButtonText: mdl_data.cancel,
+			showCancelButton: true,
+			allowOutsideClick: false,
+			showCloseButton: true
 		}).then((result) => {
-		    // Check if the user clicked "Yes"
 		    if (result.isConfirmed) {
 		      cb(true); // Execute the callback with `true`
 		    } else {
 		      cb(false); // Execute the callback with `false` if "No" or close is clicked
 		    }
-		  });;
-		// bootbox.confirm({
-		//    	message: message,
-		//    	buttons: {
-		// 	   	confirm: {
-		// 		   label: 'Yes',
-		// 		   className: 'btn-primary'
-		// 	   	},
-		// 	   	cancel: {
-		// 		   label: 'No',
-		// 		   className: 'btn-default'
-		// 	   	}
-		//    	},
-		//    	callback: cb
-		// });
+		  });
 	},
-	alert : function(message, cb){
-		// bootbox.alert({
-		//     message: message,
-		//     callback: cb
-		// });
-	},
-	show : function(message, size, cb){
-		// bootbox.alert({
-		//     message: message,
-		//     size: size,
-		//     callback: cb
-		// });
-	},
-	input : function(message,type, cb){
-		// bootbox.prompt({
-		//     title: message,
-		//     inputType: type,
-		//     callback: cb
-		// });
-	},
-	custom : function(modal, action){
-		$(modal).modal(action);
+	alert : function(data, cb){
+			Swal.fire({
+			title: data,
+			icon: "success",
+			confirmButtonColor: "#FE9900",
+			allowOutsideClick: false,
+			draggable: true
+		}).then((result) => {
+		    if (result.isConfirmed) {
+		      cb(true); // Execute the callback with `true`
+		    } else {
+		      cb(false); // Execute the callback with `false` if "No" or close is clicked
+		    }
+		  });
 	},
 	loading : function(isloading){
 		if(isloading){
-			// bootbox.dialog({ 
-			// 	message: '<center><i class="fa fa-spinner fa-spin" style="font-size:54px"></i><h2>Loading...</h2></center>', 
-			// 	closeButton: false 
-			// });
+			Swal.fire({
+			    title: 'Please wait...',
+			    text: 'Processing your request...',
+			    allowOutsideClick: false,  // Prevent closing on outside click
+			    allowEscapeKey: false,     // Prevent closing with Esc key
+			    didOpen: () => {
+			        Swal.showLoading();  // Show loading spinner
+			    }
+			});
 		} else {
-			$('.bootbox').modal('hide');
+			Swal.close();
+		}
+	},loading_progress : function(isloading, text){
+		if(isloading){
+            Swal.fire({
+            title: "Importing Data...",
+            html: '<div id="progress-container" style="width:100%;background:#ddd;height:10px;border-radius:5px;overflow:hidden;">' +
+                  '<div id="progress-bar" style="width:0%;height:100%;background:#28a745;"></div>' +
+                  '</div><p id="currentTitle" style="margin-top:10px;">Starting...</p>',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+		} else {
+			Swal.close();
 		}
 	}
+
+}
+
+function updateSwalProgress(title, progress) {
+    $("#progress-bar").css("width", progress + "%");
+    $("#currentTitle").text(`Processing: ${title} (${progress}%)`);
 }
 
 
@@ -590,6 +572,11 @@ var pagination = {
 			}
 			htm += '</select></div>';
 			$(element).html(htm);
+			if(total_page < 2){
+			  $(element).hide();
+			} else {
+			  $(element).show();
+			}
 	},
 	onchange : function(cb){
 		$(document).on('change','.pager_number', cb);
@@ -657,6 +644,17 @@ $(document).on('click', '.pg_no', function(e){
     var page_no = $(this).attr("data-value");
     $('.pager_number').val(page_no).change()
 });
+
+function checkbox_check() {
+    var checkbox_count = document.querySelectorAll('input[class="select"]').length;
+    var checked_checkboxes_count = document.querySelectorAll('input[class="select"]:checked').length;
+
+    if (checkbox_count === checked_checkboxes_count) {
+        $(".selectall").prop("checked", true);
+    } else {
+        $(".selectall").prop("checked", false);
+    }
+}
 
 $(document).on('change', '.selectall', function(){
 	var del = 0;
@@ -853,27 +851,146 @@ function sha1(msg) {
 	return temp.toLowerCase();
 }
 
-function is_exists(table, field, value, status){
-	var query = ""+ field +" = '" + value + "' AND "+status+" >= 0";
-    var exists = 0;
-    var url = base_url+"cms/global_controller";
-    var data = {
-        event : "list", 
-        select : ""+field+", "+status+"",
-        query : query, 
-        table : table,
-		[csrf_name]	: csrf_hash
-    }
-    aJax.post_async(url,data,function(result){
-        var obj = is_json(result);
-		console.log(obj, 'obj')
-        if(obj.length != 0){
-            exists = 1;
-        }
-        else{
-            exists = 0;
-        }
+//backup
+// function check_current_db(table, fields, values, status, excludeField, excludeId, useOr = false, callback) { 
+//     if (!Array.isArray(fields)) fields = [fields];
+//     if (!Array.isArray(values)) values = [values];
 
+//     if (fields.length !== values.length) {
+//         console.error("Fields and values array length must match!");
+//         return;
+//     }
+
+//     var url = base_url + "cms/global_controller";
+
+//     // Construct conditions properly for backend processing
+//     var conditions = [];
+//     fields.forEach((field, index) => {
+//         conditions.push({ field: field, value: values[index] });
+//     });
+
+//     if (excludeField && excludeId) {
+//         conditions.push({ field: excludeField, value: excludeId, operator: "!=" });
+//     }
+
+//     conditions.push({ field: status, value: 0, operator: ">=" });
+
+//     var data = {
+//         event: "list2",
+//         select: [...fields, status].join(", "), 
+//         conditions: conditions, // Send as an array of objects
+//         table: table,
+//         useOr: useOr // Pass the logical operator flag
+//     };
+
+// 	aJax.post(url, data, function (result) {
+// 		console.log(result);
+// 	    try {
+// 	        var obj = result;
+// 	        console.log(obj);
+// 	        // Ensure obj is an array before using .some()
+// 	        if (!Array.isArray(obj)) {
+// 	            console.error("Invalid response format:", obj);
+// 	            callback(false, []);
+// 	            return;
+// 	        }
+
+// 	        let duplicateFields = fields.filter((field, index) => 
+// 	            obj.some(row => row[field] === values[index])
+// 	        );
+
+// 	        callback(true, duplicateFields);
+
+// 	        if (duplicateFields.length > 0) {
+// 	            $(".validate_error_message").remove();
+// 	            var error_message = "<span class='validate_error_message required_fields'>" + data_exist + "<br></span>";
+
+// 	            duplicateFields.forEach(field => {
+// 	                let inputField = $('#' + field);
+// 	                if (inputField.length) {
+// 	                    inputField.css('border-color', 'red');
+// 	                    inputField.after(error_message);
+// 	                }
+// 	            });
+
+// 	            $('.validate_error_message').css('color', 'red');
+// 	        }
+// 	    } catch (error) {
+// 	        console.error("Error processing response:", error);
+// 	    }
+// 	});
+// }
+
+
+function check_current_db(table, fields, values, status, excludeField, excludeId, useOr = false, callback) {
+    if (!Array.isArray(fields)) fields = [fields];
+    if (!Array.isArray(values)) values = [values];
+
+    if (fields.length !== values.length) {
+        console.error("Fields and values array length must match!");
+        return;
+    }
+
+    var url = base_url + "cms/global_controller";
+    var logicalOperator = useOr ? "OR" : "AND";
+
+    // Construct conditions as an array of arrays [field, value]
+    var conditions = [];
+    fields.forEach((field, index) => {
+        // Ensure field names are strings and values are correctly passed
+        if (typeof field !== "string" || typeof values[index] !== "string") {
+            console.error(`Invalid type for field or value at index ${index}`);
+            return;
+        }
+        conditions.push([field, values[index]]);
     });
-    return exists;
+
+    if (excludeField && excludeId) {
+        conditions.push([excludeField + " !=", excludeId]);
+    }
+
+    conditions.push([status + " >=", 0]);
+
+    var data = {
+        event: "check_db_exist",
+        select: [...fields, status].join(", "),
+        query: conditions, // Send as an array
+        table: table,
+        use_or: useOr
+    };
+
+    aJax.post(url, data, function (result) {
+        try {
+            var obj = is_json(result);
+            if (!obj || obj.length === 0) {
+                callback(false, []); // No duplicates found
+                return;
+            }
+
+            let duplicateFields = fields.filter((field, index) =>
+                obj.some(row => row[field] === values[index])
+            );
+
+            callback(true, duplicateFields);
+
+            if (duplicateFields.length > 0) {
+                $(".validate_error_message").remove();
+                var error_message = "<span class='validate_error_message required_fields'>" + data_exist + "<br></span>";
+
+                duplicateFields.forEach(field => {
+                    let inputField = $('#' + field);
+                    if (inputField.length) {
+                        inputField.css('border-color', 'red');
+                        inputField.after(error_message);
+                    }
+                });
+
+                $('.validate_error_message').css('color', 'red');
+            }else{
+            	 callback(false, []); // No duplicates found
+            }
+        } catch (error) {
+            console.error("Error processing response:", error);
+        }
+    });
 }
