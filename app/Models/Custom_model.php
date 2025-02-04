@@ -148,14 +148,20 @@ class Custom_model extends Model
         return $this;
     }
 
-    public function batch_insert_product_category_tagging($table, $insert_batch_data){
-        $this->db->insertBatch($table, $insert_batch_data);
-        $updated_status = $this->db->affectedRows();
-        if($updated_status):
-            return "success";
-        else:
-            return "failed";
-        endif;
+    public function batch_insert($table, $insert_batch_data){
+        if (!is_array($insert_batch_data) || empty($insert_batch_data)) {
+            return "Invalid or empty data";
+        }
+        //$builder = $this->db->table($table);
+        try {
+            $builder = $this->db->table($table);
+            $builder->insertBatch($insert_batch_data);
+            $updatedStatus = $this->db->affectedRows();
+
+            return $updatedStatus > 0 ? "success" : "failed";
+        } catch (\Exception $e) {
+            return "Error: " . $e->getMessage();
+        }
     }
 
     public function batch_insert_article_category($table, $insert_batch_data){

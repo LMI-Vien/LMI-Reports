@@ -3,6 +3,7 @@
 namespace App\Controllers\Cms;
 use \DateTime;
 use App\Controllers\BaseController;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class Global_controller extends BaseController
 {
@@ -315,6 +316,34 @@ class Global_controller extends BaseController
 							echo "Error updating data: " . $e->getMessage();
 				}
 			break;
+				case 'batch_insert':
+				try { 
+
+			        //if ($this->request->getMethod() === 'post') {
+			        	// print_r('fghgf');
+			            // die();
+			            $table = $this->request->getPost('table');
+			            $insertBatchData = $this->request->getPost('insert_batch_data');
+			            // print_r($insertBatchData);
+			            // die();
+			            if (empty($table) || empty($insertBatchData)) {
+			                return $this->response->setJSON([
+			                    "message" => "Table name or data is missing"
+			                ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
+			            }
+
+			            $status = $this->Custom_model->batch_insert($table, $insertBatchData);
+
+			            return $this->response->setJSON(["message" => $status]);
+			        //}
+
+			        return $this->response->setJSON([
+			            "message" => "Invalid request method"
+			        ])->setStatusCode(ResponseInterface::HTTP_METHOD_NOT_ALLOWED);
+    			} catch (Exception $e) {
+					echo "Error updating data: " . $e->getMessage();
+				}
+					break;
 			case 'batch_update':
 				try { 
 					$table = $_POST['table'];
