@@ -342,6 +342,15 @@
     .card-body {
         padding-top: 0px;
     }
+
+    td {
+        word-wrap: break-word;
+        word-break: break-word;
+        white-space: normal;
+        max-width: 200px;
+        overflow-wrap: break-word;
+    }
+
 </style>
 
 <div class="content-wrapper p-4">
@@ -410,7 +419,9 @@
                 <form style="background-color: white !important; width: 100%;" id="form-save-modal">
                     <div class="mb-3">
                         <label for="code" class="form-label">Code</label>
-                        <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
+                        <div hidden>
+                            <input type="text" class="form-control" id="id" aria-describedby="id">
+                        </div>
                         <input type="text" class="form-control required" maxlength="25" id="code" aria-describedby="code">
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
@@ -693,8 +704,7 @@
 
     // delete
     function delete_data(id) {
-        // alert('Data deleted!');
-        modal.confirm("Are you sure you want to delete this record?",function(result){
+        modal.confirm(confirm_delete_message,function(result){
             if(result){
                 var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
                 var data = {
@@ -712,9 +722,11 @@
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
                     if(obj){
-                        load_swal('','600px','success','Succesfully deleted!','', false, false, function () {
-                            location.reload();
-                        });
+                        modal.alert(success_delete_message, () => {
+                            if (result) {
+                                location.reload();
+                            }
+                        })
                     }
                 });
             }
@@ -832,48 +844,36 @@
         // calls validate.standard("form-save-modal") to check if the form is valid
         if(validate.standard("form-save-modal")){
             // calls check_current_db() to check if the code and description already exist in the database
-            check_current_db(function (result) {
-                var id = $('#id').val() || 0;
-                var code = $('#code').val()
-                var description = $('#description').val()
-                var status = $('#status').prop('checked')
-                var deploy_date = $('#deploy_date').val()
-                var area_id = $('#popup_modal #area').val();
-    
-                var parsedResult = JSON.parse(result);
-    
-                invalid = false;
-                err_msg = '';
-                // loops through the parsed result to check if the code or description already exists
-                $.each(parsedResult, function(index, asc) {
-                    // if the code and description already exist, set invalid to true and add an error message
-                    if (asc.code === code || asc.description === description) {
-                        if (id != asc.id) {
-                            invalid = true;
-                            if (asc.code === code && asc.description === description) {
-                                err_msg += "⚠️ Code & Description already exists in masterfile ⚠️<br>";
-                            } else if (asc.code === code) {
-                                err_msg += "⚠️ Code already exists in masterfile ⚠️<br>";
-                            } else {
-                                err_msg += "⚠️ Description already exists in masterfile ⚠️<br>";
-                            }
-                        }
-                    }
-                });
-    
-                // if invalid is true, show an error message
-                if(invalid) {
-                    load_swal('','600px','error','Error!',err_msg, false, false, function () {});
-                } else {
-                    // if invalid is false, call confirm_edit() if id is not 0, otherwise call confirm_save()
+
+            var id = $('#id').val() || 0;
+            var code = $('#code').val()
+            var description = $('#description').val()
+            var status = $('#status').prop('checked')
+            var deploy_date = $('#deploy_date').val()
+            var area_id = $('#popup_modal #area').val();
+            var db_fields = [];
+            var input_fields = [];
+            if (id != 0) {
+                db_fields = ["id", "code", "description"];
+                input_fields = [id, code, description];
+                excludeField = "id";
+                excludeId = id;
+            } else {
+                db_fields = ["code", "description"];
+                input_fields = [code, description];
+                excludeField = null;
+                excludeId = null;
+            }
+
+            check_current_db("tbl_asc", db_fields, input_fields, "status" , excludeField, excludeId, true, function(exists, duplicateFields) {
+                if(!exists) {
                     if (id != 0) {
-                        // alert('confirm_edit() called');
                         confirm_edit(id, code, description, status, deploy_date, area_id);
                     } else {
                         confirm_save(code, description, status, deploy_date, area_id);
                     }
                 }
-            })
+            });
         }
     }
 
@@ -910,7 +910,7 @@
         html += "</tbody>"
         html += "</table>"
         // calls modal.confirm() to confirm if the user wants to save the data
-        modal.confirm("Are you sure you want to save this record?",function(result){
+        modal.confirm(confirm_add_message, function(result){
             if(result){
                 // if the user confirms, call save_to_db() to save the data
                 // passing the code, description, status, converted_date, and area as parameters
@@ -922,13 +922,7 @@
                     'area_id':area
                 }
                 save_to_db(data, function () {
-                    // show users what was saved
-                    // after users press ok refresh page
-                    load_swal(
-                        '', '1000px', 'success', 'Succesfully saved!', html, false, false, function() {
-                            location.reload();
-                        }
-                    )
+                    modal.content(success_save_message, 'success', html, '1000px', ()=>{location.reload();})
                 })
             }
         })
@@ -983,7 +977,8 @@
 
         html += "<tbody class='table_body word_break'>"
         var old = {}
-        check_current_db(
+
+        list_current_db(
             function (res) {
                 var parsedResult = JSON.parse(res);
                 $.each(parsedResult, function(index, asc) {
@@ -1032,7 +1027,7 @@
         html += "</tbody>"
         html += "</table>"
         // calls modal.confirm() to confirm if the user wants to save the data
-        modal.confirm("Are you sure you want to update this record?",function(result){
+        modal.confirm(confirm_update_message,function(result){
             if(result){
                 // if the user confirms, call save_to_db() to save the data
                 // passing the code, description, status, converted_date, and area as parameters
@@ -1047,11 +1042,7 @@
                 update_db(data, function () {
                     // show users what was saved
                     // after users press ok refresh page
-                    load_swal(
-                        '', '1000px', 'success', 'Succesfully edited!', html, false, false, function() {
-                            location.reload();
-                        }
-                    )
+                    modal.content(success_update_message, 'success', html, '1000px', ()=>{location.reload();})
                 })
             }
         })
@@ -1091,18 +1082,8 @@
 
         const file = $("#file")[0].files[0];
 
-        console.log(file);
         if (file === undefined) {
-            load_swal(
-                '',
-                '500px',
-                'error',
-                'Error!',
-                'Please select a file to upload',
-                false,
-                true,
-                function () {}
-            )
+            modal.alert('Please select a file to upload', 'error', ()=>{})
             return
         }
         const reader = new FileReader();
@@ -1139,7 +1120,7 @@
                     } else {
                         lowerCaseRecord[column] = lowerCaseRecord[column];
                     }
-                    html += "<td id=\"" + column + "\">";
+                    html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
                     html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
                     html += "</td>";
                 });
@@ -1152,11 +1133,6 @@
         };
         reader.readAsBinaryString(file);
     }
-    
-    // Attach "Next" button event
-    // $("#nextButton").click(function () {
-    //     alert('alert')
-    // });
 
     function proccess_xl_file() {
         var extracted_data = $(".import_table");
@@ -1172,46 +1148,130 @@
 
         var unique_code = [];
         var unique_description = [];
+        var unique_area_id = [];
 
         var import_array = [];
-        tr_count = 0;
+        var needle = [];
+
+        var tr_count = 1;
         extracted_data.find('tr').each(function () {
-            td_count = 0;
+            td_count = 1;
+            var temp = [];
             $(this).find('td').each( function() {
                 var text_val = $(this).html().trim();
 
-                if (td_count === 1) {
+                if (td_count === 2) {
                     if (unique_code.includes(text_val)) {
                         invalid = true;
-                        errmsg += "⚠️ Duplicated Code at line #: <b>" + html_tr_count + "</b>⚠️<br>";
+                        errmsg += "⚠️ Duplicated Code at line #: <b>" + tr_count + "</b>⚠️<br>";
+                    } else if (text_val.length > 25) {
+                        invalid = true;
+                        errmsg += "⚠️ Code exceeds 25 characters at line #: <b>" + tr_count + "</b>⚠️<br>";
+                    } else if (text_val === '') {
+                        invalid = true;
+                        errmsg += "⚠️ Code is empty at line #: <b>" + tr_count + "</b>⚠️<br>";
                     } else {
+                        code = text_val;
                         unique_code.push(text_val);
                     }
-                    code = text_val;
-                } else if (td_count === 2) {
-                    description = text_val;
-                } else if (td_count === 3) {
+                }
+                
+                if (td_count === 3) {
+                    if (unique_description.includes(text_val)) {
+                        invalid = true;
+                        errmsg += "⚠️ Duplicated Description at line #: <b>" + tr_count + "</b>⚠️<br>";
+                    } else if (text_val.length > 50) {
+                        invalid = true;
+                        errmsg += "⚠️ Description exceeds 50 characters at line #: <b>" + tr_count + "</b>⚠️<br>";
+                    } else if (text_val === '') {
+                        invalid = true;
+                        errmsg += "⚠️ Description is empty at line #: <b>" + tr_count + "</b>⚠️<br>";
+                    } else {
+                        description = text_val;
+                        unique_description.push(text_val);
+                    }
+                }
+                
+                if (td_count === 4) {
                     if (text_val.toLowerCase() === 'active') {
                         status = 1;
-                    } else {
+                    } else if (text_val.toLowerCase() === 'inactive') {
                         status = 0;
+                    } else {
+                        invalid = true;
+                        errmsg += "⚠️ Invalid Status at line #: <b>" + tr_count + "</b>⚠️<br>";
                     }
-                } else if (td_count === 4) {
+                }
+                
+                if (td_count === 5) {
+                    let dateObj = new Date(text_val);
                     if (isNaN(dateObj.getTime())) {
-                        return "Invalid Date";
+                        invalid = true;
+                        errmsg += "⚠️ Invalid Deployment Date at line #: <b>" + tr_count + "</b>⚠️<br>";
                     } else {
                         deploy_date = readable_date_to_excel_date(text_val);
                     }
-                } else if (td_count === 5) {
+                }
+                
+                if (td_count === 6) {
+                    if (!unique_area_id.includes(text_val)){
+                        unique_area_id.push(text_val);
+                    }
                     area_id = text_val;
                 }
 
                 td_count += 1;
             });
             tr_count += 1;
-            console.log(code, description, status, deploy_date, area_id);
+            temp.push(code, description, status, deploy_date, area_id)
+            needle.push([code, description])
+            import_array.push(temp)
         });
-        alert('Processing file...');
+
+        var temp_invalid = invalid;
+        var temp_errmsg = '';
+        
+        // needle = [
+        //     ['a', 'a'],
+        //     ['a', 'a'],
+        //     ['a', 'a'],
+        // ]
+        // list_existing(table, selected_fields, haystack, needle)
+        // list_existing("tbl_asc", ["id", "code", "description"], ["code", "description"], [needle], function (result) {
+        //     if(result) {
+        //         $.each(result, function(x, y) {
+        //             temp_invalid = true;
+        //             temp_errmsg += "⚠️ Item Code : <b>"
+        //             +y.code+"</b> and Item Description : <b>"
+        //             +y.description+"</b> already exists in masterfile ⚠️<br>";
+        //         });
+        //     }
+        // });
+
+        invalid = temp_invalid;
+        errmsg += temp_errmsg;
+
+        if (invalid) {
+            modal.content('Error', 'error', errmsg, '600px', ()=>{})
+        } else {
+            alert('Data saved!');
+            import_array.forEach(row => {
+                console.log(row)
+                data = {
+                    'code': row[0], 
+                    'description':row[1], 
+                    'status':row[2], 
+                    'deploy_date':row[3], 
+                    'area_id':row[4]
+                }
+                save_to_db(data, () => {})
+            })
+            load_swal(
+                '', '1000px', 'success', 'Succesfully saved!', '', false, false, function() {
+                    location.reload();
+                }
+            )
+        }
     }
 
     function readable_date_to_excel_date(readable_date) {
@@ -1265,7 +1325,7 @@
         });
     }
 
-    function check_current_db(successCallback) {
+    function list_current_db(successCallback) {
         var data = {
             event : "list",
             select : "id, code, description, deploy_date, status, area_id",

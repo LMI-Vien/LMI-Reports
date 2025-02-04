@@ -760,4 +760,29 @@ class Global_model extends Model
             return 0;
         }
     }
+
+    function get_field_values($table, $field, $ids)
+    {
+        if (empty($table) || empty($field) || empty($ids) || !is_array($ids)) {
+            return [];
+        }
+
+        $query = $this->db->table($table)
+                          ->select("id, $field") 
+                          ->whereIn('id', $ids)
+                          ->get();
+
+        $results = [];
+        foreach ($query->getResult() as $row) {
+            $results[$row->id] = $row->$field;
+        }
+
+        return $results;
+    }
+    
+    function list_existing($table, $selected_fields, $haystack, $needle)
+    {
+        
+    }
+
 }

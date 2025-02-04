@@ -459,10 +459,10 @@ var modal = {
 		    }
 		  });
 	},
-	alert : function(data, cb){
+	alert : function(data, icon = 'success', cb){
 			Swal.fire({
 			title: data,
-			icon: "success",
+			icon: icon,
 			confirmButtonColor: "#FE9900",
 			allowOutsideClick: false,
 			draggable: true
@@ -504,7 +504,23 @@ var modal = {
 		} else {
 			Swal.close();
 		}
-	}
+	},content : function(data, icon, html = '', swwidth = '500px',  cb){
+			Swal.fire({
+			title: data,
+			icon: icon,
+			confirmButtonColor: "#FE9900",
+			allowOutsideClick: false,
+			html: html,
+			width: swwidth,
+			draggable: true
+		}).then((result) => {
+			if (result.isConfirmed) {
+			cb(true); // Execute the callback with `true`
+			} else {
+			cb(false); // Execute the callback with `false` if "No" or close is clicked
+			}
+		});
+	},
 
 }
 
@@ -993,4 +1009,42 @@ function check_current_db(table, fields, values, status, excludeField, excludeId
             console.error("Error processing response:", error);
         }
     });
+}
+
+
+function get_field_values(table, field, ids){
+
+	var data = {
+		event : "get_field_values",
+		select : field,
+		ids : ids,
+		table : table,
+	}        
+	aJax.post(url,data,function(result){
+		var result = JSON.parse(result);
+		console.log(result);
+
+		if(result) {
+			$.each(result, function(x,y) {
+				console.log(y)
+				$('.sample-id-'+x).text(y);
+			});
+		}
+	});
+}
+
+function list_existing(table, selected_fields, haystack, needle, callback) {
+	var data = {
+		event : "list_existing",
+		selected_fields : selected_fields,
+		haystack : haystack,
+		needle : needle,
+		table : table,
+	}
+
+	aJax.post_async(url,data,function(result){
+		var result = JSON.parse(result);
+
+		callback(result)
+	});
 }

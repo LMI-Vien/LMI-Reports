@@ -123,6 +123,31 @@ class Global_controller extends BaseController
 			        echo json_encode(["error" => "Error displaying a list from database: " . $e->getMessage()]);
 			    }
 			    break;
+			case 'get_field_values':
+					try {
+						$table = $this->request->getPost('table');
+						$select = $this->request->getPost('select');
+						$ids = $this->request->getPost('ids');
+	
+						$result_data = $this->Global_model->get_field_values($table, $select, $ids);
+						echo json_encode($result_data);
+					} catch (Error $e) {
+						echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+					}
+					break;
+			case 'list_existing':
+					try {
+						$table = $this->request->getPost('table');
+						$selected_fields = $this->request->getPost('selected_fields');
+						$haystack = $this->request->getPost('haystack');
+						$needle = $this->request->getPost('needle');
+	
+						$result_data = $this->Global_model->list_existing($table, $selected_fields, $haystack, $needle);
+						echo json_encode($result_data);
+					} catch (Error $e) {
+						echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+					}
+					break;
 			case 'insert':
 				try { 
 					$table = $_POST['table'];

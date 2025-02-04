@@ -32,10 +32,11 @@ class Asc extends BaseController
 		$data['buttons'] = ['add', 'search', 'import'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
+				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
 				"assets/cms/js/jquery-ui.js",
-				"assets/js/moment.js"
+				"assets/js/moment.js",
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
