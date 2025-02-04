@@ -2,7 +2,7 @@
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center md-center">
-                <b>A R E A</b>
+                <b>A G E N C Y</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -43,46 +43,42 @@
         </div>
     </div>
 
-    <div class="modal" tabindex="-1" id="popup_modal">
-        <div class="modal-dialog">
+    <!-- MODAL -->
+    <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title">
                         <b></b>
                     </h1>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span>&times;</span>
                     </button>
                 </div>
-                
                 <div class="modal-body">
-                    <form style="background-color: white !important; width: 100%;">
-                        <div class="mb-3">
+                    <form id="form-modal">
+                    <div class="mb-3">
                             <label for="code" class="form-label">Code</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                             <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
                             <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                         </div>
-                        
                         <div class="mb-3">
                             <label for="description" class="form-label">Agency</label>
                             <input type="text" class="form-control required" id="agency" maxlength="50" aria-describedby="description">
                             <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
-                        
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
                             <label class="form-check-label" for="status">Active</label>
                         </div>
                     </form>
                 </div>
-                
-                <div class="modal-footer">
-                    
-                </div>
+                <div class="modal-footer"></div>
             </div>
         </div>
     </div>
+
 
     <!-- IMPORT MODAL -->
     <div class="modal" tabindex="-1" id="import_modal">
@@ -281,71 +277,119 @@
         open_modal('View Agency', 'view', id);
     }
 
-    function open_modal(msg, actions, id) {
-        modal_title = addNbsp(msg);
-        $('#popup_modal .modal-title b').html(modal_title);
-        $('#popup_modal #code').val('');
-        $('#popup_modal #agency').val('');
-        $('#popup_modal #status').prop('checked', true);
-        // <button type="button" class="btn save" id="save_data">Save</button>
-        var save_btn = create_button('Save', 'save_data', 'btn save', function () {
-            if(validate.standard("popup_modal")){
-                save_data();
-            }
-        });
-        // <button type="button" class="btn save" id="edit_data">Edit</button>
-        var edit_btn = create_button('Edit', 'edit_data', 'btn save', function () {
-            // alert("Form edited!");
-            update_data(id);
-        });
-        // <button type="button" class="btn caution" data-dismiss="modal">Close</button>
-        var close_btn = create_button('Close', 'close_data', 'btn caution', function () {
-            $('#popup_modal').modal('hide');
-        });
-        switch (actions) {
-            case 'add':
-                $('#code').attr('readonly', false);
-                $('#code').attr('disabled', false);
-                $('#agency').attr('readonly', false);   
-                $('#agency').attr('disabled', false);
-                $('#popup_modal .modal-footer').empty();
-                $('#popup_modal .modal-footer').append(save_btn);
-                $('#popup_modal .modal-footer').append(close_btn);
-                break;
+    // function open_modal(msg, actions, id) {
+    //     modal_title = addNbsp(msg);
+    //     $('#popup_modal .modal-title b').html(modal_title);
+    //     $('#popup_modal #code').val('');
+    //     $('#popup_modal #agency').val('');
+    //     $('#popup_modal #status').prop('checked', true);
+    //     // <button type="button" class="btn save" id="save_data">Save</button>
+    //     var save_btn = create_button('Save', 'save_data', 'btn save', function () {
+    //         if(validate.standard("popup_modal")){
+    //             save_data();
+    //         }
+    //     });
+    //     // <button type="button" class="btn save" id="edit_data">Edit</button>
+    //     var edit_btn = create_button('Edit', 'edit_data', 'btn save', function () {
+    //         // alert("Form edited!");
+    //         update_data(id);
+    //     });
+    //     // <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+    //     var close_btn = create_button('Close', 'close_data', 'btn caution', function () {
+    //         $('#popup_modal').modal('hide');
+    //     });
+    //     switch (actions) {
+    //         case 'add':
+    //             $('#code').attr('readonly', false);
+    //             $('#code').attr('disabled', false);
+    //             $('#agency').attr('readonly', false);   
+    //             $('#agency').attr('disabled', false);
+    //             $('#popup_modal .modal-footer').empty();
+    //             $('#popup_modal .modal-footer').append(save_btn);
+    //             $('#popup_modal .modal-footer').append(close_btn);
+    //             break;
                 
-            case 'edit':
-                populate_modal(id);
-                $('#code').attr('readonly', false);
-                $('#code').attr('disabled', false);
-                $('#agency').attr('readonly', false);   
-                $('#agency').attr('disabled', false);
-                $('#status').attr('disabled', false);
-                $('#status').attr('readonly', false);   
-                $('#popup_modal .modal-footer').empty();
-                $('#popup_modal .modal-footer').append(edit_btn);
-                $('#popup_modal .modal-footer').append(close_btn);
-                break;
+    //         case 'edit':
+    //             populate_modal(id);
+    //             $('#code').attr('readonly', false);
+    //             $('#code').attr('disabled', false);
+    //             $('#agency').attr('readonly', false);   
+    //             $('#agency').attr('disabled', false);
+    //             $('#status').attr('disabled', false);
+    //             $('#status').attr('readonly', false);   
+    //             $('#popup_modal .modal-footer').empty();
+    //             $('#popup_modal .modal-footer').append(edit_btn);
+    //             $('#popup_modal .modal-footer').append(close_btn);
+    //             break;
             
-            case 'view':
-                populate_modal(id);
-                $('#code').attr('readonly', true);
-                $('#code').attr('disabled', true);
-                $('#agency').attr('readonly', true);   
-                $('#agency').attr('disabled', true);
-                $('#status').attr('readonly', true);   
-                $('#status').attr('disabled', true);
-                $('#popup_modal .modal-footer').empty();
-                $('#popup_modal .modal-footer').append(close_btn);
-                break;
+    //         case 'view':
+    //             populate_modal(id);
+    //             $('#code').attr('readonly', true);
+    //             $('#code').attr('disabled', true);
+    //             $('#agency').attr('readonly', true);   
+    //             $('#agency').attr('disabled', true);
+    //             $('#status').attr('readonly', true);   
+    //             $('#status').attr('disabled', true);
+    //             $('#popup_modal .modal-footer').empty();
+    //             $('#popup_modal .modal-footer').append(close_btn);
+    //             break;
         
-            default:
-                populate_modal(id);
-                $('#popup_modal .modal-footer').empty();
-                $('#popup_modal .modal-footer').append(close_btn);
-                break;
-        }
-        $('#popup_modal').modal('show');
+    //         default:
+    //             populate_modal(id);
+    //             $('#popup_modal .modal-footer').empty();
+    //             $('#popup_modal .modal-footer').append(close_btn);
+    //             break;
+    //     }
+    //     $('#popup_modal').modal('show');
+    // }
+
+    function open_modal(msg, actions, id) {
+        $(".form-control").css('border-color','#ccc');
+        $(".validate_error_message").remove();
+        let $modal = $('#popup_modal');
+        let $footer = $modal.find('.modal-footer');
+
+        $modal.find('.modal-title b').html(addNbsp(msg));
+        reset_modal_fields();
+
+        let buttons = {
+            save: create_button('Save', 'save_data', 'btn save', function () {
+                if (validate.standard("form-modal")) {
+                    save_data('save', null);
+                }
+            }),
+            edit: create_button('Update', 'edit_data', 'btn update', function () {
+                if (validate.standard("form-modal")) {
+                    save_data('update', id);
+                }
+            }),
+            close: create_button('Close', 'close_data', 'btn caution', function () {
+                $modal.modal('hide');
+            })
+        };
+
+        if (['edit', 'view'].includes(actions)) populate_modal(id);
+        
+        let isReadOnly = actions === 'view';
+        set_field_state('#code, #agency, #status', isReadOnly);
+
+        $footer.empty();
+        if (actions === 'add') $footer.append(buttons.save);
+        if (actions === 'edit') $footer.append(buttons.edit);
+        $footer.append(buttons.close);
+
+        $modal.modal('show');
     }
+
+    function reset_modal_fields() {
+        $('#popup_modal #code, #popup_modal #agency, #popup_modal').val('');
+        $('#popup_modal #status').prop('checked', true);
+    }
+
+    function set_field_state(selector, isReadOnly) {
+        $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
+    }
+
 
     function create_button(btn_txt, btn_id, btn_class, onclick_event) {
         var new_btn = $('<button>', {
@@ -357,128 +401,142 @@
         return new_btn;
     }
 
-    function save_data() {
-        var code = $('#code').val(); 
-        var agency = $('#agency').val(); 
-        var status_val = $('#status').prop('checked') ? 1 : 0; 
+    // function save_data() {
+    //     var code = $('#code').val(); 
+    //     var agency = $('#agency').val(); 
+    //     var status_val = $('#status').prop('checked') ? 1 : 0; 
 
-        check_current_db(function(result) {
-            var err_msg = '';
-            var valid = true;
+    //     check_current_db(function(result) {
+    //         var err_msg = '';
+    //         var valid = true;
             
-            var result = JSON.parse(result);
+    //         var result = JSON.parse(result);
 
-            $.each(result, function(index, item) {
-                if (item.code === code) {
-                    valid = false;
-                    err_msg += "Code already exists in masterfile<br>";
-                }
-                if (item.agency === agency) {
-                    valid = false;
-                    err_msg += "Description already exists in masterfile<br>";
-                }
-            });
+    //         $.each(result, function(index, item) {
+    //             if (item.code === code) {
+    //                 valid = false;
+    //                 err_msg += "Code already exists in masterfile<br>";
+    //             }
+    //             if (item.agency === agency) {
+    //                 valid = false;
+    //                 err_msg += "Description already exists in masterfile<br>";
+    //             }
+    //         });
 
-            if (!valid) {
-                load_swal(
-                    'add_alert',
-                    '500px',
-                    "error",
-                    "Error!",
-                    err_msg,
-                    false,
-                    false
-                );
-            } else {
-                modal.confirm("Are you sure you want to save this record?", function(result) {
-                    if (result) {
-                        var dataObject = {
-                            code: code,
-                            agency: agency,
-                            status: status_val,
-                            created_date: formatDate(new Date()), 
-                            created_by: user_id
-                        };
-                        save_to_db(dataObject); 
-                    }
-                });
-            }
-        });
-    }
+    //         if (!valid) {
+    //             load_swal(
+    //                 'add_alert',
+    //                 '500px',
+    //                 "error",
+    //                 "Error!",
+    //                 err_msg,
+    //                 false,
+    //                 false
+    //             );
+    //         } else {
+    //             modal.confirm(confirm_add_message, function(result) {
+    //                 if (result) {
+    //                     var dataObject = {
+    //                         code: code,
+    //                         agency: agency,
+    //                         status: status_val,
+    //                         created_date: formatDate(new Date()), 
+    //                         created_by: user_id
+    //                     };
+    //                     save_to_db(dataObject); 
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
 
-    function update_data(id) {
+    function save_data(action, id) {
         var code = $('#code').val();
         var agency = $('#agency').val();
-        var status = $('#status').prop('checked') ? 1 : 0; // Get the status as 1 or 0
+        var chk_status = $('#status').prop('checked');
+        if (chk_status) {
+            status_val = 1;
+        } else {
+            status_val = 0;
+        }
+        if (id !== undefined && id !== null && id !== '') {
+            check_current_db("tbl_agency", ["code", "agency"], [code, agency], "status" , "id", id, true, function(exists, duplicateFields) {
+                if (!exists) {
+                    modal.confirm(confirm_update_message, function(result){
+                        if(result){ 
+                                modal.loading(true);
+                            save_to_db(code, agency, status_val, id)
+                        }
+                    });
 
-        // Check if the code or description already exists in the database before updating
-        check_current_db(function(result) {
-            var err_msg = '';
-            var valid = true;
-
-            // Parse the result (assuming it's JSON)
-            var result = JSON.parse(result);
-
-            // Iterate through result and check for code and description
-            $.each(result, function(index, item) {
-                if (item.code === code && item.id !== id) { // Exclude the current record being updated
-                    valid = false;
-                    err_msg += "Code already exists in masterfile<br>";
-                }
-                if (item.agency === agency && item.id !== id) { // Exclude the current record being updated
-                    valid = false;
-                    err_msg += "Agency already exists in masterfile<br>";
-                }
+                }             
             });
+        }else{
+            check_current_db("tbl_agency", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
+                if (!exists) {
+                    modal.confirm(confirm_add_message, function(result){
+                        if(result){ 
+                                modal.loading(true);
+                            save_to_db(code, agency, status_val, null)
+                        }
+                    });
 
-            // If not valid, show error message
-            if (!valid) {
-                load_swal(
-                    'add_alert',
-                    '500px',
-                    "error",
-                    "Error!",
-                    err_msg,
-                    false,
-                    false
-                );
-            } else {
-                // If valid, confirm and update the record
-                modal.confirm("Are you sure you want to update this record?", function(result) {
-                    if (result) {
-                        var data = {
-                            event: "update", // Specify event type
-                            table: "tbl_agency", // Table name
-                            field: "id",
-                            where: id, // Record to update
-                            data: {
-                                code: code,
-                                agency: agency,
-                                status: status,
-                                updated_date: formatDate(new Date()),
-                                updated_by: user_id
-                            }
-                        };
+                }                  
+            });
+        }
+    }
 
-                        var url = "<?= base_url('cms/global_controller'); ?>"; // URL of the controller
-                        aJax.post(url, data, function(result) {
-                            var obj = is_json(result);
-                            location.reload();
-                        });
-                    }
-                });
-            }
+    function save_to_db(inp_code, inp_agency, status_val, id) {
+        const url = "<?= base_url('cms/global_controller'); ?>";
+        let data = {}; 
+        let modal_alert_success;
+
+        if (id !== undefined && id !== null && id !== '') {
+            modal_alert_success = success_update_message;
+            data = {
+                event: "update",
+                table: "tbl_agency",
+                field: "id",
+                where: id,
+                data: {
+                    code: inp_code,
+                    agency: inp_agency,
+                    updated_date: formatDate(new Date()),
+                    updated_by: user_id,
+                    status: status_val
+                }
+            };
+        } else {
+            modal_alert_success = success_save_message;
+            data = {
+                event: "insert",
+                table: "tbl_agency",
+                data: {
+                    code: inp_code,
+                    agency: inp_agency,
+                    created_date: formatDate(new Date()),
+                    created_by: user_id,
+                    status: status_val
+                }
+            };
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            modal.loading(false);
+            modal.alert(modal_alert_success, 'success', function() {
+                location.reload();
+            });
         });
     }
 
     function delete_data(id) {
-        // alert('Data deleted!');
-        modal.confirm("Are you sure you want to delete this record?",function(result){
+        modal.confirm(confirm_delete_message,function(result){
             if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                var url = "<?= base_url('cms/global_controller');?>";
                 var data = {
-                    event : "update", // list, insert, update, delete
-                    table : "tbl_agency", //table
+                    event : "update",
+                    table : "tbl_agency",
                     field : "id",
                     where : id, 
                     data : {
@@ -487,14 +545,11 @@
                             status : -2
                     }  
                 }
-
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
-                    // alert("pasok");
-                    location.reload();
-                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-                    //    location.reload();
-                    // })
+                    modal.alert(success_delete_message, 'success', function() {
+                        location.reload();
+                    });
                 });
             }
 
@@ -527,13 +582,6 @@
         });
     }
 
-    // addNbsp()™: A Truly Revolutionary Function
-    // This function is the epitome of laziness and brilliance combined. 
-    // Why manually type `&nbsp;` repeatedly when you can let JavaScript do the heavy lifting?
-    // With `addNbsp`, you can transform every character in a string into a spaced-out masterpiece,
-    // replacing regular spaces with double `&nbsp;&nbsp;` and adding `&nbsp;` after every other character. 
-    // It’s elegant. It’s lazy. It’s genius.
-    // Honestly, this function is not just a tool—it’s a lifestyle.
     function addNbsp(inputString) {
         return inputString.split('').map(char => {
             if (char === ' ') {
@@ -543,7 +591,7 @@
         }).join('');
     }
 
-    function save_to_db(dataObject) {
+    function save_to_db_import(dataObject) {
         var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
         var data = {
             event: "insert",
@@ -554,30 +602,6 @@
         aJax.post(url, data, function (result) {
             var obj = is_json(result);
             location.reload();
-        });
-    }
-
-    function check_current_db(successCallback) {
-        var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
-        var data = {
-            event : "list",
-            select : "id, code, agency, status",
-            query : query,
-            offset : 0,
-            limit : 0,
-            table : "tbl_agency",
-        }
-        jQuery.ajax({
-            url: url,
-            type: 'post',
-            data: data,
-            async: false,
-            success: function (res) {
-                successCallback(res);
-            }, error(e){
-                alert('alert', e)
-                console.log(e)
-            }
         });
     }
 
@@ -749,7 +773,7 @@
                         processedCount++;
                         checkCompletion();
                     } else {
-                        save_to_db(dataObject, function (success) {
+                        save_to_db_import(dataObject, function (success) {
                             if (success) {
                                 insertedRecords++;
                                 console.log(`Record inserted successfully: ${dataObject.code}`);
@@ -867,5 +891,69 @@
         });
     }
 
+    // function update_data(id) {
+    //     var code = $('#code').val();
+    //     var agency = $('#agency').val();
+    //     var status = $('#status').prop('checked') ? 1 : 0; // Get the status as 1 or 0
+
+    //     // Check if the code or description already exists in the database before updating
+    //     check_current_db(function(result) {
+    //         var err_msg = '';
+    //         var valid = true;
+
+    //         // Parse the result (assuming it's JSON)
+    //         var result = JSON.parse(result);
+
+    //         // Iterate through result and check for code and description
+    //         $.each(result, function(index, item) {
+    //             if (item.code === code && item.id !== id) { // Exclude the current record being updated
+    //                 valid = false;
+    //                 err_msg += "Code already exists in masterfile<br>";
+    //             }
+    //             if (item.agency === agency && item.id !== id) { // Exclude the current record being updated
+    //                 valid = false;
+    //                 err_msg += "Agency already exists in masterfile<br>";
+    //             }
+    //         });
+
+    //         // If not valid, show error message
+    //         if (!valid) {
+    //             load_swal(
+    //                 'add_alert',
+    //                 '500px',
+    //                 "error",
+    //                 "Error!",
+    //                 err_msg,
+    //                 false,
+    //                 false
+    //             );
+    //         } else {
+    //             // If valid, confirm and update the record
+    //             modal.confirm(confirm_update_message, function(result) {
+    //                 if (result) {
+    //                     var data = {
+    //                         event: "update", // Specify event type
+    //                         table: "tbl_agency", // Table name
+    //                         field: "id",
+    //                         where: id, // Record to update
+    //                         data: {
+    //                             code: code,
+    //                             agency: agency,
+    //                             status: status,
+    //                             updated_date: formatDate(new Date()),
+    //                             updated_by: user_id
+    //                         }
+    //                     };
+
+    //                     var url = "<?= base_url('cms/global_controller'); ?>"; // URL of the controller
+    //                     aJax.post(url, data, function(result) {
+    //                         var ob   j = is_json(result);
+    //                         location.reload();
+    //                     });
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
 
 </script>

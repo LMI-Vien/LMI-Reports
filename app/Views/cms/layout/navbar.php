@@ -91,7 +91,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="<?= base_url('cms/area') ?>" class="nav-link">
+              <a href="<?= base_url('cms/area') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Area' ? 'active' : '' ?>">
                 <i class="fas fa-map-marker-alt nav-icon"></i>
                 <p>Area</p>
               </a>

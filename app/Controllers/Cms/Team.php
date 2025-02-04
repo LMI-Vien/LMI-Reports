@@ -33,7 +33,8 @@ class Team extends BaseController
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
-				"assets/js/moment.js"
+				"assets/js/moment.js",
+				"assets/js/xlsx.full.min.js"
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",

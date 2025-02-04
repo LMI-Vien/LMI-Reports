@@ -20,7 +20,7 @@ class Agency extends BaseController
 	public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "Agency",
+			"title"         =>  "Agency Masterfile",
 			"description"   =>  "Agency",
 			"keyword"       =>  ""
 		);
@@ -33,7 +33,8 @@ class Agency extends BaseController
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
-				"assets/js/moment.js"
+				"assets/js/moment.js",
+				"assets/js/xlsx.full.min.js"
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
