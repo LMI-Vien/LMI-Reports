@@ -330,24 +330,24 @@ function get_pagination()
         if (action == 'edit') {
             // console.log(get_menu_id_from_db(menu_url, menu_name)); return;
             if (get_menu_id_from_db(menu_url, menu_name) != menu_list_id){
-                if (is_exists('site_menu', 'menu_name', menu_name, chk_status) !== 0) {
-                    invalid = true;
-                    errmsg += 'This Menu Name already exists!<br>'
-                }
-                if (is_exists('site_menu', 'menu_url', menu_url, chk_status) !== 0) {
-                    invalid = true;
-                    errmsg += 'This Menu URL already exists!<br>'
-                }
+                // if (is_exists('site_menu', 'menu_name', menu_name, chk_status) !== 0) {
+                //     invalid = true;
+                //     errmsg += 'This Menu Name already exists!<br>'
+                // }
+                // if (is_exists('site_menu', 'menu_url', menu_url, chk_status) !== 0) {
+                //     invalid = true;
+                //     errmsg += 'This Menu URL already exists!<br>'
+                // }
             }
         } else {
-            if (is_exists('site_menu', 'menu_name', menu_name, chk_status) !== 0) {
-                invalid = true;
-                errmsg += 'This Menu Name already exists!<br>'
-            }
-            if (is_exists('site_menu', 'menu_url', menu_url, chk_status) !== 0) {
-                invalid = true;
-                errmsg += 'This Menu URL already exists!<br>'
-            }
+            // if (is_exists('site_menu', 'menu_name', menu_name, chk_status) !== 0) {
+            //     invalid = true;
+            //     errmsg += 'This Menu Name already exists!<br>'
+            // }
+            // if (is_exists('site_menu', 'menu_url', menu_url, chk_status) !== 0) {
+            //     invalid = true;
+            //     errmsg += 'This Menu URL already exists!<br>'
+            // }
         }
 
         if(invalid) {

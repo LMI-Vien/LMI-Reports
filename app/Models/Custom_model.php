@@ -267,6 +267,27 @@ class Custom_model extends Model
         return $status;
     }
 
+    public function menu_role_insert_site($user_role_id, $role_access) {
+        $user_id = session()->sess_uid;
+        $insert_rights = array();
+        $db      = \Config\Database::connect();
+        $builder = $db->table('cms_site_menu_roles');
+        foreach($role_access as $role_access_rights) {
+            array_push($insert_rights, array(
+                'role_id' => $user_role_id,
+                'menu_id' => $role_access_rights['menu_id'],
+                'menu_role_view' => $role_access_rights['menu_role_view'],
+                'menu_role_generate' => $role_access_rights['menu_role_generate'],
+                'menu_role_export' => $role_access_rights['menu_role_export'],
+                'menu_role_updated_date' => $role_access_rights['menu_role_updated_date'],
+                'menu_role_created_date' => $role_access_rights['menu_role_created_date'],
+            ));
+        }
+
+        $status = $builder->insertBatch($insert_rights);
+        return $status;
+    }
+
     public function seo_status_update($status_update, $ids, $user) {
         $this->db->whereIn("id", $ids);
         $status = $this->db->update('cms_metatags',

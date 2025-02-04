@@ -779,10 +779,71 @@ class Global_model extends Model
 
         return $results;
     }
-    
+
     function list_existing($table, $selected_fields, $haystack, $needle)
     {
-        
+        if (empty($table) || empty($selected_fields)) {
+            return ['status' => 'error', 'message' => 'Table or allowed fields are not set.'];
+        }
+
+        if (empty($haystack) || empty($needle)) {
+            return ['status' => 'error', 'message' => 'Invalid input parameters.'];
+        }
+
+        $builder = $this->db->table($table);
+        $builder->select($selected_fields);
+
+        // Start dynamic condition building
+        $builder->groupStart();
+        foreach ($needle as $values) {
+            $builder->orGroupStart(); // Start an OR group for each needle set
+            foreach ($values as $keyIndex => $value) {
+                if (isset($haystack[$keyIndex])) {
+                    $builder->orWhere($haystack[$keyIndex], $value);
+                }
+            }
+            $builder->groupEnd(); // Close OR group
+        }
+        $builder->groupEnd();
+
+        $query = $builder->get();
+        $existingRecords = $query->getResultArray();
+
+        if (!empty($existingRecords)) {
+            $filteredRecords = [];
+            foreach ($existingRecords as $record) {
+                $matchedFields = [];
+                foreach ($haystack as $field) {
+                    if (isset($record[$field]) && in_array($record[$field], array_column($needle, array_search($field, $haystack)))) {
+                        $matchedFields[$field] = $record[$field];
+                    }
+                }
+
+                if (!empty($matchedFields)) {
+                    $filteredRecords[] = $matchedFields;
+                }
+            }
+
+            if (!empty($filteredRecords)) {
+                $errorMessage = '';
+                foreach ($filteredRecords as $record) {
+                    $errorMessage .= "⚠️ Existing Record Found: ";
+                    foreach ($record as $field => $value) {
+                        $errorMessage .= "<b>" . ucfirst($field) . ": " . esc($value) . "</b>, ";
+                    }
+                    $errorMessage = rtrim($errorMessage, ', ') . " ⚠️<br>";
+                }
+
+                return [
+                    'status' => 'error',
+                    'message' => $errorMessage,
+                    'existing' => $filteredRecords
+                ];
+            }
+        }
+
+        return ['status' => 'success', 'message' => 'No duplicates found.'];
     }
+
 
 }

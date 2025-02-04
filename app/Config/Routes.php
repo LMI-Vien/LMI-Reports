@@ -33,6 +33,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('menu/(:num)/(:any)', 'Cms\Site_menu::index/(:num)/(:any)');
         $routes->get('menu_add/(:num)/(:any)', 'Cms\Site_menu::menu_add');
         $routes->get('menu_update/(:num)', 'Cms\Site_menu::menu_update');
+        $routes->post('menu_insert', 'Cms\Site_menu::menu_insert');
     });
     $routes->get('roles', 'Cms\Role::index');
     $routes->get('agency', 'Cms\Agency::index');

@@ -153,18 +153,6 @@
     $(document).ready(function() {
       get_data();
       get_pagination();
-      $('#btn_add').css({
-            'border': '2px solid white', 
-            'background-color':'#339933',
-            'color':'white',
-            'border-radius':'10px',
-        });
-        $('#btn_import').css({
-            'border': '2px solid white', 
-            'background-color':'#339933',
-            'color':'white',
-            'border-radius':'10px',
-        });
     });
 
     function get_data(keyword = null) {

@@ -538,7 +538,9 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination();
-
+        // let ids = [1, 2, 3, 4, 5]; 
+        // var testing = get_field_values("tbl_store", "code", ids);
+        // console.log(testing);
         $("#deploy_date").datepicker({
             changeMonth: true,
             changeYear: true
@@ -1154,10 +1156,12 @@
         var needle = [];
 
         var tr_count = 1;
+        var row_mapping = {};
+
         extracted_data.find('tr').each(function () {
             td_count = 1;
             var temp = [];
-            $(this).find('td').each( function() {
+            $(this).find('td').each(function () {
                 var text_val = $(this).html().trim();
 
                 if (td_count === 2) {
@@ -1173,9 +1177,10 @@
                     } else {
                         code = text_val;
                         unique_code.push(text_val);
+                        row_mapping[code] = tr_count;
                     }
                 }
-                
+
                 if (td_count === 3) {
                     if (unique_description.includes(text_val)) {
                         invalid = true;
@@ -1189,9 +1194,10 @@
                     } else {
                         description = text_val;
                         unique_description.push(text_val);
+                        row_mapping[description] = tr_count;
                     }
                 }
-                
+
                 if (td_count === 4) {
                     if (text_val.toLowerCase() === 'active') {
                         status = 1;
@@ -1202,7 +1208,7 @@
                         errmsg += "⚠️ Invalid Status at line #: <b>" + tr_count + "</b>⚠️<br>";
                     }
                 }
-                
+
                 if (td_count === 5) {
                     let dateObj = new Date(text_val);
                     if (isNaN(dateObj.getTime())) {
@@ -1212,9 +1218,9 @@
                         deploy_date = readable_date_to_excel_date(text_val);
                     }
                 }
-                
+
                 if (td_count === 6) {
-                    if (!unique_area_id.includes(text_val)){
+                    if (!unique_area_id.includes(text_val)) {
                         unique_area_id.push(text_val);
                     }
                     area_id = text_val;
@@ -1222,56 +1228,79 @@
 
                 td_count += 1;
             });
+
             tr_count += 1;
-            temp.push(code, description, status, deploy_date, area_id)
-            needle.push([code, description])
-            import_array.push(temp)
+            temp.push(code, description, status, deploy_date, area_id);
+            needle.push([code,description]);
+            import_array.push(temp);
         });
 
         var temp_invalid = invalid;
         var temp_errmsg = '';
-        
-        // needle = [
-        //     ['a', 'a'],
-        //     ['a', 'a'],
-        //     ['a', 'a'],
-        // ]
-        // list_existing(table, selected_fields, haystack, needle)
-        // list_existing("tbl_asc", ["id", "code", "description"], ["code", "description"], [needle], function (result) {
-        //     if(result) {
-        //         $.each(result, function(x, y) {
-        //             temp_invalid = true;
-        //             temp_errmsg += "⚠️ Item Code : <b>"
-        //             +y.code+"</b> and Item Description : <b>"
-        //             +y.description+"</b> already exists in masterfile ⚠️<br>";
-        //         });
-        //     }
-        // });
 
         invalid = temp_invalid;
         errmsg += temp_errmsg;
+        var table = 'tbl_asc';
+        var haystack = ['code', 'description'];
+        var selected_fields = ['id', 'code', 'description'];
+        // var needle = [
+        //     ['ASC004asd', 'John Doe'],
+        //     ['ASC002', 'Jane Smith'],
+        //     ['ASC001', 'Michael Brown'],
+        //     ['ASC004', 'Emily Johnson'],
+        //     ['ASC050', 'Aria Diaz']
+        // ];
+
+        //console.log(table, selected_fields);
 
         if (invalid) {
-            modal.content('Error', 'error', errmsg, '600px', ()=>{})
+            modal.content('Error', 'error', errmsg, '600px', ()=>{});
         } else {
-            alert('Data saved!');
-            import_array.forEach(row => {
-                console.log(row)
-                data = {
-                    'code': row[0], 
-                    'description':row[1], 
-                    'status':row[2], 
-                    'deploy_date':row[3], 
-                    'area_id':row[4]
+            list_existing(table, selected_fields, haystack, needle, function (result) {
+               // console.log(result.existing);
+
+                if (result.status === "error") {
+                    let errmsg = "";
+                    let processedFields = new Set();
+
+                    $.each(result.existing, function (index, record) {
+                        $.each(record, function (field, value) {
+                            if (!processedFields.has(field + value)) { 
+                                let line_number = row_mapping[value] || "Unknown";
+                                errmsg += "⚠️ Duplicated " + field.charAt(0).toUpperCase() + field.slice(1) + " at line #: <b>" + line_number + "</b>⚠️<br>";
+                                processedFields.add(field + value); // Mark as processed
+                            }
+                        });
+                    });
+                    modal.content('Error', 'error', errmsg, '600px', () => {});
+                } else {
+                    alert('Data saved!');
                 }
-                save_to_db(data, () => {})
-            })
-            load_swal(
-                '', '1000px', 'success', 'Succesfully saved!', '', false, false, function() {
-                    location.reload();
-                }
-            )
+            });
+
         }
+
+        // if (invalid) {
+        //     modal.content('Error', 'error', errmsg, '600px', ()=>{})
+        // } else {
+        //     alert('Data saved!');
+        //     import_array.forEach(row => {
+        //         console.log(row)
+        //         data = {
+        //             'code': row[0], 
+        //             'description':row[1], 
+        //             'status':row[2], 
+        //             'deploy_date':row[3], 
+        //             'area_id':row[4]
+        //         }
+        //         save_to_db(data, () => {})
+        //     })
+        //     load_swal(
+        //         '', '1000px', 'success', 'Succesfully saved!', '', false, false, function() {
+        //             location.reload();
+        //         }
+        //     )
+        // }
     }
 
     function readable_date_to_excel_date(readable_date) {
