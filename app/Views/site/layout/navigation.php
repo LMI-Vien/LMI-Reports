@@ -135,5 +135,29 @@
             const parentMenu = $(this).closest(".dropdown").find(".nav-link");
             parentMenu.addClass("active");
         });
+
+        // logout confirmation
+        $("#logout").on("click", function(e) {
+            e.preventDefault();
+
+            var logoutUrl = $(this).attr("href"); // Get the logout URL
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You will be logged out of your session.",
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, log me out!",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = logoutUrl;
+                }
+            });
+        });
     });
 </script>

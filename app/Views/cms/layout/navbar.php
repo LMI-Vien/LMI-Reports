@@ -19,7 +19,7 @@
   <ul class="navbar-nav ml-auto">
     <!-- Messages Dropdown Menu -->
     <li class="nav-item">
-      <a class="nav-link" href="<?= base_url('cms/login/sign_out');?>">
+      <a class="nav-link logout-btn" href="<?= base_url('cms/login/sign_out');?>">
         <i class="fa fa-sign-out-alt mr-2"></i> Sign Out 
       </a>
     </li>
@@ -138,3 +138,31 @@
   </div>
   <!-- /.sidebar -->
 </aside>
+
+
+<script>
+    $(document).ready(function() {
+        $(".logout-btn").on("click", function(e) {
+            e.preventDefault();
+
+            var logoutUrl = $(this).attr("href"); // Get the logout URL
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You will be logged out of your session.",
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, log me out!",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = logoutUrl;
+                }
+            });
+        });
+    });
+</script>

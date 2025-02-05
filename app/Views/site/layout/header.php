@@ -18,6 +18,9 @@
         <!-- Theme style -->
 
         <script type="text/javascript" src="<?= base_url();?>assets/js/jquery-3.7.1.min.js" ></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- Include basic styling -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
         <!-- OPTIONAL SCRIPTS -->
         <script src="https://adminlte.io/themes/v3/plugins/chart.js/Chart.min.js"></script>
