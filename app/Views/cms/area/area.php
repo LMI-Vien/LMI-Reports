@@ -21,8 +21,10 @@
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
                                         <th class='center-content'>Code</th>
                                         <th class='center-content'>Area Description</th>
-                                        <th class='center-content'>Store</th>
+                                        <!-- <th class='center-content'>Store</th> -->
                                         <th class='center-content'>Status</th>
+                                        <th class='center-content'>Date Created</th>
+                                        <th class='center-content'>Date Modified</th>
                                         <th class='center-content'>Action</th>
                                     </tr>
                                 </thead>
@@ -585,7 +587,7 @@
         function get_data(new_query) {
             var data = {
                 event : "list",
-                select : "id, code, description, store, status",
+                select : "id, code, description, store, status, created_date, updated_date",
                 query : new_query,
                 offset : offset,
                 limit : limit,
@@ -611,8 +613,10 @@
                             html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                             html += "<td style='width: 10%'>" + y.code + "</td>";
                             html += "<td style='width: 30%'>" + y.description + "</td>";
-                            html += "<td style='width: 20%'>" + y.store + "</td>";
+                            // html += "<td style='width: 20%'>" + y.store + "</td>";
                             html += "<td style='width: 10%'>" + status + "</td>";
+                            html += "<td style='width: 10%'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                            html += "<td style='width: 10%'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                             if (y.id == 0) {
                                 html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
@@ -714,6 +718,27 @@
                 }
                 return char + '&nbsp;';
             }).join('');
+        }
+
+        function ViewDateformat(dateString) {
+            let date = new Date(dateString);
+            return date.toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                hour12: true 
+            });
+        }
+
+        function trimText(str) {
+            if (str.length > 10) {
+                return str.substring(0, 10) + "...";
+            } else {
+                return str;
+            }
         }
 
     //sample data for progress loading

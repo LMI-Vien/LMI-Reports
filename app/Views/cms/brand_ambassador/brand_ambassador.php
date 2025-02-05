@@ -23,14 +23,15 @@
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                         <th class='center-content'>Code</th>
                                         <th class='center-content'>Name</th>
-                                        <th class='center-content'>Deployment Date</th>
+                                        <!-- <th class='center-content'>Deployment Date</th>
                                         <th class='center-content'>Agency</th>
                                         <th class='center-content'>Brand</th>
                                         <th class='center-content'>Store</th>
                                         <th class='center-content'>Team</th>
-                                        <th class='center-content'>Area</th>
+                                        <th class='center-content'>Area</th> -->
                                         <th class='center-content'>Status</th>
-                                        <th class='center-content'>Type</th>
+                                        <!-- <th class='center-content'>Type</th> -->
+                                        <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
                                         <th class='center-content'>Action</th>
                                     </tr>  
@@ -139,208 +140,6 @@
     </div>
 </div>
 
-<!-- Add MODAL -->
-<!-- <div class="modal fade" id="save_ba_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Code</label>
-                    <input type="text" class="form-control" id="code">
-                </div>
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" id="name">
-                </div>
-                <div class="form-group">
-                    <label>Deployment Data</label>
-                    <input type="date" class="form-control" id="deployment_data">
-                </div>
-                <div class="form-group">
-                    <label>Agency</label>
-                    <select class="form-control" id="agency">
-                        <option value="">Select Agency</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" class="form-control" id="brand">
-                </div>
-                <div class="form-group">
-                    <label>Store</label>
-                    <input type="text" class="form-control" id="store">
-                </div>
-                <div class="form-group">
-                    <label>Team</label>
-                    <input type="text" class="form-control" id="team">
-                </div>
-                <div class="form-group">
-                    <label>Area</label>
-                    <input type="text" class="form-control" id="area">
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input large-checkbox" id="status">
-                    <label class="form-check-label large-label" for="status">Active</label>
-                </div>
-                <div class="form-group mt-3">
-                    <label>Type</label>
-                    <div class="d-flex gap-2"> 
-                        <label class="mr-3">
-                            <input type="radio" name="type" value="1"> Outright
-                        </label>
-                        <label>
-                            <input type="radio" name="type" value="0"> Consign
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="saveBtn">Save changes</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div> -->
-
-<!-- Update MODAL -->
-<!-- <div class="modal fade" id="update_ba_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg"> 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Code</label>
-                    <input type="text" class="form-control" id="code">
-                </div>
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" id="name">
-                </div>
-                <div class="form-group">
-                    <label>Deployment Data</label>
-                    <input type="date" class="form-control" id="deployment_data">
-                </div>
-                <div class="form-group">
-                    <label>Agency</label>
-                    <input type="text" class="form-control" id="agency">
-                </div>
-                <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" class="form-control" id="brand">
-                </div>
-                <div class="form-group">
-                    <label>Store</label>
-                    <input type="text" class="form-control" id="store">
-                </div>
-                <div class="form-group">
-                    <label>Team</label>
-                    <input type="text" class="form-control" id="team">
-                </div>
-                <div class="form-group">
-                    <label>Area</label>
-                    <input type="text" class="form-control" id="area">
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input large-checkbox" id="status">
-                    <label class="form-check-label large-label" for="status">Active</label>
-                </div>
-                <div class="form-group mt-3">
-                    <label>Type</label>
-                    <div class="d-flex gap-2">
-                        <label class="mr-3"> 
-                            <input type="radio" name="type" value="1"> Outright
-                        </label>
-                        <label>
-                            <input type="radio" name="type" value="0"> Consign
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="updateBtn">Update</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div> -->
-
-<!-- View MODAL -->
-<!-- <div class="modal fade" id="view_ba_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Code</label>
-                    <input type="text" class="form-control" id="code" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" id="name" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Deployment Data</label>
-                    <input type="date" class="form-control" id="deployment_data" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Agency</label>
-                    <input type="text" class="form-control" id="agency" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" class="form-control" id="brand" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Store</label>
-                    <input type="text" class="form-control" id="store" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Team</label>
-                    <input type="text" class="form-control" id="team" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Area</label>
-                    <input type="text" class="form-control" id="area" readonly>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input large-checkbox" id="status" disabled>
-                    <label class="form-check-label large-label" for="status">Active</label>
-                </div>
-                <div class="form-group mt-3">
-                    <label>Type</label>
-                    <div class="d-flex gap-2"> 
-                        <label class="mr-3"> 
-                            <input type="radio" name="type" value="1" disabled> Outright
-                        </label>
-                        <label>
-                            <input type="radio" name="type" value="0" disabled> Consign
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div> -->
-
 <script>
     var query = "status >= 0";
     var limit = 10; 
@@ -362,11 +161,11 @@
 
     });
 
-    function get_data(keyword = null) {
+    function get_data(new_query) {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "id, code, name, deployment_date, agency, brand, store, team, area, status, type, updated_date",
+            select : "id, code, name, deployment_date, agency, brand, store, team, area, status, type, updated_date, created_date",
             query : query,
             offset : offset,
             limit : limit,
@@ -386,8 +185,6 @@
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        let date = new Date(y.deployment_date);
-                        let formattedDate = date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         var areaDescription = areaDescriptions[y.area] || 'N/A';
@@ -400,20 +197,21 @@
                         html += "<td class='center-content'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td>" + y.code + "</td>";
                         html += "<td>" + y.name + "</td>";
-                        html += "<td>" + formattedDate + "</td>";
-                        // html += "<td>" + y.agency + "</td>";
-                        html += "<td>" + agencyDescription + "</td>";
-                        // html += "<td>" + y.brand + "</td>";
-                        html += "<td>" + brandDescription + "</td>";
-                        // html += "<td>" + y.store + "</td>";
-                        html += "<td>" + storeDescription + "</td>";
-                        // html += "<td>" + y.team + "</td>";
-                        html += "<td>" + teamDescription + "</td>";
-                        // html += "<td>" + y.area + "</td>";
-                        html += "<td>" + areaDescription + "</td>";
+                        // html += "<td>" + ViewDateformat(y.deployment_date) + "</td>";
+                        // // html += "<td>" + y.agency + "</td>";
+                        // html += "<td>" + trimText(agencyDescription) + "</td>";
+                        // // html += "<td>" + y.brand + "</td>";
+                        // html += "<td>" + trimText(brandDescription) + "</td>";
+                        // // html += "<td>" + y.store + "</td>";
+                        // html += "<td>" + trimText(storeDescription) + "</td>";
+                        // // html += "<td>" + y.team + "</td>";
+                        // html += "<td>" + trimText(teamDescription) + "</td>";
+                        // // html += "<td>" + y.area + "</td>";
+                        // html += "<td>" + trimText(areaDescription) + "</td>";
                         html += "<td>" +status+ "</td>";
-                        html += "<td>" + (y.type == 1 ? "Outright" : "Consign") + "</td>";
-                        html += "<td class='center-content'>" + (y.updated_date ? y.updated_date : "N/A") + "</td>";
+                        // html += "<td>" + (y.type == 1 ? "Outright" : "Consign") + "</td>";
+                        html += "<td class='center-content'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td class='center-content'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
                         
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
@@ -472,18 +270,30 @@
         get_data();
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
-        $("#search_query").val("");
     })
 
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
+    $(document).on('keydown', '#search_query', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        if (event.key == 'Enter') {
+            search_input = $('#search_query').val();
             offset = 1;
-            query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
-            get_data();
             get_pagination();
+            new_query = query;
+            new_query += " AND (code LIKE '%" + search_input + "%' OR name LIKE '%" + search_input + "%' OR deployment_date LIKE '%" + search_input + "%' OR agency LIKE '%" + search_input + "%' OR brand LIKE '%" + search_input + "%' OR store LIKE '%" + search_input + "%' OR team LIKE '%" + search_input + "%' OR area LIKE '%" + search_input + "%')"
+            get_data(new_query);
         }
     });
+
+    // $(document).on('keypress', '#search_query', function(e) {               
+    //     if (e.keyCode === 13) {
+    //         var keyword = $(this).val().trim();
+    //         offset = 1;
+    //         query += " AND (code LIKE '%" + search_input + "%' OR name LIKE '%" + search_input + "%' OR deployment_date LIKE '%" + search_input + "%' OR agency LIKE '%" + search_input + "%' OR brand LIKE '%" + search_input + "%' OR store LIKE '%" + search_input + "%' OR team LIKE '%" + search_input + "%' OR area LIKE '%" + search_input + "%')"
+    //         get_data();
+    //         get_pagination();
+    //     }
+    // });
 
 
     $(document).on("change", ".record-entries", function(e) {
@@ -981,6 +791,101 @@
             // console.log(selectedStoreDescription);
         })
     }
+
+    function trimText(str) {
+        if (str.length > 10) {
+            return str.substring(0, 10) + "...";
+        } else {
+            return str;
+        }
+    }
+
+    $(document).on('click', '.btn_status', function (e) {
+        var status = $(this).attr("data-status");
+        var modal_obj = "";
+        var modal_alert_success = "";
+        var hasExecuted = false; // Prevents multiple executions
+
+        if (parseInt(status) === -2) {
+            modal_obj = confirm_delete_message;
+            modal_alert_success = success_delete_message;
+        } else if (parseInt(status) === 1) {
+            modal_obj = confirm_publish_message;
+            modal_alert_success = success_publish_message;
+        } else {
+            modal_obj = confirm_unpublish_message;
+            modal_alert_success = success_unpublish_message;
+        }
+        // var counter = 0; 
+        // $('.select:checked').each(function () {
+        //     var id = $(this).attr('data-id');
+        //     if(id){
+        //         counter++;
+        //     }
+        //  });
+        // console.log(counter);
+        modal.confirm(modal_obj, function (result) {
+            if (result) {
+                var url = "<?= base_url('cms/global_controller');?>";
+                var dataList = [];
+                
+                $('.select:checked').each(function () {
+                    var id = $(this).attr('data-id');
+                    dataList.push({
+                        event: "update",
+                        table: "tbl_brand_ambassador",
+                        field: "id",
+                        where: id,
+                        data: {
+                            status: status,
+                            updated_date: formatDate(new Date())
+                        }
+                    });
+                });
+
+                if (dataList.length === 0) return;
+
+                var processed = 0;
+                dataList.forEach(function (data, index) {
+                    aJax.post(url, data, function (result) {
+                        if (hasExecuted) return; // Prevents multiple executions
+
+                        modal.loading(false);
+                        processed++;
+
+                        if (result === "success") {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                $('.btn_status').hide();
+                                modal.alert(modal_alert_success, 'success', function () {
+                                    location.reload();
+                                });
+                            }
+                        } else {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                modal.alert(failed_transaction_message, function () {});
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    });
+
+    function ViewDateformat(dateString) {
+        let date = new Date(dateString);
+        return date.toLocaleString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: true 
+        });
+    }
+
     
 
     // $(document).ready(function () {

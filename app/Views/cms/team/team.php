@@ -24,6 +24,7 @@
                                         <th class='center-content'>Code</th>
                                         <th class='center-content'>Team Description</th>
                                         <th class='center-content'>Status</th>
+                                        <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
                                         <th class='center-content'>Action</th>
                                     </tr>  
@@ -205,7 +206,7 @@
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "id, code, team_description, status, updated_date",
+            select : "id, code, team_description, status, updated_date, created_date",
             query : query,
             offset : offset,
             limit : limit,
@@ -228,16 +229,17 @@
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td>" + y.code + "</td>";
-                        html += "<td>" + y.team_description + "</td>";
-                        html += "<td>" +status+ "</td>";
-                        html += "<td class='center-content'>" + (y.updated_date ? y.updated_date : "N/A") + "</td>";
+                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                        html += "<td style='width: 10%'>" + y.code + "</td>";
+                        html += "<td style='width: 20%'>" + trimText(y.team_description) + "</td>";
+                        html += "<td style='width: 10%'>" +status+ "</td>";
+                        html += "<td class='center-content' style='width: 10%'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td class='center-content' style='width: 10%'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
-                          html+="<td class='center-content'>";
+                          html+="<td class='center-content' style='width: 25%'>";
                           html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                           html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                           html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -293,36 +295,33 @@
     //     }
     // });
 
-    $(document).on('keydown', '#search_query', function(event) {
-        console.log("Key pressed:", event.key); // Log every key press to diagnose the issue
-
-        if (event.key === 'Enter') {
-            console.log("Enter key pressed"); // Log when 'Enter' key is detected
-
-            search_input = $('#search_query').val();
-            offset = 1;
-            get_pagination();
-            new_query = query;
-            new_query += " and code like '%" + search_input + "%' or " + query + " and team_description like '%" + search_input + "%'";
-            get_data(new_query);
-            console.log("Search Query:", search_input);
-            console.log("New Query:", new_query);
-        }
-
-        if (event.key === 'a') {
-            console.log("Key 'a' pressed and detected"); // Additional logging for 'a' key
-        }
-    });
-
-    // $(document).on('keydown', '#search_query', function(event) {
-    //     event.stopPropagation();
-    //     console.log("Key pressed:", event.key);
-    // });
-
     pagination.onchange(function(){
         offset = $(this).val();
         get_data(query);
-    })
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
+        $("#search_query").val("");
+    });
+
+    // $(document).on('keypress', '#search_query', function(e) {               
+    //     if (e.keyCode === 13) {
+    //         var keyword = $(this).val().trim();
+    //         offset = 1;
+    //         query = "( code like '%" + keyword + "%' OR team_description like '%" + keyword + "%' ) AND status >= 1";
+    //         get_data();
+    //         get_pagination();
+    //     }
+    // });
+
+    $(document).on('keypress', '#search_query', function(e) {               
+        if (e.keyCode === 13) {
+            var keyword = $(this).val().trim();
+            offset = 1;
+            query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
+            get_data();
+            get_pagination();
+        }
+    });
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
@@ -562,6 +561,100 @@
             }
             return char + '&nbsp;';
         }).join('');
+    }
+
+    function trimText(str) {
+        if (str.length > 10) {
+            return str.substring(0, 10) + "...";
+        } else {
+            return str;
+        }
+    }
+
+    $(document).on('click', '.btn_status', function (e) {
+        var status = $(this).attr("data-status");
+        var modal_obj = "";
+        var modal_alert_success = "";
+        var hasExecuted = false; // Prevents multiple executions
+
+        if (parseInt(status) === -2) {
+            modal_obj = confirm_delete_message;
+            modal_alert_success = success_delete_message;
+        } else if (parseInt(status) === 1) {
+            modal_obj = confirm_publish_message;
+            modal_alert_success = success_publish_message;
+        } else {
+            modal_obj = confirm_unpublish_message;
+            modal_alert_success = success_unpublish_message;
+        }
+        // var counter = 0; 
+        // $('.select:checked').each(function () {
+        //     var id = $(this).attr('data-id');
+        //     if(id){
+        //         counter++;
+        //     }
+        //  });
+        // console.log(counter);
+        modal.confirm(modal_obj, function (result) {
+            if (result) {
+                var url = "<?= base_url('cms/global_controller');?>";
+                var dataList = [];
+                
+                $('.select:checked').each(function () {
+                    var id = $(this).attr('data-id');
+                    dataList.push({
+                        event: "update",
+                        table: "tbl_team",
+                        field: "id",
+                        where: id,
+                        data: {
+                            status: status,
+                            updated_date: formatDate(new Date())
+                        }
+                    });
+                });
+
+                if (dataList.length === 0) return;
+
+                var processed = 0;
+                dataList.forEach(function (data, index) {
+                    aJax.post(url, data, function (result) {
+                        if (hasExecuted) return; // Prevents multiple executions
+
+                        modal.loading(false);
+                        processed++;
+
+                        if (result === "success") {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                $('.btn_status').hide();
+                                modal.alert(modal_alert_success, 'success', function () {
+                                    location.reload();
+                                });
+                            }
+                        } else {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                modal.alert(failed_transaction_message, function () {});
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    });
+
+    function ViewDateformat(dateString) {
+        let date = new Date(dateString);
+        return date.toLocaleString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: true 
+        });
     }
 
 
