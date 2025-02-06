@@ -26,7 +26,7 @@
         <script src="https://adminlte.io/themes/v3/plugins/chart.js/Chart.min.js"></script>
         <!-- AdminLTE for demo purposes -->
         <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-        <script src="https://adminlte.io/themes/v3/dist/js/pages/dashboard3.js"></script>
+        <!-- <script src="https://adminlte.io/themes/v3/dist/js/pages/dashboard3.js"></script> -->
 
         <title><?=$meta['title']?></title>
         <?php if(!empty($css)) : ?>
