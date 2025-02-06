@@ -128,9 +128,10 @@ class Global_controller extends BaseController
 					try {
 						$table = $this->request->getPost('table');
 						$select = $this->request->getPost('select');
+						$search_field = $this->request->getPost('search_field');
 						$ids = $this->request->getPost('ids');
 	
-						$result_data = $this->Global_model->get_field_values($table, $select, $ids);
+						$result_data = $this->Global_model->get_field_values($table, $select, $search_field, $ids);
 						echo json_encode($result_data);
 					} catch (Error $e) {
 						echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);

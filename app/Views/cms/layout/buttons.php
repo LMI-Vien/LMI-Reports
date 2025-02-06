@@ -110,9 +110,9 @@
 
 ?>
 
-<a href="#" data-status=1  class="status_action btn_status btn-sm btn-default cms-btn btn_publish"><span class="fa fa-check"></span> Publish </a>
-<a href="#" data-status=0 class="status_action btn_status btn-sm btn-default cms-btn btn_unpublish" ><span class="fa fa-ban"></span> Unpublish </a>
-<a href="#" data-status=-2 class="status_action btn_status btn-sm btn-default cms-btn btn_trash" ><span class="fa fa-trash"></span> Trash </a>
+<a href="#" data-status=1  class="status_action btn_status btn-sm btn-success cms-btn btn_publish"><span class="fa fa-check"></span> Publish </a>
+<a href="#" data-status=0 class="status_action btn_status btn-sm btn-success cms-btn btn_unpublish" ><span class="fa fa-ban"></span> Unpublish </a>
+<a href="#" data-status=-2 class="status_action btn_status btn-sm btn-default delete cms-btn btn_trash" ><span class="fa fa-trash"></span> Trash </a>
 </div>
 
 <style type="text/css">
@@ -200,7 +200,7 @@
         max-height: 30px;
         line-height: 0.5;
         /* background-color: #1439a6; */
-        color: #000000 !important;
+        /* color: #000000 !important; */
         border-radius: 10px;
         margin-right: 5px;
         box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
@@ -212,8 +212,8 @@
         border: 0px solid #339933 !important ; 
     }
     .cms-btn:hover {
-        color: #000000 !important ; 
-        background-color: #8c8f8c !important ; 
+        /* color: #000000 !important ;  */
+        /* background-color: #8c8f8c !important ;  */
         border: 0px solid #339933 !important ; 
     }
 

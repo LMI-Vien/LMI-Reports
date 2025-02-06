@@ -1,358 +1,3 @@
-<style>
-    .pull-right{
-        float:right;
-    }
-    .box-header.with-border {
-        margin-top: 5px;
-        display: flex;
-    }
-    .box-header:before,
-    .box-body:before,
-    .box-footer:before,
-    .box-header:after,
-    .box-body:after,
-    .box-footer:after {
-        content: " ";
-        display: table;
-    }
-    .box-header:after,
-    .box-body:after,
-    .box-footer:after {
-        clear: both;
-    }
-    .box-header {
-        color: #444;
-        display: block;
-        padding: 10px;
-        position: relative;
-    }
-    .box-header.with-border {
-        border-bottom: 1px solid #f4f4f4;
-    }
-    .collapsed-box .box-header.with-border {
-        border-bottom: none;
-    }
-
-    .tbl-content{
-        max-height: 530px;
-        overflow: auto;
-    }
-
-    div#list-data {
-        padding: 0;
-    }
-
-    .search-query {
-        height: 31px;
-        border-radius: 7px;
-    }
-    #form-search .has-feedback .form-control-feedback {
-        right: 0px !important;
-    }
-
-    #form-search  .form-group {
-        margin-right: 0px !important;
-        margin-left: 0px !important;
-    }
-
-    #form-search{
-        display: inline-block;
-        position: fixed;
-        right:2em;
-        width: 20%;
-        display: inline-block;
-    }
-    /*.hidden{
-        display: none;
-    }*/
-    .button-spacing {
-        margin-right: 5px;
-    }
-
-    .btn-custom {
-        width: 80px; 
-        height: 40px;
-        line-height: 24px; 
-        text-align: center; 
-        display: inline-block; 
-        padding: 5px 10px; 
-    }
-
-
-
-    /*for menu roles*/
-
-    th:first-child{
-        width:20px;   
-    }
-
-    th:last-child{
-        width: 30px;
-    }
-
-    td:last-child{
-        text-align: center;
-    }
-
-    .ta_c
-    {
-        text-align: center;
-    }
-
-    .module_content{
-        overflow: auto;
-        height: auto;
-    }
-    .menu_header_ul {
-        padding: 0;
-        display: block; 
-        vertical-align: middle;
-        margin: 0;
-        display: grid;
-        grid-template-columns: 52fr repeat(3, 16fr);
-    }
-    .menu_header_ul li{
-        display: inline-block;
-        text-align: left;
-    }
-
-    .menu_header_ul li:first-child {
-        text-align: left;
-    }
-
-    .menu_header_li span {
-        padding-left: 10px;
-    }
-
-    .module_header_container {
-    /*    position: absolute;*/
-        width: 100%;
-        padding: 9px 0px;
-        overflow: hidden;
-        background: #301311;
-        color: #fff;
-        font-weight: 600;
-        font-size: 15px;
-        z-index: 1;
-    }
-    .module_body_container {
-    /*    padding-top: 40px;*/
-        width: 100%;
-        position: relative;
-    }
-
-    .module_col {
-        position: relative;
-        width: 100%;
-        overflow: hidden;
-    }
-    ul.parent_menu {
-        padding: 0;
-        display: block;
-        vertical-align: middle;
-        margin: 0;
-        font-size: 16px;
-    }
-
-    ul.child_menu {
-        padding: 0;
-        display: block;
-        vertical-align: middle;
-        margin: 0;
-    }
-
-    .menu_title {
-        display: inline-block;
-        width: 52%;
-        background: rgba(44, 59, 65, 0.15);
-        color: #000;
-        font-weight: 500;
-        font-size : 17px;
-    }
-
-    .menu_title span {
-        padding-left: 10px;
-    }
-
-    .menu_chkbx {
-        display: inline-block;
-        width: 16%;
-        background: rgba(44, 59, 65, 0.15);
-        font-size: 17px;
-    }
-
-    .sub_menu_title {
-        display: inline-block;
-        width: 52%;
-    }
-
-    .sub_menu_title span {
-        padding-left: 20px;
-    }
-
-    .sub_menu_chkbx {
-        display: inline-block;
-        width: 16%;
-    }
-
-    .page-title {
-        padding: 10px; 
-        font-family: 'Courier New', Courier, monospace; 
-        font-size: large; 
-        background-color: #fdb92a; 
-        color: #333333; 
-        border: 1px solid #ffffff; 
-        border-radius: 10px
-    }
-
-    .modal-title {
-        font-family: 'Courier New', Courier, monospace; 
-        font-size: large;
-    }
-
-    .save {
-        border: 1px solid #267326; 
-        padding: 10px; 
-        min-width: 75px; 
-        max-height: 30px; 
-        line-height: 0.5; 
-        background-color: #339933; 
-        color:white; 
-        border-radius:10px; 
-        margin-right:5px;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    .save:hover {
-        color: white !important ; 
-        background-color: #15C815 !important ; 
-        border: 0px solid #339933 !important ; 
-    }
-    .save:focus {
-        color: white !important ; 
-        background-color: #15C815 !important ; 
-        border: 0px solid #339933 !important ; 
-    }
-
-    .view {
-        border: 1px solid #143996; 
-        padding: 10px; 
-        min-width: 75px; 
-        max-height: 30px; 
-        line-height: 0.5; 
-        background-color: #1439a6; 
-        color:white; 
-        border-radius:10px; 
-        margin-right:5px;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    .view:hover {
-        color: white; 
-        background-color: #1439FF; 
-        border: 0px solid #1439a6; 
-    }
-
-    .delete {
-        border: 1px solid #730000;
-        padding: 10px; 
-        min-width: 75px; 
-        max-height: 30px; 
-        line-height: 0.5; 
-        background-color: #990000; 
-        color: white; border-radius: 10px; 
-        margin-right: 2px; 
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    .delete:hover {
-        color: white; 
-        background-color: #C80000; 
-        border: 0px solid #990000; 
-    }
-
-    .caution {
-        border: 2px solid #FE9900; 
-        padding: 10px; 
-        min-width: 75px; 
-        max-height: 30px; 
-        line-height: 0.5; 
-        background-color: #FE9900; 
-        color: white; 
-        border-radius:10px; 
-        margin-right:5px;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    .caution:hover {
-        padding: 10px; 
-        color: white; 
-        background-color: #FFC14D; 
-        border: 0px solid #FE9900; 
-    }
-
-    .default {
-        border: 2px solid white; 
-        padding: 10px; 
-        min-width: 75px; 
-        max-height: 30px; 
-        line-height: 0.5; 
-        background-color:gray; 
-        color:white; 
-        border-radius:10px; 
-        margin-right:5px;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-
-    .even-row {
-        background-color: #FFFFFF;
-    }
-    .even-row:hover{
-        background-color: #b3e5fc;
-    }
-
-    .odd-row {
-        background-color: #DEDEDE;
-    }
-    .odd-row:hover{
-        background-color: #b3e5fc;
-    }
-
-    thead{
-        background-color: #301311;
-        color: white;
-    }
-
-    textarea {
-        resize: none;
-    }
-
-    input[type="file"] {
-        display: none;
-    }
-    .custom-file-upload {
-        border: 1px solid #ccc;
-        display: inline-block;
-        padding: 6px 12px;
-        cursor: pointer;
-    }
-
-    .card {
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-        border-radius: 10px;
-        margin-bottom: 10px;
-    }
-
-    .card-body {
-        padding-top: 0px;
-    }
-
-    td {
-        word-wrap: break-word;
-        word-break: break-word;
-        white-space: normal;
-        max-width: 200px;
-        overflow-wrap: break-word;
-    }
-
-</style>
-
 <div class="content-wrapper p-4">
     <div class="card">
         <div class="text-center page-title md-center">
@@ -378,9 +23,9 @@
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                     <th class='center-content'>Code</th>
                                     <th class='center-content'>ASC Name</th>
-                                    <th class='center-content'>Deployment Date</th>
                                     <th class='center-content'>Status</th>
-                                    <th class='center-content'>Area ID</th>
+                                    <th class='center-content'>Created Date</th>
+                                    <th class='center-content'>Modified Date</th>
                                     <th class='center-content'>Action</th>
                                 </tr>
                             </thead>
@@ -403,8 +48,8 @@
     </div>
 </div>
 
-<div class="modal" tabindex="-1" id="popup_modal">
-    <div class="modal-dialog">
+<div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">
@@ -461,7 +106,7 @@
     </div>
 </div>
 
-<div class="modal" tabindex="-1" id="import_modal">
+<div class="modal" tabindex="-1" id="import_modal" data-backdrop="static">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -512,7 +157,7 @@
                                     <th style="width: 20%;" class='center-content'>ASC Name</th>
                                     <th style="width: 10%;" class='center-content'>Status</th>
                                     <th style="width: 20%;" class='center-content'>Deployment Date</th>
-                                    <th style="width: 10%;" class='center-content'>Area ID</th>
+                                    <th style="width: 10%;" class='center-content'>Area</th>
                                 </tr>
                             </thead>
                             <tbody class="word_break import_table"></tbody>
@@ -538,9 +183,7 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination();
-        // let ids = [1, 2, 3, 4, 5]; 
-        // var testing = get_field_values("tbl_store", "code", ids);
-        // console.log(testing);
+        
         $("#deploy_date").datepicker({
             changeMonth: true,
             changeYear: true
@@ -550,7 +193,7 @@
     function get_data(new_query) {
         var data = {
             event : "list",
-            select : "id, code, description, status, deploy_date, area_id",
+            select : "id, code, description, status, created_date, updated_date, area_id",
             query : new_query,
             offset : offset,
             limit : limit,
@@ -564,26 +207,35 @@
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
-    
+
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
+
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var deployed_date = formatReadableDate(y.deploy_date)
+                        var createddate = formatReadableDate(y.created_date, true)
+                        var updateddate = "";
+                        if (y.updated_date === null) {
+                            updateddate = "N/A";
+                        } else {
+                            updateddate = formatReadableDate(y.updated_date, true);
+                        }
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
     
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td style='width: 10%'>" + trimText(y.code) + "</td>";
-                        html += "<td style='width: 20%'>" + trimText(y.description) + "</td>";
-                        html += "<td style='width: 20%'>" + deployed_date + "</td>";
-                        html += "<td style='width: 10%'>" + status + "</td>";
-                        html += "<td style='width: 10%'>" + y.area_id + "</td>";
+                        html += "<td class='center-content' style='width: 5%;'>"+
+                        "<input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()>"+
+                        "</td>";
+                        html += "<td style='width: 10%'>" + trimText(y.code, 10) + "</td>";
+                        html += "<td style='width: 15%'>" + trimText(y.description, 10) + "</td>";
+                        html += "<td style='width: 15%'>" + status + "</td>";
+                        html += "<td style='width: 20%'>" + createddate + "</td>";
+                        html += "<td style='width: 20%'>" + updateddate + "</td>";
     
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
-                            html+="<td class='center-content' style='width: 25%'>";
+                            html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
                             html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -600,6 +252,71 @@
         });
     }
 
+    $(document).on('click', '.btn_status', function (e) {
+        var status = $(this).attr("data-status");
+        var modal_obj = "";
+        var modal_alert_success = "";
+        var hasExecuted = false; // Prevents multiple executions
+    
+        if (parseInt(status) === -2) {
+            modal_obj = confirm_delete_message;
+            modal_alert_success = success_delete_message;
+        } else if (parseInt(status) === 1) {
+            modal_obj = confirm_publish_message;
+            modal_alert_success = success_publish_message;
+        } else {
+            modal_obj = confirm_unpublish_message;
+            modal_alert_success = success_unpublish_message;
+        }
+        
+        modal.confirm(modal_obj, function (result) {
+            if (result) {
+                var url = "<?= base_url('cms/global_controller');?>";
+                var dataList = [];
+                
+                $('.select:checked').each(function () {
+                    var id = $(this).attr('data-id');
+                    dataList.push({
+                        event: "update",
+                        table: "tbl_asc",
+                        field: "id",
+                        where: id,
+                        data: {
+                            status: status,
+                            updated_date: formatDate(new Date()),
+                            updated_by: user_id,
+                        }
+                    });
+                });
+    
+                if (dataList.length === 0) return;
+    
+                var processed = 0;
+                dataList.forEach((data, index) => {
+                    aJax.post(url, data, (result) => {
+                        if (hasExecuted) return; // Prevents multiple executions
+    
+                        modal.loading(false);
+                        processed++;
+    
+                        if (result === "success") {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                $('.btn_status').hide();
+                                modal.alert(modal_alert_success, 'success', () => {location.reload();});
+                            }
+                        } else {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                modal.alert(failed_transaction_message, 'success', () => {location.reload();});
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    });
+
     function get_area(id) {
         var data = {
             event : "list",
@@ -614,9 +331,9 @@
             }
         }
 
-        aJax.post(url,data,function(res){
+        var html = '<option id="default_val" value=" ">Select Area</option>';
+        aJax.post_async(url,data,function(res){
             var result = JSON.parse(res);
-            var html = '<option id="default_val" value=" ">Select Area</option>';
     
             if(result) {
                 if (result.length > 0) {
@@ -628,7 +345,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+"</option>"
                     })
                 }
             }
@@ -673,6 +390,7 @@
         offset = 1;
         modal.loading(true); 
         get_data(query);
+        get_pagination()
         modal.loading(false);
     });
 
@@ -680,10 +398,10 @@
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
             offset = 1;
-            get_pagination();
             new_query = query;
             new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
             get_data(new_query);
+            get_pagination();
         }
     });
 
@@ -721,10 +439,10 @@
                     }  
                 }
 
-                aJax.post(url,data,function(result){
+                aJax.post_async(url,data,function(result){
                     var obj = is_json(result);
                     if(obj){
-                        modal.alert(success_delete_message, () => {
+                        modal.alert(success_delete_message, 'success', () => {
                             if (result) {
                                 location.reload();
                             }
@@ -742,11 +460,14 @@
 
     function open_modal(msg, actions, id) {
         // add modal title
+        $(".validate_error_message").remove();
+        $(".form-control").css('border-color','#ccc');
         $('#popup_modal .modal-title b').html(addNbsp(msg));
         // clear the form inputs, dropdowns, and checkboxes
         reset_form();
         // <button type="button" class="btn save" id="save_data" onclick="validate_data()">Save</button>
         var save_btn = create_button('Save', 'save_data', 'btn save', function () {
+            id = 0;
             validate_data()
         });
         // <button type="button" class="btn save" id="edit_data">Edit</button>
@@ -764,6 +485,7 @@
                 // passing an empty string so that no area is preselected
                 // calls add_input_behavior(false) to enable input fields
                 // clears the modal footer and adds the save and close buttons
+                $('#id').val(0);
                 get_area('')
                 add_input_behavior(false);
                 $('#popup_modal .modal-footer').empty();
@@ -828,6 +550,8 @@
         $('#deploy_date').attr('disabled', bool);
         $('#area').attr('readonly', bool);   
         $('#area').attr('disabled', bool);
+        $('#status').attr('readonly', bool);   
+        $('#status').attr('disabled', bool);
     }
 
     // creates a button element with the specified text, id, class, and onclick event
@@ -890,43 +614,51 @@
             chk_val = 'Inactive'
         }
         var converted_date = formatDateToISO(date)
-        var html = "<table class= 'table table-bordered listdata'>"
-        html += "<thead>"
-        html += "<tr>"
-        html += "<th class='center-content'>Code</th>"
-        html += "<th class='center-content'>Description</th>"
-        html += "<th class='center-content'>Deployment Date</th>"
-        html += "<th class='center-content'>Status</th>"
-        html += "<th class='center-content'>Area ID</th>"
-        html += "</tr>"
-        html += "</thead>"
 
-        html += "<tbody class='table_body word_break'>"
-        html += "<tr>"
-        html += "<td style='width:20%'>"+trimText(code)+"</td>"
-        html += "<td style='width:20%'>"+trimText(description)+"</td>"
-        html += "<td style='width:20%'>"+formatReadableDate(date)+"</td>"
-        html += "<td style='width:20%'>"+chk_val+"</td>"
-        html += "<td style='width:20%'>"+area+"</td>"
-        html += "</tr>"
-        html += "</tbody>"
-        html += "</table>"
-        // calls modal.confirm() to confirm if the user wants to save the data
-        modal.confirm(confirm_add_message, function(result){
-            if(result){
-                // if the user confirms, call save_to_db() to save the data
-                // passing the code, description, status, converted_date, and area as parameters
-                data = {
-                    'code': code, 
-                    'description':description, 
-                    'status':val_status, 
-                    'deploy_date':converted_date, 
-                    'area_id':area
+        var new_area_code = '';
+        var area_code_array = {};
+        get_field_values('tbl_area', 'code', 'id', [area], (res)=>{
+            $.each(res, (x, y) => {
+                area_code_array[x] = y;
+            })
+            var html = "<table class= 'table table-bordered listdata'>"
+            html += "<thead>"
+            html += "<tr>"
+            html += "<th class='center-content'>Code</th>"
+            html += "<th class='center-content'>Description</th>"
+            html += "<th class='center-content'>Deployment Date</th>"
+            html += "<th class='center-content'>Status</th>"
+            html += "<th class='center-content'>Area</th>"
+            html += "</tr>"
+            html += "</thead>"
+    
+            html += "<tbody class='table_body word_break'>"
+            html += "<tr>"
+            html += "<td style='width:20%'>"+trimText(code, 10)+"</td>"
+            html += "<td style='width:20%'>"+trimText(description, 10)+"</td>"
+            html += "<td style='width:20%'>"+formatReadableDate(date, false)+"</td>"
+            html += "<td style='width:20%'>"+chk_val+"</td>"
+            html += "<td style='width:20%'>"+area_code_array[area]+"</td>"
+            html += "</tr>"
+            html += "</tbody>"
+            html += "</table>"
+            // calls modal.confirm() to confirm if the user wants to save the data
+            modal.confirm(confirm_add_message, function(result){
+                if(result){
+                    // if the user confirms, call save_to_db() to save the data
+                    // passing the code, description, status, converted_date, and area as parameters
+                    data = {
+                        'code': code, 
+                        'description':description, 
+                        'status':val_status, 
+                        'deploy_date':converted_date, 
+                        'area_id':area
+                    }
+                    save_to_db(data, function () {
+                        modal.content(success_save_message, 'success', html, '1000px', ()=>{location.reload();})
+                    })
                 }
-                save_to_db(data, function () {
-                    modal.content(success_save_message, 'success', html, '1000px', ()=>{location.reload();})
-                })
-            }
+            })
         })
     }
 
@@ -948,10 +680,23 @@
         }
     
         // calls aJax.post() to send the data to the controller
-        aJax.post(url,data,function(result){
+        aJax.post_async(url,data,function(result){
             var obj = is_json(result);
             // calls the callback function and passes the result
             callback();
+        });
+    }
+
+    function batch_insert(insert_batch_data, cb){
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+             event: "batch_insert",
+             table: "tbl_asc",
+             insert_batch_data: insert_batch_data
+        }
+
+        aJax.post(url,data,function(result){
+            cb(result.message)
         });
     }
 
@@ -965,19 +710,6 @@
             chk_val = 'Inactive'
         }
         var converted_date = formatDateToISO(date)
-        var html = "<table class= 'table table-bordered listdata'>"
-        html += "<thead>"
-        html += "<tr>"
-        html += "<th class='center-content'></th>"
-        html += "<th class='center-content'>Code</th>"
-        html += "<th class='center-content'>Description</th>"
-        html += "<th class='center-content'>Deployment Date</th>"
-        html += "<th class='center-content'>Status</th>"
-        html += "<th class='center-content'>Area ID</th>"
-        html += "</tr>"
-        html += "</thead>"
-
-        html += "<tbody class='table_body word_break'>"
         var old = {}
 
         list_current_db(
@@ -1000,53 +732,77 @@
             }
         )
 
-        html += "<tr>"
-        html += "<td style='width:10%'><b>From</b></td>"
-        html += "<td style='width:20%'>"+trimText(old.code)+"</td>"
-        html += "<td style='width:20%'>"+trimText(old.description)+"</td>"
-        html += "<td style='width:20%'>"+formatReadableDate(old.deploy_date)+"</td>"
-        html += "<td style='width:20%'>"+old.status+"</td>"
-        html += "<td style='width:10%'>"+old.area_id+"</td>"
-        html += "</tr>"
+        var old_area_code = '';
+        var new_area_code = '';
+        var area_code_array = {};
+        get_field_values('tbl_area', 'code', 'id', [old.area_id, area], (res)=>{
+            $.each(res, (x,y) => {
+                area_code_array[x] = y
+            })
 
-        html += "<tr>"
-        html += "<td>⬇️</td>"
-        html += "<td>⬇️</td>"
-        html += "<td>⬇️</td>"
-        html += "<td>⬇️</td>"
-        html += "<td>⬇️</td>"
-        html += "<td>⬇️</td>"
-        html += "</tr>"
+            var html = "<table class= 'table table-bordered listdata'>"
+            html += "<thead>"
+            html += "<tr>"
+            html += "<th class='center-content'></th>"
+            html += "<th class='center-content'>Code</th>"
+            html += "<th class='center-content'>Description</th>"
+            html += "<th class='center-content'>Deployment Date</th>"
+            html += "<th class='center-content'>Status</th>"
+            html += "<th class='center-content'>Area</th>"
+            html += "</tr>"
+            html += "</thead>"
 
-        html += "<tr>"
-        html += "<td><b>To</b></td>"
-        html += "<td>"+trimText(code)+"</td>"
-        html += "<td>"+trimText(description)+"</td>"
-        html += "<td>"+formatReadableDate(date)+"</td>"
-        html += "<td>"+chk_val+"</td>"
-        html += "<td>"+area+"</td>"
-        html += "</tr>"
-        html += "</tbody>"
-        html += "</table>"
-        // calls modal.confirm() to confirm if the user wants to save the data
-        modal.confirm(confirm_update_message,function(result){
-            if(result){
-                // if the user confirms, call save_to_db() to save the data
-                // passing the code, description, status, converted_date, and area as parameters
-                data = {
-                    'id': id,
-                    'code': code, 
-                    'description':description, 
-                    'status':val_status, 
-                    'deploy_date':converted_date, 
-                    'area_id':area
+            html += "<tbody class='table_body word_break'>"
+
+            html += "<tr>"
+            html += "<td style='width:10%'><b>From</b></td>"
+            html += "<td style='width:20%'>"+trimText(old.code, 10)+"</td>"
+            html += "<td style='width:20%'>"+trimText(old.description, 10)+"</td>"
+            html += "<td style='width:20%'>"+formatReadableDate(old.deploy_date, false)+"</td>"
+            html += "<td style='width:20%'>"+old.status+"</td>"
+            html += "<td style='width:10%'>"+area_code_array[old.area_id]+"</td>"
+            html += "</tr>"
+    
+            html += "<tr>"
+            html += "<td>⬇️</td>"
+            html += "<td>⬇️</td>"
+            html += "<td>⬇️</td>"
+            html += "<td>⬇️</td>"
+            html += "<td>⬇️</td>"
+            html += "<td>⬇️</td>"
+            html += "</tr>"
+    
+            html += "<tr>"
+            html += "<td><b>To</b></td>"
+            html += "<td>"+trimText(code, 10)+"</td>"
+            html += "<td>"+trimText(description, 10)+"</td>"
+            html += "<td>"+formatReadableDate(date , false)+"</td>"
+            html += "<td>"+chk_val+"</td>"
+            html += "<td>"+area_code_array[area]+"</td>"
+            html += "</tr>"
+            html += "</tbody>"
+            html += "</table>"
+
+            // calls modal.confirm() to confirm if the user wants to save the data
+            modal.confirm(confirm_update_message,function(result){
+                if(result){
+                    // if the user confirms, call save_to_db() to save the data
+                    // passing the code, description, status, converted_date, and area as parameters
+                    data = {
+                        'id': id,
+                        'code': code, 
+                        'description':description, 
+                        'status':val_status, 
+                        'deploy_date':converted_date, 
+                        'area_id':area
+                    }
+                    update_db(data, function () {
+                        // show users what was saved
+                        // after users press ok refresh page
+                        modal.content(success_update_message, 'success', html, '1000px', ()=>{location.reload();})
+                    })
                 }
-                update_db(data, function () {
-                    // show users what was saved
-                    // after users press ok refresh page
-                    modal.content(success_update_message, 'success', html, '1000px', ()=>{location.reload();})
-                })
-            }
+            })
         })
     }
 
@@ -1115,7 +871,7 @@
                 }, {});
     
                 // create a table cell for each item in the row
-                var td_validator = ['code', 'name', 'status', 'deployment date', 'area id'];
+                var td_validator = ['code', 'name', 'status', 'deployment date', 'area'];
                 td_validator.forEach(column => {
                     if (column === 'deployment date') {
                         lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -1151,6 +907,7 @@
         var unique_code = [];
         var unique_description = [];
         var unique_area_id = [];
+        var area_desc = [];
 
         var import_array = [];
         var needle = [];
@@ -1231,6 +988,9 @@
 
             tr_count += 1;
             temp.push(code, description, status, deploy_date, area_id);
+            if(!area_desc.includes(area_id)){
+                area_desc.push(area_id)
+            }
             needle.push([code,description]);
             import_array.push(temp);
         });
@@ -1240,25 +1000,15 @@
 
         invalid = temp_invalid;
         errmsg += temp_errmsg;
+
         var table = 'tbl_asc';
         var haystack = ['code', 'description'];
         var selected_fields = ['id', 'code', 'description'];
-        // var needle = [
-        //     ['ASC004asd', 'John Doe'],
-        //     ['ASC002', 'Jane Smith'],
-        //     ['ASC001', 'Michael Brown'],
-        //     ['ASC004', 'Emily Johnson'],
-        //     ['ASC050', 'Aria Diaz']
-        // ];
-
-        //console.log(table, selected_fields);
 
         if (invalid) {
             modal.content('Error', 'error', errmsg, '600px', ()=>{});
         } else {
             list_existing(table, selected_fields, haystack, needle, function (result) {
-               // console.log(result.existing);
-
                 if (result.status === "error") {
                     let errmsg = "";
                     let processedFields = new Set();
@@ -1267,40 +1017,53 @@
                         $.each(record, function (field, value) {
                             if (!processedFields.has(field + value)) { 
                                 let line_number = row_mapping[value] || "Unknown";
-                                errmsg += "⚠️ Duplicated " + field.charAt(0).toUpperCase() + field.slice(1) + " at line #: <b>" + line_number + "</b>⚠️<br>";
+                                errmsg += "⚠️ " + field.charAt(0).toUpperCase() + field.slice(1) + " already exists in masterfile at line #: <b>" + line_number + "</b>⚠️<br>";
                                 processedFields.add(field + value); // Mark as processed
                             }
                         });
                     });
                     modal.content('Error', 'error', errmsg, '600px', () => {});
                 } else {
-                    alert('Data saved!');
+                    var batch = [];
+                    let area_desc_list = [...new Set(import_array.map(row => row[4]))];
+                    get_field_values("tbl_area", "code", "code", area_desc_list, (res) => {
+                        let areaMapping = {};
+                        $.each(res, (x,y) => {
+                            areaMapping[y] = x;
+                        })
+
+                        import_array.forEach(row => {
+                            let matchedArea = areaMapping[row[4]];
+                            let area_id = matchedArea ? matchedArea : null;
+
+                            let data = {
+                                'code': row[0],
+                                'description': row[1],
+                                'status': row[2],
+                                'deploy_date': row[3],
+                                'area_id': area_id,  // Replaced with the fetched value
+                                'created_by': user_id,
+                                'created_date': formatDate(new Date())
+                            };
+
+                            batch.push(data);
+                        });
+
+                        modal.loading(true);
+                        setTimeout(() => {
+                            batch_insert(batch, () => {
+                                modal.loading(false);
+                                modal.alert(success_save_message, 'success', () => {
+                                    if (result) {
+                                        location.reload();
+                                    }
+                                })
+                            })
+                        }, 1000);
+                    });
                 }
             });
-
         }
-
-        // if (invalid) {
-        //     modal.content('Error', 'error', errmsg, '600px', ()=>{})
-        // } else {
-        //     alert('Data saved!');
-        //     import_array.forEach(row => {
-        //         console.log(row)
-        //         data = {
-        //             'code': row[0], 
-        //             'description':row[1], 
-        //             'status':row[2], 
-        //             'deploy_date':row[3], 
-        //             'area_id':row[4]
-        //         }
-        //         save_to_db(data, () => {})
-        //     })
-        //     load_swal(
-        //         '', '1000px', 'success', 'Succesfully saved!', '', false, false, function() {
-        //             location.reload();
-        //         }
-        //     )
-        // }
     }
 
     function readable_date_to_excel_date(readable_date) {
@@ -1405,13 +1168,25 @@
     }
 
     // Formats a date string to a readable format
-    function formatReadableDate(dateStr) {
+    function formatReadableDate(dateStr, datetime) {
         const date = new Date(dateStr);
-        return date.toLocaleDateString("en-US", { 
-            year: "numeric", 
-            month: "long", 
-            day: "numeric" 
-        });
+        if (datetime) {
+            return date.toLocaleDateString("en-US", { 
+                year: "numeric", 
+                month: "short", 
+                day: "numeric",
+                hour:"2-digit",
+                minute:"2-digit",
+                second:"2-digit",
+                hour12:true
+            });
+        } else {
+            return date.toLocaleDateString("en-US", { 
+                year: "numeric", 
+                month: "short", 
+                day: "numeric",
+            });
+        }
     }
 
     function load_swal(swclass, swwidth, swicon, swtitle, swtext, swoutclick, swesckey, callback) {
@@ -1430,9 +1205,9 @@
         });
     }
 
-    function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
+    function trimText(str, length) {
+        if (str.length > length) {
+            return str.substring(0, length) + "...";
         } else {
             return str;
         }

@@ -198,41 +198,41 @@
         font-family: 'Courier New', Courier, monospace; 
         font-size: large;
     }
+    
+    .md-center {
+        padding: 10px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: large;
+        background-color: #fdb92a;
+        color: #333333;
+        border: 1px solid #ffffff;
+        border-radius: 10px;
+    }
 
-        .md-center {
-            padding: 10px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: large;
-            background-color: #fdb92a;
-            color: #333333;
-            border: 1px solid #ffffff;
-            border-radius: 10px;
-        }
+    #form-modal {
+        background-color: white !important;
+        width: 100%;
+    }
 
-        #form-modal {
-            background-color: white !important;
-            width: 100%;
-        }
+    .import-label {
+        padding-left: 10px;
+        padding-top: 10px;
+    }
 
-        .import-label {
-            padding-left: 10px;
-            padding-top: 10px;
-        }
+    #file {
+        padding-left: 10px;
+    }
 
-        #file {
-            padding-left: 10px;
-        }
+    .form-text {
+        padding-left: 10px;
+    }
 
-        .form-text {
-            padding-left: 10px;
-        }
+    .extracted-data {
+        overflow-x: auto;
+        height: 350px;
+        padding: 0px;
+    }
 
-        .extracted-data {
-            overflow-x: auto;
-            height: 350px;
-            padding: 0px;
-        }
-
-        .table-bordered {
-            margin-top: 10px;
-        }
+    .table-bordered {
+        margin-top: 10px;
+    }

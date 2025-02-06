@@ -459,8 +459,8 @@ var modal = {
 		    }
 		  });
 	},
-	alert : function(data, icon = 'success', cb){
-			Swal.fire({
+	alert : function(data, icon, cb){
+		Swal.fire({
 			title: data,
 			icon: icon,
 			confirmButtonColor: "#FE9900",
@@ -1012,25 +1012,22 @@ function check_current_db(table, fields, values, status, excludeField, excludeId
 }
 
 
-function get_field_values(table, field, ids){
+function get_field_values(table, field, search_field, ids, cb) {
+    var data = {
+        event: "get_field_values",
+        select: field,
+        ids: ids,
+        search_field: search_field,
+        table: table,
+    };
 
-	var data = {
-		event : "get_field_values",
-		select : field,
-		ids : ids,
-		table : table,
-	}        
-	aJax.post(url,data,function(result){
-		var result = JSON.parse(result);
-		console.log(result);
+    aJax.post_async(url, data, function(result) {
+        var parsedResult = JSON.parse(result); // Use a distinct variable name to avoid confusion
 
-		if(result) {
-			$.each(result, function(x,y) {
-				console.log(y)
-				$('.sample-id-'+x).text(y);
-			});
-		}
-	});
+        if (parsedResult) {
+            cb(parsedResult); // Pass the parsed result instead of 'res'
+        }
+    });
 }
 
 function list_existing(table, selected_fields, haystack, needle, callback) {

@@ -761,7 +761,7 @@ class Global_model extends Model
         }
     }
 
-    function get_field_values($table, $field, $ids)
+    function get_field_values($table, $field, $search_field, $ids)
     {
         if (empty($table) || empty($field) || empty($ids) || !is_array($ids)) {
             return [];
@@ -769,7 +769,7 @@ class Global_model extends Model
 
         $query = $this->db->table($table)
                           ->select("id, $field") 
-                          ->whereIn('id', $ids)
+                          ->whereIn($search_field, $ids)
                           ->get();
 
         $results = [];
@@ -800,6 +800,7 @@ class Global_model extends Model
             foreach ($values as $keyIndex => $value) {
                 if (isset($haystack[$keyIndex])) {
                     $builder->orWhere($haystack[$keyIndex], $value);
+                    $builder->where('status >=', '0');
                 }
             }
             $builder->groupEnd(); // Close OR group

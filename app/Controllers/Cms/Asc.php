@@ -36,7 +36,6 @@ class Asc extends BaseController
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
 				"assets/cms/js/jquery-ui.js",
-				"assets/js/moment.js",
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
