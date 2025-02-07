@@ -401,7 +401,7 @@
             new_query = query;
             new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
             get_data(new_query);
-            get_pagination();
+            console.log(search_input);
         }
     });
 

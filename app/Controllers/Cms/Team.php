@@ -20,8 +20,8 @@ class Team extends BaseController
 	public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "Team",
-			"description"   =>  "Team",
+			"title"         =>  "Team Masterfile",
+			"description"   =>  "Team Masterfile",
 			"keyword"       =>  ""
 		);
 		$data['title'] = "Team";

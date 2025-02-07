@@ -571,6 +571,7 @@
         });
     }
 
+    let storedFile = null;
     function store_file(event) {
         storedFile = event.target.files[0]; // Store the file but do nothing yet
         console.log("File stored:", storedFile.name);
@@ -633,7 +634,16 @@
 
     function proccess_xl_file() {
         if (!storedFile) {
-            alert("No file selected!");
+            // alert("No file selected!");
+            load_swal(
+                'add_alert',
+                '500px',
+                "error",
+                "Error",
+                "No file was selected",
+                false,
+                false
+            );
             return;
         }
 

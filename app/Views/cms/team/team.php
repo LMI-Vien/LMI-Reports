@@ -281,20 +281,6 @@
         });
     }
 
-    // uses function get_data
-    // $(document).on('keydown', '#search_query', function(event) {
-    //     if (event.key == 'Enter') {
-    //         search_input = $('#search_query').val();
-    //         offset = 1;
-    //         get_pagination();
-    //         new_query = query;
-    //         new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
-    //         get_data(new_query);
-    //         console.log("Key pressed:", search_input);
-    //         console.log(new_query);
-    //     }
-    // });
-
     pagination.onchange(function(){
         offset = $(this).val();
         get_data(query);
@@ -313,13 +299,14 @@
     //     }
     // });
 
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
+    $(document).on('keydown', '#search_query', function(e) {               
+        if (e.key === 'Enter') { // Detect Enter key
             var keyword = $(this).val().trim();
             offset = 1;
             query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
             get_data();
             get_pagination();
+            console.log('Pressed key: ' + keyword);
         }
     });
 
@@ -657,6 +644,302 @@
         });
     }
 
+    function clear_import_table() {
+        $(".import_table").empty()
+    }
+
+    function read_xl_file() {
+        $(".import_table").empty()
+        var html = '';
+        const file = $("#file")[0].files[0];
+        if (file === undefined) {
+            load_swal(
+                '',
+                '500px',
+                'error',
+                'Error!',
+                'Please select a file to upload',
+                false,
+                true
+            )
+            return
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = e.target.result;
+            // convert the data to a workbook
+            const workbook = XLSX.read(data, {type: "binary"});
+            // get the first sheet
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            // convert the sheet to JSON
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            var tr_counter = 0;
+            jsonData.forEach(row => {
+                var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+                html += "<tr class=\""+rowClass+"\">";
+                html += "<td>";
+                html += tr_counter+1;
+                html += "</td>";
+
+                // create a table cell for each item in the row
+                var td_validator = ['code', 'team description', 'status']
+                td_validator.forEach(column => {
+                    html += "<td id=\"" + column + "\">";
+                    html += row[column] !== undefined ? row[column] : ""; // add value or leave empty
+                    html += "</td>";
+                });
+                html += "</tr>";
+                tr_counter += 1;
+            });
+
+            $(".import_table").append(html);
+            html = '';
+        };
+        reader.readAsBinaryString(file);
+    }
+
+    let storedFile = null;
+    function store_file(event) {
+        storedFile = event.target.files[0]; // Store the file but do nothing yet
+        console.log("File stored:", storedFile.name);
+    }
+
+    function proccess_xl_file() {
+        if (!storedFile) {
+            // alert("No file selected!");
+            load_swal(
+                'add_alert',
+                '500px',
+                "error",
+                "Error",
+                "No file was selected!",
+                false,
+                false
+            );
+            return;
+        }
+
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            let data = new Uint8Array(e.target.result);
+            let workbook = XLSX.read(data, { type: "array" });
+
+            let sheetName = workbook.SheetNames[0];
+            let worksheet = workbook.Sheets[sheetName];
+
+            let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            if (!Array.isArray(jsonData) || jsonData.length < 2) {
+                console.error("Invalid data format: No data rows found.");
+                alert("Invalid file format. Please upload a valid Excel file.");
+                return;
+            }
+
+            console.log("Extracted Data:", jsonData);
+
+            let headers = jsonData[0];
+            let records = jsonData.slice(1);
+
+            let columnMapping = {
+                "code": "code",
+                "team description": "team_description",
+                "status": "status"
+            };
+
+            let statusMapping = {
+                "active": 1,
+                "inactive": 0
+            };
+
+            let existingRecords = [];
+            let invalidRecords = [];
+            let insertedRecords = 0;
+            let totalRecords = records.length;
+            let processedCount = 0;
+
+            records.forEach((row, rowIndex) => {
+                let dataObject = {};
+                let isValid = true;
+
+                headers.forEach((header, index) => {
+                    let dbColumn = columnMapping[header];
+                    if (dbColumn) {
+                        let value = row[index]?.trim() ?? null;
+                        dataObject[dbColumn] = value;
+                        if (!value) isValid = false;
+                    }
+                });
+
+                if (dataObject['status']) {
+                    dataObject['status'] = statusMapping[dataObject['status'].toLowerCase()] ?? 0;
+                }
+
+                dataObject['created_date'] = formatDate(new Date());
+                dataObject['created_by'] = user_id;
+
+                if (!dataObject.code || !dataObject.team_description || dataObject.status === null) {
+                    invalidRecords.push(`Row ${rowIndex + 2}`);
+                    processedCount++;
+                    checkCompletion();
+                    return;
+                }
+
+                check_if_exists(dataObject, function (exists) {
+                    console.log("Check if it exists:", exists);
+                    if (exists) {
+                        existingRecords.push(dataObject.code);
+                        processedCount++;
+                        checkCompletion();
+                    } else {
+                        save_to_db_import(dataObject, function (success) {
+                            if (success) {
+                                insertedRecords++;
+                                console.log(`Record inserted successfully: ${dataObject.code}`);
+                            }
+                            processedCount++;
+                            checkCompletion();
+                        });
+                    }
+                });
+            });
+
+            function checkCompletion() {
+                console.log(`Processed count: ${processedCount}, Total records: ${totalRecords}`);
+                if (processedCount === totalRecords) {
+                    if (invalidRecords.length > 0) {
+                        load_swal(
+                            'add_alert',
+                            '500px',
+                            "error",
+                            "Error!",
+                            `The following rows have missing values: ${invalidRecords.join(', ')}`,
+                            false,
+                            false
+                        );
+                    } else if (existingRecords.length > 0) {
+                        load_swal(
+                            'add_alert',
+                            '500px',
+                            "error",
+                            "Error!",
+                            `The following records already exist in the database: ${existingRecords.join(', ')}`,
+                            false,
+                            false
+                        );
+                    } else if (insertedRecords > 0) {
+                        load_swal(
+                            'add_alert',
+                            '500px',
+                            "success",
+                            "Success!",
+                            `${insertedRecords} records inserted successfully!`,
+                            false,
+                            false
+                        ).then(() => {
+                            location.reload();
+                        });
+                    }
+                }
+            }
+        };
+
+        reader.readAsArrayBuffer(storedFile);
+    }
+
+    function check_if_exists(dataObject, callback) {
+        var data = {
+            event: "list",
+            select: "id, code, team_description", // Adjust as needed for your schema
+            query: `code = '${dataObject.code}' OR team_description = '${dataObject.team_description}'`, // Query for existing data
+            offset: 0,
+            limit: 0,
+            table: "tbl_team"
+        };
+
+        console.log("Sending data to check_if_exists:", data); // Debugging
+
+        $.ajax({
+            url: "<?= base_url('cms/global_controller'); ?>", // URL of the controller
+            type: 'POST',
+            data: data,
+            success: function (result) {
+                console.log("Raw server response:", result); // Debugging
+
+                // Ensure the result is parsed as JSON
+                try {
+                    result = JSON.parse(result);
+                } catch (e) {
+                    console.error("Failed to parse response:", e);
+                    callback(false); // Exit early if response parsing fails
+                    return;
+                }
+
+                if (!Array.isArray(result)) {
+                    console.error("Expected an array, but received:", result); // Debugging invalid format
+                    callback(false); // Exit early if the response is not an array
+                    return;
+                }
+
+                // Log the result for further inspection
+                result.forEach(item => {
+                    console.log(`Checking item: code = ${item.code}, team_description = ${item.team_description}`);
+                });
+
+                // Check if any record has the same code or team description
+                let exists = result.some(item => {
+                    // Trim both fields and use case-insensitive comparison
+                    let itemCode = item.code;
+                    let itemTeamDesc = item.team_description;
+                    let dataCode = dataObject.code;
+                    let dataTeamDesc = dataObject.team_description;
+
+                    console.log(`Comparing: ${dataCode} === ${itemCode} || ${dataTeamDesc} === ${itemTeamDesc}`);
+
+                    return itemCode === dataCode || itemTeamDesc === dataTeamDesc;
+                });
+
+                console.log("Does record exist?", exists); // Debugging
+                callback(exists); // Pass the result to the callback
+            },
+            error: function (e) {
+                console.error("Error checking for existing record:", e);
+                callback(false); // If error occurs, assume the record doesn't exist
+            }
+        });
+    }
+
+    function save_to_db_import(dataObject) {
+        var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
+        var data = {
+            event: "insert",
+            table: "tbl_team", // Table name
+            data: dataObject  // Pass the entire object dynamically
+        };
+
+        aJax.post(url, data, function (result) {
+            var obj = is_json(result);
+            location.reload();
+        });
+    }
+    
+    function load_swal(swclass, swwidth, swicon, swtitle, swtext, swoutclick, swesckey) {
+        Swal.fire({
+            customClass: swclass, // no special characters allowed
+            width: swwidth,
+            icon: swicon, // can be "warning", "error", "success", "info"
+            // https://sweetalert.js.org/docs/#icon
+            title: swtitle, // string
+            html: swtext, // string
+            allowOutsideClick: swoutclick, // boolean 
+            // true allow closing alert by clicking outside of alert
+            // false prevent closing alert by clicking outside of alert
+            allowEscapeKey: swesckey, // boolean
+            // true allow closing alert by pressing escape key
+            // false prevent closing alert by pressing escape key
+        });
+    }
+
 
     // $(document).ready(function () {
     //     $(document).on('click', '#btn_add', function () {
@@ -701,278 +984,6 @@
     //     $("#import_modal").modal('show')
     //     clear_import_table()
     // });
-
-    // function clear_import_table() {
-    //     $(".import_table").empty()
-    // }
-
-    // function read_xl_file() {
-    //     $(".import_table").empty()
-    //     var html = '';
-    //     const file = $("#file")[0].files[0];
-    //     if (file === undefined) {
-    //         load_swal(
-    //             '',
-    //             '500px',
-    //             'error',
-    //             'Error!',
-    //             'Please select a file to upload',
-    //             false,
-    //             true
-    //         )
-    //         return
-    //     }
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const data = e.target.result;
-    //         // convert the data to a workbook
-    //         const workbook = XLSX.read(data, {type: "binary"});
-    //         // get the first sheet
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    //         // convert the sheet to JSON
-    //         const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-    //         var tr_counter = 0;
-    //         jsonData.forEach(row => {
-    //             var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
-    //             html += "<tr class=\""+rowClass+"\">";
-    //             html += "<td>";
-    //             html += tr_counter+1;
-    //             html += "</td>";
-
-    //             // create a table cell for each item in the row
-    //             var td_validator = ['code', 'team description', 'status']
-    //             td_validator.forEach(column => {
-    //                 html += "<td id=\"" + column + "\">";
-    //                 html += row[column] !== undefined ? row[column] : ""; // add value or leave empty
-    //                 html += "</td>";
-    //             });
-    //             html += "</tr>";
-    //             tr_counter += 1;
-    //         });
-
-    //         $(".import_table").append(html);
-    //         html = '';
-    //     };
-    //     reader.readAsBinaryString(file);
-    // }
-
-    // let storedFile = null;
-
-    // function store_file(event) {
-    //     storedFile = event.target.files[0]; // Store the file but do nothing yet
-    //     console.log("File stored:", storedFile.name);
-    // }
-
-    // function proccess_xl_file() {
-    //     if (!storedFile) {
-    //         alert("No file selected!");
-    //         return;
-    //     }
-
-    //     let reader = new FileReader();
-    //     reader.onload = function (e) {
-    //         let data = new Uint8Array(e.target.result);
-    //         let workbook = XLSX.read(data, { type: "array" });
-
-    //         let sheetName = workbook.SheetNames[0];
-    //         let worksheet = workbook.Sheets[sheetName];
-
-    //         let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-    //         if (!Array.isArray(jsonData) || jsonData.length < 2) {
-    //             console.error("Invalid data format: No data rows found.");
-    //             alert("Invalid file format. Please upload a valid Excel file.");
-    //             return;
-    //         }
-
-    //         console.log("Extracted Data:", jsonData);
-
-    //         let headers = jsonData[0];
-    //         let records = jsonData.slice(1);
-
-    //         let columnMapping = {
-    //             "code": "code",
-    //             "team description": "team_description",
-    //             "status": "status"
-    //         };
-
-    //         let statusMapping = {
-    //             "active": 1,
-    //             "inactive": 0
-    //         };
-
-    //         let existingRecords = [];
-    //         let invalidRecords = [];
-    //         let insertedRecords = 0;
-    //         let totalRecords = records.length;
-    //         let processedCount = 0;
-
-    //         records.forEach((row, rowIndex) => {
-    //             let dataObject = {};
-    //             let isValid = true;
-
-    //             headers.forEach((header, index) => {
-    //                 let dbColumn = columnMapping[header];
-    //                 if (dbColumn) {
-    //                     let value = row[index]?.trim() ?? null;
-    //                     dataObject[dbColumn] = value;
-    //                     if (!value) isValid = false;
-    //                 }
-    //             });
-
-    //             if (dataObject['status']) {
-    //                 dataObject['status'] = statusMapping[dataObject['status'].toLowerCase()] ?? 0;
-    //             }
-
-    //             dataObject['created_date'] = formatDate(new Date());
-    //             dataObject['created_by'] = user_id;
-
-    //             if (!dataObject.code || !dataObject.team_description || dataObject.status === null) {
-    //                 invalidRecords.push(`Row ${rowIndex + 2}`);
-    //                 processedCount++;
-    //                 checkCompletion();
-    //                 return;
-    //             }
-
-    //             check_if_exists(dataObject, function (exists) {
-    //                 console.log("Check if it exists:", exists);
-    //                 if (exists) {
-    //                     existingRecords.push(dataObject.code);
-    //                     processedCount++;
-    //                     checkCompletion();
-    //                 } else {
-    //                     save_to_db(dataObject, function (success) {
-    //                         if (success) {
-    //                             insertedRecords++;
-    //                             console.log(`Record inserted successfully: ${dataObject.code}`);
-    //                         }
-    //                         processedCount++;
-    //                         checkCompletion();
-    //                     });
-    //                 }
-    //             });
-    //         });
-
-    //         function checkCompletion() {
-    //             console.log(`Processed count: ${processedCount}, Total records: ${totalRecords}`);
-    //             if (processedCount === totalRecords) {
-    //                 if (invalidRecords.length > 0) {
-    //                     load_swal(
-    //                         'add_alert',
-    //                         '500px',
-    //                         "error",
-    //                         "Error!",
-    //                         `The following rows have missing values: ${invalidRecords.join(', ')}`,
-    //                         false,
-    //                         false
-    //                     );
-    //                 } else if (existingRecords.length > 0) {
-    //                     load_swal(
-    //                         'add_alert',
-    //                         '500px',
-    //                         "error",
-    //                         "Error!",
-    //                         `The following records already exist in the database: ${existingRecords.join(', ')}`,
-    //                         false,
-    //                         false
-    //                     );
-    //                 } else if (insertedRecords > 0) {
-    //                     load_swal(
-    //                         'add_alert',
-    //                         '500px',
-    //                         "success",
-    //                         "Success!",
-    //                         `${insertedRecords} records inserted successfully!`,
-    //                         false,
-    //                         false
-    //                     ).then(() => {
-    //                         location.reload();
-    //                     });
-    //                 }
-    //             }
-    //         }
-    //     };
-
-    //     reader.readAsArrayBuffer(storedFile);
-    // }
-
-    // Function to check if record exists
-    // function check_if_exists(dataObject, callback) {
-    //     var data = {
-    //         event: "list",
-    //         select: "id, code, team_description", // Adjust as needed for your schema
-    //         query: `code = '${dataObject.code}' OR team_description = '${dataObject.team_description}'`, // Query for existing data
-    //         offset: 0,
-    //         limit: 0,
-    //         table: "tbl_team"
-    //     };
-
-    //     console.log("Sending data to check_if_exists:", data); // Debugging
-
-    //     $.ajax({
-    //         url: "<?= base_url('cms/global_controller'); ?>", // URL of the controller
-    //         type: 'POST',
-    //         data: data,
-    //         success: function (result) {
-    //             console.log("Raw server response:", result); // Debugging
-
-    //             // Ensure the result is parsed as JSON
-    //             try {
-    //                 result = JSON.parse(result);
-    //             } catch (e) {
-    //                 console.error("Failed to parse response:", e);
-    //                 callback(false); // Exit early if response parsing fails
-    //                 return;
-    //             }
-
-    //             if (!Array.isArray(result)) {
-    //                 console.error("Expected an array, but received:", result); // Debugging invalid format
-    //                 callback(false); // Exit early if the response is not an array
-    //                 return;
-    //             }
-
-    //             // Log the result for further inspection
-    //             result.forEach(item => {
-    //                 console.log(`Checking item: code = ${item.code}, team_description = ${item.team_description}`);
-    //             });
-
-    //             // Check if any record has the same code or team description
-    //             let exists = result.some(item => {
-    //                 // Trim both fields and use case-insensitive comparison
-    //                 let itemCode = item.code;
-    //                 let itemTeamDesc = item.team_description;
-    //                 let dataCode = dataObject.code;
-    //                 let dataTeamDesc = dataObject.team_description;
-
-    //                 console.log(`Comparing: ${dataCode} === ${itemCode} || ${dataTeamDesc} === ${itemTeamDesc}`);
-
-    //                 return itemCode === dataCode || itemTeamDesc === dataTeamDesc;
-    //             });
-
-    //             console.log("Does record exist?", exists); // Debugging
-    //             callback(exists); // Pass the result to the callback
-    //         },
-    //         error: function (e) {
-    //             console.error("Error checking for existing record:", e);
-    //             callback(false); // If error occurs, assume the record doesn't exist
-    //         }
-    //     });
-    // }
-
-    // function save_to_db(dataObject) {
-    //     var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
-    //     var data = {
-    //         event: "insert",
-    //         table: "tbl_team", // Table name
-    //         data: dataObject  // Pass the entire object dynamically
-    //     };
-
-    //     aJax.post(url, data, function (result) {
-    //         var obj = is_json(result);
-    //         location.reload();
-    //     });
-    // }
 
     // function save_data() {
     //     var code = $('#save_team_modal #add_code').val();
@@ -1190,8 +1201,6 @@
     //     return exists;
     // }
 
-    
-
     // function check_current_db(successCallback) {
     //     var data = {
     //         event : "list",
@@ -1264,25 +1273,5 @@
 
     //     return result;
     // }
-
-    // function load_swal(swclass, swwidth, swicon, swtitle, swtext, swoutclick, swesckey) {
-    //     Swal.fire({
-    //         customClass: swclass, // no special characters allowed
-    //         width: swwidth,
-    //         icon: swicon, // can be "warning", "error", "success", "info"
-    //         // https://sweetalert.js.org/docs/#icon
-    //         title: swtitle, // string
-    //         html: swtext, // string
-    //         allowOutsideClick: swoutclick, // boolean 
-    //         // true allow closing alert by clicking outside of alert
-    //         // false prevent closing alert by clicking outside of alert
-    //         allowEscapeKey: swesckey, // boolean
-    //         // true allow closing alert by pressing escape key
-    //         // false prevent closing alert by pressing escape key
-    //     });
-    // }
-
-    
-
     
 </script>

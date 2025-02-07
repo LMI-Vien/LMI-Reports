@@ -68,10 +68,15 @@
                             <textarea class="form-control required" id="description" aria-describedby="store_description" maxlength="50"></textarea>
                             <small class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label for="store" class="form-label">Store</label>
                             <input type="text" class="form-control required" id="store" aria-describedby="store" maxlength="50">
                             <small class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                        </div> -->
+                        <div class="form-group">
+                            <label>Store</label>
+                            <select name="store" class="form-control required" id="store">
+                            </select>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -84,7 +89,7 @@
         </div>
     </div>
 
-    <div class="modal" tabindex="-1" id="import_modal">
+    <!-- <div class="modal" tabindex="-1" id="import_modal">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -126,6 +131,68 @@
                 </div>
             </div>
         </div>
+    </div> -->
+
+    <!-- IMPORT MODAL -->
+    <div class="modal" tabindex="-1" id="import_modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                            <div class="text-center"
+                            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
+                            >
+                                <b>Extracted Data</b>
+                            </div>
+
+                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
+                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                            </label>
+                            <input
+                                type="file"
+                                style="display: none;"
+                                id="file"
+                                accept=".xls,.xlsx,.csv"
+                                aria-describedby="import_files"
+                                onchange="store_file(event)"
+                                onclick="clear_import_table()"
+                            >
+
+                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                            </label>
+
+                            <table class= "table table-bordered listdata">
+                                <thead>
+                                    <tr>
+                                        <th class='center-content'>Line #</th>
+                                        <th class='center-content'>Code</th>
+                                        <th class='center-content'>Area Description</th>
+                                        <th class='center-content'>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="word_break import_table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn save" onclick="proccess_xl_file()">Validate and Save</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -137,7 +204,7 @@
         $(document).ready(function() {
             get_data(query);
             get_pagination();
-
+            get_store();
         });
 
         // uses function get_data(
@@ -155,6 +222,7 @@
 
         $(document).on('click', '#btn_add', function() {
             open_modal('Add New Area', 'add', '');
+            get_store('');
         });
 
         function edit_data(id) {
@@ -234,6 +302,7 @@
                         $('#code').val(d.code);
                         $('#description').val(d.description);
                         $('#store').val(d.store);
+                        get_store(d.store);
                         if(d.status == 1) {
                             $('#status').prop('checked', true)
                         } else {
@@ -259,13 +328,29 @@
         }
 
         function read_xl_file() {
+            $(".import_table").empty()
             var html = '';
             const file = $("#file")[0].files[0];
+            if (file === undefined) {
+                load_swal(
+                    '',
+                    '500px',
+                    'error',
+                    'Error!',
+                    'Please select a file to upload',
+                    false,
+                    true
+                )
+                return
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = e.target.result;
+                // convert the data to a workbook
                 const workbook = XLSX.read(data, {type: "binary"});
+                // get the first sheet
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                // convert the sheet to JSON
                 const jsonData = XLSX.utils.sheet_to_json(sheet);
 
                 var tr_counter = 0;
@@ -277,7 +362,7 @@
                     html += "</td>";
 
                     // create a table cell for each item in the row
-                    var td_validator = ['code', 'description', 'status']
+                    var td_validator = ['code', 'area description', 'status']
                     td_validator.forEach(column => {
                         html += "<td id=\"" + column + "\">";
                         html += row[column] !== undefined ? row[column] : ""; // add value or leave empty
@@ -293,135 +378,135 @@
             reader.readAsBinaryString(file);
         }
 
-        function proccess_xl_file() {
-            // var extracted_data = $(".import_table");
-            // var html_tr_count = 1;
-            // var invalid = false;
-            // var errmsg = '';
-            // var unique_code = [];
-            // var unique_description = [];
-            // var import_array = [];
-            // extracted_data.find('tr').each(function () {
-            //     var html_td_count = 1;
-            //     var temp = [];
-            //     $(this).find('td').each( function() {
-            //         var text_val = $(this).html().trim();
-            //         if (html_td_count != 1) {
-            //             temp.push(text_val)
-            //         }
+        // function proccess_xl_file() {
+        //     // var extracted_data = $(".import_table");
+        //     // var html_tr_count = 1;
+        //     // var invalid = false;
+        //     // var errmsg = '';
+        //     // var unique_code = [];
+        //     // var unique_description = [];
+        //     // var import_array = [];
+        //     // extracted_data.find('tr').each(function () {
+        //     //     var html_td_count = 1;
+        //     //     var temp = [];
+        //     //     $(this).find('td').each( function() {
+        //     //         var text_val = $(this).html().trim();
+        //     //         if (html_td_count != 1) {
+        //     //             temp.push(text_val)
+        //     //         }
 
-            //         if (html_td_count == 2) {
-            //             if (unique_code.includes(text_val)) {
-            //                 invalid = true;
-            //                 errmsg += "⚠️ Duplicated Code at line #: <b>" + html_tr_count + "</b>⚠️<br>";
-            //             } else {
-            //                 unique_code.push(text_val);
-            //             }
-            //         }
-            //         if (html_td_count == 2 && text_val == '') {
-            //             invalid = true;
-            //             errmsg += "⚠️ Invalid Code at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-            //         }
-            //         if (html_td_count == 2 && text_val.length > 25) {
-            //             invalid = true;
-            //             errmsg += "⚠️ Code exceeds the set character limit(25) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-            //         }
+        //     //         if (html_td_count == 2) {
+        //     //             if (unique_code.includes(text_val)) {
+        //     //                 invalid = true;
+        //     //                 errmsg += "⚠️ Duplicated Code at line #: <b>" + html_tr_count + "</b>⚠️<br>";
+        //     //             } else {
+        //     //                 unique_code.push(text_val);
+        //     //             }
+        //     //         }
+        //     //         if (html_td_count == 2 && text_val == '') {
+        //     //             invalid = true;
+        //     //             errmsg += "⚠️ Invalid Code at line #: <b>"+html_tr_count+"</b>⚠️<br>";
+        //     //         }
+        //     //         if (html_td_count == 2 && text_val.length > 25) {
+        //     //             invalid = true;
+        //     //             errmsg += "⚠️ Code exceeds the set character limit(25) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
+        //     //         }
 
-            //         if (html_td_count == 3) {
-            //             if (unique_description.includes(text_val)) {
-            //                 invalid = true;
-            //                 errmsg += "⚠️ Duplicated Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-            //             }
-            //             else {
-            //                 unique_description.push(text_val)
-            //             }
-            //         }
-            //         if (html_td_count == 3 && text_val == '') {
-            //             invalid = true;
-            //             errmsg += "⚠️ Invalid Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-            //         }
-            //         if (html_td_count == 3 && text_val.length > 50) {
-            //             invalid = true;
-            //             errmsg += "⚠️ Description exceeds the set character limit(50) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-            //         }
+        //     //         if (html_td_count == 3) {
+        //     //             if (unique_description.includes(text_val)) {
+        //     //                 invalid = true;
+        //     //                 errmsg += "⚠️ Duplicated Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
+        //     //             }
+        //     //             else {
+        //     //                 unique_description.push(text_val)
+        //     //             }
+        //     //         }
+        //     //         if (html_td_count == 3 && text_val == '') {
+        //     //             invalid = true;
+        //     //             errmsg += "⚠️ Invalid Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
+        //     //         }
+        //     //         if (html_td_count == 3 && text_val.length > 50) {
+        //     //             invalid = true;
+        //     //             errmsg += "⚠️ Description exceeds the set character limit(50) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
+        //     //         }
 
-            //         if (html_td_count == 4 && text_val.toLowerCase() != 'active' && text_val.toLowerCase() != 'inactive') {
-            //             invalid = true;
-            //             errmsg += "⚠️ Invalid Status at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-            //         }
+        //     //         if (html_td_count == 4 && text_val.toLowerCase() != 'active' && text_val.toLowerCase() != 'inactive') {
+        //     //             invalid = true;
+        //     //             errmsg += "⚠️ Invalid Status at line #: <b>"+html_tr_count+"</b>⚠️<br>";
+        //     //         }
 
-            //         html_td_count+=1;
-            //     })
+        //     //         html_td_count+=1;
+        //     //     })
 
-            //     import_array.push(temp)
-            //     html_tr_count+=1;
-            // });
+        //     //     import_array.push(temp)
+        //     //     html_tr_count+=1;
+        //     // });
 
-            // var temp_invalid = false;
-            // var temp_err_msg = '';
-            // var temp_line_no = 0;
-            // var promises = [];
+        //     // var temp_invalid = false;
+        //     // var temp_err_msg = '';
+        //     // var temp_line_no = 0;
+        //     // var promises = [];
 
-            // import_array.forEach(row => {
-            //     // Wrap the check_current_db in a promise
-            //     var promise = new Promise((resolve, reject) => {
-            //         check_current_db(function(result) {
-            //             var parsedResult = JSON.parse(result);
+        //     // import_array.forEach(row => {
+        //     //     // Wrap the check_current_db in a promise
+        //     //     var promise = new Promise((resolve, reject) => {
+        //     //         check_current_db(function(result) {
+        //     //             var parsedResult = JSON.parse(result);
 
-            //             $.each(parsedResult, function(index, item) {
-            //                 if (item.code === row[0] && item.description === row[1]) {
-            //                     temp_invalid = true;
-            //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-            //                 }
-            //                 else if (item.code === row[0]) {
-            //                     temp_invalid = true;
-            //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-            //                 }
-            //                 else if (item.description === row[1]) {
-            //                     temp_invalid = true;
-            //                     temp_err_msg += "⚠️ Description already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-            //                 } else {
+        //     //             $.each(parsedResult, function(index, item) {
+        //     //                 if (item.code === row[0] && item.description === row[1]) {
+        //     //                     temp_invalid = true;
+        //     //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
+        //     //                 }
+        //     //                 else if (item.code === row[0]) {
+        //     //                     temp_invalid = true;
+        //     //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
+        //     //                 }
+        //     //                 else if (item.description === row[1]) {
+        //     //                     temp_invalid = true;
+        //     //                     temp_err_msg += "⚠️ Description already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
+        //     //                 } else {
                                 
-            //                 }
-            //             });
-            //             temp_line_no+=1;
-            //             resolve(); // Resolve if no issues are found
-            //         });
-            //     });
+        //     //                 }
+        //     //             });
+        //     //             temp_line_no+=1;
+        //     //             resolve(); // Resolve if no issues are found
+        //     //         });
+        //     //     });
                 
-            //     promises.push(promise);
-            // });
+        //     //     promises.push(promise);
+        //     // });
 
-            // // Wait for all promises to be resolved
-            // Promise.all(promises).then(() => {
-            //     invalid = temp_invalid;
-            //     errmsg += temp_err_msg;
+        //     // // Wait for all promises to be resolved
+        //     // Promise.all(promises).then(() => {
+        //     //     invalid = temp_invalid;
+        //     //     errmsg += temp_err_msg;
 
-            //     if(invalid) {
-            //         load_swal(
-            //             '',
-            //             '1000px',
-            //             'error',
-            //             'Error!',
-            //             errmsg,
-            //             false,
-            //             true
-            //         )
-            //         $("#import_modal").modal('hide')
-            //         return
-            //     }
-            //     alert('proceeded to saving')
-            //     import_array.forEach(row => {
-            //         var status_val = 0;
-            //         if (row[2] == 'active') {
-            //             status_val = 1
-            //         } else {
-            //             status_val = 0
-            //         }
-            //         save_to_db(row[0], row[1], status_val)
-            //     })
-            // });
-        }
+        //     //     if(invalid) {
+        //     //         load_swal(
+        //     //             '',
+        //     //             '1000px',
+        //     //             'error',
+        //     //             'Error!',
+        //     //             errmsg,
+        //     //             false,
+        //     //             true
+        //     //         )
+        //     //         $("#import_modal").modal('hide')
+        //     //         return
+        //     //     }
+        //     //     alert('proceeded to saving')
+        //     //     import_array.forEach(row => {
+        //     //         var status_val = 0;
+        //     //         if (row[2] == 'active') {
+        //     //             status_val = 1
+        //     //         } else {
+        //     //             status_val = 0
+        //     //         }
+        //     //         save_to_db(row[0], row[1], status_val)
+        //     //     })
+        //     // });
+        // }
 
         $(document).on('keydown', '#search_query', function(event) {
             $('.btn_status').hide();
@@ -540,7 +625,7 @@
             aJax.post(url,data,function(result){
                 var obj = is_json(result);
                 modal.loading(false);
-                modal.alert(modal_alert_success, function() {
+                modal.alert(modal_alert_success, 'success', function() {
                     location.reload();
                 });
             });
@@ -739,6 +824,293 @@
             } else {
                 return str;
             }
+        }
+
+
+        let storeDescriptions = {};
+        function get_store(id) {
+            var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+            var data = {
+                event : "list",
+                select : "id, code, description, status",
+                query : 'status >= 0',
+                offset : 0,
+                limit : 0,
+                table : "tbl_store",
+                order : {
+                    field : "code",
+                    order : "asc" 
+                }
+            }
+
+            aJax.post(url,data,function(res){
+                var result = JSON.parse(res);
+                var html = '<option id="default_val" value=" ">Select Store</option>';
+        
+                if(result) {
+                    if (result.length > 0) {
+                        var selected = '';
+                        $.each(result, function(x,y) {
+                            storeDescriptions[y.id] = y.description;
+                            if (id === y.id) {
+                                selected = 'selected'
+
+                            } else {
+                                selected = ''
+                            }
+                            html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+                        })
+                    }
+                }
+                $('#store').empty();
+                $('#store').append(html);
+
+                // let selectedStoreDescription = storeDescriptions[id] || 'N/A';
+                // console.log(selectedStoreDescription);
+            })
+        }
+
+        let storedFile = null;
+
+        function store_file(event) {
+            storedFile = event.target.files[0]; // Store the file but do nothing yet
+            console.log("File stored:", storedFile.name);
+        }
+
+        function proccess_xl_file() {
+            if (!storedFile) {
+                // alert("No file selected!");
+                load_swal(
+                    'add_alert',
+                    '500px',
+                    "error",
+                    "Error",
+                    "No file was selected!",
+                    false,
+                    false
+                );
+                return;
+            }
+
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let data = new Uint8Array(e.target.result);
+                let workbook = XLSX.read(data, { type: "array" });
+
+                let sheetName = workbook.SheetNames[0];
+                let worksheet = workbook.Sheets[sheetName];
+
+                let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (!Array.isArray(jsonData) || jsonData.length < 2) {
+                    console.error("Invalid data format: No data rows found.");
+                    alert("Invalid file format. Please upload a valid Excel file.");
+                    return;
+                }
+
+                console.log("Extracted Data:", jsonData);
+
+                let headers = jsonData[0];
+                let records = jsonData.slice(1);
+
+                let columnMapping = {
+                    "code": "code",
+                    "area description": "description",
+                    "store": "store",
+                    "status": "status"
+                };
+
+                let statusMapping = {
+                    "active": 1,
+                    "inactive": 0
+                };
+
+                let existingRecords = [];
+                let invalidRecords = [];
+                let insertedRecords = 0;
+                let totalRecords = records.length;
+                let processedCount = 0;
+
+                records.forEach((row, rowIndex) => {
+                    let dataObject = {};
+                    let isValid = true;
+
+                    headers.forEach((header, index) => {
+                        let dbColumn = columnMapping[header];
+                        if (dbColumn) {
+                            let value = row[index]?.trim() ?? null;
+                            dataObject[dbColumn] = value;
+                            if (!value) isValid = false;
+                        }
+                    });
+
+                    if (dataObject['status']) {
+                        dataObject['status'] = statusMapping[dataObject['status'].toLowerCase()] ?? 0;
+                    }
+
+                    dataObject['created_date'] = formatDate(new Date());
+                    dataObject['created_by'] = user_id;
+
+                    if (!dataObject.code || !dataObject.description || dataObject.status === null) {
+                        invalidRecords.push(`Row ${rowIndex + 2}`);
+                        processedCount++;
+                        checkCompletion();
+                        return;
+                    }
+
+                    check_if_exists(dataObject, function (exists) {
+                        console.log("Check if it exists:", exists);
+                        if (exists) {
+                            existingRecords.push(dataObject.code);
+                            processedCount++;
+                            checkCompletion();
+                        } else {
+                            save_to_db_import(dataObject, function (success) {
+                                if (success) {
+                                    insertedRecords++;
+                                    console.log(`Record inserted successfully: ${dataObject.code}`);
+                                }
+                                processedCount++;
+                                checkCompletion();
+                            });
+                        }
+                    });
+                });
+
+                function checkCompletion() {
+                    console.log(`Processed count: ${processedCount}, Total records: ${totalRecords}`);
+                    if (processedCount === totalRecords) {
+                        if (invalidRecords.length > 0) {
+                            load_swal(
+                                'add_alert',
+                                '500px',
+                                "error",
+                                "Error!",
+                                `The following rows have missing values: ${invalidRecords.join(', ')}`,
+                                false,
+                                false
+                            );
+                        } else if (existingRecords.length > 0) {
+                            load_swal(
+                                'add_alert',
+                                '500px',
+                                "error",
+                                "Error!",
+                                `The following records already exist in the database: ${existingRecords.join(', ')}`,
+                                false,
+                                false
+                            );
+                        } else if (insertedRecords > 0) {
+                            load_swal(
+                                'add_alert',
+                                '500px',
+                                "success",
+                                "Success!",
+                                `${insertedRecords} records inserted successfully!`,
+                                false,
+                                false
+                            ).then(() => {
+                                location.reload();
+                            });
+                        }
+                    }
+                }
+            };
+
+            reader.readAsArrayBuffer(storedFile);
+        }
+
+        function check_if_exists(dataObject, callback) {
+            var data = {
+                event: "list",
+                select: "id, code, description, store", // Adjust as needed for your schema
+                query: `code = '${dataObject.code}' OR description = '${dataObject.team_description}'`, // Query for existing data
+                offset: 0,
+                limit: 0,
+                table: "tbl_team"
+            };
+
+            console.log("Sending data to check_if_exists:", data); // Debugging
+
+            $.ajax({
+                url: "<?= base_url('cms/global_controller'); ?>", // URL of the controller
+                type: 'POST',
+                data: data,
+                success: function (result) {
+                    console.log("Raw server response:", result); // Debugging
+
+                    // Ensure the result is parsed as JSON
+                    try {
+                        result = JSON.parse(result);
+                    } catch (e) {
+                        console.error("Failed to parse response:", e);
+                        callback(false); // Exit early if response parsing fails
+                        return;
+                    }
+
+                    if (!Array.isArray(result)) {
+                        console.error("Expected an array, but received:", result); // Debugging invalid format
+                        callback(false); // Exit early if the response is not an array
+                        return;
+                    }
+
+                    // Log the result for further inspection
+                    result.forEach(item => {
+                        console.log(`Checking item: code = ${item.code}, team_description = ${item.team_description}`);
+                    });
+
+                    // Check if any record has the same code or team description
+                    let exists = result.some(item => {
+                        // Trim both fields and use case-insensitive comparison
+                        let itemCode = item.code;
+                        let itemTeamDesc = item.team_description;
+                        let dataCode = dataObject.code;
+                        let dataTeamDesc = dataObject.team_description;
+
+                        console.log(`Comparing: ${dataCode} === ${itemCode} || ${dataTeamDesc} === ${itemTeamDesc}`);
+
+                        return itemCode === dataCode || itemTeamDesc === dataTeamDesc;
+                    });
+
+                    console.log("Does record exist?", exists); // Debugging
+                    callback(exists); // Pass the result to the callback
+                },
+                error: function (e) {
+                    console.error("Error checking for existing record:", e);
+                    callback(false); // If error occurs, assume the record doesn't exist
+                }
+            });
+        }
+
+        function save_to_db_import(dataObject) {
+            var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
+            var data = {
+                event: "insert",
+                table: "tbl_area", // Table name
+                data: dataObject  // Pass the entire object dynamically
+            };
+
+            aJax.post(url, data, function (result) {
+                var obj = is_json(result);
+                location.reload();
+            });
+        }
+
+        function load_swal(swclass, swwidth, swicon, swtitle, swtext, swoutclick, swesckey) {
+            Swal.fire({
+                customClass: swclass, // no special characters allowed
+                width: swwidth,
+                icon: swicon, // can be "warning", "error", "success", "info"
+                // https://sweetalert.js.org/docs/#icon
+                title: swtitle, // string
+                html: swtext, // string
+                allowOutsideClick: swoutclick, // boolean 
+                // true allow closing alert by clicking outside of alert
+                // false prevent closing alert by clicking outside of alert
+                allowEscapeKey: swesckey, // boolean
+                // true allow closing alert by pressing escape key
+                // false prevent closing alert by pressing escape key
+            });
         }
 
     //sample data for progress loading

@@ -145,10 +145,6 @@
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
 
-    // $(document).ready(function() {
-    //   get_data();
-    //   get_pagination();
-    // });
     $(document).ready(function() {
         get_area();
         get_agency();
