@@ -85,6 +85,11 @@ defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);       // database 
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);      // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest automatically-assigned error code
 
+
+defined('STATUS_UNPUBLISH')         OR define('STATUS_UNPUBLISH', 0);
+defined('STATUS_PUBLISH')           OR define('STATUS_PUBLISH', 1);
+defined('STATUS_TRASH')             OR define('STATUS_TRASH', -2);
+
 /**
  * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_LOW instead.
  */

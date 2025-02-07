@@ -45,6 +45,9 @@
         var confirm_unpublish_message = '<?= confirm("confirm_unpublish"); ?>';
         var failed_transaction_message = '<?= dialog("failed_transaction"); ?>';
         var missing_user_input_message = '<?= dialog("missing_input"); ?>';
+        var error_value_used = '<?= dialog("value_used"); ?>';
+        var success_delete_message = '<?= dialog("delete_success"); ?>';
+        
         var csrf_name = "<?= csrf_token(); ?>";
         var csrf_hash = "<?= csrf_hash(); ?>";
     </script>

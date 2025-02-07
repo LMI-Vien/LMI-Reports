@@ -59,6 +59,9 @@
                 <div class="modal-body">
                     <form id="form-modal">
                         <div class="mb-3">
+                            <div hidden>
+                                <input type="text" class="form-control" id="id" aria-describedby="id">
+                            </div>
                             <label for="code" class="form-label">Code</label>
                             <input type="text" class="form-control required" id="code" aria-describedby="store_code" maxlength="25">
                             <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
@@ -203,8 +206,8 @@
 
         $(document).ready(function() {
             get_data(query);
-            get_pagination();
-            get_store();
+            get_pagination(query);
+
         });
 
         // uses function get_data(
@@ -378,6 +381,56 @@
             reader.readAsBinaryString(file);
         }
 
+        let storeDescriptions = {};
+        function get_store(id) {
+            var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+            var data = {
+                event : "list",
+                select : "id, code, description, status",
+                query : 'status >= 0',
+                offset : 0,
+                limit : 0,
+                table : "tbl_store",
+                order : {
+                    field : "code",
+                    order : "asc" 
+                }
+            }
+
+            aJax.post(url,data,function(res){
+                var result = JSON.parse(res);
+                var html = '<option id="default_val" value=" ">Select Store</option>';
+        
+                if(result) {
+                    if (result.length > 0) {
+                        var selected = '';
+                        $.each(result, function(x,y) {
+                            storeDescriptions[y.id] = y.description;
+                            if (id === y.id) {
+                                selected = 'selected'
+
+                            } else {
+                                selected = ''
+                            }
+                            html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+                        })
+                    }
+                }
+                $('#store').empty();
+                $('#store').append(html);
+
+                // let selectedStoreDescription = storeDescriptions[id] || 'N/A';
+                // console.log(selectedStoreDescription);
+            })
+        }
+
+        let storedFile = null;
+
+        function store_file(event) {
+            storedFile = event.target.files[0]; // Store the file but do nothing yet
+            console.log("File stored:", storedFile.name);
+        }
+
         // function proccess_xl_file() {
         //     // var extracted_data = $(".import_table");
         //     // var html_tr_count = 1;
@@ -514,14 +567,14 @@
             if (event.key == 'Enter') {
                 search_input = $('#search_query').val();
                 offset = 1;
-                get_pagination();
                 new_query = query;
                 new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
                 get_data(new_query);
+                get_pagination(new_query);
             }
         });
 
-        function get_pagination() {
+        function get_pagination(query) {
             var data = {
             event : "pagination",
                 select : "id",
@@ -625,7 +678,7 @@
             aJax.post(url,data,function(result){
                 var obj = is_json(result);
                 modal.loading(false);
-                modal.alert(modal_alert_success, 'success', function() {
+                modal.alert(modal_alert_success, "success", function() {
                     location.reload();
                 });
             });
@@ -650,7 +703,7 @@
                     }
                     aJax.post(url,data,function(result){
                         var obj = is_json(result);
-                        modal.alert(success_delete_message, function() {
+                        modal.alert(success_delete_message, "success", function() {
                             location.reload();
                         });
                     });
@@ -732,6 +785,7 @@
             if (parseInt(status) === -2) {
                 modal_obj = confirm_delete_message;
                 modal_alert_success = success_delete_message;
+                offset = 1;
             } else if (parseInt(status) === 1) {
                 modal_obj = confirm_publish_message;
                 modal_alert_success = success_publish_message;
@@ -739,14 +793,6 @@
                 modal_obj = confirm_unpublish_message;
                 modal_alert_success = success_unpublish_message;
             }
-            // var counter = 0; 
-            // $('.select:checked').each(function () {
-            //     var id = $(this).attr('data-id');
-            //     if(id){
-            //         counter++;
-            //     }
-            //  });
-            // console.log(counter);
             modal.confirm(modal_obj, function (result) {
                 if (result) {
                     var url = "<?= base_url('cms/global_controller');?>";
@@ -780,14 +826,14 @@
                                 if (!hasExecuted) {
                                     hasExecuted = true;
                                     $('.btn_status').hide();
-                                    modal.alert(modal_alert_success, function () {
+                                    modal.alert(modal_alert_success, "success", function () {
                                         location.reload();
                                     });
                                 }
                             } else {
                                 if (!hasExecuted) {
                                     hasExecuted = true;
-                                    modal.alert(failed_transaction_message, function () {});
+                                    modal.alert(failed_transaction_message, "error", function () {});
                                 }
                             }
                         });
@@ -795,323 +841,6 @@
                 }
             });
         });
-
-        function addNbsp(inputString) {
-            return inputString.split('').map(char => {
-                if (char === ' ') {
-                return '&nbsp;&nbsp;';
-                }
-                return char + '&nbsp;';
-            }).join('');
-        }
-
-        function ViewDateformat(dateString) {
-            let date = new Date(dateString);
-            return date.toLocaleString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit', 
-                hour12: true 
-            });
-        }
-
-        function trimText(str) {
-            if (str.length > 10) {
-                return str.substring(0, 10) + "...";
-            } else {
-                return str;
-            }
-        }
-
-
-        let storeDescriptions = {};
-        function get_store(id) {
-            var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-            var data = {
-                event : "list",
-                select : "id, code, description, status",
-                query : 'status >= 0',
-                offset : 0,
-                limit : 0,
-                table : "tbl_store",
-                order : {
-                    field : "code",
-                    order : "asc" 
-                }
-            }
-
-            aJax.post(url,data,function(res){
-                var result = JSON.parse(res);
-                var html = '<option id="default_val" value=" ">Select Store</option>';
-        
-                if(result) {
-                    if (result.length > 0) {
-                        var selected = '';
-                        $.each(result, function(x,y) {
-                            storeDescriptions[y.id] = y.description;
-                            if (id === y.id) {
-                                selected = 'selected'
-
-                            } else {
-                                selected = ''
-                            }
-                            html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
-                        })
-                    }
-                }
-                $('#store').empty();
-                $('#store').append(html);
-
-                // let selectedStoreDescription = storeDescriptions[id] || 'N/A';
-                // console.log(selectedStoreDescription);
-            })
-        }
-
-        let storedFile = null;
-
-        function store_file(event) {
-            storedFile = event.target.files[0]; // Store the file but do nothing yet
-            console.log("File stored:", storedFile.name);
-        }
-
-        function proccess_xl_file() {
-            if (!storedFile) {
-                // alert("No file selected!");
-                load_swal(
-                    'add_alert',
-                    '500px',
-                    "error",
-                    "Error",
-                    "No file was selected!",
-                    false,
-                    false
-                );
-                return;
-            }
-
-            let reader = new FileReader();
-            reader.onload = function (e) {
-                let data = new Uint8Array(e.target.result);
-                let workbook = XLSX.read(data, { type: "array" });
-
-                let sheetName = workbook.SheetNames[0];
-                let worksheet = workbook.Sheets[sheetName];
-
-                let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                if (!Array.isArray(jsonData) || jsonData.length < 2) {
-                    console.error("Invalid data format: No data rows found.");
-                    alert("Invalid file format. Please upload a valid Excel file.");
-                    return;
-                }
-
-                console.log("Extracted Data:", jsonData);
-
-                let headers = jsonData[0];
-                let records = jsonData.slice(1);
-
-                let columnMapping = {
-                    "code": "code",
-                    "area description": "description",
-                    "store": "store",
-                    "status": "status"
-                };
-
-                let statusMapping = {
-                    "active": 1,
-                    "inactive": 0
-                };
-
-                let existingRecords = [];
-                let invalidRecords = [];
-                let insertedRecords = 0;
-                let totalRecords = records.length;
-                let processedCount = 0;
-
-                records.forEach((row, rowIndex) => {
-                    let dataObject = {};
-                    let isValid = true;
-
-                    headers.forEach((header, index) => {
-                        let dbColumn = columnMapping[header];
-                        if (dbColumn) {
-                            let value = row[index]?.trim() ?? null;
-                            dataObject[dbColumn] = value;
-                            if (!value) isValid = false;
-                        }
-                    });
-
-                    if (dataObject['status']) {
-                        dataObject['status'] = statusMapping[dataObject['status'].toLowerCase()] ?? 0;
-                    }
-
-                    dataObject['created_date'] = formatDate(new Date());
-                    dataObject['created_by'] = user_id;
-
-                    if (!dataObject.code || !dataObject.description || dataObject.status === null) {
-                        invalidRecords.push(`Row ${rowIndex + 2}`);
-                        processedCount++;
-                        checkCompletion();
-                        return;
-                    }
-
-                    check_if_exists(dataObject, function (exists) {
-                        console.log("Check if it exists:", exists);
-                        if (exists) {
-                            existingRecords.push(dataObject.code);
-                            processedCount++;
-                            checkCompletion();
-                        } else {
-                            save_to_db_import(dataObject, function (success) {
-                                if (success) {
-                                    insertedRecords++;
-                                    console.log(`Record inserted successfully: ${dataObject.code}`);
-                                }
-                                processedCount++;
-                                checkCompletion();
-                            });
-                        }
-                    });
-                });
-
-                function checkCompletion() {
-                    console.log(`Processed count: ${processedCount}, Total records: ${totalRecords}`);
-                    if (processedCount === totalRecords) {
-                        if (invalidRecords.length > 0) {
-                            load_swal(
-                                'add_alert',
-                                '500px',
-                                "error",
-                                "Error!",
-                                `The following rows have missing values: ${invalidRecords.join(', ')}`,
-                                false,
-                                false
-                            );
-                        } else if (existingRecords.length > 0) {
-                            load_swal(
-                                'add_alert',
-                                '500px',
-                                "error",
-                                "Error!",
-                                `The following records already exist in the database: ${existingRecords.join(', ')}`,
-                                false,
-                                false
-                            );
-                        } else if (insertedRecords > 0) {
-                            load_swal(
-                                'add_alert',
-                                '500px',
-                                "success",
-                                "Success!",
-                                `${insertedRecords} records inserted successfully!`,
-                                false,
-                                false
-                            ).then(() => {
-                                location.reload();
-                            });
-                        }
-                    }
-                }
-            };
-
-            reader.readAsArrayBuffer(storedFile);
-        }
-
-        function check_if_exists(dataObject, callback) {
-            var data = {
-                event: "list",
-                select: "id, code, description, store", // Adjust as needed for your schema
-                query: `code = '${dataObject.code}' OR description = '${dataObject.team_description}'`, // Query for existing data
-                offset: 0,
-                limit: 0,
-                table: "tbl_team"
-            };
-
-            console.log("Sending data to check_if_exists:", data); // Debugging
-
-            $.ajax({
-                url: "<?= base_url('cms/global_controller'); ?>", // URL of the controller
-                type: 'POST',
-                data: data,
-                success: function (result) {
-                    console.log("Raw server response:", result); // Debugging
-
-                    // Ensure the result is parsed as JSON
-                    try {
-                        result = JSON.parse(result);
-                    } catch (e) {
-                        console.error("Failed to parse response:", e);
-                        callback(false); // Exit early if response parsing fails
-                        return;
-                    }
-
-                    if (!Array.isArray(result)) {
-                        console.error("Expected an array, but received:", result); // Debugging invalid format
-                        callback(false); // Exit early if the response is not an array
-                        return;
-                    }
-
-                    // Log the result for further inspection
-                    result.forEach(item => {
-                        console.log(`Checking item: code = ${item.code}, team_description = ${item.team_description}`);
-                    });
-
-                    // Check if any record has the same code or team description
-                    let exists = result.some(item => {
-                        // Trim both fields and use case-insensitive comparison
-                        let itemCode = item.code;
-                        let itemTeamDesc = item.team_description;
-                        let dataCode = dataObject.code;
-                        let dataTeamDesc = dataObject.team_description;
-
-                        console.log(`Comparing: ${dataCode} === ${itemCode} || ${dataTeamDesc} === ${itemTeamDesc}`);
-
-                        return itemCode === dataCode || itemTeamDesc === dataTeamDesc;
-                    });
-
-                    console.log("Does record exist?", exists); // Debugging
-                    callback(exists); // Pass the result to the callback
-                },
-                error: function (e) {
-                    console.error("Error checking for existing record:", e);
-                    callback(false); // If error occurs, assume the record doesn't exist
-                }
-            });
-        }
-
-        function save_to_db_import(dataObject) {
-            var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
-            var data = {
-                event: "insert",
-                table: "tbl_area", // Table name
-                data: dataObject  // Pass the entire object dynamically
-            };
-
-            aJax.post(url, data, function (result) {
-                var obj = is_json(result);
-                location.reload();
-            });
-        }
-
-        function load_swal(swclass, swwidth, swicon, swtitle, swtext, swoutclick, swesckey) {
-            Swal.fire({
-                customClass: swclass, // no special characters allowed
-                width: swwidth,
-                icon: swicon, // can be "warning", "error", "success", "info"
-                // https://sweetalert.js.org/docs/#icon
-                title: swtitle, // string
-                html: swtext, // string
-                allowOutsideClick: swoutclick, // boolean 
-                // true allow closing alert by clicking outside of alert
-                // false prevent closing alert by clicking outside of alert
-                allowEscapeKey: swesckey, // boolean
-                // true allow closing alert by pressing escape key
-                // false prevent closing alert by pressing escape key
-            });
-        }
 
     //sample data for progress loading
     //let data = ["Row 1", "Row 2", "Row 3", "Row 4", "Row 5"]; 

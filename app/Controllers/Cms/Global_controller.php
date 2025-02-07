@@ -102,6 +102,7 @@ class Global_controller extends BaseController
 			        $join = isset($_POST['join']) ? $_POST['join'] : null;
 			        $group = isset($_POST['group']) ? $_POST['group'] : null;
 			        $use_or = $_POST['use_or']; 
+			        $action = $_POST['action']; 
 
 			        if (strpos($select, '*') !== false) {
 			            echo json_encode(['message' => "Asterisk is not allowed!"]);
@@ -118,8 +119,9 @@ class Global_controller extends BaseController
 			            $params = [];
 			        }
 
-			        $result_data = $this->Global_model->check_db_exist($table, $conditions, $limit, ($offset - 1) * $limit, $select, $order_field, $order_type, $join, $group, $params, $use_or);
+			        $result_data = $this->Global_model->check_db_exist($table, $conditions, $limit, ($offset - 1) * $limit, $select, $order_field, $order_type, $join, $group, $params, $use_or, $action);
 			        echo json_encode($result_data);
+
 			    } catch (Error $e) {
 			        echo json_encode(["error" => "Error displaying a list from database: " . $e->getMessage()]);
 			    }
@@ -154,19 +156,9 @@ class Global_controller extends BaseController
 				try { 
 					$table = $_POST['table'];
 					$data = $_POST['data'];
-					$product_table = array("cms_sites", "site_tvc");
 
-					if(in_array($table,$product_table)) {
-						if("0" === $data["product_id"]) {
-							$data["product_id"] = null;
-						}
-						if("0" === $data["division_id"]) {
-							$data["division_id"] = null;
-						}
-					}
 
 					$id = $this->Global_model->save_data($table,$data);
-					//insert audit trail
 					$this->audit_trail_controller("Create", $data);
 				} catch (Exception $e) {
 	        		echo "Error adding data: " . $e->getMessage();
@@ -179,20 +171,11 @@ class Global_controller extends BaseController
 					$field = $_POST['field'];
 					$where = $_POST['where'];
 					$data = $_POST['data'];
-					$product_table = array("cms_sites", "site_tvc");
-
-					if(in_array($table,$product_table))
-					{
-						if("0" == $data["product_id"])
-						{
-							$data["product_id"] = null;
-						}
-					}
-
+	
 					//get old data for audit trail
 					$query = $field . " = " . $where;
 					$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*" ,null,null,null);
-
+					
 					//update new data
 					$status = $this->Global_model->update_data($table,$data,$field,$where);
 					echo $status;	
@@ -283,50 +266,16 @@ class Global_controller extends BaseController
 				$result_data = $this->Global_model->get_data_list($table, $query, 9999999, ($offset - 1) * 9999999, $select,$order_field,$order_type, $join);
 				$result_return = array(
 					"total_record"=> count($result_data),
-					"total_page"=>ceil(count($result_data) / 10)
+					"total_page"=>ceil(count($result_data) / $limit)
 				);
 
 				echo json_encode($result_return);
 				break;
 
-			case 'package':
-				try { 
-					$table = $_POST['table'];
-					$field = $_POST['field'];
-					$where = $_POST['where'];
-					$data = $_POST['data'];
-					//get old data for audit trail
-					$query = $field . " = " . $where;
-					$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*" ,null,null,null);
-		
-					//update new data
-					$status = $this->Global_model->update_package($table,$data,$field,$where);
-					echo $status;	
-		
-									//insert audit trail	 
-									if(isset($data['status'])){
-											if($data['status'] == -2){
-													$this->audit_trail_controller("Delete", $data, $old_data);    
-											} else {
-													$this->audit_trail_controller("Update", $data, $old_data);
-											}
-									} else {
-										$this->audit_trail_controller("Update", $data, $old_data);
-									}
-							} catch (Exception $e) {
-							echo "Error updating data: " . $e->getMessage();
-				}
-			break;
 				case 'batch_insert':
 				try { 
-
-			        //if ($this->request->getMethod() === 'post') {
-			        	// print_r('fghgf');
-			            // die();
 			            $table = $this->request->getPost('table');
 			            $insertBatchData = $this->request->getPost('insert_batch_data');
-			            // print_r($insertBatchData);
-			            // die();
 			            if (empty($table) || empty($insertBatchData)) {
 			                return $this->response->setJSON([
 			                    "message" => "Table name or data is missing"
@@ -336,7 +285,6 @@ class Global_controller extends BaseController
 			            $status = $this->Custom_model->batch_insert($table, $insertBatchData);
 
 			            return $this->response->setJSON(["message" => $status]);
-			        //}
 
 			        return $this->response->setJSON([
 			            "message" => "Invalid request method"

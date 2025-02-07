@@ -259,7 +259,8 @@
         limit = parseInt(record_entries);
         offset = 1;
         modal.loading(true); 
-        get_data();
+        get_data(query);
+        get_pagination(query);
         modal.loading(false);
     });
 

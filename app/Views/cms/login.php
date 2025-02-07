@@ -100,11 +100,11 @@ var base_url = '<?= base_url();?>';
                     password: password 
                 }, function (response) {
                     try {
-                        const parsedResponse = JSON.parse(response);
+                        const parsedResponse = is_json(response);
                         const resultCount = parsedResponse.count;
                         const result = parsedResponse.result;
 
-                        console.log("Parsed Response:", parsedResponse);
+                        console.log("ATTEMPTS REMAINING:", parsedResponse.message);
                         console.log("Result Count:", resultCount);
 
                         if (resultCount === 3) {
@@ -144,10 +144,18 @@ var base_url = '<?= base_url();?>';
                                 allowOutsideClick: false,
                                 allowEscapeKey: false,
                             });
-                        } else if (resiltCount === 5) {
+                        } else if (resultCount === 5) {
                             Swal.fire({
                                 icon: "error",
                                 title: "Login Failed",
+                                text: "Expired Account",
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                            });
+                        } else if (resultCount === 6) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Password is Expired",
                                 text: "Expired Account",
                                 allowOutsideClick: false,
                                 allowEscapeKey: false,

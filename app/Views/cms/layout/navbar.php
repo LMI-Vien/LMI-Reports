@@ -31,7 +31,7 @@
   <!-- Brand Logo -->
   <a href="<?= base_url('cms/home')?>" class="brand-link">
     <img src="<?= base_url();?>assets/img/lmi_logo_box.png" alt="AdminLTE Logo" class="brand-image" style="opacity: .8">
-    <span class="brand-text font-weight-light">LMI Portal</span>
+    <span class="brand-text font-weight-light logo-lg">LMI Portal</span>
   </a>
 
   <!-- Sidebar -->
@@ -142,6 +142,11 @@
 
 <script>
     $(document).ready(function() {
+      
+        aJax.get("<?= base_url('cms/cms_preference/get_title');?>",function(data) {
+          $('.logo-lg').html(data);
+        })
+
         $(".logout-btn").on("click", function(e) {
             e.preventDefault();
 

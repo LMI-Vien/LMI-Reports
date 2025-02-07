@@ -137,44 +137,6 @@ class Gmodel extends Model
 		endif;
     }
     
-    function tagging_delete_data($table, $id)
-    {
-        $return = $this->db
-			 	->table($table)
-				->where("site_id", $id)
-				->delete();
-		if($return):
-			return "success";
-		else:
-			return "failed";
-		endif;
-    }
-
-    function tagging_delete_category_data($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                    ->where("product_id", $id)
-                    ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_product_data($table, $id)
-    {
-        $return = $this->db
-                    ->table($table)
-                    ->where("article_id", $id)
-                    ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
 
     function db_search($search_values)
     {
@@ -235,24 +197,8 @@ class Gmodel extends Model
         return $query->getResult();
     }
 
-    function update_package($table,$data,$field,$where)
-    {
-        $return = $this->db
-			 	->table($table)
-                ->where($field, $where, FALSE)
-			 	->update($data);
-		if($return):
-			return "success";
-		else:
-			return "failed";
-		endif;
-    }
-    function get_last_order($table_name)
-    {
-        $query = $this->db->query("SELECT MAX(`sort_order`) AS last_order FROM $table_name");
-        $data = $query->getRow();
-        return $data;
-    }
+
+
     function get_data_list_report_count($select=null, $table=null,$group=null, $site_id=null, $report_type=null, $date=null){
         $builder = $this->db->table($table)
                             ->select($select)

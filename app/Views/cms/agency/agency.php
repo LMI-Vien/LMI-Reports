@@ -989,19 +989,6 @@
         });
     });
 
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
-    }
-
     // function open_modal(msg, actions, id) {
     //     modal_title = addNbsp(msg);
     //     $('#popup_modal .modal-title b').html(modal_title);

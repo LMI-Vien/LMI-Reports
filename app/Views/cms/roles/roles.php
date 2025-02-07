@@ -164,24 +164,31 @@ ul.child_menu {
     </div>
 
 <!-- Add MODAL -->
-<div class="modal fade bd-example-modal-xl" id="save_user_role_modal" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+<div class="modal fade" id="user_role_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add User Role</h5>
+                <h1 class="modal-title">
+                    <b></b>
+                </h1>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>User Role</label>
-                    <input type="text" class="form-control required" id="user_role">
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input large-checkbox required" id="status">
-                    <label class="form-check-label large-label" for="status">Active</label>
-                </div>
+                <form id="form-modal">
+                    <div class="form-group">
+                        <div hidden>
+                            <input type="text" class="form-control" id="id" aria-describedby="id">
+                        </div>
+                        <label>User Role</label>
+                        <input type="text" class="form-control required" id="name">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input large-checkbox required" id="status">
+                        <label class="form-check-label large-label" for="status">Active</label>
+                    </div>
+                </form>
             </div>
             <div class="form-group">
                 <div class="col-sm-12">
@@ -223,110 +230,9 @@ ul.child_menu {
                 </div>
                 <div class="clearfix"></div>
             </div>
-
-          <!--   <div class="modal-footer">
-                close_data
-                <button type="button" class="btn btn-primary" id="save_btn">Save changes</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div> -->
             <div class="modal-footer">
-                <button id="save_btn" class="btn save">Save</button>
-                <button id="close_data" class="btn caution" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Update MODAL -->
-<div class="modal fade" id="update_user_role_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Update User Role</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>User Role</label>
-                    <input type="text" class="form-control" id="user_role">
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input large-checkbox" id="status">
-                    <label class="form-check-label large-label" for="status">Active</label>
-                </div>
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <div class="module_col">
-                            <div class="module_content">
-                                    <div class= "module_header_container">
-                                            <ul class= "menu_header_ul">
-                                                <li class="menu_header_li"><span>CMS Modules</span></li>
-                                                <li class="menu_header_li"><input class="select_all_read" type = "checkbox"><span> Read</span></li>
-                                                <li class="menu_header_li"><input class="select_all_write" type = "checkbox"><span> Write</span></li>
-                                                <li class="menu_header_li"><input class="select_all_delete" type = "checkbox"><span> Delete</span></li>
-                                            </ul>
-                                      </div> 
-                                    <div class="module_body_container">
-                                  </div>
-                            </div>
-         
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <div class="module_col">
-                            <div class="module_content">
-                                    <div class= "module_header_container">
-                                            <ul class= "menu_header_ul">
-                                                <li class="menu_header_li"><span>Site Menu</span></li>
-                                                <li class="menu_header_li"><input class="select_all_view" type = "checkbox"><span> View</span></li>
-                                                <li class="menu_header_li"><input class="select_all_generate" type = "checkbox"><span> Generate</span></li>
-                                                <li class="menu_header_li"><input class="select_all_export" type = "checkbox"><span> Export</span></li>
-                                            </ul>
-                                      </div> 
-                                    <div class="menu_body_container_edit">
-                                  </div>
-                            </div>
-         
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="updateBtn">Update</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- View MODAL -->
-<div class="modal fade" id="view_user_role_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">View User Role</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>User Role</label>
-                    <input type="text" class="form-control" id="user_role" readonly>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input large-checkbox" id="status" disabled>
-                    <label class="form-check-label large-label" for="status">Active</label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+               <!--  <button id="save_btn" class="btn save">Save</button>
+                <button id="close_data" class="btn caution" data-dismiss="modal">Close</button> -->
             </div>
         </div>
     </div>
@@ -342,11 +248,11 @@ ul.child_menu {
     var role = parseInt("<?=$session->sess_role;?>");
     var roles_menu_id = 0;
     $(document).ready(function() {
-      get_data();
-      get_pagination();
+      get_data(query);
+      get_pagination(query);
     });
 
-    function get_data()
+    function get_data(query)
     {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
@@ -357,8 +263,8 @@ ul.child_menu {
             limit : limit,
             table : "cms_user_roles",
             order : {
-                field : "updated_date",
-                order : "desc" 
+                field : "name",
+                order : "asc" 
             }
 
         }
@@ -384,8 +290,8 @@ ul.child_menu {
                             html+="<td class='center-content'>";
                             html += "<a class='btn-sm btn save' onclick=\"edit_data("
                                 + y.id + ", '"
-                                + y.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")
-                                + y.status + "')\" data-status='"
+                                + y.name.replace(/'/g, "\\'").replace(/"/g, "&quot;") + "'"
+                                + ", "+ y.status + ")\" data-status='"
                                 + y.status + "' id='"
                                 + y.id + "' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span></a>";
 
@@ -404,7 +310,7 @@ ul.child_menu {
         });
     }
 
-    function get_pagination()
+    function get_pagination(query)
     {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
@@ -430,7 +336,7 @@ ul.child_menu {
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data();
+        get_data(query);
     })
 
     $(document).on("change", ".record-entries", function(e) {
@@ -441,7 +347,8 @@ ul.child_menu {
         limit = parseInt(record_entries);
         offset = 1;
         modal.loading(true); 
-        get_data();
+        get_data(query);
+        get_pagination(query);
         modal.loading(false);
     });
 
@@ -449,23 +356,8 @@ ul.child_menu {
       alert("call ajax to controler");
     });
 
-    $(document).ready(function () {
-        $(document).on('click', '#btn_add', function () {
-            $('#save_user_role_modal').modal('show');
-            get_data_modules();
-            get_data_site_menu();
-        });
-    });
-
-    $(document).on('click', '#save_btn', function() {
-        if (validate.standard("save_user_role_modal")) {
-          save_data('save', null);  
-        }
-    });
-
-    $(document).on('click', '#updateBtn', function() {
-        var id = $(this).attr('data-id');
-        update_data(id);
+    $(document).on('click', '#btn_add', function () {
+        open_modal('Add New Role', 'add', '');
     });
 
     $(document).on('click', '.edit', function() {
@@ -478,13 +370,26 @@ ul.child_menu {
         delete_data(id); 
     });
 
-    $(document).on('click', '.view', function() {
-        id = $(this).attr('id');
-        get_data_by_id_view(id);
-    });
+    function create_button(btn_txt, btn_id, btn_class, onclick_event) {
+        var new_btn = $('<button>', {
+            text: btn_txt,
+            id: btn_id,
+            class: btn_class,
+            click: onclick_event
+        });
+        return new_btn;
+    }
 
-    function save_data() {
-        var status = $('#save_user_role_modal #status').prop('checked') ? 1 : 0;
+    function reset_modal_fields() {
+        $('#user_role_modal #name').val('');
+        $('#user_role_modal #status').prop('checked', true);
+        $('.chckbx_menu').prop('checked', false);
+        $('.chckbx_menu_site').prop('checked', false);
+        $('.select_all_read, .select_all_write, .select_all_delete, .select_all_view, .select_all_generate, .select_all_export').prop('checked', false);
+    }
+
+    function save_data(action, id) {
+        var status = $('#user_role_modal #status').prop('checked') ? 1 : 0;
         var url = "<?= base_url('cms/global_controller');?>";
         var cms_menu_data = [];
         var site_menu_data = [];
@@ -522,12 +427,10 @@ ul.child_menu {
     });
         
         var user_role_data = {
-            name : $('#user_role').val(),
+            name : $('#name').val(),
             status : status,
             created_date :  current_date,
-           // update_date :  current_date,
             created_by  : user_id
-           // updated_by  : user_id
         };
         
         var data = {
@@ -535,41 +438,156 @@ ul.child_menu {
             site_menu_role_data : site_menu_data,
             user_role_data : user_role_data
         }
-        console.log(data);
-        modal.confirm(confirm_add_message,function(result){
-            if(result){ 
-                aJax.post("<?= base_url('cms/site-menu/menu_insert');?>",data,function(result){
-                   
-                    modal.loading(false);
-                    modal.alert(success_save_message, function(){
-                        location.href = '<?=base_url("cms/roles") ?>';
-                    }); 
-                });
-            }
+        if(action == "save"){
+                check_current_db("cms_user_roles", ["name"], [$('#name').val()], "status" , "id", id, true, function(exists, duplicateFields) {
+                    if (!exists) {
+                        modal.confirm(confirm_add_message,function(result){
+                            if(result){ 
+                                aJax.post("<?= base_url('cms/roles/menu_insert');?>",data,function(result){
+                                   
+                                    modal.loading(false);
+                                    modal.alert(success_save_message, "success", function(){
+                                        location.href = '<?=base_url("cms/roles") ?>';
+                                    }); 
+                                });
+                            }
+                        });
 
+                    }             
+                });
+        }else{
+            check_current_db("cms_user_roles", ["name"], [$('#name').val()], "status" , "id", id, true, function(exists, duplicateFields) {
+                if (!exists) {
+                        modal.confirm(confirm_add_message,function(result){
+                            if(result){ 
+                                modal.loading(true);
+                                var customURL = "<?= base_url('cms/roles/delete_role_tagging');?>"; 
+                                var data = {
+                                    role_id : id
+                                }
+                                aJax.post(customURL,data,function(result){});
+                                var url = "<?= base_url('cms/global_controller');?>";
+                                var data = {
+                                    event : "update",
+                                    table : "cms_user_roles",
+                                    field : "id",
+                                    where : id,
+                                    data : {
+
+                                            name : $('#name').val(),
+                                            status : $('#status').val(),
+                                            updated_date :  formatDate(new Date()),
+                                            updated_by : user_id
+                                    }  
+                                }
+
+                                aJax.post(url,data,function(result){ 
+                                    var obj = is_json(result);
+                                    console.log(roles_menu_id);          
+                                    save_role_module(roles_menu_id);
+                                });    
+                            }
+                        });
+                    }   
+
+            });        
+        }
+
+    }
+
+    function update_user_role(role_id)
+    {
+        modal.loading(true);
+        var customURL = "<?= base_url('cms/role/delete_role_tagging');?>"; 
+        var data = {
+            role_id : role_id
+        }
+        aJax.post(customURL,data,function(result){});
+  
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "update",
+            table : "cms_user_roles",
+            field : "id",
+            where : role_id,
+            data : {
+
+                    name : $('#name').val(),
+                    status : $('#status').val(),
+                    updated_date : formatDate(new Date()),
+                    updated_by : user_id
+            }  
+        }
+
+        aJax.post(url,data,function(result){ 
+            var obj = is_json(result);          
+            save_role_module(menu_role_id);
+        });
+    }
+
+    function save_role_module(role_id){
+        var current_date = formatDate(new Date());
+        var cms_menu_data = [];
+        var site_menu_data = [];
+       
+        $.each($('.menu_id_cms'), function(x, y) {
+            var menuId = $(this).attr('data-id'); // Get the menu ID
+
+            var data_array_cms_menu = {
+                menu_id: menuId,
+                menu_role_read: $('.read_cms[data-id="' + menuId + '"]').prop('checked') ? 1 : 0,
+                menu_role_write: $('.write_cms[data-id="' + menuId + '"]').prop('checked') ? 1 : 0,
+                menu_role_delete: $('.delete_cms[data-id="' + menuId + '"]').prop('checked') ? 1 : 0,
+                menu_role_updated_date: current_date,
+                menu_role_created_date: current_date
+            };
+
+            cms_menu_data.push(data_array_cms_menu);
+        });
+
+        $.each($('.menu_id_site'), function(x, y) {
+            var menuId = $(this).attr('data-id');
+            var data_array_site_menu = {
+                menu_id: menuId,
+                menu_role_view: $('.view_site[data-id="' + menuId + '"]').prop('checked') ? 1 : 0,
+                menu_role_generate: $('.generate_site[data-id="' + menuId + '"]').prop('checked') ? 1 : 0,
+                menu_role_export: $('.export_site[data-id="' + menuId + '"]').prop('checked') ? 1 : 0,
+                menu_role_updated_date: current_date,
+                menu_role_created_date: current_date
+            };
+
+           site_menu_data.push(data_array_site_menu);
+        });
+
+        var data = {
+            cms_menu_role_data : cms_menu_data,
+            site_menu_role_data : site_menu_data,
+            user_role_data : role_id
+        }
+
+        aJax.post("<?= base_url('cms/roles/menu_update');?>",data,function(result){
+            modal.loading(false);
+            modal.alert(success_update_message, "success", function(){
+                location.reload();
+            }); 
         });
     }
 
     function update_data(id){
-        // var status = $('#update_user_role_modal #status').val();
         var status = $('#update_user_role_modal #status').prop('checked') ? 1 : 0;
         
-        modal.confirm("Are you sure you want to update this record?",function(result){
-            console.log(result);
+        modal.confirm(confirm_add_message,function(result){
             if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                var url = "<?= base_url('cms/global_controller');?>"; 
                 var data = {
-                    event : "update", // list, insert, update, delete
-                    table : "cms_user_roles", //table
+                    event : "update", 
+                    table : "cms_user_roles",
                     field : "id",
                     where : id, 
                     data : {
-                            name : $('#update_user_role_modal #user_role').val(),
+                            name : $('#update_user_role_modal #name').val(),
                             status : $('#update_user_role_modal #status').val(),
-                            //created_date : formatDate(new Date()),
                             updated_date : formatDate(new Date()),
-                            //to follow created data and created by
-                            //created_by : user_id,
                             updated_by : user_id,
                             status : status
                     }  
@@ -577,11 +595,9 @@ ul.child_menu {
 
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
-                    //alert("pasok");
-                    location.reload();
-                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-                    //    location.reload();
-                    // })
+                    modal.alert(modal_alert_success, "success", function() {
+                        location.reload();
+                    });
                 });
             }
 
@@ -602,11 +618,11 @@ ul.child_menu {
 
         aJax.post(url,data,function(result){
             var obj = is_json(result);
-            console.log(obj);
+          //  console.log(obj);
             if(obj){
                 $.each(obj, function(x,y) {
-                    console.log(y);
-                    $('#update_user_role_modal #user_role').val(y.name);
+               //     console.log(y);
+                    $('#update_user_role_modal #name').val(y.name);
                     
                     if(y.status == 1){
                         $('#update_user_role_modal #status').prop('checked', true);
@@ -625,8 +641,14 @@ ul.child_menu {
 
     function delete_data(id){
         
-        modal.confirm("Are you sure you want to delete this record?",function(result){
-            if(result){ 
+        modal.confirm(confirm_delete_message,function(result){
+            if(result){
+                modal.loading(true);
+                var customURL = "<?= base_url('cms/roles/delete_role_tagging');?>"; 
+                var data = {
+                    role_id : id
+                }
+                aJax.post(customURL,data,function(result){});
                 var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
                 var data = {
                     event : "update", // list, insert, update, delete
@@ -642,11 +664,10 @@ ul.child_menu {
 
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
-                    // alert("pasok");
-                    location.reload();
-                    // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-                    //    location.reload();
-                    // })
+                    modal.alert(success_delete_message, "success", function() {
+                        modal.loading(false);
+                        location.reload();
+                    });
                 });
             }
 
@@ -669,7 +690,7 @@ ul.child_menu {
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(x,y) {
-                    $('#view_user_role_modal #user_role').val(y.name);
+                    $('#view_user_role_modal #name').val(y.name);
                     
                     if(y.status == 1){
                         $('#view_user_role_modal #status').prop('checked', true);
@@ -685,16 +706,33 @@ ul.child_menu {
         return exists;
     }
 
-    function get_data_site_menu(){
-        var query = "menu_level = 1 and status = 1";
+    function get_data_site_menu(query, action){
+        //var query = "menu_level = 1 and status = 1";
         var exists = 0;
 
         var url = "<?= base_url('cms/global_controller');?>";
+        var select = "";
+        var join = [];
+        if(action == "add"){
+            select = "`site_menu`.`id` as `menu_id`,`menu_name`,`menu_type`,`menu_parent_id`,`menu_level`,`status`,`sort_order`";
+        }else{
+            select = "`site_menu`.`id` as `menu_id`,`menu_name`,`menu_type`,`menu_parent_id`,`menu_level`,`status`,`sort_order`,`role_id`,`cms_site_menu_roles`.`menu_id` as `roles_menu_id`,`menu_role_view`,`menu_role_generate`,`menu_role_export`";
+            join.push({
+                table: "cms_site_menu_roles",
+                query: "cms_site_menu_roles.menu_id = site_menu.id",
+                type: "left"
+            });
+        }
         var data = {
-            event : "list", 
-            select : "id,menu_name,menu_type,menu_parent_id,menu_level,status,sort_order",
-            query : query, 
-            table : "site_menu"
+             event: "list",
+             select: select,
+             table: "site_menu",
+             query: query,
+             join : join,
+             order: {
+                field: "sort_order",
+                order: "asc"
+             }
         }
 
         aJax.post(url,data,function(result){
@@ -702,15 +740,24 @@ ul.child_menu {
             var htm = '';
             if(result.length > 0){  
                 $.each(result,function(x,y){
+                    if(action == "add"){
+                        var checked_view = "";
+                        var checked_generate = "";
+                        var checked_export = "";
+                    }else{
+                        var checked_view = ( y.menu_role_view == 1 ) ? checked_view = "checked" : checked_view = "";
+                        var checked_generate = ( y.menu_role_generate == 1 ) ? checked_generate = "checked" : checked_generate = "";
+                        var checked_export = ( y.menu_role_export == 1 ) ? checked_export = "checked" : checked_export = "";
+                    }
                     htm += "<ul class='parent_menu'>";
                         if(parseInt(y.menu_level) === 1){
-                          htm += "<li class='main_menu_sitemenu_"+y.id+"'>";
-                          htm += "<div class='menu_title'><input type='hidden' class='menu_id_site menu_id_"+counter+"' data-id="+y.id+"><span>"+y.menu_name+"</span></div>"; 
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu_site view_site view_"+counter+" chckbx_menu_view parent_chckbox_view_"+y.id+"' type = 'checkbox'  name='menu_role_view' data-id="+y.id+" value='0' onchange='chckbox_parent_menu_site("+y.id+")'></div>";
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu_site generate_site generate_"+counter+" chckbx_menu_generate parent_chckbox_generate_"+y.id+"' name='menu_role_generate' type = 'checkbox' data-id="+y.id+" value='0' onchange='chckbox_parent_menu_site("+y.id+")'></div>";
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu_site export_site export_"+counter+" chckbx_menu_export parent_chckbox_export_"+y.id+"' name='menu_role_export' type = 'checkbox' data-id="+y.id+" value='0' onchange='chckbox_parent_menu_site("+y.id+")'></div>";
+                          htm += "<li class='main_menu_sitemenu_"+y.menu_id+"'>";
+                          htm += "<div class='menu_title'><input type='hidden' class='menu_id_site menu_id_"+counter+"' data-id="+y.menu_id+"><span>"+y.menu_name+"</span></div>"; 
+                          htm += "<div class='menu_chkbx'><input class='chckbx_menu_site view_site view_"+counter+" chckbx_menu_view parent_chckbox_view_"+y.menu_id+"' type = 'checkbox'  name='menu_role_view' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu_site("+y.menu_id+")' "+checked_view+"></div>";
+                          htm += "<div class='menu_chkbx'><input class='chckbx_menu_site generate_site generate_"+counter+" chckbx_menu_generate parent_chckbox_generate_"+y.menu_id+"' name='menu_role_generate' type = 'checkbox' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu_site("+y.menu_id+")' "+checked_generate+"></div>";
+                          htm += "<div class='menu_chkbx'><input class='chckbx_menu_site export_site export_"+counter+" chckbx_menu_export parent_chckbox_export_"+y.menu_id+"' name='menu_role_export' type = 'checkbox' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu_site("+y.menu_id+")' "+checked_export+"></div>";
                           htm += "</li>";
-                            get_sub_menu(y.id, "site_menu", "sitemenu");
+                            get_sub_menu(y.menu_id, "site_menu", "sitemenu", action);
                         }
                     htm += "</ul>";
                     counter++;
@@ -727,189 +774,184 @@ ul.child_menu {
         });
     }
 
-    function get_data_modules(){
-        var query = "menu_level = 1 and status = 1";
-        var exists = 0;
-
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event : "list", 
-            select : "id,menu_name,menu_type,menu_parent_id,menu_level,status,sort_order",
-            query : query, 
-            table : "cms_menu",
-            order: {
-                field: "sort_order",
-                order: "asc"
-             }
-        }
-
-        aJax.post(url,data,function(result){
-            var result = JSON.parse(result);
-            var htm = '';
-            if(result.length > 0){  
-                $.each(result,function(x,y){
-                    htm += "<ul class='parent_menu'>";
-                        if(parseInt(y.menu_level) === 1){
-                          htm += "<li class='main_menu_cmsmenu_"+y.id+"'>";
-                          htm += "<div class='menu_title'><input type='hidden' class='menu_id_cms menu_id_"+counter_cmsmenu+"' data-id="+y.id+"><span>"+y.menu_name+"</span></div>"; 
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu read_cms read_"+counter_cmsmenu+" chckbx_menu_read parent_chckbox_read_"+y.id+"' type = 'checkbox'  name='menu_role_read' data-id="+y.id+" value='0' onchange='chckbox_parent_menu("+y.id+")'></div>";
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu write_cms write_"+counter_cmsmenu+" chckbx_menu_write parent_chckbox_write_"+y.id+"' name='menu_role_write' type = 'checkbox' data-id="+y.id+" value='0' onchange='chckbox_parent_menu("+y.id+")'></div>";
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu delete_cms delete_"+counter_cmsmenu+" chckbx_menu_delete parent_chckbox_delete_"+y.id+"' name='menu_role_delete' type = 'checkbox' data-id="+y.id+" value='0' onchange='chckbox_parent_menu("+y.id+")'></div>";
-                          htm += "</li>";
-                              get_sub_menu(y.id, "cms_menu", "cmsmenu");
-                        }
-                    htm += "</ul>";
-                    counter_cmsmenu++;
-                });
-
-
-
-            } else {
-                htm += '<ul>';
-                htm += '<li class="ta_c;">No Results Found.</li>';
-                htm += '</ul>';
-            }
-            $('.module_body_container').html(htm);
-        });
-    }
-
-    function get_sub_menu(id, table, module_name)
+    function get_sub_menu(id, table, module_name, action)
     {
-        query = "menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
-        
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event:"list",
-            select:"id,menu_name,menu_type,menu_parent_id,menu_level,status,sort_order",
-            table: table,
-            query: query,
-            group:"menu_name",
-            sort_order:{
-                field: "sort_order",
-                sort_order: "asc"
-             }
-             
-
-        }
-
-        aJax.post_async(url,data,function(result)
-        {
-
-            var obj = is_json(result);
-            var htm = '';
-
-            if(obj.length > 0)
-            {
-                 var one = "read";
-                 var two = "write";
-                 var three = "delete";
-                 var chckbx_menu = "chckbx_menu";
-                 var func = "chckbox_sub_menu";
-                 var clsname = "menu_id_cms";
-                 var clsname2 = "cms";
-                 counter = counter_cmsmenu;
-                 if(module_name == "sitemenu"){
-                    one = "view";
-                    two = "generate";
-                    three = "export";
-                    counter = counter_sitemenu;
-                    chckbx_menu = "chckbx_menu_site";
-                    func = "chckbox_sub_menu_site";
-                    clsname = "menu_id_site";
-                    clsname2 = "site";
+        if(action == "add"){
+            query = "menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
+            
+            var url = "<?= base_url('cms/global_controller');?>";
+            var data = {
+                event:"list",
+                select:"id,menu_name,menu_type,menu_parent_id,menu_level,status,sort_order",
+                table: table,
+                query: query,
+                group:"menu_name",
+                sort_order:{
+                    field: "sort_order",
+                    sort_order: "asc"
                  }
-                 $.each(obj,function(a,b)
-                 {  
-                      htm += "<ul class='child_menu'>";
-                          if(parseInt(b.menu_level) === 2){
-                              htm += "<li class='sub_menu_"+b.id+"'>";
-                              htm += "<div class='sub_menu_title'><input type='hidden' class='"+clsname+" menu_id_"+counter+"' data-id="+b.id+"><span>"+b.menu_name+"</span></div>";
-                              htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" read_"+clsname2+" "+one+"_"+counter+" chckbx_menu_"+one+" sub_checker_"+one+"_"+id+" sub_chckbox_"+one+"_"+counter+"' name='menu_role_"+one+"' type = 'checkbox' data-id="+b.id+" value='0' onchange='"+func+"("+counter+","+id+")'></div>";
-                              htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" write_"+clsname2+" "+two+"_"+counter+" chckbx_menu_"+two+" sub_checker_"+two+"_"+id+" sub_chckbox_"+two+"_"+counter+"' name='menu_role_"+two+"' type = 'checkbox' data-id="+b.id+" value='0' onchange='"+func+"("+counter+","+id+")'></div>";
-                              htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" delete_"+clsname2+" "+three+"_"+counter+" chckbx_menu_"+three+" sub_checker_"+three+"_"+id+" sub_chckbox_"+three+"_"+counter+"' name='menu_role_"+three+"' type = 'checkbox' data-id="+b.id+" value='0' onchange='"+func+"("+counter+","+id+")'></div>";
-                              htm += "</li>";
-                          }
-                      htm += "</ul>";
+                 
 
-                    counter++;
-                     
-                });
-                setTimeout(() => { 
-                    $(htm).insertAfter($('.main_menu_'+module_name+"_"+id)); 
-                }, 500);
-                      
             }
-        });
-   }
 
-    function get_sub_menu2(id, table, module_name){
-
-        console.log(id, roles_menu_id);
-        if(role == 1){
-          query = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
-        }else{
-           query = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1 AND menu_id != 14 AND menu_id != 15 AND menu_id != 22";
-        } 
-
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event:"list",
-            select:"cms_menu.id as menu_id,menu_name,menu_type,menu_parent_id,menu_level,status,sort_order,role_id,cms_menu_roles.menu_id as roles_menu_id,menu_role_read,menu_role_write,menu_role_delete",
-            table: table,
-            query: query,
-             join : [ //optional
+            aJax.post_async(url,data,function(result)
+            {
+                //console.log('sdf');
+                var obj = is_json(result);
+                var htm = '';
+                if(obj.length > 0)
                 {
-                    table : "cms_menu_roles", //table
-                    query : "cms_menu_roles.menu_id = cms_menu.id", //join query
-                    type : "left" //type of join
+                     var one = "read";
+                     var two = "write";
+                     var three = "delete";
+                     var chckbx_menu = "chckbx_menu";
+                     var func = "chckbox_sub_menu";
+                     var clsname = "menu_id_cms";
+                     var clsname2 = "cms";
+                     counter = counter_cmsmenu;
+                     if(module_name == "sitemenu"){
+                        one = "view";
+                        two = "generate";
+                        three = "export";
+                        counter = counter_sitemenu;
+                        chckbx_menu = "chckbx_menu_site";
+                        func = "chckbox_sub_menu_site";
+                        clsname = "menu_id_site";
+                        clsname2 = "site";
+                     }
+                     $.each(obj,function(a,b){
+                          htm += "<ul class='child_menu'>";
+                              if(parseInt(b.menu_level) === 2){
+                                
+                                  htm += "<li class='sub_menu_"+b.id+"'>";
+                                  htm += "<div class='sub_menu_title'><input type='hidden' class='"+clsname+" menu_id_"+counter+"' data-id="+b.id+"><span>"+b.menu_name+"</span></div>";
+                                  htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" "+one+"_"+clsname2+" "+one+"_"+counter+" chckbx_menu_"+one+" sub_checker_"+one+"_"+id+" sub_chckbox_"+one+"_"+counter+"' name='menu_role_"+one+"' type = 'checkbox' data-id="+b.id+" value='0' onchange='"+func+"("+counter+","+id+")'></div>";
+                                  htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" "+two+"_"+clsname2+" "+two+"_"+counter+" chckbx_menu_"+two+" sub_checker_"+two+"_"+id+" sub_chckbox_"+two+"_"+counter+"' name='menu_role_"+two+"' type = 'checkbox' data-id="+b.id+" value='0' onchange='"+func+"("+counter+","+id+")'></div>";
+                                  htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" "+three+"_"+clsname2+" "+three+"_"+counter+" chckbx_menu_"+three+" sub_checker_"+three+"_"+id+" sub_chckbox_"+three+"_"+counter+"' name='menu_role_"+three+"' type = 'checkbox' data-id="+b.id+" value='0' onchange='"+func+"("+counter+","+id+")'></div>";
+                                  htm += "</li>";
+                              }
+                          htm += "</ul>";
+
+                        counter++;
+                         
+                    });
+                    setTimeout(() => { 
+                        $(htm).insertAfter($('.main_menu_'+module_name+"_"+id)); 
+                    }, 500);  
                 }
-            ],
-            sort_order:{
-                field: "sort_order",
-                sort_order: "asc"
-             }
+            });
+        }else{
+            roles_menu_id = roles_menu_id;
+            if(role == 1){
+              query = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
+            }else{
+               query = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1 AND menu_id != 14 AND menu_id != 15 AND menu_id != 22";
+            } 
 
-        }
+            var url = "<?= base_url('cms/global_controller');?>";
+            var select = "";
+            var join = [];
 
-        aJax.post_async(url,data,function(result){
-            var obj = is_json(result);
-            console.log(obj);
-            var htm = '';
-            if(obj.length > 0){
-                 $.each(obj,function(a,b){  
-                      var checked_read = ( b.menu_role_read == 1 ) ? checked_read = "checked" : checked_read = "";
-                      var checked_write = ( b.menu_role_write == 1 ) ? checked_write = "checked" : checked_write = "";
-                      var checked_delete = ( b.menu_role_delete == 1 ) ? checked_delete = "checked" : checked_delete = "";
-
-                      htm += "<ul class='child_menu'>";
-                          if(b.menu_level == 2){
-                              htm += "<li class='sub_menu_"+b.menu_id+"'>";
-                              htm += "<div class='sub_menu_title'><input type='hidden' class='menu_id_"+counter+"' data-id="+b.menu_id+"><span>"+b.menu_name+"</span></div>";
-                              htm += "<div class='sub_menu_chkbx'><input class='chckbx_menu read_"+counter+" chckbx_menu_read sub_checker_read_"+id+" sub_chckbox_read_"+counter+"' name='menu_role_read' type = 'checkbox' data-id="+b.menu_id+" value="+b.menu_role_read+" onchange='chckbox_sub_menu("+counter+","+id+")' "+checked_read+"></div>";
-                              htm += "<div class='sub_menu_chkbx'><input class='chckbx_menu write_"+counter+" chckbx_menu_write sub_checker_write_"+id+" sub_chckbox_write_"+counter+"' name='menu_role_write' type = 'checkbox' data-id="+b.menu_id+" value="+b.menu_role_write+" onchange='chckbox_sub_menu("+counter+","+id+")' "+checked_write+"></div>";
-                              htm += "<div class='sub_menu_chkbx'><input class='chckbx_menu delete_"+counter+" chckbx_menu_delete sub_checker_delete_"+id+" sub_chckbox_delete_"+counter+"' name='menu_role_delete' type = 'checkbox' data-id="+b.menu_id+" value="+b.menu_role_delete+" onchange='chckbox_sub_menu("+counter+","+id+")' "+checked_delete+"></div>";
-                              htm += "</li>";
-                          }
-                      htm += "</ul>";
-
-                    counter++;
-                     
+            if (table == "cms_menu") {
+                //console.log('sf');
+                select = "cms_menu.id as menu_id, menu_name, menu_type, menu_parent_id, menu_level, status, sort_order, role_id, cms_menu_roles.menu_id as roles_menu_id, menu_role_read, menu_role_write, menu_role_delete";
+                join.push({
+                    table: "cms_menu_roles", // Table name
+                    query: "cms_menu_roles.menu_id = cms_menu.id", // Join condition
+                    type: "left" // Type of join
                 });
+            } else {
+                select = "site_menu.id as menu_id, menu_name, menu_type, menu_parent_id, menu_level, status, sort_order, role_id, cms_site_menu_roles.menu_id as roles_menu_id, menu_role_view, menu_role_generate, menu_role_export";
+                join.push({
+                    table: "cms_site_menu_roles", // Table name
+                    query: "cms_site_menu_roles.menu_id = site_menu.id", // Fixed join condition
+                    type: "left" // Type of join
+                });
+            }
+            //console.log(join);
+            var data = {
+                event:"list",
+                select:select,
+                table: table,
+                query: query,
+                join : join,
+                sort_order:{
+                    field: "sort_order",
+                    sort_order: "asc"
+                 }
 
-                setTimeout(() => { 
-                    console.log(module_name);
-                    $(htm).insertAfter($('.main_menu_'+module_name+"_"+id)); 
-                    //Select all Read
-                    select_read();
-                    //Select all Write
-                    select_write();
-                    //Select all Delete
-                    select_delete();
-                }, 500);
             }
 
-    });
+            aJax.post_async(url,data,function(result)
+            {
 
+                var obj = is_json(result);
+                var htm = '';
+
+                if(obj.length > 0)
+                {
+                     var one = "read";
+                     var two = "write";
+                     var three = "delete";
+                     var chckbx_menu = "chckbx_menu";
+                     var func = "chckbox_sub_menu";
+                     var clsname = "menu_id_cms";
+                     var clsname2 = "cms";
+                     counter = counter_cmsmenu;
+                     if(module_name == "sitemenu"){
+                        one = "view";
+                        two = "generate";
+                        three = "export";
+                        counter = counter_sitemenu;
+                        chckbx_menu = "chckbx_menu_site";
+                        func = "chckbox_sub_menu_site";
+                        clsname = "menu_id_site";
+                        clsname2 = "site";
+                     }
+                     $.each(obj,function(a,b){
+                          var checked_read = ( b.menu_role_read == 1 ) ? checked_read = "checked" : checked_read = "";
+                          var checked_write = ( b.menu_role_write == 1 ) ? checked_write = "checked" : checked_write = "";
+                          var checked_delete = ( b.menu_role_delete == 1 ) ? checked_delete = "checked" : checked_delete = "";
+
+                          var checked_view = ( b.menu_role_view == 1 ) ? checked_view = "checked" : checked_view = "";
+                          var checked_generate = ( b.menu_role_generate == 1 ) ? checked_generate = "checked" : checked_generate = "";
+                          var checked_export = ( b.menu_role_export == 1 ) ? checked_export = "checked" : checked_export = "";
+                          htm += "<ul class='child_menu'>";
+                              if(parseInt(b.menu_level) === 2){
+                                
+                                  htm += "<li class='sub_menu_"+b.menu_id+"'>";
+                                  htm += "<div class='sub_menu_title'><input type='hidden' class='"+clsname+" menu_id_"+counter+"' data-id="+b.menu_id+"><span>"+b.menu_name+"</span></div>";
+                                  htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" "+one+"_"+clsname2+" "+one+"_"+counter+" chckbx_menu_"+one+" sub_checker_"+one+"_"+id+" sub_chckbox_"+one+"_"+counter+"' name='menu_role_"+one+"' type = 'checkbox' data-id="+b.menu_id+" value='0' onchange='"+func+"("+counter+","+id+")' "+checked_read+" "+checked_view+"></div>";
+                                  htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" "+two+"_"+clsname2+" "+two+"_"+counter+" chckbx_menu_"+two+" sub_checker_"+two+"_"+id+" sub_chckbox_"+two+"_"+counter+"' name='menu_role_"+two+"' type = 'checkbox' data-id="+b.menu_id+" value='0' onchange='"+func+"("+counter+","+id+")' "+checked_write+" "+checked_generate+"></div>";
+                                  htm += "<div class='sub_menu_chkbx'><input class='"+chckbx_menu+" "+three+"_"+clsname2+" "+three+"_"+counter+" chckbx_menu_"+three+" sub_checker_"+three+"_"+id+" sub_chckbox_"+three+"_"+counter+"' name='menu_role_"+three+"' type = 'checkbox' data-id="+b.menu_id+" value='0' onchange='"+func+"("+counter+","+id+")' "+checked_delete+" "+checked_export+"></div>";
+                                  htm += "</li>";
+                              }
+                          htm += "</ul>";
+
+                        counter++;
+                         
+                    });
+                    setTimeout(() => { 
+                        $(htm).insertAfter($('.main_menu_'+module_name+"_"+id));
+                        if(action == "edit"){
+                            //Select all Read
+                            select_read();
+                            //Select all Write
+                            select_write();
+                            //Select all Delete
+                            select_delete();
+                            //Select all View
+                            select_view();
+                            //Select all Generate
+                            select_generate();
+                            //Select all Export
+                            select_export();
+                        }
+                    }, 500);
+                          
+                }
+            });            
+        }
    }
 
    function select_read(){
@@ -944,6 +986,40 @@ ul.child_menu {
         } else {
             $(".select_all_delete").prop("checked", false);
             $('.select_all_read').attr('disabled',false);
+        }   
+   }
+
+   function select_view(){
+        var view_checkbox_count = $('input[name="menu_role_view"]').length;
+        var view_checked_checkboxes_count = $('input[name="menu_role_view"]:checked').length;
+        if (view_checkbox_count == view_checked_checkboxes_count) {
+            $(".select_all_view").prop("checked", true);
+        } else {
+            $(".select_all_view").prop("checked", false);
+        }
+
+   }
+
+   function select_generate(){
+        var generate_checkbox_count = $('input[name="menu_role_generate"]').length;
+        var generate_checked_checkboxes_count = $('input[name="menu_role_generate"]:checked').length;
+        if (generate_checkbox_count == generate_checked_checkboxes_count) {
+            $(".select_all_generate").prop("checked", true);
+        } else {
+            $(".select_all_generate").prop("checked", false);
+            $('.select_all_view').attr('disabled',false);
+        }
+   }
+
+
+   function select_export(){
+        var export_checkbox_count = $('input[name="menu_role_export"]').length;
+        var export_checked_checkboxes_count = $('input[name="menu_role_export"]:checked').length;
+        if (export_checkbox_count == export_checked_checkboxes_count) {
+            $(".select_all_export").prop("checked", true);
+        } else {
+            $(".select_all_export").prop("checked", false);
+            $('.select_all_view').attr('disabled',false);
         }   
    }
 
@@ -1163,7 +1239,6 @@ ul.child_menu {
 
         //check view column if generate is checked
          if (($('input.parent_chckbox_generate_'+id+'').is(':checked'))) {
-                                  alert('asd')
               $('.sub_checker_generate_'+id+'').prop("checked", true).val(1);
               $('.parent_chckbox_view_'+id+'').prop("checked", true).val(1);
               $('.sub_checker_view_'+id+'').prop("checked", true).attr('disabled',true).val(1);    
@@ -1310,75 +1385,326 @@ ul.child_menu {
       }
     });
 
-    function edit_data(menu_role_id, name, status){
-        console.log(name, status);
-        roles_menu_id = menu_role_id;
-        $('#update_user_role_modal').modal('show');
-        if(role === 1){
-          query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 and role_id != 0";
-        }else{
-           query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 AND `menu_id` != 8 AND `menu_id` != 6 and role_id != 0";
-        } 
+    $(document).on('keydown', '#search_query', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        if (event.key == 'Enter') {
+            search_input = $('#search_query').val();
+            offset = 1;
+            new_query = query;
+            new_query += ' AND name like \'%'+search_input+'%\'';
+            get_data(new_query);
+            get_pagination(new_query);
+        }
+    });
 
+    $(document).on('click', '.btn_status', function (e) {
+        var status = $(this).attr("data-status");
+        var modal_obj = "";
+        var modal_alert_success = "";
+        var hasExecuted = false; // Prevents multiple executions
+        var id_array = [];
+
+        if (parseInt(status) === -2) {
+            modal_obj = confirm_delete_message;
+            modal_alert_success = success_delete_message;
+            offset = 1;
+        } else if (parseInt(status) === 1) {
+            modal_obj = confirm_publish_message;
+            modal_alert_success = success_publish_message;
+        } else {
+            modal_obj = confirm_unpublish_message;
+            modal_alert_success = success_unpublish_message;
+        }
+        modal.confirm(modal_obj, function (result) {
+            if (result) {
+                $('.selectall').prop('checked', false);
+                $('.select:checked').each(function(index) { 
+                    id = $(this).attr('data-id');
+                    id_array.push(id);
+                });
+                if( <?=STATUS_UNPUBLISH?> === parseInt(status) || <?=STATUS_TRASH?> === parseInt(status)){
+                    var url = "<?= base_url('cms/global_controller');?>";
+                    var data = {
+                        event : "list",
+                        select : "id,role,status",
+                        query : "status >= 0 AND role IN (" + id_array +")",
+                        table : "cms_users"
+                    }
+                    aJax.post(url,data,function(result){
+                        var obj = is_json(result);
+                        if (obj.length > 0){
+                            modal.alert(error_value_used, "error", function(){});
+                            $('.btn_status').hide();
+                            $(".select:checked").prop("checked", false);
+                        } else {
+                            var url = "<?= base_url('cms/global_controller');?>";
+                            var dataList = [];
+                            
+                            $('.select:checked').each(function () {
+                                var id = $(this).attr('data-id');
+                                dataList.push({
+                                    event: "update",
+                                    table: "cms_user_roles",
+                                    field: "id",
+                                    where: id,
+                                    data: {
+                                        status: status,
+                                        updated_date: formatDate(new Date())
+                                    }
+                                });
+                                var customURL = "<?= base_url('cms/role/delete_role_tagging');?>"; 
+                                var data = {
+                                    role_id : id
+                                }
+                                aJax.post(customURL,data,function(result){});
+                            });
+
+                            if (dataList.length === 0) return;
+
+                            var processed = 0;
+                            dataList.forEach(function (data, index) {
+                                aJax.post(url, data, function (result) {
+                                    if (hasExecuted) return; // Prevents multiple executions
+
+                                    modal.loading(false);
+                                    processed++;
+
+                                    if (result === "success") {
+                                        if (!hasExecuted) {
+                                            hasExecuted = true;
+                                            $('.btn_status').hide();
+                                            modal.alert(modal_alert_success, "success", function () {
+                                                location.reload();
+                                            });
+                                        }
+                                    } else {
+                                        if (!hasExecuted) {
+                                            hasExecuted = true;
+                                            modal.alert(failed_transaction_message, "error", function () {});
+                                        }
+                                    }
+                                });
+                            });   
+                        }
+
+                    });
+                }else{
+                    var url = "<?= base_url('cms/global_controller');?>";
+                    var dataList = [];
+                    
+                    $('.select:checked').each(function () {
+                        var id = $(this).attr('data-id');
+                        dataList.push({
+                            event: "update",
+                            table: "cms_user_roles",
+                            field: "id",
+                            where: id,
+                            data: {
+                                status: status,
+                                updated_date: formatDate(new Date())
+                            }
+                        });
+                    });
+
+                    if (dataList.length === 0) return;
+
+                    var processed = 0;
+                    dataList.forEach(function (data, index) {
+                        aJax.post(url, data, function (result) {
+                            if (hasExecuted) return; // Prevents multiple executions
+
+                            modal.loading(false);
+                            processed++;
+
+                            if (result === "success") {
+                                if (!hasExecuted) {
+                                    hasExecuted = true;
+                                    $('.btn_status').hide();
+                                    modal.alert(modal_alert_success, "success", function () {
+                                        location.reload();
+                                    });
+                                }
+                            } else {
+                                if (!hasExecuted) {
+                                    hasExecuted = true;
+                                    modal.alert(failed_transaction_message, "error", function () {});
+                                }
+                            }
+                        });
+                    });                    
+                }
+
+            }
+        });
+    });
+
+    function get_data_modules(query, action){
+        var exists = 0;
         var url = "<?= base_url('cms/global_controller');?>";
+        var select = "";
+        var join = [];
+        if(action == "add"){
+            select = "`cms_menu`.`id` as `menu_id`,`menu_name`,`menu_type`,`menu_parent_id`,`menu_level`,`status`,`sort_order`";
+        }else{
+            select = "`cms_menu`.`id` as `menu_id`,`menu_name`,`menu_type`,`menu_parent_id`,`menu_level`,`status`,`sort_order`,`role_id`,`cms_menu_roles`.`menu_id` as `roles_menu_id`,`menu_role_read`,`menu_role_write`,`menu_role_delete`";
+            join.push({
+                table: "cms_menu_roles", // Table name
+                query: "cms_menu_roles.menu_id = cms_menu.id", // Join condition
+                type: "left" // Type of join
+            });
+        }
         var data = {
              event: "list",
-             select: "`cms_menu`.`id` as `menu_id`,`menu_name`,`menu_type`,`menu_parent_id`,`menu_level`,`status`,`sort_order`,`role_id`,`cms_menu_roles`.`menu_id` as `roles_menu_id`,`menu_role_read`,`menu_role_write`,`menu_role_delete`",
+             select: select,
              table: "cms_menu",
              query: query,
-             join : [ //optional
-                {
-                    table : "cms_menu_roles", //table
-                    query : "cms_menu_roles.menu_id = cms_menu.id", //join query
-                    type : "left" //type of join
-                }
-            ],
+             join : join,
              order: {
                 field: "sort_order",
                 order: "asc"
              }
         }
 
-        aJax.post_async(url,data,function(result){
-            var obj = is_json(result);
+        aJax.post(url,data,function(result){
+            var result = JSON.parse(result);
             var htm = '';
-
-           if(obj.length > 0){  
-                $.each(obj,function(x,y){
-                    var checked_read = ( y.menu_role_read == 1 ) ? checked_read = "checked" : checked_read = "";
-                    var checked_write = ( y.menu_role_write == 1 ) ? checked_write = "checked" : checked_write = "";
-                    var checked_delete = ( y.menu_role_delete == 1 ) ? checked_delete = "checked" : checked_delete = "";
+            if(result.length > 0){  
+                $.each(result,function(x,y){
+                    if(action == "add"){
+                        var checked_read = "";
+                        var checked_write = "";
+                        var checked_delete = "";
+                    }else{
+                        var checked_read = ( y.menu_role_read == 1 ) ? checked_read = "checked" : checked_read = "";
+                        var checked_write = ( y.menu_role_write == 1 ) ? checked_write = "checked" : checked_write = "";
+                        var checked_delete = ( y.menu_role_delete == 1 ) ? checked_delete = "checked" : checked_delete = "";
+                    }
 
                     htm += "<ul class='parent_menu'>";
-                        if(y.menu_level == 1){
+                        if(parseInt(y.menu_level) === 1){
                           htm += "<li class='main_menu_cmsmenu_"+y.menu_id+"'>";
-                          htm += "<div class='menu_title'><input type='hidden' class='menu_id_"+counter+"' data-id="+y.menu_id+"><span>"+y.menu_name+"</span></div>"; 
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu  read_"+counter+" chckbx_menu_read parent_chckbox_read_"+y.menu_id+"' type = 'checkbox'  name='menu_role_read' data-id="+y.menu_id+" value="+y.menu_role_read+" onchange='chckbox_parent_menu("+y.menu_id+")' "+checked_read+"></div>";
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu write_"+counter+" chckbx_menu_write parent_chckbox_write_"+y.menu_id+"' name='menu_role_write' type = 'checkbox' data-id="+y.menu_id+" value="+y.menu_role_write+" onchange='chckbox_parent_menu("+y.menu_id+")'  "+checked_write+"></div>";
-                          htm += "<div class='menu_chkbx'><input class='chckbx_menu delete_"+counter+" chckbx_menu_delete parent_chckbox_delete_"+y.menu_id+"' name='menu_role_delete' type = 'checkbox' data-id="+y.menu_id+" value="+y.menu_role_delete+" onchange='chckbox_parent_menu("+y.menu_id+")' "+checked_delete+"></div>";
+                          htm += "<div class='menu_title'><input type='hidden' class='menu_id_cms menu_id_"+counter_cmsmenu+"' data-id="+y.menu_id+"><span>"+y.menu_name+"</span></div>"; 
+                          htm += "<div class='menu_chkbx'><input class='chckbx_menu read_cms read_"+counter_cmsmenu+" chckbx_menu_read parent_chckbox_read_"+y.menu_id+"' type = 'checkbox'  name='menu_role_read' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu("+y.menu_id+")' "+checked_read+"></div>";
+                          htm += "<div class='menu_chkbx'><input class='chckbx_menu write_cms write_"+counter_cmsmenu+" chckbx_menu_write parent_chckbox_write_"+y.menu_id+"' name='menu_role_write' type = 'checkbox' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu("+y.menu_id+")' "+checked_write+"></div>";
+                          htm += "<div class='menu_chkbx'><input class='chckbx_menu delete_cms delete_"+counter_cmsmenu+" chckbx_menu_delete parent_chckbox_delete_"+y.menu_id+"' name='menu_role_delete' type = 'checkbox' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu("+y.menu_id+")' "+checked_delete+"></div>";
                           htm += "</li>";
-                          get_sub_menu2(y.menu_id, "cms_menu", "cmsmenu");
+                              get_sub_menu(y.menu_id, "cms_menu", "cmsmenu", action);
                         }
                     htm += "</ul>";
-                    counter++;
+                    counter_cmsmenu++;
                 });
 
 
 
-             }else{
-                htm += '    <ul>';
-                htm += '        <li class="ta_c">No Results Found.</li>';
-                htm += '    </ul>';
-             }
+            } else {
+                htm += '<ul>';
+                htm += '<li class="ta_c;">No Results Found.</li>';
+                htm += '</ul>';
+            }
+            
             $('.module_body_container').html(htm);
-
         });
     }
 
+    function open_modal(msg, actions, id) {
+        modal.loading(true);
+        $(".form-control").css('border-color','#ccc');
+        $(".validate_error_message").remove();
+        let $modal = $('#user_role_modal');
+        let $footer = $modal.find('.modal-footer');
+
+        $modal.find('.modal-title b').html(addNbsp(msg));
+        reset_modal_fields();
+
+        let buttons = {
+            save: create_button('Save', 'save_data', 'btn save', function () {
+                if (validate.standard("form-modal")) {
+                    save_data('save', null);
+                }
+            }),
+            edit: create_button('Update', 'edit_data', 'btn update', function () {
+                if (validate.standard("form-modal")) {
+                    save_data('update', id);
+                }
+            }),
+            close: create_button('Close', 'close_data', 'btn caution', function () {
+                $modal.modal('hide');
+            })
+        };
+
+        if (['edit', 'view'].includes(actions)) populate_modal(id);
+        
+        let isReadOnly = actions === 'view';
+        
+
+        $footer.empty();
+        if (actions === 'add') $footer.append(buttons.save);
+        if (actions === 'edit') $footer.append(buttons.edit);
+        $footer.append(buttons.close);
+        if(id == ""){
+            var query = "`menu_level` = 1 and `status` = 1";
+            get_data_modules(query, "add");
+            get_data_site_menu(query, "add");
+        }
+        
+        setTimeout(() => {
+            modal.loading(false);
+            $modal.modal('show');
+            set_field_state('#name, #status, .chckbx_menu_site, .chckbx_menu, .select_all_view, .select_all_generate, .select_all_export, .select_all_read, .select_all_write, .select_all_delete', isReadOnly);
+        }, 2000);
+        
+    }
+
+    function populate_modal(inp_id) {
+        var query = "status >= 0 and id = " + inp_id;
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list", 
+            select : "id, name, status",
+            query : query, 
+            table : "cms_user_roles"
+        }
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            if(obj){
+                $.each(obj, function(index,d) {
+                    $('#id').val(d.id);
+                    $('#name').val(d.name);
+                    if(d.status == 1) {
+                        $('#status').prop('checked', true)
+                    } else {
+                        $('#status').prop('checked', false)
+                    }
+
+                    roles_menu_id = d.id;
+                    if(role === 1){
+                      query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 and role_id != 0";
+                    }else{
+                       query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 AND `menu_id` != 8 AND `menu_id` != 6 and role_id != 0";
+                    }
+                    get_data_modules(query, "edit");
+                    get_data_site_menu(query, "edit");
+                }); 
+            }
+        });
+    }
+
+    function view_data(id) {
+        open_modal('View Role', 'view', id);
+    }
+
+    function edit_data(menu_role_id, role, status){
+        open_modal('Edit Role', 'edit', menu_role_id);
+    }
+
+    function set_field_state(selector, isReadOnly) {
+        $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
+    }
+
     function formatDate(date) {
-        // Get components of the date
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const month = String(date.getMonth() + 1).padStart(2, '0'); 
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');

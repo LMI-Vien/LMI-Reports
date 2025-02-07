@@ -83,148 +83,99 @@ class Login extends BaseController
 	}
 
 	public function validate_log() {
-		
-		$session = session();
-		$details_cms = details("cms_preference",1);
-		$ad_authentication = $details_cms[0]->ad_authentication;
-		$ad_status = $this->request->getPost('ad_status');
-		$username = '';
+	    $session = session();
+	    $details_cms = details("cms_preference", 1);
+	    $ad_authentication = $details_cms[0]->ad_authentication;
+	    $ad_status = $this->request->getPost('ad_status');
+	    $username = $this->request->getPost('username');
 
-		$table = 'cms_users'; 
-		$field = '';
-		$where = '';
-		$login_attempts = '';
-		$current_datetime = date("Y-m-d H:i:s");
-		$account = '';
-		if(valid_email($this->request->getPost('username'))){
-			$account = $this->Global_model->check_email($this->request->getPost('username'));
-		}else{
-			$account = $this->Global_model->check_user($this->request->getPost('username'));
-		}
+	    $current_datetime = date("Y-m-d H:i:s");
+	    $table = 'cms_users';
+	    $field = 'username';
 
-		if($account != null &&  $account[0]->role == 1){ //Checks if user is Super Admin
-			$check_user = $account;
-			$username = $check_user[0]->username;
-		}else{
-			$username = $this->request->getPost('username');
-			$check_user = $this->Global_model->check_user($username);
-		}
+	    // Determine if login is via email or username
+	    $account = valid_email($username) ? $this->Global_model->check_email($username) : $this->Global_model->check_user($username);
+	    
+	    if (!$account) {
+	        echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
+	        return;
+	    }
 
-		$field = 'username';
-		$where = $username;
-		$count = count($check_user);
+	    $user = $account[0];
+	    $username = $user->username;
+	    $login_attempts = '';
 
-		//Login attemps Counter
-		$res = 0;
-		if($check_user != null && $check_user[0]->status == 1){
-			if($check_user[0]->user_error_logs == 0){
-				$login_attempts = '2 attempts remaining';
-			}elseif ($check_user[0]->user_error_logs == 1) {
-				$login_attempts = '1 attempt remaining';
-			}
-		}
-		
-		if($count == 1){
-			
-			if($check_user[0]->user_block_logs != 3){
-				//check if username is disabled or less than 3 attempts
-				
-				if($check_user[0]->user_lock_time == null || $current_datetime >=  $check_user[0]->user_lock_time){
-					//set user error logs to 0
-					if($check_user[0]->user_error_logs >= 3){
-					  	$data['user_error_logs'] = 0;
-					  	$data['user_lock_time'] = null;
-					  	$this->Global_model->update_data($table,$data,$field,$where);
-					  	$login_attempts = '2 attempts remaining';
-					}
-					
-					$password = hash('sha256', $_POST['password']);
-					
-					if ($check_user[0]->role == 1) {// If user role is Super Admin
-						if (valid_email($this->request->getPost('username')) ){
-							$data = ($ad_status == 'success') ? $check_user : null;
-						} else {
-							
-							$data = $this->Global_model->validate_log($username, $password);
-							$res = ($data);
-						}
-					} else {
-						$data = $this->Global_model->validate_log($username, $password);
-						$res = ($data);
-					}
-					
-					if($data != null)
-					{
-							
-						$result_data = count($data);
-						$user_count = 0;
-						$user_session = 0;
-						if($result_data > 0 )
-						{
-							foreach($data as $login_data)
-							{
-								if($login_data->status > 0 )
-								{
-									
-									//if count = 3 account is active 
-									$table = 'cms_users';
-									$field = 'username';
-									$where = $username;
-									$user_data['user_error_logs'] = 0;
-									$user_data['user_lock_time'] = null;
+	    // Handle login attempts message
+	    if ($user->status == 1) {
+	        switch ($user->user_error_logs) {
+	            case 0: $login_attempts = '2 attempts remaining'; break;
+	            case 1: $login_attempts = '1 attempt remaining'; break;
+	        }
+	    }
 
-									$this->Global_model->update_data($table,$user_data,$field,$where);
-									//Check expiration of password
-									$expiration_days = $this->check_expiration_of_password($check_user[0]->id);
-									if($expiration_days > 90){
-										$count += 4; //expired password
-										$this->send_email($check_user[0]->email); //send email reset password
-									}else if($expiration_days > 83){
-										$count += 2;
-										$days_left = 90 - $expiration_days;
-										$user_session++;
-										$this->set_session($data);
-										$session->setFlashdata('toast_message', 'You only have '.$days_left.' day(s) left before your password expires. Please change immediately.');
-									}else{
-										$count += 2;
-										$user_session++;
-										$this->set_session($data);
-									}
-								}
-								else
-								{
-									$user_count++;
-								}
-							}
-							if($user_count && ($user_session == 0))
-							{
-								$this->get_error_logs($username);
-								$count += 1;
-							}				
-						}
-						else 
-						{
-							$this->get_error_logs($username);
-						}
-					}
-					else
-					{
-						$this->get_error_logs($username);
-					}
-				}else{
-					$count += 3;
-				}
-			}else{
-				$count += 5;
-			}
-		}	
+	    // Check if account is blocked or locked
+	    if ($user->user_block_logs == 3) {
+	        echo json_encode(['count' => 5, 'result' => null, 'message' => 'Account is blocked', 'message' => $login_attempts]);
+	        return;
+	    }
+	    
+	    if ($user->user_lock_time && $current_datetime < $user->user_lock_time) {
+	        echo json_encode(['count' => 4, 'result' => null, 'message' => 'Account is temporarily locked', 'message' => $login_attempts]);
+	        return;
+	    }
 
-		$resul_array = array(
-			'count' => $count,
-			'result'=>$res,
-			'message' => $login_attempts
-		);
-		echo json_encode($resul_array);
+	    // Reset login attempts if needed
+	    if ($user->user_error_logs >= 3) {
+	        $this->Global_model->update_data($table, ['user_error_logs' => 0, 'user_lock_time' => null], $field, $username);
+	        $login_attempts = '2 attempts remaining';
+	    }
+
+	    // Authenticate user
+	    $password = $this->request->getPost('password');
+	    $data = ($user->role == 1 && valid_email($username) && $ad_status == 'success') 
+	            ? $account 
+	            : $this->Global_model->validate_log($username, $password);
+	    if(empty($data)){
+			$this->get_error_logs($username);
+		    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'message' => $login_attempts]);
+		    return;
+	    }        
+	    if ($data->status > 0) {
+
+			$table = 'cms_users';
+			$field = 'username';
+			$where = $username;
+			$user_data['user_error_logs'] = 0;
+			$user_data['user_block_logs'] = 0;
+			$user_data['user_lock_time'] = null;
+
+			$this->Global_model->update_data($table,$user_data,$field,$where);
+
+	        // Handle session and password expiration
+	        $expiration_days = $this->check_expiration_of_password($user->id);
+	        if ($expiration_days > 90) {
+	            //$this->send_email($user->email);
+	            echo json_encode(['count' => 6, 'result' => null, 'message' => 'Password expired', 'message' => $login_attempts]);
+	            return;
+	        }
+
+	        $days_left = 90 - $expiration_days;
+	        if ($expiration_days > 83) {
+	            $session->setFlashdata('toast_message', "You have $days_left day(s) left before your password expires. Please change immediately.");
+	        }
+
+	        $this->set_session($data);
+	        echo json_encode(['count' => 3, 'result' => $data, 'message' => 'Login successful', 'message' => $login_attempts]);
+	        return;
+	    }else{
+	    	$this->get_error_logs($username);
+	    	echo json_encode(['count' => 2, 'result' => null, 'message' => 'Inactive Account', 'message' => $login_attempts]);
+	    	return;
+	    }
+	    // Failed login attempt handling
+	    $this->get_error_logs($username);
+	    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'message' => $login_attempts]);
+	    return;
 	}
 
 	public function get_error_logs($username){
@@ -256,29 +207,38 @@ class Login extends BaseController
 		$this->Global_model->update_data($table,$data,$field,$where);
 	}
 
-	public function set_session($data) 
-	{
+	public function set_session($data) {
+	    if (is_object($data)) {
+	        $data = [$data];
+	    } elseif (!is_array($data) || empty($data)) {
+	        return;
+	    }
 
-		foreach ($data as $key => $value) {
-			$newdata = array(
-				'sess_uid'  => $value->id,
-		        'sess_user' => $value->username,
-		        'sess_email' => $value->email,
-		        'sess_name' => $value->name,
-		        'sess_role' => $value->role
-			);
-			
-			//add to audit trail
-		    $data2['user_id'] = $value->id;
-		  	$data2['url'] = "";
-		  	$data2['action'] = strip_tags(ucwords("Login"));
-		  	$data2['created_date'] = date('Y-m-d H:i:s'); 
-		  	$table = 'cms_audit_trail';
-			  
-		  	$this->Global_model->save_data($table,$data2);
-		}
-		$session = session();
-		$session->set($newdata);
+	    $session = session();
+
+	    foreach ($data as $value) {
+	        if (!is_object($value)) {
+	            continue; // Skip invalid data
+	        }
+		
+	        $newdata = [
+	            'sess_uid'  => $value->id,
+	            'sess_user' => $value->username,
+	            'sess_email' => $value->email,
+	            'sess_name' => $value->name,
+	            'sess_role' => $value->role
+	        ];
+
+	        // Add to audit trail
+	        $data2 = [
+	            'user_id' => $value->id,
+	            'url' => "",
+	            'action' => strip_tags(ucwords("Login")),
+	            'created_date' => date('Y-m-d H:i:s')
+	        ];
+	        $this->Global_model->save_data('cms_audit_trail', $data2);
+	    }
+	    $session->set($newdata);
 	}
 
 	public function sign_out() {
@@ -363,5 +323,40 @@ class Login extends BaseController
         );
         $this->Global_model->save_data("cms_site_token",$data);
         return $token;
+    }
+    public function testing(){
+		//$salt = md5(1);
+		$salt = "b91614712c2120a58ef2c011130552c6";
+		$password1 = "Testing@1234";
+
+		// Hash the password with the salt
+		$salted_password = hash("sha256", $password1 . $salt);
+
+		// Hash the salted password with password_hash
+		$options = ['cost' => 12];
+		$hash = password_hash($salted_password, PASSWORD_DEFAULT, $options);
+
+		// Simulating stored hashed password (normally retrieved from the database)
+		$stored_hashed_password = '$2y$12$REv9ggUzP7lcGQuOscD/sOZ3vKYpU2mAURiBkZURQ88wwp1MRf3by'; 
+
+		// Verify if the entered password matches the stored hashed password
+		$input_password = "Testing@1234"; // User input during login
+		$input_salted_password = hash("sha256", $input_password . $salt);
+
+		if (password_verify($input_salted_password, $stored_hashed_password)) {
+		    echo "true"; // Password is correct
+		} else {
+		    echo "false"; // Password is incorrect
+		}
+
+		echo "\nStored Hash: " . $hash;
+        // $user = array(
+        //         'password' => $salted_password,
+        //         'update_date' => date('Y-m-d H:i:s')
+        //      );
+        // $data2 = array( 'user_id' => 28, 'password' => $salted_password ); //historical
+
+        // $this->Global_model->update_data("cms_users",$user,"id",$user_id);
+        echo "success";
     }
 }

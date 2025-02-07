@@ -27,7 +27,7 @@ class Standard extends BaseConfig
     public $unblock_success = "<b>Success!</b> Record has been unblocked.";
     public $user_role_used = "<b>Error!</b> User Role is in used.";
     public $user_role_deactivated = "<b>Error!</b> User Role is deactivated or trashed.";
-    public $value_used = "<b>Error!</b> Unable to set the record to Inactive since it is currently used.";
+    public $value_used = "<b>Error!</b> Unable to set the record to Inactive/Trash since it is currently used.";
     public $value_trashed = "<b>Error!</b> Value is inactive/trashed.";
     public $scrape_success = "<b>Notice:</b> Article has been automatically scraped (for Facebook posting purposes).";
     

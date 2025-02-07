@@ -45,4 +45,94 @@ class User extends BaseController
 		return view("cms/layout/template", $data);	
 	}
 
+	public function save_user(){
+		$salt = md5(date('Y-m-d H:i:s'));
+        $data = $this->request->getPost('data');
+
+        $password1 = $data['password1'];
+        $password2 = $data['password2'];
+        if($password1 != $password2){
+            $message = "Password not matched!";
+            $success = false;
+        }else {
+        	$salted_password = hash("sha256", $password1.$salt);
+            $options = ['cost' => 12];
+            $hash = password_hash($salted_password, PASSWORD_DEFAULT, $options);
+            $user = array(	
+            				'username' => $data['username'],
+            				'email' => $data['email'],
+            				'name' => $data['name'],
+            				'password' => $hash,
+                            'salt' => $salt,
+                            'created_date' => date('Y-m-d H:i:s'),
+                            'status' => $data['status'],
+                            'role' => $data['role'],
+                            'dashboard_access' => $data['dashboard_access'],
+                            'created_by' => $data['created_by']
+
+                         );
+            $id =  $this->Global_model->save_data("cms_users",$user);
+            $data2 = array( 'user_id' => $id, 'password' => $hash );
+           
+            $this->Global_model->save_data("cms_historical_passwords", $data2);
+            $message = "success";
+            $success = true;
+		}
+		echo json_encode(array("success"=>$success, "message"=>$message));
+	}
+	public function update_user(){
+        $data = $this->request->getPost('data');
+        $user_id = $this->request->getPost('user_id');
+
+        $update_password = $data['update_password']; 
+        // echo $update_password;
+        // die();
+        if($update_password == 'true' || $update_password === true){
+            $password1 = $data['password1'];
+            $password2 = $data['password2'];
+            if($password1 != $password2){
+                $message = "Password not matched!";
+                $success = false;
+            }else {
+                $salt = $this->Global_model->get_password_salt($user_id);
+                $salted_password = hash("sha256", $password1.$salt);
+                $options = ['cost' => 12];
+                $hash = password_hash($salted_password, PASSWORD_DEFAULT, $options);
+                $user = array(  
+                                'username' => $data['username'],
+                                'email' => $data['email'],
+                                'name' => $data['name'],
+                                'password' => $hash,
+                                'salt' => $salt,
+                                'updated_date' => date('Y-m-d H:i:s'),
+                                'status' => $data['status'],
+                                'role' => $data['role'],
+                                'dashboard_access' => $data['dashboard_access'],
+                                'updated_by' => $data['updated_by']
+
+                             );
+                $result1 = $this->Global_model->update_data('cms_users',$user,'id',$user_id);
+                $data2 = array( 'user_id' => $user_id, 'password' => $hash );
+                $result2 = $this->Global_model->save_data('cms_historical_passwords',$data2);
+                $message = "success";
+                $success = true;
+            }
+        }else{
+             $user = array(  
+                        'username' => $data['username'],
+                        'email' => $data['email'],
+                        'name' => $data['name'],
+                        'updated_date' => date('Y-m-d H:i:s'),
+                        'status' => $data['status'],
+                        'role' => $data['role'],
+                        'dashboard_access' => $data['dashboard_access'],
+                        'updated_by' => $data['updated_by']
+
+                     );
+            $result1 = $this->Global_model->update_data('cms_users',$user,'id',$user_id);
+            $message = "success";
+            $success = true;
+        }
+        echo json_encode(array("success"=>$success, "message"=>$message));
+	}
 }

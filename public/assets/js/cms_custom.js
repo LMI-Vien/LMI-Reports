@@ -89,9 +89,9 @@ var aJax = {
 
 //validation
 var validate = {
-	email_address : function(email){
-		var pattern = /^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i;
-		return pattern.test(email);
+    email_address: function(email) {
+        var pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return pattern.test(email);
 	},
 	required: function(element){
 		var counter = 0;
@@ -440,6 +440,7 @@ var validate = {
 var modal = {
 	confirm : function(data,cb){
 			var mdl_data = is_json(data);
+			Swal.close();
 			Swal.fire({
 			title: mdl_data.message,
 			icon: "question",
@@ -459,8 +460,9 @@ var modal = {
 		    }
 		  });
 	},
-	alert : function(data, icon, cb){
-		Swal.fire({
+	alert : function(data, icon = 'success', cb){
+			Swal.close();
+			Swal.fire({
 			title: data,
 			icon: icon,
 			confirmButtonColor: "#FE9900",
@@ -476,6 +478,7 @@ var modal = {
 	},
 	loading : function(isloading){
 		if(isloading){
+			Swal.close();
 			Swal.fire({
 			    title: 'Please wait...',
 			    text: 'Processing your request...',
@@ -490,6 +493,7 @@ var modal = {
 		}
 	},loading_progress : function(isloading, text){
 		if(isloading){
+			Swal.close();
             Swal.fire({
             title: "Importing Data...",
             html: '<div id="progress-container" style="width:100%;background:#ddd;height:10px;border-radius:5px;overflow:hidden;">' +
@@ -505,6 +509,7 @@ var modal = {
 			Swal.close();
 		}
 	},content : function(data, icon, html = '', swwidth = '500px',  cb){
+			Swal.close();
 			Swal.fire({
 			title: data,
 			icon: icon,
@@ -961,8 +966,10 @@ function check_current_db(table, fields, values, status, excludeField, excludeId
         conditions.push([field, values[index]]);
     });
 
+    action = "add";
     if (excludeField && excludeId) {
         conditions.push([excludeField + " !=", excludeId]);
+        action = "edit";
     }
 
     conditions.push([status + " >=", 0]);
@@ -972,7 +979,8 @@ function check_current_db(table, fields, values, status, excludeField, excludeId
         select: [...fields, status].join(", "),
         query: conditions, // Send as an array
         table: table,
-        use_or: useOr
+        use_or: useOr,
+        action:action
     };
 
     aJax.post(url, data, function (result) {
@@ -1044,4 +1052,26 @@ function list_existing(table, selected_fields, haystack, needle, callback) {
 
 		callback(result)
 	});
+}
+
+function addNbsp(inputString) {
+    return inputString.split('').map(char => {
+        if (char === ' ') {
+        return '&nbsp;&nbsp;';
+        }
+        return char + '&nbsp;';
+    }).join('');
+}
+
+function ViewDateformat(dateString) {
+    let date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        hour12: true 
+    });
 }

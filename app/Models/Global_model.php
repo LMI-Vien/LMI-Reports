@@ -16,35 +16,27 @@ class Global_model extends Model
     }
 
     function validate_log($user, $pass) { 
+        // Get user record
         $builder = $this->db->table('cms_users')
                             ->select('password, salt')
                             ->where('username', $user);
         $query = $builder->get();
-        $result = $query->getResult();
+        $result = $query->getRow(); 
 
-		if($pass.$result[0]->salt!=''){
-            $saltedpassword = hash('sha256', $pass.'89B6089108oI0409');
-        }else{
-            $saltedpassword = '';
+        if (!$result) {
+            return null;
         }
 
+        $salted_password = hash('sha256', $pass . $result->salt);
 
-        $storedpass = $result[0]->password;
-        $options = ['cost' => 12];
-
-        $hash = password_hash($saltedpassword, PASSWORD_DEFAULT, $options);
-     
-        if (password_verify($storedpass, $hash)) {
-            $selectQuery = $this->db->table('cms_users')
-                                    ->where('username', $user)
-                                    ->where('password', $storedpass); 
-
-            $fquery = $selectQuery->get();
-            return $fquery->getResult();
+        if (password_verify($salted_password, $result->password)) {
+            return $this->db->table('cms_users')
+                            ->where('username', $user)
+                            ->get()
+                            ->getRow();
         } else {
             return null;
-        }	
-         
+        }   
     }
 
     function validate_log_report_user($user, $pass) { 
@@ -229,7 +221,7 @@ class Global_model extends Model
         return $q->getResult();
     }
 
-    function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false)
+    function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false, $action)
     {
         $builder = $this->db->table($table);
         $builder->select($select);
@@ -237,7 +229,11 @@ class Global_model extends Model
         if (!empty($conditions) && is_array($conditions)) {
             $totalConditions = count($conditions);
 
-            $groupSize = max(1, $totalConditions - 2);
+            $groupSize = max(1, $totalConditions - 1);
+            if($action == "edit"){
+                $groupSize = max(1, $totalConditions - 2);
+            }
+            
             $groupedConditions = array_slice($conditions, 0, $groupSize);
             $remainingConditions = array_slice($conditions, $groupSize);
 
@@ -377,117 +373,6 @@ class Global_model extends Model
                 endif;
     }
 
-    function tagging_delete_sub_ingredients($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("ingredient_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_causes_preventions($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("symptoms_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_category_data($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("product_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_product_data($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("article_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_saf_product_data($table, $id)
-    {
-        $return = $this->db
-                            ->table($table)
-                            ->where("saf_id", $id)
-                            ->delete();
-                    if($return):
-                        return "success";
-                    else:
-                        return "failed";
-                    endif;
-    }
-
-    function tagging_delete_product_info_images_data($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("product_info_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_promo_media($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("promo_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_product_variant_related_data($table, $id){
-        $return = $this->db
-                ->table($table)
-                ->where("product_variant_id", $id)
-                ->delete();
-        if($return):
-            $updated_status = $this->db
-                ->table($table)
-                ->where("related_product_variant_id", $id)
-                ->delete();
-                if($updated_status){
-                    return "success";
-                }else{
-                    return "failed";
-                }
-        else:
-            return "failed";
-        endif;
-    }
-
     function tagging_delete_email_recipient($table, $id)
     {
         $return = $this->db
@@ -501,33 +386,6 @@ class Global_model extends Model
                 endif;
     }
 
-    function tagging_delete_product_subnav($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("site_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-    function tagging_delete_related_product($table, $id)
-    {
-        $return = $this->db
-                        ->table($table)
-                        ->where("related_product_variant_id", $id)
-                        ->delete();
-                if($return):
-                    return "success";
-                else:
-                    return "failed";
-                endif;
-    }
-
-
     function get_admin(){
         $builder = $this->db->table('cms_users')
                             ->whereIn('status', [1, 2]);
@@ -535,20 +393,6 @@ class Global_model extends Model
         return $query->getResult();
     }
 
-    function check_visit($unid, $type, $url, $date = null)
-    {
-        
-        $builder = $this->db->table('site_analytics')
-                        ->where('unid', $unid)
-                        ->where('url', $url)
-                        ->where('type', $type);
-                if($date != null){
-                $builder->like('datetime', $date);
-                }
-                $query = $builder->get();
-                return $query->countAllResults();
-
-    }
 
     function db_search($search_values)
     {
@@ -599,23 +443,6 @@ class Global_model extends Model
         return $query->getResult();
     }
 
-    function site_meta_og($id, $table, $field)
-    {
-        $full_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        $selectQuery = $this->db->table('cms_seo')
-                                ->where('url', $full_url);
-        $query_first = $selectQuery->get("cms_seo");
-        $count = $query_first->countAllResults();
-
-        if($count > 0){
-            return $query_first->getRowArray()[$field];
-        }else{
-            $builder = $this->db->table($table)
-                                ->where('id', $id);
-            $query = $builder->get();
-            return $query->getRowArray()[$field];
-        }
-    } 
 
     function get_historical_passwords($user_id, $password)
     {
@@ -713,14 +540,7 @@ class Global_model extends Model
         return $result[0]->salt;
     }
 
-    function get_cookie_banner_notification() {
-        $builder = $this->db->table('site_information')
-                            ->select('site_cookie_notif_message')
-                            ->where('id', 1);
-        $query  = $builder->get();
-        $result = $query->getResult();
-        return $result[0]->site_cookie_notif_message;
-    }
+
     function list_tables()
 	{
 		return $this->db->listTables();

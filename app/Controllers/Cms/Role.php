@@ -29,7 +29,7 @@ class Role extends BaseController
 		$data['PageName'] = 'Roles';
 		$data['PageUrl'] = 'Roles';
 		$data['content'] = "cms/roles/roles.php";
-		$data['buttons'] = ['add', 'search', 'import'];
+		$data['buttons'] = ['add', 'search'];
 		$data['session'] = session(); //for frontend accessing the session data
 
 		$data['js'] = array(
@@ -45,5 +45,48 @@ class Role extends BaseController
                     );
 		return view("cms/layout/template", $data);		
 	}
+
+	public function menu_update() {
+		$table = 'cms_user_roles';
+		$role_access_cms = $_POST['cms_menu_role_data'];
+		$role_access_site = $_POST['site_menu_role_data'];
+		$role_id = $_POST['user_role_data'];
+		$this->Custom_model->menu_role_insert($role_id, $role_access_cms);
+		$this->Custom_model->menu_role_insert_site($role_id, $role_access_site);
+	}
+
+	public function menu_insert() {
+		$table = 'cms_user_roles';
+		$user_role = $_POST['user_role_data'];
+		$role_access_cms = $_POST['cms_menu_role_data'];
+		$role_access_site = $_POST['site_menu_role_data'];
+		$user_role_id = $this->Global_model->save_data($table,$user_role);
+		$this->Custom_model->menu_role_insert($user_role_id, $role_access_cms);
+		$this->Custom_model->menu_role_insert_site($user_role_id, $role_access_site);
+		$this->audit_trail();
+	}
+
+	public function delete_role_tagging(){
+		$role_id = $_POST['role_id'];
+		$table = "cms_menu_roles";
+
+		$status = $this->Custom_model->delete_role_tagging($role_id);
+
+		echo $status;
+	}
+
+	public function audit_trail()
+	{
+		$auditData['user_id'] = session()->sess_uid;
+		$auditData['url'] =str_replace(base_url("dynamic") . '/', "", $_SERVER['HTTP_REFERER']); ;
+	  	$auditData['action'] = strip_tags(ucwords("Create"));
+	  	$auditData['created_date'] = date('Y-m-d H:i:s'); 
+		$table = 'cms_audit_trail';
+
+		if($auditData['user_id'] != null){
+			$this->Global_model->save_data($table,$auditData);
+		}
+	}
+
 
 }

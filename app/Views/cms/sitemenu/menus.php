@@ -76,24 +76,102 @@
                         <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
         
-                    <div class="mb-3">
-                        <label for="menu_url" class="form-label">Menu URL</label>
-                        <textarea class="form-control required" id="menu_url" aria-describedby="menu_url" maxlength="100"></textarea>
-                        <small class="form-text text-muted">* required, must be unique, max 50 characters</small>
-                    </div>
-
-                    <div class="mb-3 type-dropdown">
-
-                    </div>
-                    
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="status" checked>
-                        <label class="form-check-label" for="status">Active</label>
-                    </div>
-                </form>
+    <div class="modal" tabindex="-1" id="add_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Menus</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span >&times;</span>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <form style="background-color: white !important; width: 100%;">
+                        <div class="mb-3">
+                            <label for="menu_name" class="form-label">Menu Name</label>
+                            <input type="text" class="form-control" id="menu_name" aria-describedby="menu_name">
+                            <small id="menu_name" class="form-text text-muted">* required, must be unique, max 25 characters</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="menu_url" class="form-label">Menu Url</label>
+                            <input type="text" class="form-control" id="menu_url" aria-describedby="menu_url">
+                            <small id="menu_url" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="menu_type" class="form-label">Menu Type</label>
+                            <br>
+                            <select name="menu_type" id="menu_type">
+                                <option value="" readonly>Please select...</option>
+                                <option value="Module">Module</option>
+                                <option value="Group Menu">Group Menu</option>
+                            </select>
+                            <small id="menu_type" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="status" checked>
+                            <label class="form-check-label" for="status">Active</label>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn save" id="add_data" onclick="validate_data('add_modal', 'save')">Save</button>
+                </div>
             </div>
 
-            <div class="modal-footer"></div>
+    <div class="modal" tabindex="-1" id="edit_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Menus</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span >&times;</span>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <form style="background-color: white !important; width: 100%;">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="menu_list_id" aria-describedby="menu_list_id" >
+                            <label for="menu_name" class="form-label">Menu Name</label>
+                            <input type="text" class="form-control" id="menu_name" aria-describedby="menu_name">
+                            <small id="menu_name" class="form-text text-muted">* required, must be unique, max 25 characters</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="menu_url" class="form-label">Menu Url</label>
+                            <input type="text" class="form-control" id="menu_url" aria-describedby="menu_url">
+                            <small id="menu_url" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="menu_type" class="form-label">Menu Type</label>
+                            <br>
+                            <select name="menu_type" id="menu_type">
+                                <option value="" readonly>Please select...</option>
+                                <option id="1" value="Module">Module</option>
+                                <option id="2" value="Group Menu">Group Menu</option>
+                            </select>
+                            <small id="menu_type" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="status" checked>
+                            <label class="form-check-label" for="status">Active</label>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn save" id="edit_data" onclick="validate_data('edit_modal', 'edit')">Save</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
