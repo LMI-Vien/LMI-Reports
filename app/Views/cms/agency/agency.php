@@ -271,6 +271,8 @@
     });
 
     $('#btn_import').on('click', function() {
+        title = addNbsp('IMPORT AGENCY')
+        $("#import_modal").find('.modal-title').find('b').html(title)
         $("#import_modal").modal('show')
         clear_import_table()
     });
