@@ -270,6 +270,8 @@
         });
 
         $('#btn_import').on('click', function() {
+            title = addNbsp('IMPORT STORE/BRANCH')
+            $("#import_modal").find('.modal-title').find('b').html(title)
             $("#import_modal").modal('show')
             clear_import_table()
         });
@@ -472,6 +474,224 @@
             });
         }
 
+        function clear_import_table() {
+            $(".import_table").empty()
+        }
+
+        function read_xl_file() {
+            clear_import_table();
+            var html = '';
+
+            const file = $("#file")[0].files[0];
+
+            if (file === undefined) {
+                modal.alert('Please select a file to upload', 'error', ()=>{})
+                return
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = e.target.result;
+                // convert the data to a workbook
+                const workbook = XLSX.read(data, {type: "binary"});
+                // get the first sheet
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                // convert the sheet to JSON
+                const jsonData = XLSX.utils.sheet_to_json(sheet);
+        
+                var tr_counter = 0;
+
+                jsonData.forEach(row => {
+                    var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+                    html += "<tr class=\""+rowClass+"\">";
+                    html += "<td>";
+                    html += tr_counter+1;
+                    html += "</td>";
+
+                    let record = row;
+
+                    let lowerCaseRecord = Object.keys(record).reduce((acc, key) => {
+                        acc[key.toLowerCase()] = record[key];
+                        return acc;
+                    }, {});
+        
+                    // create a table cell for each item in the row
+                    var td_validator = ['code', 'description', 'status'];
+                    td_validator.forEach(column => {
+                        html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
+                        html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
+                        html += "</td>";
+                    });
+                    html += "</tr>";
+                    tr_counter += 1;
+                });
+        
+                $(".import_table").append(html);
+                html = '';
+            };
+            reader.readAsBinaryString(file);
+        }
+
+        function proccess_xl_file() {
+            var extracted_data = $(".import_table");
+
+            var code = '';
+            var description = '';
+            var status = '';
+
+            var import_array = [];
+            var needle = [];
+
+            var invalid = false;
+            var errmsg = '';
+
+            var unique_code = [];
+            var unique_description = [];
+
+            var tr_count = 1;
+            var row_mapping = {};
+
+            extracted_data.find('tr').each(function () {
+                td_count = 1;
+                var temp = [];
+                $(this).find('td').each(function () {
+                    var text_val = $(this).html().trim();
+                    var error_messages = {
+                        code: {
+                            duplicate: "⚠️ Duplicated Code at line #: <b>{line}</b>⚠️<br>",
+                            length: "⚠️ Code exceeds 25 characters at line #: <b>{line}</b>⚠️<br>",
+                            empty: "⚠️ Code is empty at line #: <b>{line}</b>⚠️<br>"
+                        },
+                        description: {
+                            duplicate: "⚠️ Duplicated Description at line #: <b>{line}</b>⚠️<br>",
+                            length: "⚠️ Description exceeds 50 characters at line #: <b>{line}</b>⚠️<br>",
+                            empty: "⚠️ Description is empty at line #: <b>{line}</b>⚠️<br>"
+                        },
+                        status: "⚠️ Invalid Status at line #: <b>{line}</b>⚠️<br>"
+                    };
+
+                    const validateField = (type, value, maxLength, uniqueList) => {
+                        if (uniqueList.includes(value)) {
+                            invalid = true;
+                            errmsg += error_messages[type].duplicate.replace("{line}", tr_count);
+                        } else if (value.length > maxLength) {
+                            invalid = true;
+                            errmsg += error_messages[type].length.replace("{line}", tr_count);
+                        } else if (!value) {
+                            invalid = true;
+                            errmsg += error_messages[type].empty.replace("{line}", tr_count);
+                        } else {
+                            uniqueList.push(value);
+                            row_mapping[value] = tr_count;
+                        }
+                        return value;
+                    };
+
+                    switch (td_count) {
+                        case 2:
+                            code = validateField("code", text_val, 25, unique_code);
+                            break;
+                        case 3:
+                            description = validateField("description", text_val, 50, unique_description);
+                            break;
+                        case 4:
+                            if (["active", "inactive"].includes(text_val.toLowerCase())) {
+                                status = text_val.toLowerCase() === "active" ? 1 : 0;
+                            } else {
+                                invalid = true;
+                                errmsg += error_messages.status.replace("{line}", tr_count);
+                            }
+                            break;
+                    }
+
+                    td_count++;
+                });
+                tr_count += 1;
+                temp.push(code, description, status);
+                needle.push([code,description]);
+                import_array.push(temp);
+            })
+
+            if (tr_count === 1) {
+                modal.alert('Please select a file to upload', 'error', ()=>{})
+                return;
+            }
+
+            var temp_invalid = invalid;
+            var temp_errmsg = '';
+
+            invalid = temp_invalid;
+            errmsg += temp_errmsg;
+
+            var table = 'tbl_store';
+            var haystack = ['code', 'description'];
+            var selected_fields = ['id', 'code', 'description'];
+
+            if (invalid) {
+                modal.content('Error', 'error', errmsg, '600px', ()=>{});
+            } else {
+                list_existing(table, selected_fields, haystack, needle, function (result) {
+                    if (result.status != "error") {
+                        var batch = [];
+                        import_array.forEach(row => {
+                            let data = {
+                                'code': row[0],
+                                'description': row[1],
+                                'status': row[2],
+                                'created_by': user_id,
+                                'created_date': formatDate(new Date())
+                            };
+        
+                            batch.push(data);
+                        });
+        
+                        modal.loading(true);
+                        setTimeout(() => {
+                            batch_insert(batch, () => {
+                                modal.loading(false);
+                                modal.alert(success_save_message, 'success', () => {
+                                    if (result) {
+                                        location.reload();
+                                    }
+                                })
+                            })
+                        }, 1000);
+                    } else {
+                        let errmsg = "";
+                        let processedFields = new Set();
+
+                        $.each(result.existing, function (index, record) {
+                            $.each(record, function (field, value) {
+                                if (!processedFields.has(field + value)) { 
+                                    if (field === 'description') {
+                                        columnName = "Description"
+                                    } else {
+                                        columnName = "Code"
+                                    }
+                                    let line_number = row_mapping[value] || "Unknown";
+                                    errmsg += "⚠️ " + columnName + " already exists in masterfile at line #: <b>" + line_number + "</b>⚠️<br>";
+                                    processedFields.add(field + value); // Mark as processed
+                                }
+                            });
+                        });
+                        modal.content('Error', 'error', errmsg, '600px', () => {});
+                    }
+                })
+            }
+        }
+
+        function batch_insert(insert_batch_data, cb){
+            var url = "<?= base_url('cms/global_controller');?>";
+            var data = {
+                event: "batch_insert",
+                table: "tbl_store",
+                insert_batch_data: insert_batch_data
+            }
+
+            aJax.post(url,data,function(result){
+                cb(result.message)
+            });
+        }
+
         function formatDate(date) {
             // Get components of the date
             const year = date.getFullYear();
@@ -484,539 +704,6 @@
             // Combine into the desired format
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         }
-
-        // $(document).on('click', '#btn_add', function() {
-        //     title = addNbsp('ADD STORE/BRANCH')
-        //     $("#save_modal").find('.modal-title').find('b').html(title)
-        //     $("#save_modal").modal('show')
-        // });
-
-        // $(document).on('click', '#save_data', function(e){
-        //     save_data(e)
-        //     $("#save_modal").modal('hide')
-        // })
-
-        // $(document).on('click', '#btn_import ', function() {
-        //     title = addNbsp('IMPORT STORE/BRANCH')
-        //     $("#import_modal").find('.modal-title').find('b').html(title)
-        //     $("#import_modal").modal('show')
-        //     clear_import_table()
-        // });
-
-        // function clear_import_table() {
-        //     $(".import_table").empty()
-        // }
-
-        // function read_xl_file() {
-        //     $(".import_table").empty()
-        //     var html = '';
-        //     const file = $("#file")[0].files[0];
-        //     if (file === undefined) {
-        //         load_swal(
-        //             '',
-        //             '500px',
-        //             'error',
-        //             'Error!',
-        //             'Please select a file to upload',
-        //             false,
-        //             true
-        //         )
-        //         return
-        //     }
-        //     const reader = new FileReader();
-        //     reader.onload = function(e) {
-        //         const data = e.target.result;
-
-        //         const workbook = XLSX.read(data, {type: "binary"});
-        //         // get the first sheet
-        //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        //         // convert the sheet to JSON
-        //         const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-        //         var tr_counter = 0;
-        //         jsonData.forEach(row => {
-        //             var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
-        //             html += "<tr class=\""+rowClass+"\">";
-        //             html += "<td>";
-        //             html += tr_counter+1;
-        //             html += "</td>";
-
-        //             // create a table cell for each item in the row
-        //             var td_validator = ['code', 'description', 'status']
-        //             td_validator.forEach(column => {
-        //                 html += "<td id=\"" + column + "\">";
-        //                 html += row[column] !== undefined ? row[column] : ""; // add value or leave empty
-        //                 html += "</td>";
-        //             });
-        //             html += "</tr>";
-        //             tr_counter += 1;
-        //         });
-
-        //         $(".import_table").append(html);
-        //         html = '';
-        //     };
-        //     reader.readAsBinaryString(file);
-        // }
-
-        // function proccess_xl_file() {
-        //     var extracted_data = $(".import_table");
-        //     var html_tr_count = 1;
-        //     var invalid = false;
-        //     var errmsg = '';
-        //     var unique_code = [];
-        //     var unique_description = [];
-        //     var import_array = [];
-        //     extracted_data.find('tr').each(function () {
-        //         var html_td_count = 1;
-        //         var temp = [];
-        //         $(this).find('td').each( function() {
-        //             var text_val = $(this).html().trim();
-        //             if (html_td_count != 1) {
-        //                 temp.push(text_val)
-        //             }
-
-        //             if (html_td_count == 2) {
-        //                 if (unique_code.includes(text_val)) {
-        //                     invalid = true;
-        //                     errmsg += "⚠️ Duplicated Code at line #: <b>" + html_tr_count + "</b>⚠️<br>";
-        //                 } else {
-        //                     unique_code.push(text_val);
-        //                 }
-        //             }
-        //             if (html_td_count == 2 && text_val == '') {
-        //                 invalid = true;
-        //                 errmsg += "⚠️ Invalid Code at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-        //             }
-        //             if (html_td_count == 2 && text_val.length > 25) {
-        //                 invalid = true;
-        //                 errmsg += "⚠️ Code exceeds the set character limit(25) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-        //             }
-
-        //             if (html_td_count == 3) {
-        //                 if (unique_description.includes(text_val)) {
-        //                     invalid = true;
-        //                     errmsg += "⚠️ Duplicated Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-        //                 }
-        //                 else {
-        //                     unique_description.push(text_val)
-        //                 }
-        //             }
-        //             if (html_td_count == 3 && text_val == '') {
-        //                 invalid = true;
-        //                 errmsg += "⚠️ Invalid Description at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-        //             }
-        //             if (html_td_count == 3 && text_val.length > 50) {
-        //                 invalid = true;
-        //                 errmsg += "⚠️ Description exceeds the set character limit(50) at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-        //             }
-
-        //             if (html_td_count == 4 && text_val.toLowerCase() != 'active' && text_val.toLowerCase() != 'inactive') {
-        //                 invalid = true;
-        //                 errmsg += "⚠️ Invalid Status at line #: <b>"+html_tr_count+"</b>⚠️<br>";
-        //             }
-
-        //             html_td_count+=1;
-        //         })
-
-        //         import_array.push(temp)
-        //         html_tr_count+=1;
-        //     });
-
-        //     var temp_invalid = invalid;
-        //     var temp_err_msg = '';
-        //     var temp_line_no = 0;
-        //     var promises = [];
-
-        //     import_array.forEach(row => {
-        //         check_current_db(function(result) {
-        //             var parsedResult = JSON.parse(result);
-    
-        //             $.each(parsedResult, function(index, item) {
-        //                 if (item.code === row[0] && item.description === row[1]) {
-        //                     temp_invalid = true;
-        //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-        //                 }
-        //                 else if (item.code === row[0]) {
-        //                     temp_invalid = true;
-        //                     temp_err_msg += "⚠️ Code already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-        //                 }
-        //                 else if (item.description === row[1]) {
-        //                     temp_invalid = true;
-        //                     temp_err_msg += "⚠️ Description already exists in masterfile at line #: <b>"+temp_line_no+"</b>⚠️<br>";
-        //                 } else {
-                            
-        //                 }
-        //             });
-        //             temp_line_no+=1;
-        //         });
-        //     });
-            
-        //     invalid = temp_invalid;
-        //     errmsg += temp_err_msg;
-
-        //     if(invalid) {
-        //         load_swal(
-        //             '',
-        //             '1000px',
-        //             'error',
-        //             'Error!',
-        //             errmsg,
-        //             false,
-        //             true
-        //         )
-        //         $("#import_modal").modal('hide')
-        //         return
-        //     }
-        //     import_array.forEach(row => {
-        //         var status_val = 0;
-        //         if (row[2] == 'active') {
-        //             status_val = 1
-        //         } else {
-        //             status_val = 0
-        //         }
-        //         save_to_db(row[0], row[1], status_val)
-        //     })
-
-        //     get_pagination();
-        // }
-
-        // // uses function update_data(
-        // $(document).on('click', '#update_data', function(e){
-        //     var id = $(this).attr('data-id');
-        //     update_data(id)
-        //     $("#save_modal").modal('hide')
-        // })        
-
-        // used : 1 
-        // uses function client_validate_data(
-        // uses function check_current_db(
-        // uses function load_swal(
-        // uses function save_to_db(
-        // function save_data(e) {
-        //     var code = $('#code').val()
-        //     var description = $('#description').val()
-
-        //     if(client_validate_data(code, description)) {
-        //         check_current_db(function (result) {
-        //             var err_msg = '';
-        //             var valid = true;
-        //             var result = JSON.parse(result);
-        //             $.each(result, function(index, item) {
-        //                 if (item.code === code) {
-        //                     valid = false
-        //                     err_msg += "Code already exists in masterfile<br>";
-        //                 }
-        //                 if (item.description === description) {
-        //                     valid = false
-        //                     err_msg += "Description already exists in masterfile<br>";
-        //                 }
-        //             });
-
-        //             if(!valid){
-        //                 load_swal(
-        //                     'add_alert',
-        //                     '500px',
-        //                     "error",
-        //                     "Error!",
-        //                     err_msg,
-        //                     false,
-        //                     false
-        //                 )
-        //             } else {
-        //                 var chk_status = $('#status').prop('checked')
-        //                 if (chk_status) {
-        //                     status_val = 1
-        //                 } else {
-        //                     status_val = 0
-        //                 }
-        //                 modal.confirm("Are you sure you want to save this record?",function(result){
-        //                     if(result){ 
-        //                         save_to_db(code, description, status_val)
-        //                     }
-        //                 })
-        //             };
-        //         })
-        //     }
-        // }
-
-        // function save_to_db(inp_code, inp_description, status_val) {
-        //     var url = "<?= base_url('cms/global_controller');?>";
-        //     var data = {
-        //         event : "insert", 
-        //         table : "tbl_store",
-        //         data : {
-        //                 code : inp_code,
-        //                 description : inp_description,
-        //                 created_date : formatDate(new Date()),
-        //                 created_by : user_id,
-        //                 status : status_val
-        //         }  
-        //     }
-
-        //     aJax.post(url,data,function(result){
-        //         var obj = is_json(result);
-        //         location.reload();
-        //     });
-        // }
-
-        // function update_data(id) {
-        //     var inp_id = $('#e_id').val()
-        //     var inp_code = $('#e_code').val()
-        //     var inp_description = $('#e_description').val()
-        //     var chk_status = $('#e_status').prop('checked')
-
-        //     if(client_validate_data(inp_code, inp_description)) {
-        //         var err_msg = '';
-        //         var valid = true;
-                
-        //         check_current_db(function (result) {
-        //             var result = JSON.parse(result);
-        //             var status_msg = '';
-        //             // server_validate_data();
-        //             // check if code and description already exists in the database
-        //             $.each(result, function(index, item) {
-        //                 if(chk_status) {
-        //                     status_val = 1
-        //                 } else {
-        //                     status_val = 0
-        //                 }
-        //                 if (item.status == status_val) {
-        //                     if (item.code ===  inp_code && inp_id != item.id) {
-        //                         valid = false
-        //                         err_msg += "Code already exists in masterfile<br>";
-        //                     }
-        //                     if (item.description === inp_description && inp_id != item.id) {
-        //                         valid = false
-        //                         err_msg += "Description already exists in masterfile<br>";
-        //                     }
-        //                 }
-        //             });
-        //             // if it does show sweet alert
-        //             if(!valid){
-        //                 load_swal(
-        //                     'add_alert',
-        //                     '500px',
-        //                     "error",
-        //                     "Error!",
-        //                     err_msg,
-        //                     false,
-        //                     false
-        //                 )
-        //             } 
-        //             // otherwise proceed to saving
-        //             else {
-        //                 modal.confirm("Are you sure you want to update this record?",function(result){
-        //                     if(result){ 
-        //                         if (chk_status) {
-        //                             status_val = 1
-        //                         } else {
-        //                             status_val = 0
-        //                         }
-        //                         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-        //                         var data = {
-        //                             event : "update", // list, insert, update, delete
-        //                             table : "tbl_store", //table
-        //                             field : "id",
-        //                             where : id, 
-        //                             data : {
-        //                                     code : inp_code,
-        //                                     description : inp_description,
-        //                                     updated_by : user_id,
-        //                                     updated_date : formatDate(new Date()),
-        //                                     status : status_val
-        //                             }  
-        //                         }
-
-        //                         aJax.post(url,data,function(result){
-        //                             var obj = is_json(result);
-        //                             location.reload();
-        //                         });
-        //                     }
-        //                 });
-        //             }
-        //         })
-            
-        //     }
-        // }
-
-        // used : 1
-        // uses function view_data(
-        // function edit_data(e_id) {
-        //     // alert(code)
-        //     title = addNbsp('EDIT STORE/BRANCH')
-        //     $("#edit_modal").find('.modal-title').find('b').html(title)
-        //     view_data(e_id, 'e_', 'edit_modal', 'EDIT ')
-        // }
-
-        // used : 1
-        // uses function formatDate(
-        // function delete_data(id) {
-        //     // alert(id); return;
-        //     modal.confirm("Are you sure you want to delete this record?",function(result){
-        //         if(result){ 
-        //             var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-        //             var data = {
-        //                 event : "update", // list, insert, update, delete
-        //                 table : "tbl_store", //table
-        //                 field : "id",
-        //                 where : id, 
-        //                 data : {
-        //                         updated_date : formatDate(new Date()),
-        //                         updated_by : user_id,
-        //                         status : -2
-        //                 }  
-        //             }
-
-        //             aJax.post(url,data,function(result){
-        //                 var obj = is_json(result);
-        //                 location.reload();
-        //             });
-        //         }
-
-        //     });
-        // }
-
-        // // used : 2
-        // function view_data(inp_id, prefix, modal_class,action) {
-        //     var query = "id = " + inp_id;
-        //     var url = "<?= base_url('cms/global_controller');?>";
-        //     var data = {
-        //         event : "list", 
-        //         select : "id, code, description, status",
-        //         query : query, 
-        //         table : "tbl_store"
-        //     }
-        //     aJax.post(url,data,function(result){
-        //         var obj = is_json(result);
-        //         if(obj){
-        //             $.each(obj, function(x,y) {
-        //                 $('#'+prefix+'id').val(y.id);
-        //                 $('#'+prefix+'code').val(y.code);
-        //                 $('#'+prefix+'description').val(y.description);
-        //                 if(y.status == 1) {
-        //                     $('#'+prefix+'status').prop('checked', true)
-        //                 } else {
-        //                     $('#'+prefix+'status').prop('checked', false)
-        //                 }
-        //             }); 
-        //         }
-                
-        //         $('#update_data').attr('data-id', inp_id);
-        //         title = addNbsp(action+'STORE/BRANCH')
-        //         $("#"+modal_class).find('.modal-title').find('b').html(title)
-        //         $('#'+modal_class).modal('show');
-        //     });
-        // }
-
-        // used : 2
-        // function check_current_db(successCallback) {
-        //     var data = {
-        //         event : "list",
-        //         select : "id, code, description, status",
-        //         query : query,
-        //         offset : 0,
-        //         limit : 0,
-        //         table : "tbl_store",
-        //     }
-        //     jQuery.ajax({
-        //         url: url,
-        //         type: 'post',
-        //         data: data,
-        //         async: false,
-        //         success: function (res) {
-        //             successCallback(res);
-        //         }, error(e){
-        //             alert('alert', e)
-        //             console.log(e)
-        //         }
-        //     });
-        // }
-
-        // // used : 2
-        // // uses function load_swal(
-        // function client_validate_data(code, description, e) {
-        //     var invalid = false;
-        //     var err_title = 'Error!'
-        //     var err_msg = '';
-        //     var result = true;
-        //     // remove leading and trailing whitespace from user input
-        //     var trim_code = code.trim();
-        //     var trim_desc = description.trim()
-        //     // check for empty fields
-        //     if (trim_code === "" && trim_desc === "") {
-        //         invalid = true; // Mark the input as invalid.
-        //         err_msg+= "Code and Description is required<br>"; // Add error message.
-        //     }
-        //     else if (trim_code == "") {
-        //         invalid = true;
-        //         err_msg+= 'Code is required<br>';
-        //     }
-        //     else if (trim_desc == "") {
-        //         invalid = true;
-        //         err_msg+= 'Description is required<br>';
-        //     }
-        //     // check if the input exceeds the maximum allowed length for the database (25 characters).
-        //     if (trim_code.length > 25) {
-        //         invalid = true;
-        //         err_msg += "Code is too long. Maximum allowed is 25 characters.<br>";
-        //     }
-        //     // check if the input exceeds the maximum allowed length for the database (50 characters).
-        //     if (trim_desc.length > 50) {
-        //         invalid = true;
-        //         err_msg+="Description is too long. Maximum allowed is 50 characters.<br>";
-        //     }
-
-        //     // if input is invalid (invalid = true) display alert to user
-        //     if (invalid) {
-        //         load_swal(
-        //             'add_alert', // custom class in case you want to modify the alert
-        //             '500px',
-        //             "error", // alert style
-        //             "Error!", // title.
-        //             err_msg, // message
-        //             false, // prevent closing alert by clicking outside of alert
-        //             false // prevent closing alert by pressing escape key
-        //         );
-                
-        //         result = false; // assign false to result to prevent saving
-        //     }
-
-        //     return result;
-        // }
-
-        // used : 3
-        // function load_swal(swclass, swwidth, swicon, swtitle, swtext, swoutclick, swesckey) {
-        //     Swal.fire({
-        //         customClass: swclass, // no special characters allowed
-        //         width: swwidth,
-        //         icon: swicon, // can be "warning", "error", "success", "info"
-        //         // https://sweetalert.js.org/docs/#icon
-        //         title: swtitle, // string
-        //         html: swtext, // string
-        //         allowOutsideClick: swoutclick, // boolean 
-        //         // true allow closing alert by clicking outside of alert
-        //         // false prevent closing alert by clicking outside of alert
-        //         allowEscapeKey: swesckey, // boolean
-        //         // true allow closing alert by pressing escape key
-        //         // false prevent closing alert by pressing escape key
-        //     });
-        // }
-
-        // // used : 3
-        // function formatDate(date) {
-        //     // Get components of the date
-        //     const year = date.getFullYear();
-        //     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        //     const day = String(date.getDate()).padStart(2, '0');
-        //     const hours = String(date.getHours()).padStart(2, '0');
-        //     const minutes = String(date.getMinutes()).padStart(2, '0');
-        //     const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        //     // Combine into the desired format
-        //     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        // }
-
-        
 
         // addNbsp()™: A Truly Revolutionary Function
         // This function is the epitome of laziness and brilliance combined. 
