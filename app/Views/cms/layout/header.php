@@ -44,6 +44,7 @@
         var success_unblock_message = "<?= dialog("unblock_success"); ?>";
         var confirm_unpublish_message = '<?= confirm("confirm_unpublish"); ?>';
         var failed_transaction_message = '<?= dialog("failed_transaction"); ?>';
+        var missing_user_input_message = '<?= dialog("missing_input"); ?>';
         var csrf_name = "<?= csrf_token(); ?>";
         var csrf_hash = "<?= csrf_hash(); ?>";
     </script>

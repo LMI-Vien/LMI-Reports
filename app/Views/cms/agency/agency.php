@@ -148,11 +148,11 @@
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     $(document).ready(function() {
-      get_data();
+      get_data(query);
       get_pagination();
     });
 
-    function get_data(keyword = null) {
+    function get_data(query) {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -180,19 +180,22 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td style='width: 10%'>" + y.code + "</td>";
-                        html += "<td style='width: 20%'>" + y.agency + "</td>";
+                        html += "<td style='width: 10%'>" + trimText(y.code, 10) + "</td>";
+                        html += "<td style='width: 20%'>" + trimText(y.agency, 10) + "</td>";
                         html += "<td style='width: 10%'>" +status+ "</td>";
-                        html += "<td class='center-content' style='width: 10%'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td class='center-content' style='width: 10%'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+                        html += "<td class='center-content' style='width: 10%; min-width: 200px'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td class='center-content' style='width: 10%; min-width: 200px'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
-                          html+="<td class='center-content' style='width: 20%'>";
-                          html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                          html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                          html+="<td class='center-content' style='width: 20%; min-width: 300px'>";
+                          html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                          html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                           html+="</td>";
                         }
                         
@@ -233,7 +236,7 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data();
+        get_data(query);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
@@ -243,8 +246,9 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            query = "( code like '%" + keyword + "%' ) OR agency like '%" + keyword + "%' AND status >= 1";
-            get_data();
+            new_query = " ("+ query + " AND code like '%" + keyword + "%' ) OR";
+            new_query += " ("+ query + " AND agency like '%" + keyword + "%')";
+            get_data(new_query);
             get_pagination();
         }
     });
@@ -258,7 +262,7 @@
         limit = parseInt(record_entries);
         offset = 1;
         modal.loading(true); 
-        get_data();
+        get_data(query);
         modal.loading(false);
     });
 
@@ -571,7 +575,7 @@
         });
     }
 
-    let storedFile = null;
+    var storedFile = null;
     function store_file(event) {
         storedFile = event.target.files[0]; // Store the file but do nothing yet
         console.log("File stored:", storedFile.name);
@@ -586,15 +590,16 @@
         var html = '';
         const file = $("#file")[0].files[0];
         if (file === undefined) {
-            load_swal(
-                '',
-                '500px',
-                'error',
-                'Error!',
-                'Please select a file to upload',
-                false,
-                true
-            )
+            // load_swal(
+            //     '',
+            //     '500px',
+            //     'error',
+            //     'Error!',
+            //     'Please select a file to upload',
+            //     false,
+            //     true
+            // )
+            modal.alert('Please select a file to upload', 'error', ()=>{})
             return
         }
         const reader = new FileReader();
@@ -634,19 +639,11 @@
 
     function proccess_xl_file() {
         if (!storedFile) {
-            // alert("No file selected!");
-            load_swal(
-                'add_alert',
-                '500px',
-                "error",
-                "Error",
-                "No file was selected",
-                false,
-                false
-            );
+            modal.alert('Please select a file to upload', 'error', ()=>{})
             return;
         }
 
+        modal.loading(true)
         let reader = new FileReader();
         reader.onload = function (e) {
             let data = new Uint8Array(e.target.result);
@@ -755,17 +752,26 @@
                             false
                         );
                     } else if (insertedRecords > 0) {
-                        load_swal(
-                            'add_alert',
-                            '500px',
-                            "success",
-                            "Success!",
-                            `${insertedRecords} records inserted successfully!`,
-                            false,
-                            false
-                        ).then(() => {
-                            location.reload();
-                        });
+                        // load_swal(
+                        //     'add_alert',
+                        //     '500px',
+                        //     "success",
+                        //     "Success!",
+                        //     `${insertedRecords} records inserted successfully!`,
+                        //     false,
+                        //     false
+                        // ).then(() => {
+                        //     modal.loading(false)
+                        //     setTimeout(() => {
+                        //         location.reload(); 
+                        //     }, 1000);
+                        // });
+                        modal.loading(false)
+                        modal.alert(`${insertedRecords} records inserted successfully!`, 'success', () => {
+                            if (result) {
+                                location.reload();
+                            }
+                        })
                     }
                 }
             }
@@ -902,9 +908,9 @@
     //     });
     // }
 
-    function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
+    function trimText(str, length) {
+        if (str.length > length) {
+            return str.substring(0, length) + "...";
         } else {
             return str;
         }

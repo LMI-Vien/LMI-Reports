@@ -48,7 +48,11 @@
     </div>
 </div>
 
-<div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static">
+<div 
+    class="modal" 
+    id="popup_modal" 
+    data-backdrop="static"
+>
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -61,7 +65,7 @@
             </div>
             
             <div class="modal-body">
-                <form style="background-color: white !important; width: 100%;" id="form-save-modal">
+                <form id="form-modal form-save-modal">
                     <div class="mb-3">
                         <label for="code" class="form-label">Code</label>
                         <div hidden>
@@ -80,7 +84,8 @@
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Deployment Date</label>
-                        <input type="text" class="form-control required" id="deploy_date" placeholder="Select Date">
+                        <!-- <input type="text" class="form-control required" id="deployment_date" placeholder="Select Date"> -->
+                        <input type="date" class="form-control required" id="deployment_date">
                         <small id="description" class="form-text text-muted">* required</small>
                     </div>
 
@@ -141,7 +146,7 @@
 
                         <!-- nextButton -->
     
-                        <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                        <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
                             <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
                         </label>
 
@@ -149,7 +154,7 @@
                             <i class="fa fa-sync" style="margin-right: 5px;"></i>Next
                         </label> -->
     
-                        <table class= "table table-bordered listdata">
+                        <table class="table table-bordered listdata">
                             <thead>
                                 <tr>
                                     <th style="width: 10%;" class='center-content'>Line #</th>
@@ -183,11 +188,6 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination();
-        
-        $("#deploy_date").datepicker({
-            changeMonth: true,
-            changeYear: true
-        });
     });
 
     function get_data(new_query) {
@@ -197,7 +197,7 @@
             query : new_query,
             offset : offset,
             limit : limit,
-            table : "tbl_asc",
+            table : "tbl_area_sales_coordinator",
             order : {
                 field : "code",
                 order : "asc" 
@@ -229,16 +229,19 @@
                         html += "<td style='width: 10%'>" + trimText(y.code, 10) + "</td>";
                         html += "<td style='width: 15%'>" + trimText(y.description, 10) + "</td>";
                         html += "<td style='width: 15%'>" + status + "</td>";
-                        html += "<td style='width: 20%'>" + createddate + "</td>";
-                        html += "<td style='width: 20%'>" + updateddate + "</td>";
+                        html += "<td style='width: 20%; min-width: 200px'>" + createddate + "</td>";
+                        html += "<td style='width: 20%; min-width: 200px'>" + updateddate + "</td>";
     
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"
+                                +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
+                                +y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
+                                +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
                         }
                         
@@ -278,7 +281,7 @@
                     var id = $(this).attr('data-id');
                     dataList.push({
                         event: "update",
-                        table: "tbl_asc",
+                        table: "tbl_area_sales_coordinator",
                         field: "id",
                         where: id,
                         data: {
@@ -361,7 +364,7 @@
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_asc",
+            table : "tbl_area_sales_coordinator",
             order : {
                 field : "updated_date", //field to order
                 order : "desc" //asc or desc
@@ -429,7 +432,7 @@
                 var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
                 var data = {
                     event : "update", // list, insert, update, delete
-                    table : "tbl_asc", //table
+                    table : "tbl_area_sales_coordinator", //table
                     field : "id",
                     where : id, 
                     data : {
@@ -459,9 +462,11 @@
     }
 
     function open_modal(msg, actions, id) {
-        // add modal title
+        // remove error message
         $(".validate_error_message").remove();
+        // remove error style
         $(".form-control").css('border-color','#ccc');
+        // add modal title
         $('#popup_modal .modal-title b').html(addNbsp(msg));
         // clear the form inputs, dropdowns, and checkboxes
         reset_form();
@@ -489,8 +494,8 @@
                 get_area('')
                 add_input_behavior(false);
                 $('#popup_modal .modal-footer').empty();
-                $('#popup_modal .modal-footer').append(close_btn);
                 $('#popup_modal .modal-footer').append(save_btn);
+                $('#popup_modal .modal-footer').append(close_btn);
                 break;
                 
             case 'edit':
@@ -501,8 +506,8 @@
                 populate_modal(id);
                 add_input_behavior(false);
                 $('#popup_modal .modal-footer').empty();
-                $('#popup_modal .modal-footer').append(close_btn);
                 $('#popup_modal .modal-footer').append(edit_btn);
+                $('#popup_modal .modal-footer').append(close_btn);
                 break;
             
             case 'view':
@@ -537,7 +542,7 @@
         $('#popup_modal #area_id').val('');
         $('#popup_modal #area option').removeAttr('selected'); // Remove 'selected' from all options
         $('#popup_modal #area option:first').attr('selected', 'selected'); // Add 'selected' to the first option
-        $('#popup_modal #deploy_date').val('');
+        $('#popup_modal #deployment_date').val('');
     }
 
     // decides whether to enable or disable input fields
@@ -546,8 +551,8 @@
         $('#code').attr('disabled', bool);
         $('#description').attr('readonly', bool);   
         $('#description').attr('disabled', bool);
-        $('#deploy_date').attr('readonly', bool);   
-        $('#deploy_date').attr('disabled', bool);
+        $('#deployment_date').attr('readonly', bool);   
+        $('#deployment_date').attr('disabled', bool);
         $('#area').attr('readonly', bool);   
         $('#area').attr('disabled', bool);
         $('#status').attr('readonly', bool);   
@@ -575,8 +580,16 @@
             var code = $('#code').val()
             var description = $('#description').val()
             var status = $('#status').prop('checked')
-            var deploy_date = $('#deploy_date').val()
+            var deployment_date = $('#deployment_date').val()
             var area_id = $('#popup_modal #area').val();
+
+            if (code === '' || description === '' || deployment_date === '' || area_id === '') {
+                modal.alert(missing_user_input_message, 'error', () => {
+                    reset_form();
+                })
+                return;
+            }
+
             var db_fields = [];
             var input_fields = [];
             if (id != 0) {
@@ -591,12 +604,12 @@
                 excludeId = null;
             }
 
-            check_current_db("tbl_asc", db_fields, input_fields, "status" , excludeField, excludeId, true, function(exists, duplicateFields) {
+            check_current_db("tbl_area_sales_coordinator", db_fields, input_fields, "status" , excludeField, excludeId, true, function(exists, duplicateFields) {
                 if(!exists) {
                     if (id != 0) {
-                        confirm_edit(id, code, description, status, deploy_date, area_id);
+                        confirm_edit(id, code, description, status, deployment_date, area_id);
                     } else {
-                        confirm_save(code, description, status, deploy_date, area_id);
+                        confirm_save(code, description, status, deployment_date, area_id);
                     }
                 }
             });
@@ -613,7 +626,6 @@
             val_status = 0
             chk_val = 'Inactive'
         }
-        var converted_date = formatDateToISO(date)
 
         var new_area_code = '';
         var area_code_array = {};
@@ -646,12 +658,12 @@
             modal.confirm(confirm_add_message, function(result){
                 if(result){
                     // if the user confirms, call save_to_db() to save the data
-                    // passing the code, description, status, converted_date, and area as parameters
+                    // passing the code, description, status, date, and area as parameters
                     data = {
                         'code': code, 
                         'description':description, 
                         'status':val_status, 
-                        'deploy_date':converted_date, 
+                        'deployment_date':date, 
                         'area_id':area
                     }
                     save_to_db(data, function () {
@@ -667,11 +679,11 @@
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
         var data = {
             event : "insert", // list, insert, update, delete
-            table : "tbl_asc", //table
+            table : "tbl_area_sales_coordinator", //table
             data : {
                 code : user_input.code,
                 description : user_input.description,
-                deploy_date : user_input.deploy_date,
+                deployment_date : user_input.deployment_date,
                 status : user_input.status,
                 area_id : user_input.area_id,
                 created_by : user_id,
@@ -691,7 +703,7 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
              event: "batch_insert",
-             table: "tbl_asc",
+             table: "tbl_area_sales_coordinator",
              insert_batch_data: insert_batch_data
         }
 
@@ -709,7 +721,6 @@
             val_status = 0
             chk_val = 'Inactive'
         }
-        var converted_date = formatDateToISO(date)
         var old = {}
 
         list_current_db(
@@ -724,7 +735,7 @@
                         }
                         old['code'] = asc.code;
                         old['description'] = asc.description;
-                        old['deploy_date'] = asc.deploy_date;
+                        old['deployment_date'] = asc.deployment_date;
                         old['status'] = status_val;
                         old['area_id'] = asc.area_id;
                     }
@@ -758,7 +769,7 @@
             html += "<td style='width:10%'><b>From</b></td>"
             html += "<td style='width:20%'>"+trimText(old.code, 10)+"</td>"
             html += "<td style='width:20%'>"+trimText(old.description, 10)+"</td>"
-            html += "<td style='width:20%'>"+formatReadableDate(old.deploy_date, false)+"</td>"
+            html += "<td style='width:20%'>"+formatReadableDate(old.deployment_date, false)+"</td>"
             html += "<td style='width:20%'>"+old.status+"</td>"
             html += "<td style='width:10%'>"+area_code_array[old.area_id]+"</td>"
             html += "</tr>"
@@ -787,13 +798,13 @@
             modal.confirm(confirm_update_message,function(result){
                 if(result){
                     // if the user confirms, call save_to_db() to save the data
-                    // passing the code, description, status, converted_date, and area as parameters
+                    // passing the code, description, status, date, and area as parameters
                     data = {
                         'id': id,
                         'code': code, 
                         'description':description, 
                         'status':val_status, 
-                        'deploy_date':converted_date, 
+                        'deployment_date':date, 
                         'area_id':area
                     }
                     update_db(data, function () {
@@ -810,14 +821,14 @@
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
         var data = {
             event : "update", // list, insert, update, delete
-            table : "tbl_asc", //table
+            table : "tbl_area_sales_coordinator", //table
             field : "id",
             where : user_input.id, 
             data : {
                 code : user_input.code,
                 description : user_input.description,
                 status : user_input.status,
-                deploy_date : user_input.deploy_date,
+                deployment_date : user_input.deployment_date,
                 area_id : user_input.area_id,
                 updated_by : user_id,
                 updated_date : formatDate(new Date()),
@@ -898,7 +909,7 @@
         var code = '';
         var description = '';
         var status = '';
-        var deploy_date = '';
+        var deployment_date = '';
         var area_id = '';
 
         var invalid = false;
@@ -972,7 +983,7 @@
                         invalid = true;
                         errmsg += "⚠️ Invalid Deployment Date at line #: <b>" + tr_count + "</b>⚠️<br>";
                     } else {
-                        deploy_date = readable_date_to_excel_date(text_val);
+                        deployment_date = readable_date_to_excel_date(text_val);
                     }
                 }
 
@@ -987,7 +998,7 @@
             });
 
             tr_count += 1;
-            temp.push(code, description, status, deploy_date, area_id);
+            temp.push(code, description, status, deployment_date, area_id);
             if(!area_desc.includes(area_id)){
                 area_desc.push(area_id)
             }
@@ -995,13 +1006,18 @@
             import_array.push(temp);
         });
 
+        if (tr_count === 1) {
+            modal.alert('Please select a file to upload', 'error', ()=>{})
+            return;
+        }
+
         var temp_invalid = invalid;
         var temp_errmsg = '';
 
         invalid = temp_invalid;
         errmsg += temp_errmsg;
 
-        var table = 'tbl_asc';
+        var table = 'tbl_area_sales_coordinator';
         var haystack = ['code', 'description'];
         var selected_fields = ['id', 'code', 'description'];
 
@@ -1040,7 +1056,7 @@
                                 'code': row[0],
                                 'description': row[1],
                                 'status': row[2],
-                                'deploy_date': row[3],
+                                'deployment_date': row[3],
                                 'area_id': area_id,  // Replaced with the fetched value
                                 'created_by': user_id,
                                 'created_date': formatDate(new Date())
@@ -1092,10 +1108,10 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, code, description, status, area_id, deploy_date",
+            select : "id, code, description, status, area_id, deployment_date",
             query : query, 
             limit : 1,
-            table : "tbl_asc"
+            table : "tbl_area_sales_coordinator"
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
@@ -1105,7 +1121,7 @@
                     $('#code').val(asc.code);
                     $('#description').val(asc.description);
                     $('#area_id').val(asc.area_id);
-                    $('#deploy_date').val(formatDateToMMDDYYYY(asc.deploy_date))
+                    $('#deployment_date').val(asc.deployment_date)
                     get_area(asc.area_id);
                     if(asc.status == 1) {
                         $('#status').prop('checked', true)
@@ -1120,11 +1136,11 @@
     function list_current_db(successCallback) {
         var data = {
             event : "list",
-            select : "id, code, description, deploy_date, status, area_id",
+            select : "id, code, description, deployment_date, status, area_id",
             query : "status >= 0",
             offset : 0,
             limit : 0,
-            table : "tbl_asc",
+            table : "tbl_area_sales_coordinator",
         }
         jQuery.ajax({
             url: url,
@@ -1152,21 +1168,6 @@
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
-    // Converts a date string from mm/dd/yyyy to yyyy-mm-dd
-    function formatDateToISO(dateStr) {
-        const [mm, dd, yyyy] = dateStr.split('/'); // Destructuring the parts
-        return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-    }
-
-    // Converts a date string to mm/dd/yyyy format
-    function formatDateToMMDDYYYY(dateStr) {
-        const date = new Date(dateStr);
-        const mm = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-based
-        const dd = String(date.getDate()).padStart(2, '0');
-        const yyyy = date.getFullYear();
-        return `${mm}/${dd}/${yyyy}`;
-    }
-
     // Formats a date string to a readable format
     function formatReadableDate(dateStr, datetime) {
         const date = new Date(dateStr);
@@ -1187,22 +1188,6 @@
                 day: "numeric",
             });
         }
-    }
-
-    function load_swal(swclass, swwidth, swicon, swtitle, swtext, swoutclick, swesckey, callback) {
-        Swal.fire({
-            customClass: swclass,
-            width: swwidth,
-            icon: swicon,
-            title: swtitle,
-            html: swtext,
-            allowOutsideClick: swoutclick,
-            allowEscapeKey: swesckey,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                callback()
-		    }
-        });
     }
 
     function trimText(str, length) {
