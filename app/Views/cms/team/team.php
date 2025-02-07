@@ -113,7 +113,6 @@
                             id="file"
                             accept=".xls,.xlsx,.csv"
                             aria-describedby="import_files"
-                            onchange="store_file(event)"
                             onclick="clear_import_table()"
                         >
 
@@ -148,6 +147,8 @@
     var query = "status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
+    var url = "<?= base_url('cms/global_controller');?>";
+
     $(document).ready(function() {
       get_data(query);
       get_pagination();
@@ -226,7 +227,6 @@
 
         aJax.post(url,data,function(result){
             var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
-            console.log(obj);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -244,8 +244,10 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
-            get_data();
+            // query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
+            var new_query = "("+query+" AND code like '%" + keyword + "%') OR "+
+            "("+query+" AND team_description like '%" + keyword + "%')"
+            get_data(new_query);
             get_pagination();
             console.log('Pressed key: ' + keyword);
         }
@@ -317,6 +319,229 @@
     function reset_modal_fields() {
         $('#popup_modal #code, #popup_modal #team_description, #popup_modal').val('');
         $('#popup_modal #status').prop('checked', true);
+    }
+
+    function clear_import_table() {
+        $(".import_table").empty()
+    }
+
+    function read_xl_file() {
+        clear_import_table();
+        var html = '';
+
+        const file = $("#file")[0].files[0];
+
+        if (file === undefined) {
+            modal.alert('Please select a file to upload', 'error', ()=>{})
+            return
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = e.target.result;
+            // convert the data to a workbook
+            const workbook = XLSX.read(data, {type: "binary"});
+            // get the first sheet
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            // convert the sheet to JSON
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+    
+            var tr_counter = 0;
+
+            jsonData.forEach(row => {
+                var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+                html += "<tr class=\""+rowClass+"\">";
+                html += "<td>";
+                html += tr_counter+1;
+                html += "</td>";
+
+                let record = row;
+
+                let lowerCaseRecord = Object.keys(record).reduce((acc, key) => {
+                    acc[key.toLowerCase()] = record[key];
+                    return acc;
+                }, {});
+    
+                // create a table cell for each item in the row
+                var td_validator = ['code', 'description', 'status'];
+                td_validator.forEach(column => {
+                    if (column === 'deployment date') {
+                        lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
+                    } else {
+                        lowerCaseRecord[column] = lowerCaseRecord[column];
+                    }
+                    html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
+                    html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
+                    html += "</td>";
+                });
+                html += "</tr>";
+                tr_counter += 1;
+            });
+    
+            $(".import_table").append(html);
+            html = '';
+        };
+        reader.readAsBinaryString(file);
+    }
+
+    function proccess_xl_file() {
+        var extracted_data = $(".import_table");
+
+        var code = '';
+        var description = '';
+        var status = '';
+
+        var import_array = [];
+        var needle = [];
+
+        var invalid = false;
+        var errmsg = '';
+
+        var unique_code = [];
+        var unique_description = [];
+
+        var tr_count = 1;
+        var row_mapping = {};
+
+        extracted_data.find('tr').each(function () {
+            td_count = 1;
+            var temp = [];
+            $(this).find('td').each(function () {
+                var text_val = $(this).html().trim();
+                var error_messages = {
+                    code: {
+                        duplicate: "⚠️ Duplicated Code at line #: <b>{line}</b>⚠️<br>",
+                        length: "⚠️ Code exceeds 25 characters at line #: <b>{line}</b>⚠️<br>",
+                        empty: "⚠️ Code is empty at line #: <b>{line}</b>⚠️<br>"
+                    },
+                    description: {
+                        duplicate: "⚠️ Duplicated Description at line #: <b>{line}</b>⚠️<br>",
+                        length: "⚠️ Description exceeds 50 characters at line #: <b>{line}</b>⚠️<br>",
+                        empty: "⚠️ Description is empty at line #: <b>{line}</b>⚠️<br>"
+                    },
+                    status: "⚠️ Invalid Status at line #: <b>{line}</b>⚠️<br>"
+                };
+
+                const validateField = (type, value, maxLength, uniqueList) => {
+                    if (uniqueList.includes(value)) {
+                        invalid = true;
+                        errmsg += error_messages[type].duplicate.replace("{line}", tr_count);
+                    } else if (value.length > maxLength) {
+                        invalid = true;
+                        errmsg += error_messages[type].length.replace("{line}", tr_count);
+                    } else if (!value) {
+                        invalid = true;
+                        errmsg += error_messages[type].empty.replace("{line}", tr_count);
+                    } else {
+                        uniqueList.push(value);
+                        row_mapping[value] = tr_count;
+                    }
+                    return value;
+                };
+
+                switch (td_count) {
+                    case 2:
+                        code = validateField("code", text_val, 25, unique_code);
+                        break;
+                    case 3:
+                        description = validateField("description", text_val, 50, unique_description);
+                        break;
+                    case 4:
+                        if (["active", "inactive"].includes(text_val.toLowerCase())) {
+                            status = text_val.toLowerCase() === "active" ? 1 : 0;
+                        } else {
+                            invalid = true;
+                            errmsg += error_messages.status.replace("{line}", tr_count);
+                        }
+                        break;
+                }
+
+                td_count++;
+            });
+            tr_count += 1;
+            temp.push(code, description, status);
+            needle.push([code,description]);
+            import_array.push(temp);
+        })
+
+        if (tr_count === 1) {
+            modal.alert('Please select a file to upload', 'error', ()=>{})
+            return;
+        }
+
+        var temp_invalid = invalid;
+        var temp_errmsg = '';
+
+        invalid = temp_invalid;
+        errmsg += temp_errmsg;
+
+        var table = 'tbl_team';
+        var haystack = ['code', 'team_description'];
+        var selected_fields = ['id', 'code', 'team_description'];
+
+        if (invalid) {
+            modal.content('Error', 'error', errmsg, '600px', ()=>{});
+        } else {
+            list_existing(table, selected_fields, haystack, needle, function (result) {
+                if (result.status != "error") {
+                    var batch = [];
+                    import_array.forEach(row => {
+                        let data = {
+                            'code': row[0],
+                            'team_description': row[1],
+                            'status': row[2],
+                            'created_by': user_id,
+                            'created_date': formatDate(new Date())
+                        };
+    
+                        batch.push(data);
+                    });
+    
+                    modal.loading(true);
+                    setTimeout(() => {
+                        batch_insert(batch, () => {
+                            modal.loading(false);
+                            modal.alert(success_save_message, 'success', () => {
+                                if (result) {
+                                    location.reload();
+                                }
+                            })
+                        })
+                    }, 1000);
+                } else {
+                    let errmsg = "";
+                    let processedFields = new Set();
+
+                    $.each(result.existing, function (index, record) {
+                        $.each(record, function (field, value) {
+                            if (!processedFields.has(field + value)) { 
+                                if (field === 'team_description') {
+                                    columnName = "Description"
+                                } else {
+                                    columnName = "Code"
+                                }
+                                let line_number = row_mapping[value] || "Unknown";
+                                errmsg += "⚠️ " + columnName + " already exists in masterfile at line #: <b>" + line_number + "</b>⚠️<br>";
+                                processedFields.add(field + value); // Mark as processed
+                            }
+                        });
+                    });
+                    modal.content('Error', 'error', errmsg, '600px', () => {});
+                }
+            })
+        }
+    }
+
+    function batch_insert(insert_batch_data, cb){
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+             event: "batch_insert",
+             table: "tbl_team",
+             insert_batch_data: insert_batch_data
+        }
+
+        aJax.post(url,data,function(result){
+            cb(result.message)
+        });
     }
 
     function set_field_state(selector, isReadOnly) {
@@ -526,7 +751,6 @@
         //         counter++;
         //     }
         //  });
-        // console.log(counter);
         modal.confirm(modal_obj, function (result) {
             if (result) {
                 var url = "<?= base_url('cms/global_controller');?>";
