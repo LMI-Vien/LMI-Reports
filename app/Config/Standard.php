@@ -45,6 +45,7 @@ class Standard extends BaseConfig
     public $unpublish_failed = "<b>Error!</b> Record was not unpublished.";
     public $add_failed = "<b>Error!</b> Failed to Add Data.";
     public $inactive_modal_error = "Error: Unable to set the record to Inactive since it is currently used.";
+    public $missing_input = "<b>Error!</b> Missing input please fill all required fields.";
     
     //VALIDATION
     public $data_exist = "The information already exists.";
