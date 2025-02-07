@@ -135,8 +135,6 @@
             </div>
         </div>
     </div> -->
-
-    <!-- IMPORT MODAL -->
     <div class="modal" tabindex="-1" id="import_modal">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -178,10 +176,10 @@
                             <table class= "table table-bordered listdata">
                                 <thead>
                                     <tr>
-                                        <th class='center-content'>Line #</th>
-                                        <th class='center-content'>Code</th>
-                                        <th class='center-content'>Area Description</th>
-                                        <th class='center-content'>Status</th>
+                                        <th class='center-content' scope="col">Line #</th>
+                                        <th class='center-content' scope="col">Code</th>
+                                        <th class='center-content' scope="col">Area</th>
+                                        <th class='center-content' scope="col">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody class="word_break import_table"></tbody>
@@ -284,6 +282,8 @@
         }
 
         $(document).on('click', '#btn_import ', function() {
+            title = addNbsp('IMPORT AREA')
+            $("#import_modal").find('.modal-title').find('b').html(title)
             $("#import_modal").modal('show')
             clear_import_table()
         });
