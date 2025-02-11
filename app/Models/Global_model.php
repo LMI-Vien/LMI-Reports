@@ -320,12 +320,28 @@ class Global_model extends Model
             return "failed";
         endif;
     }
+
+    function total_delete($table,$field,$where)
+    {
+        $return = $this->db
+			 	->table($table)
+				->where($field, $where)
+				->delete();
+		if($return):
+			return "success";
+		else:
+			return "failed";
+		endif;
+        // return "$table,$field,$where";
+    }
+
     function batch_update($table,$data,$field,$where_in)
     {
         $return = $this->db
                 ->table($table)
                 ->whereIn($field, $where_in)
                 ->update($data);
+    
         if($return):
             return "success";
         else:
