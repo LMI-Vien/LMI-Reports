@@ -122,13 +122,33 @@
             </li>
           </ul>
         </li>
-        <li class="nav-item">
-          <a href="<?= base_url('cms/site-menu') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Site Menu' ? 'active' : '' ?>">
-            <i class="nav-icon fas fa-bars"></i>
+
+        <li class="nav-item has-treeview <?= in_array($PageUrl ?? '', ['Site Menu', 'CMS Menu']) ? 'menu-open' : '' ?> <?= in_array($PageUrl ?? '', ['Site Menu', 'CMS Menu']) ? 'active' : '' ?>">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-user"></i>
             <p>
-              Site Menu
+              Menus
+              <i class="right fas fa-angle-left"></i>
             </p>
           </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="<?= base_url('cms/site-menu') ?>" class="nav-link <?= ($PageUrl ?? '') === 'Site Menu' ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-bars"></i>
+                <p>
+                  Site Menu
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="<?= base_url('cms/cms-menu') ?>" class="nav-link <?= ($PageUrl ?? '') === 'CMS Menu' ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-clipboard"></i>
+                <p>
+                  CMS Menu
+                </p>
+              </a>
+            </li>
+          </ul>
         </li>
       </ul>
     </nav>
