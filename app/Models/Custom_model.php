@@ -167,7 +167,17 @@ class Custom_model extends Model
             $builder->insertBatch($insert_batch_data);
             $updatedStatus = $this->db->affectedRows();
 
-            return $updatedStatus > 0 ? "success" : "failed";
+            $lastInsertId = $this->db->insertID();
+
+            // Generate the list of IDs for the inserted rows
+            $insertedIds = [];
+            for ($i = 0; $i < count($insert_batch_data); $i++) {
+                $insertedIds[] = [
+                    'id'   => $lastInsertId + $i,
+                    'code' => $insert_batch_data[$i]['code']
+                ];
+            }
+            return $updatedStatus > 0 ? $insertedIds : "failed";
         } catch (\Exception $e) {
             return "Error: " . $e->getMessage();
         }

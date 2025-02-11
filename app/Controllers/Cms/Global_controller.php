@@ -160,6 +160,7 @@ class Global_controller extends BaseController
 
 					$id = $this->Global_model->save_data($table,$data);
 					$this->audit_trail_controller("Create", $data);
+					echo json_encode(["ID" => $id]);
 				} catch (Exception $e) {
 	        		echo "Error adding data: " . $e->getMessage();
 				}
@@ -193,6 +194,29 @@ class Global_controller extends BaseController
 	            } catch (Exception $e) {
 	        		echo "Error updating data: " . $e->getMessage();
 				}
+			break;
+
+			case 'total_delete':
+			try { 
+				$table = $_POST['table'];
+				$field = $_POST['field'];
+				$where = $_POST['where'];
+
+				// echo json_encode(['debug' => "$table,$field,$where"]);
+
+				// Get old data for audit trail before deletion
+				$query = "$field = '$where'";
+				$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*", null, null, null);
+
+				// Perform delete operation
+				$status = $this->Global_model->total_delete($table, $field, $where);
+				echo $status;
+
+				// Insert audit trail for deletion
+				$this->audit_trail_controller("Delete", null, $old_data);
+			} catch (Exception $e) {
+				echo "Error deleting data: " . $e->getMessage();
+			}
 			break;
 
 			case 'batch_sort_update':
@@ -286,11 +310,11 @@ class Global_controller extends BaseController
 
 			            return $this->response->setJSON(["message" => $status]);
 
+					} catch (Exception $e) {
 			        return $this->response->setJSON([
 			            "message" => "Invalid request method"
 			        ])->setStatusCode(ResponseInterface::HTTP_METHOD_NOT_ALLOWED);
-    			} catch (Exception $e) {
-					echo "Error updating data: " . $e->getMessage();
+					// echo "Error updating data: " . $e->getMessage();
 				}
 					break;
 			case 'batch_update':
