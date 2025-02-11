@@ -43,6 +43,7 @@ class Global_model extends Model
         // Get user record
         $builder = $this->db->table('cms_users')
                             ->select('password, salt')
+                            ->where('dashboard_access', 1)
                             ->where('email', $email);
         $query = $builder->get();
         $result = $query->getRow(); 
