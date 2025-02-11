@@ -1,6 +1,6 @@
 
 <?php
-    $account_type = 'Username';
+    $account_type = 'emailadd';
 ?>
 
 <body>
@@ -36,111 +36,67 @@
 
     
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
 var base_url = '<?= base_url();?>';
-    $(document).ready(function () {
-        $("#loginFormUser").on("submit", function (e) {
-            e.preventDefault(); 
+$(document).ready(function () {
+    $("#loginFormUser").on("submit", function (e) {
+        e.preventDefault();
 
-            let isValid = true;
-            const emailadd = $("#emailadd").val().trim();
-            const password = $("#password").val().trim();
-            const usernamePattern = /^[^@]+@[^@]+$/;
+        const emailadd = $("#emailadd").val().trim();
+        const password = $("#password").val().trim();
+        const emailPattern = /^[^@]+@[^@]+$/;
+        
+        if (!emailadd && !password) {
+            return modal.alert_custom("Fill up the Fields.", "Email Address and Password are required.", "error");
+        }
+        
+        if (!emailPattern.test(emailadd)) {
+            return modal.alert_custom("Invalid Email Address.", "The Email Address must contain an '@' and a name after it.", "warning");
+        }
 
-            if (emailadd === "" && password === "") {
-                isValid = false;
-                Swal.fire({
-                    icon: "error",
-                    title: "Fill up the Fields",
-                    text: "Email Address and Password is required.",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                });
-                e.preventDefault();
-                return;
-            }
+        if (!emailadd) {
+            return modal.alert_custom("Fill up the email.", "Email Address is required.", "warning");
+        }
 
-            if (!usernamePattern.test(emailadd)) {
-                isValid = false;
-                Swal.fire({
-                    icon: "warning",
-                    title: "Invalid Email Address",
-                    text: "The Email Address must contain an '@' and a name after it.",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                });
-                e.preventDefault();
-                return;
-            }
+        if (!password) {
+            return modal.alert_custom("Fill up the password.", "Password is required.", "warning");
+        }
 
-            if (emailadd === "") {
-                isValid = false;
-                Swal.fire({
-                    icon: "warning",
-                    title: "Fill up the email",
-                    text: "Email Address is required.",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                });
-                e.preventDefault();
-                return; 
-            }
+        $.post(base_url + 'login/validate_log', { emailadd, password })
+            .done(function (response) {
+                try {
+                    const parsedResponse = is_json(response);
+                    const resultCount = parsedResponse.count;
+                    const attempts = "Incorrect Email Address or Password.";
 
-            if (password === "") {
-                isValid = false;
-                Swal.fire({
-                    icon: "warning",
-                    title: "Fill up the password",
-                    text: "Password is required.",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                });
-                e.preventDefault();
-                return;
-            }
+                    console.log("ATTEMPTS REMAINING:", attempts);
+                    console.log("Result Count:", resultCount);
 
-            if (isValid) {
-                $.post(base_url + 'login/auth', { 
-                    data: { email: emailadd, password: password } 
-                }, function (response) {
-                    var result = response.trim();
+                    const messages = {
+                        3: ["Login Successful.", `Welcome ${emailadd} !`, "success", () => location.href = base_url + 'dashboard'],
+                        2: ["Inactive.", "This Account is Inactive.", "warning"],
+                        1: ["Login Failed.", attempts, "error"],
+                        0: ["Login Failed.", attempts, "error"],
+                        4: ["Login Failed.", "This account is Blocked/Locked.", "error"],
+                        5: ["Login Failed.", "Expired Account.", "error"],
+                        6: ["Password is Expired.", "Expired Account.", "error"]
+                    };
 
-                    if (result === "valid") {
-                        Swal.fire({
-                            icon: "success",
-                            title: "Login Successful",
-                            text: "Welcome " + emailadd + " !",
-                            timer: 2000,
-                            showConfirmButton: false,
-                            didOpen: () => {
-                                Swal.showLoading(); 
-                            }
-                        }).then(() => {
-                            location.href = base_url+'dashboard';
-                        });
+                    if (messages[resultCount]) {
+                        modal.alert_custom(...messages[resultCount]);
                     } else {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Login Failed",
-                            text: "Incorrect Email Address or Password.",
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
+                        modal.alert_custom("Login Failed.", "It seems that you're not in my database.", "error");
                     }
-                }).fail(function () {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Server Error",
-                        text: "There was an error processing your request. Please try again later.",
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                    });
-                });
-            }
-        });
+                } catch (error) {
+                    modal.alert_custom("Error.", "Server Error.", "Unexpected response from the server. Please try again later.");
+                }
+            })
+            .fail(function () {
+                modal.alert_custom("Error.", "Server Error.", "There was an error processing your request. Please try again later.");
+            });
     });
+});
 </script>
 </body>
 

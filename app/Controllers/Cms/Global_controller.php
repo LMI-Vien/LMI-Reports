@@ -296,26 +296,56 @@ class Global_controller extends BaseController
 				echo json_encode($result_return);
 				break;
 
-				case 'batch_insert':
-				try { 
-			            $table = $this->request->getPost('table');
-			            $insertBatchData = $this->request->getPost('insert_batch_data');
-			            if (empty($table) || empty($insertBatchData)) {
-			                return $this->response->setJSON([
-			                    "message" => "Table name or data is missing"
-			                ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
-			            }
+			case 'batch_insert':
+			    try {
+			        $table = $this->request->getPost('table');
+			        $insertBatchData = $this->request->getPost('insert_batch_data');
 
-			            $status = $this->Custom_model->batch_insert($table, $insertBatchData);
+			        if (empty($table) || empty($insertBatchData)) {
+			            return $this->response->setJSON([
+			                "message" => "Table name or data is missing"
+			            ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
+			        }
 
-			            return $this->response->setJSON(["message" => $status]);
+			        // Perform batch insert and get the number of inserted rows
+			        $insertedCount = $this->Custom_model->batch_insert($table, $insertBatchData);
 
-					} catch (Exception $e) {
+			        if ($insertedCount === false) {
+			            return $this->response->setJSON([
+			                "message" => "Database insert failed"
+			            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+			        }
+
 			        return $this->response->setJSON([
-			            "message" => "Invalid request method"
-			        ])->setStatusCode(ResponseInterface::HTTP_METHOD_NOT_ALLOWED);
-					// echo "Error updating data: " . $e->getMessage();
-				}
+			            "message" => "success",
+			            "inserted" => $insertedCount
+			        ]);
+
+			    } catch (Exception $e) {
+			        return $this->response->setJSON([
+			            "message" => "Error updating data: " . $e->getMessage()
+			        ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+			    }
+
+					break;
+
+			case 'get_last_inserted_code':
+		        try {
+		            // Fetch the last inserted code
+		          //  $table = $this->request->getPost('table');
+		            $lastCode = $this->Custom_model->get_last_inserted_code('tbl_area_sales_coordinator');
+
+		            return $this->response->setJSON([
+		                'message' => 'success',
+		                'last_code' => $lastCode
+		            ]);
+		        } catch (\Exception $e) {
+		            return $this->response->setJSON([
+		                'message' => 'error',
+		                'error' => $e->getMessage()
+		            ]);
+		        }
+
 					break;
 			case 'batch_update':
 				try { 

@@ -12,8 +12,8 @@
         <h1>CMS Login</h1>
         <form id="loginFormAdmin">
             <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="text" id="username" name="username" placeholder="Enter your email">
+                <label for="email">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
@@ -30,165 +30,62 @@
 </html>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
 var base_url = '<?= base_url();?>';
-    $(document).ready(function () {
-        $("#loginFormAdmin").on("submit", function (e) {
-            e.preventDefault(); 
+$(document).ready(function () {
+    $("#loginFormAdmin").on("submit", function (e) {
+        e.preventDefault();
 
-            let isValid = true;
-            const username = $("#username").val().trim();
-            const password = $("#password").val().trim();
-            const usernamePattern = /^[^@]+@[^@]+$/;
+        const username = $("#username").val().trim();
+        const password = $("#password").val().trim();
+        const emailPattern = /^[^@]+@[^@]+$/;
+        
+        if (!username && !password) {
+            return modal.alert_custom("Fill up the Fields.", "Email Address and Password are required.", "error");
+        }
 
-            if (username === "" && password === "") {
-                isValid = false;
-                Swal.fire({
-                    icon: "error",
-                    title: "Fill up the Fields",
-                    text: "Email Address and Password is required.",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                });
-                e.preventDefault();
-                return;
-            }
+        if (!username) {
+            return modal.alert_custom("Fill up the email.", "Email Address is required.", "warning");
+        }
 
-            // if (!usernamePattern.test(emailadd)) {
-            //     isValid = false;
-            //     Swal.fire({
-            //         icon: "warning",
-            //         title: "Invalid Email Address",
-            //         text: "The Email Address must contain an '@' and a name after it.",
-            //         allowOutsideClick: false,
-            //         allowEscapeKey: false,
-            //     });
-            //     e.preventDefault();
-            //     return;
-            // }
+        if (!password) {
+            return modal.alert_custom("Fill up the password.", "Password is required.", "warning");
+        }
 
-            if (username === "") {
-                isValid = false;
-                Swal.fire({
-                    icon: "warning",
-                    title: "Fill up the email",
-                    text: "Email Address is required.",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                });
-                e.preventDefault();
-                return; 
-            }
+        $.post(base_url + 'cms/login/validate_log', { username, password })
+            .done(function (response) {
+                try {
+                    const parsedResponse = is_json(response);
+                    const resultCount = parsedResponse.count;
+                    const attempts = parsedResponse.attempts || "Incorrect Email Address or Password.";
 
-            if (password === "") {
-                isValid = false;
-                Swal.fire({
-                    icon: "warning",
-                    title: "Fill up the password",
-                    text: "Password is required.",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                });
-                e.preventDefault();
-                return;
-            }
-            if (isValid) {
-                $.post(base_url + 'cms/login/validate_log', { 
-                    username: username, 
-                    password: password 
-                }, function (response) {
-                    try {
-                        const parsedResponse = is_json(response);
-                        const resultCount = parsedResponse.count;
-                        const result = parsedResponse.result;
+                    console.log("ATTEMPTS REMAINING:", attempts);
+                    console.log("Result Count:", resultCount);
 
-                        console.log("ATTEMPTS REMAINING:", parsedResponse.message);
-                        console.log("Result Count:", resultCount);
+                    const messages = {
+                        3: ["Login Successful.", `Welcome ${username} !`, "success", () => location.href = base_url + 'cms/home'],
+                        2: ["Inactive.", "This Account is Inactive.", "warning"],
+                        1: ["Login Failed.", attempts, "error"],
+                        0: ["Login Failed.", attempts, "error"],
+                        4: ["Login Failed.", "This account is Blocked/Locked.", "error"],
+                        5: ["Login Failed.", "Expired Account.", "error"],
+                        6: ["Password is Expired.", "Expired Account.", "error"]
+                    };
 
-                        if (resultCount === 3) {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Login Successful",
-                                text: "Welcome " + username + " !",
-                                timer: 2000,
-                                showConfirmButton: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            }).then(() => {
-                                location.href = base_url +'cms/home';
-                            });
-                        } else if (resultCount === 2) {
-                            Swal.fire({
-                                icon: "warning",
-                                title: "Inactive",
-                                text: "This Account is Inactive",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                        } else if (resultCount === 1 || resultCount === 0) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Login Failed",
-                                text: parsedResponse.message || "Incorrect Email Address or Password.",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                        } else if (resultCount === 4) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Login Failed",
-                                text: "This account is Blocked/Locked",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                        } else if (resultCount === 5) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Login Failed",
-                                text: "Expired Account",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                        } else if (resultCount === 6) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Password is Expired",
-                                text: "Expired Account",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Login Failed",
-                                text: "It seem's that you're not in my database",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                        }   
-                    } catch (error) {
-                        console.error("Error parsing response:", error, response);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Server Error",
-                            text: "Unexpected response from the server. Please try again later.",
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
+                    if (messages[resultCount]) {
+                        modal.alert_custom(...messages[resultCount]);
+                    } else {
+                        modal.alert_custom("Login Failed.", "It seems that you're not in my database.", "error");
                     }
-                }).fail(function () {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Server Error",
-                        text: "There was an error processing your request. Please try again later.",
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                    });
-                });
-            }
-        });
+                } catch (error) {
+                    modal.alert_custom("Error.", "Server Error.", "Unexpected response from the server. Please try again later.");
+                }
+            })
+            .fail(function () {
+                modal.alert_custom("Error.", "Server Error.", "There was an error processing your request. Please try again later.");
+            });
     });
+});
+
 </script>

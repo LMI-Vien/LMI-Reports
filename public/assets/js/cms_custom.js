@@ -476,6 +476,25 @@ var modal = {
 		    }
 		  });
 	},
+	alert_custom: function(title, text, icon, cb) {
+	    Swal.close();
+	    Swal.fire({
+	        title: title,
+	        text: text,
+	        icon: icon,
+	        confirmButtonColor: "#FE9900",
+	        allowOutsideClick: false,
+	        draggable: true
+	    }).then((result) => {
+	        if (typeof cb === "function") { // Check if cb is a valid function
+	            if (result.isConfirmed) {
+	                cb(true); // Execute the callback with `true`
+	            } else {
+	                cb(false); // Execute the callback with `false`
+	            }
+	        }
+	    });
+	},
 	loading : function(isloading){
 		if(isloading){
 			Swal.close();
@@ -491,11 +510,11 @@ var modal = {
 		} else {
 			Swal.close();
 		}
-	},loading_progress : function(isloading, text){
+	},loading_progress : function(isloading, title){
 		if(isloading){
 			Swal.close();
             Swal.fire({
-            title: "Importing Data...",
+            title: title,
             html: '<div id="progress-container" style="width:100%;background:#ddd;height:10px;border-radius:5px;overflow:hidden;">' +
                   '<div id="progress-bar" style="width:0%;height:100%;background:#28a745;"></div>' +
                   '</div><p id="currentTitle" style="margin-top:10px;">Starting...</p>',
@@ -571,8 +590,8 @@ var pagination = {
 			htm += '  <button type="button" class="btn btn-default first-page"><i class="fas fa-angle-double-left"></i></button>';
 			htm += '  <button type="button" class="btn btn-default prev-page"><i class="fas fa-angle-left"></i></button>';
 			htm += '  <div class="btn-group dropup">';
-		//	htm += '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">';
-		//	htm += '      <span class="pager_no">Page 1</span>';
+			htm += '    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">';
+			htm += '      <span class="pager_no">Page 1</span>';
 			htm += '      <span class="glyphicon glyphicon-menu-down"></span>';
 			htm += '    </button>';
 			htm += '    <ul class="dropdown-menu" style="max-height: 200px; overflow: auto"">';
@@ -586,7 +605,7 @@ var pagination = {
 			htm += '  <button type="button" class="btn btn-default last-page"><i class="fas fa-angle-double-right"></i></button>';
 			htm += '</div></center>';
 			//htm += '<div><span class="">Page 1</span>';
-			htm += '<select class="form-control pager_number input-sm hidden" style="width: 70px;">';
+			htm += '<select class="form-control pager_number input-sm hidden" style="width: 70px; display:none;">';
 			for(var x =1; x<=total_page; x++){
 				var pgno = x;
 				htm += "<option value='" + pgno + "'>" + pgno + "</option>";
@@ -1074,4 +1093,90 @@ function ViewDateformat(dateString) {
         second: '2-digit', 
         hour12: true 
     });
+}
+
+function trimText(str, length) {
+    if (str.length > length) {
+        return str.substring(0, length) + "...";
+    } else {
+        return str;
+    }
+}
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    // Combine into the desired format
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function formatReadableDate(dateStr, datetime) {
+    const date = new Date(dateStr);
+    if (datetime) {
+        return date.toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric",
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
+        });
+    } else {
+        return date.toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric",
+        });
+    }
+}
+
+//pagination of import
+function firstPage() {
+    currentPage = 1;
+    display_imported_data();
+}
+
+function lastPage() {
+    currentPage = totalPages;
+    display_imported_data();
+}
+
+function goToPage(page) {
+    currentPage = parseInt(page);
+    display_imported_data();
+}
+
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        display_imported_data();
+    }
+}
+
+function nextPage() {
+    if (currentPage < totalPages) {
+        currentPage++;
+        display_imported_data();
+    }
+}
+
+function goToFirstPage() {
+    if (currentPage !== 1) {
+        currentPage = 1;
+        display_imported_data();
+    }
+}
+
+function goToLastPage() {
+    if (currentPage !== totalPages) {
+        currentPage = totalPages;
+        display_imported_data();
+    }
 }

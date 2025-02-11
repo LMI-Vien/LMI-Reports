@@ -19,6 +19,11 @@ class Home extends BaseController
 
 	public function index()
 	{
+		// $session = session();
+		// echo '<pre>';
+		// var_dump($session->get());
+		// echo '</pre>';
+		// die();
 		$data['meta'] = array(
 			"title"         =>  "LMI CMS Portal",
 			"description"   =>  "LMI CMS Portal Wep application",

@@ -140,6 +140,7 @@ ul.child_menu {
                             <tr>
                                 <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                     <th class='center-content'>User Role</th>
+                                    <th class='center-content'>Date Created</th>
                                     <th class='center-content'>Date Modified</th>
                                     <th class='center-content'>Status</th>
                                     <th class='center-content'>Action</th>
@@ -257,7 +258,7 @@ ul.child_menu {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "id, name, status, updated_date",
+            select : "id, name, status, created_date, updated_date",
             query : query,
             offset : offset,
             limit : limit,
@@ -281,7 +282,8 @@ ul.child_menu {
                         html += "<tr>";
                         html += "<td class='center-content'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td>" + y.name + "</td>";
-                        html += "<td class='center-content'>"+y.updated_date+  "</td>";
+                        html += "<td class='center-content'>"+(y.created_date ? ViewDateformat(y.created_date) : "N/A")+  "</td>";
+                        html += "<td class='center-content'>"+(y.updated_date ? ViewDateformat(y.updated_date) : "N/A")+  "</td>";
                         html += "<td>" +status+ "</td>";
 
                         if (y.id <= 2) {

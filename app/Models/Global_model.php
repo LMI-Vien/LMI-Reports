@@ -39,6 +39,30 @@ class Global_model extends Model
         }   
     }
 
+    function validate_log_email($email, $pass) { 
+        // Get user record
+        $builder = $this->db->table('cms_users')
+                            ->select('password, salt')
+                            ->where('email', $email);
+        $query = $builder->get();
+        $result = $query->getRow(); 
+
+        if (!$result) {
+            return null;
+        }
+
+        $salted_password = hash('sha256', $pass . $result->salt);
+
+        if (password_verify($salted_password, $result->password)) {
+            return $this->db->table('cms_users')
+                            ->where('email', $email)
+                            ->get()
+                            ->getRow();
+        } else {
+            return null;
+        }   
+    }
+
     function validate_log_report_user($user, $pass) { 
         $builder = $this->db->table('tbl_report_users')
                             ->select('password')
@@ -221,7 +245,7 @@ class Global_model extends Model
         return $q->getResult();
     }
 
-    function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false, $action)
+    function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false, $action = null)
     {
         $builder = $this->db->table($table);
         $builder->select($select);

@@ -15,7 +15,7 @@ $routes->get('/api/get_users', 'Dashboard::get_users');
 
 $routes->group('login/', static function ($routes) {
     $routes->get('/', 'Login::login');
-    $routes->post('auth', 'Login::auth');
+    $routes->post('validate_log', 'Login::validate_log');
     $routes->get('logout', 'Login::logout');
     $routes->get('sign_out', 'Login::sign_out');
 });

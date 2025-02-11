@@ -155,7 +155,7 @@ class Login extends BaseController
 	        $expiration_days = $this->check_expiration_of_password($user->id);
 	        if ($expiration_days > 90) {
 	            //$this->send_email($user->email);
-	            echo json_encode(['count' => 6, 'result' => null, 'message' => 'Password expired', 'message' => $login_attempts]);
+	            echo json_encode(['count' => 6, 'result' => null, 'message' => 'Password expired', 'attempts' => $login_attempts]);
 	            return;
 	        }
 
@@ -165,16 +165,16 @@ class Login extends BaseController
 	        }
 
 	        $this->set_session($data);
-	        echo json_encode(['count' => 3, 'result' => $data, 'message' => 'Login successful', 'message' => $login_attempts]);
+	        echo json_encode(['count' => 3, 'result' => $data, 'message' => 'Login successful', 'attempts' => $login_attempts]);
 	        return;
 	    }else{
 	    	$this->get_error_logs($username);
-	    	echo json_encode(['count' => 2, 'result' => null, 'message' => 'Inactive Account', 'message' => $login_attempts]);
+	    	echo json_encode(['count' => 2, 'result' => null, 'message' => 'Inactive Account', 'attempts' => $login_attempts]);
 	    	return;
 	    }
 	    // Failed login attempt handling
 	    $this->get_error_logs($username);
-	    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'message' => $login_attempts]);
+	    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'attempts' => $login_attempts]);
 	    return;
 	}
 
@@ -254,7 +254,9 @@ class Login extends BaseController
 	  		$this->Global_model->save_data($table,$data2);
 	  	}
 	  	$session = session();
-	  	$session->destroy();
+	  	//$session->destroy();
+		$sessionKeys = ['sess_uid', 'sess_user', 'sess_email', 'sess_name', 'sess_role'];
+	    $session->remove($sessionKeys);
 		$session->setTempdata('logout_data', 'You are successfully logged out.', 5);
 		return redirect()->to(base_url("cms/login")); 
 	}

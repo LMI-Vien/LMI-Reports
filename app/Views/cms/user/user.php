@@ -49,6 +49,8 @@
                                     <th class='center-content'>Username</th>
                                     <th class='center-content'>Email Address</th>
                                     <th class='center-content'>User Role</th>
+                                    <th class='center-content'>Date Created</th>
+                                    <th class='center-content'>Date Modified</th>
                                     <th class='center-content'>Status</th>
                                     <th class='center-content'>Action</th>
                                 </tr>  
@@ -186,7 +188,7 @@
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "u.id, u.username, u.email, u.name, u.status, r.name as role_name",
+            select : "u.id, u.username, u.email, u.name, u.status, r.name as role_name, u.created_date, u.updated_date",
             query : query,
             offset : offset,
             limit : limit,
@@ -220,6 +222,8 @@
                         html+="<td>"+y.username+"</td>";
                         html+="<td>"+y.email+"</a></p></td>";
                         html+="<td>"+y.role_name+"</a></p></td>";
+                        html += "<td class='center-content'>"+(y.created_date ? ViewDateformat(y.created_date) : "N/A")+  "</td>";
+                        html += "<td class='center-content'>"+(y.updated_date ? ViewDateformat(y.updated_date) : "N/A")+  "</td>";
                         html+="<td>"+status+"</a></td>";
                         html+="<td class='center-content'>";
                         html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";

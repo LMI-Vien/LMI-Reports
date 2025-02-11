@@ -168,12 +168,13 @@
                             <tbody class="word_break import_table"></tbody>
                         </table>
                     </div>
+                    <div class="import_pagination"></div>
                 </div>
             </div>
             
             <div class="modal-footer">
                 <button type="button" class="btn caution" data-dismiss="modal">Close</button>
-                <button type="button" class="btn save" onclick="proccess_xl_file()">Validate and Save</button>
+                <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
             </div>
         </div>
     </div>
@@ -184,6 +185,12 @@
     var limit = 10;
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
+
+    //for importing
+    let currentPage = 1;
+    let rowsPerPage = 1000;
+    let totalPages = 1;
+    let dataset = [];
 
     $(document).ready(function() {
         get_data(query);
@@ -570,11 +577,8 @@
         return new_btn;
     }
 
-    // validates the data in the modal
     function validate_data() {
-        // calls validate.standard("form-save-modal") to check if the form is valid
         if(validate.standard("form-save-modal")){
-            // calls check_current_db() to check if the code and description already exist in the database
 
             var id = $('#id').val() || 0;
             var code = $('#code').val()
@@ -616,9 +620,7 @@
         }
     }
 
-    // confirms if the user wants to save the data
     function confirm_save(code, description, status, date, area) {
-        // checks if the status is true or false and sets the value accordingly
         if (status) {
             val_status = 1
             chk_val = 'Active'
@@ -654,11 +656,8 @@
             html += "</tr>"
             html += "</tbody>"
             html += "</table>"
-            // calls modal.confirm() to confirm if the user wants to save the data
             modal.confirm(confirm_add_message, function(result){
                 if(result){
-                    // if the user confirms, call save_to_db() to save the data
-                    // passing the code, description, status, date, and area as parameters
                     data = {
                         'code': code, 
                         'description':description, 
@@ -696,19 +695,6 @@
             var obj = is_json(result);
             // calls the callback function and passes the result
             callback();
-        });
-    }
-
-    function batch_insert(insert_batch_data, cb){
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-             event: "batch_insert",
-             table: "tbl_area_sales_coordinator",
-             insert_batch_data: insert_batch_data
-        }
-
-        aJax.post(url,data,function(result){
-            cb(result.message)
         });
     }
 
@@ -841,261 +827,288 @@
         });
     }
 
+
     function clear_import_table() {
-        $(".import_table").empty()
+        $(".import_table").empty();
+    }
+
+    function paginateData(rowsPerPage) {
+        totalPages = Math.ceil(dataset.length / rowsPerPage);
+        currentPage = 1;
+        display_imported_data();
+    }
+
+    function display_imported_data() {
+        let start = (currentPage - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        let paginatedData = dataset.slice(start, end);
+
+        let html = '';
+        let tr_counter = start;
+
+        paginatedData.forEach(row => {
+            let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+            html += `<tr class="${rowClass}">`;
+            html += `<td>${tr_counter + 1}</td>`;
+
+            let lowerCaseRecord = Object.keys(row).reduce((acc, key) => {
+                acc[key.toLowerCase()] = row[key];
+                return acc;
+            }, {});
+
+            let td_validator = ['code', 'name', 'status', 'deployment date', 'area'];
+            td_validator.forEach(column => {
+                if (column === 'deployment date') {
+                    lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
+                }
+                html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
+            });
+
+            html += "</tr>";
+            tr_counter += 1;
+        });
+
+        modal.loading(false);
+        $(".import_table").html(html);
+        updatePaginationControls();
+    }
+
+    function updatePaginationControls() {
+        let paginationHtml = `
+            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}>First</button>
+            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}>Previous</button>
+            
+            <select onchange="goToPage(this.value)">
+                ${Array.from({ length: totalPages }, (_, i) => 
+                    `<option value="${i + 1}" ${i + 1 === currentPage ? "selected" : ""}>Page ${i + 1}</option>`
+                ).join('')}
+            </select>
+            
+            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}>Next</button>
+            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}>Last</button>
+        `;
+
+        $(".import_pagination").html(paginationHtml);
+    }
+
+    function createErrorLogFile(errorLogs, filename) {
+        let errorText = errorLogs.join("\n");
+        let blob = new Blob([errorText], { type: "text/plain" });
+        let url = URL.createObjectURL(blob);
+
+        let $downloadBtn = $("<a>", {
+            href: url,
+            download: filename+".txt",
+            text: "Download Error Logs",
+            css: {
+                border: "1px solid #730000",
+                display: "block",
+                marginTop: "10px",
+                padding: "10px",
+                background: "#990000",
+                color: "white",
+                textAlign: "center",
+                cursor: "pointer",
+                textDecoration: "none"
+            }
+        });
+
+        $(".import_pagination").append($downloadBtn);
     }
 
     function read_xl_file() {
         clear_import_table();
-        var html = '';
+        
+        dataset = [];
 
         const file = $("#file")[0].files[0];
-
-        if (file === undefined) {
-            modal.alert('Please select a file to upload', 'error', ()=>{})
-            return
+        if (!file) {
+            modal.loading_progress(false);
+            modal.alert('Please select a file to upload', 'error', ()=>{});
+            return;
         }
+        modal.loading_progress(true, "Reviewing Data...");
+
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = e.target.result;
-            // convert the data to a workbook
-            const workbook = XLSX.read(data, {type: "binary"});
-            // get the first sheet
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            // convert the sheet to JSON
-            const jsonData = XLSX.utils.sheet_to_json(sheet);
-    
-            var tr_counter = 0;
 
-            jsonData.forEach(row => {
-                var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
-                html += "<tr class=\""+rowClass+"\">";
-                html += "<td>";
-                html += tr_counter+1;
-                html += "</td>";
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
 
-                let record = row;
-
-                let lowerCaseRecord = Object.keys(record).reduce((acc, key) => {
-                    acc[key.toLowerCase()] = record[key];
-                    return acc;
-                }, {});
-    
-                // create a table cell for each item in the row
-                var td_validator = ['code', 'name', 'status', 'deployment date', 'area'];
-                td_validator.forEach(column => {
-                    if (column === 'deployment date') {
-                        lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
-                    } else {
-                        lowerCaseRecord[column] = lowerCaseRecord[column];
-                    }
-                    html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
-                    html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
-                    html += "</td>";
-                });
-                html += "</tr>";
-                tr_counter += 1;
+            //console.log('Total records to process:', jsonData.length);
+            // Process in chunks
+            processInChunks(jsonData, 5000, () => {
+                paginateData(rowsPerPage);
             });
-    
-            $(".import_table").append(html);
-            html = '';
         };
-        reader.readAsBinaryString(file);
+        reader.readAsArrayBuffer(file);
     }
 
-    function proccess_xl_file() {
-        var extracted_data = $(".import_table");
+    function processInChunks(data, chunkSize, callback) {
+        let index = 0;
+        let totalRecords = data.length;
+        let totalProcessed = 0;
 
-        var code = '';
-        var description = '';
-        var status = '';
-        var deployment_date = '';
-        var area_id = '';
-
-        var invalid = false;
-        var errmsg = '';
-
-        var unique_code = [];
-        var unique_description = [];
-        var unique_area_id = [];
-        var area_desc = [];
-
-        var import_array = [];
-        var needle = [];
-
-        var tr_count = 1;
-        var row_mapping = {};
-
-        extracted_data.find('tr').each(function () {
-            td_count = 1;
-            var temp = [];
-            $(this).find('td').each(function () {
-                var text_val = $(this).html().trim();
-
-                if (td_count === 2) {
-                    if (unique_code.includes(text_val)) {
-                        invalid = true;
-                        errmsg += "⚠️ Duplicated Code at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    } else if (text_val.length > 25) {
-                        invalid = true;
-                        errmsg += "⚠️ Code exceeds 25 characters at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    } else if (text_val === '') {
-                        invalid = true;
-                        errmsg += "⚠️ Code is empty at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    } else {
-                        code = text_val;
-                        unique_code.push(text_val);
-                        row_mapping[code] = tr_count;
-                    }
-                }
-
-                if (td_count === 3) {
-                    if (unique_description.includes(text_val)) {
-                        invalid = true;
-                        errmsg += "⚠️ Duplicated Description at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    } else if (text_val.length > 50) {
-                        invalid = true;
-                        errmsg += "⚠️ Description exceeds 50 characters at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    } else if (text_val === '') {
-                        invalid = true;
-                        errmsg += "⚠️ Description is empty at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    } else {
-                        description = text_val;
-                        unique_description.push(text_val);
-                        row_mapping[description] = tr_count;
-                    }
-                }
-
-                if (td_count === 4) {
-                    if (text_val.toLowerCase() === 'active') {
-                        status = 1;
-                    } else if (text_val.toLowerCase() === 'inactive') {
-                        status = 0;
-                    } else {
-                        invalid = true;
-                        errmsg += "⚠️ Invalid Status at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    }
-                }
-
-                if (td_count === 5) {
-                    let dateObj = new Date(text_val);
-                    if (isNaN(dateObj.getTime())) {
-                        invalid = true;
-                        errmsg += "⚠️ Invalid Deployment Date at line #: <b>" + tr_count + "</b>⚠️<br>";
-                    } else {
-                        deployment_date = readable_date_to_excel_date(text_val);
-                    }
-                }
-
-                if (td_count === 6) {
-                    if (!unique_area_id.includes(text_val)) {
-                        unique_area_id.push(text_val);
-                    }
-                    area_id = text_val;
-                }
-
-                td_count += 1;
-            });
-
-            tr_count += 1;
-            temp.push(code, description, status, deployment_date, area_id);
-            if(!area_desc.includes(area_id)){
-                area_desc.push(area_id)
+        function nextChunk() {
+            if (index >= data.length) {
+                modal.loading_progress(false);
+                //console.log('Total records processed:', totalProcessed);
+                callback(); 
+                return;
             }
-            needle.push([code,description]);
-            import_array.push(temp);
-        });
 
-        if (tr_count === 1) {
-            modal.alert('Please select a file to upload', 'error', ()=>{})
+            let chunk = data.slice(index, index + chunkSize);
+            dataset = dataset.concat(chunk);
+            totalProcessed += chunk.length; 
+            index += chunkSize;
+
+
+            // Calculate progress percentage
+            let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
+            setTimeout(() => {
+                updateSwalProgress("Preview Data", progress);
+                nextChunk();
+            }, 100); // Delay for UI update
+        }
+        nextChunk();
+    }
+
+    function process_xl_file() {
+        if (dataset.length === 0) {
+            modal.alert('No data to process. Please upload a file.', 'error', () => {});
             return;
         }
 
-        var temp_invalid = invalid;
-        var temp_errmsg = '';
+        let jsonData = dataset.map(row => {
+            return {
+                "Code": row["Code"] || "",
+                "Name": row["Name"] || "",
+                "Status": row["Status"] || "",
+                "Deployment Date": row["Deployment Date"] ? row["Deployment Date"] : "",
+                "Area": row["Area"] || ""
+            };
+        });
 
-        invalid = temp_invalid;
-        errmsg += temp_errmsg;
+        modal.loading_progress(true, "Validating and Saving data...");
+        let worker = new Worker(base_url + "assets/cms/js/validator_asc.js");
+        worker.postMessage(jsonData);
 
-        var table = 'tbl_area_sales_coordinator';
-        var haystack = ['code', 'description'];
-        var selected_fields = ['id', 'code', 'description'];
+        worker.onmessage = function(e) {
+            modal.loading_progress(false);
 
-        if (invalid) {
-            modal.content('Error', 'error', errmsg, '600px', ()=>{});
-        } else {
-            list_existing(table, selected_fields, haystack, needle, function (result) {
-                if (result.status === "error") {
-                    let errmsg = "";
-                    let processedFields = new Set();
-
-                    $.each(result.existing, function (index, record) {
-                        $.each(record, function (field, value) {
-                            if (!processedFields.has(field + value)) { 
-                                let line_number = row_mapping[value] || "Unknown";
-                                errmsg += "⚠️ " + field.charAt(0).toUpperCase() + field.slice(1) + " already exists in masterfile at line #: <b>" + line_number + "</b>⚠️<br>";
-                                processedFields.add(field + value); // Mark as processed
-                            }
-                        });
-                    });
-                    modal.content('Error', 'error', errmsg, '600px', () => {});
+            let { invalid, errorLogs, valid_data, err_counter } = e.data;
+            if (invalid) {
+                if (err_counter > 5000) {
+                    
+                    modal.content(
+                        'Validation Error',
+                        'error',
+                        '⚠️ Too many errors detected. Please download the error log for details.',
+                        '600px',
+                        () => {}
+                    );
                 } else {
-                    var batch = [];
-                    let area_desc_list = [...new Set(import_array.map(row => row[4]))];
-                    get_field_values("tbl_area", "code", "code", area_desc_list, (res) => {
-                        let areaMapping = {};
-                        $.each(res, (x,y) => {
-                            areaMapping[y] = x;
-                        })
-
-                        import_array.forEach(row => {
-                            let matchedArea = areaMapping[row[4]];
-                            let area_id = matchedArea ? matchedArea : null;
-
-                            let data = {
-                                'code': row[0],
-                                'description': row[1],
-                                'status': row[2],
-                                'deployment_date': row[3],
-                                'area_id': area_id,  // Replaced with the fetched value
-                                'created_by': user_id,
-                                'created_date': formatDate(new Date())
-                            };
-
-                            batch.push(data);
-                        });
-
-                        modal.loading(true);
-                        setTimeout(() => {
-                            batch_insert(batch, () => {
-                                modal.loading(false);
-                                modal.alert(success_save_message, 'success', () => {
-                                    if (result) {
-                                        location.reload();
-                                    }
-                                })
-                            })
-                        }, 1000);
-                    });
+                    modal.content(
+                        'Validation Error',
+                        'error',
+                        errorLogs.join("<br>"),
+                        '600px',
+                        () => {}
+                    );
                 }
+                createErrorLogFile(errorLogs);
+            } else if (valid_data && valid_data.length > 0) {
+                updateSwalProgress("Validation Completed", 50);
+                setTimeout(() => saveValidatedData(valid_data), 500);
+            } else {
+                modal.loading_progress(false);
+                console.error("No valid data returned from worker.");
+                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+            }
+        };
+
+        worker.onerror = function() {
+            modal.loading_progress(false);
+            modal.alert("Error processing data. Please try again.", "error", () => {});
+        };
+    }
+
+
+    function saveValidatedData(valid_data) {
+        let batch_size = 5000; // Process 1000 records at a time
+        let total_batches = Math.ceil(valid_data.length / batch_size);
+        let batch_index = 0;
+        let retry_count = 0;
+        let max_retries = 5; 
+
+        function processNextBatch() {
+            if (batch_index >= total_batches) {
+                modal.alert(success_save_message, 'success', () => location.reload());
+                return;
+            }
+
+            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+            let progress = Math.round(((batch_index + 1) / total_batches) * 100);
+            setTimeout(() => {
+                updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
+            }, 100);
+            batch_insert(batch, function() {
+                batch_index++;
+                processNextBatch();
             });
         }
+
+        function handleSaveError(batch) {
+            if (retry_count < max_retries) {
+                retry_count++;
+                let wait_time = Math.pow(2, retry_count) * 1000;
+                //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
+                setTimeout(() => {
+                    //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
+                    batch_insert(batch, function(success) {
+                        if (success) {
+                            batch_index++;
+                            retry_count = 0;
+                            processNextBatch();
+                        } else {
+                            handleSaveError(batch);
+                        }
+                    });
+                }, wait_time);
+            } else {
+                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+            }
+        }
+
+        modal.loading_progress(true, "Validating and Saving data...");
+        setTimeout(processNextBatch, 1000);
     }
 
     function readable_date_to_excel_date(readable_date) {
         var dateObj = new Date(readable_date);
-        
         var yyyy = dateObj.getFullYear();
-        var mm = String(dateObj.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
         var dd = String(dateObj.getDate()).padStart(2, '0');
-        
         var formattedDate = `${yyyy}-${mm}-${dd}`;
 
         return formattedDate;
     }
 
     function excel_date_to_readable_date(excel_date) {
-        var date = new Date((excel_date - (25567 + 1)) * 86400 * 1000);
+        var dateStr = excel_date.split('/').map((part, index) => {
+            if (index === 2 && part.length === 2) {
+            }
+            return part;
+        }).join('/');
+
+        var date = new Date(dateStr);
+        
+        if (isNaN(date)) {
+            return "Invalid Date";
+        }
+        
         return date.toLocaleDateString("en-US", { 
             year: "numeric", 
             month: "long", 
@@ -1155,63 +1168,55 @@
         });
     }
 
-    function formatDate(date) {
-        // Get components of the date
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-    
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
+    function batch_insert(insert_batch_data, cb) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "batch_insert",
+            table: "tbl_area_sales_coordinator",
+            insert_batch_data: insert_batch_data
+        };
 
-    // Formats a date string to a readable format
-    function formatReadableDate(dateStr, datetime) {
-        const date = new Date(dateStr);
-        if (datetime) {
-            return date.toLocaleDateString("en-US", { 
-                year: "numeric", 
-                month: "short", 
-                day: "numeric",
-                hour:"2-digit",
-                minute:"2-digit",
-                second:"2-digit",
-                hour12:true
-            });
-        } else {
-            return date.toLocaleDateString("en-US", { 
-                year: "numeric", 
-                month: "short", 
-                day: "numeric",
+        let retry_count = 0;
+        let max_retries = 5; // Maximum retry attempts
+
+        // Function to make the AJAX request and handle retries
+        function attemptInsert() {
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: function(result) {
+                    if (result.message === "success") {
+                        cb(true); // Success callback
+                    } else {
+                        handleSaveError(result); // Handle error if message is not success
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Save failed:", status, error);
+                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
+                }
             });
         }
-    }
 
-    function trimText(str, length) {
-        if (str.length > length) {
-            return str.substring(0, length) + "...";
-        } else {
-            return str;
-        }
-    }
+        // Handle the error and retry the request
+        function handleSaveError(result) {
+            if (retry_count < max_retries) {
+                retry_count++;
+                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
+                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
 
-    // addNbsp()™: A Truly Revolutionary Function
-    // This function is the epitome of laziness and brilliance combined. 
-    // Why manually type `&nbsp;` repeatedly when you can let JavaScript do the heavy lifting?
-    // With `addNbsp`, you can transform every character in a string into a spaced-out masterpiece,
-    // replacing regular spaces with double `&nbsp;&nbsp;` and adding `&nbsp;` after every other character. 
-    // It’s elegant. It’s lazy. It’s genius.
-    // Honestly, this function is not just a tool—it’s a lifestyle.
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
+                setTimeout(() => {
+                    console.log(`Retrying attempt ${retry_count}...`);
+                    attemptInsert(); // Retry the insertion
+                }, wait_time);
+            } else {
+                console.error("Failed to save data after multiple attempts.");
+                cb(false); // Call callback with failure if retries exceed max attempts
             }
-            return char + '&nbsp;';
-        }).join('');
-    }
+        }
 
+        // Initiate the first attempt to insert
+        attemptInsert();
+    }
 </script>

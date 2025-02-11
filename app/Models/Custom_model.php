@@ -157,15 +157,14 @@ class Custom_model extends Model
         return $this;
     }
 
-    public function batch_insert($table, $insert_batch_data){
+    public function batch_insert($table, $insert_batch_data) {
         if (!is_array($insert_batch_data) || empty($insert_batch_data)) {
             return "Invalid or empty data";
         }
-        //$builder = $this->db->table($table);
+
         try {
             $builder = $this->db->table($table);
             $builder->insertBatch($insert_batch_data);
-            $updatedStatus = $this->db->affectedRows();
 
             $lastInsertId = $this->db->insertID();
 
@@ -179,7 +178,10 @@ class Custom_model extends Model
             }
             return $updatedStatus > 0 ? $insertedIds : "failed";
         } catch (\Exception $e) {
-            return "Error: " . $e->getMessage();
+            return [
+                "message" => "Error: " . $e->getMessage(),
+                "inserted" => 0
+            ];
         }
     }
 
@@ -366,5 +368,21 @@ class Custom_model extends Model
         }
         $queryResult = $builder->get();
         return $queryResult->getRow();
+    }
+
+    public function get_last_inserted_code($table)
+    {
+        $lastCode = $this->db->table($table)
+            ->select('Code')
+            ->orderBy('id', 'desc') // Assuming 'id' is the auto-incremented primary key
+            ->limit(1)
+            ->get()
+            ->getRowArray();
+
+        if ($lastCode) {
+            return $lastCode['Code'];
+        } else {
+            return null; // If no records exist
+        }
     }
 }
