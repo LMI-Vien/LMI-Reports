@@ -51,6 +51,15 @@ class Custom_model extends Model
 
     }
 
+    function get_site_menu_list($table, $select, $query){
+        $builder = $this->db->table($table);
+        $builder->select($select);
+        $builder->where($query);
+        $builder->orderBy('sort_order','asc');
+        $result = $builder->get();
+        return $result->getResult();
+    }
+
     function update_menu_data($table,$data,$role_id){
         $session = session();
         $insert_rights = array();

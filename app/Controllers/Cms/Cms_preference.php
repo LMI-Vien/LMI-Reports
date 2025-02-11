@@ -99,4 +99,55 @@ class Cms_preference extends BaseController
         // helper('download');
         // force_download($db_name, $backup); 
     }
+
+	public function get_site_menu() {
+		$session = session();
+		$select = 'id, menu_url, menu_name, menu_type, menu_parent_id';
+		$query = 'status = 1';
+		$result = $this->Custom_model->get_site_menu_list('site_menu', $select, $query);
+	
+		$menuTree = [];
+		$menuLookup = [];
+	
+		foreach ($result as $menu) {
+			$menu->children = [];
+			$menuLookup[$menu->id] = $menu;
+		}
+	
+		foreach ($result as $menu) {
+			if ($menu->menu_parent_id == 0) {
+				$menuTree[$menu->id] = $menu;
+			} else {
+				if (isset($menuLookup[$menu->menu_parent_id])) {
+					$menuLookup[$menu->menu_parent_id]->children[] = $menu;
+				}
+			}
+		}
+	
+		$html = '<ul class="navbar-nav">' . $this->generateMenuHtml($menuTree) . '</ul>';
+		return $this->response->setBody($html); 
+	}
+	
+	private function generateMenuHtml($menuTree) {
+		$html = '';
+	
+		foreach ($menuTree as $menu) {
+			$new_location = str_replace("content_management", "dynamic", $menu->menu_url);
+			if (!empty($menu->children)) {
+				$html .= '
+				<li class="nav-item dropdown">
+					<a href="#" class="nav-link dropdown-toggle" id="menu-'.$menu->id.'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						'.($menu->menu_name).'
+					</a>
+					<ul class="dropdown-menu" aria-labelledby="menu-'.$menu->id.'">
+						'.$this->generateMenuHtml($menu->children).'
+					</ul>
+				</li>';
+			} else {
+				$html .= '<li class="nav-item"><a class="nav-link" href="'.base_url().$new_location.'">'.($menu->menu_name).'</a></li>';
+			}
+		}
+	
+		return $html;
+	}
 }

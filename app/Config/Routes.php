@@ -45,6 +45,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('get_menu', 'Cms\Cms_preference::get_menu');
         $routes->get('get_title', 'Cms\Cms_preference::get_title');
         //$routes->get('get_custom_theme', 'Cms\Cms_preference::get_custom_theme');
+        $routes->get('get_site_menu', 'Cms\Cms_preference::get_site_menu');
     });
 
     $routes->group('roles/', static function ($routes) {

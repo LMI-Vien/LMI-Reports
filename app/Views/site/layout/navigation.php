@@ -19,7 +19,7 @@
                                 </div>
                             </div>
                             
-                            <div class="nav-item dropdown">
+                            <!-- <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" id="watsonsMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i class="fas fa-dashboard"></i> Watsons Sell Through Report
                                 </a>
@@ -92,7 +92,11 @@
                                     <a class="dropdown-item" href="#">Trade Report on ASC</a>
                                     <a class="dropdown-item" href="#">Trade Report on BA</a>
                                 </div>
-                            </div>
+                            </div> -->
+
+                            <ul class="navbar-nav">
+                                <div id="dynamic-menu"></div>
+                            </ul>
 
                         </div>
 
@@ -140,7 +144,7 @@
         $("#logout").on("click", function(e) {
             e.preventDefault();
 
-            var logoutUrl = $(this).attr("href"); // Get the logout URL
+            var logoutUrl = $(this).attr("href");
 
             Swal.fire({
                 title: "Are you sure?",
@@ -159,5 +163,17 @@
                 }
             });
         });
+
+        // dynamic menu site
+        function get_menu_site() {
+            var url = "<?= site_url('cms/cms_preference/get_site_menu'); ?>"; 
+            $.get(url, function(response) {
+                $("#dynamic-menu").html(response); 
+            });
+        }
+
+        get_menu_site();
+
     });
+    
 </script>
