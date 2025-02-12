@@ -42,9 +42,9 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('cms-menu', static function ($routes) {
         $routes->get('/', 'Cms\Cms_menu::index');
-        // $routes->get('menu/(:num)/(:any)', 'Cms\Cms_menu::index/(:num)/(:any)');
-        // $routes->get('menu_add/(:num)/(:any)', 'Cms\Cms_menu::menu_add');
-        // $routes->get('menu_update/(:num)', 'Cms\Cms_menu::menu_update');
+        $routes->get('menu/(:num)/(:any)', 'Cms\Cms_menu::index/(:num)/(:any)');
+        $routes->get('menu_add/(:num)/(:any)', 'Cms\Cms_menu::menu_add');
+        $routes->get('menu_update/(:num)', 'Cms\Cms_menu::menu_update');
     });
 
     $routes->group('cms_preference/', static function ($routes) {

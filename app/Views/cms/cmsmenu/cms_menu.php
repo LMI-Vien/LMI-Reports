@@ -69,42 +69,42 @@
             </div>
 
             <div class="modal-body">
-                    <form style="background-color: white !important; width: 100%;">
-                        <div class="mb-3">
-                            <label for="menu_name" class="form-label">Menu Name</label>
-                            <input type="text" class="form-control" id="menu_name" aria-describedby="menu_name">
-                            <small id="menu_name" class="form-text text-muted">* required, must be unique, max 25 characters</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="menu_url" class="form-label">Menu Url</label>
-                            <input type="text" class="form-control" id="menu_url" aria-describedby="menu_url">
-                            <small id="menu_url" class="form-text text-muted">* required, must be unique, max 50 characters</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="menu_type" class="form-label">Menu Type</label>
-                            <br>
-                            <select name="menu_type" id="menu_type">
-                                <option value="" readonly>Please select...</option>
-                                <option value="Module">Module</option>
-                                <option value="Group Menu">Group Menu</option>
-                            </select>
-                            <small id="menu_type" class="form-text text-muted">* required, must be unique, max 50 characters</small>
-                        </div>
-                        
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="status" checked>
-                            <label class="form-check-label" for="status">Active</label>
-                        </div>
-                    </form>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn save" id="add_data" onclick="validate_data('add_modal', 'save')">Save</button>
-                </div>
+                <form style="background-color: white !important; width: 100%;">
+                    <div class="mb-3">
+                        <label for="menu_name" class="form-label">Menu Name</label>
+                        <input type="text" class="form-control" id="menu_name" aria-describedby="menu_name">
+                        <small id="menu_name" class="form-text text-muted">* required, must be unique, max 25 characters</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="menu_url" class="form-label">Menu Url</label>
+                        <input type="text" class="form-control" id="menu_url" aria-describedby="menu_url">
+                        <small id="menu_url" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="menu_type" class="form-label">Menu Type</label>
+                        <br>
+                        <select name="menu_type" id="menu_type">
+                            <option value="" readonly>Please select...</option>
+                            <option value="2">Module</option>
+                            <option value="1">Group Menu</option>
+                        </select>
+                        <small id="menu_type_small" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="status" checked>
+                        <label class="form-check-label" for="status">Active</label>
+                    </div>
+                </form>
             </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                <button type="button" class="btn save" id="add_data" onclick="validate_data('add_modal', 'save')">Save</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -138,7 +138,7 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "id, menu_name, menu_url, menu_icon, menu_type, menu_parent_id, status",
+            select : "id, menu_name, menu_url, menu_icon, menu_type, menu_parent_id, status, updated_date, created_date",
             query : query,
             offset : offset,
             limit : limit,
@@ -180,7 +180,7 @@
                         html += '<td class="hidden"><p class="order" data-order="" data-id='+y.id+'></p></td>';
                         html += '<td><input class = "select"  data-id='+y.id+' type ="checkbox"></td>';
                         
-                        if (y.menu_type === "Group Menu") {
+                        if (y.menu_type === "1") {
                             if (y.menu_type === "Buy Now") {
                                 html += '<td><a class="text-primary" href="<?= base_url('cms/cms-menu/shop_list');?>">'+y.menu_name+'</a></td>';
                             } else {
@@ -197,7 +197,8 @@
                         let updated_date = y.updated_date ? formatReadableDate(y.updated_date, true) : 'N/A';
                         html += '<td>' + menu_mapping[y.menu_parent_id] + '</td>'; 
                         html += '<td>' +y.menu_url+ '</td>'; 
-                        html += '<td>'+y.menu_type+ '</td>';
+                        // html += '<td>'+y.menu_type+ '</td>';
+                        html += '<td>' + (y.menu_type == 1 ? 'Group Menu' : y.menu_type == 2 ? 'Module' : 'Unknown') + '</td>';
                         html += '<td class = "center-align-format">' + formatReadableDate(y.created_date, true) + '</td>';
                         html += '<td class = "center-align-format">' + updated_date + '</td>';
                         if (parseInt(y.status) === 1) {
@@ -403,8 +404,8 @@
         <input type="text" class="form-control" id="type_val" aria-describedby="type_val" hidden>
         <select name="menu_type" class="form-control required" id="menu_type">
         <option value="">Select Option</option>
-        <option class="mod" value="1">Module</option>
-        <option class="grp" value="2">Group Menu</option>
+        <option class="mod" value="2">Module</option>
+        <option class="grp" value="1">Group Menu</option>
         </select>
         <small class="form-text text-muted">* required</small>`
 
@@ -473,16 +474,19 @@
         var menu_url = $('#menu_url').val();
         var menu_drop = $('#menu_type').val();
         var chk_status = $('#status').prop('checked');
-        if (menu_drop == 1) {
-            menu_type = 'Module'
-        } else if (menu_drop == 2) {
-            menu_type = 'Group Menu'
+
+        if (menu_drop == 2) {
+            menu_type = '2'
+        } else if (menu_drop == 1) {
+            menu_type = '1'
         } else {
             menu_type = 'error!'
         }
+
         if (sub_menu_id != 0) {
-            menu_type = 'Module'
+            menu_type = '2'
         }
+        
         if (chk_status) {
             status = '1'
         } else {
@@ -527,7 +531,7 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, menu_name, menu_url, menu_type, status",
+            select : "id, menu_url, menu_name, menu_type, status",
             query : query, 
             table : "cms_menu"
         }
