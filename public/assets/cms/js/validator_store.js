@@ -23,8 +23,6 @@ self.onmessage = function(e) {
             let code = row["Code"] ? row["Code"].trim() : "";
             let description = row["Name"] ? row["Name"].trim() : "";
             let status = row["Status"] ? row["Status"].toLowerCase() : "";
-            let deployment_date = row["Deployment Date"] ? row["Deployment Date"].trim() : "";
-            let area_id = row["Area"] ? row["Area"].trim() : "";
             let user_id = row["Created By"] ? row["Created By"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
 
@@ -58,20 +56,11 @@ self.onmessage = function(e) {
                 err_counter++;
             }
 
-            let dateObj = new Date(deployment_date);
-            if (isNaN(dateObj.getTime())) {
-                invalid = true;
-                errorLogs.push(`⚠️ Invalid Deployment Date at line #: ${tr_count}`);
-                err_counter++;
-            }
-
             if (!invalid) {
                 valid_data.push({
                     code: code,
                     description: description,
                     status: status === "active" ? 1 : 0,
-                    deployment_date: deployment_date,
-                    area_id: area_id,
                     created_by: user_id,
                     created_date: date_of_creation
                 });

@@ -132,27 +132,29 @@
                             <b>Extracted Data</b>
                         </div>
     
-                        <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
-                            <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                        </label>
-                        <input
-                            type="file"
-                            style="padding-left: 10px;"
-                            id="file"
-                            accept=".xls,.xlsx,.csv"
-                            aria-describedby="import_files"
-                            onclick="clear_import_table()"
-                        >
+                        <div class="import_buttons">
+                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
+                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                            </label>
+                            <input
+                                type="file"
+                                style="padding-left: 10px;"
+                                id="file"
+                                accept=".xls,.xlsx,.csv"
+                                aria-describedby="import_files"
+                                onclick="clear_import_table()"
+                            >
 
-                        <!-- nextButton -->
-    
-                        <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                            <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                        </label>
+                            <!-- nextButton -->
+        
+                            <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                            </label>
 
-                        <!-- <label for="preview" class="custom-file-upload save" id="nextButton" style="margin-top: 10px">
-                            <i class="fa fa-sync" style="margin-right: 5px;"></i>Next
-                        </label> -->
+                            <!-- <label for="preview" class="custom-file-upload save" id="nextButton" style="margin-top: 10px">
+                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Next
+                            </label> -->
+                        </div>
     
                         <table class="table table-bordered listdata">
                             <thead>
@@ -168,7 +170,9 @@
                             <tbody class="word_break import_table"></tbody>
                         </table>
                     </div>
-                    <div class="import_pagination"></div>
+                    <center style="margin-bottom: 5px">
+                        <div class="import_pagination btn-group"></div>
+                    </center>
                 </div>
             </div>
             
@@ -411,7 +415,6 @@
             new_query = query;
             new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
             get_data(new_query);
-            console.log(search_input);
         }
     });
 
@@ -875,8 +878,8 @@
 
     function updatePaginationControls() {
         let paginationHtml = `
-            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}>First</button>
-            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}>Previous</button>
+            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
+            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
             
             <select onchange="goToPage(this.value)">
                 ${Array.from({ length: totalPages }, (_, i) => 
@@ -884,8 +887,8 @@
                 ).join('')}
             </select>
             
-            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}>Next</button>
-            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}>Last</button>
+            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
+            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
         `;
 
         $(".import_pagination").html(paginationHtml);
@@ -901,19 +904,21 @@
             download: filename+".txt",
             text: "Download Error Logs",
             css: {
-                border: "1px solid #730000",
-                display: "block",
-                marginTop: "10px",
+                border: "1px solid white",
+                borderRadius: "10px",
+                display: "inline-block",
                 padding: "10px",
+                lineHeight: 0.5,
                 background: "#990000",
                 color: "white",
                 textAlign: "center",
                 cursor: "pointer",
-                textDecoration: "none"
+                textDecoration: "none",
+                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
             }
         });
 
-        $(".import_pagination").append($downloadBtn);
+        $(".import_buttons").append($downloadBtn);
     }
 
     function read_xl_file() {
@@ -987,7 +992,9 @@
                 "Name": row["Name"] || "",
                 "Status": row["Status"] || "",
                 "Deployment Date": row["Deployment Date"] ? row["Deployment Date"] : "",
-                "Area": row["Area"] || ""
+                "Area": row["Area"] || "",
+                "Created By": user_id || "",
+                "Created Date": formatDate(new Date()) || ""
             };
         });
 
@@ -1018,7 +1025,7 @@
                         () => {}
                     );
                 }
-                createErrorLogFile(errorLogs);
+                createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
             } else if (valid_data && valid_data.length > 0) {
                 updateSwalProgress("Validation Completed", 50);
                 setTimeout(() => saveValidatedData(valid_data), 500);

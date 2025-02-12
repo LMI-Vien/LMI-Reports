@@ -945,6 +945,7 @@
                 }
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
+                    total_delete('tbl_store_group', 'area_id', id)
                     modal.alert(success_delete_message, "success", function() {
                         location.reload();
                     });

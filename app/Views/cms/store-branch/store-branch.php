@@ -106,21 +106,23 @@
                                 <b>Extracted Data</b>
                             </div>
 
-                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
-                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                            </label>
-                            <input
-                                type="file"
-                                style="padding-left: 10px;"
-                                id="file"
-                                accept=".xls,.xlsx,.csv"
-                                aria-describedby="import_files"
-                                onclick="clear_import_table()"
-                            >
+                            <div class="import_buttons">
+                                <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
+                                    <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                                </label>
+                                <input
+                                    type="file"
+                                    style="padding-left: 10px;"
+                                    id="file"
+                                    accept=".xls,.xlsx,.csv"
+                                    aria-describedby="import_files"
+                                    onclick="clear_import_table()"
+                                >
 
-                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                            </label>
+                                <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                                    <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                                </label>
+                            </div>
 
                             <table class= "table table-bordered listdata">
                                 <thead>
@@ -138,7 +140,7 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn save" onclick="proccess_xl_file()">Validate and Save</button>
+                    <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
                     <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -474,209 +476,285 @@
             });
         }
 
+        let currentPage = 1;
+        let rowsPerPage = 1000;
+        let totalPages = 1;
+        let dataset = [];
+        
         function clear_import_table() {
             $(".import_table").empty()
         }
 
         function read_xl_file() {
             clear_import_table();
-            var html = '';
+            
+            dataset = [];
 
             const file = $("#file")[0].files[0];
-
-            if (file === undefined) {
-                modal.alert('Please select a file to upload', 'error', ()=>{})
-                return
+            if (!file) {
+                modal.loading_progress(false);
+                modal.alert('Please select a file to upload', 'error', ()=>{});
+                return;
             }
+            modal.loading_progress(true, "Reviewing Data...");
+
             const reader = new FileReader();
             reader.onload = function(e) {
-                const data = e.target.result;
-                // convert the data to a workbook
-                const workbook = XLSX.read(data, {type: "binary"});
-                // get the first sheet
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                // convert the sheet to JSON
-                const jsonData = XLSX.utils.sheet_to_json(sheet);
-        
-                var tr_counter = 0;
 
-                jsonData.forEach(row => {
-                    var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
-                    html += "<tr class=\""+rowClass+"\">";
-                    html += "<td>";
-                    html += tr_counter+1;
-                    html += "</td>";
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
 
-                    let record = row;
-
-                    let lowerCaseRecord = Object.keys(record).reduce((acc, key) => {
-                        acc[key.toLowerCase()] = record[key];
-                        return acc;
-                    }, {});
-        
-                    // create a table cell for each item in the row
-                    var td_validator = ['code', 'description', 'status'];
-                    td_validator.forEach(column => {
-                        html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
-                        html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
-                        html += "</td>";
-                    });
-                    html += "</tr>";
-                    tr_counter += 1;
+                //console.log('Total records to process:', jsonData.length);
+                // Process in chunks
+                processInChunks(jsonData, 5000, () => {
+                    paginateData(rowsPerPage);
                 });
-        
-                $(".import_table").append(html);
-                html = '';
             };
-            reader.readAsBinaryString(file);
+            reader.readAsArrayBuffer(file);
         }
 
-        function proccess_xl_file() {
-            var extracted_data = $(".import_table");
+        function processInChunks(data, chunkSize, callback) {
+            let index = 0;
+            let totalRecords = data.length;
+            let totalProcessed = 0;
 
-            var code = '';
-            var description = '';
-            var status = '';
+            function nextChunk() {
+                if (index >= data.length) {
+                    modal.loading_progress(false);
+                    //console.log('Total records processed:', totalProcessed);
+                    callback(); 
+                    return;
+                }
 
-            var import_array = [];
-            var needle = [];
+                let chunk = data.slice(index, index + chunkSize);
+                dataset = dataset.concat(chunk);
+                totalProcessed += chunk.length; 
+                index += chunkSize;
 
-            var invalid = false;
-            var errmsg = '';
 
-            var unique_code = [];
-            var unique_description = [];
+                // Calculate progress percentage
+                let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
+                setTimeout(() => {
+                    updateSwalProgress("Preview Data", progress);
+                    nextChunk();
+                }, 100); // Delay for UI update
+            }
+            nextChunk();
+        }
 
-            var tr_count = 1;
-            var row_mapping = {};
+        function paginateData(rowsPerPage) {
+            totalPages = Math.ceil(dataset.length / rowsPerPage);
+            currentPage = 1;
+            display_imported_data();
+        }
 
-            extracted_data.find('tr').each(function () {
-                td_count = 1;
-                var temp = [];
-                $(this).find('td').each(function () {
-                    var text_val = $(this).html().trim();
-                    var error_messages = {
-                        code: {
-                            duplicate: "⚠️ Duplicated Code at line #: <b>{line}</b>⚠️<br>",
-                            length: "⚠️ Code exceeds 25 characters at line #: <b>{line}</b>⚠️<br>",
-                            empty: "⚠️ Code is empty at line #: <b>{line}</b>⚠️<br>"
-                        },
-                        description: {
-                            duplicate: "⚠️ Duplicated Description at line #: <b>{line}</b>⚠️<br>",
-                            length: "⚠️ Description exceeds 50 characters at line #: <b>{line}</b>⚠️<br>",
-                            empty: "⚠️ Description is empty at line #: <b>{line}</b>⚠️<br>"
-                        },
-                        status: "⚠️ Invalid Status at line #: <b>{line}</b>⚠️<br>"
-                    };
+        function display_imported_data() {
+            let start = (currentPage - 1) * rowsPerPage;
+            let end = start + rowsPerPage;
+            let paginatedData = dataset.slice(start, end);
 
-                    const validateField = (type, value, maxLength, uniqueList) => {
-                        if (uniqueList.includes(value)) {
-                            invalid = true;
-                            errmsg += error_messages[type].duplicate.replace("{line}", tr_count);
-                        } else if (value.length > maxLength) {
-                            invalid = true;
-                            errmsg += error_messages[type].length.replace("{line}", tr_count);
-                        } else if (!value) {
-                            invalid = true;
-                            errmsg += error_messages[type].empty.replace("{line}", tr_count);
-                        } else {
-                            uniqueList.push(value);
-                            row_mapping[value] = tr_count;
-                        }
-                        return value;
-                    };
+            let html = '';
+            let tr_counter = start;
 
-                    switch (td_count) {
-                        case 2:
-                            code = validateField("code", text_val, 25, unique_code);
-                            break;
-                        case 3:
-                            description = validateField("description", text_val, 50, unique_description);
-                            break;
-                        case 4:
-                            if (["active", "inactive"].includes(text_val.toLowerCase())) {
-                                status = text_val.toLowerCase() === "active" ? 1 : 0;
-                            } else {
-                                invalid = true;
-                                errmsg += error_messages.status.replace("{line}", tr_count);
-                            }
-                            break;
-                    }
+            paginatedData.forEach(row => {
+                let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+                html += `<tr class="${rowClass}">`;
+                html += `<td>${tr_counter + 1}</td>`;
 
-                    td_count++;
+                let lowerCaseRecord = Object.keys(row).reduce((acc, key) => {
+                    acc[key.toLowerCase()] = row[key];
+                    return acc;
+                }, {});
+
+                let td_validator = ['code', 'description', 'status'];
+                td_validator.forEach(column => {
+                    html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
                 });
-                tr_count += 1;
-                temp.push(code, description, status);
-                needle.push([code,description]);
-                import_array.push(temp);
-            })
 
-            if (tr_count === 1) {
-                modal.alert('Please select a file to upload', 'error', ()=>{})
+                html += "</tr>";
+                tr_counter += 1;
+            });
+
+            modal.loading(false);
+            $(".import_table").html(html);
+            updatePaginationControls();
+        }
+
+        function updatePaginationControls() {
+            let paginationHtml = `
+                <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
+                <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
+                
+                <select onchange="goToPage(this.value)">
+                    ${Array.from({ length: totalPages }, (_, i) => 
+                        `<option value="${i + 1}" ${i + 1 === currentPage ? "selected" : ""}>Page ${i + 1}</option>`
+                    ).join('')}
+                </select>
+                
+                <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
+                <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
+            `;
+
+            $(".import_pagination").html(paginationHtml);
+        }
+
+        function excel_date_to_readable_date(excel_date) {
+            var dateStr = excel_date.split('/').map((part, index) => {
+                if (index === 2 && part.length === 2) {
+                }
+                return part;
+            }).join('/');
+
+            var date = new Date(dateStr);
+            
+            if (isNaN(date)) {
+                return "Invalid Date";
+            }
+            
+            return date.toLocaleDateString("en-US", { 
+                year: "numeric", 
+                month: "long", 
+                day: "numeric" 
+            });
+        }
+
+        function process_xl_file() {
+            if (dataset.length === 0) {
+                modal.alert('No data to process. Please upload a file.', 'error', () => {});
                 return;
             }
 
-            var temp_invalid = invalid;
-            var temp_errmsg = '';
+            let jsonData = dataset.map(row => {
+                return {
+                    "Code": row["code"] || "",
+                    "Name": row["description"] || "",
+                    "Status": row["status"] || "",
+                    "Created By": user_id || "",
+                    "Created Date": formatDate(new Date()) || ""
+                };
+            });
 
-            invalid = temp_invalid;
-            errmsg += temp_errmsg;
+            modal.loading_progress(true, "Validating and Saving data...");
+            let worker = new Worker(base_url + "assets/cms/js/validator_store.js");
+            worker.postMessage(jsonData);
 
-            var table = 'tbl_store';
-            var haystack = ['code', 'description'];
-            var selected_fields = ['id', 'code', 'description'];
+            worker.onmessage = function(e) {
+                modal.loading_progress(false);
 
-            if (invalid) {
-                modal.content('Error', 'error', errmsg, '600px', ()=>{});
-            } else {
-                list_existing(table, selected_fields, haystack, needle, function (result) {
-                    if (result.status != "error") {
-                        var batch = [];
-                        import_array.forEach(row => {
-                            let data = {
-                                'code': row[0],
-                                'description': row[1],
-                                'status': row[2],
-                                'created_by': user_id,
-                                'created_date': formatDate(new Date())
-                            };
-        
-                            batch.push(data);
-                        });
-        
-                        modal.loading(true);
-                        setTimeout(() => {
-                            batch_insert(batch, () => {
-                                modal.loading(false);
-                                modal.alert(success_save_message, 'success', () => {
-                                    if (result) {
-                                        location.reload();
-                                    }
-                                })
-                            })
-                        }, 1000);
+                let { invalid, errorLogs, valid_data, err_counter } = e.data;
+                if (invalid) {
+                    if (err_counter > 5000) {
+                        
+                        modal.content(
+                            'Validation Error',
+                            'error',
+                            '⚠️ Too many errors detected. Please download the error log for details.',
+                            '600px',
+                            () => {}
+                        );
                     } else {
-                        let errmsg = "";
-                        let processedFields = new Set();
-
-                        $.each(result.existing, function (index, record) {
-                            $.each(record, function (field, value) {
-                                if (!processedFields.has(field + value)) { 
-                                    if (field === 'description') {
-                                        columnName = "Description"
-                                    } else {
-                                        columnName = "Code"
-                                    }
-                                    let line_number = row_mapping[value] || "Unknown";
-                                    errmsg += "⚠️ " + columnName + " already exists in masterfile at line #: <b>" + line_number + "</b>⚠️<br>";
-                                    processedFields.add(field + value); // Mark as processed
-                                }
-                            });
-                        });
-                        modal.content('Error', 'error', errmsg, '600px', () => {});
+                        modal.content(
+                            'Validation Error',
+                            'error',
+                            errorLogs.join("<br>"),
+                            '600px',
+                            () => {}
+                        );
                     }
-                })
+                    createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
+                } else if (valid_data && valid_data.length > 0) {
+                    updateSwalProgress("Validation Completed", 50);
+                    setTimeout(() => saveValidatedData(valid_data), 500);
+                } else {
+                    modal.loading_progress(false);
+                    console.error("No valid data returned from worker.");
+                    modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                }
+            };
+
+            worker.onerror = function() {
+                modal.loading_progress(false);
+                modal.alert("Error processing data. Please try again.", "error", () => {});
+            };
+        }
+        
+        function saveValidatedData(valid_data) {
+            let batch_size = 5000; // Process 1000 records at a time
+            let total_batches = Math.ceil(valid_data.length / batch_size);
+            let batch_index = 0;
+            let retry_count = 0;
+            let max_retries = 5; 
+
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.alert(success_save_message, 'success', () => location.reload());
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let progress = Math.round(((batch_index + 1) / total_batches) * 100);
+                setTimeout(() => {
+                    updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
+                }, 100);
+                batch_insert(batch, function() {
+                    batch_index++;
+                    processNextBatch();
+                });
             }
+
+            function handleSaveError(batch) {
+                if (retry_count < max_retries) {
+                    retry_count++;
+                    let wait_time = Math.pow(2, retry_count) * 1000;
+                    //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
+                    setTimeout(() => {
+                        //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
+                        batch_insert(batch, function(success) {
+                            if (success) {
+                                batch_index++;
+                                retry_count = 0;
+                                processNextBatch();
+                            } else {
+                                handleSaveError(batch);
+                            }
+                        });
+                    }, wait_time);
+                } else {
+                    modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+                }
+            }
+
+            modal.loading_progress(true, "Validating and Saving data...");
+            setTimeout(processNextBatch, 1000);
+        }
+
+        function createErrorLogFile(errorLogs, filename) {
+            let errorText = errorLogs.join("\n");
+            let blob = new Blob([errorText], { type: "text/plain" });
+            let url = URL.createObjectURL(blob);
+
+            let $downloadBtn = $("<a>", {
+                href: url,
+                download: filename+".txt",
+                text: "Download Error Logs",
+                css: {
+                    border: "1px solid white",
+                    borderRadius: "10px",
+                    display: "inline-block",
+                    padding: "10px",
+                    lineHeight: 0.5,
+                    background: "#990000",
+                    color: "white",
+                    textAlign: "center",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
+                }
+            });
+
+            $(".import_buttons").append($downloadBtn);
         }
 
         function batch_insert(insert_batch_data, cb){
