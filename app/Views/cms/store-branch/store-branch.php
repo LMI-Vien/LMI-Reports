@@ -735,10 +735,13 @@
             let blob = new Blob([errorText], { type: "text/plain" });
             let url = URL.createObjectURL(blob);
 
+            $(".import_buttons").find("a.download-error-log").remove();
+
             let $downloadBtn = $("<a>", {
                 href: url,
                 download: filename+".txt",
                 text: "Download Error Logs",
+                class: "download-error-log",
                 css: {
                     border: "1px solid white",
                     borderRadius: "10px",
