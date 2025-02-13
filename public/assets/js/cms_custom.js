@@ -1180,3 +1180,4 @@ function goToLastPage() {
         display_imported_data();
     }
 }
+

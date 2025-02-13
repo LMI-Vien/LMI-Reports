@@ -24,66 +24,73 @@ class Cms_preference extends BaseController
 		$result = $this->Global_model->get_by_id("cms_preference",1);
 		echo $result[0]->cms_skin;
 	}
-    public function get_menu()
+
+	public function get_menu()
 	{ 
-        $session = session();
-		$select = 'cms_menu.id,menu_url,menu_name,menu_icon,menu_type,menu_parent_id,menu_level,sort_order,status,role_id,menu_id,menu_role_read,menu_role_write,menu_role_delete';
-		$query = 'status = 1 AND role_id = '.$session->sess_role.' AND menu_level = 1 AND menu_role_read = 1';
-		$result = $this->Custom_model->get_menu_list('cms_menu',$select,$query);
-		$html = '';
-		foreach ($result as $key => $value) 
-		{
-			$new_location = str_replace("content_management","dynamic",$value->menu_url);
-			$html .= '<li class="treeview menu_checker_'.$value->id.'">';
-          	$html .= '<a class="side_drop " href="'.base_url().$new_location.'">';
-          	$html .= '  <i class="'.$value->menu_icon.'"></i> <span>'.strtoupper($value->menu_name).'</span>';
-			if($value->menu_type == 1){
-			    $html .= '  <span class="pull-right-container">';
-			    $html .= '    <i class="fa fa-angle-left pull-right"></i>';
-			    $html .= '  </span>';
-			}
-          	$html .= '</a>';
-          	if($value->menu_type == 1)
-          	{
-          		$this->get_sub_menu($value->id);
-            	$html .= $this->submenu;
-			}
-			$html .= '</li>';
 
-
-		}
-		echo json_encode($html);
+	    $session = session();
+	    $currentUrl = base_url(uri_string()); 
+	    //temp
+	    $select = 'cms_menu.id, menu_url, menu_name, menu_icon, menu_type, menu_parent_id, menu_level, sort_order, status, role_id, menu_id, menu_role_read, menu_role_write, menu_role_delete';
+	    $query = 'status = 1 AND role_id = ' . $session->sess_role . ' AND menu_level = 1 AND menu_role_read = 1';
+	    $result = $this->Custom_model->get_menu_list('cms_menu', $select, $query);
+	    $html = '';
+	    
+	    foreach ($result as $value) {
+	        $new_location = base_url($value->menu_url);
+	        $hasSubmenu = $value->menu_type == 1;
+	        
+	        $html .= '<li class="nav-item ' . ($hasSubmenu ? 'has-treeview' : '') . '" data-id="' . $value->id . '">';
+	        $html .= '  <a href="' . ($hasSubmenu ? '#' : $new_location) . '" class="' . ($hasSubmenu ? 'nav-link' : 'nav-link nav-link-main') . '">';
+	        $html .= '    <i class="nav-icon ' . $value->menu_icon . '"></i>';
+	        $html .= '    <p>' . strtoupper($value->menu_name);
+	        if ($hasSubmenu) {
+	            $html .= '      <i class="right fas fa-angle-left"></i>';
+	        }
+	        $html .= '    </p>';
+	        $html .= '  </a>';
+	        
+	        if ($hasSubmenu) {
+	            $html .= $this->get_sub_menu($value->id);
+	        }
+	        
+	        $html .= '</li>';
+	    }
+	    echo json_encode($html);
 	}
-    public function get_sub_menu($id)
+
+	public function get_sub_menu($id)
 	{
-        $session = session();
-		$select = 'cms_menu.id,menu_url,menu_name,menu_icon,menu_type,menu_parent_id,menu_level,sort_order,status,role_id,menu_id,menu_role_read,menu_role_write,menu_role_delete';
-		$query = 'status = 1 AND role_id = '.$session->sess_role.' AND menu_role_read = 1 AND menu_parent_id ='.$id.'';
-		$result = $this->Custom_model->get_menu_list('cms_menu',$select,$query);
-		$html = '';
-
-		$html .= '<ul class="treeview-menu sub_menu">';
-        foreach ($result as $key => $value) 
-		{
-			$new_location = str_replace("content_management","dynamic",$value->menu_url);
-            $html .= '     <li class="treeview menu_checker_'.$value->id.'"><a class="side_drop " href="'.base_url().$new_location.'"> ';
-            $html .= '   <span>'.strtoupper($value->menu_name).'</span>';
-            if($value->menu_type == 1){
-				$html .= '  <span class="pull-right-container">';
-				$html .= '    <i class="fa fa-angle-left pull-right"></i>';
-				$html .= '  </span>';
-            }
-            $html .= '       </a>';
-            if($value->menu_type == 1)
-            {
-            	$this->get_sub_menu($value->id);
-                $html .= $this->submenu;
-            }
-            $html .= '     </li>';
-        }
-        $html .= '</ul>';
-
-        $this->submenu = $html;
+	    $session = session();
+	    $select = 'cms_menu.id, menu_url, menu_name, menu_icon, menu_type, menu_parent_id, menu_level, sort_order, status, role_id, menu_id, menu_role_read, menu_role_write, menu_role_delete';
+	    $query = 'status = 1 AND role_id = ' . $session->sess_role . ' AND menu_role_read = 1 AND menu_parent_id = ' . $id;
+	    $result = $this->Custom_model->get_menu_list('cms_menu', $select, $query);
+	    $html = '';
+	    
+	    $html .= '<ul class="nav nav-treeview">';
+	    foreach ($result as $value) {
+	        $new_location = base_url($value->menu_url);
+	        $hasSubmenu = $value->menu_type == 1;
+	        
+	        $html .= '<li class="nav-item" data-id="' . $value->id . '">';
+	        $html .= '  <a href="' . ($hasSubmenu ? '#' : $new_location) . '" class="nav-link" >';
+	        $html .= '    <i class="far fa-circle nav-icon"></i>';
+	        $html .= '    <p>' . strtoupper($value->menu_name);
+	        if ($hasSubmenu) {
+	            $html .= '      <i class="right fas fa-angle-left"></i>';
+	        }
+	        $html .= '    </p>';
+	        $html .= '  </a>';
+	        
+	        if ($hasSubmenu) {
+	            $html .= $this->get_sub_menu($value->id);
+	        }
+	        
+	        $html .= '</li>';
+	    }
+	    $html .= '</ul>';
+	    
+	    return $html;
 	}
 
     public function backup()
@@ -132,7 +139,7 @@ class Cms_preference extends BaseController
 		$html = '';
 	
 		foreach ($menuTree as $menu) {
-			$new_location = str_replace("content_management", "dynamic", $menu->menu_url);
+			$new_location = $menu->menu_url;
 			if (!empty($menu->children)) {
 				$html .= '
 				<li class="nav-item dropdown">

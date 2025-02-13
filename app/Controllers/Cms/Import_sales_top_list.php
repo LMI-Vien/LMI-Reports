@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Home extends BaseController
+class Import_sales_top_list extends BaseController
 {
     protected $session;
 
@@ -19,26 +19,31 @@ class Home extends BaseController
 
 	public function index()
 	{
+
 		$data['meta'] = array(
-			"title"         =>  "LMI CMS Portal",
-			"description"   =>  "LMI CMS Portal Wep application",
+			"title"         =>  "Import Sales Top List",
+			"description"   =>  "Import Sales Top List",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Home";
-		$data['PageName'] = 'Home';
-		$data['content'] = "cms/home/home.php";
-		$data['session'] = session();
-
+		$data['title'] = "Import Sales Top List";
+		$data['PageName'] = 'Import Sales Top List';
+		$data['PageUrl'] = 'Import Sales Top List';
+		$data['content'] = "cms/import/sales_top_list.php";
+		$data['buttons'] = ['add', 'search', 'import'];
+		$data['session'] = session(); //for frontend accessing the session data
+		$data['standard'] = config('Standard');
 		$data['js'] = array(
+				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
-				"assets/cms/js/login/login_js.js"
+				"assets/js/moment.js",
+				"assets/js/xlsx.full.min.js"
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/site/css/login/login_style.css",
+        		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		

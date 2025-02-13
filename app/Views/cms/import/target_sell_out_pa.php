@@ -37,7 +37,7 @@
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center page-title md-center">
-                <b>A R E A</b>
+                <b>T A R G E T - S E L L - O U T - P E R - A C C O U N T</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -828,7 +828,7 @@
                                 })
                                 batch_insert(batch, 'tbl_store_group', () => {
                                     modal.loading(false);
-                                    modal.alert(success_update_message, "success", function() {
+                                    modal.alert(success_save_message, "success", function() {
                                         location.reload();
                                     });
                                 })
@@ -921,7 +921,10 @@
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             cb(obj)
-            modal.loading(false);
+            // modal.loading(false);
+            // modal.alert(modal_alert_success, "success", function() {
+            //     location.reload();
+            // });
         });
     }
 
@@ -942,7 +945,6 @@
                 }
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
-                    total_delete('tbl_store_group', 'area_id', id)
                     modal.alert(success_delete_message, "success", function() {
                         location.reload();
                     });

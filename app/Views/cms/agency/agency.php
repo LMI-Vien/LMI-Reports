@@ -174,8 +174,8 @@
             limit : limit,
             table : "tbl_agency",
             order : {
-                field : "updated_date",
-                order : "desc" 
+                field : "agency",
+                order : "asc" 
             }
 
         }
@@ -226,14 +226,14 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id",
+            select : "id, agency",
             query : query,
             offset : offset,
             limit : limit,
             table : "tbl_agency",
             order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
+                field : "agency", //field to order
+                order : "asc" //asc or desc
             }
 
         }
@@ -249,10 +249,7 @@
     pagination.onchange(function(){
         offset = $(this).val();
         get_data(query);
-        $('.selectall').prop('checked', false);
-        $('.btn_status').hide();
-        $("#search_query").val("");
-    })
+    });
 
     $(document).on('keypress', '#search_query', function(e) {               
         if (e.keyCode === 13) {

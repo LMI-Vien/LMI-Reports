@@ -391,7 +391,12 @@ ul.child_menu {
     }
 
     function save_data(action, id) {
-        var status = $('#user_role_modal #status').prop('checked') ? 1 : 0;
+        var chk_status = $('#user_role_modal #status').prop('checked');
+        if (chk_status) {
+            status_val = 1;
+        } else {
+            status_val = 0;
+        }
         var url = "<?= base_url('cms/global_controller');?>";
         var cms_menu_data = [];
         var site_menu_data = [];
@@ -430,7 +435,7 @@ ul.child_menu {
         
         var user_role_data = {
             name : $('#name').val(),
-            status : status,
+            status : status_val,
             created_date :  current_date,
             created_by  : user_id
         };
@@ -460,6 +465,12 @@ ul.child_menu {
         }else{
             check_current_db("cms_user_roles", ["name"], [$('#name').val()], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
+                        var chk_status = $('#user_role_modal #status').prop('checked');
+                        if (chk_status) {
+                            status_val = 1;
+                        } else {
+                            status_val = 0;
+                        }
                         modal.confirm(confirm_add_message,function(result){
                             if(result){ 
                                 modal.loading(true);
@@ -477,7 +488,7 @@ ul.child_menu {
                                     data : {
 
                                             name : $('#name').val(),
-                                            status : $('#status').val(),
+                                            status : status_val,
                                             updated_date :  formatDate(new Date()),
                                             updated_by : user_id
                                     }  
@@ -495,36 +506,6 @@ ul.child_menu {
             });        
         }
 
-    }
-
-    function update_user_role(role_id)
-    {
-        modal.loading(true);
-        var customURL = "<?= base_url('cms/role/delete_role_tagging');?>"; 
-        var data = {
-            role_id : role_id
-        }
-        aJax.post(customURL,data,function(result){});
-  
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event : "update",
-            table : "cms_user_roles",
-            field : "id",
-            where : role_id,
-            data : {
-
-                    name : $('#name').val(),
-                    status : $('#status').val(),
-                    updated_date : formatDate(new Date()),
-                    updated_by : user_id
-            }  
-        }
-
-        aJax.post(url,data,function(result){ 
-            var obj = is_json(result);          
-            save_role_module(menu_role_id);
-        });
     }
 
     function save_role_module(role_id){
@@ -572,37 +553,6 @@ ul.child_menu {
             modal.alert(success_update_message, "success", function(){
                 location.reload();
             }); 
-        });
-    }
-
-    function update_data(id){
-        var status = $('#update_user_role_modal #status').prop('checked') ? 1 : 0;
-        
-        modal.confirm(confirm_add_message,function(result){
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>"; 
-                var data = {
-                    event : "update", 
-                    table : "cms_user_roles",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            name : $('#update_user_role_modal #name').val(),
-                            status : $('#update_user_role_modal #status').val(),
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : status
-                    }  
-                }
-
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(modal_alert_success, "success", function() {
-                        location.reload();
-                    });
-                });
-            }
-
         });
     }
 
@@ -739,6 +689,7 @@ ul.child_menu {
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
+            console.log(result);
             var htm = '';
             if(result.length > 0){  
                 $.each(result,function(x,y){

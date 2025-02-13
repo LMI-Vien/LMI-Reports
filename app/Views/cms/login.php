@@ -60,9 +60,6 @@ $(document).ready(function () {
                     const resultCount = parsedResponse.count;
                     const attempts = parsedResponse.attempts || "Incorrect Email Address or Password.";
 
-                    console.log("ATTEMPTS REMAINING:", attempts);
-                    console.log("Result Count:", resultCount);
-
                     const messages = {
                         3: ["Login Successful.", `Welcome ${username} !`, "success", () => location.href = base_url + 'cms/home'],
                         2: ["Inactive.", "This Account is Inactive.", "warning"],

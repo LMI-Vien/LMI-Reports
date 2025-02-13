@@ -828,7 +828,7 @@
                                 })
                                 batch_insert(batch, 'tbl_store_group', () => {
                                     modal.loading(false);
-                                    modal.alert(success_update_message, "success", function() {
+                                    modal.alert(success_save_message, "success", function() {
                                         location.reload();
                                     });
                                 })
@@ -921,7 +921,10 @@
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             cb(obj)
-            modal.loading(false);
+            // modal.loading(false);
+            // modal.alert(modal_alert_success, "success", function() {
+            //     location.reload();
+            // });
         });
     }
 
@@ -942,7 +945,6 @@
                 }
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
-                    total_delete('tbl_store_group', 'area_id', id)
                     modal.alert(success_delete_message, "success", function() {
                         location.reload();
                     });

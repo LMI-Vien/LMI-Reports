@@ -7,7 +7,7 @@
     <div class="login-container">
         <!-- Logo Section -->
         <div class="logo">
-            <img src="/assets/img/lifestrong-logo-hi-res.webp" alt="Company Logo">
+            <img src="<?= base_url('assets/img/lifestrong-logo-hi-res.webp'); ?>" alt="Company Logo">
         </div>
         <h1>Login</h1>
         <form id="loginFormUser">
@@ -33,9 +33,6 @@
             </div>
         </form>
     </div>
-
-    
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 var base_url = '<?= base_url();?>';

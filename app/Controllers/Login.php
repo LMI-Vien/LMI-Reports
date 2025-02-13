@@ -44,6 +44,7 @@ class Login extends BaseController
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
+				"assets/js/sweetalert2@11.js",
 				"assets/site/js/login/login_js.js",
 				"assets/js/cms_custom.js"
                     );
@@ -104,65 +105,6 @@ class Login extends BaseController
 	    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
 	    return;
 	}
-
-	// public function auth() {
-	//     $data = $this->request->getPost('data');
-	// 	// print_r($data); die();
-	//     $email = $data['email'];
-	//     $password = hash('sha256', $data['password']);
-	//     $result = $this->Global_model->validate_log_report_user($email, $password);
-	//     $final_result = "invalid";
-
-	//     if (!empty($result) && isset($result[0])) {
-	//         $data_object = $result[0];
-	//         $final_result = "valid";
-
-	//         $usersData = [
-	//             'id' => $data_object->id,
-	//             'username' => $data_object->username,
-	//             'email' => $data_object->email,
-	//             'name' => $data_object->name,
-	//         ];
-
-	//         $audit_data = [
-	//             'user_id' => $data_object->id,
-	//             'url' => "", 
-	//             'action' => strip_tags(ucwords("Login")),
-	//             'created_date' => date('Y-m-d H:i:s'),
-	//         ];
-	//         $table = 'cms_audit_trail';
-
-	//         $this->Global_model->save_data($table, $audit_data);
-
-	//         //$session = session();
-	//         $this->set_session($usersData);
-	//     }
-	//     echo $final_result;
-	// }
-
-	// public function set_session($data) 
-	// {
-	// 	$newdata = array(
-	// 		'sess_site_uid'  => $data['id'],
-	//         'sess_site_user' => $data['username'],
-	//         'sess_site_email' => $data['email'],
-	//         'sess_site_name' => $data['name']
-	//        // 'sess_site_role' => $data['role']
-	// 	);
-		
-	//     $data2['user_id'] = $data['id'];
-	//   	$data2['url'] = "";
-	//   	$data2['action'] = strip_tags(ucwords("Login"));
-	//   	$data2['created_date'] = date('Y-m-d H:i:s'); 
-	//   	$table = 'cms_audit_trail';
-		  
-	//   	$this->Global_model->save_data($table,$data2);
-
-	// 	$session = session();
-	// 	$session->set($newdata);
-	// 	//print_r($session->get());
-	// 	//die();
-	// }
 
 	public function set_session($data) {
 	    if (is_object($data)) {

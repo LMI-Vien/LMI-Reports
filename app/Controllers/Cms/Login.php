@@ -69,6 +69,7 @@ class Login extends BaseController
 		$data['content'] = "cms/login.php";
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
+				"assets/js/sweetalert2@11.js",
 				"assets/cms/js/login/login_js.js"
                     );
         $data['css'] = array(
@@ -140,7 +141,7 @@ class Login extends BaseController
 		    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'message' => $login_attempts]);
 		    return;
 	    }        
-	    if ($data->status > 0) {
+	    if ($data->status > 0 ) {
 
 			$table = 'cms_users';
 			$field = 'username';

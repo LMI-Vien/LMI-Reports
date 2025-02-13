@@ -457,7 +457,6 @@
     }
 
     function save_data(action, id) {
-        console.log(action, id)
         var menu_name = $('#menu_name').val();
         var menu_url = $('#menu_url').val();
         var menu_drop = $('#menu_type').val();
@@ -479,13 +478,13 @@
         }
         console.log(menu_name, menu_url, menu_type, sub_menu_id, status)
         if (id !== undefined && id !== null && id !== '') {
-            db_fields = ["id", "menu_name", "menu_url"];
-            input_fields = [id, menu_name, menu_url];
+            db_fields = ["id", "menu_name"];
+            input_fields = [id, menu_name];
             excludeField = "id";
             excludeId = id;
         } else {
-            db_fields = ["menu_name", "menu_url"];
-            input_fields = [menu_name, menu_url];
+            db_fields = ["menu_name"];
+            input_fields = [menu_name];
             excludeField = null;
             excludeId = null;
         }
@@ -551,6 +550,7 @@
     function save_to_db(menu_name, menu_url, menu_type, sub_menu_id, status, id) {
         var url = "<?= base_url('cms/global_controller');?>"
         if (id !== undefined && id !== null && id !== '') {
+            modal_alert_success = success_update_message;
             var data = {
                 event: "update",
                 table: "site_menu",
@@ -566,6 +566,7 @@
                 }
             }
         } else {
+            modal_alert_success = success_save_message;
             var data = {
                 event : "insert", // list, insert, update, delete
                 table : "site_menu", // table
@@ -582,8 +583,12 @@
         }
     
         aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            location.reload();
+            // var obj = is_json(result);
+            // location.reload();
+            modal.loading(false);
+            modal.alert(modal_alert_success, "success", function() {
+                location.reload();
+            });
         });
     }
 

@@ -1,43 +1,13 @@
 <style>
-    .rmv-btn {
-        border-radius: 20px;
-        background-color: #C80000;
-        color: white;
-        border: 0.5px solid #990000;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-
-    .rmv-btn:disabled {
-        border-radius: 20px;
-        background-color: gray;
-        color: black;
-        border: 0.5px solid gray;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    .add_line {
-        margin-right: 10px;
-        margin-bottom: 10px;
-        padding: 10px;
-        min-width: 75px;
-        max-height: 30px;
-        line-height: 0.5;
-        background-color: #339933;
-        color: white;
-        border: 1px solid #267326;
-        border-radius: 10px;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-
-    .add_line:disabled {
-        background-color: gray !important;
-        color: black !important;
-    }
+.box-header{
+    height: 40px;
+}
 </style>
 
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center page-title md-center">
-                <b>A R E A</b>
+                <b>S E L L - O U T</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -828,7 +798,7 @@
                                 })
                                 batch_insert(batch, 'tbl_store_group', () => {
                                     modal.loading(false);
-                                    modal.alert(success_update_message, "success", function() {
+                                    modal.alert(success_save_message, "success", function() {
                                         location.reload();
                                     });
                                 })
@@ -921,7 +891,10 @@
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             cb(obj)
-            modal.loading(false);
+            // modal.loading(false);
+            // modal.alert(modal_alert_success, "success", function() {
+            //     location.reload();
+            // });
         });
     }
 
@@ -942,7 +915,6 @@
                 }
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
-                    total_delete('tbl_store_group', 'area_id', id)
                     modal.alert(success_delete_message, "success", function() {
                         location.reload();
                     });

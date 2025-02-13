@@ -3,7 +3,7 @@
       <div class="container">
         <div class="card">
           <div class="card-body text-center">
-            <h1 class="mb-4">Welcome to Portal!</h1>
+            <h1 class="mb-4">Welcome to SFA!</h1>
             <div class="btn-group btn-block">
               <!-- <a href="/user/article/" class="btn btn-outline-primary py-4">
                 <i class="fas fa-2x fa-info"></i><br>

@@ -1,4 +1,38 @@
+<style>
+    .rmv-btn {
+        border-radius: 20px;
+        background-color: #C80000;
+        color: white;
+        border: 0.5px solid #990000;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
 
+    .rmv-btn:disabled {
+        border-radius: 20px;
+        background-color: gray;
+        color: black;
+        border: 0.5px solid gray;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+    .add_line {
+        margin-right: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        min-width: 75px;
+        max-height: 30px;
+        line-height: 0.5;
+        background-color: #339933;
+        color: white;
+        border: 1px solid #267326;
+        border-radius: 10px;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .add_line:disabled {
+        background-color: gray !important;
+        color: black !important;
+    }
+</style>
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center page-title md-center">
@@ -82,7 +116,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Deployment Data</label>
+                        <label>Deployment Date</label>
                         <input type="date" class="form-control" id="deployment_date">
                     </div>
 
@@ -92,11 +126,31 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+<!--                     <div class="form-group">
                         <label>Brand</label>
                         <select name="area" class="form-control required" id="brand">
                         </select>
                     </div>
+ -->
+                        <div class="form-group">
+                            <div class="row" >
+                                <label class="col" >Brand</label>
+                                <input
+                                    type="button"
+                                    value="Add Brand"
+                                    class="row add_line"
+                                    onclick="add_line()"
+                                >
+                            </div>
+                            <div id="brand_list">
+                                <!-- <div id="line_0" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                    <select name="store" class="form-control store_drop required" id="store_0"></select>
+                                    <button type="button" class="rmv-btn" onclick="remove_line(0)" disabled readonly>
+                                        <i class="fa fa-minus" aria-hidden="true"></i>
+                                    </button>
+                                </div> -->
+                            </div>
+                        </div>
 
                     <div class="form-group">
                         <label>Store</label>
@@ -140,36 +194,132 @@
     </div>
 </div>
 
+    <div class="modal" tabindex="-1" id="import_modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                            <div class="text-center"
+                            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
+                            >
+                                <b>Extracted Data</b>
+                            </div>
+
+                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
+                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                            </label>
+                            <input
+                                type="file"
+                                style="display: none;"
+                                id="file"
+                                accept=".xls,.xlsx,.csv"
+                                aria-describedby="import_files"
+                                onchange="store_file(event)"
+                                onclick="clear_import_table()"
+                            >
+
+                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                            </label>
+
+                            <table class= "table table-bordered listdata">
+                                <thead>
+                                    <tr>
+                                        <th class='center-content' scope="col">Line #</th>
+                                        <th class='center-content' scope="col">Code</th>
+                                        <th class='center-content' scope="col">Name</th>
+                                        <th class='center-content' scope="col">Deployment Date</th>
+                                        <th class='center-content' scope="col">Agency</th>
+                                        <th class='center-content' scope="col">Brand</th>
+                                        <th class='center-content' scope="col">Store</th>
+                                        <th class='center-content' scope="col">Team</th>
+                                        <th class='center-content' scope="col">Area</th>
+                                        <th class='center-content' scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="word_break import_table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn save" onclick="proccess_xl_file()">Validate and Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <script>
-    var query = "status >= 0";
+    var query = "ba.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
+    var url = "<?= base_url("cms/global_controller");?>";
 
     $(document).ready(function() {
-        get_area();
-        get_agency();
-        get_store();
-        get_team();
-        get_brand();
+        // get_area();
+        // get_agency();
+        // get_store();
+        // get_team();
+        // get_brand();
         
-        get_data();
-        get_pagination();
+        get_data(query);
+        get_pagination(query);
 
     });
 
-    function get_data(new_query) {
+    function get_data(query) {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "id, code, name, deployment_date, agency, brand, store, team, area, status, type, updated_date, created_date",
+            select : "ba.id, ba.code, ba.name, ba.deployment_date, a.agency, s.description as store, t.team_description, ar.description as area, ba.status, ba.type, ba.updated_date, ba.created_date",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_brand_ambassador",
+            table : "tbl_brand_ambassador ba",
             order : {
-                field : "updated_date",
+                field : "ba.updated_date",
                 order : "desc" 
-            }
+            },
+            join : [
+                {
+                    table: "tbl_agency a",
+                    query: "a.id = ba.agency",
+                    type: "left"
+                },
+                // {
+                //     table: "tbl_ba_brands b",
+                //     query: "b.ba_id = ba.id",
+                //     type: "left"
+                // },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = ba.store",
+                    type: "left"
+                },
+                {
+                    table: "tbl_team t",
+                    query: "t.id = ba.team",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area ar",
+                    query: "ar.id = ba.area",
+                    type: "left"
+                }
+            ]            
+            
 
         }
 
@@ -193,17 +343,6 @@
                         html += "<td class='center-content'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td>" + y.code + "</td>";
                         html += "<td>" + y.name + "</td>";
-                        // html += "<td>" + ViewDateformat(y.deployment_date) + "</td>";
-                        // // html += "<td>" + y.agency + "</td>";
-                        // html += "<td>" + trimText(agencyDescription) + "</td>";
-                        // // html += "<td>" + y.brand + "</td>";
-                        // html += "<td>" + trimText(brandDescription) + "</td>";
-                        // // html += "<td>" + y.store + "</td>";
-                        // html += "<td>" + trimText(storeDescription) + "</td>";
-                        // // html += "<td>" + y.team + "</td>";
-                        // html += "<td>" + trimText(teamDescription) + "</td>";
-                        // // html += "<td>" + y.area + "</td>";
-                        // html += "<td>" + trimText(areaDescription) + "</td>";
                         html += "<td>" +status+ "</td>";
                         // html += "<td>" + (y.type == 1 ? "Outright" : "Consign") + "</td>";
                         html += "<td class='center-content'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
@@ -241,11 +380,11 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id",
+            select : "id, status",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_brand_ambassador",
+            table : "tbl_brand_ambassador ba",
             order : {
                 field : "updated_date", //field to order
                 order : "desc" //asc or desc
@@ -263,7 +402,7 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data();
+        get_data(get_data);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
     })
@@ -274,23 +413,13 @@
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
             offset = 1;
-            get_pagination();
             new_query = query;
-            new_query += " AND (code LIKE '%" + search_input + "%' OR name LIKE '%" + search_input + "%' OR deployment_date LIKE '%" + search_input + "%' OR agency LIKE '%" + search_input + "%' OR brand LIKE '%" + search_input + "%' OR store LIKE '%" + search_input + "%' OR team LIKE '%" + search_input + "%' OR area LIKE '%" + search_input + "%')"
+            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.descriptiom LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%')";
+            //to follow OR b.brand_description LIKE '%" + search_input + "%'
             get_data(new_query);
+            get_pagination(new_query);
         }
     });
-
-    // $(document).on('keypress', '#search_query', function(e) {               
-    //     if (e.keyCode === 13) {
-    //         var keyword = $(this).val().trim();
-    //         offset = 1;
-    //         query += " AND (code LIKE '%" + search_input + "%' OR name LIKE '%" + search_input + "%' OR deployment_date LIKE '%" + search_input + "%' OR agency LIKE '%" + search_input + "%' OR brand LIKE '%" + search_input + "%' OR store LIKE '%" + search_input + "%' OR team LIKE '%" + search_input + "%' OR area LIKE '%" + search_input + "%')"
-    //         get_data();
-    //         get_pagination();
-    //     }
-    // });
-
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
@@ -310,7 +439,7 @@
         get_agency('');
         get_store('');
         get_team('');
-        get_brand('');
+        get_brand('', 'brand_0');
     });
 
     function edit_data(id) {
@@ -325,6 +454,7 @@
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#popup_modal');
+        let $brand_list = $('#brand_list');
         let $footer = $modal.find('.modal-footer');
 
         $modal.find('.modal-title b').html(addNbsp(msg));
@@ -350,11 +480,41 @@
         
         let isReadOnly = actions === 'view';
         set_field_state('#code, #name, #deployment_date, #agency, #brand, #store, #team, #area, #status', isReadOnly);
+        $brand_list.empty();
         $('input[name="type"]').prop('disabled', isReadOnly);
 
         $footer.empty();
-        if (actions === 'add') $footer.append(buttons.save);
-        if (actions === 'edit') $footer.append(buttons.edit);
+        //if (actions === 'add') $footer.append(buttons.save);
+        if (actions === 'add') {
+            let line = get_max_number();
+
+            let html = `
+            <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
+                <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                </button>
+            </div>
+            `;
+            $brand_list.append(html)
+            $('input[name="type"]').each(function() {
+                if ($(this).val() == 1) {
+                    $(this).prop('checked', true); 
+                }
+            });
+            $('.add_line').attr('disabled', false)
+            $('.add_line').attr('readonly', false)
+            $footer.append(buttons.save)
+        };
+        if (actions === 'edit') {
+            $footer.append(buttons.edit)
+            $('.add_line').attr('disabled', false)
+            $('.add_line').attr('readonly', false)
+        };
+        if (actions === 'view') {
+            $('.add_line').attr('disabled', true)
+            $('.add_line').attr('readonly', true)
+        }
         $footer.append(buttons.close);
 
         $modal.modal('show');
@@ -375,12 +535,23 @@
         return new_btn;
     }
 
+    function clear_import_table() {
+        $(".import_table").empty()
+    }
+
+    $(document).on('click', '#btn_import ', function() {
+        title = addNbsp('IMPORT BRAND AMBASSADOR')
+        $("#import_modal").find('.modal-title').find('b').html(title)
+        $("#import_modal").modal('show')
+        clear_import_table()
+    });
+
     function populate_modal(inp_id) {
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, code, name, deployment_date, agency, brand, store, team, area, status, type",
+            select : "id, code, name, deployment_date, agency, store, team, area, status, type",
             query : query, 
             table : "tbl_brand_ambassador"
         }
@@ -395,13 +566,39 @@
                     $('#agency').val(ba.agency);
                     get_agency(ba.agency);
                     $('#brand').val(ba.brand);
-                    get_brand(ba.brand);
                     $('#store').val(ba.store);
                     get_store(ba.store);
                     $('#team').val(ba.team);
                     get_team(ba.team);
                     $('#area').val(ba.area);
+                    //console.log(area);
                     get_area(ba.area);
+
+                    var line = 0;
+                    var readonly = '';
+                    var disabled = ''
+
+                    let $brand_list = $('#brand_list')
+                    $.each(get_ba_brands(ba.id), (x, y) => {
+                        if (line === 0) {
+                            disabled = 'disabled';
+                            readonly = 'readonly';
+                        } else {
+                            readonly = '';
+                            disabled = ''
+                        }
+                        let html = `
+                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                            <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
+                            <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
+                                <i class="fa fa-minus" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        `;
+                        $brand_list.append(html)
+                        get_brand(y.brand_id, `brand_${line}`);
+                        line++
+                    })
                     $('input[name="type"]').each(function() {
                         if ($(this).val() == ba.type) {
                             $(this).prop('checked', true); 
@@ -415,6 +612,28 @@
                 }); 
             }
         });
+    }
+
+    function get_ba_brands(ba_id) {
+        var data = {
+            event : "list",
+            select : "id, ba_id, brand_id",
+            query : 'id > 0 and ba_id = '+ba_id,
+            offset : 0,
+            limit : 0,
+            table : "tbl_ba_brands",
+            order : {
+                field : "id",
+                order : "asc" 
+            }
+        }
+        var result = '';
+
+        aJax.post_async(url,data,function(res){
+            result = JSON.parse(res);
+        })
+
+        return result;
     }
 
     function reset_modal_fields() {
@@ -434,6 +653,16 @@
         var area = $('#area').val();
         var type = $('input[name="type"]:checked').val() || ''; 
         var chk_status = $('#status').prop('checked');
+        var linenum = 0;
+        var unique_brand = [];
+        var brand_list = $('#brand_list');
+        // add_line
+        brand_list.find('select').each(function() {
+            linenum++
+            if (!unique_brand.includes($(this).val())) {
+                unique_brand.push($(this).val())
+            }
+        });
         if (chk_status) {
             status_val = 1;
         } else {
@@ -445,7 +674,25 @@
                     modal.confirm(confirm_update_message, function(result){
                         if(result){ 
                                 modal.loading(true);
-                            save_to_db(code, name, deployment_date, agency, brand, store, team, area, type, status_val, id)
+                            save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                total_delete('tbl_ba_brands', 'ba_id', id)
+                                let batch = [];
+                                $.each(unique_brand, (x, y) => {
+                                    let data = {
+                                        'ba_id': id,
+                                        'brand_id': y,
+                                        'created_by': user_id,
+                                        'created_date': formatDate(new Date())
+                                    };
+                                    batch.push(data);
+                                })
+                                batch_insert(batch, 'tbl_ba_brands', () => {
+                                    modal.loading(false);
+                                    modal.alert(success_update_message, "success", function() {
+                                        location.reload();
+                                    });
+                                })
+                            });
                         }
                     });
 
@@ -457,7 +704,24 @@
                     modal.confirm(confirm_add_message, function(result){
                         if(result){ 
                                 modal.loading(true);
-                            save_to_db(code, name, deployment_date, agency, brand, store, team, area, type, status_val, null)
+                            save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, null, (obj) => {
+                                let batch = [];
+                                $.each(unique_brand, (x, y) => {
+                                    let data = {
+                                        'ba_id': obj.ID,
+                                        'brand_id': y,
+                                        'created_by': user_id,
+                                        'created_date': formatDate(new Date())
+                                    };
+                                    batch.push(data);
+                                })
+                                batch_insert(batch, 'tbl_ba_brands', () => {
+                                    modal.loading(false);
+                                    modal.alert(success_save_message, "success", function() {
+                                        location.reload();
+                                    });
+                                })
+                            });
                         }
                     });
 
@@ -466,7 +730,7 @@
         }
     }
 
-    function save_to_db(inp_code, inp_name, inp_deployment_date, inp_agency, inp_brand, inp_store, inp_team, inp_area, int_type, status_val, id) {
+    function save_to_db(inp_code, inp_name, inp_deployment_date, inp_agency, inp_store, inp_team, inp_area, int_type, status_val, id, cb) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -483,7 +747,7 @@
                     name: inp_name,
                     deployment_date: inp_deployment_date,
                     agency: inp_agency,
-                    brand: inp_brand,
+                    //brand: inp_brand,
                     store: inp_store,
                     team: inp_team,
                     area: inp_area,
@@ -503,7 +767,7 @@
                     name: inp_name,
                     deployment_date: inp_deployment_date,
                     agency: inp_agency,
-                    brand: inp_brand,
+                    //brand: inp_brand,
                     store: inp_store,
                     team: inp_team,
                     area: inp_area,
@@ -517,33 +781,9 @@
 
         aJax.post(url,data,function(result){
             var obj = is_json(result);
+            cb(obj);
             modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function() {
-                location.reload();
-            });
         });
-    }
-
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
-    }
-
-    function formatDate(date) {
-        // Get components of the date
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
     function delete_data(id) {
@@ -739,15 +979,12 @@
             }
             $('#team').empty();
             $('#team').append(html);
-
-            // let selectedStoreDescription = teamDescriptions[id] || 'N/A';
-            // console.log(selectedStoreDescription);
-        })
+        });
     }
 
     let brandDescriptions = {};
-    function get_brand(id) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+    function get_brand(id, dropdown_id) {
+        var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
             select : "id, brand_code, brand_description, status",
@@ -780,12 +1017,9 @@
                     })
                 }
             }
-            $('#brand').empty();
-            $('#brand').append(html);
-
-            // let selectedStoreDescription = brandDescriptions[id] || 'N/A';
-            // console.log(selectedStoreDescription);
-        })
+            $('#'+dropdown_id).empty();
+            $('#'+dropdown_id).append(html);
+        });
     }
 
     function trimText(str) {
@@ -812,14 +1046,7 @@
             modal_obj = confirm_unpublish_message;
             modal_alert_success = success_unpublish_message;
         }
-        // var counter = 0; 
-        // $('.select:checked').each(function () {
-        //     var id = $(this).attr('data-id');
-        //     if(id){
-        //         counter++;
-        //     }
-        //  });
-        // console.log(counter);
+
         modal.confirm(modal_obj, function (result) {
             if (result) {
                 var url = "<?= base_url('cms/global_controller');?>";
@@ -869,273 +1096,61 @@
         });
     });
 
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
+    function get_max_number() {
+        let storeElements = $('[id^="brand_"]');
+        
+        let maxNumber = Math.max(
+            0,
+            ...storeElements.map(function () {
+                return parseInt(this.id.replace("brand_", ""), 10) || 0;
+            }).get()
+        );
+
+        return maxNumber;
+    }
+
+    function add_line() {
+        let line = get_max_number() + 1;
+
+        let html = `
+        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+            <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
+            <button type="button" class="rmv-btn" onclick="remove_line(${line})">
+                <i class="fa fa-minus" aria-hidden="true"></i>
+            </button>
+        </div>
+        `;
+        $('#brand_list').append(html);
+        get_brand('', `brand_${line}`);
+    }
+
+    function remove_line(lineId) {
+        $(`#line_${lineId}`).remove();
+    }
+
+    function batch_insert(insert_batch_data, batch_table, cb){
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "batch_insert",
+            table: batch_table,
+            insert_batch_data: insert_batch_data
+        }
+
+        aJax.post(url,data,function(result){
+            cb(result)
         });
     }
 
-    
-
-    // $(document).ready(function () {
-    //     $(document).on('click', '#btn_add', function () {
-    //         $('#popup_modal').modal('show');
-    //     });
-    // });
-
-    // $(document).on('click', '#updateBtn', function() {
-    //     var id = $(this).attr('data-id');
-    //     update_data(id);
-    // });
-
-    // $(document).on('click', '.edit', function() {
-    //     id = $(this).attr('id');
-    //     get_data_by_id(id);
-    // });
-
-    // $(document).on('click', '.delete_data', function() {
-    //     var id = $(this).attr('id');
-    //     delete_data(id); 
-    //     // console.log('hello');
-    // });
-
-    // $(document).on('click', '.view', function() {
-    //     id = $(this).attr('id');
-    //     get_data_by_id_view(id);
-    // });
-
-    
-    // $(document).on('click', '#saveBtn', function() {
-       
-    //     save_data();
-    //     // var status = $('#status').is(':checked') ? 1 : 0;
-    //     // console.log($('#code').val());
-    //     // console.log($('#name').val());
-    //     // console.log($('#deployment_data').val());
-    //     // console.log($('#agency').val());
-    //     // console.log($('#brand').val());
-    //     // console.log($('#store').val());
-    //     // console.log($('#team').val());
-    //     // console.log($('#area').val());
-    //     // console.log(status);
-    //     // console.log($('input[name="type"]:checked').val());
-    // });
-
-    // function save_data() {
-    //     var status = $('#save_ba_modal #status').prop('checked') ? 1 : 0;
-    //     modal.confirm("Are you sure you want to save this record?",function(result){
-    //         if(result){ 
-    //             var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-    //             var data = {
-    //                 event : "insert", // list, insert, update, delete
-    //                 table : "tbl_brand_ambassador", //table
-    //                 data : {
-    //                         code : $('#save_ba_modal #code').val(),
-    //                         name : $('#save_ba_modal #name').val(),
-    //                         deployment_date : $('#save_ba_modal #deployment_date').val(),
-    //                         agency : $('#save_ba_modal #agency').val(),
-    //                         brand : $('#save_ba_modal #brand').val(),
-    //                         store  : $('#save_ba_modal #store').val(),
-    //                         team : $('#save_ba_modal #team').val(),
-    //                         area : $('#save_ba_modal #area').val(),
-    //                         status : $('#save_ba_modal #status').val(),
-    //                         type : $('#save_ba_modal #type').val(),
-    //                         created_date : formatDate(new Date()),
-    //                         //update_date : formatDate(new Date()).format('YYYY-MM-DD HH:mm:ss'),
-    //                         //to follow created data and created by
-    //                         created_by : user_id,
-    //                         status : status
-    //                 }  
-    //             }
-
-    //             aJax.post(url,data,function(result){
-    //                 var obj = is_json(result);
-    //                 // alert("pasok");
-    //                 location.reload();
-    //                 // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-    //                 //    location.reload();
-    //                 // })
-    //             });
-    //         }
-
-    //     });
-    // }
-
-    // function get_data_by_id(id){
-    //     var query = "id = " + id;
-    //     var exists = 0;
-
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event : "list", 
-    //         select : "id, code, name, deployment_date, agency, brand, store, team, area, status, type, updated_date",
-    //         query : query, 
-    //         table : "tbl_brand_ambassador"
-    //     }
-
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result);
-    //         console.log(obj);
-    //         if(obj){
-    //             $.each(obj, function(x,y) {
-    //                 console.log(y);
-    //                 $('#update_ba_modal #code').val(y.code);
-    //                 $('#update_ba_modal #name').val(y.name);
-    //                 $('#update_ba_modal #deployment_date').val(y.deployment_date);
-    //                 $('#update_ba_modal #agency').val(y.agency);
-    //                 $('#update_ba_modal #brand').val(y.brand);
-    //                 $('#update_ba_modal #store').val(y.store);
-    //                 $('#update_ba_modal #team').val(y.team);
-    //                 $('#update_ba_modal #area').val(y.area);
-                    
-    //                 if(y.status == 1){
-    //                     $('#update_ba_modal #status').prop('checked', true);
-    //                 }else{
-    //                     $('#update_ba_modal #status').prop('checked', false);
-    //                 }
-
-    //                 $('input[name="type"][value="' + y.type + '"]').prop('checked', true);
-
-    //             }); 
-    //         }
-            
-    //         $('#updateBtn').attr('data-id', id);
-    //         $('#update_ba_modal').modal('show');
-    //     });
-    //     return exists;
-    // }
-
-    // function update_data(id){
-    //     // var status = $('#update_user_modal #status').val();
-    //     var status = $('#update_ba_modal #status').prop('checked') ? 1 : 0;
-    //     console.log(status);
-    //     // if(status == 'on'){
-    //     //     status = 1;
-    //     // }else{
-    //     //     status = 0;
-    //     // }
-    //     modal.confirm("Are you sure you want to update this record?",function(result){
-    //         console.log(result);
-    //         if(result){ 
-    //             var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-    //             var data = {
-    //                 event : "update", // list, insert, update, delete
-    //                 table : "tbl_brand_ambassador", //table
-    //                 field : "id",
-    //                 where : id, 
-    //                 data : {
-    //                         code : $('#update_ba_modal #code').val(),
-    //                         name : $('#update_ba_modal #name').val(),
-    //                         deployment_date : $('#update_ba_modal #deployment_date').val(),
-    //                         agency : $('#update_ba_modal #agency').val(),
-    //                         brand : $('#update_ba_modal #brand').val(),
-    //                         store  : $('#update_ba_modal #store').val(),
-    //                         team : $('#update_ba_modal #team').val(),
-    //                         area : $('#update_ba_modal #area').val(),
-    //                         status : $('#update_ba_modal #status').val(),
-    //                         type: $('input[name="type"]:checked').val(),
-    //                         //created_date : formatDate(new Date()),
-    //                         updated_date : formatDate(new Date()),
-    //                         //to follow created data and created by
-    //                         //created_by : user_id,
-    //                         updated_by : user_id,
-    //                         status : status
-    //                 }  
-    //             }
-
-    //             aJax.post(url,data,function(result){
-    //                 var obj = is_json(result);
-    //                 //alert("pasok");
-    //                 location.reload();
-    //                 // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-    //                 //    location.reload();
-    //                 // })
-    //             });
-    //         }
-
-    //     });
-    // }
-
-    // function delete_data(id){
-        
-    //     modal.confirm("Are you sure you want to delete this record?",function(result){
-    //         if(result){ 
-    //             var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-    //             var data = {
-    //                 event : "update", // list, insert, update, delete
-    //                 table : "tbl_brand_ambassador", //table
-    //                 field : "id",
-    //                 where : id, 
-    //                 data : {
-    //                         updated_date : formatDate(new Date()),
-    //                         updated_by : user_id,
-    //                         status : -2
-    //                 }  
-    //             }
-
-    //             aJax.post(url,data,function(result){
-    //                 var obj = is_json(result);
-    //                 // alert("pasok");
-    //                 location.reload();
-    //                 // modal.alert("<strong>Success!</strong> Record has been Saved",function(){ 
-    //                 //    location.reload();
-    //                 // })
-    //             });
-    //         }
-
-    //     });
-    // }
-
-    // function get_data_by_id_view(id){
-    //     var query = "id = " + id;
-    //     var exists = 0;
-
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event : "list", 
-    //         select : "id, code, name, deployment_date, agency, brand, store, team, area, status, type, updated_date",
-    //         query : query, 
-    //         table : "tbl_brand_ambassador"
-    //     }
-
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result);
-    //         console.log(obj);
-    //         if(obj){
-    //             $.each(obj, function(x,y) {
-    //                 console.log(y);
-    //                 $('#view_ba_modal #code').val(y.code);
-    //                 $('#view_ba_modal #name').val(y.name);
-    //                 $('#view_ba_modal #deployment_date').val(y.deployment_date);
-    //                 $('#view_ba_modal #agency').val(y.agency);
-    //                 $('#view_ba_modal #brand').val(y.brand);
-    //                 $('#view_ba_modal #store').val(y.store);
-    //                 $('#view_ba_modal #team').val(y.team);
-    //                 $('#view_ba_modal #area').val(y.area);
-                    
-    //                 if(y.status == 1){
-    //                     $('#view_ba_modal #status').prop('checked', true);
-    //                 }else{
-    //                     $('#view_ba_modal #status').prop('checked', false);
-    //                 }
-
-    //                 $('input[name="type"][value="' + y.type + '"]').prop('checked', true);
-
-    //             }); 
-    //         }
-            
-    //         $('#updateBtn').attr('data-id', id);
-    //         $('#view_ba_modal').modal('show');
-    //     });
-    //     return exists;
-    // }
-
+    function total_delete(delete_table, delete_field, delete_where) {
+        data = {
+            event : "total_delete",
+            table : delete_table,
+            field : delete_field,
+            where : delete_where
+        }
+        aJax.post(url,data,function(result){
+            // console.log(result)
+        })
+    }
     
 </script>

@@ -47,11 +47,36 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('menu_update/(:num)', 'Cms\Cms_menu::menu_update');
     });
 
+    $routes->group('import-sell-out', static function ($routes) {
+        $routes->get('/', 'Cms\Import_sell_out::index');
+    });
+
+    $routes->group('import-target-sell-out-pa', static function ($routes) {
+        $routes->get('/', 'Cms\Import_target_sell_out_pa::index');
+    });
+
+    $routes->group('import-vmi', static function ($routes) {
+        $routes->get('/', 'Cms\Import_vmi::index');
+    });
+
+    $routes->group('import-ba-sales-report', static function ($routes) {
+        $routes->get('/', 'Cms\Import_ba_sales_report::index');
+    });
+
+    $routes->group('import-target-sales-ps', static function ($routes) {
+        $routes->get('/', 'Cms\Import_target_sales_ps::index');
+    });
+
+    $routes->group('import-sales-top-list', static function ($routes) {
+        $routes->get('/', 'Cms\Import_sales_top_list::index');
+    });
+
     $routes->group('cms_preference/', static function ($routes) {
         $routes->get('get_logo', 'Cms\Cms_preference::get_logo');
         $routes->get('get_menu', 'Cms\Cms_preference::get_menu');
         $routes->get('get_title', 'Cms\Cms_preference::get_title');
         //$routes->get('get_custom_theme', 'Cms\Cms_preference::get_custom_theme');
+        
         $routes->get('get_site_menu', 'Cms\Cms_preference::get_site_menu');
     });
 
@@ -69,6 +94,26 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('store-branch', 'Cms\Store_Branch::index');
     $routes->get('asc', 'Cms\Asc::index');
     $routes->get('area', 'Cms\Area::index');
+
+        //Audit trail
+    $routes->group('Audit_trail/', static function ($routes) {
+        $routes->get('/', 'Cms\Audit_trail::index');
+    });
+
+    //Error logs
+    $routes->group('error_logs/', static function ($routes) {
+        $routes->post('get_error_log_files', 'Cms\Error_logs::get_error_log_files');
+        $routes->get('get_error_log_files', 'Cms\Error_logs::get_error_log_files');
+        $routes->post('get_error_log_files_filter', 'Cms\Error_logs::get_error_log_files_filter');
+        $routes->post('error_data', 'Cms\Error_logs::error_data');
+        $routes->get('log/(:any)', 'Cms\Error_logs::log');
+    });
+    
+    //Error logs
+    $routes->group('Error_logs/', static function ($routes) {
+        $routes->get('/', 'Cms\Error_logs::index');
+    });
+        
 
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');
