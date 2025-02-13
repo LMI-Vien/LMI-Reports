@@ -636,6 +636,17 @@
                 };
             });
 
+            var table = 'tbl_store';
+            var haystack = ['code', 'description'];
+            var selected_fields = ['id', 'code', 'description'];
+            var needle = []
+
+            jsonData.forEach(item => {
+                if (item.Code && item.Name) { // Ensure Code and Name are not empty
+                    needle.push([item.Code, item.Name]);
+                }
+            });
+
             modal.loading_progress(true, "Validating and Saving data...");
             let worker = new Worker(base_url + "assets/cms/js/validator_store.js");
             worker.postMessage(jsonData);
@@ -665,8 +676,39 @@
                     }
                     createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
                 } else if (valid_data && valid_data.length > 0) {
-                    updateSwalProgress("Validation Completed", 50);
-                    setTimeout(() => saveValidatedData(valid_data), 500);
+                    // validate contents of excel first before making a query to the database
+                    list_existing(table, selected_fields, haystack, needle, function (result) {
+                        // if all codes and descriptions are unique start saving data
+                        if (result.status != "error") {
+                            // delay to let UI catch up with jquery updates
+                            updateSwalProgress("Validation Completed", 50);
+                            setTimeout(() => saveValidatedData(valid_data), 500);
+                        } 
+                        // if one of the codes and description already exists in the database
+                        else {
+                            var split_result = []
+                            // stop loading ui
+                            modal.loading_progress(false)
+                            // split and store into array
+                            split_result = result.message.split("<br>")
+                            $.each(split_result, (x, y) => {
+                                // for each message remove <b> tags
+                                cleaned_message = y.replace("<b>", "").replace("</b>", "").replace("<b>", "").replace("</b>", "")
+                                // add to error logs
+                                errorLogs.push(cleaned_message)
+                            })
+                            // pass error logs to create text file of error logs
+                            createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
+                            // call popup to alert users with error messages
+                            modal.content(
+                                'Validation Error',
+                                'error',
+                                errorLogs.join("<br>"),
+                                '600px',
+                                () => {}
+                            );
+                        }
+                    })
                 } else {
                     modal.loading_progress(false);
                     console.error("No valid data returned from worker.");
