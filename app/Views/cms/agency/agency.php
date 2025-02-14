@@ -140,8 +140,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                     <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>        
                 </div>
             </div>
         </div>
@@ -540,15 +540,34 @@
             };
         });
 
+        var table = 'tbl_agency';
+        var haystack = ['code', 'agency'];
+        var selected_fields = ['id', 'code', 'agency'];
+        var needle = []
+
+        console.log("jsonData before processing:", jsonData);
+
+        jsonData.forEach(item => {
+            console.log("Processing item:", item);
+
+            if (item.Code && item.Agency) { // Ensure Code and Name are not empty
+                needle.push([item.Code, item.Agency]);
+            }
+        });
+
+        console.log("Final needle array:", needle);
+
         modal.loading_progress(true, "Validating and Saving data...");
         let worker = new Worker(base_url + "assets/cms/js/validator_agency.js");
         worker.postMessage(jsonData);
 
         worker.onmessage = function(e) {
+            console.log("Received from worker:", e.data);
             modal.loading_progress(false);
 
             let { invalid, errorLogs, valid_data, err_counter } = e.data;
             if (invalid) {
+                console.log("Error logs from worker:", errorLogs);
                 if (err_counter > 5000) {
                     
                     modal.content(
@@ -569,8 +588,39 @@
                 }
                 createErrorLogFile(errorLogs);
             } else if (valid_data && valid_data.length > 0) {
-                updateSwalProgress("Validation Completed", 50);
-                setTimeout(() => saveValidatedData(valid_data), 500);
+                // validate contents of excel first before making a query to the database
+                list_existing(table, selected_fields, haystack, needle, function (result) {
+                    // if all codes and descriptions are unique start saving data
+                    if (result.status != "error") {
+                        // delay to let UI catch up with jquery updates
+                        updateSwalProgress("Validation Completed", 50);
+                        setTimeout(() => saveValidatedData(valid_data), 500);
+                    } 
+                    // if one of the codes and description already exists in the database
+                    else {
+                        var split_result = []
+                        // stop loading ui
+                        modal.loading_progress(false)
+                        // split and store into array
+                        split_result = result.message.split("<br>")
+                        $.each(split_result, (x, y) => {
+                            // for each message remove <b> tags
+                            cleaned_message = y.replace("<b>", "").replace("</b>", "").replace("<b>", "").replace("</b>", "")
+                            // add to error logs
+                            errorLogs.push(cleaned_message)
+                        })
+                        // pass error logs to create text file of error logs
+                        createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
+                        // call popup to alert users with error messages
+                        modal.content(
+                            'Validation Error',
+                            'error',
+                            errorLogs.join("<br>"),
+                            '600px',
+                            () => {}
+                        );
+                    }
+                })
             } else {
                 modal.loading_progress(false);
                 console.error("No valid data returned from worker.");

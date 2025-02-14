@@ -23,7 +23,7 @@ self.onmessage = function(e) {
             console.log(`Processing row ${index + 1}:`, row);
             let tr_count = index + 1;
             let code = row["Code"] ? row["Code"].trim() : "";
-            let team_description = row["Team Description"] ? row["Team Description"].trim() : "";
+            let team_description = row["Team_Description"] ? row["Team_Description"].trim() : "";
 
             let status = row["Status"] ? row["Status"].toLowerCase() : "";
             let user_id = row["Created by"] ? row["Created by"].trim() : "";
