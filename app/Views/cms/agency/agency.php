@@ -150,6 +150,7 @@
 <script>
     var query = "status >= 0";
     var limit = 10; 
+    //var offset = 0;
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
 
@@ -161,7 +162,7 @@
 
     $(document).ready(function() {
       get_data(query);
-      get_pagination();
+      get_pagination(query);
     });
 
     function get_data(query) {
@@ -222,7 +223,7 @@
         });
     }
 
-    function get_pagination() {
+    function get_pagination(query) {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
@@ -235,7 +236,6 @@
                 field : "agency", //field to order
                 order : "asc" //asc or desc
             }
-
         }
 
         aJax.post(url,data,function(result){
@@ -258,7 +258,7 @@
             new_query = " ("+ query + " AND code like '%" + keyword + "%' ) OR";
             new_query += " ("+ query + " AND agency like '%" + keyword + "%')";
             get_data(new_query);
-            get_pagination();
+            get_pagination(query);
         }
     });
 
@@ -495,10 +495,22 @@
 
     function save_to_db_import(dataObject) {
         var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
+        // var data = {
+        //     event: "insert",
+        //     table: "tbl_agency", // Table name
+        //     data: dataObject  // Pass the entire object dynamically
+        // };
+
         var data = {
             event: "insert",
-            table: "tbl_agency", // Table name
-            data: dataObject  // Pass the entire object dynamically
+            table: "tbl_agency",
+            data: {
+                code: dataObject.code,
+                agency: dataObject.agency,
+                status: dataObject.status,
+                created_date: formatDate(new Date()),
+                created_by: user_id
+            },
         };
 
         aJax.post(url, data, function (result) {

@@ -32,6 +32,8 @@
         background-color: gray !important;
         color: black !important;
     }
+
+    
 </style>
 
     <div class="content-wrapper p-4">
@@ -49,6 +51,7 @@
                         }
                     ?>
                     <div class="box-body">
+                        <!-- <div id="testing"></div> -->
                         <div class="col-md-12 list-data tbl-content" id="list-data">
                             <table class="table table-bordered listdata">
                                 <thead>
@@ -203,10 +206,19 @@
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
+    var store = [];
     
     $(document).ready(function() {
         get_data(query);
         get_pagination(query);
+
+        // get_store_list(function() {
+        //     console.log(store);
+
+        //     store.forEach(function(element) {
+        //         $('#testing').append(`<p>${element}</p>`)
+        //     });
+        // });
 
     });
     
@@ -227,7 +239,7 @@
         open_modal('Add New Area', 'add', '');
         get_store('', 'store_0');
     });
-    
+
     function edit_data(id) {
         open_modal('Edit Area', 'edit', id);
     }
@@ -272,18 +284,35 @@
         if (actions === 'add') {
             let line = get_max_number();
 
-            let html = `
-            <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <select name="store" class="form-control store_drop required" id="store_${line}"></select>
-                <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
-                    <i class="fa fa-minus" aria-hidden="true"></i>
-                </button>
-            </div>
-            `;
-            $store_list.append(html)
-            $('.add_line').attr('disabled', false)
-            $('.add_line').attr('readonly', false)
-            $footer.append(buttons.save)
+            let html = '';
+            
+            get_store_list(function() {
+                // console.log(store);
+
+                html = `
+                <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                    <input list="stores" class="form-control" id="store_${line}" name="store">
+                    <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
+                        <i class="fa fa-minus" aria-hidden="true"></i>
+                    </button>
+                </div>
+                `;
+
+                html += `<datalist id="stores">`
+                store.forEach(function(element) {
+                    html += `<option value="${element}">`;
+                });
+                html += `</datalist>`;
+                
+                // console.log(html);
+
+                $store_list.append(html)
+                $('.add_line').attr('disabled', false)
+                $('.add_line').attr('readonly', false)
+                $footer.append(buttons.save)
+            });
+
+
         };
         if (actions === 'edit') {
             $footer.append(buttons.edit)
@@ -326,7 +355,7 @@
 
         let html = `
         <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-            <select name="store" class="form-control store_drop required" id="store_${line}"></select>
+            <input list="stores" class="form-control" id="store_${line}" name="store">
             <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                 <i class="fa fa-minus" aria-hidden="true"></i>
             </button>
@@ -357,7 +386,7 @@
                     $('#code').val(d.code);
                     $('#description').val(d.description);
                     $('#store').val(d.store);
-                    // get_store(d.store, 'store_0');
+                    get_store(d.store, 'store_0');
                     var line = 0;
                     var readonly = '';
                     var disabled = ''
@@ -372,7 +401,7 @@
                         }
                         let html = `
                         <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                            <select name="store" class="form-control store_drop required" id="store_${line}"></select>
+                            <input list="stores" class="form-control" id="store_${line}" name="store">
                             <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
                                 <i class="fa fa-minus" aria-hidden="true"></i>
                             </button>
@@ -388,6 +417,7 @@
                         $('#status').prop('checked', false)
                     }
                 }); 
+                console.log(obj);
             }
         });
     }
@@ -470,13 +500,47 @@
         };
         reader.readAsBinaryString(file);
     }
+
+    function get_store_list(callback) {
+        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+        var data = {
+            event : "list",
+            select : "id, description",
+            query : 'status >= 0',
+            offset : 0,
+            limit : 0,
+            table : "tbl_store",
+            order : {
+                field : "code",
+                order : "asc" 
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: data,
+            success: function(res) {
+                var result = JSON.parse(res);
+
+                $.each(result, function(x, y) {
+                    store[y.id] = y.description;
+                    // console.log(y.description);
+                });
+
+                if (callback) {
+                    callback();
+                }
+            }
+        })
+    }
     
     let storeDescriptions = {};
     function get_store(id, dropdown_id) {
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
         var data = {
             event : "list",
-            select : "id, code, description, status",
+            select : "id, description",
             query : 'status >= 0',
             offset : 0,
             limit : 0,
@@ -489,25 +553,28 @@
 
         aJax.post(url,data,function(res){
             var result = JSON.parse(res);
-            var html = '<option id="default_val" value=" ">Select Store</option>';
+            // var html = '<option id="default_val" value=" ">Select Store</option>';
     
-            if(result) {
-                if (result.length > 0) {
-                    var selected = '';
-                    $.each(result, function(x,y) {
-                        storeDescriptions[y.id] = y.description;
-                        if (id === y.id) {
-                            selected = 'selected'
+            // if(result) {
+            //     if (result.length > 0) {
+            //         var selected = '';
+            //         $.each(result, function(x,y) {
+            //             storeDescriptions[y.id] = y.description;
+            //             if (id === y.id) {
+            //                 selected = 'selected'
 
-                        } else {
-                            selected = ''
-                        }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
-                    })
-                }
-            }
-            $('#'+dropdown_id).empty();
-            $('#'+dropdown_id).append(html);
+            //             } else {
+            //                 selected = ''
+            //             }
+            //             html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+            //         })
+            //     }
+            // }
+
+            // console.log(store);
+            // console.log(store);
+            // $('#'+dropdown_id).empty();
+            // $('#'+dropdown_id).append(html);
         })
     }
 
@@ -787,21 +854,34 @@
         get_data(query);
     })
 
+    function get_stores() {
+        var store = [];
+        var i = 0;
+
+        while($(`#store_${i}`).length) {
+            store.push($(`#store_${i}`).val());
+            i++;
+        }
+
+        return store.join(', ');
+    }
+
     function save_data(action, id) {
         var code = $('#code').val();
         var description = $('#description').val();
-        var store = $('#store').val();
+        var store = get_stores();
         var chk_status = $('#status').prop('checked');
         var linenum = 0;
         var unique_store = [];
         var store_list = $('#store_list');
+        // alert(store);
         // add_line
-        store_list.find('select').each(function() {
-            linenum++
-            if (!unique_store.includes($(this).val())) {
-                unique_store.push($(this).val())
-            }
-        });
+        // store_list.find('option').each(function() {
+        //     linenum++
+        //     if (!unique_store.includes($(this).val())) {
+        //         unique_store.push($(this).val())
+        //     }
+        // });
         if (chk_status) {
             status_val = 1;
         } else {
@@ -817,15 +897,15 @@
                             save_to_db(code, description, store, status_val, id, (obj) => {
                                 total_delete('tbl_store_group', 'area_id', id)
                                 let batch = [];
-                                $.each(unique_store, (x, y) => {
-                                    let data = {
-                                        'area_id': id,
-                                        'store_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
+                                let data = {
+                                    'area_id': id,
+                                    'store_id': store,
+                                    'created_by': user_id,
+                                    'created_date': formatDate(new Date())
+                                };
+                                batch.push(data);
+                                // $.each(unique_store, (x, y) => {
+                                // })
                                 batch_insert(batch, 'tbl_store_group', () => {
                                     modal.loading(false);
                                     modal.alert(success_update_message, "success", function() {
@@ -846,15 +926,15 @@
                              modal.loading(true);
                             save_to_db(code, description, store, status_val, null, (obj) => {
                                 let batch = [];
-                                $.each(unique_store, (x, y) => {
-                                    let data = {
-                                        'area_id': obj.ID,
-                                        'store_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
+                                let data = {
+                                    'area_id': obj.ID,
+                                    'store_id': store,
+                                    'created_by': user_id,
+                                    'created_date': formatDate(new Date())
+                                };
+                                batch.push(data);
+                                // $.each(unique_store, (x, y) => {
+                                // })
                                 batch_insert(batch, 'tbl_store_group', () => {
                                     modal.loading(false);
                                     modal.alert(success_save_message, "success", function() {
@@ -896,7 +976,7 @@
                 data: {
                     code: inp_code,
                     description: inp_description,
-                    // store: inp_store,
+                    store: inp_store,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                     status: status_val
@@ -910,7 +990,7 @@
                 data: {
                     code: inp_code,
                     description: inp_description,
-                    // store: inp_store,
+                    store: inp_store,
                     created_date: formatDate(new Date()),
                     created_by: user_id,
                     status: status_val
@@ -922,6 +1002,12 @@
             var obj = is_json(result);
             cb(obj)
             modal.loading(false);
+<<<<<<< Updated upstream
+=======
+            modal.alert(modal_alert_success, "success", function() {
+                location.reload();
+            });
+>>>>>>> Stashed changes
         });
     }
 
