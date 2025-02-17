@@ -230,6 +230,32 @@ var validate = {
 			});
 	    }
 
+		//numbers only
+
+	    if ($(element).hasClass("numbersonly")) {
+			$(".numbersonly").each(function(){
+				var str = $(this).val();
+				if (!/^\d+$/.test(str)) {
+					counter++;
+					$(this).css('border-color','red');
+	  				$("<span class='validate_error_message' style='color: red;'>This field only required only Numbers.<br></span>").insertAfter(this);
+				}
+			});
+	    }
+
+		//numbers with decimal
+
+		if ($(element).hasClass("numbersdecimalonly")) {
+			$(".numbersdecimalonly").each(function(){
+				var str = $(this).val();
+				if (!/^\d+(\.\d+)?$/.test(str)) {
+					counter++;
+					$(this).css('border-color','red');
+	  				$("<span class='validate_error_message' style='color: red;'>This field only required only Numbers with Decimal.<br></span>").insertAfter(this);
+				}
+			});
+	    }
+
 
 
 		//validate script tags
