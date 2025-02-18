@@ -35,6 +35,7 @@
     .tbl-content{
       max-height: 530px;
       overflow: auto;
+      margin-top: 10px;
     }
 
     div#list-data {
@@ -84,6 +85,14 @@
         color: white;
     }
 
+    thead tr{
+        position: sticky;
+        background-color: #301311;
+        color: white;
+        top: 0;
+        z-index: 10; /* Keep it above other elements */
+    }
+
     .save, .update {
         border: 1px solid #267326; 
         padding: 10px; 
@@ -94,6 +103,8 @@
         color:white; 
         border-radius:10px; 
         margin-right:5px;
+        margin-bottom:2px;
+        margin-top:2px;
         box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
     }
     .save:focus, .update:focus  {
@@ -117,6 +128,8 @@
         color:white; 
         border-radius:10px; 
         margin-right:5px;
+        margin-bottom:2px;
+        margin-top:2px;
         box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
     }
     .view:hover {
@@ -133,7 +146,9 @@
         line-height: 0.5; 
         background-color: #990000; 
         color: white; border-radius: 10px; 
-        margin-right: 2px; 
+        margin-right: 5px; 
+        margin-bottom:2px;
+        margin-top:2px;
         box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
     }
     .delete:hover {
@@ -152,6 +167,8 @@
         color: white; 
         border-radius:10px; 
         margin-right:5px;
+        margin-bottom:2px;
+        margin-top:2px;
         box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
     }
     .caution:hover {
@@ -171,6 +188,8 @@
         color:white; 
         border-radius:10px; 
         margin-right:5px;
+        margin-bottom:2px;
+        margin-top:2px;
         box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
     }
 
@@ -231,8 +250,4 @@
         overflow-x: auto;
         height: 350px;
         padding: 0px;
-    }
-
-    .table-bordered {
-        margin-top: 10px;
     }
