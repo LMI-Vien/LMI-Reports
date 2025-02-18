@@ -160,22 +160,23 @@
                                 <b>Extracted Data</b>
                             </div>
 
-                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
-                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                            </label>
-                            <input
-                                type="file"
-                                style="display: none;"
-                                id="file"
-                                accept=".xls,.xlsx,.csv"
-                                aria-describedby="import_files"
-                                onchange="store_file(event)"
-                                onclick="clear_import_table()"
-                            >
+                            <div class="import_buttons">
+                                <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
+                                    <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                                </label>
+                                <input
+                                    type="file"
+                                    style="padding-left: 10px;"
+                                    id="file"
+                                    accept=".xls,.xlsx,.csv"
+                                    aria-describedby="import_files"
+                                    onclick="clear_import_table()"
+                                >
 
-                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                            </label>
+                                <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                                    <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                                </label>
+                            </div>
 
                             <table class= "table table-bordered listdata">
                                 <thead>
@@ -195,17 +196,26 @@
                 
                 <div class="modal-footer">
                     <button type="button" class="btn caution" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn save" onclick="proccess_xl_file()">Validate and Save</button>
+                    <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
     var query = "status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
+
+    let currentPage = 1;
+    let rowsPerPage = 1000;
+    let totalPages = 1;
+    let dataset = [];
+    let stores_under_area = []
     
     $(document).ready(function() {
         get_data(query);
@@ -213,7 +223,6 @@
 
     });
     
-    // uses function get_data(
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
         $(".record-entries").val($(this).val());
@@ -266,10 +275,6 @@
         };
 
         if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
-        console.log('Action: ', actions);
-        let isReadOnly = actions === 'view';
-        // console.log('Readonly', isReadOnly);
-        set_field_state('#code, #description, #status, #store_0', isReadOnly);
         
         $store_list.empty()
         $footer.empty();
@@ -286,18 +291,15 @@
             </div>
             `;
             $store_list.append(html)
-            $('.add_line').attr('disabled', false)
-            $('.add_line').attr('readonly', false)
+            set_field_state('.add_line', false)
             $footer.append(buttons.save)
         };
         if (actions === 'edit') {
             $footer.append(buttons.edit)
-            $('.add_line').attr('disabled', false)
-            $('.add_line').attr('readonly', false)
+            set_field_state('.add_line', false)
         };
         if (actions === 'view') {
-            $('.add_line').attr('disabled', true)
-            $('.add_line').attr('readonly', true)
+            set_field_state('.add_line', true)
         }
         $footer.append(buttons.close);
 
@@ -345,7 +347,7 @@
         $(`#line_${lineId}`).remove();
     }
     
-    function populate_modal(inp_id, action = null) {
+    function populate_modal(inp_id, actions) {
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -368,37 +370,19 @@
                     var disabled = '';
                     let $store_list = $('#store_list')
                     $.each(get_area_stores(d.id), (x, y) => {
-                        console.log('store: ', y.store_id);
-                        if (action === 'view') {
-                            disabled = 'disabled';
-                            readonly = 'readonly';
-                        } else {
-                            readonly = '';
-                            disabled = ''
-                        }
-                        get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
-                            console.log(res);
-                            $.each(res, (x, y) => {
-                                // console.log(res);
-
-                                if (action === 'edit') {
-                                    readonly = (line == 0) ? 'readonly' : '';
-                                    disabled = (line == 0) ? 'disabled' : '';
-                                }
-
-                                let html = `
-                                <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                    <input list="stores" id="store_${line}" value="${y}" class="form-control" ${action === 'view' ? 'readonly' : ''}>
-                                    <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
-                                        <i class="fa fa-minus" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                                `;
-                                $store_list.append(html)
-                                get_store(x, `store_${line}`);
-                                line++
-                            });
-                        });
+                        disabled = readonly = (line === 0 || actions === 'view') ? 'disabled' : '';
+                        if (disabled !== 'disabled') readonly = '';
+                        let html = `
+                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                            <select name="store" class="form-control store_drop required" id="store_${line}"></select>
+                            <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
+                                <i class="fa fa-minus" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        `;
+                        $store_list.append(html)
+                        get_store(y.store_id, `store_${line}`);
+                        line++
                     })
                     if(d.status == 1) {
                         $('#status').prop('checked', true)
@@ -432,61 +416,118 @@
     });
     
     function read_xl_file() {
-        $(".import_table").empty()
-        var html = '';
+        clear_import_table();
+        
+        dataset = [];
+
         const file = $("#file")[0].files[0];
-        if (file === undefined) {
-            load_swal(
-                '',
-                '500px',
-                'error',
-                'Error!',
-                'Please select a file to upload',
-                false,
-                true
-            )
-            return
+        if (!file) {
+            modal.loading_progress(false);
+            modal.alert('Please select a file to upload', 'error', ()=>{});
+            return;
         }
+        modal.loading_progress(true, "Reviewing Data...");
+
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = e.target.result;
-            // convert the data to a workbook
-            const workbook = XLSX.read(data, {type: "binary"});
-            // get the first sheet
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            // convert the sheet to JSON
-            const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-            var tr_counter = 0;
-            jsonData.forEach(row => {
-                var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
-                html += "<tr class=\""+rowClass+"\">";
-                html += "<td>";
-                html += tr_counter+1;
-                html += "</td>";
+            const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
 
-                let record = row;
+            // Process in chunks
+            processInChunks(jsonData, 5000, () => {
+                paginateData(rowsPerPage);
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    }
 
-                let lowerCaseRecord = Object.keys(record).reduce((acc, key) => {
-                    acc[key.toLowerCase()] = record[key];
-                    return acc;
-                }, {});
-    
-                // create a table cell for each item in the row
-                var td_validator = ['code', 'description', 'stores', 'status'];
-                td_validator.forEach(column => {
-                    html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
-                    html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
-                    html += "</td>";
-                });
-                html += "</tr>";
-                tr_counter += 1;
+    function processInChunks(data, chunkSize, callback) {
+        let index = 0;
+        let totalRecords = data.length;
+        let totalProcessed = 0;
+
+        function nextChunk() {
+            if (index >= data.length) {
+                modal.loading_progress(false);
+                //console.log('Total records processed:', totalProcessed);
+                callback(); 
+                return;
+            }
+
+            let chunk = data.slice(index, index + chunkSize);
+            dataset = dataset.concat(chunk);
+            totalProcessed += chunk.length; 
+            index += chunkSize;
+
+
+            // Calculate progress percentage
+            let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
+            setTimeout(() => {
+                updateSwalProgress("Preview Data", progress);
+                nextChunk();
+            }, 100); // Delay for UI update
+        }
+        nextChunk();
+    }
+
+    function paginateData(rowsPerPage) {
+        totalPages = Math.ceil(dataset.length / rowsPerPage);
+        currentPage = 1;
+        display_imported_data();
+    }
+
+    function display_imported_data() {
+        let start = (currentPage - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        let paginatedData = dataset.slice(start, end);
+
+        let html = '';
+        let tr_counter = start;
+
+        paginatedData.forEach(row => {
+            let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+            html += `<tr class="${rowClass}">`;
+            html += `<td>${tr_counter + 1}</td>`;
+
+            let lowerCaseRecord = Object.keys(row).reduce((acc, key) => {
+                acc[key.toLowerCase()] = row[key];
+                return acc;
+            }, {});
+
+            // 
+            let td_validator = ['code', 'description', 'stores', 'status'];
+            td_validator.forEach(column => {
+                html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
 
-            $(".import_table").append(html);
-            html = '';
-        };
-        reader.readAsBinaryString(file);
+            html += "</tr>";
+            tr_counter += 1;
+        });
+
+        modal.loading(false);
+        $(".import_table").html(html);
+        updatePaginationControls();
+    }
+
+    function updatePaginationControls() {
+        let paginationHtml = `
+            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
+            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
+            
+            <select onchange="goToPage(this.value)">
+                ${Array.from({ length: totalPages }, (_, i) => 
+                    `<option value="${i + 1}" ${i + 1 === currentPage ? "selected" : ""}>Page ${i + 1}</option>`
+                ).join('')}
+            </select>
+            
+            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
+            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
+        `;
+
+        $(".import_pagination").html(paginationHtml);
     }
     
     let storeDescriptions = [];
@@ -549,200 +590,237 @@
         return result;
     }
 
-    let storedFile = null;
-
-    function store_file(event) {
-        storedFile = event.target.files[0]; // Store the file but do nothing yet
-    }
-
-    function proccess_xl_file() {
-        var extracted_data = $(".import_table");
-
-        var code = '';
-        var description = '';
-        var status = '';
-        var deployment_date = '';
-        var area_id = '';
-
-        var invalid = false;
-        var errmsg = '';
-
-        var unique_code = [];
-        var unique_description = [];
-        var store_per_area = {};
-
-        var import_array = [];
-        var needle = [];
-
-        var tr_count = 1;
-        var row_mapping = {};
-
-        extracted_data.find('tr').each(function (){
-            td_count = 1;
-            var temp = [];
-            $(this).find('td').each(function () {
-                var text_val = $(this).html().trim();
-                var error_messages = {
-                    code: {
-                        duplicate: "⚠️ Duplicated Code at line #: <b>{line}</b>⚠️<br>",
-                        length: "⚠️ Code exceeds 25 characters at line #: <b>{line}</b>⚠️<br>",
-                        empty: "⚠️ Code is empty at line #: <b>{line}</b>⚠️<br>"
-                    },
-                    description: {
-                        duplicate: "⚠️ Duplicated Description at line #: <b>{line}</b>⚠️<br>",
-                        length: "⚠️ Description exceeds 50 characters at line #: <b>{line}</b>⚠️<br>",
-                        empty: "⚠️ Description is empty at line #: <b>{line}</b>⚠️<br>"
-                    },
-                    status: "⚠️ Invalid Status at line #: <b>{line}</b>⚠️<br>"
-                };
-
-                const validateField = (type, value, maxLength, uniqueList) => {
-                    if (uniqueList.includes(value)) {
-                        // invalid = true;
-                        errmsg += error_messages[type].duplicate.replace("{line}", tr_count);
-                    } else if (value.length > maxLength) {
-                        invalid = true;
-                        errmsg += error_messages[type].length.replace("{line}", tr_count);
-                    } else if (!value) {
-                        invalid = true;
-                        errmsg += error_messages[type].empty.replace("{line}", tr_count);
-                    } else {
-                        uniqueList.push(value);
-                        row_mapping[value] = tr_count;
-                    }
-                    return value;
-                };
-
-                switch (td_count) {
-                    case 2:
-                        code = validateField("code", text_val, 25, unique_code);
-                        if (!store_per_area[code]) {
-                            store_per_area[code] = [];
-                        }
-                        break;
-                    case 3:
-                        description = validateField("description", text_val, 50, unique_description);
-                        break;
-                    case 4:
-                        stores = text_val;
-                        if (!store_per_area[code].includes(stores)) {
-                            store_per_area[code].push(stores);
-                        }
-                        break;
-                    case 5:
-                        if (["active", "inactive"].includes(text_val.toLowerCase())) {
-                            status = text_val.toLowerCase() === "active" ? 1 : 0;
-                        } else {
-                            invalid = true;
-                            errmsg += error_messages.status.replace("{line}", tr_count);
-                        }
-                        break;
-                }
-
-                td_count++;
-            })
-            tr_count += 1;
-            if (!needle.some(item => item[0] === code)) {
-                needle.push([code, description]);
-            }
-
-            if (!import_array.some(item => item[0] === code)) {
-                let temp = []; 
-                temp.push(code, description, status);
-                import_array.push(temp);
-            }
-        })
-
-        if (tr_count === 1) {
-            modal.alert('Please select a file to upload', 'error', ()=>{})
+    function process_xl_file() {
+        // Check if dataset is empty
+        if (dataset.length === 0) {
+            modal.alert('No data to process. Please upload a file.', 'error', () => {});
             return;
         }
 
-        var temp_invalid = invalid;
-        var temp_errmsg = '';
+        let existingEntries = new Set(); // Set to track unique code-description pairs
 
-        invalid = temp_invalid;
-        errmsg += temp_errmsg;
+        // Convert dataset into JSON format with required fields
+        let jsonData = dataset.map(row => {
+            return {
+                "Code": row["code"] || "", // Get 'code' field or default to empty string
+                "Name": row["description"] || "", // Get 'description' field or default to empty string
+                "Status": row["status"] || "", // Get 'status' field or default to empty string
+                "Stores": row["stores"] 
+                    ? row["stores"].split(",").map(store => store.trim()) 
+                    : [], // Convert 'stores' field into an array of trimmed store names
+                "Created By": user_id || "", // Add the user ID of the creator
+                "Created Date": formatDate(new Date()) || "" // Add the current date in a formatted way
+            };
+        });
 
-        var table = 'tbl_area';
-        var haystack = ['code', 'description'];
-        var selected_fields = ['id', 'code', 'description'];
+        var table = 'tbl_area'; // Database table where data will be checked
+        var selected_fields = ['id', 'code', 'description']; // Fields to retrieve for validation
+        var haystack = ['code', 'description']; // Fields used for duplicate checking
+        var needle = []; // Array to hold unique (code, description) pairs for validation
 
-        if (invalid) {
-            modal.content('Error', 'error', errmsg, '600px', ()=>{});
-        } else {
-            list_existing(table, selected_fields, haystack, needle, function (result) {
-                if (result.status != "error") {
-                    var batch = [];
-                    import_array.forEach(row => {
-                        let data = {
-                            'code': row[0],
-                            'description': row[1],
-                            'status': row[2],
-                            'created_by': user_id,
-                            'created_date': formatDate(new Date())
-                        };
+        // Populate 'needle' array with code-description pairs if they are not empty
+        jsonData.forEach(item => {
+            if (item.Code && item.Name) { 
+                needle.push([item.Code, item.Name]);
+            }
+        });
 
-                        if (!batch.some(item => item.code === row[0])) {
-                            batch.push(data);
+        // Show loading progress
+        modal.loading_progress(true, "Validating and Saving data...");
+
+        // Initialize a Web Worker to validate data asynchronously
+        let worker = new Worker(base_url + "assets/cms/js/validator_area.js");
+        worker.postMessage(jsonData); // Send data to worker for validation
+
+        // Handle messages (results) from worker
+        worker.onmessage = function (e) {
+            modal.loading_progress(false); // Hide loading modal when processing is done
+
+            let { invalid, errorLogs, valid_data, err_counter, store_per_area } = e.data;
+            stores_under_area = store_per_area; // Store processed store-area mapping
+
+            // Function to show error messages in a modal
+            const showErrorModal = (message) => {
+                modal.content('Validation Error', 'error', message, '600px', () => {});
+            };
+
+            // Function to handle validation errors
+            const handleErrors = (result) => {
+                let errors = result.status !== "error" ? errorLogs : [
+                    ...errorLogs,
+                    ...result.message.replace(/<\/?b>/g, "").split("<br>") // Clean HTML tags from error messages
+                ];
+                createErrorLogFile(errors, "Error " + formatReadableDate(new Date(), true)); // Create error log file
+                showErrorModal(errors.join("<br>")); // Display errors in modal
+            };
+
+            // If there are invalid entries
+            if (invalid) {
+                if (err_counter > 5000) { // Prevent excessive error display
+                    return showErrorModal("⚠️ Too many errors detected. Please download the error log for details.");
+                }
+                // Check existing records in the database and handle errors
+                list_existing(table, selected_fields, haystack, needle, handleErrors);
+            } 
+            // If data is valid, proceed with further validation and saving
+            else if (valid_data?.length) {
+                list_existing(table, selected_fields, haystack, needle, (result) => {
+                    if (result.status !== "error") {
+                        updateSwalProgress("Validation Completed", 50); // Show progress update
+                        return setTimeout(() => saveValidatedData(valid_data), 500); // Save data after validation
+                    }
+                    handleErrors(result);
+                });
+            } 
+            // If no valid data is returned, show an error
+            else {
+                console.error("No valid data returned from worker.");
+                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+            }
+        };
+
+        // Handle worker script errors
+        worker.onerror = function() {
+            modal.loading_progress(false);
+            modal.alert("Error processing data. Please try again.", "error", () => {});
+        };
+    }
+
+    function createErrorLogFile(errorLogs, filename) {
+        let errorText = errorLogs.join("\n");
+        let blob = new Blob([errorText], { type: "text/plain" });
+        let url = URL.createObjectURL(blob);
+
+        $(".import_buttons").find("a.download-error-log").remove();
+
+        let $downloadBtn = $("<a>", {
+            href: url,
+            download: filename+".txt",
+            text: "Download Error Logs",
+            class: "download-error-log",
+            css: {
+                border: "1px solid white",
+                borderRadius: "10px",
+                display: "inline-block",
+                padding: "10px",
+                lineHeight: 0.5,
+                background: "#990000",
+                color: "white",
+                textAlign: "center",
+                cursor: "pointer",
+                textDecoration: "none",
+                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
+            }
+        });
+
+        $(".import_buttons").append($downloadBtn);
+    }
+
+    function saveValidatedData(valid_data) {
+        let batch_size = 5000; // Process 1000 records at a time
+        let total_batches = Math.ceil(valid_data.length / batch_size);
+        let batch_index = 0;
+        let retry_count = 0;
+        let max_retries = 5; 
+
+        function processNextBatch() {
+            if (batch_index >= total_batches) {
+                modal.alert(success_save_message, 'success', () => location.reload());
+                return;
+            }
+
+            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+            let progress = Math.round(((batch_index + 1) / total_batches) * 100);
+            setTimeout(() => {
+                updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
+            }, 100);
+            batch_insert(batch, 'tbl_area', function(result) {
+                console.log(batch, 'batch')
+                console.log(stores_under_area, 'stores_under_area saveValidatedData')
+                // console.log(result.inserted, 'result.inserted saveValidatedData')
+
+                // Step 1: Extract Unique Descriptions Efficiently
+                let uniq_desc = new Set();
+
+                result.inserted.forEach(({ code }) => {
+                    (stores_under_area[code] || []).forEach(storeList => {
+                        storeList.forEach(store => uniq_desc.add(fixEncoding(store)));
+                    });
+                });
+
+                // Convert Set to Array for further processing
+                uniq_desc = Array.from(uniq_desc);
+
+                // Step 2: Get Field Values and Map them
+                let store_value = new Map();
+
+                get_field_values(
+                    "tbl_store",
+                    "description",
+                    "description",
+                    uniq_desc,
+                    (res) => {
+                        Object.entries(res).forEach(([key, value]) => {
+                            store_value.set(fixEncoding(value), key);
+                        });
+                    }
+                );
+
+                // Step 3: Construct per_area_batch Array
+                let per_area_batch = [];
+
+                result.inserted.forEach(({ id, code }) => {
+                    (stores_under_area[code] || []).forEach(storeList => {
+                        storeList.forEach(store => {
+                            let encodedStore = fixEncoding(store);
+                            let set_store_id = store_value.get(encodedStore)
+                            if (set_store_id != undefined) {
+                                per_area_batch.push({
+                                    area_id: id,
+                                    store_id: set_store_id,  // Use Map for efficient lookup
+                                    created_by: user_id,
+                                    created_date: formatDate(new Date()),
+                                });
+                            }
+                        });
+                    });
+                });
+
+                console.log(per_area_batch, 'per_area_batch');
+
+                // Step 4: Batch Insert and Process Next Batch
+                batch_insert(per_area_batch, 'tbl_store_group', function(res) {
+                    console.log(res)
+                    batch_index++;
+                    processNextBatch();
+                });
+            });
+        }
+
+        function handleSaveError(batch) {
+            if (retry_count < max_retries) {
+                retry_count++;
+                let wait_time = Math.pow(2, retry_count) * 1000;
+                //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
+                setTimeout(() => {
+                    //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
+                    batch_insert(batch, 'tbl_area', function(success) {
+                        if (success) {
+                            batch_index++;
+                            retry_count = 0;
+                            processNextBatch();
+                        } else {
+                            handleSaveError(batch);
                         }
                     });
-    
-                    modal.loading(true);
-                    setTimeout(() => {
-                        modal.loading(false);
-                        batch_insert(batch, 'tbl_area',(result) => {
-
-                            var temp_store_list = []
-                            $.each(store_per_area, (x, stores) => {
-                                $.each(stores, (a, b) => {
-                                    if(!temp_store_list.includes(fixEncoding(b))) {
-                                        temp_store_list.push(fixEncoding(b))
-                                    }
-                                })
-                            })
-
-                            var store_list_mapping = []
-                            get_field_values(
-                                "tbl_store", 
-                                "description", 
-                                "description",
-                                temp_store_list,
-                                (res) => {
-                                    $.each(res, (x, y)=>{
-                                        store_list_mapping[y] = x
-                                    })
-                                }
-                            )
-
-                            var store_batch = [];
-                            $.each(result.message, (x,y) => {
-                                $.each(store_per_area[y.code], (a,b) => {
-                                    console.log(fixEncoding(b))
-                                    console.log(y.id, store_list_mapping[fixEncoding(b)], user_id, formatDate(new Date()))
-                                    temp = {
-                                        'area_id': y.id,
-                                        'store_id': store_list_mapping[fixEncoding(b)],
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    }
-                                    store_batch.push(temp)
-                                })
-                            })
-                            console.log(store_batch);
-                            batch_insert(store_batch, 'tbl_store_group',(result) => {
-                                modal.loading(false);
-                                modal.alert(success_save_message, 'success', () => {
-                                    if (result) {
-                                        location.reload();
-                                    }
-                                })
-                            })
-                        })
-                    }, 1000);
-                }
-            })
+                }, wait_time);
+            } else {
+                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+            }
         }
+
+        modal.loading_progress(true, "Validating and Saving data...");
+        setTimeout(processNextBatch, 1000);
     }
 
     function fixEncoding(text) {
@@ -1042,7 +1120,7 @@
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
-                            html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+                            html+="<td class='center-content' scope=\"col\">";
                             html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -1059,71 +1137,151 @@
         });
     }
 
-    $(document).on('click', '.btn_status', function (e) {
-            var status = $(this).attr("data-status");
-            var modal_obj = "";
-            var modal_alert_success = "";
-            var hasExecuted = false; // Prevents multiple executions
-
-            if (parseInt(status) === -2) {
-                modal_obj = confirm_delete_message;
-                modal_alert_success = success_delete_message;
-                offset = 1;
-            } else if (parseInt(status) === 1) {
-                modal_obj = confirm_publish_message;
-                modal_alert_success = success_publish_message;
-            } else {
-                modal_obj = confirm_unpublish_message;
-                modal_alert_success = success_unpublish_message;
+    $(document).on('click', '#btn_export', function () {
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                handleExport()
             }
-            modal.confirm(modal_obj, function (result) {
-                if (result) {
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var dataList = [];
-                    
-                    $('.select:checked').each(function () {
-                        var id = $(this).attr('data-id');
-                        dataList.push({
-                            event: "update",
-                            table: "tbl_area",
-                            field: "id",
-                            where: id,
-                            data: {
-                                status: status,
-                                updated_date: formatDate(new Date())
-                            }
-                        });
-                    });
-    
-                    if (dataList.length === 0) return;
-    
-                    var processed = 0;
-                    dataList.forEach(function (data, index) {
-                        aJax.post(url, data, function (result) {
-                            if (hasExecuted) return; // Prevents multiple executions
-    
-                            modal.loading(false);
-                            processed++;
-    
-                            if (result === "success") {
-                                if (!hasExecuted) {
-                                    hasExecuted = true;
-                                    $('.btn_status').hide();
-                                    modal.alert(modal_alert_success, "success", function () {
-                                        location.reload();
-                                    });
-                                }
-                            } else {
-                                if (!hasExecuted) {
-                                    hasExecuted = true;
-                                    modal.alert(failed_transaction_message, "error", function () {});
-                                }
-                            }
-                        });
-                    });
-                }
-            });
+        })
+    })
+
+    function handleExport() {
+        var new_query = query; // Default: assign query to new_query
+        
+        var ids = [];
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`'${id}'`); // Collect IDs in an array
         });
+
+        // Only modify new_query if there are selected checkboxes
+        if (ids.length > 0) {
+            new_query += ' and id in (' + ids.join(', ') + ')';
+        }
+
+        console.log(new_query); // Debugging output
+
+        var data = {
+            event: "list",
+            select: "id, code, description, status, updated_date, created_date",
+            query: new_query,
+            offset: 0,
+            limit: 0,
+            table: "tbl_area",
+            order: {
+                field: "code",
+                order: "asc"
+            }
+        };
+
+        aJax.post(url, data, function (result) {
+            var result = JSON.parse(result);
+            const formattedData = result.map(item => ({
+                // ID: item.id,
+                Code: item.code,
+                Description: item.description,
+                Status: item.status === "1" ? "Active" : "Inactive",
+                "Updated Date": item.updated_date ? item.updated_date : "N/A",
+                "Created Date": item.created_date
+            }));
+
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."], // Row 1
+                ["Masterfile: Area"], // Row 2
+                ["Date Printed: " + formatDate(new Date())], // Row 3
+                [""], // Empty row for spacing
+            ];
+
+            exportArrayToExcel(formattedData, "Masterfile: Area - " + formatDate(new Date()), headerData);
+        });
+    };
+
+    function exportArrayToExcel(data, filename, headerData) {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+
+        // Convert data to worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Append sheet to workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+        // Generate Excel file
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+        // Convert buffer to Blob and trigger download
+        const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, filename + ".xlsx");
+    }
+
+    $(document).on('click', '.btn_status', function (e) {
+        var status = $(this).attr("data-status");
+        var modal_obj = "";
+        var modal_alert_success = "";
+        var hasExecuted = false; // Prevents multiple executions
+
+        if (parseInt(status) === -2) {
+            modal_obj = confirm_delete_message;
+            modal_alert_success = success_delete_message;
+            offset = 1;
+        } else if (parseInt(status) === 1) {
+            modal_obj = confirm_publish_message;
+            modal_alert_success = success_publish_message;
+        } else {
+            modal_obj = confirm_unpublish_message;
+            modal_alert_success = success_unpublish_message;
+        }
+        modal.confirm(modal_obj, function (result) {
+            if (result) {
+                var url = "<?= base_url('cms/global_controller');?>";
+                var dataList = [];
+                
+                $('.select:checked').each(function () {
+                    var id = $(this).attr('data-id');
+                    dataList.push({
+                        event: "update",
+                        table: "tbl_area",
+                        field: "id",
+                        where: id,
+                        data: {
+                            status: status,
+                            updated_date: formatDate(new Date())
+                        }
+                    });
+                });
+
+                if (dataList.length === 0) return;
+
+                var processed = 0;
+                dataList.forEach(function (data, index) {
+                    aJax.post(url, data, function (result) {
+                        if (hasExecuted) return; // Prevents multiple executions
+
+                        modal.loading(false);
+                        processed++;
+
+                        if (result === "success") {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                $('.btn_status').hide();
+                                modal.alert(modal_alert_success, "success", function () {
+                                    location.reload();
+                                });
+                            }
+                        } else {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                modal.alert(failed_transaction_message, "error", function () {});
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    });
         
     function trimText(str, length) {
         if (str.length > length) {

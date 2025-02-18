@@ -48,6 +48,7 @@
         var missing_user_input_message = '<?= dialog("missing_input"); ?>';
         var error_value_used = '<?= dialog("value_used"); ?>';
         var success_delete_message = '<?= dialog("delete_success"); ?>';
+        var confirm_export_message = '<?= confirm("confirm_export"); ?>';
         var base_url = '<?= base_url();?>';
         var csrf_name = "<?= csrf_token(); ?>";
         var csrf_hash = "<?= csrf_hash(); ?>";

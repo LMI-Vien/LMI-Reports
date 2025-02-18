@@ -157,31 +157,36 @@ class Custom_model extends Model
         return $this;
     }
 
-    public function batch_insert($table, $insert_batch_data) {
+    public function batch_insert($table, $insert_batch_data){
         if (!is_array($insert_batch_data) || empty($insert_batch_data)) {
             return "Invalid or empty data";
         }
-
+        //$builder = $this->db->table($table);
         try {
             $builder = $this->db->table($table);
             $builder->insertBatch($insert_batch_data);
+            $updatedStatus = $this->db->affectedRows();
 
             $lastInsertId = $this->db->insertID();
 
             // Generate the list of IDs for the inserted rows
             $insertedIds = [];
             for ($i = 0; $i < count($insert_batch_data); $i++) {
-                $insertedIds[] = [
-                    'id'   => $lastInsertId + $i,
-                    'code' => $insert_batch_data[$i]['code']
-                ];
+                if (isset($insert_batch_data[$i]['code'])) {
+                    $insertedIds[] = [
+                        'id'   => $lastInsertId + $i,
+                        'code' => $insert_batch_data[$i]['code']
+                    ];
+                } else {
+                    $insertedIds[] = [
+                        'id'   => $lastInsertId + $i,
+                        'area_id' => $insert_batch_data[$i]['area_id']
+                    ];
+                }
             }
             return $updatedStatus > 0 ? $insertedIds : "failed";
         } catch (\Exception $e) {
-            return [
-                "message" => "Error: " . $e->getMessage(),
-                "inserted" => 0
-            ];
+            return "Error: " . $e->getMessage();
         }
     }
 
