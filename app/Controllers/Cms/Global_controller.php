@@ -170,24 +170,19 @@ class Global_controller extends BaseController
 			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
 			    }
 			    break; 
-			case 'fetch_existing_brands':    
+			case 'fetch_existing_custom':    
 		    try {
 		        // Get the ba_id from the post request
-		        $ba_id = $this->request->getPost('ba_id');
+		        //$ba_id = $this->request->getPost('ba_id');
+ 				$table = $this->request->getPost('table');
+			    $select = $this->request->getPost('select');
+			    $field = $this->request->getPost('field');
+			    $value = $this->request->getPost('value');
+			    $lookup_field = $this->request->getPost('lookup_field');
 		        
-		        // Query to get the existing brands linked to the ba_id
-		        $builder = $this->db->table('tbl_ba_brands');
-		        $builder->select('brand_id');
-		        $builder->where('ba_id', $ba_id);
-		        $query = $builder->get();
-		        
-		        // Send back the result
-		        if ($query->getNumRows() > 0) {
-		            $brands = $query->getResultArray();
-		            echo json_encode(['brands' => array_column($brands, 'brand_id')]);
-		        } else {
-		            echo json_encode(['brands' => []]);
-		        }
+
+		        $result_data = $this->Global_model->fetch_existing_custom($table, $select, $field, $value, $lookup_field);
+		        echo $result_data;
 		    } catch (Exception $e) {
 		        echo json_encode(['error' => $e->getMessage()]);
 		    }
@@ -266,15 +261,8 @@ class Global_controller extends BaseController
 			        $field_value = $this->request->getPost('field_value');
 			        $where_in = $this->request->getPost('where_in');
 
-			        $builder = $this->db->table($table);
-			        $builder->whereIn('brand_id', $where_in);
-			        $builder->where($field, $field_value);
-			        $result = $builder->delete();
-			        if ($result) {
-			            echo json_encode(['message' => 'success']);
-			        } else {
-			            echo json_encode(['message' => 'failed']);
-			        }
+			        $result_data = $this->Global_model->batch_delete($table, $field, $field_value, $where_in);
+		        	echo $result_data;
 			    } catch (Exception $e) {
 			        echo json_encode(['error' => $e->getMessage()]);
 			    }

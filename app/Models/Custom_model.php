@@ -157,48 +157,45 @@ class Custom_model extends Model
         return $this;
     }
 
-    public function batch_insert($table, $insert_batch_data){
+    public function batch_insert($table, $insert_batch_data, $get_code = false) {
         if (!is_array($insert_batch_data) || empty($insert_batch_data)) {
             return "Invalid or empty data";
         }
-        //$builder = $this->db->table($table);
+
         try {
             $builder = $this->db->table($table);
+            
+            $query = $this->db->query("SELECT MAX(id) as max_id FROM {$table}");
+            $row = $query->getRow();
+            $startingId = $row ? (int) $row->max_id : 0;
+
             $builder->insertBatch($insert_batch_data);
             $updatedStatus = $this->db->affectedRows();
 
-        $builder->insertBatch($insert_batch_data);
-        $updatedStatus = $this->db->affectedRows();
-
-            // Generate the list of IDs for the inserted rows
             $insertedIds = [];
-            for ($i = 0; $i < count($insert_batch_data); $i++) {
-                if (isset($insert_batch_data[$i]['code'])) {
-                    $insertedIds[] = [
-                        'id'   => $lastInsertId + $i,
-                        'code' => $insert_batch_data[$i]['code']
-                    ];
-                } else {
-                    $insertedIds[] = [
-                        'id'   => $lastInsertId + $i,
-                        'area_id' => $insert_batch_data[$i]['area_id']
-                    ];
-                }
-            }
-            return $updatedStatus > 0 ? $insertedIds : "failed";
-        } catch (\Exception $e) {
-            return "Error: " . $e->getMessage();
-        }
 
-        // Return inserted IDs only if updates were successful, else return "failed"
-        return ($updatedStatus > 0 && !empty($insertedIds)) ? $insertedIds : "failed";
-    } catch (\Exception $e) {
-        return [
-            "message"  => "Error: " . $e->getMessage(),
-            "inserted" => 0
-        ];
+            if (!isset($get_code)) {
+                $get_code = false; // Ensure `$get_code` is always defined
+            }
+
+            foreach ($insert_batch_data as $index => $data) {
+                $entry = ['id' => $startingId + $index + 1];
+                if ($get_code === true && isset($data['code']) || $get_code == 'true' && isset($data['code'])) {
+                    $entry['code'] = $data['code'];
+                }
+
+                $insertedIds[] = $entry;
+            }
+
+            // Return inserted IDs only if updates were successful, else return "failed"
+            return ($updatedStatus > 0 && !empty($insertedIds)) ? $insertedIds : "failed";
+        } catch (\Exception $e) {
+            return [
+                "message"  => "Error: " . $e->getMessage(),
+                "inserted" => 0
+            ];
+        }
     }
-}
 
 
     public function delete_field_tagging($site_id){

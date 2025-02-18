@@ -83,7 +83,7 @@ self.onmessage = async function(e) {
                     for (let key in brand_lookup) {
                         normalized_brand_lookup[key.toLowerCase()] = brand_lookup[key];
                     }
-                     console.log(brand);
+
                     for (i = 0; i < brand.length; ++i) {
                         let brand_lower = brand[i].toLowerCase();
                         if (brand_lower in normalized_brand_lookup) {

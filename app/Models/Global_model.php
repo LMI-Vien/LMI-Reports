@@ -735,6 +735,34 @@ class Global_model extends Model
         return $builder->get()->getResultArray();
     }
     
+    public function fetch_existing_custom($table, $select, $field = null, $value = null, $lookup_field = null)
+    {
+                $builder = $this->db->table($table);
+                $builder->select($select);
+                $builder->where($field, $value);
+                $query = $builder->get();
+                
+                // Send back the result
+                if ($query->getNumRows() > 0) {
+                    $data = $query->getResultArray();
+                    return json_encode(['data' => array_column($data, $lookup_field)]);
+                } else {
+                    return json_encode(['data' => []]);
+                }
+    }
+
+    public function batch_delete($table, $field, $field_value, $where_in){
+        $builder = $this->db->table($table);
+        $builder->whereIn('brand_id', $where_in);
+        $builder->where($field, $field_value);
+        $result = $builder->delete();
+        if ($result) {
+            return json_encode(['message' => 'success']);
+        } else {
+            return json_encode(['message' => 'failed']);
+        }
+    }
+
     function get_valid_records($table, $column_name){
         return $this->db->table($table)->select('id, '.$column_name)->get()->getResultArray();
     }

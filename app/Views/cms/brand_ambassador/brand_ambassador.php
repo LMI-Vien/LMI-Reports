@@ -766,7 +766,6 @@
             modal.loading_progress(false);
 
             let { invalid, errorLogs, valid_data, err_counter, brand_per_ba } = e.data;
-            console.log(invalid);
             if (invalid) {
                 if (err_counter > 1000) {
                     
@@ -816,7 +815,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
     modal.loading_progress(true, "Validating and Saving data...");
 
     // Step 1: Fetch existing ambassadors
-    aJax.post(url, { event: "fetch_existing", table: table, selected_fields: selected_fields }, function(response) {
+    aJax.post(url, { table:'tbl_brand_ambassador', event: "fetch_existing", table: table, selected_fields: selected_fields }, function(response) {
         let result = JSON.parse(response);
         if (result.existing) {
             result.existing.forEach(record => {
@@ -861,7 +860,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
             });
 
             function processBrandUpdates(ba_id, newBrands, callback) {
-                aJax.post(url, { event: "fetch_existing_brands", ba_id: ba_id }, function(response) {
+                aJax.post(url, { table:'tbl_ba_brands', event: "fetch_existing_custom", select:'brand_id', field:'ba_id', value: ba_id, lookup_field:'brand_id'}, function(response) {
                     let result = JSON.parse(response);
                     if (result.error) {
                         errorLogs.push(`Error fetching existing brands: ${result.error}`);
@@ -869,8 +868,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
                         return;
                     }
 
-                    let existingBrands = new Set(result.brands); // Set of existing brand_ids
-
+                    let existingBrands = new Set(result.data); 
                     let brandsToAdd = newBrands.filter(brand_id => !existingBrands.has(brand_id));
                     let brandsToRemove = [...existingBrands].filter(brand_id => !newBrands.includes(brand_id));
 
@@ -938,7 +936,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
                         if (response.message === 'success') {
                             let inserted_ids = response.inserted;
                             updateOverallProgress("Saving Brand Ambassadors...", batch_index + 1, total_batches);
-
+                            //console.log(inserted_ids);
                             processBrandPerBA(inserted_ids, brand_per_ba, function() {
                                 batch_index++;
                                 setTimeout(processNextBatch, 300);
@@ -964,7 +962,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
 function batch_delete(table, field, field_value, where_in, callback) {
     aJax.post(url, { event: "batch_delete", table: table, field: field, field_value: field_value, where_in: where_in }, function(response) {
-        console.log(response, "response delete");
         let result = JSON.parse(response);
         callback(result);
     });
