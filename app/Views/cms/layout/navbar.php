@@ -66,7 +66,6 @@
 
 <script>
 var menu_url = 'cms/'+'<?=$combine_url;?>';
-console.log(menu_url);
 
 $(document).ready(function () {
     $(".logout-btn").on("click", function(e) {
@@ -145,7 +144,6 @@ $(document).ready(function () {
                         .removeClass('menu-open active')
                         .children('.nav-treeview')
                         .slideUp();
-                    localStorage.setItem('activeMenu', $menuItem.attr('data-id'));
                 }
             } else {
                 $('.nav-item a.active').removeClass('active');
@@ -181,7 +179,6 @@ $('.brand-link').on('click', function (e) {
   });
 
   function user_role_editor() {
-    console.log('asdasdasd');
     var user_role = '<?= $session->sess_role?>';
     var query = "cms_menu.status >= 0 AND menu_url = '"+menu_url+"' AND role_id = '"+user_role+"'"; 
     var url = "<?= base_url("cms/global_controller");?>";
@@ -192,10 +189,6 @@ $('.brand-link').on('click', function (e) {
         offset : offset,
         limit : 1,
         table : "cms_menu",
-        // order : {
-        //     field : "ba.updated_date",
-        //     order : "desc" 
-        // },
         join : [
             {
                 table: "cms_menu_roles",
@@ -207,8 +200,7 @@ $('.brand-link').on('click', function (e) {
 
     }    
     aJax.post(url,data, function(result){
-        obj = (is_json(result))
-        console.log(obj);
+        obj = is_json(result);
         if(obj.length > 0){
            $.each(obj,function(x,y){
                 var role_read = y.menu_role_read;

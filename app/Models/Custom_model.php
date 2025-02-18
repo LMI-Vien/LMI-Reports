@@ -167,7 +167,8 @@ class Custom_model extends Model
             $builder->insertBatch($insert_batch_data);
             $updatedStatus = $this->db->affectedRows();
 
-            $lastInsertId = $this->db->insertID();
+        $builder->insertBatch($insert_batch_data);
+        $updatedStatus = $this->db->affectedRows();
 
             // Generate the list of IDs for the inserted rows
             $insertedIds = [];
@@ -188,7 +189,17 @@ class Custom_model extends Model
         } catch (\Exception $e) {
             return "Error: " . $e->getMessage();
         }
+
+        // Return inserted IDs only if updates were successful, else return "failed"
+        return ($updatedStatus > 0 && !empty($insertedIds)) ? $insertedIds : "failed";
+    } catch (\Exception $e) {
+        return [
+            "message"  => "Error: " . $e->getMessage(),
+            "inserted" => 0
+        ];
     }
+}
+
 
     public function delete_field_tagging($site_id){
         $this->db->query('DELETE `cms_site_package_field_tagging` FROM `cms_site_package_field_tagging` 

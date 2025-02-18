@@ -360,19 +360,29 @@ class Global_model extends Model
         // return "$table,$field,$where";
     }
 
-    function batch_update($table,$data,$field,$where_in)
-    {
-        $return = $this->db
-                ->table($table)
-                ->whereIn($field, $where_in)
-                ->update($data);
-    
-        if($return):
-            return "success";
-        else:
+    public function batch_update($table, $data, $primaryKey, $where_in) {
+        if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
             return "failed";
-        endif;
+        }
+
+        // Prepare batch update data
+        $updateData = [];
+        foreach ($data as $row) {
+            if (isset($row[$primaryKey]) && in_array($row[$primaryKey], $where_in)) {
+                $updateData[] = $row;
+            }
+        }
+
+        if (empty($updateData)) {
+            return "failed"; // No valid data to update
+        }
+
+        // Perform batch update
+        $result = $this->db->table($table)->updateBatch($updateData, $primaryKey);
+
+        return $result ? "success" : "failed";
     }
+
 
     function batch_sort_update_data($table,$data,$field,$where)
     {
@@ -703,9 +713,30 @@ class Global_model extends Model
                 ];
             }
         }
-
         return ['status' => 'success', 'message' => 'No duplicates found.'];
     }
 
+    public function fetch_existing($table, $selected_fields, $field = null, $value = null, $status = false)
+    {
+        if (empty($table) || empty($selected_fields)) {
+            return [];
+        }
+
+        $builder = $this->db->table($table);
+        $builder->select($selected_fields);
+        if($status == 'true' || $status === true){
+            $builder->where('status >', 0);            
+        }
+
+        if($field){
+            $builder->where($field, $value);
+        }
+
+        return $builder->get()->getResultArray();
+    }
+    
+    function get_valid_records($table, $column_name){
+        return $this->db->table($table)->select('id, '.$column_name)->get()->getResultArray();
+    }
 
 }
