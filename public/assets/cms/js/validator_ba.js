@@ -153,7 +153,7 @@ self.onmessage = async function(e) {
                     team = normalized_team_lookup[team_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Agency at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Team at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -167,7 +167,7 @@ self.onmessage = async function(e) {
                     area = normalized_area_lookup[area_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Agency at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Area at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -181,7 +181,7 @@ self.onmessage = async function(e) {
                     store = normalized_store_lookup[store_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Agency at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
                     err_counter++;
                 }
 

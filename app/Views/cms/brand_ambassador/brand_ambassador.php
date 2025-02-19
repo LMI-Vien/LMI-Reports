@@ -273,7 +273,7 @@
 
     //for importing
     let currentPage = 1;
-    let rowsPerPage = 5000;
+    let rowsPerPage = 1000;
     let totalPages = 1;
     let dataset = [];
 
@@ -666,8 +666,8 @@
             modal.alert('Please select a file to upload', 'error', ()=>{});
             return;
         }
-        // File Size Validation (Limit: 50MB) temp
-        const maxFileSize = 70 * 1024 * 1024; // 50MB in bytes
+        // File Size Validation (Limit: 30MB) temp
+        const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
         if (file.size > maxFileSize) {
             modal.loading_progress(false);
             modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
@@ -710,12 +710,8 @@
             totalProcessed += chunk.length; 
             index += chunkSize;
 
-
-            // Calculate progress percentage
             let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
             updateSwalProgress("Preview Data", progress);
-
-            // Yield to event loop to prevent call stack overflow
             requestAnimationFrame(nextChunk);
         }
         nextChunk();
@@ -723,12 +719,12 @@
 
     function process_xl_file() {
         $(".import_buttons").find("a.download-error-log").remove();
-        modal.loading(true);
+        
         if (dataset.length === 0) {
             modal.alert('No data to process. Please upload a file.', 'error', () => {});
             return;
         }
-        
+        modal.loading(true);
         let jsonData = dataset.map(row => {
             if (row["Brand"]) { 
                 let brandList = row["Brand"].split(',').map(item => item.trim());
@@ -791,7 +787,6 @@
                 setTimeout(() => saveValidatedData(valid_data, brand_per_ba), 500);
             } else {
                 modal.loading_progress(false);
-                console.error("No valid data returned from worker.");
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
             }
         };
@@ -802,574 +797,266 @@
         };
     }
 
-function saveValidatedData(valid_data, brand_per_ba) {
-    let batch_size = 5000;
-    let total_batches = Math.ceil(valid_data.length / batch_size);
-    let batch_index = 0;
-    let errorLogs = [];
-    let url = "<?= base_url('cms/global_controller');?>";
-    let table = 'tbl_brand_ambassador';
-    let selected_fields = ['id', 'code', 'name'];
-    let existingMap = new Map();
+    function saveValidatedData(valid_data, brand_per_ba) {
+        let batch_size = 5000;
+        let total_batches = Math.ceil(valid_data.length / batch_size);
+        let batch_index = 0;
+        let errorLogs = [];
+        let url = "<?= base_url('cms/global_controller');?>";
+        let table = 'tbl_brand_ambassador';
+        let selected_fields = ['id', 'code', 'name'];
+        let existingMap = new Map();
 
-    modal.loading_progress(true, "Validating and Saving data...");
+        modal.loading_progress(true, "Validating and Saving data...");
 
-    // Step 1: Fetch existing ambassadors
-    aJax.post(url, { table:'tbl_brand_ambassador', event: "fetch_existing", table: table, selected_fields: selected_fields }, function(response) {
-        let result = JSON.parse(response);
-        if (result.existing) {
-            result.existing.forEach(record => {
-                existingMap.set(record.code + '|' + record.name, record.id);
-            });
-        }
+        aJax.post(url, { table:table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+            let result = JSON.parse(response);
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    existingMap.set(record.code + '|' + record.name, record.id);
+                });
+            }
 
-        function updateOverallProgress(stepName, completed, total) {
-            let progress = Math.round((completed / total) * 100);
-            updateSwalProgress(stepName, progress);
-        }
+            function updateOverallProgress(stepName, completed, total) {
+                let progress = Math.round((completed / total) * 100);
+                updateSwalProgress(stepName, progress);
+            }
 
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                modal.loading_progress(false);
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
 
-                if (errorLogs.length > 0) {
-                    createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                    modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-                } else {
-                    modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                    if (errorLogs.length > 0) {
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+                    } else {
+                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                    }
+                    return;
                 }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let key = row.code + '|' + row.name;
+                    if (existingMap.has(key)) {
+                        row.id = existingMap.get(key);
+                        row.updated_date = formatDate(new Date());
+                        updateRecords.push(row);
+                    } else {
+                        row.created_by = user_id;
+                        row.created_date = formatDate(new Date());
+                        row.updated_date = formatDate(new Date());
+                        newRecords.push(row);
+                    }
+                });
+
+                function processBrandUpdates(ba_id, newBrands, callback) {
+                    aJax.post(url, { table:'tbl_ba_brands', event: "fetch_existing_custom", select:'brand_id', field:'ba_id', value: ba_id, lookup_field:'brand_id'}, function(response) {
+                        let result = JSON.parse(response);
+                        if (result.error) {
+                            errorLogs.push(`Error fetching existing brands: ${result.error}`);
+                            callback();
+                            return;
+                        }
+
+                        let existingBrands = new Set(result.data); 
+                        let brandsToAdd = newBrands.filter(brand_id => !existingBrands.has(brand_id));
+                        let brandsToRemove = [...existingBrands].filter(brand_id => !newBrands.includes(brand_id));
+
+                        function handleRemovals(next) {
+                            if (brandsToRemove.length > 0) {
+                                batch_delete(url, "tbl_ba_brands", "ba_id", ba_id, 'brand_id', brandsToRemove, function(resp) {
+                                    next();
+                                });
+                            } else {
+                                next();
+                            }
+                        }
+
+                        function handleInserts() {
+                            if (brandsToAdd.length > 0) {
+                                let insertData = brandsToAdd.map(brand_id => ({
+                                    ba_id: ba_id,
+                                    brand_id: brand_id,
+                                    created_by: user_id,
+                                    created_date: formatDate(new Date()),
+                                    updated_date: formatDate(new Date())
+                                }));
+
+                                batch_insert(url, insertData, "tbl_ba_brands", false, function(resp) {
+                                    callback();
+                                });
+                            } else {
+                                callback();
+                            }
+                        }
+
+                        handleRemovals(handleInserts);
+                    });
+                }
+
+                function processUpdates(callback) {
+                    if (updateRecords.length > 0) {
+                        batch_update(url, updateRecords, "tbl_brand_ambassador", "id", (response) => {
+                            if (response.message !== 'success') {
+                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                            }
+
+                            let updateTasks = updateRecords.map(row => {
+                                return new Promise(resolve => {
+                                    if (brand_per_ba[row.code]) {
+                                        processBrandUpdates(row.id, brand_per_ba[row.code], resolve);
+                                    } else {
+                                        resolve();
+                                    }
+                                });
+                            });
+
+                            Promise.all(updateTasks).then(callback);
+                        });
+                    } else {
+                        callback();
+                    }
+                }
+
+                function processInserts() {
+                    if (newRecords.length > 0) {
+                        batch_insert(url, newRecords, "tbl_brand_ambassador", true, (response) => {
+                            if (response.message === 'success') {
+                                let inserted_ids = response.inserted;
+                                updateOverallProgress("Saving Brand Ambassadors...", batch_index + 1, total_batches);
+                                //console.log(inserted_ids);
+                                processBrandPerBA(inserted_ids, brand_per_ba, function() {
+                                    batch_index++;
+                                    setTimeout(processNextBatch, 300);
+                                });
+                            } else {
+                                errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                batch_index++;
+                                setTimeout(processNextBatch, 300);
+                            }
+                        });
+                    } else {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    }
+                }
+
+                processUpdates(processInserts);
+            }
+
+            setTimeout(processNextBatch, 1000);
+        });
+    }
+
+    function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
+        let batch_size = 5000;
+        let brandBatchIndex = 0;
+        let brandDataKeys = Object.keys(brand_per_ba);
+        let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
+        let insertedMap = {};
+
+        inserted_ids.forEach(({ id, code }) => {
+            insertedMap[code] = id;
+        });
+
+        function processNextBrandBatch() {
+            if (brandBatchIndex >= total_brand_batches) {
+                callback();
                 return;
             }
 
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let newRecords = [];
-            let updateRecords = [];
+            let chunkKeys = brandDataKeys.slice(brandBatchIndex * batch_size, (brandBatchIndex + 1) * batch_size);
+            let chunkData = [];
 
-            batch.forEach(row => {
-                let key = row.code + '|' + row.name;
-                if (existingMap.has(key)) {
-                    row.id = existingMap.get(key);
-                    row.updated_date = formatDate(new Date());
-                    updateRecords.push(row);
-                } else {
-                    row.created_by = user_id;
-                    row.created_date = formatDate(new Date());
-                    row.updated_date = formatDate(new Date());
-                    newRecords.push(row);
-                }
-            });
-
-            function processBrandUpdates(ba_id, newBrands, callback) {
-                aJax.post(url, { table:'tbl_ba_brands', event: "fetch_existing_custom", select:'brand_id', field:'ba_id', value: ba_id, lookup_field:'brand_id'}, function(response) {
-                    let result = JSON.parse(response);
-                    if (result.error) {
-                        errorLogs.push(`Error fetching existing brands: ${result.error}`);
-                        callback();
-                        return;
-                    }
-
-                    let existingBrands = new Set(result.data); 
-                    let brandsToAdd = newBrands.filter(brand_id => !existingBrands.has(brand_id));
-                    let brandsToRemove = [...existingBrands].filter(brand_id => !newBrands.includes(brand_id));
-
-                    function handleRemovals(next) {
-                        // console.log(brandsToRemove, 'brandsToRemove');
-                        // console.log(ba_id, 'ba_id');
-                        if (brandsToRemove.length > 0) {
-                            batch_delete("tbl_ba_brands", "ba_id", ba_id, brandsToRemove, function(resp) {
-                                next();
-                            });
-                        } else {
-                            next();
-                        }
-                    }
-
-                    function handleInserts() {
-                        if (brandsToAdd.length > 0) {
-                            let insertData = brandsToAdd.map(brand_id => ({
-                                ba_id: ba_id,
-                                brand_id: brand_id,
-                                created_by: user_id,
-                                created_date: formatDate(new Date()),
-                                updated_date: formatDate(new Date())
-                            }));
-
-                            batch_insert(insertData, "tbl_ba_brands", false, function(resp) {
-                                callback();
-                            });
-                        } else {
-                            callback();
-                        }
-                    }
-
-                    handleRemovals(handleInserts);
-                });
-            }
-
-            function processUpdates(callback) {
-                if (updateRecords.length > 0) {
-                    batch_update(updateRecords, "tbl_brand_ambassador", "id", (response) => {
-                        if (response.message !== 'success') {
-                            errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                        }
-
-                        let updateTasks = updateRecords.map(row => {
-                            return new Promise(resolve => {
-                                if (brand_per_ba[row.code]) {
-                                    processBrandUpdates(row.id, brand_per_ba[row.code], resolve);
-                                } else {
-                                    resolve();
-                                }
-                            });
-                        });
-
-                        Promise.all(updateTasks).then(callback);
-                    });
-                } else {
-                    callback();
-                }
-            }
-
-            function processInserts() {
-                if (newRecords.length > 0) {
-                    batch_insert(newRecords, "tbl_brand_ambassador", true, (response) => {
-                        if (response.message === 'success') {
-                            let inserted_ids = response.inserted;
-                            updateOverallProgress("Saving Brand Ambassadors...", batch_index + 1, total_batches);
-                            //console.log(inserted_ids);
-                            processBrandPerBA(inserted_ids, brand_per_ba, function() {
-                                batch_index++;
-                                setTimeout(processNextBatch, 300);
-                            });
-                        } else {
-                            errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                            batch_index++;
-                            setTimeout(processNextBatch, 300);
-                        }
-                    });
-                } else {
-                    batch_index++;
-                    setTimeout(processNextBatch, 300);
-                }
-            }
-
-            processUpdates(processInserts);
-        }
-
-        setTimeout(processNextBatch, 1000);
-    });
-}
-
-function batch_delete(table, field, field_value, where_in, callback) {
-    aJax.post(url, { event: "batch_delete", table: table, field: field, field_value: field_value, where_in: where_in }, function(response) {
-        let result = JSON.parse(response);
-        callback(result);
-    });
-}
-
-function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
-    let batch_size = 5000;
-    let brandBatchIndex = 0;
-    let brandDataKeys = Object.keys(brand_per_ba);
-    let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
-    let insertedMap = {};
-
-    inserted_ids.forEach(({ id, code }) => {
-        insertedMap[code] = id;
-    });
-
-    function processNextBrandBatch() {
-        if (brandBatchIndex >= total_brand_batches) {
-            callback();
-            return;
-        }
-
-        let chunkKeys = brandDataKeys.slice(brandBatchIndex * batch_size, (brandBatchIndex + 1) * batch_size);
-        let chunkData = [];
-
-        chunkKeys.forEach(code => {
-            if (insertedMap[code]) {
-                let ba_id = insertedMap[code];
-                let brand_ids = brand_per_ba[code];
-                brand_ids.forEach(brand_id => {
-                    chunkData.push({
-                        ba_id: ba_id,
-                        brand_id: brand_id,
-                        created_by: user_id,
-                        created_date: formatDate(new Date()),
-                        updated_date: formatDate(new Date())
-                    });
-                });
-            }
-        });
-
-        if (chunkData.length > 0) {
-            // First, check for duplicates
-            let brand_ids = chunkData.map(item => item.brand_id);
-            let ba_ids = chunkData.map(item => item.ba_id);
-
-            aJax.post("<?= base_url('cms/global_controller'); ?>", {
-                event: "fetch_existing",
-                table: "tbl_ba_brands",
-                status: false,
-                selected_fields: ["id", "ba_id", "brand_id"],
-                where: {
-                    ba_id: ba_ids,
-                    brand_id: brand_ids
-                }
-            }, function(existingResponse) {
-                let existingRecords = JSON.parse(existingResponse).existing || [];
-                let existingMap = new Set(existingRecords.map(r => `${r.ba_id}|${r.brand_id}`));
-
-                let newData = [];
-                let updateData = [];
-
-                chunkData.forEach(record => {
-                    let key = `${record.ba_id}|${record.brand_id}`;
-                    if (existingMap.has(key)) {
-                        updateData.push({
-                            ba_id: record.ba_id,
-                            brand_id: record.brand_id,
+            chunkKeys.forEach(code => {
+                if (insertedMap[code]) {
+                    let ba_id = insertedMap[code];
+                    let brand_ids = brand_per_ba[code];
+                    brand_ids.forEach(brand_id => {
+                        chunkData.push({
+                            ba_id: ba_id,
+                            brand_id: brand_id,
+                            created_by: user_id,
+                            created_date: formatDate(new Date()),
                             updated_date: formatDate(new Date())
                         });
-                    } else {
-                        newData.push(record);
-                    }
-                });
-
-                // Perform batch insert for new records
-                if (newData.length > 0) {
-                    batch_insert(newData, "tbl_ba_brands", false, function(response) {
-                        processBatchUpdates(updateData);
                     });
-                } else {
-                    processBatchUpdates(updateData);
                 }
             });
-        } else {
-            brandBatchIndex++;
-            setTimeout(processNextBrandBatch, 100);
-        }
-    }
 
-    function processBatchUpdates(updateData) {
-        if (updateData.length > 0) {
-            batch_update(updateData, "tbl_ba_brands", "ba_id", function(updateResponse) {
+            if (chunkData.length > 0) {
+                // First, check for duplicates
+                let brand_ids = chunkData.map(item => item.brand_id);
+                let ba_ids = chunkData.map(item => item.ba_id);
+
+                aJax.post("<?= base_url('cms/global_controller'); ?>", {
+                    event: "fetch_existing",
+                    table: "tbl_ba_brands",
+                    status: false,
+                    selected_fields: ["id", "ba_id", "brand_id"],
+                    where: {
+                        ba_id: ba_ids,
+                        brand_id: brand_ids
+                    }
+                }, function(existingResponse) {
+                    let existingRecords = JSON.parse(existingResponse).existing || [];
+                    let existingMap = new Set(existingRecords.map(r => `${r.ba_id}|${r.brand_id}`));
+
+                    let newData = [];
+                    let updateData = [];
+
+                    chunkData.forEach(record => {
+                        let key = `${record.ba_id}|${record.brand_id}`;
+                        if (existingMap.has(key)) {
+                            updateData.push({
+                                ba_id: record.ba_id,
+                                brand_id: record.brand_id,
+                                updated_date: formatDate(new Date())
+                            });
+                        } else {
+                            newData.push(record);
+                        }
+                    });
+
+                    // Perform batch insert for new records
+                    if (newData.length > 0) {
+                        batch_insert(url, newData, "tbl_ba_brands", false, function(response) {
+                            processBatchUpdates(updateData);
+                        });
+                    } else {
+                        processBatchUpdates(updateData);
+                    }
+                });
+            } else {
+                brandBatchIndex++;
+                setTimeout(processNextBrandBatch, 100);
+            }
+        }
+
+        function processBatchUpdates(updateData) {
+            if (updateData.length > 0) {
+                batch_update(url, updateData, "tbl_ba_brands", "ba_id", function(updateResponse) {
+                    brandBatchIndex++;
+                    //updateSwalProgress("Processing Brands...", Math.round((brandBatchIndex / total_brand_batches) * 100));
+                    setTimeout(processNextBrandBatch, 100);
+                });
+            } else {
                 brandBatchIndex++;
                 //updateSwalProgress("Processing Brands...", Math.round((brandBatchIndex / total_brand_batches) * 100));
                 setTimeout(processNextBrandBatch, 100);
-            });
+            }
+        }
+
+        if (brandDataKeys.length > 0) {
+            processNextBrandBatch();
         } else {
-            brandBatchIndex++;
-            //updateSwalProgress("Processing Brands...", Math.round((brandBatchIndex / total_brand_batches) * 100));
-            setTimeout(processNextBrandBatch, 100);
+            callback();
         }
     }
-
-    if (brandDataKeys.length > 0) {
-        processNextBrandBatch();
-    } else {
-        callback();
-    }
-}
-
-
-
-function batch_update(data, table, primaryKey, callback) {
-    let url = "<?= base_url('cms/global_controller'); ?>";
-
-    aJax.post(url, {
-        event: "batch_update",
-        table: table,
-        field: primaryKey,  // Match with the controller parameter
-        data: data,
-        where_in: data.map(item => item[primaryKey]) // Extract primary key values
-    }, function(response) {
-        let result = JSON.parse(response);
-        callback(result);
-    });
-}
-
-
-
-//with duplicate error logs
-// function saveValidatedData(valid_data, brand_per_ba) {
-//     let batch_size = 5000;
-//     let total_batches = Math.ceil(valid_data.length / batch_size);
-//     let batch_index = 0;
-//     let errorLogs = [];
-//     var url = "<?= base_url('cms/global_controller');?>";
-
-//     let table = 'tbl_brand_ambassador';
-//     let selected_fields = ['id', 'code', 'name'];
-//     let existingMap = new Set();
-
-//     modal.loading_progress(true, "Validating and Saving data...");
-
-//     aJax.post(url, { event: "fetch_existing", table: table, selected_fields: selected_fields }, function(response) {
-//         let result = JSON.parse(response);
-//         if (result.existing) {
-//             result.existing.forEach(record => {
-//                 existingMap.add(record.code + '|' + record.name);
-//             });
-//         }
-
-//         let total_operations = total_batches;
-//         let completed_operations = 0;
-
-//         function updateOverallProgress(stepName) {
-//             completed_operations++;
-//             let progress = Math.round((completed_operations / total_operations) * 100);
-//             updateSwalProgress(stepName, progress);
-//         }
-
-//         function processNextBatch() {
-//             if (batch_index >= total_batches) {
-//                 modal.loading_progress(false);
-//                 if (errorLogs.length > 0) {
-//                     createErrorLogFile(errorLogs, "Duplicate_Error_Log_" + formatReadableDate(new Date(), true));
-//                     modal.alert("Some records already exist. Please download the error log.", 'error', () => {});
-//                 } else {
-//                     modal.alert(success_save_message, 'success', () => location.reload());
-//                 }
-//                 return;
-//             }
-
-//             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-
-//             let newBatch = [];
-//             batch.forEach(row => {
-//                 let key = row.code + '|' + row.name;
-//                 if (existingMap.has(key)) {
-//                     errorLogs.push(`⚠️ Duplicate skipped: Code=${row.code}, Name=${row.name}`);
-//                 } else {
-//                     newBatch.push(row);
-//                 }
-//             });
-
-//             if (newBatch.length > 0) {
-//                 batch_insert(newBatch, "tbl_brand_ambassador", true, (response) => {
-//                     if (response.message == 'success') {
-//                         let inserted_ids = response.inserted;
-//                         updateOverallProgress("Saving Brand Ambassadors...");
-//                         proccess_brand_per_ba(inserted_ids, brand_per_ba, () => {
-//                             batch_index++;
-//                             setTimeout(processNextBatch, 300);
-//                         });
-//                     } else {
-//                         errorLogs.push(`Batch failed to insert: ${JSON.stringify(response.error)}`);
-//                         batch_index++;
-//                         setTimeout(processNextBatch, 300);
-//                     }
-//                 });
-//             } else {
-//                 batch_index++;
-//                 setTimeout(processNextBatch, 300);
-//             }
-//         }
-
-//         setTimeout(processNextBatch, 1000);
-//     });
-// }
-
-// function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
-//     let batch_size = 5000;
-//     let brandBatchIndex = 0;
-//     let brandDataKeys = Object.keys(brand_per_ba);
-//     let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
-//     let insertedMap = {};
-
-//     inserted_ids.forEach(({ id, code }) => {
-//         insertedMap[code] = id;
-//     });
-
-//     function processNextBrandBatch() {
-//         if (brandBatchIndex >= total_brand_batches) {
-//             if(brandBatchIndex == total_brand_batches){
-//                 updateSwalProgress("Finalizing...", 100);    
-//             }
-//             callback();
-//             return;
-//         }
-
-
-//         let chunkKeys = brandDataKeys.slice(brandBatchIndex * batch_size, (brandBatchIndex + 1) * batch_size);
-//         let chunkData = [];
-
-//         chunkKeys.forEach(code => {
-//             if (insertedMap[code]) {
-//                 let ba_id = insertedMap[code];
-//                 let brand_ids = brand_per_ba[code];
-//                 brand_ids.forEach(brand_id => {
-//                     chunkData.push({
-//                         ba_id: ba_id,
-//                         brand_id: brand_id,
-//                         created_by: user_id,
-//                         created_date: formatDate(new Date()),
-//                         updated_date: formatDate(new Date())
-//                     });
-//                 });
-//             }
-//         });
-
-//         if (chunkData.length > 0) {
-//             batch_insert(chunkData, "tbl_ba_brands", false, function(response) {
-//                 brandBatchIndex++;
-//                 updateSwalProgress("Processing Brands...", Math.round((brandBatchIndex / total_brand_batches) * 100));
-//                 setTimeout(processNextBrandBatch, 100);
-//             });
-//         } else {
-//             brandBatchIndex++;
-//             setTimeout(processNextBrandBatch, 100);
-//         }
-//     }
-
-//     if (brandDataKeys.length > 0) {
-//         processNextBrandBatch();
-//     } else {
-//         callback();
-//     }
-// }
-
-
-// function saveValidatedData(valid_data, brand_per_ba) {
-//     let batch_size = 5000; 
-//     let total_batches = Math.ceil(valid_data.length / batch_size);
-//     let batch_index = 0;
-//     let errorLogs = [];
-//     var url = "<?= base_url('cms/global_controller');?>";
-
-//     let table = 'tbl_brand_ambassador';
-//     let selected_fields = ['id', 'code', 'name'];
-//     let existingMap = new Set(); 
-
-//     modal.loading_progress(true, "Validating and Saving data...");
-
-//     aJax.post(url, { event: "fetch_existing", table: table, selected_fields: selected_fields }, function(response) {
-//         let result = JSON.parse(response);
-//         if (result.existing) {
-//             result.existing.forEach(record => {
-//                 existingMap.add(record.code + '|' + record.name);
-//             });
-//         }
-
-//         let brandDataKeys = Object.keys(brand_per_ba);
-//         let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
-//         let total_operations = total_batches + total_brand_batches; // Track total steps
-//         let completed_operations = 0; // Track progress
-
-//         function updateOverallProgress(stepName) {
-//             completed_operations++;
-//             let progress = Math.round((completed_operations / total_operations) * 100);
-//             updateSwalProgress(stepName, progress);
-//         }
-
-//         function processNextBatch() {
-//             if (batch_index >= total_batches) {
-//                 modal.loading_progress(false);
-//                 if (errorLogs.length > 0) {
-//                     createErrorLogFile(errorLogs, "Duplicate_Error_Log_" + formatReadableDate(new Date(), true));
-//                     modal.alert("Some records already exist. Please download the error log.", 'error', () => {});
-//                 } else {
-//                     modal.alert(success_save_message, 'success', () => location.reload());
-//                 }
-//                 return;
-//             }
-
-//             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-
-//             let newBatch = batch.filter(row => {
-//                 let key = row.code + '|' + row.name;
-//                 if (existingMap.has(key)) {
-//                     errorLogs.push(`Duplicate found: Code=${row.code}, Name=${row.name}`);
-//                     return false;
-//                 }
-//                 return true;
-//             });
-
-//             if (newBatch.length > 0) {
-//                 batch_insert(newBatch, "tbl_brand_ambassador", true, (response) => {
-//                     if (response.message == 'success') {
-//                         let inserted_ids = response.inserted;
-//                         updateOverallProgress("Saving Brand Ambassadors...");
-//                         processBrandPerBA(inserted_ids, brand_per_ba, () => {
-//                             batch_index++;
-//                             setTimeout(processNextBatch, 300);
-//                         });
-//                     } else {
-//                         errorLogs.push(`Batch failed to insert: ${JSON.stringify(response.error)}`);
-//                         batch_index++;
-//                         //updateOverallProgress("Skipping Failed Batch...");
-//                         setTimeout(processNextBatch, 300);
-//                     }
-//                 });
-//             } else {
-//                 batch_index++;
-//                 //updateOverallProgress("Skipping Duplicate Data...");
-//                 setTimeout(processNextBatch, 300);
-//             }
-//         }
-
-//         function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
-//             let brandBatchIndex = 0;
-//             let insertedMap = {};
-
-//             inserted_ids.forEach(({ id, code }) => {
-//                 insertedMap[code] = id;
-//             });
-
-//             function processNextBrandBatch() {
-//                 if (brandBatchIndex >= total_brand_batches) {
-//                     //updateSwalProgress("Finalizing...", 100);
-//                     callback();
-//                     return;
-//                 }
-
-//                 let chunkKeys = brandDataKeys.slice(brandBatchIndex * batch_size, (brandBatchIndex + 1) * batch_size);
-//                 let chunkData = [];
-
-//                 chunkKeys.forEach(code => {
-//                     if (insertedMap[code]) {
-//                         let ba_id = insertedMap[code];
-//                         let brand_ids = brand_per_ba[code];
-//                         brand_ids.forEach(brand_id => {
-//                             chunkData.push({
-//                                 ba_id: ba_id,
-//                                 brand_id: brand_id,
-//                                 created_by: user_id,
-//                                 created_date: formatDate(new Date()),
-//                                 updated_date: formatDate(new Date())
-//                             });
-//                         });
-//                     }
-//                 });
-
-//                 if (chunkData.length > 0) {
-//                     batch_insert(chunkData, "tbl_ba_brands", false, function(response) {
-//                         brandBatchIndex++;
-//                        // updateOverallProgress("Processing Brands...");
-//                         setTimeout(processNextBrandBatch, 100);
-//                     });
-//                 } else {
-//                     brandBatchIndex++;
-//                     //updateOverallProgress("Skipping Empty Brands...");
-//                     setTimeout(processNextBrandBatch, 100);
-//                 }
-//             }
-
-//             if (brandDataKeys.length > 0) {
-//                 processNextBrandBatch();
-//             } else {
-//                 callback();
-//             }
-//         }
-
-//         setTimeout(processNextBatch, 1000);
-//     });
-// }
-
-
-
 
     function proccess_brand_per_ba(inserted_ids, brand_per_ba, callback) {
 
@@ -1401,7 +1088,7 @@ function batch_update(data, table, primaryKey, callback) {
             return;
         }
 
-        batch_insert(brandData, "tbl_ba_brands", false, function(response) {
+        batch_insert(url, brandData, "tbl_ba_brands", false, function(response) {
             callback();
         });
     }
@@ -1533,8 +1220,8 @@ function batch_update(data, table, primaryKey, callback) {
     }
 
     function save_data(action, id) {
-        var code = $('#code').val();
-        var name = $('#name').val();
+        var code = $('#code').val().trim();
+        var name = $('#name').val().trim();
         var deployment_date = $('#deployment_date').val();
         var agency = $('#agency').val();
         var brand = $('#brand').val();
@@ -1565,7 +1252,7 @@ function batch_update(data, table, primaryKey, callback) {
                         if(result){ 
                                 modal.loading(true);
                             save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                total_delete('tbl_ba_brands', 'ba_id', id)
+                                total_delete(url, 'tbl_ba_brands', 'ba_id', id)
                                 let batch = [];
                                 $.each(unique_brand, (x, y) => {
                                     let data = {
@@ -1576,7 +1263,7 @@ function batch_update(data, table, primaryKey, callback) {
                                     };
                                     batch.push(data);
                                 })
-                                batch_insert(batch, 'tbl_ba_brands', false, () => {
+                                batch_insert(url, batch, 'tbl_ba_brands', false, () => {
                                     modal.loading(false);
                                     modal.alert(success_update_message, "success", function() {
                                         location.reload();
@@ -1605,7 +1292,7 @@ function batch_update(data, table, primaryKey, callback) {
                                     };
                                     batch.push(data);
                                 })
-                                batch_insert(batch, 'tbl_ba_brands', false, () => {
+                                batch_insert(url, batch, 'tbl_ba_brands', false, () => {
                                     modal.loading(false);
                                     modal.alert(success_save_message, "success", function() {
                                         location.reload();
@@ -2006,32 +1693,6 @@ function batch_update(data, table, primaryKey, callback) {
 
     function remove_line(lineId) {
         $(`#line_${lineId}`).remove();
-    }
-
-    function batch_insert(insert_batch_data, batch_table, get_code, cb){
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event: "batch_insert",
-            table: batch_table,
-            get_code: get_code,
-            insert_batch_data: insert_batch_data
-        }
-
-        aJax.post(url,data,function(result){
-            cb(result)
-        });
-    }
-
-    function total_delete(delete_table, delete_field, delete_where) {
-        data = {
-            event : "total_delete",
-            table : delete_table,
-            field : delete_field,
-            where : delete_where
-        }
-        aJax.post(url,data,function(result){
-            // console.log(result)
-        })
     }
     
 </script>

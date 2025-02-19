@@ -260,8 +260,9 @@ class Global_controller extends BaseController
 			        $field = $this->request->getPost('field');
 			        $field_value = $this->request->getPost('field_value');
 			        $where_in = $this->request->getPost('where_in');
+			        $where_in_field = $this->request->getPost('where_in_field');
 
-			        $result_data = $this->Global_model->batch_delete($table, $field, $field_value, $where_in);
+			        $result_data = $this->Global_model->batch_delete($table, $field, $field_value, $where_in_field, $where_in);
 		        	echo $result_data;
 			    } catch (Exception $e) {
 			        echo json_encode(['error' => $e->getMessage()]);
