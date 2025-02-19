@@ -210,6 +210,7 @@
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
+    var base_url = '<?= base_url();?>';
 
     let currentPage = 1;
     let rowsPerPage = 1000;
@@ -426,6 +427,14 @@
             modal.alert('Please select a file to upload', 'error', ()=>{});
             return;
         }
+
+        // File Size Validation (Limit: 30MB) temp
+        const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+        if (file.size > maxFileSize) {
+            modal.loading_progress(false);
+            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+            return;
+        }
         modal.loading_progress(true, "Reviewing Data...");
 
         const reader = new FileReader();
@@ -452,7 +461,6 @@
         function nextChunk() {
             if (index >= data.length) {
                 modal.loading_progress(false);
-                //console.log('Total records processed:', totalProcessed);
                 callback(); 
                 return;
             }
@@ -462,13 +470,9 @@
             totalProcessed += chunk.length; 
             index += chunkSize;
 
-
-            // Calculate progress percentage
             let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
-            setTimeout(() => {
-                updateSwalProgress("Preview Data", progress);
-                nextChunk();
-            }, 100); // Delay for UI update
+            updateSwalProgress("Preview Data", progress);
+            requestAnimationFrame(nextChunk);
         }
         nextChunk();
     }
@@ -591,99 +595,314 @@
     }
 
     function process_xl_file() {
-        // Check if dataset is empty
-        if (dataset.length === 0) {
-            modal.alert('No data to process. Please upload a file.', 'error', () => {});
+        $(".import_buttons").find("a.download-error-log").remove();
+        modal.loading(true);
+
+        if (!dataset.length) {
+            modal.alert("No data to process. Please upload a file.", "error");
             return;
         }
 
-        let existingEntries = new Set(); // Set to track unique code-description pairs
-
-        // Convert dataset into JSON format with required fields
         let jsonData = dataset.map(row => {
-            return {
-                "Code": row["code"] || "", // Get 'code' field or default to empty string
-                "Name": row["description"] || "", // Get 'description' field or default to empty string
-                "Status": row["status"] || "", // Get 'status' field or default to empty string
-                "Stores": row["stores"] 
-                    ? row["stores"].split(",").map(store => store.trim()) 
-                    : [], // Convert 'stores' field into an array of trimmed store names
-                "Created By": user_id || "", // Add the user ID of the creator
-                "Created Date": formatDate(new Date()) || "" // Add the current date in a formatted way
-            };
-        });
-
-        var table = 'tbl_area'; // Database table where data will be checked
-        var selected_fields = ['id', 'code', 'description']; // Fields to retrieve for validation
-        var haystack = ['code', 'description']; // Fields used for duplicate checking
-        var needle = []; // Array to hold unique (code, description) pairs for validation
-
-        // Populate 'needle' array with code-description pairs if they are not empty
-        jsonData.forEach(item => {
-            if (item.Code && item.Name) { 
-                needle.push([item.Code, item.Name]);
+            if (row["stores"]) {
+                let storeList = row["stores"].split(",").map(item => item.trim().toLowerCase());
+                row["stores"] = [...new Set(storeList)]; // Remove duplicates
             }
+            return {
+                "Code": row["code"] || "",
+                "Name": row["description"] || "", 
+                "Status": row["status"] || "", 
+                "Stores": row["stores"] || "", 
+                "Created By": user_id || "",
+                "Created Date": formatDate(new Date()) || ""
+            };
         });
 
-        // Show loading progress
-        modal.loading_progress(true, "Validating and Saving data...");
-
-        // Initialize a Web Worker to validate data asynchronously
         let worker = new Worker(base_url + "assets/cms/js/validator_area.js");
-        worker.postMessage(jsonData); // Send data to worker for validation
+        worker.postMessage({ data: jsonData, base_url });
 
-        // Handle messages (results) from worker
-        worker.onmessage = function (e) {
-            modal.loading_progress(false); // Hide loading modal when processing is done
+        worker.onmessage = function(e) {
+            modal.loading_progress(false);
+            const { invalid, errorLogs, valid_data, err_counter, store_per_area } = e.data;
 
-            let { invalid, errorLogs, valid_data, err_counter, store_per_area } = e.data;
-            stores_under_area = store_per_area; // Store processed store-area mapping
-
-            // Function to show error messages in a modal
-            const showErrorModal = (message) => {
-                modal.content('Validation Error', 'error', message, '600px', () => {});
-            };
-
-            // Function to handle validation errors
-            const handleErrors = (result) => {
-                let errors = result.status !== "error" ? errorLogs : [
-                    ...errorLogs,
-                    ...result.message.replace(/<\/?b>/g, "").split("<br>") // Clean HTML tags from error messages
-                ];
-                createErrorLogFile(errors, "Error " + formatReadableDate(new Date(), true)); // Create error log file
-                showErrorModal(errors.join("<br>")); // Display errors in modal
-            };
-
-            // If there are invalid entries
             if (invalid) {
-                if (err_counter > 5000) { // Prevent excessive error display
-                    return showErrorModal("⚠️ Too many errors detected. Please download the error log for details.");
-                }
-                // Check existing records in the database and handle errors
-                list_existing(table, selected_fields, haystack, needle, handleErrors);
-            } 
-            // If data is valid, proceed with further validation and saving
-            else if (valid_data?.length) {
-                list_existing(table, selected_fields, haystack, needle, (result) => {
-                    if (result.status !== "error") {
-                        updateSwalProgress("Validation Completed", 50); // Show progress update
-                        return setTimeout(() => saveValidatedData(valid_data), 500); // Save data after validation
-                    }
-                    handleErrors(result);
-                });
-            } 
-            // If no valid data is returned, show an error
-            else {
-                console.error("No valid data returned from worker.");
-                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                let errorMsg = err_counter > 1000 
+                    ? "⚠️ Too many errors detected. Please download the error log for details."
+                    : errorLogs.join("<br>");
+
+                modal.content("Validation Error", "error", errorMsg, "600px", read_xl_file);
+                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
+            } else if (valid_data?.length) {
+                updateSwalProgress("Validation Completed", 10);
+                setTimeout(() => saveValidatedData(valid_data, store_per_area), 500);
+            } else {
+                modal.alert("No valid data returned. Please check the file and try again.", "error");
             }
         };
 
-        // Handle worker script errors
         worker.onerror = function() {
             modal.loading_progress(false);
-            modal.alert("Error processing data. Please try again.", "error", () => {});
+            modal.alert("Error processing data. Please try again.", "error");
         };
+    }
+
+    function saveValidatedData(valid_data, store_per_area) {
+        let batch_size = 5000;
+        let total_batches = Math.ceil(valid_data.length / batch_size);
+        let batch_index = 0;
+        let errorLogs = [];
+        let url = "<?= base_url('cms/global_controller');?>";
+        let table = 'tbl_area';
+        let selected_fields = ['id', 'code', 'description'];
+        let existingMap = new Map();
+
+        modal.loading_progress(true, "Validating and Saving data...");
+
+        aJax.post(url, { table:table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+            let result = JSON.parse(response);
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    existingMap.set(record.code + '|' + record.description, record.id);
+                });
+            }
+
+            function updateOverallProgress(stepName, completed, total) {
+                let progress = Math.round((completed / total) * 100);
+                updateSwalProgress(stepName, progress);
+            }
+
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
+
+                    if (errorLogs.length > 0) {
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+                    } else {
+                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                    }
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let key = row.code + '|' + row.description;
+                    if (existingMap.has(key)) {
+                        row.id = existingMap.get(key);
+                        row.updated_date = formatDate(new Date());
+                        updateRecords.push(row);
+                    } else {
+                        row.created_by = user_id;
+                        row.created_date = formatDate(new Date());
+                        row.updated_date = formatDate(new Date());
+                        newRecords.push(row);
+                    }
+                });
+
+                function processStoreUpdates(area_id, newStores, callback) {
+                    aJax.post(url, { table:'tbl_store_group', event: "fetch_existing_custom", select:'store_id', field:'area_id', value: area_id, lookup_field:'store_id'}, function(response) {
+                        let result = JSON.parse(response);
+                        if (result.error) {
+                            errorLogs.push(`Error fetching existing stores: ${result.error}`);
+                            callback();
+                            return;
+                        }
+
+                        let existingStores = new Set(result.data); 
+                        let storesToAdd = newStores.filter(store_id => !existingStores.has(store_id));
+                        let storesToRemove = [...existingStores].filter(store_id => !newStores.includes(store_id));
+
+                        function handleRemovals(next) {
+                            if (storesToRemove.length > 0) {
+                                batch_delete(url, "tbl_store_group", "area_id", area_id, 'store_id', storesToRemove, function(resp) {
+                                    next();
+                                });
+                            } else {
+                                next();
+                            }
+                        }
+
+                        function handleInserts() {
+                            if (storesToAdd.length > 0) {
+                                let insertData = storesToAdd.map(store_id => ({
+                                    area_id: area_id,
+                                    store_id: store_id,
+                                    created_by: user_id,
+                                    created_date: formatDate(new Date()),
+                                    updated_date: formatDate(new Date())
+                                }));
+
+                                batch_insert(url, insertData, "tbl_store_group", false, function(resp) {
+                                    callback();
+                                });
+                            } else {
+                                callback();
+                            }
+                        }
+
+                        handleRemovals(handleInserts);
+                    });
+                }
+
+                function processUpdates(callback) {
+                    if (updateRecords.length > 0) {
+                        batch_update(url, updateRecords, "tbl_area", "id", (response) => {
+                            if (response.message !== 'success') {
+                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                            }
+
+                            let updateTasks = updateRecords.map(row => {
+                                return new Promise(resolve => {
+                                    if (store_per_area[row.code]) {
+                                        processStoreUpdates(row.id, store_per_area[row.code], resolve);
+                                    } else {
+                                        resolve();
+                                    }
+                                });
+                            });
+
+                            Promise.all(updateTasks).then(callback);
+                        });
+                    } else {
+                        callback();
+                    }
+                }
+
+                function processInserts() {
+                    if (newRecords.length > 0) {
+                        batch_insert(url, newRecords, "tbl_area", true, (response) => {
+                            if (response.message === 'success') {
+                                let inserted_ids = response.inserted;
+                                updateOverallProgress("Saving Stores...", batch_index + 1, total_batches);
+                                //console.log(inserted_ids);
+                                processStorePerArea(inserted_ids, store_per_area, function() {
+                                    batch_index++;
+                                    setTimeout(processNextBatch, 300);
+                                });
+                            } else {
+                                errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                batch_index++;
+                                setTimeout(processNextBatch, 300);
+                            }
+                        });
+                    } else {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    }
+                }
+
+                processUpdates(processInserts);
+            }
+
+            setTimeout(processNextBatch, 1000);
+        });
+    }
+
+    function processStorePerArea(inserted_ids, store_per_area, callback) {
+        let batch_size = 5000;
+        let storeBatchIndex = 0;
+        let storeDataKeys = Object.keys(store_per_area);
+        let total_store_batches = Math.ceil(storeDataKeys.length / batch_size);
+        let insertedMap = {};
+
+        inserted_ids.forEach(({ id, code }) => {
+            insertedMap[code] = id;
+        });
+
+        function processNextStoreBatch() {
+            if (storeBatchIndex >= total_store_batches) {
+                callback();
+                return;
+            }
+
+            let chunkKeys = storeDataKeys.slice(storeBatchIndex * batch_size, (storeBatchIndex + 1) * batch_size);
+            let chunkData = [];
+
+            chunkKeys.forEach(code => {
+                if (insertedMap[code]) {
+                    let area_id = insertedMap[code];
+                    let store_ids = store_per_area[code];
+                    store_ids.forEach(store_id => {
+                        chunkData.push({
+                            area_id: area_id,
+                            store_id: store_id,
+                            created_by: user_id,
+                            created_date: formatDate(new Date()),
+                            updated_date: formatDate(new Date())
+                        });
+                    });
+                }
+            });
+
+            if (chunkData.length > 0) {
+                // First, check for duplicates
+                let store_ids = chunkData.map(item => item.store_id);
+                let area_ids = chunkData.map(item => item.area_id);
+
+                aJax.post("<?= base_url('cms/global_controller'); ?>", {
+                    event: "fetch_existing",
+                    table: "tbl_store_group",
+                    status: false,
+                    selected_fields: ["id", "area_id", "store_id"],
+                    where: {
+                        area_id: area_ids,
+                        store_id: store_ids
+                    }
+                }, function(existingResponse) {
+                    let existingRecords = JSON.parse(existingResponse).existing || [];
+                    let existingMap = new Set(existingRecords.map(r => `${r.area_id}|${r.store_id}`));
+
+                    let newData = [];
+                    let updateData = [];
+
+                    chunkData.forEach(record => {
+                        let key = `${record.area_id}|${record.store_id}`;
+                        if (existingMap.has(key)) {
+                            updateData.push({
+                                area_id: record.area_id,
+                                store_id: record.store_id,
+                                updated_date: formatDate(new Date())
+                            });
+                        } else {
+                            newData.push(record);
+                        }
+                    });
+
+                    // Perform batch insert for new records
+                    if (newData.length > 0) {
+                        batch_insert(url, newData, "tbl_store_group", false, function(response) {
+                            processBatchUpdates(updateData);
+                        });
+                    } else {
+                        processBatchUpdates(updateData);
+                    }
+                });
+            } else {
+                storeBatchIndex++;
+                setTimeout(processNextStoreBatch, 100);
+            }
+        }
+
+        function processBatchUpdates(updateData) {
+            if (updateData.length > 0) {
+                batch_update(url, updateData, "tbl_store_group", "area_id", function(updateResponse) {
+                    storeBatchIndex++;
+                    setTimeout(processNextStoreBatch, 100);
+                });
+            } else {
+                storeBatchIndex++;
+                setTimeout(processNextStoreBatch, 100);
+            }
+        }
+
+        if (storeDataKeys.length > 0) {
+            processNextStoreBatch();
+        } else {
+            callback();
+        }
     }
 
     function createErrorLogFile(errorLogs, filename) {
@@ -716,129 +935,9 @@
         $(".import_buttons").append($downloadBtn);
     }
 
-    function saveValidatedData(valid_data) {
-        let batch_size = 5000; // Process 1000 records at a time
-        let total_batches = Math.ceil(valid_data.length / batch_size);
-        let batch_index = 0;
-        let retry_count = 0;
-        let max_retries = 5; 
-
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                modal.alert(success_save_message, 'success', () => location.reload());
-                return;
-            }
-
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let progress = Math.round(((batch_index + 1) / total_batches) * 100);
-            setTimeout(() => {
-                updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
-            }, 100);
-            batch_insert(batch, 'tbl_area', function(result) {
-                console.log(batch, 'batch')
-                console.log(stores_under_area, 'stores_under_area saveValidatedData')
-                // console.log(result.inserted, 'result.inserted saveValidatedData')
-
-                // Step 1: Extract Unique Descriptions Efficiently
-                let uniq_desc = new Set();
-
-                result.inserted.forEach(({ code }) => {
-                    (stores_under_area[code] || []).forEach(storeList => {
-                        storeList.forEach(store => uniq_desc.add(fixEncoding(store)));
-                    });
-                });
-
-                // Convert Set to Array for further processing
-                uniq_desc = Array.from(uniq_desc);
-
-                // Step 2: Get Field Values and Map them
-                let store_value = new Map();
-
-                get_field_values(
-                    "tbl_store",
-                    "description",
-                    "description",
-                    uniq_desc,
-                    (res) => {
-                        Object.entries(res).forEach(([key, value]) => {
-                            store_value.set(fixEncoding(value), key);
-                        });
-                    }
-                );
-
-                // Step 3: Construct per_area_batch Array
-                let per_area_batch = [];
-
-                result.inserted.forEach(({ id, code }) => {
-                    (stores_under_area[code] || []).forEach(storeList => {
-                        storeList.forEach(store => {
-                            let encodedStore = fixEncoding(store);
-                            let set_store_id = store_value.get(encodedStore)
-                            if (set_store_id != undefined) {
-                                per_area_batch.push({
-                                    area_id: id,
-                                    store_id: set_store_id,  // Use Map for efficient lookup
-                                    created_by: user_id,
-                                    created_date: formatDate(new Date()),
-                                });
-                            }
-                        });
-                    });
-                });
-
-                console.log(per_area_batch, 'per_area_batch');
-
-                // Step 4: Batch Insert and Process Next Batch
-                batch_insert(per_area_batch, 'tbl_store_group', function(res) {
-                    console.log(res)
-                    batch_index++;
-                    processNextBatch();
-                });
-            });
-        }
-
-        function handleSaveError(batch) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000;
-                //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
-                setTimeout(() => {
-                    //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
-                    batch_insert(batch, 'tbl_area', function(success) {
-                        if (success) {
-                            batch_index++;
-                            retry_count = 0;
-                            processNextBatch();
-                        } else {
-                            handleSaveError(batch);
-                        }
-                    });
-                }, wait_time);
-            } else {
-                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-            }
-        }
-
-        modal.loading_progress(true, "Validating and Saving data...");
-        setTimeout(processNextBatch, 1000);
-    }
-
     function fixEncoding(text) {
         let correctedText = text.replace(/\uFFFD|\u0092/g, "’");
         return correctedText;
-    }
-
-    function batch_insert(insert_batch_data, batch_table, cb){
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event: "batch_insert",
-            table: batch_table,
-            insert_batch_data: insert_batch_data
-        }
-
-        aJax.post(url,data,function(result){
-            cb(result)
-        });
     }
 
     $(document).on('keydown', '#search_query', function(event) {
@@ -906,10 +1005,7 @@
             check_current_db("tbl_area", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
                     modal.confirm(confirm_update_message,function(result){
-                        // modal.loading(true);
                         if(result){ 
-                            // console.log(valid);
-                            
                             let batch = [];
                             let valid = true;
                             $.each(unique_store, (x, y) => {
@@ -933,9 +1029,9 @@
 
                             if(valid) {
                                 save_to_db(code, description, store, status_val, id, (obj) => {
-                                    total_delete('tbl_store_group', 'area_id', id);
+                                    total_delete(url, 'tbl_store_group', 'area_id', id);
 
-                                    batch_insert(batch, 'tbl_store_group', () => {
+                                    batch_insert(url, batch, 'tbl_store_group', false, () => {
                                         modal.loading(false);
                                         modal.alert(success_update_message, "success", function() {
                                             location.reload();
@@ -954,7 +1050,7 @@
                 }             
             });
         }else{
-            check_current_db("tbl_area", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
+            check_current_db("tbl_area", ["code", "description"], [code, description], "status" , null, null, true, function(exists, duplicateFields) {
                 if (!exists) {
                     modal.confirm(confirm_add_message,function(result){
                         if(result){ 
@@ -975,8 +1071,7 @@
                                         });
                                     })
                                 });
-                                console.log(batch);
-                                batch_insert(batch, 'tbl_store_group', () => {
+                                batch_insert(url, batch, 'tbl_store_group', false, () => {
                                     modal.loading(false);
                                     modal.alert(success_save_message, "success", function() {
                                         location.reload();
@@ -988,18 +1083,6 @@
                 }                  
             });
         }
-    }
-
-    function total_delete(delete_table, delete_field, delete_where) {
-        data = {
-            event : "total_delete",
-            table : delete_table,
-            field : delete_field,
-            where : delete_where
-        }
-        aJax.post(url,data,function(result){
-            // console.log(result)
-        })
     }
 
     function save_to_db(inp_code, inp_description, inp_store, status_val, id, cb) {
@@ -1063,7 +1146,7 @@
                 }
                 aJax.post(url,data,function(result){
                     var obj = is_json(result);
-                    total_delete('tbl_store_group', 'area_id', id)
+                    total_delete(url, 'tbl_store_group', 'area_id', id)
                     modal.alert(success_delete_message, "success", function() {
                         location.reload();
                     });
