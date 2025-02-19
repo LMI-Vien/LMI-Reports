@@ -40,23 +40,24 @@ self.onmessage = function(e) {
             let customer_cost = row["Customer Cost"] ? row["Customer Cost"].trim() : "";
             let customer_cost_nov = row["Customer Cost (Net of Vat)"] ? row["Customer Cost (Net of Vat)"].trim() : "";
 
-            let january_tq = row["January"] ? row["January"].trim() : "";
-            let february_tq = row["February"] ? row["February"].trim() : "";
-            let march_tq = row["March"] ? row["March"].trim() : "";
-            let april_tq = row["April"] ? row["April"].trim() : "";
-            let may_tq = row["May"] ? row["May"].trim() : "";
-            let june_tq = row["June"] ? row["June"].trim() : "";
-            let july_tq = row["July"] ? row["July"].trim() : "";
-            let august_tq = row["August"] ? row["August"].trim() : "";
-            let september_tq = row["September"] ? row["September"].trim() : "";
-            let october_tq = row["October"] ? row["October"].trim() : "";
-            let november_tq = row["November"] ? row["November"].trim() : "";
-            let december_tq = row["December"] ? row["December"].trim() : "";
+            let monthlyTq = getMonthlyValues(row, "tq");
+            
+            // let january_tq = row["January"] ? row["January"].trim() : "";
+            // let february_tq = row["February"] ? row["February"].trim() : "";
+            // let march_tq = row["March"] ? row["March"].trim() : "";
+            // let april_tq = row["April"] ? row["April"].trim() : "";
+            // let may_tq = row["May"] ? row["May"].trim() : "";
+            // let june_tq = row["June"] ? row["June"].trim() : "";
+            // let july_tq = row["July"] ? row["July"].trim() : "";
+            // let august_tq = row["August"] ? row["August"].trim() : "";
+            // let september_tq = row["September"] ? row["September"].trim() : "";
+            // let october_tq = row["October"] ? row["October"].trim() : "";
+            // let november_tq = row["November"] ? row["November"].trim() : "";
+            // let december_tq = row["December"] ? row["December"].trim() : "";
             let totalQty = row["Total Quantity"]?.trim() || "";
             // let totalAmount = row["Total Amount"]?.trim() || "";
             let user_id = row["Created by"] ? row["Created by"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";  
-
 
             // if (payment_group.length > 25 || payment_group === "") {
             //     invalid = true;
@@ -85,18 +86,7 @@ self.onmessage = function(e) {
                     trade_discount: trade_discount,
                     customer_cost: customer_cost,
                     customer_cost_net_of_vat: customer_cost_nov,
-                    january_tq: january_tq,
-                    february_tq: february_tq,
-                    march_tq: march_tq, 
-                    april_tq: april_tq,
-                    may_tq: may_tq,
-                    june_tq: june_tq,
-                    july_tq: july_tq,
-                    august_tq: august_tq, 
-                    september_tq: september_tq,
-                    october_tq: october_tq,
-                    november_tq: november_tq, 
-                    december_tq: december_tq,
+                    ...monthlyTq,
                     total_quantity: totalQty,
                     created_by: user_id,
                     created_date: date_of_creation
@@ -109,22 +99,19 @@ self.onmessage = function(e) {
 
     processBatch();
 
-    // let monthlyTq = getMonthlyValues(row, "tq");
-    // // let monthlyTa = getMonthlyValues(row, "ta");
-
-    // function getMonthlyValues(row, type) {
-    //     const months = [
-    //         "January", "February", "March", "April", "May", "June",
-    //         "July", "August", "September", "October", "November", "December"
-    //     ];
+    function getMonthlyValues(row, type) {
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
         
-    //     let values = {};
-    //     months.forEach(month => {
-    //         values[`${month.toLowerCase()}_${type}`] = row[month]?.trim() || "";
-    //     });
+        let values = {};
+        months.forEach(month => {
+            values[`${month.toLowerCase()}_${type}`] = row[month]?.trim() || "";
+        });
     
-    //     return values;
-    // }
+        return values;
+    }
 
    
 };

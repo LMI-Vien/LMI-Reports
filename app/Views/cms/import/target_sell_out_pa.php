@@ -619,8 +619,12 @@
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
             lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
             january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
-            total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
+            total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
+            // select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
+            // lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
+            // january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+            // total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+            // total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
             query : query, 
             table : "tbl_accounts_target_sellout_pa"
         }
@@ -661,19 +665,19 @@
                     $('#nov_tq').val(d.november_tq);
                     $('#dec_tq').val(d.december_tq);
                     $('#total_qty').val(d.total_quantity);
-                    $('#jan_ta').val(d.january_ta);
-                    $('#feb_ta').val(d.february_ta);
-                    $('#mar_ta').val(d.march_ta);
-                    $('#apr_ta').val(d.april_ta);
-                    $('#may_ta').val(d.may_ta);
-                    $('#jun_ta').val(d.june_ta);
-                    $('#jul_ta').val(d.july_ta);
-                    $('#aug_ta').val(d.august_ta);
-                    $('#sep_ta').val(d.september_ta);
-                    $('#oct_ta').val(d.october_ta);
-                    $('#nov_ta').val(d.november_ta);
-                    $('#dec_ta').val(d.december_ta);
-                    $('#total_amount').val(d.total_amount);
+                    // $('#jan_ta').val(d.january_ta);
+                    // $('#feb_ta').val(d.february_ta);
+                    // $('#mar_ta').val(d.march_ta);
+                    // $('#apr_ta').val(d.april_ta);
+                    // $('#may_ta').val(d.may_ta);
+                    // $('#jun_ta').val(d.june_ta);
+                    // $('#jul_ta').val(d.july_ta);
+                    // $('#aug_ta').val(d.august_ta);
+                    // $('#sep_ta').val(d.september_ta);
+                    // $('#oct_ta').val(d.october_ta);
+                    // $('#nov_ta').val(d.november_ta);
+                    // $('#dec_ta').val(d.december_ta);
+                    // $('#total_amount').val(d.total_amount);
                 }); 
             }
         });
@@ -1095,36 +1099,24 @@
         setTimeout(processNextBatch, 1000);
     }
 
-    $(document).on('keydown', '#search_query', function(event) {
-        $('.btn_status').hide();
-        $(".selectall").prop("checked", false);
-        if (event.key == 'Enter') {
-            search_input = $('#search_query').val();
-            offset = 1;
-            new_query = query;
-            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
-            get_data(new_query);
-            get_pagination(new_query);
-        }
-    });
-
-    function get_pagination(query) {
+    function get_pagination() {
+        var url = "<?= base_url("cms/global_controller");?>";
         var data = {
-        event : "pagination",
+          event : "pagination",
             select : "id",
             query : query,
             offset : offset,
             limit : limit,
             table : "tbl_accounts_target_sellout_pa",
             order : {
-                field : "updated_date",
-                order : "desc" 
+                field : "updated_date", //field to order
+                order : "desc" //asc or desc
             }
 
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); 
+            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -1133,7 +1125,37 @@
     pagination.onchange(function(){
         offset = $(this).val();
         get_data(query);
-    })
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
+        $("#search_query").val("");
+    });
+
+
+    $(document).on('keypress', '#search_query', function(e) {               
+        if (e.keyCode === 13) {
+            var keyword = $(this).val().trim();
+            offset = 1;
+            var new_query = "(" + query + " AND payment_group LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND vendor LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND kam_kas_kaa LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND sales_group LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND terms LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND brands LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND lmi_code LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND rgdi_code LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND customer_sku_code LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND item_description LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND item_status LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND srp LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND trade_discount LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND customer_cost LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND customer_cost_net_of_vat LIKE '%" + keyword + "%')";
+            get_data(new_query);
+            get_pagination();
+            console.log('Pressed key: ' + keyword);
+        }
+    });
+
 
     function save_data(action, id) {
         var code = $('#code').val();
