@@ -65,7 +65,7 @@
             </div>
             
             <div class="modal-body">
-                <form id="form-modal form-save-modal">
+                <form id="form-save-modal">
                     <div class="mb-3">
                         <label for="code" class="form-label">Code</label>
                         <div hidden>
@@ -189,6 +189,7 @@
     var limit = 10;
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
+    var base_url = '<?= base_url();?>';
 
     //for importing
     let currentPage = 1;
@@ -935,6 +936,15 @@
             modal.alert('Please select a file to upload', 'error', ()=>{});
             return;
         }
+
+        // File Size Validation (Limit: 30MB) temp
+        const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+        if (file.size > maxFileSize) {
+            modal.loading_progress(false);
+            modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+            return;
+        }
+
         modal.loading_progress(true, "Reviewing Data...");
 
         const reader = new FileReader();
@@ -944,9 +954,6 @@
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-            //console.log('Total records to process:', jsonData.length);
-            // Process in chunks
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -962,7 +969,6 @@
         function nextChunk() {
             if (index >= data.length) {
                 modal.loading_progress(false);
-                //console.log('Total records processed:', totalProcessed);
                 callback(); 
                 return;
             }
@@ -972,128 +978,174 @@
             totalProcessed += chunk.length; 
             index += chunkSize;
 
-
-            // Calculate progress percentage
             let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
-            setTimeout(() => {
-                updateSwalProgress("Preview Data", progress);
-                nextChunk();
-            }, 100); // Delay for UI update
+            updateSwalProgress("Preview Data", progress);
+            requestAnimationFrame(nextChunk);
         }
         nextChunk();
     }
 
     function process_xl_file() {
+        $(".import_buttons").find("a.download-error-log").remove();
         if (dataset.length === 0) {
             modal.alert('No data to process. Please upload a file.', 'error', () => {});
             return;
         }
 
-        let jsonData = dataset.map(row => {
-            return {
-                "Code": row["Code"] || "",
-                "Name": row["Name"] || "",
-                "Status": row["Status"] || "",
-                "Deployment Date": row["Deployment Date"] ? row["Deployment Date"] : "",
-                "Area": row["Area"] || "",
-                "Created By": user_id || "",
-                "Created Date": formatDate(new Date()) || ""
-            };
-        });
+        let jsonData = dataset.map(row => ({
+            "Code": row["Code"] || "",
+            "Name": row["Name"] || "",
+            "Status": row["Status"] || "",
+            "Deployment Date": row["Deployment Date"] || "",
+            "Area": row["Area"] || "",
+            "Created By": user_id || "",
+            "Created Date": formatDate(new Date()) || ""
+        }));
 
-        modal.loading_progress(true, "Validating and Saving data...");
         let worker = new Worker(base_url + "assets/cms/js/validator_asc.js");
-        worker.postMessage(jsonData);
+        worker.postMessage({ data: jsonData, base_url: base_url });
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
 
             let { invalid, errorLogs, valid_data, err_counter } = e.data;
             if (invalid) {
-                if (err_counter > 5000) {
-                    
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        '⚠️ Too many errors detected. Please download the error log for details.',
-                        '600px',
-                        () => {}
-                    );
-                } else {
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        errorLogs.join("<br>"),
-                        '600px',
-                        () => {}
-                    );
-                }
-                createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
+                let errorMsg = err_counter > 5000 
+                    ? '⚠️ Too many errors detected. Please download the error log for details.'
+                    : errorLogs.join("<br>");
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { read_xl_file(); });
+                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
             } else if (valid_data && valid_data.length > 0) {
-                updateSwalProgress("Validation Completed", 50);
+                updateSwalProgress("Validation Completed", 10);
                 setTimeout(() => saveValidatedData(valid_data), 500);
             } else {
-                modal.loading_progress(false);
-                console.error("No valid data returned from worker.");
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
             }
         };
 
         worker.onerror = function() {
-            modal.loading_progress(false);
             modal.alert("Error processing data. Please try again.", "error", () => {});
         };
     }
 
-
     function saveValidatedData(valid_data) {
-        let batch_size = 5000; // Process 1000 records at a time
+        let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
         let retry_count = 0;
         let max_retries = 5; 
-
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                modal.alert(success_save_message, 'success', () => location.reload());
-                return;
-            }
-
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let progress = Math.round(((batch_index + 1) / total_batches) * 100);
-            setTimeout(() => {
-                updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
-            }, 100);
-            batch_insert(batch, function() {
-                batch_index++;
-                processNextBatch();
-            });
-        }
-
-        function handleSaveError(batch) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000;
-                //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
-                setTimeout(() => {
-                    //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
-                    batch_insert(batch, function(success) {
-                        if (success) {
-                            batch_index++;
-                            retry_count = 0;
-                            processNextBatch();
-                        } else {
-                            handleSaveError(batch);
-                        }
-                    });
-                }, wait_time);
-            } else {
-                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-            }
-        }
+        let errorLogs = [];
+        let url = "<?= base_url('cms/global_controller');?>";
+        let table = 'tbl_area_sales_coordinator';
+        let selected_fields = ['id', 'code', 'description'];
+        let existingMap = new Map();
 
         modal.loading_progress(true, "Validating and Saving data...");
-        setTimeout(processNextBatch, 1000);
+
+        // Fetch existing records to determine insert vs. update
+        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+            let result = JSON.parse(response);
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    existingMap.set(record.code + '|' + record.description, record.id);
+                });
+            }
+
+            function updateOverallProgress(stepName, completed, total) {
+                let progress = Math.round((completed / total) * 100);
+                updateSwalProgress(stepName, progress);
+            }
+
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
+                    if (errorLogs.length > 0) {
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+                    } else {
+                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                    }
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let key = row.code + '|' + row.description;
+                    if (existingMap.has(key)) {
+                        row.id = existingMap.get(key);
+                        row.updated_date = formatDate(new Date());
+                        updateRecords.push(row);
+                    } else {
+                        row.created_by = user_id;
+                        row.created_date = formatDate(new Date());
+                        row.updated_date = formatDate(new Date());
+                        newRecords.push(row);
+                    }
+                });
+
+                function processUpdates() {
+                    return new Promise((resolve) => {
+                        if (updateRecords.length > 0) {
+                            batch_update(url, updateRecords, "tbl_area_sales_coordinator", "id", (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                function processInserts() {
+                    return new Promise((resolve) => {
+                        if (newRecords.length > 0) {
+                            batch_insert(url, newRecords, "tbl_area_sales_coordinator", true, (response) => {
+                                if (response.message === 'success') {
+                                    updateOverallProgress("Saving ASC...", batch_index + 1, total_batches);
+                                } else {
+                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                }
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                function handleSaveError() {
+                    if (retry_count < max_retries) {
+                        retry_count++;
+                        let wait_time = Math.pow(2, retry_count) * 1000;
+                        setTimeout(() => {
+                            processInserts().then(() => {
+                                batch_index++;
+                                retry_count = 0;
+                                processNextBatch();
+                            }).catch(handleSaveError);
+                        }, wait_time);
+                    } else {
+                        modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+                    }
+                }
+
+                // Execute updates first, then inserts, then proceed to next batch
+                processUpdates()
+                    .then(processInserts)
+                    .then(() => {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    })
+                    .catch(handleSaveError);
+            }
+
+            setTimeout(processNextBatch, 1000);
+        });
     }
 
     function readable_date_to_excel_date(readable_date) {
@@ -1176,57 +1228,5 @@
                 alert('alert', e)
             }
         });
-    }
-
-    function batch_insert(insert_batch_data, cb) {
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event: "batch_insert",
-            table: "tbl_area_sales_coordinator",
-            insert_batch_data: insert_batch_data
-        };
-
-        let retry_count = 0;
-        let max_retries = 5; // Maximum retry attempts
-
-        // Function to make the AJAX request and handle retries
-        function attemptInsert() {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: function(result) {
-                    if (result.message === "success") {
-                        cb(true); // Success callback
-                    } else {
-                        handleSaveError(result); // Handle error if message is not success
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Save failed:", status, error);
-                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
-                }
-            });
-        }
-
-        // Handle the error and retry the request
-        function handleSaveError(result) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
-                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
-
-                setTimeout(() => {
-                    console.log(`Retrying attempt ${retry_count}...`);
-                    attemptInsert(); // Retry the insertion
-                }, wait_time);
-            } else {
-                console.error("Failed to save data after multiple attempts.");
-                cb(false); // Call callback with failure if retries exceed max attempts
-            }
-        }
-
-        // Initiate the first attempt to insert
-        attemptInsert();
     }
 </script>
