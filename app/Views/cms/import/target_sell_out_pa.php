@@ -41,408 +41,408 @@
 
 </style>
 
-    <div class="content-wrapper p-4">
-        <div class="card">
-            <div class="text-center page-title md-center">
-                <b>T A R G E T - S E L L - O U T - P E R - A C C O U N T</b>
-            </div>
-            <div class="card-body text-center">
-                <div class="box">
-                    <?php
-                        echo view("cms/layout/buttons",$buttons);
-                        $optionSet = '';
-                        foreach($pageOption as $pageOptionLoop) {
-                            $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
-                        }
-                    ?>
-                    <div class="box-body">
-                        <div class="col-md-12 list-data tbl-content" id="list-data">
-                            <table class="table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                        <th class='center-content'>ID</th>
-                                        <th class='center-content'>Date Created</th>
-                                        <th class='center-content'>Date Modified</th>
-                                        <th class='center-content'>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="table_body word_break"></tbody>
-                            </table>
-                        </div>
-                        <div class="list_pagination"></div>
-                        <div class="form-group pull-right">
-                            <label>Show</label>
-                            <select class="record-entries">
-                                <?= $optionSet; ?>
-                            </select>
-                            <label>Entries</label>
-                        </div>
+<div class="content-wrapper p-4">
+    <div class="card">
+        <div class="text-center page-title md-center">
+            <b>T A R G E T - S E L L - O U T - P E R - A C C O U N T</b>
+        </div>
+        <div class="card-body text-center">
+            <div class="box">
+                <?php
+                    echo view("cms/layout/buttons",$buttons);
+                    $optionSet = '';
+                    foreach($pageOption as $pageOptionLoop) {
+                        $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
+                    }
+                ?>
+                <div class="box-body">
+                    <div class="col-md-12 list-data tbl-content" id="list-data">
+                        <table class="table table-bordered listdata">
+                            <thead>
+                                <tr>
+                                    <th class='center-content'><input class="selectall" type="checkbox"></th>
+                                    <th class='center-content'>ID</th>
+                                    <th class='center-content'>Date Created</th>
+                                    <th class='center-content'>Date Modified</th>
+                                    <th class='center-content'>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table_body word_break"></tbody>
+                        </table>
+                    </div>
+                    <div class="list_pagination"></div>
+                    <div class="form-group pull-right">
+                        <label>Show</label>
+                        <select class="record-entries">
+                            <?= $optionSet; ?>
+                        </select>
+                        <label>Entries</label>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- MODAL -->
-    <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">
-                        <b></b>
-                    </h1>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="form-modal">
-                        <div class="mb-3">
-                            <div hidden>
-                                <input type="text" class="form-control" id="id" aria-describedby="id">
-                            </div>
-                            <label for="store" class="form-label">Payment Group</label>
-                            <input type="text" class="form-control required" id="payment_group" aria-describedby="payment_group">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Vendor</label>
-                            <input type="text" class="form-control required" id="vendor" aria-describedby="vendor">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Overall</label>
-                            <input type="text" class="form-control required" id="overall" aria-describedby="overall">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">KAM/KAS/KAA</label>
-                            <input type="text" class="form-control required" id="kam_kas_kaa" aria-describedby="kam_kas_kaa">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Sales Group</label>
-                            <input type="text" class="form-control required" id="sales_group" aria-describedby="sales_group">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Terms</label>
-                            <input type="text" class="form-control required" id="terms" aria-describedby="terms">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Channel</label>
-                            <input type="text" class="form-control required" id="channel" aria-describedby="channel">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Brand</label>
-                            <input type="text" class="form-control required" id="brand" aria-describedby="brand">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Exclusivity</label>
-                            <input type="text" class="form-control required" id="exclusivity" aria-describedby="exclusivity">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Category</label>
-                            <input type="text" class="form-control required" id="category" aria-describedby="category">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">LMI Code</label>
-                            <input type="text" class="form-control required" id="lmi_code" aria-describedby="lmi_code">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">RGDI Code</label>
-                            <input type="text" class="form-control required" id="rgdi_code" aria-describedby="rgdi_code">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Customer SKU Code</label>
-                            <input type="text" class="form-control required" id="customer_sku_code" aria-describedby="customer_sku_code">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Item Description</label>
-                            <input type="text" class="form-control required" id="item_description" aria-describedby="item_description">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Item Status</label>
-                            <input type="text" class="form-control required" id="item_status" aria-describedby="item_status">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">SRP</label>
-                            <input type="text" class="form-control required" id="srp" aria-describedby="srp">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Trade Discount</label>
-                            <input type="text" class="form-control required" id="trade_discount" aria-describedby="trade_discount">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Customer Cost</label>
-                            <input type="text" class="form-control required" id="customer_cost" aria-describedby="customer_cost">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Customer Cost Net of Vat</label>
-                            <input type="text" class="form-control required" id="customer_cost_net_of_vat" aria-describedby="customer_cost_net_of_vat">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">January</label>
-                            <input type="text" class="form-control required" id="jan_tq" aria-describedby="jan_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">February</label>
-                            <input type="text" class="form-control required" id="feb_tq" aria-describedby="feb_tq">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="code" class="form-label">March</label>
-                            <input type="text" class="form-control required" id="mar_tq" aria-describedby="mar_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">April</label>
-                            <input type="text" class="form-control required" id="apr_tq" aria-describedby="apr_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">May</label>
-                            <input type="text" class="form-control required" id="may_tq" aria-describedby="may_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">June</label>
-                            <input type="text" class="form-control required" id="jun_tq" aria-describedby="jun_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">July</label>
-                            <input type="text" class="form-control required" id="jul_tq" aria-describedby="jul_tq">
-                        </div>
-
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">August</label>
-                            <input type="text" class="form-control required" id="aug_tq" aria-describedby="aug_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">September</label>
-                            <input type="text" class="form-control required" id="sep_tq" aria-describedby="sep_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">October</label>
-                            <input type="text" class="form-control required" id="oct_tq" aria-describedby="oct_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">November</label>
-                            <input type="text" class="form-control required" id="nov_tq" aria-describedby="nov_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">December</label>
-                            <input type="text" class="form-control required" id="dec_tq" aria-describedby="dec_tq">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Total Quantity</label>
-                            <input type="text" class="form-control required" id="total_qty" aria-describedby="total_qty">
-                        </div>
-
-                        <!-- <div class="mb-3">
-                            <label for="code" class="form-label">January</label>
-                            <input type="text" class="form-control required" id="jan_ta" aria-describedby="jan_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">February</label>
-                            <input type="text" class="form-control required" id="feb_ta" aria-describedby="feb_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">March</label>
-                            <input type="text" class="form-control required" id="mar_ta" aria-describedby="mar_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">April</label>
-                            <input type="text" class="form-control required" id="apr_ta" aria-describedby="apr_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">May</label>
-                            <input type="text" class="form-control required" id="may_ta" aria-describedby="may_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">June</label>
-                            <input type="text" class="form-control required" id="jun_ta" aria-describedby="jun_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">July</label>
-                            <input type="text" class="form-control required" id="jul_ta" aria-describedby="jul_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">August</label>
-                            <input type="text" class="form-control required" id="aug_ta" aria-describedby="aug_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">September</label>
-                            <input type="text" class="form-control required" id="sep_ta" aria-describedby="sep_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">October</label>
-                            <input type="text" class="form-control required" id="oct_ta" aria-describedby="oct_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">November</label>
-                            <input type="text" class="form-control required" id="nov_ta" aria-describedby="nov_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">December</label>
-                            <input type="text" class="form-control required" id="dec_ta" aria-describedby="dec_ta">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Total Amount</label>
-                            <input type="text" class="form-control required" id="total_amount" aria-describedby="total_amount">
-                        </div> -->
-                    </form>
-                </div>
-                <div class="modal-footer"></div>
+<!-- MODAL -->
+<div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">
+                    <b></b>
+                </h1>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span>&times;</span>
+                </button>
             </div>
-        </div>
-    </div>
-    
-    <!-- IMPORT MODAL -->
-    <div class="modal" tabindex="-1" id="import_modal">
-        <div class="modal-dialog modal-xxl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">
-                        <b></b>
-                    </h1>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="card">
-                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
-                            <div class="text-center"
-                            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
-                            >
-                                <b>Extracted Data</b>
-                            </div>
-
-                            <div class="import_buttons">
-                                <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
-                                    <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                                </label>
-                                <input
-                                    type="file"
-                                    style="display: none;"
-                                    id="file"
-                                    accept=".xls,.xlsx,.csv"
-                                    aria-describedby="import_files"
-                                    onclick="clear_import_table()"
-                                >
-
-                                <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                    <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                                </label>
-                            </div>
-
-                            <table class= "table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content'>Line #</th>
-                                        <th class='center-content'>Payment Group</th>
-                                        <th class='center-content'>Vendor</th>
-                                        <th class='center-content'>Overall</th>
-                                        <th class='center-content'>KAM/KAS/KAA</th>
-                                        <th class='center-content'>Sales Group</th>
-                                        <th class='center-content'>Terms</th>
-                                        <th class='center-content'>Channel</th>
-                                        <th class='center-content'>Brand</th>
-                                        <th class='center-content'>Exclusivity</th>
-                                        <th class='center-content'>Category</th>
-                                        <th class='center-content'>LMI Code</th>
-                                        <th class='center-content'>RGDI Code</th>
-                                        <th class='center-content'>Customer SKU Code</th>
-                                        <th class='center-content'>Item Description</th>
-                                        <th class='center-content'>Item Status</th>
-                                        <th class='center-content'>SRP</th>
-                                        <th class='center-content'>Trade Discount</th>
-                                        <th class='center-content'>Customer Cost</th>
-                                        <th class='center-content'>Customer Cost Net of VAT</th>
-                                        <th class='center-content'>January TQ</th>
-                                        <th class='center-content'>February TQ</th>
-                                        <th class='center-content'>March TQ</th>
-                                        <th class='center-content'>April TQ</th>
-                                        <th class='center-content'>May TQ</th>
-                                        <th class='center-content'>June TQ</th>
-                                        <th class='center-content'>July TQ</th>
-                                        <th class='center-content'>August TQ</th>
-                                        <th class='center-content'>September TQ</th>
-                                        <th class='center-content'>October TQ</th>
-                                        <th class='center-content'>November TQ</th>
-                                        <th class='center-content'>December TQ</th>
-                                        <th class='center-content'>Total Quantity</th>
-                                        <!-- <th class='center-content'>January TA</th>
-                                        <th class='center-content'>February TA</th>
-                                        <th class='center-content'>March TA</th>
-                                        <th class='center-content'>April TA</th>
-                                        <th class='center-content'>May TA</th>
-                                        <th class='center-content'>June TA</th>
-                                        <th class='center-content'>July TA</th>
-                                        <th class='center-content'>August TA</th>
-                                        <th class='center-content'>September TA</th>
-                                        <th class='center-content'>October TA</th>
-                                        <th class='center-content'>November TA</th>
-                                        <th class='center-content'>December TA</th>
-                                        <th class='center-content'>Total Amount</th> -->
-                                    </tr>
-                                </thead>
-                                <tbody class="word_break import_table"></tbody>
-                            </table>
+            <div class="modal-body">
+                <form id="form-modal">
+                    <div class="mb-3">
+                        <div hidden>
+                            <input type="text" class="form-control" id="id" aria-describedby="id">
                         </div>
-                        <center style="margin-bottom: 5px">
-                            <div class="import_pagination btn-group"></div>
-                        </center>
+                        <label for="store" class="form-label">Payment Group</label>
+                        <input type="text" class="form-control required" id="payment_group" aria-describedby="payment_group">
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Vendor</label>
+                        <input type="text" class="form-control required" id="vendor" aria-describedby="vendor">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Overall</label>
+                        <input type="text" class="form-control required" id="overall" aria-describedby="overall">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">KAM/KAS/KAA</label>
+                        <input type="text" class="form-control required" id="kam_kas_kaa" aria-describedby="kam_kas_kaa">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Sales Group</label>
+                        <input type="text" class="form-control required" id="sales_group" aria-describedby="sales_group">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Terms</label>
+                        <input type="text" class="form-control required" id="terms" aria-describedby="terms">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Channel</label>
+                        <input type="text" class="form-control required" id="channel" aria-describedby="channel">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Brand</label>
+                        <input type="text" class="form-control required" id="brand" aria-describedby="brand">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Exclusivity</label>
+                        <input type="text" class="form-control required" id="exclusivity" aria-describedby="exclusivity">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Category</label>
+                        <input type="text" class="form-control required" id="category" aria-describedby="category">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">LMI Code</label>
+                        <input type="text" class="form-control required" id="lmi_code" aria-describedby="lmi_code">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">RGDI Code</label>
+                        <input type="text" class="form-control required" id="rgdi_code" aria-describedby="rgdi_code">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Customer SKU Code</label>
+                        <input type="text" class="form-control required" id="customer_sku_code" aria-describedby="customer_sku_code">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Item Description</label>
+                        <input type="text" class="form-control required" id="item_description" aria-describedby="item_description">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Item Status</label>
+                        <input type="text" class="form-control required" id="item_status" aria-describedby="item_status">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">SRP</label>
+                        <input type="text" class="form-control required" id="srp" aria-describedby="srp">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Trade Discount</label>
+                        <input type="text" class="form-control required" id="trade_discount" aria-describedby="trade_discount">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Customer Cost</label>
+                        <input type="text" class="form-control required" id="customer_cost" aria-describedby="customer_cost">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Customer Cost Net of Vat</label>
+                        <input type="text" class="form-control required" id="customer_cost_net_of_vat" aria-describedby="customer_cost_net_of_vat">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">January</label>
+                        <input type="text" class="form-control required" id="jan_tq" aria-describedby="jan_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">February</label>
+                        <input type="text" class="form-control required" id="feb_tq" aria-describedby="feb_tq">
+                    </div>
                     
+                    <div class="mb-3">
+                        <label for="code" class="form-label">March</label>
+                        <input type="text" class="form-control required" id="mar_tq" aria-describedby="mar_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">April</label>
+                        <input type="text" class="form-control required" id="apr_tq" aria-describedby="apr_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">May</label>
+                        <input type="text" class="form-control required" id="may_tq" aria-describedby="may_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">June</label>
+                        <input type="text" class="form-control required" id="jun_tq" aria-describedby="jun_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">July</label>
+                        <input type="text" class="form-control required" id="jul_tq" aria-describedby="jul_tq">
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">August</label>
+                        <input type="text" class="form-control required" id="aug_tq" aria-describedby="aug_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">September</label>
+                        <input type="text" class="form-control required" id="sep_tq" aria-describedby="sep_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">October</label>
+                        <input type="text" class="form-control required" id="oct_tq" aria-describedby="oct_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">November</label>
+                        <input type="text" class="form-control required" id="nov_tq" aria-describedby="nov_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">December</label>
+                        <input type="text" class="form-control required" id="dec_tq" aria-describedby="dec_tq">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Total Quantity</label>
+                        <input type="text" class="form-control required" id="total_qty" aria-describedby="total_qty">
+                    </div>
+
+                    <!-- <div class="mb-3">
+                        <label for="code" class="form-label">January</label>
+                        <input type="text" class="form-control required" id="jan_ta" aria-describedby="jan_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">February</label>
+                        <input type="text" class="form-control required" id="feb_ta" aria-describedby="feb_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">March</label>
+                        <input type="text" class="form-control required" id="mar_ta" aria-describedby="mar_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">April</label>
+                        <input type="text" class="form-control required" id="apr_ta" aria-describedby="apr_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">May</label>
+                        <input type="text" class="form-control required" id="may_ta" aria-describedby="may_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">June</label>
+                        <input type="text" class="form-control required" id="jun_ta" aria-describedby="jun_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">July</label>
+                        <input type="text" class="form-control required" id="jul_ta" aria-describedby="jul_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">August</label>
+                        <input type="text" class="form-control required" id="aug_ta" aria-describedby="aug_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">September</label>
+                        <input type="text" class="form-control required" id="sep_ta" aria-describedby="sep_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">October</label>
+                        <input type="text" class="form-control required" id="oct_ta" aria-describedby="oct_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">November</label>
+                        <input type="text" class="form-control required" id="nov_ta" aria-describedby="nov_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">December</label>
+                        <input type="text" class="form-control required" id="dec_ta" aria-describedby="dec_ta">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Total Amount</label>
+                        <input type="text" class="form-control required" id="total_amount" aria-describedby="total_amount">
+                    </div> -->
+                </form>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
+    
+<!-- IMPORT MODAL -->
+<div class="modal" tabindex="-1" id="import_modal">
+    <div class="modal-dialog modal-xxl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">
+                    <b></b>
+                </h1>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="card">
+                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="text-center"
+                        style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
+                        >
+                            <b>Extracted Data</b>
+                        </div>
+
+                        <div class="import_buttons">
+                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
+                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                            </label>
+                            <input
+                                type="file"
+                                style="display: none;"
+                                id="file"
+                                accept=".xls,.xlsx,.csv"
+                                aria-describedby="import_files"
+                                onclick="clear_import_table()"
+                            >
+
+                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
+                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                            </label>
+                        </div>
+
+                        <table class= "table table-bordered listdata">
+                            <thead>
+                                <tr>
+                                    <th class='center-content'>Line #</th>
+                                    <th class='center-content'>Payment Group</th>
+                                    <th class='center-content'>Vendor</th>
+                                    <th class='center-content'>Overall</th>
+                                    <th class='center-content'>KAM/KAS/KAA</th>
+                                    <th class='center-content'>Sales Group</th>
+                                    <th class='center-content'>Terms</th>
+                                    <th class='center-content'>Channel</th>
+                                    <th class='center-content'>Brand</th>
+                                    <th class='center-content'>Exclusivity</th>
+                                    <th class='center-content'>Category</th>
+                                    <th class='center-content'>LMI Code</th>
+                                    <th class='center-content'>RGDI Code</th>
+                                    <th class='center-content'>Customer SKU Code</th>
+                                    <th class='center-content'>Item Description</th>
+                                    <th class='center-content'>Item Status</th>
+                                    <th class='center-content'>SRP</th>
+                                    <th class='center-content'>Trade Discount</th>
+                                    <th class='center-content'>Customer Cost</th>
+                                    <th class='center-content'>Customer Cost Net of VAT</th>
+                                    <th class='center-content'>January TQ</th>
+                                    <th class='center-content'>February TQ</th>
+                                    <th class='center-content'>March TQ</th>
+                                    <th class='center-content'>April TQ</th>
+                                    <th class='center-content'>May TQ</th>
+                                    <th class='center-content'>June TQ</th>
+                                    <th class='center-content'>July TQ</th>
+                                    <th class='center-content'>August TQ</th>
+                                    <th class='center-content'>September TQ</th>
+                                    <th class='center-content'>October TQ</th>
+                                    <th class='center-content'>November TQ</th>
+                                    <th class='center-content'>December TQ</th>
+                                    <th class='center-content'>Total Quantity</th>
+                                    <!-- <th class='center-content'>January TA</th>
+                                    <th class='center-content'>February TA</th>
+                                    <th class='center-content'>March TA</th>
+                                    <th class='center-content'>April TA</th>
+                                    <th class='center-content'>May TA</th>
+                                    <th class='center-content'>June TA</th>
+                                    <th class='center-content'>July TA</th>
+                                    <th class='center-content'>August TA</th>
+                                    <th class='center-content'>September TA</th>
+                                    <th class='center-content'>October TA</th>
+                                    <th class='center-content'>November TA</th>
+                                    <th class='center-content'>December TA</th>
+                                    <th class='center-content'>Total Amount</th> -->
+                                </tr>
+                            </thead>
+                            <tbody class="word_break import_table"></tbody>
+                        </table>
+                    </div>
+                    <center style="margin-bottom: 5px">
+                        <div class="import_pagination btn-group"></div>
+                    </center>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
+                <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                
             </div>
         </div>
     </div>
-    
+</div>
+
 <script>
-    var query = "";
+    var query = "status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -455,8 +455,166 @@
     
     $(document).ready(function() {
         get_data(query);
-        get_pagination(query);
+        get_pagination();
+    });
 
+
+    function get_data(new_query) {
+        var data = {
+            event : "list",
+            select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
+                lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
+                january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                total_quantity, status, created_date, updated_date`.replace(/\s+/g, ' '),
+            query : new_query,
+            offset : offset,
+            limit : limit,
+            table : "tbl_accounts_target_sellout_pa",
+            order : {
+                field : "id, updated_date",
+                order : "asc, desc" 
+            }
+
+        }
+
+        aJax.post(url,data,function(result){
+            var result = JSON.parse(result);
+            var html = '';
+
+            if(result) {
+                if (result.length > 0) {
+                    $.each(result, function(x,y) {
+                        console.log(y);
+                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+
+                        html += "<tr class='" + rowClass + "'>";
+                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                        html += "<td scope=\"col\">" + (y.id) + "</td>";
+                        console.log("This is your status", y.status);
+                        // html += "<td scope=\"col\">" + trimText(y.payment_group, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.vendor, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.overall, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.kam_kas_kaa, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.sales_group, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.terms, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.channel, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.brand, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.exclusivity, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.category, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.lmi_code, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.rgdi_code, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.customer_sku_code, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.item_description, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.item_status, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.srp, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.trade_discount, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.customer_cost, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.customer_cost_net_of_vat, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.january_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.february_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.march_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.april_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.may_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.june_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.july_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.august_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.september_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.october_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.november_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.december_tq, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.total_quantity, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.january_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.february_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.march_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.april_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.may_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.june_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.july_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.august_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.september_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.october_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.november_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.december_ta, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(y.total_amount, 10) + "</td>";
+                        // html += "<td scope=\"col\">" + status + "</td>";
+                        html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+                        if (y.id == 0) {
+                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+                        } else {
+                            html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="</td>";
+                        }
+                        
+                        html += "</tr>";   
+                    });
+                } else {
+                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+                }
+            }
+            $('.table_body').html(html);
+        });
+    }
+
+    function get_pagination() {
+        var url = "<?= base_url("cms/global_controller");?>";
+        var data = {
+          event : "pagination",
+            select : "id",
+            query : query,
+            offset : offset,
+            limit : limit,
+            table : "tbl_accounts_target_sellout_pa",
+            order : {
+                field : "updated_date", //field to order
+                order : "desc" //asc or desc
+            }
+
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
+            modal.loading(false);
+            pagination.generate(obj.total_page, ".list_pagination", get_data);
+        });
+    }
+
+    pagination.onchange(function(){
+        offset = $(this).val();
+        get_data(query);
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
+        $("#search_query").val("");
+    });
+
+    $(document).on('keypress', '#search_query', function(e) {               
+        if (e.keyCode === 13) {
+            var keyword = $(this).val().trim();
+            offset = 1;
+            var new_query = "(" + query + " AND payment_group LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND vendor LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND kam_kas_kaa LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND sales_group LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND terms LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND brand LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND lmi_code LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND rgdi_code LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND customer_sku_code LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND item_description LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND item_status LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND srp LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND trade_discount LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND customer_cost LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND customer_cost_net_of_vat LIKE '%" + keyword + "%')";
+            get_data(new_query);
+            get_pagination();
+            console.log('Pressed key: ' + keyword);
+        }
     });
     
     // uses function get_data(
@@ -484,7 +642,6 @@
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#popup_modal');
-        let $store_list = $('#store_list')
         let $footer = $modal.find('.modal-footer');
 
         $modal.find('.modal-title b').html(addNbsp(msg));
@@ -497,9 +654,8 @@
                 }
             }),
             edit: create_button('Update', 'edit_data', 'btn update', function () {
-                if (validate.standard("form-modal")) {
-                    save_data('update', id);
-                }
+                save_data('update', id);
+               
             }),
             close: create_button('Close', 'close_data', 'btn caution', function () {
                 $modal.modal('hide');
@@ -509,14 +665,6 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        // let fields = [
-        //     "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
-        //     "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
-        //     "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
-        //     "nov_tq", "dec_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta",
-        //     "oct_ta", "nov_ta", "dec_ta", "total_amount"
-        // ];
-
         let fields = [
             "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
             "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
@@ -526,93 +674,91 @@
 
         set_field_state(fields.map(id => `#${id}`).join(', '), isReadOnly);
 
-        $store_list.empty()
         $footer.empty();
-        if (actions === 'add') {
-            let line = get_max_number();
-
-            let html = `
-            <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <select name="store" class="form-control store_drop required" id="store_${line}"></select>
-                <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
-                    <i class="fa fa-minus" aria-hidden="true"></i>
-                </button>
-            </div>
-            `;
-            $store_list.append(html)
-            $('.add_line').attr('disabled', false)
-            $('.add_line').attr('readonly', false)
-            $footer.append(buttons.save)
-        };
-        if (actions === 'edit') {
-            $footer.append(buttons.edit)
-            $('.add_line').attr('disabled', false)
-            $('.add_line').attr('readonly', false)
-        };
-        if (actions === 'view') {
-            $('.add_line').attr('disabled', true)
-            $('.add_line').attr('readonly', true)
-        }
+        if (actions === 'add') $footer.append(buttons.save);
+        if (actions === 'edit') $footer.append(buttons.edit);
         $footer.append(buttons.close);
 
         $modal.modal('show');
     }
+
+    // function open_modal(msg, actions, id) {
+    //     $(".form-control").css('border-color','#ccc');
+    //     $(".validate_error_message").remove();
+    //     let $modal = $('#popup_modal');
+    //     let $footer = $modal.find('.modal-footer');
+
+    //     $modal.find('.modal-title b').html(addNbsp(msg));
+    //     reset_modal_fields();
+
+    //     let buttons = {
+    //         save: create_button('Save', 'save_data', 'btn save', function () {
+    //             if (validate.standard("form-modal")) {
+    //                 save_data('save', null);
+    //             }
+    //         }),
+    //         edit: create_button('Update', 'edit_data', 'btn update', function () {
+    //             save_data('update', id);
+               
+    //         }),
+    //         close: create_button('Close', 'close_data', 'btn caution', function () {
+    //             $modal.modal('hide');
+    //         })
+    //     };
+
+    //     if (['edit', 'view'].includes(actions)) populate_modal(id);
+        
+    //     let isReadOnly = actions === 'view';
+    //     set_field_state('#store, #store_name, #item, #item_name, #item_class, #supplier, #group, #dept, #class, #sub_class, #on_hand, #in_transit, #total_qty, #avg_sales_unit, #swc, #202445, #status', isReadOnly);
+
+    //     $footer.empty();
+    //     if (actions === 'add') $footer.append(buttons.save);
+    //     if (actions === 'edit') $footer.append(buttons.edit);
+    //     $footer.append(buttons.close);
+
+    //     $modal.modal('show');
+    // }
+
     
     function reset_modal_fields() {
-    let fields = [
-        "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
-        "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
-        "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
-        "nov_tq", "december_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta",
-        "oct_ta", "nov_ta", "dec_ta", "total_amount"
-    ];
+        let fields = [
+            "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
+            "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
+            "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
+            "nov_tq", "december_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta",
+            "oct_ta", "nov_ta", "dec_ta", "total_amount"
+        ];
 
-    fields.forEach(field => {
-        $(`#popup_modal #${field}`).val('');
-    });
+        fields.forEach(field => {
+            $(`#popup_modal #${field}`).val('');
+        });
 
-    $('#popup_modal #status').prop('checked', true);
-}
+        $('#popup_modal #status').prop('checked', true);
+    }
 
-    
+    function clear_import_table() {
+        $(".import_table").empty()
+    }
+
+    function paginateData(rowsPerPage) {
+        totalPages = Math.ceil(dataset.length / rowsPerPage);
+        currentPage = 1;
+        display_imported_data();
+    }
+
     function set_field_state(selector, isReadOnly) {
         $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
     }
-    
-    function get_max_number() {
-        let storeElements = $('[id^="store_"]');
-        
-        let maxNumber = Math.max(
-            0,
-            ...storeElements.map(function () {
-                return parseInt(this.id.replace("store_", ""), 10) || 0;
-            }).get()
-        );
 
-        return maxNumber;
-    }
-
-    function add_line() {
-        let line = get_max_number() + 1;
-
-        let html = `
-        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-            <select name="store" class="form-control store_drop required" id="store_${line}"></select>
-            <button type="button" class="rmv-btn" onclick="remove_line(${line})">
-                <i class="fa fa-minus" aria-hidden="true"></i>
-            </button>
-        </div>
-        `;
-        $('#store_list').append(html);
-        get_store('', `store_${line}`);
-    }
-
-    function remove_line(lineId) {
-        $(`#line_${lineId}`).remove();
-    }
+    $(document).on('click', '#btn_import ', function() {
+        title = addNbsp('IMPORT TARGET SELL OUT PER ACCOUNT')
+        $("#import_modal").find('.modal-title').find('b').html(title)
+        $("#import_modal").modal('show')
+        clear_import_table()
+    });
     
     function populate_modal(inp_id) {
-        var query = "id = " + inp_id;
+        var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
@@ -692,23 +838,275 @@
         });
         return new_btn;
     }
-    
-    function clear_import_table() {
-        $(".import_table").empty()
+
+    function save_to_db(inp_payment_group, inp_vendor, inp_overall, inp_kam_kas_kaa, inp_sales_group, inp_terms, inp_channel, inp_brand, inp_exclusivity, inp_category, 
+        inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description, inp_item_status, inp_srp, inp_trade_discount,
+        inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq, inp_martq, 
+        inp_aprtq, inp_maytq, inp_juntq, inp_jultq, inp_augtq, inp_septq, inp_octtq,
+        inp_novtq, inp_dectq, inp_total_quantity, id) {
+        // let {inp_payment_group, inp_vendor, inp_overall, inp_kam_kas_kaa, inp_sales_group, inp_terms, inp_channel, 
+        //     inp_brand, inp_exclusivity, inp_category, inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description,
+        //     inp_item_status, inp_srp, inp_trade_discount, inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq,
+        //     inp_martq, inp_aprtq, inp_maytq, inp_juntq, inp_jul, inp_augtq, inp_septq, inp_octtq, inp_novtq, inp_dectq,
+        //     total_quantity
+        // } = data;
+
+        const url = "<?= base_url('cms/global_controller'); ?>";
+        let data = {}; 
+        let modal_alert_success;
+
+        console.log(id);
+        // return;
+
+        if (id !== undefined && id !== null && id !== '') {
+            modal_alert_success = success_update_message;
+            data = {
+                event: "update",
+                table: "tbl_accounts_target_sellout_pa",
+                field: "id",
+                where: id,
+                data: {
+                    payment_group: inp_payment_group,
+                    vendor: inp_vendor,
+                    overall: inp_overall,
+                    kam_kas_kaa: inp_kam_kas_kaa,
+                    sales_group: inp_sales_group,
+                    terms: inp_terms,
+                    channel: inp_channel,
+                    brand: inp_brand,
+                    exclusivity: inp_exclusivity,
+                    category: inp_category, 
+                    lmi_code: inp_lmi_code,
+                    rgdi_code: inp_rgdi_code,
+                    customer_sku_code: inp_sku_code,
+                    item_description: inp_item_description,
+                    item_status: inp_item_status,
+                    srp: inp_srp,
+                    trade_discount: inp_trade_discount,
+                    customer_cost: inp_customer_cost,
+                    customer_cost_net_of_vat: inp_customer_cost_nov,
+                    january_tq: inp_jantq,
+                    february_tq: inp_febtq,
+                    march_tq: inp_martq,
+                    april_tq: inp_aprtq,
+                    may_tq: inp_maytq,
+                    june_tq: inp_juntq,
+                    july_tq: inp_jultq,
+                    august_tq: inp_augtq,
+                    september_tq: inp_septq,
+                    october_tq: inp_octtq,
+                    november_tq: inp_novtq,
+                    december_tq: inp_dectq,
+                    total_quantity: inp_total_quantity,
+                    updated_date: formatDate(new Date()),
+                    updated_by: user_id,
+          
+                }
+            };
+        } else {
+            modal_alert_success = success_save_message;
+            data = {
+                event: "insert",
+                table: "tbl_accounts_target_sellout_pa",
+                data: {
+                    payment_group: inp_payment_group,
+                    vendor: inp_vendor,
+                    overall: inp_overall,
+                    kam_kas_kaa: inp_kam_kas_kaa,
+                    sales_group: inp_sales_group,
+                    terms: inp_terms,
+                    channel: inp_channel,
+                    brand: inp_brand,
+                    exclusivity: inp_exclusivity,
+                    category: inp_category, 
+                    lmi_code: inp_lmi_code,
+                    rgdi_code: inp_rgdi_code,
+                    customer_sku_code: inp_sku_code,
+                    item_description: inp_item_description,
+                    item_status: inp_item_status,
+                    srp: inp_srp,
+                    trade_discount: inp_trade_discount,
+                    customer_cost: inp_customer_cost,
+                    customer_cost_net_of_vat: inp_customer_cost_nov,
+                    january_tq: inp_jantq,
+                    february_tq: inp_febtq,
+                    march_tq: inp_martq,
+                    april_tq: inp_aprtq,
+                    may_tq: inp_maytq,
+                    june_tq: inp_juntq,
+                    july_tq: inp_jultq,
+                    august_tq: inp_augtq,
+                    september_tq: inp_septq,
+                    october_tq: inp_octtq,
+                    november_tq: inp_novtq,
+                    december_tq: inp_dectq,
+                    total_quantity: total_quantity,
+                    updated_date: formatDate(new Date()),
+                    updated_by: user_id,
+                }
+            };
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            modal.loading(false);
+            modal.alert(modal_alert_success, 'success', function() {
+                location.reload();
+            });
+        });
     }
 
-    function paginateData(rowsPerPage) {
-        totalPages = Math.ceil(dataset.length / rowsPerPage);
-        currentPage = 1;
-        display_imported_data();
+    function save_data(action, id) {
+
+        console.log("This is your action: ", action);
+
+        var payment_group = $('#payment_group').val();
+        var vendor = $('#vendor').val();
+        var overall = $('#overall').val();
+        var kam_kas_kaa = $('#kam_kas_kaa').val();
+        var sales_group = $('#sales_group').val();
+        var terms = $('#terms').val();
+        var channel = $('#channel').val();
+        var brand = $('#brand').val();
+        var exclusivity = $('#exclusivity').val();
+        var category = $('#category').val();
+        var lmi_code = $('#lmi_code').val();
+        var rgdi_code = $('#rgdi_code').val();
+        var customer_sku_code = $('#customer_sku_code').val();
+        var item_description = $('#item_description').val();
+        var item_status = $('#item_status').val();
+        var srp = $('#srp').val();
+        var trade_discount = $('#trade_discount').val();
+        var customer_cost = $('#customer_cost').val();
+        var customer_cost_nov = $('#customer_cost_net_of_vat').val();
+        var jan_tq = $('#jan_tq').val();
+        var feb_tq = $('#feb_tq').val();
+        var mar_tq = $('#mar_tq').val();
+        var apr_tq = $('#apr_tq').val();
+        var may_tq = $('#may_tq').val();
+        var jun_tq = $('#jun_tq').val();
+        var jul_tq = $('#jul_tq').val();
+        var aug_tq = $('#aug_tq').val();
+        var sep_tq = $('#sep_tq').val();
+        var oct_tq = $('#oct_tq').val();
+        var nov_tq = $('#nov_tq').val();
+        var dec_tq = $('#dec_tq').val();
+        var totalQty = $('#total_qty').val();
+
+        console.log("Updating record with ID:", id);
+        console.log("Input Values:", {
+            payment_group,
+            vendor,
+            overall,
+            kam_kas_kaa,
+            sales_group,
+            terms,
+            channel,
+            brand,
+            exclusivity,
+            category,
+            lmi_code,
+            rgdi_code,
+            customer_sku_code,
+            item_description,
+            item_status,
+            srp,
+            trade_discount,
+            customer_cost,
+            customer_cost_nov,
+            jan_tq,
+            feb_tq,
+            mar_tq,
+            apr_tq,
+            may_tq,
+            jun_tq,
+            jul_tq,
+            aug_tq,
+            sep_tq,
+            oct_tq,
+            nov_tq,
+            dec_tq,
+            totalQty
+        });
+
+        // let months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+        // let monthlyTq = {};
+
+        // months.forEach(month => {
+        //     monthlyTq[`${month}_tq`] = $(`#${month}_tq`).val();
+        // });
+
+        // let formData = {
+        //     payment_group,
+        //     vendor,
+        //     overall,
+        //     kam_kas_kaa,
+        //     sales_group,
+        //     terms,
+        //     channel,
+        //     brand,
+        //     exclusivity,
+        //     category,
+        //     lmi_code,
+        //     rgdi_code,
+        //     customer_sku_code,
+        //     item_description,
+        //     item_status,
+        //     srp,
+        //     trade_discount,
+        //     customer_cost,
+        //     customer_cost_nov,
+        //     totalQty,
+        //     ...monthlyTq 
+        // };
+
+        // console.log(formData);
+
+        if (validate.standard("form-modal")) {
+            if (id !== undefined && id !== null && id !== '') {
+                modal.confirm(confirm_update_message, function (result) {
+                    if (result) {
+                        modal.loading(true);
+                        save_to_db(
+                            payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, 
+                            channel, brand, exclusivity, category, lmi_code, rgdi_code, 
+                            customer_sku_code, item_description, item_status, srp, 
+                            trade_discount, customer_cost, customer_cost_nov, 
+                            jan_tq, feb_tq, mar_tq, apr_tq, may_tq, jun_tq, jul_tq, aug_tq,
+                            sep_tq, oct_tq, nov_tq, dec_tq, totalQty, id
+                        );
+                    }
+                });
+            }
+        }
     }
 
-    $(document).on('click', '#btn_import ', function() {
-        title = addNbsp('IMPORT TARGET SELL OUT PER ACCOUNT')
-        $("#import_modal").find('.modal-title').find('b').html(title)
-        $("#import_modal").modal('show')
-        clear_import_table()
-    });
+    function delete_data(id) {
+        modal.confirm(confirm_delete_message,function(result){
+            if(result){ 
+                var url = "<?= base_url('cms/global_controller');?>";
+                var data = {
+                    event : "update",
+                    table : "tbl_accounts_target_sellout_pa",
+                    field : "id",
+                    where : id, 
+                    data : {
+                            updated_date : formatDate(new Date()),
+                            updated_by : user_id,
+                            status : -2
+                    }  
+                }
+                aJax.post(url,data,function(result){
+                    var obj = is_json(result);
+                    modal.alert(success_delete_message, "success", function() {
+                        location.reload();
+                    });
+                });
+            }
+
+        });
+    }
+
     
     function read_xl_file() {
         clear_import_table();
@@ -1050,7 +1448,7 @@
     }
 
     function saveValidatedData(valid_data) {
-        let batch_size = 5000; // Process 1000 records at a time
+        let batch_size = 1000; // Process 1000 records at a time
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
         let retry_count = 0;
@@ -1099,231 +1497,6 @@
         setTimeout(processNextBatch, 1000);
     }
 
-    function get_pagination() {
-        var url = "<?= base_url("cms/global_controller");?>";
-        var data = {
-          event : "pagination",
-            select : "id",
-            query : query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_accounts_target_sellout_pa",
-            order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
-            }
-
-        }
-
-        aJax.post(url,data,function(result){
-            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
-            modal.loading(false);
-            pagination.generate(obj.total_page, ".list_pagination", get_data);
-        });
-    }
-
-    pagination.onchange(function(){
-        offset = $(this).val();
-        get_data(query);
-        $('.selectall').prop('checked', false);
-        $('.btn_status').hide();
-        $("#search_query").val("");
-    });
-
-
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
-            offset = 1;
-            var new_query = "(" + query + " AND payment_group LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND vendor LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND kam_kas_kaa LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND sales_group LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND terms LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND brands LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND lmi_code LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND rgdi_code LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND customer_sku_code LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND item_description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND item_status LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND srp LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND trade_discount LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND customer_cost LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND customer_cost_net_of_vat LIKE '%" + keyword + "%')";
-            get_data(new_query);
-            get_pagination();
-            console.log('Pressed key: ' + keyword);
-        }
-    });
-
-
-    function save_data(action, id) {
-        var code = $('#code').val();
-        var description = $('#description').val();
-        var store = $('#store').val();
-        var chk_status = $('#status').prop('checked');
-        var linenum = 0;
-        var unique_store = [];
-        var store_list = $('#store_list');
-        // add_line
-        store_list.find('select').each(function() {
-            linenum++
-            if (!unique_store.includes($(this).val())) {
-                unique_store.push($(this).val())
-            }
-        });
-        if (chk_status) {
-            status_val = 1;
-        } else {
-            status_val = 0;
-        }
-        // return;
-        if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_area", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_update_message,function(result){
-                        if(result){ 
-                             modal.loading(true);
-                            save_to_db(code, description, store, status_val, id, (obj) => {
-                                total_delete('tbl_store_group', 'area_id', id)
-                                let batch = [];
-                                $.each(unique_store, (x, y) => {
-                                    let data = {
-                                        'area_id': id,
-                                        'store_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
-                                batch_insert(batch, 'tbl_store_group', () => {
-                                    modal.loading(false);
-                                    modal.alert(success_save_message, "success", function() {
-                                        location.reload();
-                                    });
-                                })
-                            })
-                        }
-                    });
-
-                }             
-            });
-        }else{
-            check_current_db("tbl_area", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_add_message,function(result){
-                        if(result){ 
-                             modal.loading(true);
-                            save_to_db(code, description, store, status_val, null, (obj) => {
-                                let batch = [];
-                                $.each(unique_store, (x, y) => {
-                                    let data = {
-                                        'area_id': obj.ID,
-                                        'store_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
-                                batch_insert(batch, 'tbl_store_group', () => {
-                                    modal.loading(false);
-                                    modal.alert(success_save_message, "success", function() {
-                                        location.reload();
-                                    });
-                                })
-                            })
-                        }
-                    });
-                }                  
-            });
-        }
-    }
-
-    function total_delete(delete_table, delete_field, delete_where) {
-        data = {
-            event : "total_delete",
-            table : delete_table,
-            field : delete_field,
-            where : delete_where
-        }
-        aJax.post(url,data,function(result){
-            // console.log(result)
-        })
-    }
-
-    function save_to_db(inp_code, inp_description, inp_store, status_val, id, cb) {
-        const url = "<?= base_url('cms/global_controller'); ?>";
-        let data = {}; 
-        let modal_alert_success;
-
-        if (id !== undefined && id !== null && id !== '') {
-            modal_alert_success = success_update_message;
-            data = {
-                event: "update",
-                table: "tbl_area",
-                field: "id",
-                where: id,
-                data: {
-                    code: inp_code,
-                    description: inp_description,
-                    // store: inp_store,
-                    updated_date: formatDate(new Date()),
-                    updated_by: user_id,
-                    status: status_val
-                }
-            };
-        } else {
-            modal_alert_success = success_save_message;
-            data = {
-                event: "insert",
-                table: "tbl_area",
-                data: {
-                    code: inp_code,
-                    description: inp_description,
-                    // store: inp_store,
-                    created_date: formatDate(new Date()),
-                    created_by: user_id,
-                    status: status_val
-                }
-            };
-        }
-
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            cb(obj)
-            // modal.loading(false);
-            // modal.alert(modal_alert_success, "success", function() {
-            //     location.reload();
-            // });
-        });
-    }
-
-    function delete_data(id) {
-        modal.confirm(confirm_delete_message,function(result){
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_accounts_target_sellout_pa",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(success_delete_message, "success", function() {
-                        location.reload();
-                    });
-                });
-            }
-
-        });
-    }
-
     function formatDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); 
@@ -1334,180 +1507,178 @@
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
-    function get_data(new_query) {
-        var data = {
-            event : "list",
-            // select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
-            // lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-            // january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            // total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
-            // total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
-            select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
-            lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-            january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
-            query : new_query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_accounts_target_sellout_pa",
-            order : {
-                field : "updated_date",
-                order : "desc" 
-            }
+    // function get_data(new_query) {
+    //     var data = {
+    //         event : "list",
+    //         // select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
+    //         // lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
+    //         // january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+    //         // total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+    //         // total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
+    //         select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
+    //         lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
+    //         january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+    //         total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
+    //         query : new_query,
+    //         offset : offset,
+    //         limit : limit,
+    //         table : "tbl_accounts_target_sellout_pa",
+    //         order : {
+    //             field : "id, updated_date",
+    //             order : "asc, desc" 
+    //         }
 
-        }
+    //     }
 
-        console.log(data);
+    //     console.log(data);
 
-        aJax.post(url,data,function(result){
-            var result = JSON.parse(result);
-            var html = '';
+    //     aJax.post(url,data,function(result){
+    //         var result = JSON.parse(result);
+    //         var html = '';
 
-            if(result) {
-                if (result.length > 0) {
-                    $.each(result, function(x,y) {
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+    //         if(result) {
+    //             if (result.length > 0) {
+    //                 $.each(result, function(x,y) {
+    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
-                        // console.log("hello word", y.payment_group);
+    //                     html += "<tr class='" + rowClass + "'>";
+    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+    //                     html += "<td scope=\"col\">" + (y.id) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.payment_group, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.vendor, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.overall, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.kam_kas_kaa, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.sales_group, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.terms, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.channel, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.brand, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.exclusivity, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.category, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.lmi_code, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.rgdi_code, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.customer_sku_code, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.item_description, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.item_status, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.srp, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.trade_discount, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.customer_cost, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.customer_cost_net_of_vat, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.january_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.february_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.march_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.april_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.may_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.june_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.july_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.august_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.september_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.october_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.november_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.december_tq, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.total_quantity, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.january_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.february_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.march_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.april_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.may_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.june_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.july_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.august_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.september_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.october_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.november_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.december_ta, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + trimText(y.total_amount, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + status + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
-                        html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + (y.id) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.payment_group, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.vendor, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.overall, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.kam_kas_kaa, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.sales_group, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.terms, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.channel, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.brand, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.exclusivity, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.category, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.lmi_code, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.rgdi_code, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.customer_sku_code, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.item_description, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.item_status, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.srp, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.trade_discount, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.customer_cost, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.customer_cost_net_of_vat, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.january_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.february_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.march_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.april_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.may_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.june_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.july_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.august_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.september_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.october_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.november_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.december_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.total_quantity, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.january_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.february_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.march_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.april_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.may_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.june_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.july_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.august_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.september_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.october_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.november_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.december_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.total_amount, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + status + "</td>";
-                        html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
-                        if (y.id == 0) {
-                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-                        } else {
-                            html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-                            html+="</td>";
-                        }
+    //                     if (y.id == 0) {
+    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+    //                     } else {
+    //                         html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+    //                         html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+    //                         html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+    //                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+    //                         html+="</td>";
+    //                     }
                         
-                        html += "</tr>";   
-                    });
-                } else {
-                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-                }
-            }
-            $('.table_body').html(html);
-        });
-    }
+    //                     html += "</tr>";   
+    //                 });
+    //             } else {
+    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+    //             }
+    //         }
+    //         $('.table_body').html(html);
+    //     });
+    // }
 
     $(document).on('click', '.btn_status', function (e) {
-            var status = $(this).attr("data-status");
-            var modal_obj = "";
-            var modal_alert_success = "";
-            var hasExecuted = false; // Prevents multiple executions
+        var status = $(this).attr("data-status");
+        var modal_obj = "";
+        var modal_alert_success = "";
+        var hasExecuted = false; // Prevents multiple executions
 
-            if (parseInt(status) === -2) {
-                modal_obj = confirm_delete_message;
-                modal_alert_success = success_delete_message;
-                offset = 1;
-            } else if (parseInt(status) === 1) {
-                modal_obj = confirm_publish_message;
-                modal_alert_success = success_publish_message;
-            } else {
-                modal_obj = confirm_unpublish_message;
-                modal_alert_success = success_unpublish_message;
+        if (parseInt(status) === -2) {
+            modal_obj = confirm_delete_message;
+            modal_alert_success = success_delete_message;
+            offset = 1;
+        } else if (parseInt(status) === 1) {
+            modal_obj = confirm_publish_message;
+            modal_alert_success = success_publish_message;
+        } else {
+            modal_obj = confirm_unpublish_message;
+            modal_alert_success = success_unpublish_message;
+        }
+        modal.confirm(modal_obj, function (result) {
+            if (result) {
+                var url = "<?= base_url('cms/global_controller');?>";
+                var dataList = [];
+                
+                $('.select:checked').each(function () {
+                    var id = $(this).attr('data-id');
+                    dataList.push({
+                        event: "update",
+                        table: "tbl_accounts_target_sellout_pa",
+                        field: "id",
+                        where: id,
+                        data: {
+                            status: status,
+                            updated_date: formatDate(new Date())
+                        }
+                    });
+                });
+
+                if (dataList.length === 0) return;
+
+                var processed = 0;
+                dataList.forEach(function (data, index) {
+                    aJax.post(url, data, function (result) {
+                        if (hasExecuted) return; // Prevents multiple executions
+
+                        modal.loading(false);
+                        processed++;
+
+                        if (result === "success") {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                $('.btn_status').hide();
+                                modal.alert(modal_alert_success, "success", function () {
+                                    location.reload();
+                                });
+                            }
+                        } else {
+                            if (!hasExecuted) {
+                                hasExecuted = true;
+                                modal.alert(failed_transaction_message, "error", function () {});
+                            }
+                        }
+                    });
+                });
             }
-            modal.confirm(modal_obj, function (result) {
-                if (result) {
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var dataList = [];
-                    
-                    $('.select:checked').each(function () {
-                        var id = $(this).attr('data-id');
-                        dataList.push({
-                            event: "update",
-                            table: "tbl_area",
-                            field: "id",
-                            where: id,
-                            data: {
-                                status: status,
-                                updated_date: formatDate(new Date())
-                            }
-                        });
-                    });
-    
-                    if (dataList.length === 0) return;
-    
-                    var processed = 0;
-                    dataList.forEach(function (data, index) {
-                        aJax.post(url, data, function (result) {
-                            if (hasExecuted) return; // Prevents multiple executions
-    
-                            modal.loading(false);
-                            processed++;
-    
-                            if (result === "success") {
-                                if (!hasExecuted) {
-                                    hasExecuted = true;
-                                    $('.btn_status').hide();
-                                    modal.alert(modal_alert_success, "success", function () {
-                                        location.reload();
-                                    });
-                                }
-                            } else {
-                                if (!hasExecuted) {
-                                    hasExecuted = true;
-                                    modal.alert(failed_transaction_message, "error", function () {});
-                                }
-                            }
-                        });
-                    });
-                }
-            });
         });
+    });
         
     function trimText(str, length) {
         if (str.length > length) {

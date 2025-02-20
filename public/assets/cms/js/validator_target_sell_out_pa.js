@@ -41,7 +41,7 @@ self.onmessage = function(e) {
             let customer_cost_nov = row["Customer Cost (Net of Vat)"] ? row["Customer Cost (Net of Vat)"].trim() : "";
 
             let monthlyTq = getMonthlyValues(row, "tq");
-            
+
             // let january_tq = row["January"] ? row["January"].trim() : "";
             // let february_tq = row["February"] ? row["February"].trim() : "";
             // let march_tq = row["March"] ? row["March"].trim() : "";
@@ -88,6 +88,7 @@ self.onmessage = function(e) {
                     customer_cost_net_of_vat: customer_cost_nov,
                     ...monthlyTq,
                     total_quantity: totalQty,
+                    status: 1,
                     created_by: user_id,
                     created_date: date_of_creation
                 });
