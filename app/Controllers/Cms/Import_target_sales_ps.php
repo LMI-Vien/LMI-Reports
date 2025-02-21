@@ -29,7 +29,7 @@ class Import_target_sales_ps extends BaseController
 		$data['PageName'] = 'Import Target Sales Per Store';
 		$data['PageUrl'] = 'Import Target Sales Per Store';
 		$data['content'] = "cms/import/target_sales_ps.php";
-		$data['buttons'] = ['add', 'search', 'import'];
+		$data['buttons'] = ['search', 'import'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(

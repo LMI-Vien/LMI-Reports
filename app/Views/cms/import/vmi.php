@@ -300,7 +300,7 @@
             limit : limit,
             table : "tbl_vmi",
             order : {
-                field : "store, updated_date",
+                field : "id, updated_date",
                 order : "asc, desc" 
             }
 
@@ -757,7 +757,7 @@
                     var id = $(this).attr('data-id');
                     dataList.push({
                         event: "update",
-                        table: "tbl_team",
+                        table: "tbl_vmi",
                         field: "id",
                         where: id,
                         data: {

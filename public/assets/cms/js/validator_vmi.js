@@ -38,7 +38,7 @@ self.onmessage = function(e) {
             let ave_sales_unit = row["Ave Sales Unit"] ? row["Ave Sales Unit"].trim() : "";
             let swc = row["SWC"] ? row["SWC"].trim() : "";
             let a202445 = row["202446"] ? row["202446"].trim() : "";
-            let user_id = row["Created By"] ? row["Created By"].trim() : "";
+            let user_id = row["Created by"] ? row["Created by"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
 
 
