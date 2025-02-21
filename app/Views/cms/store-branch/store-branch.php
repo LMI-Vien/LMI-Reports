@@ -145,6 +145,9 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
     var query = "status >= 0";
     var limit = 10; 
@@ -213,16 +216,16 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td style='width: 10%'>" + trimText(y.code) + "</td>";
-                        html += "<td style='width: 20%'>" + trimText(y.description) + "</td>";
-                        html += "<td style='width: 10%'>" + status + "</td>";
-                        html += "<td style='width: 10%'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td style='width: 10%'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.code) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.description) + "</td>";
+                        html += "<td scope=\"col\">" + status + "</td>";
+                        html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
-                            html+="<td class='center-content' style='width: 25%'>";
+                            html+="<td class='center-content' scope=\"col\">";
                             html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"', 'v_', 'view_modal', 'VIEW ')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -918,6 +921,86 @@
             }
         });
     });
+
+    $(document).on('click', '#btn_export', function () {
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                handleExport()
+            }
+        })
+    });
+
+    function handleExport() {
+        var new_query = query; // Default: assign query to new_query
+        
+        var ids = [];
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`'${id}'`); // Collect IDs in an array
+        });
+
+        // Only modify new_query if there are selected checkboxes
+        if (ids.length > 0) {
+            new_query += ' and id in (' + ids.join(', ') + ')';
+        }
+
+        console.log(new_query); // Debugging output
+
+        var data = {
+            event: "list",
+            select: "id, code, description, status, updated_date, created_date",
+            query: new_query,
+            offset: 0,
+            limit: 0,
+            table: "tbl_store",
+            order: {
+                field: "code",
+                order: "asc"
+            }
+        };
+
+        aJax.post(url, data, function (result) {
+            var result = JSON.parse(result);
+            const formattedData = result.map(item => ({
+                // ID: item.id,
+                Code: item.code,
+                Description: item.description,
+                Status: item.status === "1" ? "Active" : "Inactive",
+                "Updated Date": item.updated_date ? item.updated_date : "N/A",
+                "Created Date": item.created_date
+            }));
+
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."], // Row 1
+                ["Masterfile: Store/Branch"], // Row 2
+                ["Date Printed: " + formatDate(new Date())], // Row 3
+                [""], // Empty row for spacing
+            ];
+
+            exportArrayToExcel(formattedData, "Masterfile: Store/Branch - " + formatDate(new Date()), headerData);
+        });
+    };
+
+    function exportArrayToExcel(data, filename, headerData) {
+        // Create a new workbook
+        const workbook = XLSX.utils.book_new();
+
+        // Convert data to worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Append sheet to workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+        // Generate Excel file
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+        // Convert buffer to Blob and trigger download
+        const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        saveAs(blob, filename + ".xlsx");
+    };
 
     function ViewDateformat(dateString) {
         let date = new Date(dateString);
