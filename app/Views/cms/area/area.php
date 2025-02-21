@@ -395,7 +395,7 @@
                     var disabled = '';
                     let $store_list = $('#store_list')
                     $.each(get_area_stores(d.id), (x, y) => {
-                        if (action === 'view') {
+                        if (actions === 'view') {
                             disabled = 'disabled';
                             readonly = 'readonly';
                         } else {
@@ -406,14 +406,14 @@
                             $.each(res, (x, y) => {
                                 // console.log(res);
 
-                                if (action === 'edit') {
+                                if (actions === 'edit') {
                                     readonly = (line == 0) ? 'readonly' : '';
                                     disabled = (line == 0) ? 'disabled' : '';
                                 }
 
                                 let html = `
                                 <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                    <input id='store_${line}' class='form-control' value='${y}' ${action === 'view' ? 'readonly' : ''}>
+                                    <input id='store_${line}' class='form-control' value='${y}' ${actions === 'view' ? 'readonly' : ''}>
                                     <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
                                         <i class="fa fa-minus" aria-hidden="true"></i>
                                     </button>
@@ -963,7 +963,7 @@
         get_data(query);
     })
 
-    function save_data(action, id) {
+    function save_data(actions, id) {
         var code = $('#code').val();
         var description = $('#description').val();
         var store = $('#store').val();
@@ -1054,6 +1054,7 @@
                                         });
                                     })
                                 });
+                               
                                 batch_insert(url, batch, 'tbl_store_group', false, () => {
                                     modal.loading(false);
                                     modal.alert(success_save_message, "success", function() {

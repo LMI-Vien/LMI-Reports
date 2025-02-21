@@ -1207,6 +1207,19 @@ function goToLastPage() {
     }
 }
 
+function total_delete(url, delete_table, delete_field, delete_where) {
+    data = {
+        event : "total_delete",
+        table : delete_table,
+        field : delete_field,
+        where : delete_where
+    }
+    aJax.post(url,data,function(result){
+        // console.log(result)
+    })
+}
+
+
 function batch_update(url, data, table, primaryKey, get_code, callback) {
     aJax.post(url, { event: "batch_update", table, field: primaryKey, data, get_code, where_in: data.map(item => item[primaryKey]) }, response => callback(JSON.parse(response)));
 }
