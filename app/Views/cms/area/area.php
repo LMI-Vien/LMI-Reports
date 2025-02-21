@@ -33,6 +33,10 @@
         background-color: gray !important;
         color: black !important;
     }
+
+    .ui-widget {
+        z-index: 1051 !important;
+    }
 </style>
 
     <div class="content-wrapper p-4">
@@ -125,8 +129,8 @@
                                     </button>
                                 </div> -->
                             </div>
-                            <datalist id="stores">
-                            </datalist>
+                            <!-- <datalist id="stores">
+                            </datalist> -->
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -200,6 +204,8 @@
             </div>
         </div>
     </div>
+
+
     
 <script>
     var query = "status >= 0";
@@ -266,9 +272,7 @@
         };
 
         if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
-        console.log('Action: ', actions);
         let isReadOnly = actions === 'view';
-        // console.log('Readonly', isReadOnly);
         set_field_state('#code, #description, #status, #store_0', isReadOnly);
         
         $store_list.empty()
@@ -278,14 +282,23 @@
             let line = get_max_number();
 
             let html = `
-            <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <input list="stores" id="store_${line}" class="form-control" placeholder="Select store">
-                <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
+            <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                <input id='store_${line}' class='form-control'>
+                <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
             </div>
             `;
-            $store_list.append(html)
+
+            $('#store_list').append(html);
+
+            $(`#store_${line}`).autocomplete({
+                source: function(request, response) {
+                    var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                    var uniqueResults = [...new Set(results)];
+                    response(uniqueResults.slice(0, 10));
+                },
+            });
             $('.add_line').attr('disabled', false)
             $('.add_line').attr('readonly', false)
             $footer.append(buttons.save)
@@ -330,14 +343,23 @@
         let line = get_max_number() + 1;
 
         let html = `
-        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-            <input list="stores" id="store_${line}" placeholder="Select store" class="form-control">
+        <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+            <input id='store_${line}'>
             <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                 <i class="fa fa-minus" aria-hidden="true"></i>
             </button>
         </div>
         `;
+
         $('#store_list').append(html);
+
+        $(`#store_${line}`).autocomplete({
+            source: function(request, response) {
+                var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                var uniqueResults = [...new Set(results)];
+                response(uniqueResults.slice(0, 10));
+            },
+        });
         get_store('', `store_${line}`);
     }
 
@@ -368,7 +390,6 @@
                     var disabled = '';
                     let $store_list = $('#store_list')
                     $.each(get_area_stores(d.id), (x, y) => {
-                        console.log('store: ', y.store_id);
                         if (action === 'view') {
                             disabled = 'disabled';
                             readonly = 'readonly';
@@ -377,7 +398,6 @@
                             disabled = ''
                         }
                         get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
-                            console.log(res);
                             $.each(res, (x, y) => {
                                 // console.log(res);
 
@@ -387,14 +407,23 @@
                                 }
 
                                 let html = `
-                                <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                    <input list="stores" id="store_${line}" value="${y}" class="form-control" ${action === 'view' ? 'readonly' : ''}>
-                                    <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
+                                <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                    <input id='store_${line}' class='form-control' value='${y}' ${action === 'view' ? 'readonly' : ''}>
+                                    <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
                                         <i class="fa fa-minus" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 `;
-                                $store_list.append(html)
+
+                                $('#store_list').append(html);
+
+                                $(`#store_${line}`).autocomplete({
+                                    source: function(request, response) {
+                                        var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                                        var uniqueResults = [...new Set(results)];
+                                        response(uniqueResults.slice(0, 10));
+                                    },
+                                });
                                 get_store(x, `store_${line}`);
                                 line++
                             });
@@ -509,14 +538,12 @@
             var result = JSON.parse(res);
             // var html = '<option id="default_val" value=" ">Select Store</option>';
             var html = '';
-
-            console.log(result);
     
             if(result) {
                 if (result.length > 0) {
                     var selected = '';
                     
-                    result.slice(0, 5).forEach(function (y) {
+                    result.forEach(function (y) {
                         storeDescriptions.push(y.description);
                         html += `<option value="${y.description}">`;
                     });
