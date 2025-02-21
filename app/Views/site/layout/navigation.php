@@ -6,7 +6,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 200px;
-        transition: all 0.3s ease-in-out;
+        /* transition: all 0.3s ease-in-out; */
     }
 
     #dynamic-menu .nav-item.dropdown.expanded {
@@ -15,7 +15,7 @@
         background: white;
         border: 2px solid black;
         border-radius: 5px;
-        padding: 5px;
+        /* padding: 5px; */
     }
 
     #dynamic-menu .nav-item.dropdown .dropdown-menu {
@@ -25,7 +25,7 @@
         left: 0;
         background: white;
         border: 2px solid black;
-        padding: 5px;
+        /* padding: 5px; */
         box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
         z-index: 10;
     }

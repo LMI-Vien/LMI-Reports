@@ -33,6 +33,10 @@
         background-color: gray !important;
         color: black !important;
     }
+
+    .ui-widget {
+        z-index: 1051 !important;
+    }
 </style>
 
     <div class="content-wrapper p-4">
@@ -125,8 +129,8 @@
                                     </button>
                                 </div> -->
                             </div>
-                            <datalist id="stores">
-                            </datalist>
+                            <!-- <datalist id="stores">
+                            </datalist> -->
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -202,9 +206,8 @@
         </div>
     </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
+    
 <script>
     var query = "status >= 0";
     var limit = 10; 
@@ -276,6 +279,8 @@
         };
 
         if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
+        let isReadOnly = actions === 'view';
+        set_field_state('#code, #description, #status, #store_0', isReadOnly);
         
         $store_list.empty()
         $footer.empty();
@@ -284,15 +289,25 @@
             let line = get_max_number();
 
             let html = `
-            <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <input list="stores" id="store_${line}" class="form-control" placeholder="Select store">
-                <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
+            <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                <input id='store_${line}' class='form-control'>
+                <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
             </div>
             `;
-            $store_list.append(html)
-            set_field_state('.add_line', false)
+
+            $('#store_list').append(html);
+
+            $(`#store_${line}`).autocomplete({
+                source: function(request, response) {
+                    var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                    var uniqueResults = [...new Set(results)];
+                    response(uniqueResults.slice(0, 10));
+                },
+            });
+            $('.add_line').attr('disabled', false)
+            $('.add_line').attr('readonly', false)
             $footer.append(buttons.save)
         };
         if (actions === 'edit') {
@@ -333,14 +348,23 @@
         let line = get_max_number() + 1;
 
         let html = `
-        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-            <input list="stores" id="store_${line}" placeholder="Select store" class="form-control">
+        <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+            <input id='store_${line}'>
             <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                 <i class="fa fa-minus" aria-hidden="true"></i>
             </button>
         </div>
         `;
+
         $('#store_list').append(html);
+
+        $(`#store_${line}`).autocomplete({
+            source: function(request, response) {
+                var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                var uniqueResults = [...new Set(results)];
+                response(uniqueResults.slice(0, 10));
+            },
+        });
         get_store('', `store_${line}`);
     }
 
@@ -371,19 +395,44 @@
                     var disabled = '';
                     let $store_list = $('#store_list')
                     $.each(get_area_stores(d.id), (x, y) => {
-                        disabled = readonly = (line === 0 || actions === 'view') ? 'disabled' : '';
-                        if (disabled !== 'disabled') readonly = '';
-                        let html = `
-                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                            <select name="store" class="form-control store_drop required" id="store_${line}"></select>
-                            <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
-                                <i class="fa fa-minus" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        `;
-                        $store_list.append(html)
-                        get_store(y.store_id, `store_${line}`);
-                        line++
+                        if (action === 'view') {
+                            disabled = 'disabled';
+                            readonly = 'readonly';
+                        } else {
+                            readonly = '';
+                            disabled = ''
+                        }
+                        get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
+                            $.each(res, (x, y) => {
+                                // console.log(res);
+
+                                if (action === 'edit') {
+                                    readonly = (line == 0) ? 'readonly' : '';
+                                    disabled = (line == 0) ? 'disabled' : '';
+                                }
+
+                                let html = `
+                                <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                    <input id='store_${line}' class='form-control' value='${y}' ${action === 'view' ? 'readonly' : ''}>
+                                    <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+                                        <i class="fa fa-minus" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                `;
+
+                                $('#store_list').append(html);
+
+                                $(`#store_${line}`).autocomplete({
+                                    source: function(request, response) {
+                                        var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                                        var uniqueResults = [...new Set(results)];
+                                        response(uniqueResults.slice(0, 10));
+                                    },
+                                });
+                                get_store(x, `store_${line}`);
+                                line++
+                            });
+                        });
                     })
                     if(d.status == 1) {
                         $('#status').prop('checked', true)
@@ -561,7 +610,7 @@
                 if (result.length > 0) {
                     var selected = '';
                     
-                    result.slice(0, 5).forEach(function (y) {
+                    result.forEach(function (y) {
                         storeDescriptions.push(y.description);
                         html += `<option value="${y.description}">`;
                     });
