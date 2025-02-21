@@ -48,4 +48,9 @@ class Asc extends BaseController
 		return view("cms/layout/template", $data);		
 	}
 
+	public function get_valid_ba_data(){
+		$areas = $this->Global_model->get_valid_records("tbl_area", 'description');
+		return $this->response->setJSON(["areas" => $areas]);
+	}
+
 }

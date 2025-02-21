@@ -34,6 +34,8 @@
 <script>
 var base_url = '<?= base_url();?>';
 $(document).ready(function () {
+    localStorage.removeItem('activeSubMenu');
+    localStorage.removeItem('activeMenu');
     $("#loginFormAdmin").on("submit", function (e) {
         e.preventDefault();
 

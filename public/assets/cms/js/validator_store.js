@@ -1,5 +1,6 @@
-self.onmessage = function(e) {
-    let data = e.data;
+self.onmessage = async function(e) {
+    let data = e.data.data;
+    let BASE_URL = e.data.base_url;
     let invalid = false;
     let errorLogs = [];
     let unique_code = new Set();
@@ -25,7 +26,6 @@ self.onmessage = function(e) {
             let status = row["Status"] ? row["Status"].toLowerCase() : "";
             let user_id = row["Created By"] ? row["Created By"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
-
             if (unique_code.has(code)) {
                 invalid = true;
                 errorLogs.push(`⚠️ Duplicated Code at line #: ${tr_count}`);

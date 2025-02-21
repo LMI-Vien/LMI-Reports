@@ -1,6 +1,6 @@
-self.onmessage = function(e) {
-    console.log("Worker received data:", e.data);
-    let data = e.data;
+self.onmessage = async function(e) {
+    let data = e.data.data;
+    let BASE_URL = e.data.base_url;
     let invalid = false;
     let errorLogs = [];
     let unique_code = new Set();
@@ -20,7 +20,6 @@ self.onmessage = function(e) {
 
         for (let i = 0; i < batchSize && index < data.length; i++, index++) {
             let row = data[index];
-            console.log(`Processing row ${index + 1}:`, row);
             let tr_count = index + 1;
             let code = row["Code"] ? row["Code"].trim() : "";
             let team_description = row["Team_Description"] ? row["Team_Description"].trim() : "";
@@ -30,7 +29,6 @@ self.onmessage = function(e) {
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
 
             if (unique_code.has(code)) {
-                console.log(`Duplicate Code found at line ${tr_count}:`, code);
                 invalid = true;
                 errorLogs.push(`⚠️ Duplicated Code at line #: ${tr_count}`);
                 err_counter++;
@@ -43,7 +41,6 @@ self.onmessage = function(e) {
             }
 
             if (unique_team_description.has(team_description)) {
-                console.log(`Duplicate Code found at line ${tr_count}:`, team_description);
                 invalid = true;
                 errorLogs.push(`⚠️ Duplicated Team Description at line #: ${tr_count}`);
                 err_counter++;
@@ -56,7 +53,6 @@ self.onmessage = function(e) {
             }
 
             if (!["active", "inactive"].includes(status)) {
-                console.log(`Invalid Status at line ${tr_count}:`, status);
                 invalid = true;
                 errorLogs.push(`⚠️ Invalid Status at line #: ${tr_count}`);
                 err_counter++;

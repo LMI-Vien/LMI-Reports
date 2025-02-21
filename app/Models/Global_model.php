@@ -105,7 +105,7 @@ class Global_model extends Model
         
         $builder = $this->db->table('cms_users')
                             ->where('email', $email)
-                            ->where('status', 1);	
+                            ->where('status', 1);   
         $query = $builder->get();
         return $query->getResult();
 
@@ -116,7 +116,7 @@ class Global_model extends Model
         $builder = $this->db->table('cms_users')
                             ->where('id', $user_id)
                             ->where('password', $password)
-                            ->where('status', 1);	
+                            ->where('status', 1);   
         $query = $builder->get();
         return $query->getResult();
 
@@ -146,7 +146,7 @@ class Global_model extends Model
             return $fquery->getResult();
         } else {
             return null;
-        }	
+        }   
     }
     
     function get_by_id($table, $id) {
@@ -324,13 +324,13 @@ class Global_model extends Model
     function save_data($table, $data)
     {
         $return = $this->db
-			 	->table($table)
-			 	->insert($data);
-		if($return):
+                ->table($table)
+                ->insert($data);
+        if($return):
             return $this->db->insertID();
-		else:
-			return "failed";
-		endif;
+        else:
+            return "failed";
+        endif;
     }
 
     function update_data($table,$data,$field,$where)
@@ -349,29 +349,74 @@ class Global_model extends Model
     function total_delete($table,$field,$where)
     {
         $return = $this->db
-			 	->table($table)
-				->where($field, $where)
-				->delete();
-		if($return):
-			return "success";
-		else:
-			return "failed";
-		endif;
-        // return "$table,$field,$where";
-    }
-
-    function batch_update($table,$data,$field,$where_in)
-    {
-        $return = $this->db
                 ->table($table)
-                ->whereIn($field, $where_in)
-                ->update($data);
-    
+                ->where($field, $where)
+                ->delete();
         if($return):
             return "success";
         else:
             return "failed";
         endif;
+        // return "$table,$field,$where";
+    }
+
+    // public function batch_update($table, $data, $primaryKey, $get_code, $where_in) {
+    //     if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
+    //         return "failed";
+    //     }
+
+    //     if (!isset($get_code)) {
+    //         $get_code = false; // Ensure `$get_code` is always defined
+    //     }
+
+    //     $updateData = [];
+    //     $updatedIds = []; // To store the updated primary keys
+    //     foreach ($data as $row) {
+    //         if (isset($row[$primaryKey]) && in_array($row[$primaryKey], $where_in)) {
+    //             $updateData[] = $row;
+    //             $updatedIds[] = $row[$primaryKey]; 
+    //         }
+
+    //     }
+
+    //     if (empty($updateData)) {
+    //         return "failed"; 
+    //     }
+
+    //     $result = $this->db->table($table)->updateBatch($updateData, $primaryKey);
+    //     return $result ? $updatedIds : "failed";
+    // }
+
+    public function batch_update($table, $data, $primaryKey, $get_code = null, $where_in = null) {
+        if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
+            return false; // Return false instead of string for consistency
+        }
+        // Prepare batch update data and collect updated IDs
+        $updateData = [];
+        $updatedIds = []; // To store the updated primary keys 
+
+        foreach ($data as $row) {
+            if (isset($row[$primaryKey]) && in_array($row[$primaryKey], $where_in)) {
+                $updateData[] = $row;
+
+                $entry = ['id' => $row[$primaryKey]];
+
+                // Include 'code' if required
+                if ($get_code === true && isset($row['code']) || $get_code == 'true' && isset($row['code'])) {
+                    $entry['code'] = $row['code'];
+                }
+
+                $updatedIds[] = $entry; // Store unique updated entries
+            }
+        }
+
+        if (empty($updateData)) {
+            return false;
+        }
+
+        // Perform batch update
+        $result = $this->db->table($table)->updateBatch($updateData, $primaryKey);
+        return $result ? $updatedIds : false;
     }
 
     function batch_sort_update_data($table,$data,$field,$where)
@@ -391,14 +436,14 @@ class Global_model extends Model
     function delete_data($table, $id)
     {
         $return = $this->db
-			 	->table($table)
-				->where("id", $id)
-				->delete();
-		if($return):
-			return "success";
-		else:
-			return "failed";
-		endif;
+                ->table($table)
+                ->where("id", $id)
+                ->delete();
+        if($return):
+            return "success";
+        else:
+            return "failed";
+        endif;
     }
     
     function tagging_delete_data($table, $id)
@@ -583,27 +628,27 @@ class Global_model extends Model
 
 
     function list_tables()
-	{
-		return $this->db->listTables();
-	}
+    {
+        return $this->db->listTables();
+    }
 
-	function list_fields($table)
-	{
-		return $this->db->getFieldNames($table);
-	}
+    function list_fields($table)
+    {
+        return $this->db->getFieldNames($table);
+    }
     function check_field($table, $field, $path)
-	{
-		$builder = $this->db->table($table);
-		$builder->like($field, $path);
-		$query = $builder->get();
-		return $query->getNumRows();
-	}
+    {
+        $builder = $this->db->table($table);
+        $builder->like($field, $path);
+        $query = $builder->get();
+        return $query->getNumRows();
+    }
     function count_list($table)
-	{
-		$builder = $this->db->table($table);
-		$query = $builder->get();
-		return $query->getNumRows();
-	}
+    {
+        $builder = $this->db->table($table);
+        $query = $builder->get();
+        return $query->getNumRows();
+    }
 
     public function get_site_url($site_id)
     {
@@ -703,8 +748,61 @@ class Global_model extends Model
                 ];
             }
         }
-
         return ['status' => 'success', 'message' => 'No duplicates found.'];
+    }
+
+    public function fetch_existing($table, $selected_fields, $field = null, $value = null, $status = false)
+    {
+        if (empty($table) || empty($selected_fields)) {
+            return [];
+        }
+
+        $builder = $this->db->table($table);
+        $builder->select($selected_fields);
+        if($status == 'true' || $status === true){
+            $builder->where('status >=', 0);            
+        }
+
+        if($field){
+            $builder->where($field, $value);
+        }
+
+        return $builder->get()->getResultArray();
+    }
+    
+    public function fetch_existing_custom($table, $select, $field = null, $value = null, $lookup_field = null)
+    {
+                $builder = $this->db->table($table);
+                $builder->select($select);
+                $builder->where($field, $value);
+                $query = $builder->get();
+                
+                // Send back the result
+                if ($query->getNumRows() > 0) {
+                    $data = $query->getResultArray();
+                    return json_encode(['data' => array_column($data, $lookup_field)]);
+                } else {
+                    return json_encode(['data' => []]);
+                }
+    }
+
+    public function batch_delete($table, $field, $field_value, $where_in){
+        $builder = $this->db->table($table);
+        $builder->whereIn($field, $field_value);
+        $result = $builder->delete();
+        if ($result) {
+            return json_encode(['message' => 'success']);
+        } else {
+            return json_encode(['message' => 'failed']);
+        }
+    }
+
+    function get_valid_records($table, $column_name) {
+        return $this->db->table($table)
+            ->select('id, ' . $column_name)
+            ->where('status', 1)
+            ->get()
+            ->getResultArray();
     }
 
     function getStoresByAreaWhereIn($areaCode) {

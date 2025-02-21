@@ -88,12 +88,26 @@ $routes->group('cms/', static function ($routes) {
     });
     
     $routes->get('agency', 'Cms\Agency::index');
-    $routes->get('brand-ambassador', 'Cms\Brand_Ambassador::index');
+
+    $routes->group('brand-ambassador', static function ($routes) {
+        $routes->get('/', 'Cms\Brand_Ambassador::index');
+        $routes->get('get_valid_ba_data', 'Cms\Brand_Ambassador::get_valid_ba_data');
+    });
+    
     $routes->get('team', 'Cms\Team::index');
 
     $routes->get('store-branch', 'Cms\Store_Branch::index');
-    $routes->get('asc', 'Cms\Asc::index');
-    $routes->get('area', 'Cms\Area::index');
+
+    $routes->group('area', static function ($routes) {
+        $routes->get('/', 'Cms\Area::index');
+        $routes->get('get_valid_ba_data', 'Cms\Area::get_valid_ba_data');
+    });
+
+
+    $routes->group('asc', static function ($routes) {
+        $routes->get('/', 'Cms\Asc::index');
+        $routes->get('get_valid_ba_data', 'Cms\Asc::get_valid_ba_data');
+    });
 
         //Audit trail
     $routes->group('Audit_trail/', static function ($routes) {
