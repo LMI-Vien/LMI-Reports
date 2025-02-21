@@ -1,3 +1,4 @@
+<!-- <?= phpinfo() ?> -->
 <div class="content-wrapper p-4">
     <div class="card">
         <div class="text-center page-title md-center">
@@ -132,28 +133,32 @@
                             <b>Extracted Data</b>
                         </div>
     
-                        <div class="import_buttons">
-                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
-                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                            </label>
-                            <input
-                                type="file"
-                                style="padding-left: 10px;"
-                                id="file"
-                                accept=".xls,.xlsx,.csv"
-                                aria-describedby="import_files"
-                                onclick="clear_import_table()"
-                            >
+                        <div class="import_buttons row">
+                            <div class="col-4">
+                                <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
+                                    <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                                </label>
+                                <input
+                                    type="file"
+                                    style="padding-left: 10px;"
+                                    id="file"
+                                    accept=".xls,.xlsx,.csv"
+                                    aria-describedby="import_files"
+                                    onclick="clear_import_table()"
+                                >
+            
+                                <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px; margin-bottom: 10px" onclick="read_xl_file()">
+                                    <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                                </label>
+                            </div>
 
-                            <!-- nextButton -->
-        
-                            <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                            </label>
+                            <div class="col"></div>
 
-                            <!-- <label for="preview" class="custom-file-upload save" id="nextButton" style="margin-top: 10px">
-                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Next
-                            </label> -->
+                            <div class="col-3">
+                                <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
+                                    <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
+                                </label>
+                            </div>
                         </div>
     
                         <table class="table table-bordered listdata">
@@ -177,12 +182,16 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
+                <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var query = "status >= 0";

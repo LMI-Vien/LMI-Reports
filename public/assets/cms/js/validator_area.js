@@ -61,6 +61,7 @@ self.onmessage = async function(e) {
                     for (let key in store_lookup) {
                         normalized_store_lookup[key.toLowerCase()] = store_lookup[key];
                     }
+                    
                     for (i = 0; i < stores.length; ++i) {
                         let store_lower = stores[i].toLowerCase();
                         if (store_lower in normalized_store_lookup) {

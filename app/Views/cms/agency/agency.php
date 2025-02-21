@@ -229,16 +229,16 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td style='width: 10%'>" + trimText(y.code, 10) + "</td>";
-                        html += "<td style='width: 20%'>" + trimText(y.agency, 10) + "</td>";
-                        html += "<td style='width: 10%'>" +status+ "</td>";
-                        html += "<td class='center-content' style='width: 10%; min-width: 200px'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td class='center-content' style='width: 10%; min-width: 200px'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.agency, 10) + "</td>";
+                        html += "<td scope=\"col\">" +status+ "</td>";
+                        html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
-                          html+="<td class='center-content' style='width: 20%; min-width: 300px'>";
+                          html+="<td class='center-content' scope=\"col\">";
                           html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                           html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"

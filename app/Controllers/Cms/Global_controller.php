@@ -187,6 +187,49 @@ class Global_controller extends BaseController
 		        echo json_encode(['error' => $e->getMessage()]);
 		    }
 		    break; 
+			case 'store_by_area_where_in':
+				try {
+					$areaCode = $this->request->getPost('area_codes');
+					$result_data = $this->Global_model->getStoresByAreaWhereIn($areaCode);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'store_by_area':
+				try {
+					$result_data = $this->Global_model->getStoresByArea();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_asc_where_in':
+				try {
+					$ascCode = $this->request->getPost('asc_codes');
+					$result_data = $this->Global_model->get_asc_where_in($ascCode);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_asc':
+				try {
+					$ascOffset = $this->request->getPost('asc_offset');
+					$result_data = $this->Global_model->get_asc($ascOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_asc_count':
+				try {
+					$result_data = $this->Global_model->get_asc_masterfile_count();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
 			case 'insert':
 				try { 
 					$table = $_POST['table'];

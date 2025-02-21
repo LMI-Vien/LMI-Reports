@@ -105,7 +105,7 @@ class Global_model extends Model
         
         $builder = $this->db->table('cms_users')
                             ->where('email', $email)
-                            ->where('status', 1);	
+                            ->where('status', 1);   
         $query = $builder->get();
         return $query->getResult();
 
@@ -116,7 +116,7 @@ class Global_model extends Model
         $builder = $this->db->table('cms_users')
                             ->where('id', $user_id)
                             ->where('password', $password)
-                            ->where('status', 1);	
+                            ->where('status', 1);   
         $query = $builder->get();
         return $query->getResult();
 
@@ -146,7 +146,7 @@ class Global_model extends Model
             return $fquery->getResult();
         } else {
             return null;
-        }	
+        }   
     }
     
     function get_by_id($table, $id) {
@@ -324,13 +324,13 @@ class Global_model extends Model
     function save_data($table, $data)
     {
         $return = $this->db
-			 	->table($table)
-			 	->insert($data);
-		if($return):
+                ->table($table)
+                ->insert($data);
+        if($return):
             return $this->db->insertID();
-		else:
-			return "failed";
-		endif;
+        else:
+            return "failed";
+        endif;
     }
 
     function update_data($table,$data,$field,$where)
@@ -349,14 +349,14 @@ class Global_model extends Model
     function total_delete($table,$field,$where)
     {
         $return = $this->db
-			 	->table($table)
-				->where($field, $where)
-				->delete();
-		if($return):
-			return "success";
-		else:
-			return "failed";
-		endif;
+                ->table($table)
+                ->where($field, $where)
+                ->delete();
+        if($return):
+            return "success";
+        else:
+            return "failed";
+        endif;
         // return "$table,$field,$where";
     }
 
@@ -436,14 +436,14 @@ class Global_model extends Model
     function delete_data($table, $id)
     {
         $return = $this->db
-			 	->table($table)
-				->where("id", $id)
-				->delete();
-		if($return):
-			return "success";
-		else:
-			return "failed";
-		endif;
+                ->table($table)
+                ->where("id", $id)
+                ->delete();
+        if($return):
+            return "success";
+        else:
+            return "failed";
+        endif;
     }
     
     function tagging_delete_data($table, $id)
@@ -628,27 +628,27 @@ class Global_model extends Model
 
 
     function list_tables()
-	{
-		return $this->db->listTables();
-	}
+    {
+        return $this->db->listTables();
+    }
 
-	function list_fields($table)
-	{
-		return $this->db->getFieldNames($table);
-	}
+    function list_fields($table)
+    {
+        return $this->db->getFieldNames($table);
+    }
     function check_field($table, $field, $path)
-	{
-		$builder = $this->db->table($table);
-		$builder->like($field, $path);
-		$query = $builder->get();
-		return $query->getNumRows();
-	}
+    {
+        $builder = $this->db->table($table);
+        $builder->like($field, $path);
+        $query = $builder->get();
+        return $query->getNumRows();
+    }
     function count_list($table)
-	{
-		$builder = $this->db->table($table);
-		$query = $builder->get();
-		return $query->getNumRows();
-	}
+    {
+        $builder = $this->db->table($table);
+        $query = $builder->get();
+        return $query->getNumRows();
+    }
 
     public function get_site_url($site_id)
     {
@@ -805,4 +805,25 @@ class Global_model extends Model
             ->getResultArray();
     }
 
+    function getStoresByAreaWhereIn($areaCode) {
+        $query = $this->db->query("CALL get_store_per_area_where_in($areaCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function getStoresByArea() {
+        $query = $this->db->query("CALL get_store_per_area()");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_asc_where_in($ascCode) {
+        $query = $this->db->query("CALL get_asc_where_in($ascCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_asc($ascOffset) {
+        $query = $this->db->query("CALL get_asc($ascOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_asc_masterfile_count() {
+        $query = $this->db->query("CALL get_asc_masterfile_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
 }

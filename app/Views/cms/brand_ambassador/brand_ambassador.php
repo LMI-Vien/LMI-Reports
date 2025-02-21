@@ -258,8 +258,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                     <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -983,7 +983,7 @@
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_brand_ambassador';
         let selected_fields = ['id', 'code', 'name'];
-        
+
         let existingMapByCode = new Map();
         let existingMapByName = new Map();
         matchType = "OR";

@@ -199,8 +199,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                     <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
