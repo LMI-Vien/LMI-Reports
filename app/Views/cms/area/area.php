@@ -280,7 +280,7 @@
 
         if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
         let isReadOnly = actions === 'view';
-        set_field_state('#code, #description, #status, #store_0', isReadOnly);
+        set_field_state('#code, #description, #status', isReadOnly);
         
         $store_list.empty()
         $footer.empty();
@@ -290,7 +290,7 @@
 
             let html = `
             <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <input id='store_${line}' class='form-control'>
+                <input id='store_${line}' class='form-control' placeholder='Select store'>
                 <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
@@ -349,7 +349,7 @@
 
         let html = `
         <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-            <input id='store_${line}'>
+            <input id='store_${line}' class='form-control' placeholder='Select store'>
             <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                 <i class="fa fa-minus" aria-hidden="true"></i>
             </button>
@@ -413,7 +413,7 @@
 
                                 let html = `
                                 <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                    <input id='store_${line}' class='form-control' value='${y}' ${actions === 'view' ? 'readonly' : ''}>
+                                    <input id='store_${line}' class='form-control' placeholder='Select store' value='${y}' ${actions === 'view' ? 'readonly' : ''}>
                                     <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
                                         <i class="fa fa-minus" aria-hidden="true"></i>
                                     </button>
@@ -1037,31 +1037,44 @@
                 if (!exists) {
                     modal.confirm(confirm_add_message,function(result){
                         if(result){ 
-                            modal.loading(true);
-                            save_to_db(code, description, store, status_val, null, (obj) => {
-                                let batch = [];
-
-                                $.each(unique_store, (x, y) => {
-                                    get_field_values('tbl_store', 'id', 'description', [y], (res) => {
+                            let batch = [];
+                            let valid = true;
+                            $.each(unique_store, (x, y) => {
+                                get_field_values('tbl_store', 'id', 'description', [y], (res) => {
+                                    if(res.length == 0) {
+                                        valid = false;
+                                    } else {
+                                        modal_alert = 'success';
                                         $.each(res, (x, y) => {
                                             let data = {
-                                                'area_id': obj.ID,
+                                                'area_id': id,
                                                 'store_id': y,
                                                 'created_by': user_id,
                                                 'created_date': formatDate(new Date())
                                             };
                                             batch.push(data);
-                                        });
-                                    })
-                                });
-                               
-                                batch_insert(url, batch, 'tbl_store_group', false, () => {
-                                    modal.loading(false);
-                                    modal.alert(success_save_message, "success", function() {
-                                        location.reload();
-                                    });
+                                        })
+                                    }
                                 })
                             })
+
+                            if(valid) {
+                                save_to_db(code, description, store, status_val, id, (obj) => {
+                                    total_delete(url, 'tbl_store_group', 'area_id', id);
+
+                                    batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                        modal.loading(false);
+                                        modal.alert(success_update_message, "success", function() {
+                                            location.reload();
+                                        });
+                                    })
+                                })
+                                
+                            } else {
+                                // alert('mali');
+                                modal.loading(false);
+                                modal.alert('Store not found', 'error', function() {});
+                            }
                         }
                     });
                 }                  
