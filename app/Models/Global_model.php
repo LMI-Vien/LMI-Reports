@@ -707,5 +707,25 @@ class Global_model extends Model
         return ['status' => 'success', 'message' => 'No duplicates found.'];
     }
 
+    function getStoresByAreaWhereIn($areaCode) {
+        $query = $this->db->query("CALL get_store_per_area_where_in($areaCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function getStoresByArea() {
+        $query = $this->db->query("CALL get_store_per_area()");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_asc_where_in($ascCode) {
+        $query = $this->db->query("CALL get_asc_where_in($ascCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_asc($ascOffset) {
+        $query = $this->db->query("CALL get_asc($ascOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
 
+    function get_asc_masterfile_count() {
+        $query = $this->db->query("CALL get_asc_masterfile_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
 }

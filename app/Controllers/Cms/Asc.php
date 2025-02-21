@@ -29,7 +29,7 @@ class Asc extends BaseController
 		$data['PageName'] = 'Area Sales Coordinator';
 		$data['PageUrl'] = 'Area Sales Coordinator';
 		$data['content'] = "cms/asc/asc.php";
-		$data['buttons'] = ['add', 'search', 'import'];
+		$data['buttons'] = ['add', 'search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
 				"assets/js/xlsx.full.min.js",

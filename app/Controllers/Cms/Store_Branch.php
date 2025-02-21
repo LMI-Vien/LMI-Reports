@@ -29,7 +29,7 @@ class Store_Branch extends BaseController
 		$data['PageName'] = 'Store/Branch';
 		$data['PageUrl'] = 'Store/Branch';
 		$data['content'] = "cms/store-branch/store-branch.php";
-		$data['buttons'] = ['add', 'search', 'import'];
+		$data['buttons'] = ['add', 'search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
 				"assets/js/xlsx.full.min.js",

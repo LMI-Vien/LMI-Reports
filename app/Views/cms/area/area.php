@@ -55,7 +55,7 @@
                                     <tr>
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
                                         <th class='center-content'>Code</th>
-                                        <th class='center-content'>Area Description</th>
+                                        <th class='center-content'>Area</th>
                                         <!-- <th class='center-content'>Store</th> -->
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
@@ -157,7 +157,35 @@
                                 <b>Extracted Data</b>
                             </div>
 
-                            <div class="import_buttons">
+                            <div class="import_buttons row">
+                                <div class="col-4">
+                                    <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
+                                        <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                                    </label>
+                                    <input
+                                        type="file"
+                                        style="padding-left: 10px;"
+                                        id="file"
+                                        accept=".xls,.xlsx,.csv"
+                                        aria-describedby="import_files"
+                                        onclick="clear_import_table()"
+                                    >
+                
+                                    <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px; margin-bottom: 10px" onclick="read_xl_file()">
+                                        <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                                    </label>
+                                </div>
+
+                                <div class="col"></div>
+
+                                <div class="col-3">
+                                    <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
+                                        <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- <div class="import_buttons">
                                 <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
                                     <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
                                 </label>
@@ -173,7 +201,7 @@
                                 <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
                                     <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
                                 </label>
-                            </div>
+                            </div> -->
 
                             <table class= "table table-bordered listdata">
                                 <thead>
@@ -1114,10 +1142,29 @@
     $(document).on('click', '#btn_export', function () {
         modal.confirm(confirm_export_message,function(result){
             if (result) {
-                handleExport()
+                startTimer()
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    handleExport()
+                }, 500);
             }
         })
     })
+
+    function download_template() {
+        const headerData = [];
+
+        formattedData = [
+            {
+                "Code": "",
+                "Description": "",
+                "Status": "",
+                "Stores": ""
+            }
+        ]
+
+        exportArrayToExcel(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
+    }
 
     function handleExport() {
         var new_query = query; // Default: assign query to new_query
@@ -1127,47 +1174,38 @@
             var id = $(this).attr('data-id');
             ids.push(`'${id}'`); // Collect IDs in an array
         });
+        
+        const fetchStores = (callback) => {
+            const processResponse = (res) => {
+                formattedData = res.map(({ 
+                    area_code, area_description, status, updated_date, created_date, 
+                    store_code, store_description 
+                }) => ({
+                    Code: area_code,
+                    Description: area_description,
+                    Status: status === "1" ? "Active" : "Inactive",
+                    "Updated Date": updated_date || "N/A",
+                    "Created Date": created_date,
+                    StoreID: store_code,
+                    StoreDescription: store_description,
+                }));
+            };
 
-        // Only modify new_query if there are selected checkboxes
-        if (ids.length > 0) {
-            new_query += ' and id in (' + ids.join(', ') + ')';
-        }
-
-        console.log(new_query); // Debugging output
-
-        var data = {
-            event: "list",
-            select: "id, code, description, status, updated_date, created_date",
-            query: new_query,
-            offset: 0,
-            limit: 0,
-            table: "tbl_area",
-            order: {
-                field: "code",
-                order: "asc"
-            }
+            ids.length > 0 
+                ? getStoresByAreaWhereIn(`"${ids.join(', ')}"`, processResponse)
+                : getStoresByArea(processResponse);
         };
 
-        aJax.post(url, data, function (result) {
-            var result = JSON.parse(result);
-            const formattedData = result.map(item => ({
-                // ID: item.id,
-                Code: item.code,
-                Description: item.description,
-                Status: item.status === "1" ? "Active" : "Inactive",
-                "Updated Date": item.updated_date ? item.updated_date : "N/A",
-                "Created Date": item.created_date
-            }));
+        fetchStores();
 
-            const headerData = [
-                ["Company Name: Lifestrong Marketing Inc."], // Row 1
-                ["Masterfile: Area"], // Row 2
-                ["Date Printed: " + formatDate(new Date())], // Row 3
-                [""], // Empty row for spacing
-            ];
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Masterfile: Area"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
 
-            exportArrayToExcel(formattedData, "Masterfile: Area - " + formatDate(new Date()), headerData);
-        });
+        exportArrayToExcel(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
     };
 
     function exportArrayToExcel(data, filename, headerData) {
