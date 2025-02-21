@@ -1207,3 +1207,14 @@ function goToLastPage() {
     }
 }
 
+function batch_update(url, data, table, primaryKey, get_code, callback) {
+    aJax.post(url, { event: "batch_update", table, field: primaryKey, data, get_code, where_in: data.map(item => item[primaryKey]) }, response => callback(JSON.parse(response)));
+}
+
+function batch_delete(url, table, field, field_value, where_in_field, callback) {
+    aJax.post(url, { event: "batch_delete", table, field, field_value, where_in_field }, response => callback(JSON.parse(response)));
+}
+
+function batch_insert(url, insert_batch_data, batch_table, get_code, callback) {
+    aJax.post(url, { event: "batch_insert", table: batch_table, get_code, insert_batch_data }, callback);
+}

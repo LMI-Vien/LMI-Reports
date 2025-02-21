@@ -860,7 +860,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'name', 'status', 'deployment date', 'area'];
+            let td_validator = ['code', 'name', 'deployment date', 'status', 'area'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -926,6 +926,8 @@
     }
 
     function read_xl_file() {
+        let btn = $(".btn.save");
+        btn.prop("disabled", false); 
         clear_import_table();
         
         dataset = [];
@@ -986,12 +988,17 @@
     }
 
     function process_xl_file() {
+        let btn = $(".btn.save");
+        if (btn.prop("disabled")) return; // Prevent multiple clicks
+
+        btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
+
         if (dataset.length === 0) {
             modal.alert('No data to process. Please upload a file.', 'error', () => {});
             return;
         }
-
+        modal.loading(true);
         let jsonData = dataset.map(row => ({
             "Code": row["Code"] || "",
             "Name": row["Name"] || "",
@@ -1010,15 +1017,20 @@
 
             let { invalid, errorLogs, valid_data, err_counter } = e.data;
             if (invalid) {
-                let errorMsg = err_counter > 5000 
+                let errorMsg = err_counter > 1000 
                     ? '⚠️ Too many errors detected. Please download the error log for details.'
                     : errorLogs.join("<br>");
-                modal.content('Validation Error', 'error', errorMsg, '600px', () => { read_xl_file(); });
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                    read_xl_file();
+                    btn.prop("disabled", false);
+                });
                 createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
             } else if (valid_data && valid_data.length > 0) {
+                btn.prop("disabled", false);
                 updateSwalProgress("Validation Completed", 10);
                 setTimeout(() => saveValidatedData(valid_data), 500);
             } else {
+                btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
             }
         };
@@ -1038,16 +1050,21 @@
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_area_sales_coordinator';
         let selected_fields = ['id', 'code', 'description'];
-        let existingMap = new Map();
 
+        //for lookup of duplicate recors
+        const matchFields = ["code", "description"];  
+        const matchType = "OR";  //use OR/AND depending on the condition
         modal.loading_progress(true, "Validating and Saving data...");
 
         // Fetch existing records to determine insert vs. update
         aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
             let result = JSON.parse(response);
+            let existingMap = new Map(); // Stores records using composite keys
+
             if (result.existing) {
                 result.existing.forEach(record => {
-                    existingMap.set(record.code + '|' + record.description, record.id);
+                    let key = matchFields.map(field => record[field] || "").join("|"); 
+                    existingMap.set(key, record.id);
                 });
             }
 
@@ -1073,15 +1090,34 @@
                 let updateRecords = [];
 
                 batch.forEach(row => {
-                    let key = row.code + '|' + row.description;
-                    if (existingMap.has(key)) {
-                        row.id = existingMap.get(key);
+                    let matchedId = null;
+
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => row[field] || "").join("|");
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+
+                            for (let field of matchFields) {
+                                if (keyParts.includes(row[field])) {
+                                    matchedId = id;
+                                }
+                            }
+
+                            if (matchedId) break; // Stop looping if we found a match
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
                         row.updated_date = formatDate(new Date());
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
                         row.created_date = formatDate(new Date());
-                        row.updated_date = formatDate(new Date());
                         newRecords.push(row);
                     }
                 });
@@ -1089,7 +1125,7 @@
                 function processUpdates() {
                     return new Promise((resolve) => {
                         if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_area_sales_coordinator", "id", (response) => {
+                            batch_update(url, updateRecords, "tbl_area_sales_coordinator", "id", false, (response) => {
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
                                 }
@@ -1104,7 +1140,7 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_area_sales_coordinator", true, (response) => {
+                            batch_insert(url, newRecords, "tbl_area_sales_coordinator", false, (response) => {
                                 if (response.message === 'success') {
                                     updateOverallProgress("Saving ASC...", batch_index + 1, total_batches);
                                 } else {

@@ -1,5 +1,6 @@
-self.onmessage = function(e) {
-    let data = e.data;
+self.onmessage = async function(e) {
+    let data = e.data.data;
+    let BASE_URL = e.data.base_url;
     let invalid = false;
     let errorLogs = [];
     let unique_code = new Set();

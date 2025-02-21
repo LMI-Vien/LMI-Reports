@@ -244,6 +244,7 @@
                                         <th class='center-content' scope="col">Store</th>
                                         <th class='center-content' scope="col">Team</th>
                                         <th class='center-content' scope="col">Area</th>
+                                        <th class='center-content' scope="col">Type</th>
                                         <th class='center-content' scope="col">Status</th>
                                     </tr>
                                 </thead>
@@ -278,12 +279,6 @@
     let dataset = [];
 
     $(document).ready(function() {
-        // get_area();
-        // get_agency();
-        // get_store();
-        // get_team();
-        // get_brand();
-        
         get_data(query);
         get_pagination(query);
 
@@ -378,14 +373,7 @@
             $('.table_body').html(html);
         });
     }
-
-    // get_area();
-    // get_agency();
-    // get_store();
-    // get_team();
-    // get_brand();
     
-
     function get_pagination() {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
@@ -590,7 +578,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'status'];
+            let td_validator = ['code', 'name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -683,8 +671,6 @@
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-            //console.log('Total records to process:', jsonData.length);
             // Process in chunks
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
@@ -718,6 +704,10 @@
     }
 
     function process_xl_file() {
+        let btn = $(".btn.save");
+        if (btn.prop("disabled")) return; // Prevent multiple clicks
+
+        btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
         
         if (dataset.length === 0) {
@@ -750,6 +740,7 @@
                 "Team": row["Team"] || "",
                 "Area": row["Area"] || "",
                 "Status": row["Status"] || "",
+                "Type": row["Type"] || "",
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
             };
@@ -797,6 +788,193 @@
         };
     }
 
+    //backup
+    // function saveValidatedData(valid_data, brand_per_ba) {
+    //     let batch_size = 5000;
+    //     let total_batches = Math.ceil(valid_data.length / batch_size);
+    //     let batch_index = 0;
+    //     let errorLogs = [];
+    //     let url = "<?= base_url('cms/global_controller');?>";
+    //     let table = 'tbl_brand_ambassador';
+    //     let selected_fields = ['id', 'code', 'name'];
+    //     let existingMapByCode = new Map();
+    //     let existingMapByName = new Map();
+    //     matchType = "OR";
+
+    //     modal.loading_progress(true, "Validating and Saving data...");
+
+    //     aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
+    //         let result = JSON.parse(response);
+    //         if (result.existing) {
+    //             result.existing.forEach(record => {
+    //                 existingMapByCode.set(record.code, record.id);
+    //                 existingMapByName.set(record.name, record.id);
+    //             });
+    //         }
+
+    //         function updateOverallProgress(stepName, completed, total) {
+    //             let progress = Math.round((completed / total) * 100);
+    //             updateSwalProgress(stepName, progress);
+    //         }
+
+    //         function processNextBatch() {
+    //             if (batch_index >= total_batches) {
+    //                 modal.loading_progress(false);
+
+    //                 if (errorLogs.length > 0) {
+    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+    //                     modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+    //                 } else {
+    //                     modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+    //                 }
+    //                 return;
+    //             }
+
+    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+    //             let newRecords = [];
+    //             let updateRecords = [];
+
+    //             batch.forEach(row => {
+    //                 let matchByCode = existingMapByCode.get(row.code);
+    //                 let matchByName = existingMapByName.get(row.name);
+
+    //                 let matchFound = false;
+    //                 let existingId = null;
+
+    //                 if (matchType === "AND") {
+    //                     if (matchByCode && matchByName && matchByCode === matchByName) {
+    //                         matchFound = true;
+    //                         existingId = matchByCode;
+    //                     }
+    //                 } else if (matchType === "OR") {
+    //                     if (matchByCode || matchByName) {
+    //                         matchFound = true;
+    //                         existingId = matchByCode || matchByName;
+    //                     }
+    //                 }
+
+    //                 if (matchFound) {
+    //                     row.id = existingId;
+    //                     row.updated_date = formatDate(new Date());
+    //                     updateRecords.push(row);
+    //                 } else {
+    //                     row.created_by = user_id;
+    //                     row.created_date = formatDate(new Date());
+    //                     newRecords.push(row);
+    //                 }
+    //             });
+
+    //             function processUpdates(callback) {
+    //                 if (updateRecords.length > 0) {
+    //                     batch_update(url, updateRecords, "tbl_brand_ambassador", "id", true, (response) => {
+    //                         let inserted_ids = response.inserted_ids;
+    //                         if (response.message !== 'success') {
+    //                             updateOverallProgress("Updating Brands...", batch_index + 1, total_batches);
+    //                             errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+    //                         }
+    //                         processBrandPerBA(inserted_ids, brand_per_ba, function() {
+    //                         });
+    //                         callback();
+    //                     });
+    //                 } else {
+    //                     callback();
+    //                 }
+    //             }
+
+    //             function processInserts() {
+    //                 if (newRecords.length > 0) {
+    //                     batch_insert(url, newRecords, "tbl_brand_ambassador", true, (response) => {
+    //                         if (response.message === 'success') {
+    //                             let inserted_ids = response.inserted;
+    //                             updateOverallProgress("Saving Brands...", batch_index + 1, total_batches);
+    //                             processBrandPerBA(inserted_ids, brand_per_ba, function() {
+    //                                 batch_index++;
+    //                                 setTimeout(processNextBatch, 300);
+    //                             });
+    //                         } else {
+    //                             errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+    //                             batch_index++;
+    //                             setTimeout(processNextBatch, 300);
+    //                         }
+    //                     });
+    //                 } else {
+    //                     batch_index++;
+    //                     setTimeout(processNextBatch, 300);
+    //                 }
+    //             }
+
+    //             processUpdates(processInserts);
+    //         }
+
+    //         setTimeout(processNextBatch, 1000);
+    //     });
+    // }
+
+    // function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
+    //     let batch_size = 5000;
+    //     let brandBatchIndex = 0;
+    //     let brandDataKeys = Object.keys(brand_per_ba);
+    //     let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
+    //     let insertedMap = {};
+
+    //     inserted_ids.forEach(({ id, code }) => {
+    //         insertedMap[code] = id;
+    //     });
+
+    //     function processNextBrandBatch() {
+    //         if (brandBatchIndex >= total_brand_batches) {
+    //             callback();
+    //             return;
+    //         }
+
+    //         let chunkKeys = brandDataKeys.slice(brandBatchIndex * batch_size, (brandBatchIndex + 1) * batch_size);
+    //         let chunkData = [];
+    //         let baIdsToDelete = [];
+    //         chunkKeys.forEach(code => {
+    //             if (insertedMap[code]) {
+
+    //                 let ba_id = insertedMap[code];
+    //                 let brand_ids = brand_per_ba[code];
+    //                 baIdsToDelete.push(ba_id);
+    //                 brand_ids.forEach(brand_id => {
+    //                     chunkData.push({
+    //                         ba_id: ba_id,
+    //                         brand_id: brand_id,
+    //                         created_by: user_id,
+    //                         created_date: formatDate(new Date()),
+    //                         updated_date: formatDate(new Date())
+    //                     });
+    //                 });
+    //             }
+    //         });
+    //         if (baIdsToDelete.length > 0) {
+    //             batch_delete(url, "tbl_ba_brands", "ba_id", baIdsToDelete, 'brand_id', function(resp) {
+    //                 insertNewBrandRecords(chunkData);
+    //             });
+    //         } else {
+    //             insertNewBrandRecords(chunkData);
+    //         }
+    //     }
+
+    //     function insertNewBrandRecords(chunkData) {
+    //         if (chunkData.length > 0) {
+    //             batch_insert(url, chunkData, "tbl_ba_brands", false, function(response) {
+    //                 brandBatchIndex++;
+    //                 setTimeout(processNextBrandBatch, 100);
+    //             });
+    //         } else {
+    //             brandBatchIndex++;
+    //             setTimeout(processNextBrandBatch, 100);
+    //         }
+    //     }
+
+    //     if (brandDataKeys.length > 0) {
+    //         processNextBrandBatch();
+    //     } else {
+    //         callback();
+    //     }
+    // }
+
     function saveValidatedData(valid_data, brand_per_ba) {
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
@@ -805,15 +983,19 @@
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_brand_ambassador';
         let selected_fields = ['id', 'code', 'name'];
-        let existingMap = new Map();
+        
+        let existingMapByCode = new Map();
+        let existingMapByName = new Map();
+        matchType = "OR";
 
         modal.loading_progress(true, "Validating and Saving data...");
 
-        aJax.post(url, { table:table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+        aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
             let result = JSON.parse(response);
             if (result.existing) {
                 result.existing.forEach(record => {
-                    existingMap.set(record.code + '|' + record.name, record.id);
+                    existingMapByCode.set(record.code, record.id);
+                    existingMapByName.set(record.name, record.id);
                 });
             }
 
@@ -840,85 +1022,46 @@
                 let updateRecords = [];
 
                 batch.forEach(row => {
-                    let key = row.code + '|' + row.name;
-                    if (existingMap.has(key)) {
-                        row.id = existingMap.get(key);
+                    let matchByCode = existingMapByCode.get(row.code);
+                    let matchByName = existingMapByName.get(row.name);
+
+                    let matchFound = false;
+                    let existingId = null;
+
+                    if (matchType === "AND") {
+                        if (matchByCode && matchByName && matchByCode === matchByName) {
+                            matchFound = true;
+                            existingId = matchByCode;
+                        }
+                    } else if (matchType === "OR") {
+                        if (matchByCode || matchByName) {
+                            matchFound = true;
+                            existingId = matchByCode || matchByName;
+                        }
+                    }
+
+                    if (matchFound) {
+                        row.id = existingId;
                         row.updated_date = formatDate(new Date());
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
                         row.created_date = formatDate(new Date());
-                        row.updated_date = formatDate(new Date());
                         newRecords.push(row);
                     }
                 });
 
-                function processBrandUpdates(ba_id, newBrands, callback) {
-                    aJax.post(url, { table:'tbl_ba_brands', event: "fetch_existing_custom", select:'brand_id', field:'ba_id', value: ba_id, lookup_field:'brand_id'}, function(response) {
-                        let result = JSON.parse(response);
-                        if (result.error) {
-                            errorLogs.push(`Error fetching existing brands: ${result.error}`);
-                            callback();
-                            return;
-                        }
-
-                        let existingBrands = new Set(result.data); 
-                        let brandsToAdd = newBrands.filter(brand_id => !existingBrands.has(brand_id));
-                        let brandsToRemove = [...existingBrands].filter(brand_id => !newBrands.includes(brand_id));
-
-                        function handleRemovals(next) {
-                            if (brandsToRemove.length > 0) {
-                                batch_delete(url, "tbl_ba_brands", "ba_id", ba_id, 'brand_id', brandsToRemove, function(resp) {
-                                    next();
-                                });
-                            } else {
-                                next();
-                            }
-                        }
-
-                        function handleInserts() {
-                            if (brandsToAdd.length > 0) {
-                                let insertData = brandsToAdd.map(brand_id => ({
-                                    ba_id: ba_id,
-                                    brand_id: brand_id,
-                                    created_by: user_id,
-                                    created_date: formatDate(new Date()),
-                                    updated_date: formatDate(new Date())
-                                }));
-
-                                batch_insert(url, insertData, "tbl_ba_brands", false, function(resp) {
-                                    callback();
-                                });
-                            } else {
-                                callback();
-                            }
-                        }
-
-                        handleRemovals(handleInserts);
-                    });
-                }
-
                 function processUpdates(callback) {
                     if (updateRecords.length > 0) {
-                        batch_update(url, updateRecords, "tbl_brand_ambassador", "id", (response) => {
+                        batch_update(url, updateRecords, "tbl_brand_ambassador", "id", true, (response) => {
                             if (response.message !== 'success') {
                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
                             }
-
-                            let updateTasks = updateRecords.map(row => {
-                                return new Promise(resolve => {
-                                    if (brand_per_ba[row.code]) {
-                                        processBrandUpdates(row.id, brand_per_ba[row.code], resolve);
-                                    } else {
-                                        resolve();
-                                    }
-                                });
-                            });
-
-                            Promise.all(updateTasks).then(callback);
+                            updateOverallProgress("Updating Brands...", batch_index + 1, total_batches);
+                            processBrandPerBA(updateRecords.map(r => ({ id: r.id, code: r.code })), brand_per_ba, callback);
                         });
                     } else {
-                        callback();
+                        callback(); // Proceed even if no updates
                     }
                 }
 
@@ -927,8 +1070,7 @@
                         batch_insert(url, newRecords, "tbl_brand_ambassador", true, (response) => {
                             if (response.message === 'success') {
                                 let inserted_ids = response.inserted;
-                                updateOverallProgress("Saving Brand Ambassadors...", batch_index + 1, total_batches);
-                                //console.log(inserted_ids);
+                                updateOverallProgress("Saving Brands...", batch_index + 1, total_batches);
                                 processBrandPerBA(inserted_ids, brand_per_ba, function() {
                                     batch_index++;
                                     setTimeout(processNextBatch, 300);
@@ -971,11 +1113,13 @@
 
             let chunkKeys = brandDataKeys.slice(brandBatchIndex * batch_size, (brandBatchIndex + 1) * batch_size);
             let chunkData = [];
+            let baIdsToDelete = [];
 
             chunkKeys.forEach(code => {
                 if (insertedMap[code]) {
                     let ba_id = insertedMap[code];
                     let brand_ids = brand_per_ba[code];
+                    baIdsToDelete.push(ba_id);
                     brand_ids.forEach(brand_id => {
                         chunkData.push({
                             ba_id: ba_id,
@@ -988,66 +1132,24 @@
                 }
             });
 
-            if (chunkData.length > 0) {
-                // First, check for duplicates
-                let brand_ids = chunkData.map(item => item.brand_id);
-                let ba_ids = chunkData.map(item => item.ba_id);
-
-                aJax.post("<?= base_url('cms/global_controller'); ?>", {
-                    event: "fetch_existing",
-                    table: "tbl_ba_brands",
-                    status: false,
-                    selected_fields: ["id", "ba_id", "brand_id"],
-                    where: {
-                        ba_id: ba_ids,
-                        brand_id: brand_ids
-                    }
-                }, function(existingResponse) {
-                    let existingRecords = JSON.parse(existingResponse).existing || [];
-                    let existingMap = new Set(existingRecords.map(r => `${r.ba_id}|${r.brand_id}`));
-
-                    let newData = [];
-                    let updateData = [];
-
-                    chunkData.forEach(record => {
-                        let key = `${record.ba_id}|${record.brand_id}`;
-                        if (existingMap.has(key)) {
-                            updateData.push({
-                                ba_id: record.ba_id,
-                                brand_id: record.brand_id,
-                                updated_date: formatDate(new Date())
-                            });
-                        } else {
-                            newData.push(record);
-                        }
+            function insertNewBrandRecords(chunkData) {
+                if (chunkData.length > 0) {
+                    batch_insert(url, chunkData, "tbl_ba_brands", false, function(response) {
+                        brandBatchIndex++;
+                        setTimeout(processNextBrandBatch, 100);
                     });
-
-                    // Perform batch insert for new records
-                    if (newData.length > 0) {
-                        batch_insert(url, newData, "tbl_ba_brands", false, function(response) {
-                            processBatchUpdates(updateData);
-                        });
-                    } else {
-                        processBatchUpdates(updateData);
-                    }
-                });
-            } else {
-                brandBatchIndex++;
-                setTimeout(processNextBrandBatch, 100);
-            }
-        }
-
-        function processBatchUpdates(updateData) {
-            if (updateData.length > 0) {
-                batch_update(url, updateData, "tbl_ba_brands", "ba_id", function(updateResponse) {
+                } else {
                     brandBatchIndex++;
-                    //updateSwalProgress("Processing Brands...", Math.round((brandBatchIndex / total_brand_batches) * 100));
                     setTimeout(processNextBrandBatch, 100);
+                }
+            }
+
+            if (baIdsToDelete.length > 0) {
+                batch_delete(url, "tbl_ba_brands", "ba_id", baIdsToDelete, 'brand_id', function(resp) {
+                    insertNewBrandRecords(chunkData);
                 });
             } else {
-                brandBatchIndex++;
-                //updateSwalProgress("Processing Brands...", Math.round((brandBatchIndex / total_brand_batches) * 100));
-                setTimeout(processNextBrandBatch, 100);
+                insertNewBrandRecords(chunkData);
             }
         }
 
@@ -1056,41 +1158,6 @@
         } else {
             callback();
         }
-    }
-
-    function proccess_brand_per_ba(inserted_ids, brand_per_ba, callback) {
-
-        let brandData = [];
-        let insertedMap = {};
-        inserted_ids.forEach(({ id, code }) => {
-            insertedMap[code] = id;
-        });
-
-        for (let code in brand_per_ba) {
-            if (insertedMap[code]) { 
-                let ba_id = insertedMap[code]; 
-                let brand_ids = brand_per_ba[code];
-
-                brand_ids.forEach(brand_id => {
-                    brandData.push({
-                        ba_id: ba_id,
-                        brand_id: brand_id,
-                        created_by: user_id,
-                        created_date: formatDate(new Date()),
-                        updated_date: formatDate(new Date())
-                    });
-                });
-            }
-        }
-
-        if (brandData.length === 0) {
-            callback();
-            return;
-        }
-
-        batch_insert(url, brandData, "tbl_ba_brands", false, function(response) {
-            callback();
-        });
     }
 
     function readable_date_to_excel_date(readable_date) {

@@ -360,29 +360,64 @@ class Global_model extends Model
         // return "$table,$field,$where";
     }
 
-    public function batch_update($table, $data, $primaryKey, $where_in) {
-        if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
-            return "failed";
-        }
+    // public function batch_update($table, $data, $primaryKey, $get_code, $where_in) {
+    //     if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
+    //         return "failed";
+    //     }
 
-        // Prepare batch update data
+    //     if (!isset($get_code)) {
+    //         $get_code = false; // Ensure `$get_code` is always defined
+    //     }
+
+    //     $updateData = [];
+    //     $updatedIds = []; // To store the updated primary keys
+    //     foreach ($data as $row) {
+    //         if (isset($row[$primaryKey]) && in_array($row[$primaryKey], $where_in)) {
+    //             $updateData[] = $row;
+    //             $updatedIds[] = $row[$primaryKey]; 
+    //         }
+
+    //     }
+
+    //     if (empty($updateData)) {
+    //         return "failed"; 
+    //     }
+
+    //     $result = $this->db->table($table)->updateBatch($updateData, $primaryKey);
+    //     return $result ? $updatedIds : "failed";
+    // }
+
+    public function batch_update($table, $data, $primaryKey, $get_code = null, $where_in = null) {
+        if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
+            return false; // Return false instead of string for consistency
+        }
+        // Prepare batch update data and collect updated IDs
         $updateData = [];
+        $updatedIds = []; // To store the updated primary keys 
+
         foreach ($data as $row) {
             if (isset($row[$primaryKey]) && in_array($row[$primaryKey], $where_in)) {
                 $updateData[] = $row;
+
+                $entry = ['id' => $row[$primaryKey]];
+
+                // Include 'code' if required
+                if ($get_code === true && isset($row['code']) || $get_code == 'true' && isset($row['code'])) {
+                    $entry['code'] = $row['code'];
+                }
+
+                $updatedIds[] = $entry; // Store unique updated entries
             }
         }
 
         if (empty($updateData)) {
-            return "failed"; // No valid data to update
+            return false;
         }
 
         // Perform batch update
         $result = $this->db->table($table)->updateBatch($updateData, $primaryKey);
-
-        return $result ? "success" : "failed";
+        return $result ? $updatedIds : false;
     }
-
 
     function batch_sort_update_data($table,$data,$field,$where)
     {
@@ -725,7 +760,7 @@ class Global_model extends Model
         $builder = $this->db->table($table);
         $builder->select($selected_fields);
         if($status == 'true' || $status === true){
-            $builder->where('status >', 0);            
+            $builder->where('status >=', 0);            
         }
 
         if($field){
@@ -753,8 +788,7 @@ class Global_model extends Model
 
     public function batch_delete($table, $field, $field_value, $where_in){
         $builder = $this->db->table($table);
-        $builder->whereIn('brand_id', $where_in);
-        $builder->where($field, $field_value);
+        $builder->whereIn($field, $field_value);
         $result = $builder->delete();
         if ($result) {
             return json_encode(['message' => 'success']);
@@ -763,8 +797,12 @@ class Global_model extends Model
         }
     }
 
-    function get_valid_records($table, $column_name){
-        return $this->db->table($table)->select('id, '.$column_name)->get()->getResultArray();
+    function get_valid_records($table, $column_name) {
+        return $this->db->table($table)
+            ->select('id, ' . $column_name)
+            ->where('status', 1)
+            ->get()
+            ->getResultArray();
     }
 
 }

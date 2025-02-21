@@ -480,6 +480,8 @@
     };
 
     function read_xl_file() {
+        let btn = $(".btn.save");
+        btn.prop("disabled", false); 
         clear_import_table();
         
         dataset = [];
@@ -646,30 +648,20 @@
 
             let { invalid, errorLogs, valid_data, err_counter, brand_per_ba } = e.data;
             if (invalid) {
-                if (err_counter > 1000) {
-                    
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        '⚠️ Too many errors detected. Please download the error log for details.',
-                        '600px',
-                        () => {read_xl_file()}
-                    );
-                } else {
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        errorLogs.join("<br>"),
-                        '600px',
-                        () => {read_xl_file()}
-                    );
-                }
-                createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
+                let errorMsg = err_counter > 1000 
+                    ? '⚠️ Too many errors detected. Please download the error log for details.'
+                    : errorLogs.join("<br>");
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                    read_xl_file();
+                    btn.prop("disabled", false);
+                });
+                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
             } else if (valid_data && valid_data.length > 0) {
+                btn.prop("disabled", false);
                 updateSwalProgress("Validation Completed", 10);
-                setTimeout(() => saveValidatedData(valid_data, brand_per_ba), 500);
+                setTimeout(() => saveValidatedData(valid_data), 500);
             } else {
-                modal.loading_progress(false);
+                btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
             }
         };
@@ -690,16 +682,21 @@
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_store';
         let selected_fields = ['id', 'code', 'description'];
-        let existingMap = new Map();
 
+        //for lookup of duplicate recors
+        const matchFields = ["code", "description"];  
+        const matchType = "OR";  //use OR/AND depending on the condition
         modal.loading_progress(true, "Validating and Saving data...");
 
         // Fetch existing records to determine insert vs. update
         aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
             let result = JSON.parse(response);
+            let existingMap = new Map(); // Stores records using composite keys
+
             if (result.existing) {
                 result.existing.forEach(record => {
-                    existingMap.set(record.code + '|' + record.description, record.id);
+                    let key = matchFields.map(field => record[field] || "").join("|"); 
+                    existingMap.set(key, record.id);
                 });
             }
 
@@ -725,15 +722,34 @@
                 let updateRecords = [];
 
                 batch.forEach(row => {
-                    let key = row.code + '|' + row.description;
-                    if (existingMap.has(key)) {
-                        row.id = existingMap.get(key);
+                    let matchedId = null;
+
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => row[field] || "").join("|");
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+
+                            for (let field of matchFields) {
+                                if (keyParts.includes(row[field])) {
+                                    matchedId = id;
+                                }
+                            }
+
+                            if (matchedId) break; // Stop looping if we found a match
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
                         row.updated_date = formatDate(new Date());
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
                         row.created_date = formatDate(new Date());
-                        //row.updated_date = formatDate(new Date());
                         newRecords.push(row);
                     }
                 });
@@ -741,7 +757,7 @@
                 function processUpdates() {
                     return new Promise((resolve) => {
                         if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_store", "id", (response) => {
+                            batch_update(url, updateRecords, "tbl_store", "id", false, (response) => {
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
                                 }
@@ -756,7 +772,7 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_store", true, (response) => {
+                            batch_insert(url, newRecords, "tbl_store", false, (response) => {
                                 if (response.message === 'success') {
                                     updateOverallProgress("Saving Store...", batch_index + 1, total_batches);
                                 } else {

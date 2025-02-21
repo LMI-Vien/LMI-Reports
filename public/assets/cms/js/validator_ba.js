@@ -59,6 +59,7 @@ self.onmessage = async function(e) {
                 let team = row["Team"] ? row["Team"].trim() : "";
                 let area = row["Area"] ? row["Area"].trim() : "";
                 let status = row["Status"] ? row["Status"].toLowerCase() : "";
+                let type = row["Type"] ? row["Type"].toLowerCase() : "";
                 let deployment_date = row["Deployment Date"] ? row["Deployment Date"].trim() : "";
                 let user_id = row["Created By"] ? row["Created By"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
@@ -114,6 +115,12 @@ self.onmessage = async function(e) {
                     err_counter++;
                 } else {
                     unique_name.add(name);
+                }
+
+                if (!["outright", "consign"].includes(type)) {
+                    invalid = true;
+                    errorLogs.push(`⚠️ Invalid Type at line #: ${tr_count}`);
+                    err_counter++;
                 }
 
                 if (!["active", "inactive"].includes(status)) {
@@ -196,8 +203,10 @@ self.onmessage = async function(e) {
                         deployment_date: deployment_date,
                         store: store,
                         team: team,
+                        agency: agency,
                         area: area,
                         status: status.toLowerCase() === "active" ? 1 : 0,
+                        type: type.toLowerCase() === "consign" ? 1 : 0,
                         created_by: user_id,
                         created_date: date_of_creation
                     });

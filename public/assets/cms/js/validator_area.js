@@ -61,11 +61,8 @@ self.onmessage = async function(e) {
                     for (let key in store_lookup) {
                         normalized_store_lookup[key.toLowerCase()] = store_lookup[key];
                     }
-console.log(stores);
                     for (i = 0; i < stores.length; ++i) {
                         let store_lower = stores[i].toLowerCase();
-                        console.log(store_lower, 'store_lower');
-                        console.log(normalized_store_lookup, 'normalized_store_lookup')
                         if (store_lower in normalized_store_lookup) {
                             let store_id = normalized_store_lookup[store_lower];
                             if (!store_per_area[code].includes(store_id)) {

@@ -260,9 +260,8 @@ class Global_controller extends BaseController
 			        $field = $this->request->getPost('field');
 			        $field_value = $this->request->getPost('field_value');
 			        $where_in = $this->request->getPost('where_in');
-			        $where_in_field = $this->request->getPost('where_in_field');
 
-			        $result_data = $this->Global_model->batch_delete($table, $field, $field_value, $where_in_field, $where_in);
+			        $result_data = $this->Global_model->batch_delete($table, $field, $field_value, $where_in);
 		        	echo $result_data;
 			    } catch (Exception $e) {
 			        echo json_encode(['error' => $e->getMessage()]);
@@ -403,35 +402,21 @@ class Global_controller extends BaseController
 			        $primaryKey = $this->request->getPost('field');
 			        $where_in = $this->request->getPost('where_in');
 			        $data = $this->request->getPost('data');
+			        $get_code = $this->request->getPost('get_code');
 
 			        if (empty($table) || empty($primaryKey) || empty($where_in) || empty($data)) {
 			            return $this->response->setJSON(['message' => 'error', 'error' => 'Invalid request data']);
 			        }
 
-			        // Get old data for audit trail
-			        // $old_data = $this->Global_model->get_data_list(
-			        //     $table,
-			        //     "{$primaryKey} IN (" . implode(",", array_map('intval', $where_in)) . ")",
-			        //     count($where_in),
-			        //     0,
-			        //     "*"
-			        // );
-
 			        // Perform batch update
-			        $status = $this->Global_model->batch_update($table, $data, $primaryKey, $where_in);
+			        $status = $this->Global_model->batch_update($table, $data, $primaryKey, $get_code, $where_in);
 			        
 			        // Send response
-			        if ($status === "success") {
-			            // if (isset($data['status']) && $data['status'] == -2) {
-			            //   //  $this->audit_trail_controller("Delete", $data, $old_data);
-			            // } else {
-			            //  //   $this->audit_trail_controller("Update", $data, $old_data);
-			            // }
-
-			            echo json_encode(['message' => 'success']);
-			        } else {
-			            echo json_encode(['message' => 'error', 'error' => 'Update failed']);
-			        }
+					if ($status !== "failed" && !empty($status)) {
+					    echo json_encode(['message' => 'success', 'inserted_ids' => $status]);
+					} else {
+					    echo json_encode(['message' => 'error', 'error' => 'Update failed']);
+					}
 			    } catch (Exception $e) {
 			        echo json_encode(['message' => 'error', 'error' => $e->getMessage()]);
 			    }
