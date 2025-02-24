@@ -109,7 +109,11 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('get_valid_ba_data', 'Cms\Asc::get_valid_ba_data');
     });
 
-        //Audit trail
+    $routes->get('year', 'Cms\Year::index');
+
+    $routes->get('company', 'Cms\Company::index');
+
+    //Audit trail
     $routes->group('Audit_trail/', static function ($routes) {
         $routes->get('/', 'Cms\Audit_trail::index');
     });
