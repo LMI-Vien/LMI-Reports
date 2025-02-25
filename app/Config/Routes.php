@@ -57,6 +57,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-vmi', static function ($routes) {
         $routes->get('/', 'Cms\Import_vmi::index');
+        $routes->get('get_valid_ba_data', 'Cms\Import_vmi::get_valid_ba_data');
     });
 
     $routes->group('import-ba-sales-report', static function ($routes) {

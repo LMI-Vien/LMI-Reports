@@ -303,11 +303,6 @@
                     query: "a.id = ba.agency",
                     type: "left"
                 },
-                // {
-                //     table: "tbl_ba_brands b",
-                //     query: "b.ba_id = ba.id",
-                //     type: "left"
-                // },
                 {
                     table: "tbl_store s",
                     query: "s.id = ba.store",

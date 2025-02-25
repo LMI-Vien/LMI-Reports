@@ -799,8 +799,16 @@ class Global_model extends Model
 
     function get_valid_records($table, $column_name) {
         return $this->db->table($table)
-            ->select('id, ' . $column_name)
+            ->select(['id', $column_name])
             ->where('status', 1)
+            ->get()
+            ->getResultArray();
+    }
+
+    function get_valid_records_pricelist($table, $column_name) {
+        return $this->db->table($table)
+            ->select(['recid', $column_name])
+            ->where('cusitmcde !=', '')
             ->get()
             ->getResultArray();
     }

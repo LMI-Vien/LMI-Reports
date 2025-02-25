@@ -708,6 +708,7 @@ function last(){
 $(document).on('click', '.pg_no', function(e){
     e.preventDefault();
     var page_no = $(this).attr("data-value");
+    $('.pager_no').text('Page '+page_no);
     $('.pager_number').val(page_no).change()
 });
 
