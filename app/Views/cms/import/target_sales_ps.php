@@ -32,12 +32,18 @@
         background-color: gray !important;
         color: black !important;
     }
+
+    @media (min-width: 1200px) {
+        .modal-xxl {
+            max-width: 95%;
+        }
+    }
 </style>
 
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center page-title md-center">
-                <b>T A R G E T - S A L E S - P E R S T O R E</b>
+                <b>T A R G E T - S A L E S - P E R -S T O R E</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -250,24 +256,24 @@
         </div>
     </div>
     
-    <script>
-        var query = "status >= 0";
-        var limit = 10; 
-        var user_id = '<?=$session->sess_uid;?>';
-        var url = "<?= base_url('cms/global_controller');?>";
+<script>
+    var query = "status >= 0";
+    var limit = 10; 
+    var user_id = '<?=$session->sess_uid;?>';
+    var url = "<?= base_url('cms/global_controller');?>";
 
-        //for importing
-        let currentPage = 1;
-        let rowsPerPage = 1000;
-        let totalPages = 1;
-        let dataset = [];
+    //for importing
+    let currentPage = 1;
+    let rowsPerPage = 1000;
+    let totalPages = 1;
+    let dataset = [];
 
-        $(document).ready(function() {
-            get_data(query);
-            get_pagination();
-        });
+    $(document).ready(function() {
+        get_data(query);
+        get_pagination();
+    });
 
-        function get_data(new_query) {
+    function get_data(new_query) {
         var data = {
             event : "list",
             select : "id, location, location_description, january, february, march, april, may, june, july, august, september, october, november, december, status, created_date, updated_date",

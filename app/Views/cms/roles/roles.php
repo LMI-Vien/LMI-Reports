@@ -286,9 +286,9 @@ ul.child_menu {
                         html += "<td class='center-content'>"+(y.updated_date ? ViewDateformat(y.updated_date) : "N/A")+  "</td>";
                         html += "<td>" +status+ "</td>";
 
-                        if (y.id <= 2) {
-                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-                        } else {
+                        // if (y.id <= 2) {
+                        //     html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+                        // } else {
                             html+="<td class='center-content'>";
                             html += "<a class='btn-sm btn save' onclick=\"edit_data("
                                 + y.id + ", '"
@@ -300,7 +300,7 @@ ul.child_menu {
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
-                        }
+                        // }
                         
                         html += "</tr>";   
                     });

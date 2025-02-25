@@ -262,7 +262,7 @@
                         <input type="text" class="form-control required" id="total_qty" aria-describedby="total_qty">
                     </div>
 
-                    <!-- <div class="mb-3">
+                    <div class="mb-3">
                         <label for="code" class="form-label">January</label>
                         <input type="text" class="form-control required" id="jan_ta" aria-describedby="jan_ta">
                     </div>
@@ -325,7 +325,7 @@
                     <div class="mb-3">
                         <label for="code" class="form-label">Total Amount</label>
                         <input type="text" class="form-control required" id="total_amount" aria-describedby="total_amount">
-                    </div> -->
+                    </div>
                 </form>
             </div>
             <div class="modal-footer"></div>
@@ -465,14 +465,14 @@
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
                 lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
                 january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-                total_quantity, status, created_date, updated_date`.replace(/\s+/g, ' '),
+                total_quantity, status, created_date`.replace(/\s+/g, ' '),
             query : new_query,
             offset : offset,
             limit : limit,
             table : "tbl_accounts_target_sellout_pa",
             order : {
-                field : "id, updated_date",
-                order : "asc, desc" 
+                field : "id",
+                order : "asc" 
             }
 
         }
@@ -669,7 +669,8 @@
             "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
             "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
             "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
-            "nov_tq", "dec_tq", "total_qty"
+            "nov_tq", "dec_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta", "oct_ta", "nov_ta",
+            "dec_ta", "total_amount"
         ];
 
         set_field_state(fields.map(id => `#${id}`).join(', '), isReadOnly);
@@ -762,15 +763,15 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
-            lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-            january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
             // select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
             // lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
             // january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            // total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
-            // total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
+            // total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
+            select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
+            lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
+            january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+            total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+            total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
             query : query, 
             table : "tbl_accounts_target_sellout_pa"
         }
@@ -811,19 +812,19 @@
                     $('#nov_tq').val(d.november_tq);
                     $('#dec_tq').val(d.december_tq);
                     $('#total_qty').val(d.total_quantity);
-                    // $('#jan_ta').val(d.january_ta);
-                    // $('#feb_ta').val(d.february_ta);
-                    // $('#mar_ta').val(d.march_ta);
-                    // $('#apr_ta').val(d.april_ta);
-                    // $('#may_ta').val(d.may_ta);
-                    // $('#jun_ta').val(d.june_ta);
-                    // $('#jul_ta').val(d.july_ta);
-                    // $('#aug_ta').val(d.august_ta);
-                    // $('#sep_ta').val(d.september_ta);
-                    // $('#oct_ta').val(d.october_ta);
-                    // $('#nov_ta').val(d.november_ta);
-                    // $('#dec_ta').val(d.december_ta);
-                    // $('#total_amount').val(d.total_amount);
+                    $('#jan_ta').val(d.january_ta);
+                    $('#feb_ta').val(d.february_ta);
+                    $('#mar_ta').val(d.march_ta);
+                    $('#apr_ta').val(d.april_ta);
+                    $('#may_ta').val(d.may_ta);
+                    $('#jun_ta').val(d.june_ta);
+                    $('#jul_ta').val(d.july_ta);
+                    $('#aug_ta').val(d.august_ta);
+                    $('#sep_ta').val(d.september_ta);
+                    $('#oct_ta').val(d.october_ta);
+                    $('#nov_ta').val(d.november_ta);
+                    $('#dec_ta').val(d.december_ta);
+                    $('#total_amount').val(d.total_amount);
                 }); 
             }
         });
@@ -843,7 +844,8 @@
         inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description, inp_item_status, inp_srp, inp_trade_discount,
         inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq, inp_martq, 
         inp_aprtq, inp_maytq, inp_juntq, inp_jultq, inp_augtq, inp_septq, inp_octtq,
-        inp_novtq, inp_dectq, inp_total_quantity, id) {
+        inp_novtq, inp_dectq, inp_total_quantity, inp_janta, inp_febta, inp_marta, inp_aprta,
+        inp_julta, inp_augta, inp_septa, inp_octta, inp_novta, inp_decta, inp_total_amount, id) {
         // let {inp_payment_group, inp_vendor, inp_overall, inp_kam_kas_kaa, inp_sales_group, inp_terms, inp_channel, 
         //     inp_brand, inp_exclusivity, inp_category, inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description,
         //     inp_item_status, inp_srp, inp_trade_discount, inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq,
@@ -898,6 +900,19 @@
                     november_tq: inp_novtq,
                     december_tq: inp_dectq,
                     total_quantity: inp_total_quantity,
+                    january_ta: inp_janta,
+                    february_ta: inp_febta,
+                    march_ta: inp_marta,
+                    april_ta: inp_aprta,
+                    may_ta: inp_marta,
+                    june_ta: inp_junta,
+                    july_ta: inp_julta,
+                    august_ta: inp_augta,
+                    september_ta: inp_septa,
+                    october_ta: inp_octta,
+                    november_ta: inp_novta,
+                    december_ta: inp_decta,
+                    total_amount: inp_total_amount,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
           
@@ -992,6 +1007,19 @@
         var nov_tq = $('#nov_tq').val();
         var dec_tq = $('#dec_tq').val();
         var totalQty = $('#total_qty').val();
+        var jan_ta = $('#jan_ta').val();
+        var feb_ta = $('#feb_ta').val();
+        var mar_ta = $('#mar_ta').val();
+        var apr_ta = $('#apr_ta').val();
+        var may_ta = $('#may_ta').val();
+        var jun_ta = $('#jun_ta').val();
+        var jul_ta = $('#jul_ta').val();
+        var aug_ta = $('#aug_ta').val();
+        var sep_ta = $('#sep_ta').val();
+        var oct_ta = $('#oct_ta').val();
+        var nov_ta = $('#nov_ta').val();
+        var dec_ta = $('#dec_ta').val();
+        var totalAmnt = $('#total_amount').val();
 
         console.log("Updating record with ID:", id);
         console.log("Input Values:", {
@@ -1026,7 +1054,19 @@
             oct_tq,
             nov_tq,
             dec_tq,
-            totalQty
+            totalQty,
+            jan_ta,
+            feb_ta,
+            mar_ta,
+            apr_ta,
+            jun_ta,
+            jul_ta,
+            aug_ta,
+            sep_ta,
+            oct_ta,
+            nov_ta,
+            dec_ta,
+            totalAmnt,
         });
 
         // let months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -1073,7 +1113,9 @@
                             customer_sku_code, item_description, item_status, srp, 
                             trade_discount, customer_cost, customer_cost_nov, 
                             jan_tq, feb_tq, mar_tq, apr_tq, may_tq, jun_tq, jul_tq, aug_tq,
-                            sep_tq, oct_tq, nov_tq, dec_tq, totalQty, id
+                            sep_tq, oct_tq, nov_tq, dec_tq, totalQty,
+                            jan_ta, feb_ta, mar_ta, apr_ta, may_ta, jun_ta, jul_ta, aug_ta,
+                            sep_ta, oct_ta, nov_ta, dec_ta, totalAmnt, id
                         );
                     }
                 });
@@ -1185,8 +1227,8 @@
                 return acc;
             }, {});
 
-            // let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total amount'];
-            let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity'];
+            let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total amount'];
+            // let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
 
@@ -1260,18 +1302,18 @@
                 "November": row["November"] || "",
                 "December": row["December"] || "",
                 "Total Quantity": row["Total Quantity"] || "",
-                // "JanuaryTA": row["JanuaryTA"] || "",
-                // "FebruaryTA": row["FebruaryTA"] || "",
-                // "MarchTA": row["MarchTA"] || "",
-                // "AprilTA": row["AprilTA"] || "",
-                // "JuneTA": row["JuneTA"] || "",
-                // "JulyTA": row["JulyTA"] || "",
-                // "AugustTA": row["AugustTA"] || "",
-                // "SeptemberTA": row["SeptemberTA"] || "",
-                // "OctoberTA": row["OctoberTA"] || "",
-                // "NovemberTA": row["NovemberTA"] || "",
-                // "DecemberTA": row["DecemberTA"] || "",
-                // "Total Amount": row["Total Amount"] || "",
+                "JanuaryTA": row["JanuaryTA"] || "",
+                "FebruaryTA": row["FebruaryTA"] || "",
+                "MarchTA": row["MarchTA"] || "",
+                "AprilTA": row["AprilTA"] || "",
+                "JuneTA": row["JuneTA"] || "",
+                "JulyTA": row["JulyTA"] || "",
+                "AugustTA": row["AugustTA"] || "",
+                "SeptemberTA": row["SeptemberTA"] || "",
+                "OctoberTA": row["OctoberTA"] || "",
+                "NovemberTA": row["NovemberTA"] || "",
+                "DecemberTA": row["DecemberTA"] || "",
+                "Total Amount": row["Total Amount"] || "",
                 "Created by": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
             };

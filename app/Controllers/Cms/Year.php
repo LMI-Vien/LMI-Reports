@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Import_ba_sales_report extends BaseController
+class Year extends BaseController
 {
     protected $session;
 
@@ -19,21 +19,18 @@ class Import_ba_sales_report extends BaseController
 
 	public function index()
 	{
-
 		$data['meta'] = array(
-			"title"         =>  "Import BA Sales Report",
-			"description"   =>  "Import BA Sales Report",
+			"title"         =>  "Year",
+			"description"   =>  "Year",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Import BA Sales Report";
-		$data['PageName'] = 'Import BA Sales Report';
-		$data['PageUrl'] = 'Import BA Sales Report';
-		$data['content'] = "cms/import/ba_sales_report.php";
-		$data['buttons'] = ['search', 'import'];
+		$data['title'] = "Year";
+		$data['PageName'] = 'Year';
+		$data['PageUrl'] = 'Year';
+		$data['buttons'] = ['add', 'search'];
+		$data['content'] = "cms/year/year.php";
 		$data['session'] = session(); //for frontend accessing the session data
-		$data['standard'] = config('Standard');
 		$data['js'] = array(
-				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
 				"assets/js/moment.js",
@@ -46,7 +43,7 @@ class Import_ba_sales_report extends BaseController
         		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);		
+		return view("cms/layout/template", $data);	
 	}
 
 }
