@@ -41,6 +41,7 @@ self.onmessage = function(e) {
             let customer_cost_nov = row["Customer Cost (Net of Vat)"] ? row["Customer Cost (Net of Vat)"].trim() : "";
 
             let monthlyTq = getMonthlyValues(row, "tq");
+            let monthlyTa = getMonthlyValues(row, "ta");
 
             // let january_tq = row["January"] ? row["January"].trim() : "";
             // let february_tq = row["February"] ? row["February"].trim() : "";
@@ -55,7 +56,7 @@ self.onmessage = function(e) {
             // let november_tq = row["November"] ? row["November"].trim() : "";
             // let december_tq = row["December"] ? row["December"].trim() : "";
             let totalQty = row["Total Quantity"]?.trim() || "";
-            // let totalAmount = row["Total Amount"]?.trim() || "";
+            let totalAmount = row["Total Amount"]?.trim() || "";
             let user_id = row["Created by"] ? row["Created by"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";  
 
@@ -88,6 +89,8 @@ self.onmessage = function(e) {
                     customer_cost_net_of_vat: customer_cost_nov,
                     ...monthlyTq,
                     total_quantity: totalQty,
+                    ...monthlyTa,
+                    total_amount: totalAmount,
                     status: 1,
                     created_by: user_id,
                     created_date: date_of_creation
