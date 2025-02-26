@@ -44,6 +44,19 @@ self.onmessage = async function(e) {
             let monthlyTq = getMonthlyValues(row, "tq");
             let monthlyTa = getMonthlyTAValues(row, "ta");
 
+            // let january_ta = row["JanuaryTA"] ? row["JanuaryTA"].trim() : "";
+            // let february_ta = row["FebruaryTA"] ? row["FebruaryTA"].trim() : "";
+            // let march_ta = row["MarchTA"] ? row["MarchTA"].trim() : "";
+            // let april_ta = row["AprilTA"] ? row["AprilTA"].trim() : "";
+            // let may_ta = row["MayTA"] ? row["MayTA"].trim() : "";
+            // let june_ta = row["JuneTA"] ? row["JuneTA"].trim() : "";
+            // let july_ta = row["JulyTA"] ? row["JulyTA"].trim() : "";
+            // let august_ta = row["AugustTA"] ? row["AugustTA"].trim() : "";
+            // let september_ta = row["SeptemberTA"] ? row["SeptemberTA"].trim() : "";
+            // let october_ta = row["OctoberTA"] ? row["OctoberTA"].trim() : "";
+            // let november_ta = row["NovemberTA"] ? row["NovemberTA"].trim() : "";
+            // let december_ta = row["DecemberTA"] ? row["DecemberTA"].trim() : "";
+
             let user_id = row["Created by"] ? row["Created by"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";  
 
@@ -75,9 +88,19 @@ self.onmessage = async function(e) {
                     customer_cost: customer_cost,
                     customer_cost_net_of_vat: customer_cost_nov,
                     ...monthlyTq,
-                    //total_quantity: totalQty,
-                    ...monthlyTa,
-                    //total_amount: totalAmount,
+                    // ...monthlyTa,
+                    january_ta: monthlyTa.january_ta,
+                    february_ta: monthlyTa.february_ta,
+                    march_ta: monthlyTa.march_ta,
+                    april_ta: monthlyTa.april_ta,
+                    may_ta: monthlyTa.may_ta,
+                    june_ta: monthlyTa.june_ta,
+                    july_ta: monthlyTa.july_ta,
+                    august_ta: monthlyTa.august_ta,
+                    september_ta: monthlyTa.september_ta,
+                    october_ta: monthlyTa.october_ta,
+                    november_ta: monthlyTa.november_ta,
+                    december_ta: monthlyTa.december_ta,
                     status: 1,
                     created_by: user_id,
                     created_date: date_of_creation
@@ -101,7 +124,10 @@ self.onmessage = async function(e) {
         
         let values = {};
         months.forEach(month => {
-            values[`${month.toLowerCase()}_${type}`] = row[month]?.trim() || "";
+            let key = type === "ta" ? `${month}TA` : month;
+            let value = row[key]?.replace(/,/g, "").trim() || "";  
+
+            values[`${month.toLowerCase()}_${type}`] = value;
         });
     
         return values;
