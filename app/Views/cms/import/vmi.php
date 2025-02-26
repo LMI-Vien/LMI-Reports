@@ -927,32 +927,39 @@
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
-            const { invalid, errorLogs, valid_data, err_counter } = e.data;
-
-            if (invalid) {
-                let errorMsg = err_counter > 1000 
-                    ? '⚠️ Too many errors detected. Please download the error log for details.'
-                    : errorLogs.join("<br>");
-                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
-                    read_xl_file();
+            const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
+            if(progress == 100){
+                if (invalid) {
+                    let errorMsg = err_counter > 1000 
+                        ? '⚠️ Too many errors detected. Please download the error log for details.'
+                        : errorLogs.join("<br>");
+                    modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                        read_xl_file();
+                        btn.prop("disabled", false);
+                    });
+                    createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
+                } else if (valid_data && valid_data.length > 0) {
                     btn.prop("disabled", false);
-                });
-                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
-            } else if (valid_data && valid_data.length > 0) {
-                btn.prop("disabled", false);
-                updateSwalProgress("Validation Completed", 10);
-                new_data = valid_data.map(record => ({
-                    ...record,
-                    year: year,
-                    month: month,
-                    week: week,
-                    company: company
-                }));
-                setTimeout(() => saveValidatedData(new_data), 500);
-            } else {
-                btn.prop("disabled", false);
-                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                    updateSwalProgress("Validation Completed", 10);
+                    new_data = valid_data.map(record => ({
+                        ...record,
+                        year: year,
+                        month: month,
+                        week: week,
+                        company: company
+                    }));
+                    setTimeout(() => saveValidatedData(new_data), 500);
+                } else {
+                    btn.prop("disabled", false);
+                    modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                }
+            }else{
+                modal.loading(false);
+                modal.loading_progress(true); 
+                updateSwalProgress("Validating data...", progress);
+            
             }
+
         };
 
         worker.onerror = function() {
@@ -1037,12 +1044,13 @@
             'in_transit', 'average_sales_unit', 'year', 'month', 'company'
         ];
 
-        // Fields used for matching existing records
         const matchFields = [
             'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 
             'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 
             'average_sales_unit', 'year', 'month', 'company'
         ];  
+
+        const matchType = "AND";  // Use "AND" or "OR" for matching logic
 
         modal.loading_progress(true, "Validating and Saving data...");
 
@@ -1056,6 +1064,7 @@
                     existingMap.set(key, record.id);
                 });
             }
+
             function processNextBatch() {
                 if (batch_index >= total_batches) {
                     modal.loading_progress(false);
@@ -1073,10 +1082,28 @@
                 let updateRecords = [];
 
                 batch.forEach(row => {
-                    let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+                    let matchedId = null;
 
-                    if (existingMap.has(key)) {
-                        row.id = existingMap.get(key);
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else if (matchType === "OR") {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+                            for (let field of matchFields) {
+                                if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
+                                    matchedId = id;
+                                    break; // Stop searching once a match is found
+                                }
+                            }
+                            if (matchedId) break;
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
                         row.updated_date = formatDate(new Date());
                         updateRecords.push(row);
                     } else {
@@ -1093,6 +1120,7 @@
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
                                 }
+                                updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
                                 resolve();
                             });
                         } else {
@@ -1105,7 +1133,9 @@
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
                             batch_insert(url, newRecords, table, false, (response) => {
-                                if (response.message !== 'success') {
+                                if (response.message === 'success') {
+                                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+                                } else {
                                     errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
                                 }
                                 resolve();
@@ -1131,6 +1161,7 @@
             setTimeout(processNextBatch, 1000);
         });
     }
+
 
     function excel_date_to_readable_date(excel_date) {
         var dateStr = excel_date.split('/').map((part, index) => {
@@ -1197,7 +1228,7 @@
             }
         });
 
-        $(".import_buttons").html($downloadBtn);
+        $(".import_buttons").append($downloadBtn);
     }
 
     function get_year() {

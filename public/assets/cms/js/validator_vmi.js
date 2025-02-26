@@ -22,9 +22,13 @@ self.onmessage = async function(e) {
 
         function processBatch() {
             if (index >= data.length) {
-                self.postMessage({ invalid, errorLogs, valid_data, err_counter });
+                self.postMessage({ invalid, errorLogs, valid_data, err_counter, progress: 100 });
                 return;
             }
+
+            let progress = Math.round((index / data.length) * 100); // Calculate dynamic progress
+            self.postMessage({ progress });
+           // console.log(progress);
 
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
