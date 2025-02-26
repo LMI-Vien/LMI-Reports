@@ -257,10 +257,10 @@
                         <input type="text" class="form-control required" id="dec_tq" aria-describedby="dec_tq">
                     </div>
 
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <label for="code" class="form-label">Total Quantity</label>
                         <input type="text" class="form-control required" id="total_qty" aria-describedby="total_qty">
-                    </div>
+                    </div> -->
 
                     <div class="mb-3">
                         <label for="code" class="form-label">January</label>
@@ -322,10 +322,10 @@
                         <input type="text" class="form-control required" id="dec_ta" aria-describedby="dec_ta">
                     </div>
 
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <label for="code" class="form-label">Total Amount</label>
                         <input type="text" class="form-control required" id="total_amount" aria-describedby="total_amount">
-                    </div>
+                    </div> -->
                 </form>
             </div>
             <div class="modal-footer"></div>
@@ -408,8 +408,8 @@
                                     <th class='center-content'>October TQ</th>
                                     <th class='center-content'>November TQ</th>
                                     <th class='center-content'>December TQ</th>
-                                    <th class='center-content'>Total Quantity</th>
-                                    <!-- <th class='center-content'>January TA</th>
+                          
+                                    <th class='center-content'>January TA</th>
                                     <th class='center-content'>February TA</th>
                                     <th class='center-content'>March TA</th>
                                     <th class='center-content'>April TA</th>
@@ -421,7 +421,7 @@
                                     <th class='center-content'>October TA</th>
                                     <th class='center-content'>November TA</th>
                                     <th class='center-content'>December TA</th>
-                                    <th class='center-content'>Total Amount</th> -->
+    
                                 </tr>
                             </thead>
                             <tbody class="word_break import_table"></tbody>
@@ -465,7 +465,8 @@
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
                 lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
                 january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-                total_quantity, status, created_date`.replace(/\s+/g, ' '),
+                status, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+                created_date`.replace(/\s+/g, ' '),
             query : new_query,
             offset : offset,
             limit : limit,
@@ -484,14 +485,13 @@
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
-                        console.log(y);
+                        // console.log(y);
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + (y.id) + "</td>";
-                        console.log("This is your status", y.status);
                         // html += "<td scope=\"col\">" + trimText(y.payment_group, 10) + "</td>";
                         // html += "<td scope=\"col\">" + trimText(y.vendor, 10) + "</td>";
                         // html += "<td scope=\"col\">" + trimText(y.overall, 10) + "</td>";
@@ -669,8 +669,8 @@
             "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
             "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
             "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
-            "nov_tq", "dec_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta", "oct_ta", "nov_ta",
-            "dec_ta", "total_amount"
+            "nov_tq", "dec_tq", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta", "oct_ta", "nov_ta",
+            "dec_ta"
         ];
 
         set_field_state(fields.map(id => `#${id}`).join(', '), isReadOnly);
@@ -726,8 +726,8 @@
             "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
             "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
             "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
-            "nov_tq", "december_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta",
-            "oct_ta", "nov_ta", "dec_ta", "total_amount"
+            "nov_tq", "december_tq", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta",
+            "oct_ta", "nov_ta", "dec_ta"
         ];
 
         fields.forEach(field => {
@@ -770,8 +770,8 @@
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
             lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
             january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
-            total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
+            january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+            created_date, updated_date`.replace(/\s+/g, ' '),
             query : query, 
             table : "tbl_accounts_target_sellout_pa"
         }
@@ -811,7 +811,6 @@
                     $('#oct_tq').val(d.october_tq);
                     $('#nov_tq').val(d.november_tq);
                     $('#dec_tq').val(d.december_tq);
-                    $('#total_qty').val(d.total_quantity);
                     $('#jan_ta').val(d.january_ta);
                     $('#feb_ta').val(d.february_ta);
                     $('#mar_ta').val(d.march_ta);
@@ -824,7 +823,6 @@
                     $('#oct_ta').val(d.october_ta);
                     $('#nov_ta').val(d.november_ta);
                     $('#dec_ta').val(d.december_ta);
-                    $('#total_amount').val(d.total_amount);
                 }); 
             }
         });
@@ -844,8 +842,8 @@
         inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description, inp_item_status, inp_srp, inp_trade_discount,
         inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq, inp_martq, 
         inp_aprtq, inp_maytq, inp_juntq, inp_jultq, inp_augtq, inp_septq, inp_octtq,
-        inp_novtq, inp_dectq, inp_total_quantity, inp_janta, inp_febta, inp_marta, inp_aprta,
-        inp_julta, inp_augta, inp_septa, inp_octta, inp_novta, inp_decta, inp_total_amount, id) {
+        inp_novtq, inp_dectq, inp_janta, inp_febta, inp_marta, inp_aprta,
+        inp_julta, inp_augta, inp_septa, inp_octta, inp_novta, inp_decta, id) {
         // let {inp_payment_group, inp_vendor, inp_overall, inp_kam_kas_kaa, inp_sales_group, inp_terms, inp_channel, 
         //     inp_brand, inp_exclusivity, inp_category, inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description,
         //     inp_item_status, inp_srp, inp_trade_discount, inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq,
@@ -899,7 +897,6 @@
                     october_tq: inp_octtq,
                     november_tq: inp_novtq,
                     december_tq: inp_dectq,
-                    total_quantity: inp_total_quantity,
                     january_ta: inp_janta,
                     february_ta: inp_febta,
                     march_ta: inp_marta,
@@ -912,7 +909,6 @@
                     october_ta: inp_octta,
                     november_ta: inp_novta,
                     december_ta: inp_decta,
-                    total_amount: inp_total_amount,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
           
@@ -955,7 +951,18 @@
                     october_tq: inp_octtq,
                     november_tq: inp_novtq,
                     december_tq: inp_dectq,
-                    total_quantity: total_quantity,
+                    january_ta: inp_janta,
+                    february_ta: inp_febta,
+                    march_ta: inp_marta,
+                    april_ta: inp_aprta,
+                    may_ta: inp_marta,
+                    june_ta: inp_junta,
+                    july_ta: inp_julta,
+                    august_ta: inp_augta,
+                    september_ta: inp_septa,
+                    october_ta: inp_octta,
+                    november_ta: inp_novta,
+                    december_ta: inp_decta,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                 }
@@ -1006,7 +1013,6 @@
         var oct_tq = $('#oct_tq').val();
         var nov_tq = $('#nov_tq').val();
         var dec_tq = $('#dec_tq').val();
-        var totalQty = $('#total_qty').val();
         var jan_ta = $('#jan_ta').val();
         var feb_ta = $('#feb_ta').val();
         var mar_ta = $('#mar_ta').val();
@@ -1019,7 +1025,6 @@
         var oct_ta = $('#oct_ta').val();
         var nov_ta = $('#nov_ta').val();
         var dec_ta = $('#dec_ta').val();
-        var totalAmnt = $('#total_amount').val();
 
         console.log("Updating record with ID:", id);
         console.log("Input Values:", {
@@ -1227,7 +1232,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total amount'];
+            let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'januaryta', 'februaryta', 'marchta', 'aprilta', 'mayta', 'juneta', 'julyta', 'augustta', 'septemberta', 'octoberta', 'novemberta', 'decemberta'];
             // let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
@@ -1301,11 +1306,11 @@
                 "October": row["October"] || "",
                 "November": row["November"] || "",
                 "December": row["December"] || "",
-                "Total Quantity": row["Total Quantity"] || "",
                 "JanuaryTA": row["JanuaryTA"] || "",
                 "FebruaryTA": row["FebruaryTA"] || "",
                 "MarchTA": row["MarchTA"] || "",
                 "AprilTA": row["AprilTA"] || "",
+                "MayTA": row["MayTA"] || "",
                 "JuneTA": row["JuneTA"] || "",
                 "JulyTA": row["JulyTA"] || "",
                 "AugustTA": row["AugustTA"] || "",
@@ -1313,7 +1318,6 @@
                 "OctoberTA": row["OctoberTA"] || "",
                 "NovemberTA": row["NovemberTA"] || "",
                 "DecemberTA": row["DecemberTA"] || "",
-                "Total Amount": row["Total Amount"] || "",
                 "Created by": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
             };
