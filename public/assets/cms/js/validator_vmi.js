@@ -26,9 +26,8 @@ self.onmessage = async function(e) {
                 return;
             }
 
-            let progress = Math.round((index / data.length) * 100); // Calculate dynamic progress
+            let progress = Math.round((index / data.length) * 100);
             self.postMessage({ progress });
-           // console.log(progress);
 
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];

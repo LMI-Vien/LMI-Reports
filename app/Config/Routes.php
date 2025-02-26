@@ -62,6 +62,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-ba-sales-report', static function ($routes) {
         $routes->get('/', 'Cms\Import_ba_sales_report::index');
+        $routes->get('get_valid_ba_data', 'Cms\Import_ba_sales_report::get_valid_ba_data');
     });
 
     $routes->group('import-target-sales-ps', static function ($routes) {

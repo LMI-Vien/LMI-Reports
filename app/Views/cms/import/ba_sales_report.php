@@ -66,9 +66,10 @@
                                         <th class='center-content'>BA Name</th>
                                         <th class='center-content'>Date</th>
                                         <th class='center-content'>Amount</th>
-                                        <!-- <th class='center-content'>Status</th> -->
+                                        <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
+                                        
                                         <th class='center-content'>Action</th>
                                     </tr>
                                 </thead>
@@ -164,23 +165,23 @@
                                 <b>Extracted Data</b>
                             </div>
 
-                            <div class="import_buttons">
-                                <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
-                                    <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                        <div class="row my-3">
+                            <div class="col-md-8 import_buttons">
+                                <label for="file" class="btn btn-warning mt-2" style="margin-bottom: 0px;">
+                                    <i class="fa fa-file-import me-2"></i> Custom Upload
                                 </label>
-                                <input
-                                    type="file"
-                                    style="display: none;"
-                                    id="file"
-                                    accept=".xls,.xlsx,.csv"
-                                    aria-describedby="import_files"
-                                    onclick="clear_import_table()"
-                                >
+                                <input type="file" id="file" accept=".xls,.xlsx,.csv" style="display: none;" onclick="clear_import_table()">
 
-                                <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                    <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                                </label>
+                                <button class="btn btn-primary mt-2" id="preview_xl_file" onclick="read_xl_file()">
+                                    <i class="fa fa-sync me-2"></i> Preview Data
+                                </button>
+
+                                <button class="btn btn-success mt-2" id="download_template" onclick="download_template()">
+                                    <i class="fa fa-file-download me-2"></i> Download Import Template
+                                </button>
                             </div>
+
+                        </div>
 
                             <table class= "table table-bordered listdata">
                                 <thead>
@@ -212,7 +213,7 @@
     </div>
     
 <script>
-    var query = "status >= 0";
+    var query = "basr.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
@@ -231,14 +232,36 @@
     function get_data(new_query) {
         var data = {
             event : "list",
-            select : "id, area, store_name, brand, ba_name, date, amount, status, created_date, updated_date",
+            select : "basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status",
             query : new_query,
             offset : offset,
             limit : limit,
-            table : "tbl_ba_sales_report",
+            table : "tbl_ba_sales_report basr",
+            join : [
+                {
+                    table: "tbl_brand b",
+                    query: "b.id = basr.brand",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = basr.store_name",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.id = basr.ba_name",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area ar",
+                    query: "ar.id = basr.area",
+                    type: "left"
+                }
+            ], 
             order : {
-                field : "id, updated_date",
-                order : "asc, desc" 
+                field : "basr.id",
+                order : "asc" 
             }
 
         }
@@ -250,9 +273,9 @@
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
-                        console.log(y);
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         y.amount = parseFloat(y.amount) || 0;
 
                         html += "<tr class='" + rowClass + "'>";
@@ -263,6 +286,7 @@
                         html += "<td scope=\"col\">" + (y.ba_name) + "</td>";
                         html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
                         html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
+                        html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
@@ -270,7 +294,6 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
@@ -290,16 +313,11 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id",
+            select : "basr.id, basr.status",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_ba_sales_report",
-            order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
-            }
-
+            table : "tbl_ba_sales_report as basr"
         }
 
         aJax.post(url,data,function(result){
@@ -321,15 +339,14 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            var new_query = "(" + query + " AND area LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND store_name LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND brand LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND ba_name LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND date LIKE '%" + keyword + "%')"; 
+            var new_query = "(" + query + " AND ar.description LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND s.description LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND b.brand_description LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND ba.name LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND basr.date LIKE '%" + keyword + "%')"; 
                 
             get_data(new_query);
             get_pagination();
-            console.log('Pressed key: ' + keyword);
         }
     });
 
@@ -681,6 +698,8 @@
     }
 
     function read_xl_file() {
+        let btn = $(".btn.save");
+        btn.prop("disabled", false); 
         clear_import_table();
         
         dataset = [];
@@ -701,8 +720,6 @@
 
             const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
 
-            //console.log('Total records to process:', jsonData.length);
-            // Process in chunks
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -711,10 +728,19 @@
     }
 
     function process_xl_file() {
+        let btn = $(".btn.save");
+        if (btn.prop("disabled")) return; // Prevent multiple clicks
+
+        btn.prop("disabled", true);
+        $(".import_buttons").find("a.download-error-log").remove();
+        setTimeout(() => {
+            btn.prop("disabled", false);
+        }, 4000);
+
         if (dataset.length === 0) {
-            modal.alert('No data to process. Please upload a file.', 'error', () => {});
-            return;
+            return modal.alert('No data to process. Please upload a file.', 'error', () => {});
         }
+        modal.loading(true);
 
         let jsonData = dataset.map(row => {
             return {
@@ -729,99 +755,42 @@
             };
         });
 
-        // var table = 'tbl_vmi';
-        // var haystack = ['store', 'store_name', 'item', 'item_name', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'total_qty', 'average_sales_unit', 'swc', 'a202445'];
-        // var selected_fields = ['id', 'store', 'store_name', 'item', 'item_name', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'total_qty', 'average_sales_unit', 'swc', 'a202445'];
-        // var needle = []
-
-        console.log("jsonData before processing:", jsonData);
-
-        // jsonData.forEach(item => {
-        //     console.log("Processing item:", item);
-
-        //     if (item.store && item.Store_Name && item.Item && item.Item_Name && item.Item_Class && item.Supplier && item.Group && item.Dept && item.Class && item.Sub_class && item.on_hand && item.in_transit && item.total_qty && item.Ave_Sales_Unit && item.SWC && item.a202446) { // Ensure Code and Name are not empty
-        //         needle.push([item.store, item.Store_Name, item.Item, item.Item_Name, item.Item_Class, item.Supplier, item.Group, item.Dept, item.Class, item.Sub_class, item.on_hand, item.in_transit, item.total_qty, item.Ave_Sales_Unit, item.SWC, item.a202446  ]);
-        //     }
-        // });
-
-        // console.log("Final needle array:", needle);
-
-        modal.loading_progress(true, "Validating and Saving data...");
         let worker = new Worker(base_url + "assets/cms/js/validator_ba_sales_report.js");
-        worker.postMessage(jsonData);
+        worker.postMessage({ data: jsonData, base_url });
 
         worker.onmessage = function(e) {
-            console.log("Received from worker:", e.data);
             modal.loading_progress(false);
-
-            let { invalid, errorLogs, valid_data, err_counter } = e.data;
-            if (invalid) {
-                console.log("Error logs from worker:", errorLogs);
-                if (err_counter > 5000) {
-                    
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        '⚠️ Too many errors detected. Please download the error log for details.',
-                        '600px',
-                        () => {}
-                    );
+            const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
+            if(progress == 100){
+                if (invalid) {
+                    let errorMsg = err_counter > 1000 
+                        ? '⚠️ Too many errors detected. Please download the error log for details.'
+                        : errorLogs.join("<br>");
+                    modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                        read_xl_file();
+                        btn.prop("disabled", false);
+                    });
+                    createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
+                } else if (valid_data && valid_data.length > 0) {
+                    btn.prop("disabled", false);
+                    updateSwalProgress("Validation Completed", 10);
+                    setTimeout(() => saveValidatedData(valid_data), 500);
                 } else {
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        errorLogs.join("<br>"),
-                        '600px',
-                        () => {}
-                    );
+                    btn.prop("disabled", false);
+                    modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
                 }
-                createErrorLogFile(errorLogs);
-            } else if (valid_data && valid_data.length > 0) {
-                updateSwalProgress("Validation Completed", 50);
-                setTimeout(() => saveValidatedData(valid_data), 500);
-                // validate contents of excel first before making a query to the database
-                // list_existing(table, selected_fields, haystack, needle, function (result) {
-                //     // if all codes and descriptions are unique start saving data
-                //     if (result.status != "error") {
-                //         // delay to let UI catch up with jquery updates
-                //         updateSwalProgress("Validation Completed", 50);
-                //         setTimeout(() => saveValidatedData(valid_data), 500);
-                //     } 
-                //     // if one of the codes and description already exists in the database
-                //     else {
-                //         var split_result = []
-                //         // stop loading ui
-                //         modal.loading_progress(false)
-                //         // split and store into array
-                //         split_result = result.message.split("<br>")
-                //         $.each(split_result, (x, y) => {
-                //             // for each message remove <b> tags
-                //             cleaned_message = y.replace("<b>", "").replace("</b>", "").replace("<b>", "").replace("</b>", "")
-                //             // add to error logs
-                //             errorLogs.push(cleaned_message)
-                //         })
-                //         // pass error logs to create text file of error logs
-                //         createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
-                //         // call popup to alert users with error messages
-                //         modal.content(
-                //             'Validation Error',
-                //             'error',
-                //             errorLogs.join("<br>"),
-                //             '600px',
-                //             () => {}
-                //         );
-                //     }
-                // })
-            } else {
-                modal.loading_progress(false);
-                console.error("No valid data returned from worker.");
-                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+            }else{
+                modal.loading(false);
+                modal.loading_progress(true); 
+                updateSwalProgress("Validating data...", progress);
+            
             }
+
         };
 
         worker.onerror = function() {
             modal.loading_progress(false);
-            modal.alert("Error processing data. Please try again.", "error", () => {});
+            modal.alert("Error processing data. Please try again.", "error");
         };
     }
 
@@ -833,7 +802,6 @@
         function nextChunk() {
             if (index >= data.length) {
                 modal.loading_progress(false);
-                console.log('Total records processed:', totalProcessed);
                 callback(); 
                 return;
             }
@@ -843,13 +811,9 @@
             totalProcessed += chunk.length; 
             index += chunkSize;
 
-
-            // Calculate progress percentage
             let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
-            setTimeout(() => {
-                updateSwalProgress("Preview Data", progress);
-                nextChunk();
-            }, 100); // Delay for UI update
+            updateSwalProgress("Preview Data", progress);
+            requestAnimationFrame(nextChunk);
         }
         nextChunk();
     }
@@ -897,50 +861,131 @@
         let batch_size = 5000; // Process 1000 records at a time
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
-        let retry_count = 0;
-        let max_retries = 5; 
+        let errorLogs = [];
+        let url = "<?= base_url('cms/global_controller');?>";
+        let table = 'tbl_ba_sales_report';
 
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                modal.alert(success_save_message, 'success', () => location.reload());
-                return;
-            }
+        let selected_fields = [
+            'id', 'area', 'store_name', 'brand', 'ba_name', 'date'
+        ];
 
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let progress = Math.round(((batch_index + 1) / total_batches) * 100);
-            setTimeout(() => {
-                updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
-            }, 100);
-            batch_insert(batch, function() {
-                batch_index++;
-                processNextBatch();
-            });
-        }
+        const matchFields = [
+            'area', 'store_name', 'brand', 'ba_name', 'date'
+        ];  
 
-        function handleSaveError(batch) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000;
-                //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
-                setTimeout(() => {
-                    //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
-                    batch_insert(batch, function(success) {
-                        if (success) {
-                            batch_index++;
-                            retry_count = 0;
-                            processNextBatch();
-                        } else {
-                            handleSaveError(batch);
-                        }
-                    });
-                }, wait_time);
-            } else {
-                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-            }
-        }
+        const matchType = "AND";  // Use "AND" or "OR" for matching logic
 
         modal.loading_progress(true, "Validating and Saving data...");
-        setTimeout(processNextBatch, 1000);
+
+        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+            let result = JSON.parse(response);
+            let existingMap = new Map();
+
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+                    existingMap.set(key, record.id);
+                });
+            }
+
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
+                    if (errorLogs.length > 0) {
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info');
+                    } else {
+                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                    }
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let matchedId = null;
+                    if (row.date) {
+                        row.date = formatDateToISO(row.date);
+                    }
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else if (matchType === "OR") {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+                            for (let field of matchFields) {
+                                if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
+                                    matchedId = id;
+                                    break; // Stop searching once a match is found
+                                }
+                            }
+                            if (matchedId) break;
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
+                        row.updated_by = user_id;
+                        row.updated_date = formatDate(new Date());
+                        updateRecords.push(row);
+                    } else {
+                        row.created_by = user_id;
+                        row.created_date = formatDate(new Date());
+                        newRecords.push(row);
+                    }
+                });
+
+                function processUpdates() {
+                    return new Promise((resolve) => {
+                        if (updateRecords.length > 0) {
+                            batch_update(url, updateRecords, table, "id", false, (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                function processInserts() {
+                    return new Promise((resolve) => {
+                        if (newRecords.length > 0) {
+                            batch_insert(url, newRecords, table, false, (response) => {
+                                if (response.message === 'success') {
+                                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+                                } else {
+                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                }
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                processUpdates()
+                    .then(processInserts)
+                    .then(() => {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    })
+                    .catch(error => {
+                        errorLogs.push(`Unexpected error: ${error}`);
+                        processNextBatch();
+                    });
+            }
+
+            setTimeout(processNextBatch, 1000);
+        });
     }
 
     function excel_date_to_readable_date(excel_date) {
@@ -965,8 +1010,8 @@
 
     function updatePaginationControls() {
         let paginationHtml = `
-            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}>First</button>
-            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}>Previous</button>
+            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
+            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
             
             <select onchange="goToPage(this.value)">
                 ${Array.from({ length: totalPages }, (_, i) => 
@@ -974,8 +1019,8 @@
                 ).join('')}
             </select>
             
-            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}>Next</button>
-            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}>Last</button>
+            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
+            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
         `;
 
         $(".import_pagination").html(paginationHtml);
@@ -992,13 +1037,13 @@
             href: url,
             download: filename+".txt",
             text: "Download Error Logs",
-            class: "download-error-log", 
+            class: "download-error-log btn btn-danger mt-2", 
             css: {
                 border: "1px solid white",
                 borderRadius: "10px",
                 display: "inline-block",
-                padding: "10px",
-                lineHeight: 0.5,
+                // padding: "10px",
+                // lineHeight: 0.5,
                 background: "#990000",
                 color: "white",
                 textAlign: "center",
@@ -1009,59 +1054,6 @@
         });
 
         $(".import_buttons").append($downloadBtn);
-    }
-
-
-    function batch_insert(insert_batch_data, cb) {
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event: "batch_insert",
-            table: "tbl_ba_sales_report",
-            insert_batch_data: insert_batch_data
-        };
-
-        let retry_count = 0;
-        let max_retries = 5; // Maximum retry attempts
-
-        // Function to make the AJAX request and handle retries
-        function attemptInsert() {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: function(result) {
-                    if (result.message === "success") {
-                        cb(true); // Success callback
-                    } else {
-                        handleSaveError(result); // Handle error if message is not success
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Save failed:", status, error);
-                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
-                }
-            });
-        }
-
-        // Handle the error and retry the request
-        function handleSaveError(result) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
-                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
-
-                setTimeout(() => {
-                    console.log(`Retrying attempt ${retry_count}...`);
-                    attemptInsert(); // Retry the insertion
-                }, wait_time);
-            } else {
-                console.error("Failed to save data after multiple attempts.");
-                cb(false); // Call callback with failure if retries exceed max attempts
-            }
-        }
-
-        // Initiate the first attempt to insert
-        attemptInsert();
     }
     
 </script>

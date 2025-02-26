@@ -340,7 +340,7 @@
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
-                        var status = (parseInt(y.status) === 1) ? "Active" : (parseInt(y.status) === 3) ? "De-listed" : "Inactive";
+                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         html += "<tr class='" + rowClass + "'>";
@@ -1041,13 +1041,12 @@
         let selected_fields = [
             'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
             'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 
-            'in_transit', 'average_sales_unit', 'year', 'month', 'company'
+            'in_transit', 'year', 'month', 'company'
         ];
 
         const matchFields = [
             'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 
-            'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 
-            'average_sales_unit', 'year', 'month', 'company'
+            'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'company'
         ];  
 
         const matchType = "AND";  // Use "AND" or "OR" for matching logic
@@ -1104,6 +1103,7 @@
 
                     if (matchedId) {
                         row.id = matchedId;
+                        row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
                         updateRecords.push(row);
                     } else {

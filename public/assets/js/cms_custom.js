@@ -1220,7 +1220,6 @@ function total_delete(url, delete_table, delete_field, delete_where) {
     })
 }
 
-
 function batch_update(url, data, table, primaryKey, get_code, callback) {
     aJax.post(url, { event: "batch_update", table, field: primaryKey, data, get_code, where_in: data.map(item => item[primaryKey]) }, response => callback(JSON.parse(response)));
 }
@@ -1231,4 +1230,23 @@ function batch_delete(url, table, field, field_value, where_in_field, callback) 
 
 function batch_insert(url, insert_batch_data, batch_table, get_code, callback) {
     aJax.post(url, { event: "batch_insert", table: batch_table, get_code, insert_batch_data }, callback);
+}
+
+function formatDateToISO(dateString) {
+    let parts = dateString.split("-");
+    if (parts.length === 3) {
+        let [year, month, day] = parts;
+
+        if (year.length === 2) {
+            year = "20" + year;
+        }
+
+        let numericYear = parseInt(year, 10);
+        if (numericYear < 1900 || numericYear > 2100) {
+            console.warn(`⚠️ Invalid year detected: ${year}. Keeping original format.`);
+        }
+
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    return dateString; 
 }

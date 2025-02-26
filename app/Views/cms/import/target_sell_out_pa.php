@@ -39,6 +39,25 @@
         }
     }
 
+    .card {
+        margin-right: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .uniform-dropdown {
+        height: 36px;
+        font-size: 14px;
+        border-radius: 5px;
+        min-width: 120px; /* Ensures uniform dropdown width */
+        flex-grow: 1; /* Makes sure dropdown takes available space */
+    }
+    
+    .d-flex {
+        gap: 10px; /* Adds space between label and dropdown */
+        margin: 5px;
+    }
+
 </style>
 
 <div class="content-wrapper p-4">
@@ -102,230 +121,230 @@
                         <div hidden>
                             <input type="text" class="form-control" id="id" aria-describedby="id">
                         </div>
-                        <label for="store" class="form-label">Payment Group</label>
+                        <label for="payment_group" class="form-label">Payment Group</label>
                         <input type="text" class="form-control required" id="payment_group" aria-describedby="payment_group">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Vendor</label>
+                        <label for="vendor" class="form-label">Vendor</label>
                         <input type="text" class="form-control required" id="vendor" aria-describedby="vendor">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Overall</label>
+                        <label for="overall" class="form-label">Overall</label>
                         <input type="text" class="form-control required" id="overall" aria-describedby="overall">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">KAM/KAS/KAA</label>
+                        <label for="kam_kas_kaa" class="form-label">KAM/KAS/KAA</label>
                         <input type="text" class="form-control required" id="kam_kas_kaa" aria-describedby="kam_kas_kaa">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Sales Group</label>
+                        <label for="sales_group" class="form-label">Sales Group</label>
                         <input type="text" class="form-control required" id="sales_group" aria-describedby="sales_group">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Terms</label>
+                        <label for="terms" class="form-label">Terms</label>
                         <input type="text" class="form-control required" id="terms" aria-describedby="terms">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Channel</label>
+                        <label for="channel" class="form-label">Channel</label>
                         <input type="text" class="form-control required" id="channel" aria-describedby="channel">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Brand</label>
+                        <label for="category" class="form-label">Brand</label>
                         <input type="text" class="form-control required" id="brand" aria-describedby="brand">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Exclusivity</label>
+                        <label for="category" class="form-label">Exclusivity</label>
                         <input type="text" class="form-control required" id="exclusivity" aria-describedby="exclusivity">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Category</label>
+                        <label for="category" class="form-label">Category</label>
                         <input type="text" class="form-control required" id="category" aria-describedby="category">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">LMI Code</label>
+                        <label for="lmi_code" class="form-label">LMI Code</label>
                         <input type="text" class="form-control required" id="lmi_code" aria-describedby="lmi_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">RGDI Code</label>
+                        <label for="rgdi_code" class="form-label">RGDI Code</label>
                         <input type="text" class="form-control required" id="rgdi_code" aria-describedby="rgdi_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Customer SKU Code</label>
+                        <label for="customer_sku_code" class="form-label">Customer SKU Code</label>
                         <input type="text" class="form-control required" id="customer_sku_code" aria-describedby="customer_sku_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Item Description</label>
+                        <label for="item_description" class="form-label">Item Description</label>
                         <input type="text" class="form-control required" id="item_description" aria-describedby="item_description">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Item Status</label>
+                        <label for="item_status" class="form-label">Item Status</label>
                         <input type="text" class="form-control required" id="item_status" aria-describedby="item_status">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">SRP</label>
+                        <label for="srp" class="form-label">SRP</label>
                         <input type="text" class="form-control required" id="srp" aria-describedby="srp">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Trade Discount</label>
+                        <label for="trade_discount" class="form-label">Trade Discount</label>
                         <input type="text" class="form-control required" id="trade_discount" aria-describedby="trade_discount">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Customer Cost</label>
+                        <label for="customer_cost" class="form-label">Customer Cost</label>
                         <input type="text" class="form-control required" id="customer_cost" aria-describedby="customer_cost">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Customer Cost Net of Vat</label>
+                        <label for="customer_cost_net_of_vat" class="form-label">Customer Cost Net of Vat</label>
                         <input type="text" class="form-control required" id="customer_cost_net_of_vat" aria-describedby="customer_cost_net_of_vat">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">January</label>
+                        <label for="jan_tq" class="form-label">January</label>
                         <input type="text" class="form-control required" id="jan_tq" aria-describedby="jan_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">February</label>
+                        <label for="feb_tq" class="form-label">February</label>
                         <input type="text" class="form-control required" id="feb_tq" aria-describedby="feb_tq">
                     </div>
                     
                     <div class="mb-3">
-                        <label for="code" class="form-label">March</label>
+                        <label for="mar_tq" class="form-label">March</label>
                         <input type="text" class="form-control required" id="mar_tq" aria-describedby="mar_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">April</label>
+                        <label for="apr_tq" class="form-label">April</label>
                         <input type="text" class="form-control required" id="apr_tq" aria-describedby="apr_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">May</label>
+                        <label for="may_tq" class="form-label">May</label>
                         <input type="text" class="form-control required" id="may_tq" aria-describedby="may_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">June</label>
+                        <label for="jun_tq" class="form-label">June</label>
                         <input type="text" class="form-control required" id="jun_tq" aria-describedby="jun_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">July</label>
+                        <label for="jul_tq" class="form-label">July</label>
                         <input type="text" class="form-control required" id="jul_tq" aria-describedby="jul_tq">
                     </div>
 
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">August</label>
+                        <label for="aug_tq" class="form-label">August</label>
                         <input type="text" class="form-control required" id="aug_tq" aria-describedby="aug_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">September</label>
+                        <label for="sep_tq" class="form-label">September</label>
                         <input type="text" class="form-control required" id="sep_tq" aria-describedby="sep_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">October</label>
+                        <label for="oct_tq" class="form-label">October</label>
                         <input type="text" class="form-control required" id="oct_tq" aria-describedby="oct_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">November</label>
+                        <label for="nov_tq" class="form-label">November</label>
                         <input type="text" class="form-control required" id="nov_tq" aria-describedby="nov_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">December</label>
+                        <label for="nov_tq" class="form-label">December</label>
                         <input type="text" class="form-control required" id="dec_tq" aria-describedby="dec_tq">
                     </div>
 
-                    <div class="mb-3">
+                   <!--  <div class="mb-3">
                         <label for="code" class="form-label">Total Quantity</label>
                         <input type="text" class="form-control required" id="total_qty" aria-describedby="total_qty">
-                    </div>
+                    </div> -->
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">January</label>
+                        <label for="jan_ta" class="form-label">January</label>
                         <input type="text" class="form-control required" id="jan_ta" aria-describedby="jan_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">February</label>
+                        <label for="feb_ta" class="form-label">February</label>
                         <input type="text" class="form-control required" id="feb_ta" aria-describedby="feb_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">March</label>
+                        <label for="mar_ta" class="form-label">March</label>
                         <input type="text" class="form-control required" id="mar_ta" aria-describedby="mar_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">April</label>
+                        <label for="apr_ta" class="form-label">April</label>
                         <input type="text" class="form-control required" id="apr_ta" aria-describedby="apr_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">May</label>
+                        <label for="may_ta" class="form-label">May</label>
                         <input type="text" class="form-control required" id="may_ta" aria-describedby="may_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">June</label>
+                        <label for="jun_ta" class="form-label">June</label>
                         <input type="text" class="form-control required" id="jun_ta" aria-describedby="jun_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">July</label>
+                        <label for="jul_ta" class="form-label">July</label>
                         <input type="text" class="form-control required" id="jul_ta" aria-describedby="jul_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">August</label>
+                        <label for="aug_ta" class="form-label">August</label>
                         <input type="text" class="form-control required" id="aug_ta" aria-describedby="aug_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">September</label>
+                        <label for="sep_ta" class="form-label">September</label>
                         <input type="text" class="form-control required" id="sep_ta" aria-describedby="sep_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">October</label>
+                        <label for="oct_ta" class="form-label">October</label>
                         <input type="text" class="form-control required" id="oct_ta" aria-describedby="oct_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">November</label>
+                        <label for="nov_ta" class="form-label">November</label>
                         <input type="text" class="form-control required" id="nov_ta" aria-describedby="nov_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">December</label>
+                        <label for="dec_ta" class="form-label">December</label>
                         <input type="text" class="form-control required" id="dec_ta" aria-describedby="dec_ta">
                     </div>
 
-                    <div class="mb-3">
+                   <!--  <div class="mb-3">
                         <label for="code" class="form-label">Total Amount</label>
                         <input type="text" class="form-control required" id="total_amount" aria-describedby="total_amount">
-                    </div>
+                    </div> -->
                 </form>
             </div>
             <div class="modal-footer"></div>
@@ -334,7 +353,7 @@
 </div>
     
 <!-- IMPORT MODAL -->
-<div class="modal" tabindex="-1" id="import_modal">
+<div class="modal" tabindex="-1" id="import_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-xxl">
         <div class="modal-content">
             <div class="modal-header">
@@ -348,84 +367,95 @@
 
             <div class="modal-body">
                 <div class="card">
-                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                    <div class="mb-3">
                         <div class="text-center"
                         style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
                         >
                             <b>Extracted Data</b>
                         </div>
 
-                        <div class="import_buttons">
-                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
-                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                            </label>
-                            <input
-                                type="file"
-                                style="display: none;"
-                                id="file"
-                                accept=".xls,.xlsx,.csv"
-                                aria-describedby="import_files"
-                                onclick="clear_import_table()"
-                            >
+                        <div class="row my-3">
+                            <div class="col-md-8 import_buttons">
+                                <label for="file" class="btn btn-warning mt-2" style="margin-bottom: 0px;">
+                                    <i class="fa fa-file-import me-2"></i> Custom Upload
+                                </label>
+                                <input type="file" id="file" accept=".xls,.xlsx,.csv" style="display: none;" onclick="clear_import_table()">
 
-                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                            </label>
+                                <button class="btn btn-primary mt-2" id="preview_xl_file" onclick="read_xl_file()">
+                                    <i class="fa fa-sync me-2"></i> Preview Data
+                                </button>
+
+                                <button class="btn btn-success mt-2" id="download_template" onclick="download_template()">
+                                    <i class="fa fa-file-download me-2"></i> Download Import Template
+                                </button>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card p-4 shadow-lg rounded-3 border-0" style="background: #f8f9fa;">
+                                    <div class="row g-3">
+                                        <div class="col-12 d-flex align-items-center">
+                                            <label for="yearSelect" class="form-label fw-semibold me-2">Choose Year:</label>
+                                            <select id="yearSelect" class="form-select uniform-dropdown">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-
-                        <table class= "table table-bordered listdata">
-                            <thead>
-                                <tr>
-                                    <th class='center-content'>Line #</th>
-                                    <th class='center-content'>Payment Group</th>
-                                    <th class='center-content'>Vendor</th>
-                                    <th class='center-content'>Overall</th>
-                                    <th class='center-content'>KAM/KAS/KAA</th>
-                                    <th class='center-content'>Sales Group</th>
-                                    <th class='center-content'>Terms</th>
-                                    <th class='center-content'>Channel</th>
-                                    <th class='center-content'>Brand</th>
-                                    <th class='center-content'>Exclusivity</th>
-                                    <th class='center-content'>Category</th>
-                                    <th class='center-content'>LMI Code</th>
-                                    <th class='center-content'>RGDI Code</th>
-                                    <th class='center-content'>Customer SKU Code</th>
-                                    <th class='center-content'>Item Description</th>
-                                    <th class='center-content'>Item Status</th>
-                                    <th class='center-content'>SRP</th>
-                                    <th class='center-content'>Trade Discount</th>
-                                    <th class='center-content'>Customer Cost</th>
-                                    <th class='center-content'>Customer Cost Net of VAT</th>
-                                    <th class='center-content'>January TQ</th>
-                                    <th class='center-content'>February TQ</th>
-                                    <th class='center-content'>March TQ</th>
-                                    <th class='center-content'>April TQ</th>
-                                    <th class='center-content'>May TQ</th>
-                                    <th class='center-content'>June TQ</th>
-                                    <th class='center-content'>July TQ</th>
-                                    <th class='center-content'>August TQ</th>
-                                    <th class='center-content'>September TQ</th>
-                                    <th class='center-content'>October TQ</th>
-                                    <th class='center-content'>November TQ</th>
-                                    <th class='center-content'>December TQ</th>
-                                    <th class='center-content'>Total Quantity</th>
-                                    <!-- <th class='center-content'>January TA</th>
-                                    <th class='center-content'>February TA</th>
-                                    <th class='center-content'>March TA</th>
-                                    <th class='center-content'>April TA</th>
-                                    <th class='center-content'>May TA</th>
-                                    <th class='center-content'>June TA</th>
-                                    <th class='center-content'>July TA</th>
-                                    <th class='center-content'>August TA</th>
-                                    <th class='center-content'>September TA</th>
-                                    <th class='center-content'>October TA</th>
-                                    <th class='center-content'>November TA</th>
-                                    <th class='center-content'>December TA</th>
-                                    <th class='center-content'>Total Amount</th> -->
-                                </tr>
-                            </thead>
-                            <tbody class="word_break import_table"></tbody>
-                        </table>
+                        <div style="overflow-x: auto; max-height: 400px;">
+                            <table class= "table table-bordered listdata">
+                                <thead>
+                                    <tr>
+                                        <th class='center-content'>Line #</th>
+                                        <th class='center-content'>Payment Group</th>
+                                        <th class='center-content'>Vendor</th>
+                                        <th class='center-content'>Overall</th>
+                                        <th class='center-content'>KAM/KAS/KAA</th>
+                                        <th class='center-content'>Sales Group</th>
+                                        <th class='center-content'>Terms</th>
+                                        <th class='center-content'>Channel</th>
+                                        <th class='center-content'>Brand</th>
+                                        <th class='center-content'>Exclusivity</th>
+                                        <th class='center-content'>Category</th>
+                                        <th class='center-content'>LMI Code</th>
+                                        <th class='center-content'>RGDI Code</th>
+                                        <th class='center-content'>Customer SKU Code</th>
+                                        <th class='center-content'>Item Description</th>
+                                        <th class='center-content'>Item Status</th>
+                                        <th class='center-content'>SRP</th>
+                                        <th class='center-content'>Trade Discount</th>
+                                        <th class='center-content'>Customer Cost</th>
+                                        <th class='center-content'>Customer Cost Net of VAT</th>
+                                        <th class='center-content'>January TQ</th>
+                                        <th class='center-content'>February TQ</th>
+                                        <th class='center-content'>March TQ</th>
+                                        <th class='center-content'>April TQ</th>
+                                        <th class='center-content'>May TQ</th>
+                                        <th class='center-content'>June TQ</th>
+                                        <th class='center-content'>July TQ</th>
+                                        <th class='center-content'>August TQ</th>
+                                        <th class='center-content'>September TQ</th>
+                                        <th class='center-content'>October TQ</th>
+                                        <th class='center-content'>November TQ</th>
+                                        <th class='center-content'>December TQ</th>
+                                        <th class='center-content'>January TA</th>
+                                        <th class='center-content'>February TA</th>
+                                        <th class='center-content'>March TA</th>
+                                        <th class='center-content'>April TA</th>
+                                        <th class='center-content'>May TA</th>
+                                        <th class='center-content'>June TA</th>
+                                        <th class='center-content'>July TA</th>
+                                        <th class='center-content'>August TA</th>
+                                        <th class='center-content'>September TA</th>
+                                        <th class='center-content'>October TA</th>
+                                        <th class='center-content'>November TA</th>
+                                        <th class='center-content'>December TA</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="word_break import_table"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <center style="margin-bottom: 5px">
                         <div class="import_pagination btn-group"></div>
@@ -456,6 +486,7 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination();
+        get_year();
     });
 
 
@@ -464,8 +495,7 @@
             event : "list",
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
                 lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-                january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-                total_quantity, status, created_date`.replace(/\s+/g, ' '),
+                january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq, status, created_date`.replace(/\s+/g, ' '),
             query : new_query,
             offset : offset,
             limit : limit,
@@ -545,7 +575,7 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            //html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
@@ -669,8 +699,8 @@
             "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
             "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
             "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
-            "nov_tq", "dec_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta", "oct_ta", "nov_ta",
-            "dec_ta", "total_amount"
+            "nov_tq", "dec_tq", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta", "oct_ta", "nov_ta",
+            "dec_ta"
         ];
 
         set_field_state(fields.map(id => `#${id}`).join(', '), isReadOnly);
@@ -726,8 +756,8 @@
             "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
             "lmi_code", "rgdi_code", "customer_sku_code", "item_description", "item_status", "srp", "trade_discount", "customer_cost",
             "customer_cost_net_of_vat", "jan_tq", "feb_tq", "mar_tq", "apr_tq", "may_tq", "jun_tq", "jul_tq", "aug_tq", "sep_tq", "oct_tq",
-            "nov_tq", "december_tq", "total_qty", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta",
-            "oct_ta", "nov_ta", "dec_ta", "total_amount"
+            "nov_tq", "december_tq", "jan_ta", "feb_ta", "mar_ta", "apr_ta", "may_ta", "jun_ta", "jul_ta", "aug_ta", "sep_ta",
+            "oct_ta", "nov_ta", "dec_ta"
         ];
 
         fields.forEach(field => {
@@ -769,9 +799,7 @@
             // total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
             lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-            january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
-            total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
+            january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta, created_date, updated_date`.replace(/\s+/g, ' '),
             query : query, 
             table : "tbl_accounts_target_sellout_pa"
         }
@@ -811,7 +839,7 @@
                     $('#oct_tq').val(d.october_tq);
                     $('#nov_tq').val(d.november_tq);
                     $('#dec_tq').val(d.december_tq);
-                    $('#total_qty').val(d.total_quantity);
+                    //$('#total_qty').val(d.total_quantity);
                     $('#jan_ta').val(d.january_ta);
                     $('#feb_ta').val(d.february_ta);
                     $('#mar_ta').val(d.march_ta);
@@ -824,7 +852,7 @@
                     $('#oct_ta').val(d.october_ta);
                     $('#nov_ta').val(d.november_ta);
                     $('#dec_ta').val(d.december_ta);
-                    $('#total_amount').val(d.total_amount);
+                   // $('#total_amount').val(d.total_amount);
                 }); 
             }
         });
@@ -844,8 +872,8 @@
         inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description, inp_item_status, inp_srp, inp_trade_discount,
         inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq, inp_martq, 
         inp_aprtq, inp_maytq, inp_juntq, inp_jultq, inp_augtq, inp_septq, inp_octtq,
-        inp_novtq, inp_dectq, inp_total_quantity, inp_janta, inp_febta, inp_marta, inp_aprta,
-        inp_julta, inp_augta, inp_septa, inp_octta, inp_novta, inp_decta, inp_total_amount, id) {
+        inp_novtq, inp_dectq, inp_janta, inp_febta, inp_marta, inp_aprta,
+        inp_julta, inp_augta, inp_septa, inp_octta, inp_novta, inp_decta, id) {
         // let {inp_payment_group, inp_vendor, inp_overall, inp_kam_kas_kaa, inp_sales_group, inp_terms, inp_channel, 
         //     inp_brand, inp_exclusivity, inp_category, inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description,
         //     inp_item_status, inp_srp, inp_trade_discount, inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq,
@@ -899,7 +927,7 @@
                     october_tq: inp_octtq,
                     november_tq: inp_novtq,
                     december_tq: inp_dectq,
-                    total_quantity: inp_total_quantity,
+                    //total_quantity: inp_total_quantity,
                     january_ta: inp_janta,
                     february_ta: inp_febta,
                     march_ta: inp_marta,
@@ -912,7 +940,7 @@
                     october_ta: inp_octta,
                     november_ta: inp_novta,
                     december_ta: inp_decta,
-                    total_amount: inp_total_amount,
+                    //total_amount: inp_total_amount,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
           
@@ -955,7 +983,7 @@
                     october_tq: inp_octtq,
                     november_tq: inp_novtq,
                     december_tq: inp_dectq,
-                    total_quantity: total_quantity,
+                    //total_quantity: total_quantity,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                 }
@@ -1006,7 +1034,7 @@
         var oct_tq = $('#oct_tq').val();
         var nov_tq = $('#nov_tq').val();
         var dec_tq = $('#dec_tq').val();
-        var totalQty = $('#total_qty').val();
+        //var totalQty = $('#total_qty').val();
         var jan_ta = $('#jan_ta').val();
         var feb_ta = $('#feb_ta').val();
         var mar_ta = $('#mar_ta').val();
@@ -1019,7 +1047,7 @@
         var oct_ta = $('#oct_ta').val();
         var nov_ta = $('#nov_ta').val();
         var dec_ta = $('#dec_ta').val();
-        var totalAmnt = $('#total_amount').val();
+        //var totalAmnt = $('#total_amount').val();
 
         console.log("Updating record with ID:", id);
         console.log("Input Values:", {
@@ -1227,7 +1255,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total amount'];
+            let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'january ta', 'february ta', 'march ta', 'april ta', 'may ta', 'june ta', 'july ta', 'august ta', 'september ta', 'october ta', 'november ta', 'december ta'];
             // let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
@@ -1246,8 +1274,8 @@
 
     function updatePaginationControls() {
         let paginationHtml = `
-            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}>First</button>
-            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}>Previous</button>
+            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
+            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
             
             <select onchange="goToPage(this.value)">
                 ${Array.from({ length: totalPages }, (_, i) => 
@@ -1255,18 +1283,37 @@
                 ).join('')}
             </select>
             
-            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}>Next</button>
-            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}>Last</button>
+            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
+            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
         `;
 
         $(".import_pagination").html(paginationHtml);
     }
+
     
     function process_xl_file() {
-        if (dataset.length === 0) {
-            modal.alert('No data to process. Please upload a file.', 'error', () => {});
-            return;
+        let btn = $(".btn.save");
+        if (btn.prop("disabled")) return; // Prevent multiple clicks
+
+        btn.prop("disabled", true);
+        $(".import_buttons").find("a.download-error-log").remove();
+         setTimeout(() => {
+                btn.prop("disabled", false);
+            }, 4000);
+        const year = $('#yearSelect').val()?.trim();
+
+        const fields = { year };
+
+        for (const [key, value] of Object.entries(fields)) {
+            if (!value) {
+                return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
+            }
         }
+
+        if (dataset.length === 0) {
+            return modal.alert('No data to process. Please upload a file.', 'error', () => {});
+        }
+        modal.loading(true);
 
         let jsonData = dataset.map(row => {
             return {
@@ -1319,88 +1366,42 @@
             };
         });
 
-        console.log("jsonData before processing:", JSON.stringify(jsonData, null, 2));
 
-        modal.loading_progress(true, "Validating and Saving data...");
         let worker = new Worker(base_url + "assets/cms/js/validator_target_sell_out_pa.js");
-        worker.postMessage(jsonData);
+        worker.postMessage({ data: jsonData, base_url });
 
         worker.onmessage = function(e) {
-            console.log("Received from worker:", e.data);
             modal.loading_progress(false);
+            const { invalid, errorLogs, valid_data, err_counter } = e.data;
 
-            let { invalid, errorLogs, valid_data, err_counter } = e.data;
             if (invalid) {
-                console.log("Error logs from worker:", errorLogs);
-                if (err_counter > 5000) {
-                    
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        '⚠️ Too many errors detected. Please download the error log for details.',
-                        '600px',
-                        () => {}
-                    );
-                } else {
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        errorLogs.join("<br>"),
-                        '600px',
-                        () => {}
-                    );
-                }
-                createErrorLogFile(errorLogs);
+                let errorMsg = err_counter > 1000 
+                    ? '⚠️ Too many errors detected. Please download the error log for details.'
+                    : errorLogs.join("<br>");
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                    read_xl_file();
+                    btn.prop("disabled", false);
+                });
+                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
             } else if (valid_data && valid_data.length > 0) {
-                updateSwalProgress("Validation Completed", 50);
-                console.log("Final valid_data before saving:", JSON.stringify(valid_data, null, 2));
-                setTimeout(() => saveValidatedData(valid_data), 500);
-                // validate contents of excel first before making a query to the database
-                // list_existing(table, selected_fields, haystack, needle, function (result) {
-                //     // if all codes and descriptions are unique start saving data
-                //     if (result.status != "error") {
-                //         // delay to let UI catch up with jquery updates
-                //         updateSwalProgress("Validation Completed", 50);
-                //         setTimeout(() => saveValidatedData(valid_data), 500);
-                //     } 
-                //     // if one of the codes and description already exists in the database
-                //     else {
-                //         var split_result = []
-                //         // stop loading ui
-                //         modal.loading_progress(false)
-                //         // split and store into array
-                //         split_result = result.message.split("<br>")
-                //         $.each(split_result, (x, y) => {
-                //             // for each message remove <b> tags
-                //             cleaned_message = y.replace("<b>", "").replace("</b>", "").replace("<b>", "").replace("</b>", "")
-                //             // add to error logs
-                //             errorLogs.push(cleaned_message)
-                //         })
-                //         // pass error logs to create text file of error logs
-                //         createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
-                //         // call popup to alert users with error messages
-                //         modal.content(
-                //             'Validation Error',
-                //             'error',
-                //             errorLogs.join("<br>"),
-                //             '600px',
-                //             () => {}
-                //         );
-                //     }
-                // })
+                btn.prop("disabled", false);
+                updateSwalProgress("Validation Completed", 10);
+                new_data = valid_data.map(record => ({
+                    ...record,
+                    year: year
+                }));
+                setTimeout(() => saveValidatedData(new_data), 500);
             } else {
-                modal.loading_progress(false);
-                console.error("No valid data returned from worker.");
+                btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
             }
         };
 
         worker.onerror = function() {
             modal.loading_progress(false);
-            modal.alert("Error processing data. Please try again.", "error", () => {});
+            modal.alert("Error processing data. Please try again.", "error");
         };
     }
-
 
     function createErrorLogFile(errorLogs, filename) {
         let errorText = errorLogs.join("\n");
@@ -1413,13 +1414,13 @@
             href: url,
             download: filename+".txt",
             text: "Download Error Logs",
-            class: "download-error-log", 
+            class: "download-error-log btn btn-danger mt-2", 
             css: {
                 border: "1px solid white",
                 borderRadius: "10px",
                 display: "inline-block",
-                padding: "10px",
-                lineHeight: 0.5,
+                // padding: "10px",
+                // lineHeight: 0.5,
                 background: "#990000",
                 color: "white",
                 textAlign: "center",
@@ -1429,7 +1430,41 @@
             }
         });
 
-        $(".import_buttons").append($downloadBtn);
+        $(".import_buttons").html($downloadBtn);
+    }
+
+    function get_year() {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list",
+            select : "id, year, status",
+            query : 'status >= 0',
+            offset : 0,
+            limit : 0,
+            table : "tbl_year",
+            order : {
+                field : "id",
+                order : "asc" 
+            }
+        }
+
+        aJax.post(url,data,function(res){
+            var result = JSON.parse(res);
+            var html = '';
+            html += '<option id="default_val" value=" ">Select Year</option>';
+
+    
+            if(result) {
+                if (result.length > 0) {
+                    var selected = '';
+                    
+                    result.forEach(function (y) {
+                        html += `<option value="${y.id}">${y.year}</option>`;
+                    });
+                }
+            }
+            $('#yearSelect').html(html);
+        })
     }
 
     function fixEncoding(text) {
@@ -1437,106 +1472,150 @@
         return correctedText;
     }
 
-    function batch_insert(insert_batch_data, cb) {
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event: "batch_insert",
-            table: "tbl_accounts_target_sellout_pa",
-            insert_batch_data: insert_batch_data
-        };
-
-        let retry_count = 0;
-        let max_retries = 5; // Maximum retry attempts
-
-        // Function to make the AJAX request and handle retries
-        function attemptInsert() {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: function(result) {
-                    if (result.message === "success") {
-                        cb(true); // Success callback
-                    } else {
-                        handleSaveError(result); // Handle error if message is not success
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Save failed:", status, error);
-                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
-                }
-            });
-        }
-
-        // Handle the error and retry the request
-        function handleSaveError(result) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
-                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
-
-                setTimeout(() => {
-                    console.log(`Retrying attempt ${retry_count}...`);
-                    attemptInsert(); // Retry the insertion
-                }, wait_time);
-            } else {
-                console.error("Failed to save data after multiple attempts.");
-                cb(false); // Call callback with failure if retries exceed max attempts
-            }
-        }
-
-        // Initiate the first attempt to insert
-        attemptInsert();
-    }
-
     function saveValidatedData(valid_data) {
-        let batch_size = 1000; // Process 1000 records at a time
+        console.log(valid_data);
+        let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
-        let retry_count = 0;
-        let max_retries = 5; 
+        let errorLogs = [];
 
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                modal.alert(success_save_message, 'success', () => location.reload());
-                return;
-            }
+        let url = "<?= base_url('cms/global_controller');?>";
+        let table = 'tbl_accounts_target_sellout_pa';
 
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let progress = Math.round(((batch_index + 1) / total_batches) * 100);
-            setTimeout(() => {
-                updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
-            }, 100);
-            batch_insert(batch, function() {
-                batch_index++;
-                processNextBatch();
-            });
-        }
+        let selected_fields = [
+            'id', 'payment_group', 'vendor', 'overall', 'kam_kas_kaa', 'sales_group',
+            'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi_code', 
+            'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'srp', 'trade_discount',
+            'customer_cost', 'customer_cost_net_of_vat', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
+            'may_tq', 'june_tq', 'july_tq', 'august_tq', 'september_tq', 'october_tq', 'november_tq', 'december_tq',
+            'january_ta', 'february_ta', 'march_ta', 'april_ta',
+            'may_ta', 'june_ta', 'july_ta', 'august_ta', 'september_ta', 'october_ta', 'november_ta', 'december_ta',
+            'year'
 
-        function handleSaveError(batch) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000;
-                //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
-                setTimeout(() => {
-                    //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
-                    batch_insert(batch, function(success) {
-                        if (success) {
-                            batch_index++;
-                            retry_count = 0;
-                            processNextBatch();
-                        } else {
-                            handleSaveError(batch);
-                        }
-                    });
-                }, wait_time);
-            } else {
-                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-            }
-        }
+        ];
+
+        // Fields used for matching existing records
+        const matchFields = [
+            'payment_group', 'vendor', 'overall', 'kam_kas_kaa', 'sales_group',
+            'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi_code', 
+            'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'srp', 'trade_discount',
+            'customer_cost', 'customer_cost_net_of_vat', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
+            'may_tq', 'june_tq', 'july_tq', 'august_tq', 'september_tq', 'october_tq', 'november_tq', 'december_tq',
+            'january_ta', 'february_ta', 'march_ta', 'april_ta',
+            'may_ta', 'june_ta', 'july_ta', 'august_ta', 'september_ta', 'october_ta', 'november_ta', 'december_ta',
+            'year'
+        ];  
+
+        const matchType = "AND";  // Use "AND" or "OR" for matching logic
 
         modal.loading_progress(true, "Validating and Saving data...");
-        setTimeout(processNextBatch, 1000);
+
+        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+            let result = JSON.parse(response);
+            let existingMap = new Map();
+
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+                    existingMap.set(key, record.id);
+                });
+            }
+
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
+                    if (errorLogs.length > 0) {
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info');
+                    } else {
+                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                    }
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let matchedId = null;
+
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else if (matchType === "OR") {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+                            for (let field of matchFields) {
+                                if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
+                                    matchedId = id;
+                                    break; // Stop searching once a match is found
+                                }
+                            }
+                            if (matchedId) break;
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
+                        row.updated_date = formatDate(new Date());
+                        updateRecords.push(row);
+                    } else {
+                        row.created_by = user_id;
+                        row.created_date = formatDate(new Date());
+                        newRecords.push(row);
+                    }
+                });
+
+                function processUpdates() {
+                    return new Promise((resolve) => {
+                        if (updateRecords.length > 0) {
+                            batch_update(url, updateRecords, table, "id", false, (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                function processInserts() {
+                    return new Promise((resolve) => {
+                        if (newRecords.length > 0) {
+                            batch_insert(url, newRecords, table, false, (response) => {
+                                if (response.message === 'success') {
+                                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+                                } else {
+                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                }
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                processUpdates()
+                    .then(processInserts)
+                    .then(() => {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    })
+                    .catch(error => {
+                        errorLogs.push(`Unexpected error: ${error}`);
+                        processNextBatch();
+                    });
+            }
+
+            setTimeout(processNextBatch, 1000);
+        });
     }
 
     function formatDate(date) {
