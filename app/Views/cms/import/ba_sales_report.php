@@ -212,10 +212,11 @@
     </div>
     
 <script>
-    var query = "status >= 0";
+    var query = "basr.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
+    var base_url = '<?= base_url();?>';
 
     //for importing
     let currentPage = 1;
@@ -228,18 +229,98 @@
         get_pagination();
     });
 
+    // function get_data(new_query) {
+    //     var data = {
+    //         event : "list",
+    //         select : "id, area, store_name, brand, ba_name, date, amount, status, created_date, updated_date",
+    //         query : new_query,
+    //         offset : offset,
+    //         limit : limit,
+    //         table : "tbl_ba_sales_report",
+    //         order : {
+    //             field : "id, updated_date",
+    //             order : "asc, desc" 
+    //         }
+
+    //     }
+
+    //     aJax.post(url,data,function(result){
+    //         var result = JSON.parse(result);
+    //         var html = '';
+
+    //         if(result) {
+    //             if (result.length > 0) {
+    //                 $.each(result, function(x,y) {
+    //                     console.log(y);
+    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+    //                     y.amount = parseFloat(y.amount) || 0;
+
+    //                     html += "<tr class='" + rowClass + "'>";
+    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+    //                     html += "<td scope=\"col\">" + trimText(y.area) + "</td>";
+    //                     html += "<td scope=\"col\">" + trimText(y.store_name, 10) + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.brand) + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.ba_name) + "</td>";
+    //                     html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+    //                     if (y.id == 0) {
+    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+    //                     } else {
+    //                         html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+    //                         html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+    //                         html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+    //                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+    //                         html+="</td>";
+    //                     }
+                        
+    //                     html += "</tr>";   
+    //                 });
+    //             } else {
+    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+    //             }
+    //         }
+    //         $('.table_body').html(html);
+    //     });
+    // }
+
     function get_data(new_query) {
         var data = {
             event : "list",
-            select : "id, area, store_name, brand, ba_name, date, amount, status, created_date, updated_date",
+            select : "basr.id, basr.date, basr.amount, a.description AS area, s.description AS store_name, br.brand_description AS brand, bra.name AS ba_name, basr.status, basr.created_date, basr.updated_date",
             query : new_query,
             offset : offset,
             limit : limit,
-            table : "tbl_ba_sales_report",
+            table : "tbl_ba_sales_report basr",
             order : {
-                field : "id, updated_date",
-                order : "asc, desc" 
-            }
+                field : "basr.id",
+                order : "asc" 
+            },
+            join : [
+                {
+                    table: "tbl_area a",
+                    query: "a.id = basr.area",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = basr.store_name",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand br",
+                    query: "br.id = basr.brand",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador bra",
+                    query: "bra.id = basr.ba_name",
+                    type: "left"
+                },
+            ]
 
         }
 
@@ -250,19 +331,24 @@
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
-                        console.log(y);
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
                         y.amount = parseFloat(y.amount) || 0;
 
+                        var areaDescription = y.area || 'N/A';
+                        var storeDescription = y.store_name || 'N/A';
+                        var brandDescription = y.brand || 'NA';
+                        var brandAmbassadorName = y.ba_name || 'NA';
+
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.area) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.store_name, 10) + "</td>";
-                        html += "<td scope=\"col\">" + (y.brand) + "</td>";
-                        html += "<td scope=\"col\">" + (y.ba_name) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(areaDescription) + "</td>"
+                        html += "<td scope=\"col\">" + trimText(storeDescription) + "</td>"
+                        html += "<td scope=\"col\">" + trimText(brandDescription) + "</td>"
+                        html += "<td scope=\"col\">" + trimText(brandAmbassadorName) + "</td>"
                         html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
                         html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
+                        // html += "<td>" +status+ "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
@@ -294,9 +380,9 @@
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_ba_sales_report",
+            table : "tbl_ba_sales_report basr",
             order : {
-                field : "updated_date", //field to order
+                field : "basr.updated_date", //field to order
                 order : "desc" //asc or desc
             }
 
