@@ -1517,3 +1517,33 @@ function formatDateToISO(dateString) {
     }
     return dateString; 
 }
+
+function createErrorLogFile(errorLogs, filename) {
+    let errorText = errorLogs.join("\n");
+    let blob = new Blob([errorText], { type: "text/plain" });
+    let url = URL.createObjectURL(blob);
+
+    $(".import_buttons").find("a.download-error-log").remove();
+
+    let $downloadBtn = $("<a>", {
+        href: url,
+        download: filename+".txt",
+        text: "Download Error Logs",
+        class: "download-error-log btn btn-danger mt-2", 
+        css: {
+            border: "1px solid white",
+            borderRadius: "10px",
+            display: "inline-block",
+            // padding: "10px",
+            // lineHeight: 0.5,
+            background: "#990000",
+            color: "white",
+            textAlign: "center",
+            cursor: "pointer",
+            textDecoration: "none",
+            boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
+        }
+    });
+
+    $(".import_buttons").append($downloadBtn);
+}

@@ -121,7 +121,7 @@ self.onmessage = async function(e) {
                     err_counter++;
                 }
 
-                if (ave_sales_unit === "" || !Number.isInteger(Number(ave_sales_unit))) {
+                if (ave_sales_unit === "" || isNaN(ave_sales_unit) || isNaN(parseFloat(ave_sales_unit))) {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid In Ave Sales Unit at line #: ${tr_count}`);
                     err_counter++;

@@ -1261,7 +1261,7 @@
                     });
                 }
             }
-            $('#yearSelect').html(html);
+            $('#yearSelect').append(html);
         })
     }
 
@@ -1295,7 +1295,7 @@
                     });
                 }
             }
-            $('#monthSelect').html(html);
+            $('#monthSelect').append(html);
         })
     }
 
@@ -1329,7 +1329,7 @@
                     });
                 }
             }
-            $('#weekSelect').html(html);
+            $('#weekSelect').append(html);
         })
     }
 

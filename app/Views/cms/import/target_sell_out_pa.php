@@ -121,158 +121,158 @@
                         <div hidden>
                             <input type="text" class="form-control" id="id" aria-describedby="id">
                         </div>
-                        <label for="payment_group" class="form-label">Payment Group</label>
+                        <label for="store" class="form-label">Payment Group</label>
                         <input type="text" class="form-control required" id="payment_group" aria-describedby="payment_group">
                     </div>
 
                     <div class="mb-3">
-                        <label for="vendor" class="form-label">Vendor</label>
+                        <label for="code" class="form-label">Vendor</label>
                         <input type="text" class="form-control required" id="vendor" aria-describedby="vendor">
                     </div>
 
                     <div class="mb-3">
-                        <label for="overall" class="form-label">Overall</label>
+                        <label for="code" class="form-label">Overall</label>
                         <input type="text" class="form-control required" id="overall" aria-describedby="overall">
                     </div>
 
                     <div class="mb-3">
-                        <label for="kam_kas_kaa" class="form-label">KAM/KAS/KAA</label>
+                        <label for="code" class="form-label">KAM/KAS/KAA</label>
                         <input type="text" class="form-control required" id="kam_kas_kaa" aria-describedby="kam_kas_kaa">
                     </div>
 
                     <div class="mb-3">
-                        <label for="sales_group" class="form-label">Sales Group</label>
+                        <label for="code" class="form-label">Sales Group</label>
                         <input type="text" class="form-control required" id="sales_group" aria-describedby="sales_group">
                     </div>
 
                     <div class="mb-3">
-                        <label for="terms" class="form-label">Terms</label>
+                        <label for="code" class="form-label">Terms</label>
                         <input type="text" class="form-control required" id="terms" aria-describedby="terms">
                     </div>
 
                     <div class="mb-3">
-                        <label for="channel" class="form-label">Channel</label>
+                        <label for="code" class="form-label">Channel</label>
                         <input type="text" class="form-control required" id="channel" aria-describedby="channel">
                     </div>
 
                     <div class="mb-3">
-                        <label for="category" class="form-label">Brand</label>
+                        <label for="code" class="form-label">Brand</label>
                         <input type="text" class="form-control required" id="brand" aria-describedby="brand">
                     </div>
 
                     <div class="mb-3">
-                        <label for="category" class="form-label">Exclusivity</label>
+                        <label for="code" class="form-label">Exclusivity</label>
                         <input type="text" class="form-control required" id="exclusivity" aria-describedby="exclusivity">
                     </div>
 
                     <div class="mb-3">
-                        <label for="category" class="form-label">Category</label>
+                        <label for="code" class="form-label">Category</label>
                         <input type="text" class="form-control required" id="category" aria-describedby="category">
                     </div>
 
                     <div class="mb-3">
-                        <label for="lmi_code" class="form-label">LMI Code</label>
+                        <label for="code" class="form-label">LMI Code</label>
                         <input type="text" class="form-control required" id="lmi_code" aria-describedby="lmi_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="rgdi_code" class="form-label">RGDI Code</label>
+                        <label for="code" class="form-label">RGDI Code</label>
                         <input type="text" class="form-control required" id="rgdi_code" aria-describedby="rgdi_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="customer_sku_code" class="form-label">Customer SKU Code</label>
+                        <label for="code" class="form-label">Customer SKU Code</label>
                         <input type="text" class="form-control required" id="customer_sku_code" aria-describedby="customer_sku_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="item_description" class="form-label">Item Description</label>
+                        <label for="code" class="form-label">Item Description</label>
                         <input type="text" class="form-control required" id="item_description" aria-describedby="item_description">
                     </div>
 
                     <div class="mb-3">
-                        <label for="item_status" class="form-label">Item Status</label>
+                        <label for="code" class="form-label">Item Status</label>
                         <input type="text" class="form-control required" id="item_status" aria-describedby="item_status">
                     </div>
 
                     <div class="mb-3">
-                        <label for="srp" class="form-label">SRP</label>
+                        <label for="code" class="form-label">SRP</label>
                         <input type="text" class="form-control required" id="srp" aria-describedby="srp">
                     </div>
 
                     <div class="mb-3">
-                        <label for="trade_discount" class="form-label">Trade Discount</label>
+                        <label for="code" class="form-label">Trade Discount</label>
                         <input type="text" class="form-control required" id="trade_discount" aria-describedby="trade_discount">
                     </div>
 
                     <div class="mb-3">
-                        <label for="customer_cost" class="form-label">Customer Cost</label>
+                        <label for="code" class="form-label">Customer Cost</label>
                         <input type="text" class="form-control required" id="customer_cost" aria-describedby="customer_cost">
                     </div>
 
                     <div class="mb-3">
-                        <label for="customer_cost_net_of_vat" class="form-label">Customer Cost Net of Vat</label>
+                        <label for="code" class="form-label">Customer Cost Net of Vat</label>
                         <input type="text" class="form-control required" id="customer_cost_net_of_vat" aria-describedby="customer_cost_net_of_vat">
                     </div>
 
                     <div class="mb-3">
-                        <label for="jan_tq" class="form-label">January</label>
+                        <label for="code" class="form-label">January</label>
                         <input type="text" class="form-control required" id="jan_tq" aria-describedby="jan_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="feb_tq" class="form-label">February</label>
+                        <label for="code" class="form-label">February</label>
                         <input type="text" class="form-control required" id="feb_tq" aria-describedby="feb_tq">
                     </div>
                     
                     <div class="mb-3">
-                        <label for="mar_tq" class="form-label">March</label>
+                        <label for="code" class="form-label">March</label>
                         <input type="text" class="form-control required" id="mar_tq" aria-describedby="mar_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="apr_tq" class="form-label">April</label>
+                        <label for="code" class="form-label">April</label>
                         <input type="text" class="form-control required" id="apr_tq" aria-describedby="apr_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="may_tq" class="form-label">May</label>
+                        <label for="code" class="form-label">May</label>
                         <input type="text" class="form-control required" id="may_tq" aria-describedby="may_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="jun_tq" class="form-label">June</label>
+                        <label for="code" class="form-label">June</label>
                         <input type="text" class="form-control required" id="jun_tq" aria-describedby="jun_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="jul_tq" class="form-label">July</label>
+                        <label for="code" class="form-label">July</label>
                         <input type="text" class="form-control required" id="jul_tq" aria-describedby="jul_tq">
                     </div>
 
 
                     <div class="mb-3">
-                        <label for="aug_tq" class="form-label">August</label>
+                        <label for="code" class="form-label">August</label>
                         <input type="text" class="form-control required" id="aug_tq" aria-describedby="aug_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="sep_tq" class="form-label">September</label>
+                        <label for="code" class="form-label">September</label>
                         <input type="text" class="form-control required" id="sep_tq" aria-describedby="sep_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="oct_tq" class="form-label">October</label>
+                        <label for="code" class="form-label">October</label>
                         <input type="text" class="form-control required" id="oct_tq" aria-describedby="oct_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="nov_tq" class="form-label">November</label>
+                        <label for="code" class="form-label">November</label>
                         <input type="text" class="form-control required" id="nov_tq" aria-describedby="nov_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="nov_tq" class="form-label">December</label>
+                        <label for="code" class="form-label">December</label>
                         <input type="text" class="form-control required" id="dec_tq" aria-describedby="dec_tq">
                     </div>
 
@@ -282,62 +282,62 @@
                     </div> -->
 
                     <div class="mb-3">
-                        <label for="jan_ta" class="form-label">January</label>
+                        <label for="code" class="form-label">January</label>
                         <input type="text" class="form-control required" id="jan_ta" aria-describedby="jan_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="feb_ta" class="form-label">February</label>
+                        <label for="code" class="form-label">February</label>
                         <input type="text" class="form-control required" id="feb_ta" aria-describedby="feb_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="mar_ta" class="form-label">March</label>
+                        <label for="code" class="form-label">March</label>
                         <input type="text" class="form-control required" id="mar_ta" aria-describedby="mar_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="apr_ta" class="form-label">April</label>
+                        <label for="code" class="form-label">April</label>
                         <input type="text" class="form-control required" id="apr_ta" aria-describedby="apr_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="may_ta" class="form-label">May</label>
+                        <label for="code" class="form-label">May</label>
                         <input type="text" class="form-control required" id="may_ta" aria-describedby="may_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="jun_ta" class="form-label">June</label>
+                        <label for="code" class="form-label">June</label>
                         <input type="text" class="form-control required" id="jun_ta" aria-describedby="jun_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="jul_ta" class="form-label">July</label>
+                        <label for="code" class="form-label">July</label>
                         <input type="text" class="form-control required" id="jul_ta" aria-describedby="jul_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="aug_ta" class="form-label">August</label>
+                        <label for="code" class="form-label">August</label>
                         <input type="text" class="form-control required" id="aug_ta" aria-describedby="aug_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="sep_ta" class="form-label">September</label>
+                        <label for="code" class="form-label">September</label>
                         <input type="text" class="form-control required" id="sep_ta" aria-describedby="sep_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="oct_ta" class="form-label">October</label>
+                        <label for="code" class="form-label">October</label>
                         <input type="text" class="form-control required" id="oct_ta" aria-describedby="oct_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="nov_ta" class="form-label">November</label>
+                        <label for="code" class="form-label">November</label>
                         <input type="text" class="form-control required" id="nov_ta" aria-describedby="nov_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="dec_ta" class="form-label">December</label>
+                        <label for="code" class="form-label">December</label>
                         <input type="text" class="form-control required" id="dec_ta" aria-describedby="dec_ta">
                     </div>
 
@@ -353,7 +353,7 @@
 </div>
     
 <!-- IMPORT MODAL -->
-<div class="modal" tabindex="-1" id="import_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal" tabindex="-1" id="import_modal">
     <div class="modal-dialog modal-xxl">
         <div class="modal-content">
             <div class="modal-header">
@@ -403,60 +403,61 @@
                             </div>
 
                         </div>
-
-                        <table class= "table table-bordered listdata">
-                            <thead>
-                                <tr>
-                                    <th class='center-content'>Line #</th>
-                                    <th class='center-content'>Payment Group</th>
-                                    <th class='center-content'>Vendor</th>
-                                    <th class='center-content'>Overall</th>
-                                    <th class='center-content'>KAM/KAS/KAA</th>
-                                    <th class='center-content'>Sales Group</th>
-                                    <th class='center-content'>Terms</th>
-                                    <th class='center-content'>Channel</th>
-                                    <th class='center-content'>Brand</th>
-                                    <th class='center-content'>Exclusivity</th>
-                                    <th class='center-content'>Category</th>
-                                    <th class='center-content'>LMI Code</th>
-                                    <th class='center-content'>RGDI Code</th>
-                                    <th class='center-content'>Customer SKU Code</th>
-                                    <th class='center-content'>Item Description</th>
-                                    <th class='center-content'>Item Status</th>
-                                    <th class='center-content'>SRP</th>
-                                    <th class='center-content'>Trade Discount</th>
-                                    <th class='center-content'>Customer Cost</th>
-                                    <th class='center-content'>Customer Cost Net of VAT</th>
-                                    <th class='center-content'>January TQ</th>
-                                    <th class='center-content'>February TQ</th>
-                                    <th class='center-content'>March TQ</th>
-                                    <th class='center-content'>April TQ</th>
-                                    <th class='center-content'>May TQ</th>
-                                    <th class='center-content'>June TQ</th>
-                                    <th class='center-content'>July TQ</th>
-                                    <th class='center-content'>August TQ</th>
-                                    <th class='center-content'>September TQ</th>
-                                    <th class='center-content'>October TQ</th>
-                                    <th class='center-content'>November TQ</th>
-                                    <th class='center-content'>December TQ</th>
-                          
-                                    <th class='center-content'>January TA</th>
-                                    <th class='center-content'>February TA</th>
-                                    <th class='center-content'>March TA</th>
-                                    <th class='center-content'>April TA</th>
-                                    <th class='center-content'>May TA</th>
-                                    <th class='center-content'>June TA</th>
-                                    <th class='center-content'>July TA</th>
-                                    <th class='center-content'>August TA</th>
-                                    <th class='center-content'>September TA</th>
-                                    <th class='center-content'>October TA</th>
-                                    <th class='center-content'>November TA</th>
-                                    <th class='center-content'>December TA</th>
-    
-                                </tr>
-                            </thead>
-                            <tbody class="word_break import_table"></tbody>
-                        </table>
+                        <div style="overflow-x: auto; max-height: 400px;">
+                            <table class= "table table-bordered listdata">
+                                <thead>
+                                    <tr>
+                                        <th class='center-content'>Line #</th>
+                                        <th class='center-content'>Payment Group</th>
+                                        <th class='center-content'>Vendor</th>
+                                        <th class='center-content'>Overall</th>
+                                        <th class='center-content'>KAM/KAS/KAA</th>
+                                        <th class='center-content'>Sales Group</th>
+                                        <th class='center-content'>Terms</th>
+                                        <th class='center-content'>Channel</th>
+                                        <th class='center-content'>Brand</th>
+                                        <th class='center-content'>Exclusivity</th>
+                                        <th class='center-content'>Category</th>
+                                        <th class='center-content'>LMI Code</th>
+                                        <th class='center-content'>RGDI Code</th>
+                                        <th class='center-content'>Customer SKU Code</th>
+                                        <th class='center-content'>Item Description</th>
+                                        <th class='center-content'>Item Status</th>
+                                        <th class='center-content'>SRP</th>
+                                        <th class='center-content'>Trade Discount</th>
+                                        <th class='center-content'>Customer Cost</th>
+                                        <th class='center-content'>Customer Cost Net of VAT</th>
+                                        <th class='center-content'>January TQ</th>
+                                        <th class='center-content'>February TQ</th>
+                                        <th class='center-content'>March TQ</th>
+                                        <th class='center-content'>April TQ</th>
+                                        <th class='center-content'>May TQ</th>
+                                        <th class='center-content'>June TQ</th>
+                                        <th class='center-content'>July TQ</th>
+                                        <th class='center-content'>August TQ</th>
+                                        <th class='center-content'>September TQ</th>
+                                        <th class='center-content'>October TQ</th>
+                                        <th class='center-content'>November TQ</th>
+                                        <th class='center-content'>December TQ</th>
+                              
+                                        <th class='center-content'>January TA</th>
+                                        <th class='center-content'>February TA</th>
+                                        <th class='center-content'>March TA</th>
+                                        <th class='center-content'>April TA</th>
+                                        <th class='center-content'>May TA</th>
+                                        <th class='center-content'>June TA</th>
+                                        <th class='center-content'>July TA</th>
+                                        <th class='center-content'>August TA</th>
+                                        <th class='center-content'>September TA</th>
+                                        <th class='center-content'>October TA</th>
+                                        <th class='center-content'>November TA</th>
+                                        <th class='center-content'>December TA</th>
+        
+                                    </tr>
+                                </thead>
+                                <tbody class="word_break import_table"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <center style="margin-bottom: 5px">
                         <div class="import_pagination btn-group"></div>
@@ -487,7 +488,6 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination();
-        get_year();
     });
 
 
@@ -577,7 +577,7 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            //html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
@@ -787,7 +787,8 @@
         title = addNbsp('IMPORT TARGET SELL OUT PER ACCOUNT')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $("#import_modal").modal('show')
-        clear_import_table()
+        clear_import_table();
+        get_year();
     });
     
     function populate_modal(inp_id) {
@@ -1298,7 +1299,6 @@
 
         $(".import_pagination").html(paginationHtml);
     }
-
     
     function process_xl_file() {
         let btn = $(".btn.save");
@@ -1374,7 +1374,6 @@
             };
         });
 
-
         let worker = new Worker(base_url + "assets/cms/js/validator_target_sell_out_pa.js");
         worker.postMessage({ data: jsonData, base_url });
 
@@ -1411,82 +1410,16 @@
         };
     }
 
-    function createErrorLogFile(errorLogs, filename) {
-        let errorText = errorLogs.join("\n");
-        let blob = new Blob([errorText], { type: "text/plain" });
-        let url = URL.createObjectURL(blob);
-
-        $(".import_buttons").find("a.download-error-log").remove();
-
-        let $downloadBtn = $("<a>", {
-            href: url,
-            download: filename+".txt",
-            text: "Download Error Logs",
-            class: "download-error-log btn btn-danger mt-2", 
-            css: {
-                border: "1px solid white",
-                borderRadius: "10px",
-                display: "inline-block",
-                // padding: "10px",
-                // lineHeight: 0.5,
-                background: "#990000",
-                color: "white",
-                textAlign: "center",
-                cursor: "pointer",
-                textDecoration: "none",
-                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
-            }
-        });
-
-        $(".import_buttons").html($downloadBtn);
-    }
-
-    function get_year() {
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event : "list",
-            select : "id, year, status",
-            query : 'status >= 0',
-            offset : 0,
-            limit : 0,
-            table : "tbl_year",
-            order : {
-                field : "id",
-                order : "asc" 
-            }
-        }
-
-        aJax.post(url,data,function(res){
-            var result = JSON.parse(res);
-            var html = '';
-            html += '<option id="default_val" value=" ">Select Year</option>';
-
-    
-            if(result) {
-                if (result.length > 0) {
-                    var selected = '';
-                    
-                    result.forEach(function (y) {
-                        html += `<option value="${y.id}">${y.year}</option>`;
-                    });
-                }
-            }
-            $('#yearSelect').html(html);
-        })
-    }
-
     function fixEncoding(text) {
         let correctedText = text.replace(/\uFFFD|\u0092/g, "’");
         return correctedText;
     }
 
     function saveValidatedData(valid_data) {
-        console.log(valid_data);
-        let batch_size = 5000;
+        let batch_size = 1000; // Process 1000 records at a time
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
         let errorLogs = [];
-
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_accounts_target_sellout_pa';
 
@@ -1496,23 +1429,17 @@
             'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'srp', 'trade_discount',
             'customer_cost', 'customer_cost_net_of_vat', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
             'may_tq', 'june_tq', 'july_tq', 'august_tq', 'september_tq', 'october_tq', 'november_tq', 'december_tq',
-            'january_ta', 'february_ta', 'march_ta', 'april_ta',
-            'may_ta', 'june_ta', 'july_ta', 'august_ta', 'september_ta', 'october_ta', 'november_ta', 'december_ta',
             'year'
-
         ];
 
-        // Fields used for matching existing records
         const matchFields = [
             'payment_group', 'vendor', 'overall', 'kam_kas_kaa', 'sales_group',
             'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi_code', 
             'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'srp', 'trade_discount',
             'customer_cost', 'customer_cost_net_of_vat', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
             'may_tq', 'june_tq', 'july_tq', 'august_tq', 'september_tq', 'october_tq', 'november_tq', 'december_tq',
-            'january_ta', 'february_ta', 'march_ta', 'april_ta',
-            'may_ta', 'june_ta', 'july_ta', 'august_ta', 'september_ta', 'october_ta', 'november_ta', 'december_ta',
             'year'
-        ];  
+        ]; 
 
         const matchType = "AND";  // Use "AND" or "OR" for matching logic
 
@@ -1568,6 +1495,7 @@
 
                     if (matchedId) {
                         row.id = matchedId;
+                        row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
                         updateRecords.push(row);
                     } else {
@@ -1815,5 +1743,39 @@
         } else {
             return str;
         }
+    }
+
+    function get_year() {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list",
+            select : "id, year, status",
+            query : 'status >= 0',
+            offset : 0,
+            limit : 0,
+            table : "tbl_year",
+            order : {
+                field : "id",
+                order : "asc" 
+            }
+        }
+
+        aJax.post(url,data,function(res){
+            var result = JSON.parse(res);
+            var html = '';
+            html += '<option id="default_val" value=" ">Select Year</option>';
+
+    
+            if(result) {
+                if (result.length > 0) {
+                    var selected = '';
+                    
+                    result.forEach(function (y) {
+                        html += `<option value="${y.id}">${y.year}</option>`;
+                    });
+                }
+            }
+            $('#yearSelect').html(html);
+        })
     }
 </script>
