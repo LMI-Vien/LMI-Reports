@@ -1,4 +1,3 @@
-<!-- <?= phpinfo() ?> -->
 <div class="content-wrapper p-4">
     <div class="card">
         <div class="text-center page-title md-center">
@@ -133,8 +132,8 @@
                             <b>Extracted Data</b>
                         </div>
     
-                        <div class="import_buttons row">
-                            <div class="col-4">
+                        <div class="row">
+                            <div class="import_buttons col-6">
                                 <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
                                     <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
                                 </label>
@@ -151,9 +150,9 @@
                                     <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
                                 </label>
                             </div>
-
+    
                             <div class="col"></div>
-
+    
                             <div class="col-3">
                                 <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
                                     <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
@@ -189,9 +188,6 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var query = "status >= 0";
@@ -1273,5 +1269,242 @@
                 alert('alert', e)
             }
         });
+    }
+
+    function batch_insert(insert_batch_data, cb) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "batch_insert",
+            table: "tbl_area_sales_coordinator",
+            insert_batch_data: insert_batch_data
+        };
+
+        let retry_count = 0;
+        let max_retries = 5; // Maximum retry attempts
+
+        // Function to make the AJAX request and handle retries
+        function attemptInsert() {
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: function(result) {
+                    if (result.message === "success") {
+                        cb(true); // Success callback
+                    } else {
+                        handleSaveError(result); // Handle error if message is not success
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Save failed:", status, error);
+                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
+                }
+            });
+        }
+
+        // Handle the error and retry the request
+        function handleSaveError(result) {
+            if (retry_count < max_retries) {
+                retry_count++;
+                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
+                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
+
+                setTimeout(() => {
+                    console.log(`Retrying attempt ${retry_count}...`);
+                    attemptInsert(); // Retry the insertion
+                }, wait_time);
+            } else {
+                console.error("Failed to save data after multiple attempts.");
+                cb(false); // Call callback with failure if retries exceed max attempts
+            }
+        }
+
+        // Initiate the first attempt to insert
+        attemptInsert();
+    }
+
+    // This code is a fine example of reinventing the wheel—except the wheel is square, and occasionally forgets it's a wheel.
+    let startTime, endTime;
+
+    // Function to start the timer
+    function startTimer() {
+        startTime = new Date(); // Get the current time
+        console.log("Timer started at: " + startTime.toLocaleTimeString());
+    }
+
+    // Function to stop the timer
+    function stopTimer() {
+        if (!startTime) {
+            console.log("Timer was not started!");
+            return;
+        }
+        
+        endTime = new Date(); // Get the current time
+        console.log("Timer stopped at: " + endTime.toLocaleTimeString());
+        
+        let timeDiff = endTime - startTime; // Time difference in milliseconds
+        let seconds = Math.floor(timeDiff / 1000); // Convert to seconds
+        let minutes = Math.floor(seconds / 60);
+        let hours = Math.floor(minutes / 60);
+        
+        seconds = seconds % 60; // Remaining seconds
+        minutes = minutes % 60; // Remaining minutes
+
+        console.log(`Elapsed time: ${hours}h ${minutes}m ${seconds}s`);
+    }
+
+    function download_template() {
+        const headerData = [];
+
+        formattedData = [
+            {
+                "Code": "",
+                "Name": "",
+                "Status": "",
+                "Deployment Date": "",
+                "Area": "",
+                "NOTE:": "Please do not change the column headers."
+            }
+        ]
+
+        exportArrayToCSV(formattedData, `Masterfile: Area Sales Coordinator - ${formatDate(new Date())}`, headerData);
+    }
+
+    $(document).on('click', '#btn_export', function () {
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                startTimer()
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    handleExport()
+                }, 500);
+            }
+        })
+    })
+
+    /**
+     * Handles the export process for Area Sales Coordinator data.
+     * This function retrieves selected records or fetches all records if none are selected,
+     * formats the data, and exports it to an Excel file.
+     */
+    function handleExport() {
+        var formattedData = []; // Array to store formatted data for export
+        var ids = []; // Array to store selected record IDs
+        
+        // Collect selected record IDs from checkboxes
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`'${id}'`); // Wrap ID in single quotes
+        });
+        
+        /**
+         * Fetches store data based on selected IDs.
+         * If IDs are provided, fetches specific records; otherwise, fetches all records in batches.
+         * @param {Function} callback - Function to process the response data
+         */
+        const fetchAscs = (callback) => {
+            /**
+             * Processes the ajax response and formats the data.
+             * @param {Array} res - ajax response containing store records
+             */
+            const processResponse = (res) => {
+                console.log(res)
+                formattedData = res.map(({
+                    asc_code, asc_description, 
+                    status, deployment_date, 
+                    area_code, area_description 
+                }) => ({
+                    Code: asc_code,
+                    Description: asc_description,
+                    Status: status === "1" ? "Active" : "Inactive",
+                    "Deployment Date": deployment_date,
+                    "Area Code": area_code,
+                    "Area Description": area_description,
+                }));
+            };
+
+            // If specific IDs are selected, fetch corresponding records; 
+            // otherwise, perform batch export
+            ids.length > 0 
+                ? get_asc_where_in(`"${ids.join(', ')}"`, processResponse)
+                : batch_export();
+        };
+
+        /**
+         * Fetches all store data in batches if no specific IDs are selected.
+         * Uses pagination to handle large datasets "efficiently".
+         */
+        function batch_export() {
+            get_asc_count((res) => {
+                if (res && res.length > 0) {
+                    console.log(res[0].total_records, 'asc count');
+
+                    let asc_count = res[0].total_records; // Total number of records
+
+                    // Fetch data in batches of 100,000 records
+                    for (let index = 0; index < asc_count; index += 100000) {
+                        get_asc(index, (res) => {
+                            console.log(res)
+                            let newData = res.map(({
+                                asc_code, asc_description, 
+                                status, deployment_date, 
+                                area_code, area_description 
+                            }) => ({
+                                Code: asc_code,
+                                Description: asc_description,
+                                Status: status === "1" ? "Active" : "Inactive",
+                                "Deployment Date": deployment_date,
+                                "Area Code": area_code,
+                                "Area Description": area_description,
+                            }));
+                            formattedData.push(...newData); // Append new data to formattedData array
+                        })
+                    }
+                    
+                } else {
+                    console.log('No data received'); // error handling
+                }
+            });
+            
+        }
+
+        // Initiate data retrieval
+        fetchAscs();
+
+        console.log(formattedData, 'formattedData') // debugging
+
+        // Header information for the exported Excel file
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Masterfile: Area Sales Coordinator"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+
+        // Export the formatted data to an Excel file
+        exportArrayToCSV(formattedData, `Masterfile: Area Sales Coordinator - ${formatDate(new Date())}`, headerData);
+
+        // Hide the loading progress modal
+        modal.loading_progress(false);
+
+        console.log('done');
+        stopTimer();
+    };
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
     }
 </script>

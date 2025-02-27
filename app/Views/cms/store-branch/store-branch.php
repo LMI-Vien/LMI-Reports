@@ -104,22 +104,32 @@
                             <b>Extracted Data</b>
                         </div>
 
-                        <div class="import_buttons">
-                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px">
-                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                            </label>
-                            <input
-                                type="file"
-                                style="padding-left: 10px;"
-                                id="file"
-                                accept=".xls,.xlsx,.csv"
-                                aria-describedby="import_files"
-                                onclick="clear_import_table()"
-                            >
-
-                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                            </label>
+                        <div class="row">
+                            <div class="import_buttons col-6">
+                                <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
+                                    <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                                </label>
+                                <input
+                                    type="file"
+                                    style="padding-left: 10px;"
+                                    id="file"
+                                    accept=".xls,.xlsx,.csv"
+                                    aria-describedby="import_files"
+                                    onclick="clear_import_table()"
+                                >
+            
+                                <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px; margin-bottom: 10px" onclick="read_xl_file()">
+                                    <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                                </label>
+                            </div>
+    
+                            <div class="col"></div>
+    
+                            <div class="col-3">
+                                <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
+                                    <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
+                                </label>
+                            </div>
                         </div>
 
                         <table class= "table table-bordered listdata">
@@ -144,9 +154,6 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var query = "status >= 0";
@@ -959,85 +966,111 @@
         });
     });
 
+    function download_template() {
+        const headerData = [];
+
+        formattedData = [
+            {
+                "Code": "",
+                "Description": "",
+                "Status": "",
+                "NOTE:": "Please do not change the column headers."
+            }
+        ]
+
+        exportArrayToCSV(formattedData, `Masterfile: Store/Branch - ${formatDate(new Date())}`, headerData);
+    }
+
     $(document).on('click', '#btn_export', function () {
         modal.confirm(confirm_export_message,function(result){
             if (result) {
-                handleExport()
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    handleExport()
+                }, 500);
             }
         })
-    });
+    })
 
     function handleExport() {
-        var new_query = query; // Default: assign query to new_query
-        
+        var formattedData = [];
         var ids = [];
+
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
             ids.push(`'${id}'`); // Collect IDs in an array
         });
 
-        // Only modify new_query if there are selected checkboxes
-        if (ids.length > 0) {
-            new_query += ' and id in (' + ids.join(', ') + ')';
-        }
+        const fetchStores = (callback) => {
+            const processResponse = (res) => {
+                formattedData = res.map(({ 
+                    code, description, status
+                }) => ({
+                    Code: code,
+                    Description: description,
+                    Status: status === "1" ? "Active" : "Inactive",
+                }));
+            };
 
-        console.log(new_query); // Debugging output
-
-        var data = {
-            event: "list",
-            select: "id, code, description, status, updated_date, created_date",
-            query: new_query,
-            offset: 0,
-            limit: 0,
-            table: "tbl_store",
-            order: {
-                field: "code",
-                order: "asc"
-            }
+            ids.length > 0 
+                ? get_store_branch_where_in(`"${ids.join(', ')}"`, processResponse)
+                : batch_export();
         };
 
-        aJax.post(url, data, function (result) {
-            var result = JSON.parse(result);
-            const formattedData = result.map(item => ({
-                // ID: item.id,
-                Code: item.code,
-                Description: item.description,
-                Status: item.status === "1" ? "Active" : "Inactive",
-                "Updated Date": item.updated_date ? item.updated_date : "N/A",
-                "Created Date": item.created_date
-            }));
+        const batch_export = () => {
+            get_store_branch_count((res) => {
+                if (res && res.length > 0) {
+                    let total_records = res[0].total_records;
+                    console.log(total_records, 'total records');
 
-            const headerData = [
-                ["Company Name: Lifestrong Marketing Inc."], // Row 1
-                ["Masterfile: Store/Branch"], // Row 2
-                ["Date Printed: " + formatDate(new Date())], // Row 3
-                [""], // Empty row for spacing
-            ];
+                    for (let index = 0; index < total_records; index += 100000) {
+                        get_store_branch(index, (res) => {
+                            console.log(res, 'look here')
+                            let newData = res.map(({ 
+                                code, description, status
+                            }) => ({
+                                Code: code,
+                                Description: description,
+                                Status: status === "1" ? "Active" : "Inactive",
+                            }));
+                            formattedData.push(...newData); // Append new data to formattedData array
+                        })
+                    }
+                } else {
+                    console.log('No data received');
+                }
+            })
+        };
 
-            exportArrayToExcel(formattedData, "Masterfile: Store/Branch - " + formatDate(new Date()), headerData);
-        });
+        fetchStores();
+
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Masterfile: Store/Branch"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+
+        exportArrayToCSV(formattedData, `Masterfile: Store/Branch"], - ${formatDate(new Date())}`, headerData);
+        modal.loading_progress(false);
     };
 
-    function exportArrayToExcel(data, filename, headerData) {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-
-        // Convert data to worksheet
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
 
         // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
 
-        // Append sheet to workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
 
-        // Generate Excel file
-        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-        // Convert buffer to Blob and trigger download
-        const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, filename + ".xlsx");
-    };
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
+    }
 
     function ViewDateformat(dateString) {
         let date = new Date(dateString);

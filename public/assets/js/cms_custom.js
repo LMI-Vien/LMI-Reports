@@ -1100,6 +1100,273 @@ function list_existing(table, selected_fields, haystack, needle, callback) {
 	});
 }
 
+// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+// ----------------------------------------------------------- Agency -----------------------------------------------------------
+function get_agency_where_in(agency_codes, callback) {
+	var data = {
+		event : "get_agency_where_in",
+		agency_codes : agency_codes,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_agency(agency_offset, callback) {
+	data = {
+		event : "get_agency",
+		agency_offset : agency_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_agency_count(callback) {
+	data = {
+		event : "get_agency_count"
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+// ----------------------------------------------------------- Agency -----------------------------------------------------------
+// ------------------------------------------------------------ Area ------------------------------------------------------------
+function get_area_where_in(area_codes, callback) {
+	var data = {
+		event : "get_area_where_in",
+		area_codes : area_codes,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_area(area_offset, callback) {
+	data = {
+		event : "get_area",
+		area_offset : area_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_area_count(callback) {
+	data = {
+		event : "get_area_count"
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function area_stores(area_offset, callback) {
+	data = {
+		event : "get_area_stores",
+		area_offset : area_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+// ------------------------------------------------------------ Area ------------------------------------------------------------
+// --------------------------------------------------- Area Sales Coordinator ---------------------------------------------------
+function get_asc_where_in(asc_codes, callback) {
+	data = {
+		event : "get_asc_where_in",
+		asc_codes : asc_codes,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_asc(asc_offset, callback) {
+	data = {
+		event : "get_asc",
+		asc_offset : asc_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_asc_count(callback) {
+	data = {
+		event : "get_asc_count"
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+// --------------------------------------------------- Area Sales Coordinator ---------------------------------------------------
+// ------------------------------------------------------ Brand Ambassador ------------------------------------------------------
+function get_brand_ambassador_where_in(brand_ambassador_codes, callback) {
+	data = {
+		event : "get_brand_ambassador_where_in",
+		brand_ambassador_codes : brand_ambassador_codes,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_brand_ambassador(brand_ambassador_offset, callback) {
+	data = {
+		event : "get_brand_ambassador",
+		brand_ambassador_offset : brand_ambassador_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_brand_ambassador_count(callback) {
+	data = {
+		event : "get_brand_ambassador_count"
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_brand_ambassador_brands(brand_ambassador_offset, callback) {
+	data = {
+		event : "get_brand_ambassador_brands",
+		brand_ambassador_offset, brand_ambassador_offset
+	}
+
+	// var brands = '';
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		// console.log(result)
+		// brands = result[0].brands;
+		callback(result)
+	})
+	// return brands;
+}
+// ------------------------------------------------------ Brand Ambassador ------------------------------------------------------
+// ------------------------------------------------------- Store / Branch -------------------------------------------------------
+function get_store_branch_where_in(store_branch_codes, callback) {
+	data = {
+		event : "get_store_branch_where_in",
+		store_branch_codes : store_branch_codes,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_store_branch(store_branch_offset, callback) {
+	data = {
+		event : "get_store_branch",
+		store_branch_offset : store_branch_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_store_branch_count(callback) {
+	data = {
+		event : "get_store_branch_count"
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+// ------------------------------------------------------- Store / Branch -------------------------------------------------------
+// ------------------------------------------------------------ Team ------------------------------------------------------------
+function get_team_where_in(team_codes, callback) {
+	data = {
+		event : "get_team_where_in",
+		team_codes : team_codes,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_team(team_offset, callback) {
+	data = {
+		event : "get_team",
+		team_offset : team_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_team_count(callback) {
+	data = {
+		event : "get_team_count"
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+// ------------------------------------------------------------ Team ------------------------------------------------------------
+// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+
 function addNbsp(inputString) {
     return inputString.split('').map(char => {
         if (char === ' ') {

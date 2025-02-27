@@ -139,23 +139,33 @@
                                 <b>Extracted Data</b>
                             </div>
 
-                        <div class="import_buttons">
-                            <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
-                                <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                            </label>
-                            <input
-                                type="file"
-                                style="display: none;"
-                                id="file"
-                                accept=".xls,.xlsx,.csv"
-                                aria-describedby="import_files"
-                                onclick="clear_import_table()"
-                            >
-
-                            <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                            </label>
-                        </div>
+                            <div class="row">
+                                <div class="import_buttons col-6">
+                                    <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
+                                        <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                                    </label>
+                                    <input
+                                        type="file"
+                                        style="padding-left: 10px;"
+                                        id="file"
+                                        accept=".xls,.xlsx,.csv"
+                                        aria-describedby="import_files"
+                                        onclick="clear_import_table()"
+                                    >
+                
+                                    <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px; margin-bottom: 10px" onclick="read_xl_file()">
+                                        <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                                    </label>
+                                </div>
+        
+                                <div class="col"></div>
+        
+                                <div class="col-3">
+                                    <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
+                                        <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
+                                    </label>
+                                </div>
+                            </div>
 
                             <table class= "table table-bordered listdata">
                                 <thead>
@@ -1002,5 +1012,111 @@
             }
         });
     });
+
+    function download_template() {
+        const headerData = [];
+
+        formattedData = [
+            {
+                "Code": "",
+                "Description": "",
+                "Status": "",
+                "NOTE:": "Please do not change the column headers."
+            }
+        ]
+
+        exportArrayToCSV(formattedData, `Masterfile: Agency - ${formatDate(new Date())}`, headerData);
+    }
+
+    $(document).on('click', '#btn_export', function () {
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    handleExport()
+                }, 500);
+            }
+        })
+    })
+
+    function handleExport() {
+        var formattedData = [];
+        var ids = [];
+
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`'${id}'`); // Collect IDs in an array
+        });
+
+        const fetchStores = (callback) => {
+            const processResponse = (res) => {
+                formattedData = res.map(({ 
+                    code, agency, status
+                }) => ({
+                    Code: code,
+                    Description: agency,
+                    Status: status === "1" ? "Active" : "Inactive",
+                }));
+            };
+
+            ids.length > 0 
+                ? get_agency_where_in(`"${ids.join(', ')}"`, processResponse)
+                : batch_export();
+        };
+
+        const batch_export = () => {
+            get_agency_count((res) => {
+                if (res && res.length > 0) {
+                    let total_records = res[0].total_records;
+                    console.log(total_records, 'total records');
+
+                    for (let index = 0; index < total_records; index += 100000) {
+                        get_agency(index, (res) => {
+                            console.log(res, 'look here')
+                            let newData = res.map(({ 
+                                code, agency, status
+                            }) => ({
+                                Code: code,
+                                Description: agency,
+                                Status: status === "1" ? "Active" : "Inactive",
+                            }));
+                            formattedData.push(...newData); // Append new data to formattedData array
+                        })
+                    }
+                } else {
+                    console.log('No data received');
+                }
+            })
+        };
+
+        fetchStores();
+
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Masterfile: Agency"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+
+        exportArrayToCSV(formattedData, `Masterfile: Agency - ${formatDate(new Date())}`, headerData);
+        modal.loading_progress(false);
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
+    }
 
 </script>
