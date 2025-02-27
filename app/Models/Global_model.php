@@ -804,15 +804,41 @@ class Global_model extends Model
             ->get()
             ->getResultArray();
     }
-
-    function getStoresByAreaWhereIn($areaCode) {
-        $query = $this->db->query("CALL get_store_per_area_where_in($areaCode)");
+    
+    // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+    // ----------------------------------------------------------- Agency -----------------------------------------------------------
+    function get_agency_where_in($areaCode) {
+        $query = $this->db->query("CALL get_agency_where_in($areaCode)");
         return $query->getResultArray(); // Return data as an array
     }
-    function getStoresByArea() {
-        $query = $this->db->query("CALL get_store_per_area()");
+    function get_agency($areaOffset) {
+        $query = $this->db->query("CALL get_agency($areaOffset)");
         return $query->getResultArray(); // Return data as an array
     }
+    function get_agency_masterfile_count() {
+        $query = $this->db->query("CALL get_agency_masterfile_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
+    // ----------------------------------------------------------- Agency -----------------------------------------------------------
+    // ------------------------------------------------------------ Area ------------------------------------------------------------
+    function get_area_where_in($areaCode) {
+        $query = $this->db->query("CALL get_area_where_in($areaCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_area($areaOffset) {
+        $query = $this->db->query("CALL get_area($areaOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_area_masterfile_count() {
+        $query = $this->db->query("CALL get_area_masterfile_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_area_stores($areaOffset) {
+        $query = $this->db->query("CALL get_area_stores($areaOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    // ------------------------------------------------------------ Area ------------------------------------------------------------
+    // --------------------------------------------------- Area Sales Coordinator ---------------------------------------------------
     function get_asc_where_in($ascCode) {
         $query = $this->db->query("CALL get_asc_where_in($ascCode)");
         return $query->getResultArray(); // Return data as an array
@@ -821,9 +847,56 @@ class Global_model extends Model
         $query = $this->db->query("CALL get_asc($ascOffset)");
         return $query->getResultArray(); // Return data as an array
     }
-
     function get_asc_masterfile_count() {
         $query = $this->db->query("CALL get_asc_masterfile_count()");
         return $query->getResultArray(); // Return data as an array
     }
+    // --------------------------------------------------- Area Sales Coordinator ---------------------------------------------------
+    // ------------------------------------------------------ Brand Ambassador ------------------------------------------------------
+    function get_brand_ambassador_where_in($brandAmbassadorCode) {
+        $query = $this->db->query("CALL get_brand_ambassador_where_in($brandAmbassadorCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_brand_ambassador($brandAmbassadorOffset) {
+        $query = $this->db->query("CALL get_brand_ambassador($brandAmbassadorOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_brand_ambassador_masterfile_count() {
+        $query = $this->db->query("CALL get_brand_ambassador_masterfile_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_brand_ambassador_brands($brandAmbassadorOffset) {
+        $query = $this->db->query("CALL get_brand_ambassador_brands($brandAmbassadorOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    // ------------------------------------------------------ Brand Ambassador ------------------------------------------------------
+    // ------------------------------------------------------- Store / Branch -------------------------------------------------------
+    function get_store_branch_where_in($storeBranchCode) {
+        $query = $this->db->query("CALL get_store_branch_where_in($storeBranchCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_store_branch($storeBranchOffset) {
+        $query = $this->db->query("CALL get_store_branch($storeBranchOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_store_branch_masterfile_count() {
+        $query = $this->db->query("CALL get_store_branch_masterfile_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
+    // ------------------------------------------------------- Store / Branch -------------------------------------------------------
+    // ------------------------------------------------------------ Team ------------------------------------------------------------
+    function get_team_where_in($teamCode) {
+        $query = $this->db->query("CALL get_team_where_in($teamCode)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_team($teamOffset) {
+        $query = $this->db->query("CALL get_team($teamOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    function get_team_masterfile_count() {
+        $query = $this->db->query("CALL get_team_masterfile_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
+    // ------------------------------------------------------------ Team ------------------------------------------------------------
+    // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
 }

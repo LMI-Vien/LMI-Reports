@@ -49,6 +49,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-sell-out', static function ($routes) {
         $routes->get('/', 'Cms\Import_sell_out::index');
+        $routes->get('view/(:num)', 'Cms\Import_sell_out::view');
     });
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {

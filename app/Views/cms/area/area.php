@@ -164,8 +164,8 @@
                                 <b>Extracted Data</b>
                             </div>
 
-                            <div class="import_buttons row">
-                                <div class="col-4">
+                            <div class="row">
+                                <div class="import_buttons col-6">
                                     <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
                                         <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
                                     </label>
@@ -182,9 +182,9 @@
                                         <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
                                     </label>
                                 </div>
-
+        
                                 <div class="col"></div>
-
+        
                                 <div class="col-3">
                                     <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
                                         <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
@@ -233,8 +233,6 @@
             </div>
         </div>
     </div>
-
-
     
 <script>
     var query = "status >= 0";
@@ -1235,7 +1233,6 @@
     $(document).on('click', '#btn_export', function () {
         modal.confirm(confirm_export_message,function(result){
             if (result) {
-                startTimer()
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
                     handleExport()
@@ -1252,17 +1249,25 @@
                 "Code": "",
                 "Description": "",
                 "Status": "",
-                "Stores": ""
+                "Stores": "",
+                "NOTE:": "Please do not change the column headers."
+            },
+            {
+                "Code": "",
+                "Description": "",
+                "Status": "",
+                "Stores": "",
+                "NOTE:": "Stores should be separated by commas. eg(Store1, Store2, Store3)"
             }
         ]
 
-        exportArrayToExcel(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
+        exportArrayToCSV(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
     }
 
     function handleExport() {
-        var new_query = query; // Default: assign query to new_query
-        
+        var formattedData = [];
         var ids = [];
+        
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
             ids.push(`'${id}'`); // Collect IDs in an array
@@ -1271,22 +1276,59 @@
         const fetchStores = (callback) => {
             const processResponse = (res) => {
                 formattedData = res.map(({ 
-                    area_code, area_description, status, updated_date, created_date, 
-                    store_code, store_description 
+                    id, area_code, area_description, status, store_description
                 }) => ({
                     Code: area_code,
                     Description: area_description,
                     Status: status === "1" ? "Active" : "Inactive",
-                    "Updated Date": updated_date || "N/A",
-                    "Created Date": created_date,
-                    StoreID: store_code,
-                    StoreDescription: store_description,
+                    "Stores": store_description,
                 }));
             };
 
             ids.length > 0 
-                ? getStoresByAreaWhereIn(`"${ids.join(', ')}"`, processResponse)
-                : getStoresByArea(processResponse);
+                ? get_area_where_in(`"${ids.join(', ')}"`, processResponse)
+                // : getStoresByArea(processResponse);
+                : batch_export();
+        };
+
+        const batch_export = () => {
+            get_area_count((res) => {
+                if (res && res.length > 0) {
+                    let total_records = res[0].total_records;
+
+                    for (let index = 0; index < total_records; index += 100000) {
+                        console.log(index, 'index here')
+                        var ano_ire = [];
+
+                        area_stores(index, (result) => {
+                            
+                            console.log(result, 'result here');
+
+                            result.forEach(({ area_id, store_description }) => {
+                                ano_ire[area_id] = store_description;  // Assign value to ano_ire array using id as index
+                            });
+
+                            console.log(ano_ire, 'ano_ire'); // To check the final array
+                        })
+
+                        console.log(ano_ire, 'ano_ire');
+
+                        get_area(index, (res) => {
+                            let newData = res.map(({ 
+                                id, area_code, area_description, status
+                            }) => ({
+                                Code: area_code,
+                                Description: area_description,
+                                Status: status === "1" ? "Active" : "Inactive",
+                                "Stores": ano_ire[id] || '',
+                            }));
+                            formattedData.push(...newData); // Append new data to formattedData array
+                        })
+                    }
+                } else {
+                    console.log('No data received');
+                }
+            })
         };
 
         fetchStores();
@@ -1298,28 +1340,25 @@
             [""],
         ];
 
-        exportArrayToExcel(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
+        exportArrayToCSV(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
+        modal.loading_progress(false);
     };
 
-    function exportArrayToExcel(data, filename, headerData) {
-        // Create a new workbook
-        const workbook = XLSX.utils.book_new();
-
-        // Convert data to worksheet
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
 
         // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
 
-        // Append sheet to workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
 
-        // Generate Excel file
-        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-        // Convert buffer to Blob and trigger download
-        const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        saveAs(blob, filename + ".xlsx");
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
     }
 
     $(document).on('click', '.btn_status', function (e) {

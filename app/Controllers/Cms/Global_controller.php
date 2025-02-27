@@ -152,23 +152,73 @@ class Global_controller extends BaseController
 						echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
 					}
 					break;
-			case 'store_by_area_where_in':
+			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+			// ----------------------------------------------------------- Agency -----------------------------------------------------------
+			case 'get_agency_where_in':
+				try {
+					$agencyCode = $this->request->getPost('agency_codes');
+					$result_data = $this->Global_model->get_agency_where_in($agencyCode);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_agency':
+				try {
+					$agencyOffset = $this->request->getPost('agency_offset');
+					$result_data = $this->Global_model->get_agency($agencyOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_agency_count':
+				try {
+					$result_data = $this->Global_model->get_agency_masterfile_count();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			// ----------------------------------------------------------- Agency -----------------------------------------------------------
+			// ------------------------------------------------------------ Area ------------------------------------------------------------
+			case 'get_area_where_in':
 				try {
 					$areaCode = $this->request->getPost('area_codes');
-					$result_data = $this->Global_model->getStoresByAreaWhereIn($areaCode);
+					$result_data = $this->Global_model->get_area_where_in($areaCode);
 					echo json_encode($result_data);
 				} catch (Error $e) {
 					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
 				}
 				break;
-			case 'store_by_area':
+			case 'get_area':
 				try {
-					$result_data = $this->Global_model->getStoresByArea();
+					$areaOffset = $this->request->getPost('area_offset');
+					$result_data = $this->Global_model->get_area($areaOffset);
 					echo json_encode($result_data);
 				} catch (Error $e) {
 					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
 				}
 				break;
+			case 'get_area_count':
+				try {
+					$result_data = $this->Global_model->get_area_masterfile_count();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_area_stores':
+				try {
+					$areaOffset = $this->request->getPost('area_offset');
+					$result_data = $this->Global_model->get_area_stores($areaOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			// ------------------------------------------------------------ Area ------------------------------------------------------------
+			// --------------------------------------------------- Area Sales Coordinator ---------------------------------------------------
 			case 'get_asc_where_in':
 				try {
 					$ascCode = $this->request->getPost('asc_codes');
@@ -195,6 +245,101 @@ class Global_controller extends BaseController
 					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
 				}
 				break;
+			// --------------------------------------------------- Area Sales Coordinator ---------------------------------------------------
+			// ------------------------------------------------------ Brand Ambassador ------------------------------------------------------
+			case 'get_brand_ambassador_where_in':
+				try {
+					$brandAmbassadorCode = $this->request->getPost('brand_ambassador_codes');
+					$result_data = $this->Global_model->get_brand_ambassador_where_in($brandAmbassadorCode);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_brand_ambassador':
+				try {
+					$brandAmbassadorOffset = $this->request->getPost('brand_ambassador_offset');
+					$result_data = $this->Global_model->get_brand_ambassador($brandAmbassadorOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_brand_ambassador_count':
+				try {
+					$result_data = $this->Global_model->get_brand_ambassador_masterfile_count();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_brand_ambassador_brands':
+				try {
+					$brandAmbassadorOffset = $this->request->getPost('brand_ambassador_offset');
+					$result_data = $this->Global_model->get_brand_ambassador_brands($brandAmbassadorOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			// ------------------------------------------------------ Brand Ambassador ------------------------------------------------------
+			// ------------------------------------------------------- Store / Branch -------------------------------------------------------
+			case 'get_store_branch_where_in':
+				try {
+					$storeBranchCode = $this->request->getPost('store_branch_codes');
+					$result_data = $this->Global_model->get_store_branch_where_in($storeBranchCode);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_store_branch':
+				try {
+					$storeBranchOffset = $this->request->getPost('store_branch_offset');
+					$result_data = $this->Global_model->get_store_branch($storeBranchOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_store_branch_count':
+				try {
+					$result_data = $this->Global_model->get_store_branch_masterfile_count();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			// ------------------------------------------------------- Store / Branch -------------------------------------------------------
+			// ------------------------------------------------------------ Team ------------------------------------------------------------
+			case 'get_team_where_in':
+				try {
+					$teamCode = $this->request->getPost('team_codes');
+					$result_data = $this->Global_model->get_team_where_in($teamCode);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_team':
+				try {
+					$teamOffset = $this->request->getPost('team_offset');
+					$result_data = $this->Global_model->get_team($teamOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_team_count':
+				try {
+					$result_data = $this->Global_model->get_team_masterfile_count();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			// ------------------------------------------------------------ Team ------------------------------------------------------------
+			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
 			case 'fetch_existing':
 			    try {
 			        $table = $this->request->getPost('table');
