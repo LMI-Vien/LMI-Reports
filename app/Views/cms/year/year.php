@@ -560,37 +560,37 @@
 
 
     // get the last sort_order
-    function get_sort_order(callback) {
-        var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
+    // function get_sort_order(callback) {
+    //     var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
 
-        var data = {
-            event: "list",
-            select: "MAX(sort_order) as max_sort_order", // Get the highest sort_order
-            query: "status >= 0",
-            table: "tbl_year"
-        };
+    //     var data = {
+    //         event: "list",
+    //         select: "MAX(sort_order) as max_sort_order", // Get the highest sort_order
+    //         query: "status >= 0",
+    //         table: "tbl_year"
+    //     };
 
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: data,
-            dataType: "json",
-            success: function(response) {
-                let lastSortOrder = response[0]?.max_sort_order ? parseInt(response[0].max_sort_order) : 0;
-                console.log("Last Sort Order:", lastSortOrder); 
-                callback(lastSortOrder); 
-            },
-            error: function(xhr, status, error) {
-                console.error("Error fetching sort_order:", error);
-                callback(0); 
-            }
-        });
-    }
+    //     $.ajax({
+    //         url: url,
+    //         type: "POST",
+    //         data: data,
+    //         dataType: "json",
+    //         success: function(response) {
+    //             let lastSortOrder = response[0]?.max_sort_order ? parseInt(response[0].max_sort_order) : 0;
+    //             console.log("Last Sort Order:", lastSortOrder); 
+    //             callback(lastSortOrder); 
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error("Error fetching sort_order:", error);
+    //             callback(0); 
+    //         }
+    //     });
+    // }
 
-    get_sort_order(function(lastSortOrder) {
-        let newSortOrder = lastSortOrder + 1;
-        console.log("New Sort Order for Insert:", newSortOrder);
-    });
+    // get_sort_order(function(lastSortOrder) {
+    //     let newSortOrder = lastSortOrder + 1;
+    //     console.log("New Sort Order for Insert:", newSortOrder);
+    // });
 
 
 

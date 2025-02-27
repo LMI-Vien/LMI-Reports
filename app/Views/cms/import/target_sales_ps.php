@@ -43,7 +43,7 @@
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center page-title md-center">
-                <b>T A R G E T - S A L E S - P E R -S T O R E</b>
+                <b>T A R G E T - S A L E S - P E R - S T O R E</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -257,10 +257,11 @@
     </div>
     
 <script>
-    var query = "status >= 0";
+    var query = "tsps.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
+    var base_url = '<?= base_url();?>';
 
     //for importing
     let currentPage = 1;
@@ -273,68 +274,136 @@
         get_pagination();
     });
 
+    // function get_data(new_query) {
+    //     var data = {
+    //         event : "list",
+    //         select : "id, location, location_description, january, february, march, april, may, june, july, august, september, october, november, december, status, created_date, updated_date",
+    //         query : new_query,
+    //         offset : offset,
+    //         limit : limit,
+    //         table : "tbl_target_sales_per_store",
+    //         order : {
+    //             field : "id, updated_date",
+    //             order : "asc, desc" 
+    //         }
+
+    //     }
+
+    //     aJax.post(url,data,function(result){
+    //         var result = JSON.parse(result);
+    //         var html = '';
+
+    //         if(result) {
+    //             if (result.length > 0) {
+    //                 $.each(result, function(x,y) {
+    //                     console.log(y);
+    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+
+    //                     html += "<tr class='" + rowClass + "'>";
+    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+    //                     html += "<td scope=\"col\">" + trimText(y.location) + "</td>";
+    //                     html += "<td scope=\"col\">" + trimText(y.location_description, 10) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.january) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.february) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.march) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.april) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.may) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.june) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.july) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.august) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.september) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.october) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.november) + "</td>";
+    //                     // html += "<td scope=\"col\">" + (y.december) + "</td>";
+    //                     // html += "<td scope=\"col\">" + status + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+    //                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+    //                     if (y.id == 0) {
+    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+    //                     } else {
+    //                         html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+    //                         html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+    //                         html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+    //                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+    //                         html+="</td>";
+    //                     }
+                        
+    //                     html += "</tr>";   
+    //                 });
+    //             } else {
+    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+    //             }
+    //         }
+    //         $('.table_body').html(html);
+    //     });
+    // }
+    
     function get_data(new_query) {
         var data = {
-            event : "list",
-            select : "id, location, location_description, january, february, march, april, may, june, july, august, september, october, november, december, status, created_date, updated_date",
-            query : new_query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_target_sales_per_store",
+            event: "list",
+            select: "tsps.id, tsps.january, tsps.february, tsps.march, tsps.april, tsps.may, tsps.june, tsps.july, tsps.august, tsps.september, tsps.october, tsps.november, tsps.december, s1.code AS location, s2.description AS location_description, tsps.status, tsps.updated_date, tsps.created_date",
+            query: new_query,
+            offset: offset,
+            limit: limit,
+            table: "tbl_target_sales_per_store tsps",
             order : {
-                field : "id, updated_date",
-                order : "asc, desc" 
-            }
+                field : "tsps.id",
+                order : "asc" 
+            },
+            join: [
+                {
+                    table: "tbl_store s1",
+                    query: "s1.id = tsps.location",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s2",
+                    query: "s2.id = tsps.location_description",
+                    type: "left"
+                }
+            ]
+        };
 
-        }
+        aJax.post(url, data, function(result) {
+            // console.log("Raw result:", result);
 
-        aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
 
-            if(result) {
-                if (result.length > 0) {
-                    $.each(result, function(x,y) {
-                        console.log(y);
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+            if (result && result.length > 0) {
+                $.each(result, function(x, y) {
+                    // console.log(y);
+                    var status = (parseInt(y.status) === 1) ? "Active" : "Inactive";
+                    var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
-                        html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.location) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.location_description, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.january) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.february) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.march) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.april) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.may) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.june) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.july) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.august) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.september) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.october) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.november) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.december) + "</td>";
-                        // html += "<td scope=\"col\">" + status + "</td>";
-                        html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+                    var storeCode = y.location || 'N/A';
+                    var storeCodeLocation = y.location_description || 'NA';
 
-                        if (y.id == 0) {
-                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-                        } else {
-                            html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-                            html+="</td>";
-                        }
-                        
-                        html += "</tr>";   
-                    });
-                } else {
-                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-                }
+                    html += "<tr class='" + rowClass + "'>";
+                    html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
+                    html += "<td scope=\"col\">" + trimText(storeCode) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(storeCodeLocation) + "</td>";
+                    html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                    html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+                    if (y.id == 0) {
+                        html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+                    } else {
+                        html += "<td class='center-content' style='width: 25%; min-width: 300px'>";
+                        html += "<a class='btn-sm btn update' onclick=\"edit_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span></a> ";
+                        html += "<a class='btn-sm btn delete' onclick=\"delete_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Delete Item'><span class='glyphicon glyphicon-trash'>Delete</span></a> ";
+                        html += "<a class='btn-sm btn view' onclick=\"view_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Show Details'><span class='glyphicon glyphicon-eye-open'>View</span></a>";
+                        html += "</td>";
+                    }
+
+                    html += "</tr>";
+                });
+            } else {
+                html = '<tr><td colspan=12 class="center-align-format">' + no_records + '</td></tr>';
             }
+
             $('.table_body').html(html);
         });
     }
@@ -347,9 +416,9 @@
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_target_sales_per_store",
+            table : "tbl_target_sales_per_store tsps",
             order : {
-                field : "updated_date", //field to order
+                field : "tsps.updated_date", //field to order
                 order : "desc" //asc or desc
             }
 
