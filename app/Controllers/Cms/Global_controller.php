@@ -595,9 +595,13 @@ class Global_controller extends BaseController
 			                "message" => "Database insert failed"
 			            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
 			        }
-
+					if (is_array($insertedCount)) {
+					    $message = 'success';
+					} else {
+					    $message = 'error';
+					}
 			        return $this->response->setJSON([
-			            "message" => "success",
+			            "message" => $message,
 			            "inserted" => $insertedCount
 			        ]);
 

@@ -51,7 +51,7 @@ class Import_vmi extends BaseController
 
 	public function get_valid_ba_data(){
 		$stores = $this->Global_model->get_valid_records("tbl_store", 'code');
-		$items = $this->Global_model->get_valid_records_pricelist("pricecodefile2", 'cusitmcde');
+		$items = $this->Global_model->get_valid_records_tracc_data("pricecodefile2", 'cusitmcde');
 		return $this->response->setJSON(["stores" => $stores, "items" => $items]);
 	}
 

@@ -798,16 +798,19 @@ class Global_model extends Model
     }
 
     function get_valid_records($table, $column_name) {
-        return $this->db->table($table)
+        return array_map(function ($row) use ($column_name) {
+            $row[$column_name] = trim($row[$column_name]); 
+            return $row;
+        }, $this->db->table($table)
             ->select(['id', $column_name])
             ->where('status', 1)
             ->get()
-            ->getResultArray();
+            ->getResultArray());
     }
 
-    function get_valid_records_pricelist($table, $column_name) {
+    function get_valid_records_tracc_data($table, $column_name) {
         return $this->db->table($table)
-            ->select(['recid', $column_name])
+            ->select(['recid', $column_name, 'itmcde'])
             ->where('cusitmcde !=', '')
             ->get()
             ->getResultArray();

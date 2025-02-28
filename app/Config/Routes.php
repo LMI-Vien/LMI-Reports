@@ -54,6 +54,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sell_out_pa::index');
+        $routes->get('get_valid_ba_data', 'Cms\Import_target_sell_out_pa::get_valid_ba_data');
     });
 
     $routes->group('import-vmi', static function ($routes) {
