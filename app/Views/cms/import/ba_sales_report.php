@@ -109,32 +109,32 @@
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
-                            <label for="store" class="form-label">Area</label>
+                            <label for="area" class="form-label">Area</label>
                             <input type="text" class="form-control required" id="area" aria-describedby="area">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Store Name</label>
+                            <label for="store_name" class="form-label">Store Name</label>
                             <input type="text" class="form-control required" id="store_name" aria-describedby="store_name">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Brand</label>
+                            <label for="brand" class="form-label">Brand</label>
                             <input type="text" class="form-control required" id="brand" aria-describedby="brand">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">BA Name</label>
+                            <label for="ba_name" class="form-label">BA Name</label>
                             <input type="text" class="form-control required" id="ba_name" aria-describedby="ba_name">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="code" class="form-label">Date</label>
+                            <label for="date" class="form-label">Date</label>
                             <input type="date" class="form-control required" id="date" aria-describedby="date">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Amount</label>
+                            <label for="amount" class="form-label">Amount</label>
                             <input type="text" class="form-control required" id="amount" aria-describedby="amount">
                         </div>
                     </form>
@@ -515,10 +515,14 @@
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
-                    $('#area').val(d.area);
-                    $('#store_name').val(d.store_name);
-                    $('#brand').val(d.brand);
-                    $('#ba_name').val(d.ba_name);
+                    // $('#area').val(d.area);
+                    get_area(d.area);
+                    // $('#store_name').val(d.store_name);
+                    get_store(d.store_name);
+                    // $('#brand').val(d.brand);
+                    get_brand(d.brand);
+                    // $('#ba_name').val(d.ba_name);
+                    get_brand_ambassador(d.ba_name);
                     $('#date').val(d.date);
                     $('#amount').val(d.amount);
                 }); 
@@ -1090,5 +1094,119 @@
 
         $(".import_pagination").html(paginationHtml);
     }
+
+    function get_area(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "list",
+            select: "id, code, description, status",
+            query: "status >= 0 AND id = " + id,
+            offset: 0,
+            limit: 0,
+            table: "tbl_area",
+            order: {
+                field: "id",
+                order: "asc"
+            }
+        };
+
+        aJax.post(url, data, function(res) {
+            var result = JSON.parse(res);
+            // console.log("location Data:", result);
+
+            var area = ''; 
+            if (result && result.length > 0) {
+                area = result[0].code; 
+            }
+
+            $('#area').val(area); 
+        });
+    }
+
+    function get_store(id) {
+        var url = "<?= base_url('cms/global_controller');?>"; 
+        var data = {
+            event: "list",
+            select: "id, code, description, status",
+            query: "status >= 0 AND id = " + id,
+            offset: 0,
+            limit: 0,
+            table: "tbl_store",
+            order: {
+                field: "code",
+                order: "asc"
+            }
+        };
+
+        aJax.post(url, data, function(res) {
+            var result = JSON.parse(res);
+            // console.log("location Data:", result);
+
+            var store_name = '';
+            if (result && result.length > 0) {
+                store_name = result[0].description;
+            }
+
+            $('#store_name').val(store_name);
+        });
+    }
+
+    function get_brand(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "list",
+            select: "id, brand_code, brand_description, status",
+            query: "status >= 0 AND id = " + id,
+            offset: 0,
+            limit: 0,
+            table: "tbl_brand",
+            order: {
+                field: "brand_code",
+                order: "asc"
+            }
+        };
+
+        aJax.post(url, data, function(res) {
+            var result = JSON.parse(res);
+            // console.log("location Data:", result);
+
+            var brand = '';
+            if (result && result.length > 0) {
+                brand = result[0].brand_description;
+            }
+
+            $('#brand').val(brand);
+        });
+    }
+
+    function get_brand_ambassador(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "list",
+            select: "id, code, name, deployment_date, status",
+            query: "status >= 0 AND id = " + id,
+            offset: 0,
+            limit: 0,
+            table: "tbl_brand_ambassador",
+            order: {
+                field: "code",
+                order: "asc"
+            }
+        };
+
+        aJax.post(url, data, function(res) {
+            var result = JSON.parse(res);
+            // console.log("location Data:", result);
+
+            var ba_name = '';
+            if (result && result.length > 0) {
+                ba_name = result[0].name;
+            }
+
+            $('#ba_name').val(ba_name);
+        });
+    }
+
+
     
 </script>
