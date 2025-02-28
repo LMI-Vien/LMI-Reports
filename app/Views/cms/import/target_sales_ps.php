@@ -103,73 +103,73 @@
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
-                            <label for="store" class="form-label">Location</label>
+                            <label for="location" class="form-label">Location</label>
                             <input type="text" class="form-control required" id="location" aria-describedby="location">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Location Description</label>
+                            <label for="location_desc" class="form-label">Location Description</label>
                             <input type="text" class="form-control required" id="location_desc" aria-describedby="location_desc">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">January</label>
+                            <label for="jan" class="form-label">January</label>
                             <input type="text" class="form-control required" id="jan" aria-describedby="jan">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">February</label>
+                            <label for="feb" class="form-label">February</label>
                             <input type="text" class="form-control required" id="feb" aria-describedby="feb">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="code" class="form-label">March</label>
+                            <label for="mar" class="form-label">March</label>
                             <input type="text" class="form-control required" id="mar" aria-describedby="mar">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">April</label>
+                            <label for="apr" class="form-label">April</label>
                             <input type="text" class="form-control required" id="apr" aria-describedby="apr">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">May</label>
+                            <label for="may" class="form-label">May</label>
                             <input type="text" class="form-control required" id="may" aria-describedby="may">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">June</label>
+                            <label for="jun" class="form-label">June</label>
                             <input type="text" class="form-control required" id="jun" aria-describedby="jun">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">July</label>
+                            <label for="jul" class="form-label">July</label>
                             <input type="text" class="form-control required" id="jul" aria-describedby="jul">
                         </div>
 
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">August</label>
+                            <label for="aug" class="form-label">August</label>
                             <input type="text" class="form-control required" id="aug" aria-describedby="aug">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">September</label>
+                            <label for="sep" class="form-label">September</label>
                             <input type="text" class="form-control required" id="sep" aria-describedby="sep">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">October</label>
+                            <label for="oct" class="form-label">October</label>
                             <input type="text" class="form-control required" id="oct" aria-describedby="oct">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">November</label>
+                            <label for="nov" class="form-label">November</label>
                             <input type="text" class="form-control required" id="nov" aria-describedby="nov">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">December</label>
+                            <label for="dec" class="form-label">December</label>
                             <input type="text" class="form-control required" id="dec" aria-describedby="dec">
                         </div>
                     </form>
@@ -563,8 +563,10 @@
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
-                    $('#location').val(d.location);
-                    $('#location_desc').val(d.location_description);
+                    // $('#location').val(d.location);
+                    get_store(d.location);
+                    // $('#location_desc').val(d.location_description);
+                    get_store(d.location_description);
                     $('#jan').val(d.january);
                     $('#feb').val(d.february);
                     $('#mar').val(d.march);
@@ -1223,6 +1225,40 @@
 
         // Initiate the first attempt to insert
         attemptInsert();
+    }
+
+    function get_store(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "list",
+            select: "id, code, description, status",
+            query: "status >= 0 AND id = " + id,
+            offset: 0,
+            limit: 0,
+            table: "tbl_store",
+            order: {
+                field: "code",
+                order: "asc"
+            }
+        };
+
+        aJax.post(url, data, function(res) {
+            var result = JSON.parse(res);
+            // console.log("location Data:", result);
+
+            var location = ''; 
+            if (result && result.length > 0) {
+                location = result[0].code; 
+            }
+
+            var location_desc = '';
+            if (result && result.length > 0) {
+                location_desc = result[0].description;
+            }
+
+            $('#location').val(location); 
+            $('#location_desc').val(location_desc);
+        });
     }
     
 </script>
