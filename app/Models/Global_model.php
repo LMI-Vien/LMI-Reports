@@ -797,15 +797,25 @@ class Global_model extends Model
         }
     }
 
-    function get_valid_records($table, $column_name) {
-        return array_map(function ($row) use ($column_name) {
-            $row[$column_name] = trim($row[$column_name]); 
-            return $row;
-        }, $this->db->table($table)
-            ->select(['id', $column_name])
+    function get_valid_records($table, $columns) {
+        $columns = (array) $columns;
+
+        array_unshift($columns, 'id');
+
+        $results = $this->db->table($table)
+            ->select($columns)
             ->where('status', 1)
             ->get()
-            ->getResultArray());
+            ->getResultArray();
+
+        return array_map(function ($row) use ($columns) {
+            foreach ($columns as $column) {
+                if (isset($row[$column]) && is_string($row[$column])) {
+                    $row[$column] = trim($row[$column]);
+                }
+            }
+            return $row;
+        }, $results);
     }
 
     function get_valid_records_tracc_data($table, $column_name) {

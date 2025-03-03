@@ -28,7 +28,7 @@ class User extends BaseController
 		$data['PageName'] = 'Users';
 		$data['PageUrl'] = 'Users';
 		$data['buttons'] = ['add', 'search'];
-		$data['content'] = "cms/User/User.php";
+		$data['content'] = "cms/user/User.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",

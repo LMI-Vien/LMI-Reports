@@ -69,6 +69,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-target-sales-ps', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sales_ps::index');
+        $routes->get('get_valid_ba_data', 'Cms\Import_target_sales_ps::get_valid_ba_data');
     });
 
     $routes->group('import-sales-top-list', static function ($routes) {

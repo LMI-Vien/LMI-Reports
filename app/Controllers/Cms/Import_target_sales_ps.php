@@ -49,9 +49,9 @@ class Import_target_sales_ps extends BaseController
 		return view("cms/layout/template", $data);		
 	}
 
-	public function get_valid_target_sales_ps() {
-		$codes = $this->Global_model->get_valid_records("tbl_store", 'code');
-		return $this->response->setJSON(["codes" => $codes]);
+	public function get_valid_ba_data() {
+		$stores = $this->Global_model->get_valid_records("tbl_store", ['code', 'description']);
+		return $this->response->setJSON(["stores" => $stores]);
 	}
 
 }

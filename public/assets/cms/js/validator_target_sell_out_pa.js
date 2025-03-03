@@ -9,15 +9,6 @@ self.onmessage = async function (e) {
         let get_ba_valid_response = await fetch(`${BASE_URL}cms/import-target-sell-out-pa/get_valid_ba_data`);
         let ba_data = await get_ba_valid_response.json();
 
-        function createLookup(records, key1, key2) {
-            let lookup = {};
-            records.forEach(record => {
-                lookup[record[key1].toLowerCase()] = record.recid;
-                lookup[record[key2].toLowerCase()] = record.recid;
-            });
-            return lookup;
-        }
-
         let brand_lookup = createLookup(ba_data.brands, "brand_code", "brand_code");
         let payment_group_lookup = createLookup(ba_data.payment_group, "customer_group_code", "customer_group_code");
 
@@ -35,6 +26,15 @@ self.onmessage = async function (e) {
 
         let batchSize = 2000;
         let index = 0;
+
+        function createLookup(records, key1, key2) {
+            let lookup = {};
+            records.forEach(record => {
+                lookup[record[key1].toLowerCase()] = record.id;
+                lookup[record[key2].toLowerCase()] = record.id;
+            });
+            return lookup;
+        }
 
         function normalizeLookup(lookup, skuValue, itemValue, fieldName) {
             let lowerSkuValue = skuValue.toLowerCase();
@@ -70,9 +70,12 @@ self.onmessage = async function (e) {
 
         function processBatch() {
             if (index >= data.length) {
-                self.postMessage({ invalid: err_counter > 0, errorLogs, valid_data, err_counter });
+                self.postMessage({ invalid, errorLogs, valid_data, err_counter, progress: 100 });
                 return;
             }
+
+            let progress = Math.round((index / data.length) * 100);
+            self.postMessage({ progress });
 
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
