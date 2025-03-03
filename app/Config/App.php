@@ -16,7 +16,11 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
+<<<<<<< Updated upstream
     public string $baseURL = BASE; 
+=======
+    public string $baseURL = BASE;
+>>>>>>> Stashed changes
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
