@@ -157,8 +157,4 @@ $routes->group('cms/', static function ($routes) {
 	});
 
     $routes->post('global_controller', 'Cms\Global_controller::index');
-<<<<<<< Updated upstream
 });
-=======
-});
->>>>>>> Stashed changes
