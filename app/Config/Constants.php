@@ -24,16 +24,12 @@ defined('APP_NAMESPACE') || define('APP_NAMESPACE', 'App');
  | the vendor folder is in the Root directory, but you can customize that here.
  */
 defined('COMPOSER_PATH') || define('COMPOSER_PATH', ROOTPATH . 'vendor/autoload.php');
-$protocol = 'http://localhost:8080/';
-if (isset($_SERVER['HTTP_HOST'])) {
-    $protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? 'https://' : 'http://';
-    $protocol .= $_SERVER['HTTP_HOST'];
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
+$scriptPath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
-    // Ensure the script path is properly included
-    $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
-    $protocol .= rtrim($scriptPath, '/') . '/';
-}
-defined('BASE') || define('BASE',$protocol);
+defined('BASE') || define('BASE', $protocol . $host . $scriptPath . '/');
+
 
 /*
  |--------------------------------------------------------------------------
