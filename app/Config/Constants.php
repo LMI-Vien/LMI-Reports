@@ -24,24 +24,13 @@ defined('APP_NAMESPACE') || define('APP_NAMESPACE', 'App');
  | the vendor folder is in the Root directory, but you can customize that here.
  */
 defined('COMPOSER_PATH') || define('COMPOSER_PATH', ROOTPATH . 'vendor/autoload.php');
-$protocol = 'http://'; // Default to HTTP
-
-if (
-    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
-    (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
-    (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on')
-) {
-    $protocol = 'https://';
+$protocol = 'http://localhost:8080/';
+if(isset($_SERVER['HTTP_HOST'])){
+	$protocol = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
+	$protocol  = $protocol.$_SERVER['HTTP_HOST'];
+	$protocol .= str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
 }
-
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
-
-// Get script directory dynamically
-$scriptPath = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
-
-// Define BASE constant dynamically
-defined('BASE') || define('BASE', $protocol . $host . rtrim($scriptPath, '/') . '/');
-
+defined('BASE') || define('BASE',$protocol);
 
 /*
  |--------------------------------------------------------------------------
