@@ -24,6 +24,12 @@
         margin: 5px;
     }
 
+    th, td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
 </style>
 
 <div class="content-wrapper p-4">
@@ -197,93 +203,141 @@
                 </button>
             </div>
 
-<div class="modal-body">
-    <div class="card p-3">
-        <div class="mb-3" style="overflow-x: auto; height: 450px;">
-            <div class="text-center p-2" 
-                style="font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border-radius: 10px;">
-                <b>Extracted Data</b>
-            </div>
-
-            <div class="row my-3">
-                <div class="col-md-8 import_buttons">
-                    <label for="file" class="btn btn-warning mt-2" style="margin-bottom: 0px;">
-                        <i class="fa fa-file-import me-2"></i> Custom Upload
-                    </label>
-                    <input type="file" id="file" accept=".xls,.xlsx,.csv" style="display: none;" onclick="clear_import_table()">
-
-                    <button class="btn btn-primary mt-2" id="preview_xl_file" onclick="read_xl_file()">
-                        <i class="fa fa-sync me-2"></i> Preview Data
-                    </button>
-
-                    <button class="btn btn-success mt-2" id="download_template" onclick="download_template()">
-                        <i class="fa fa-file-download me-2"></i> Download Import Template
-                    </button>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card p-4 shadow-lg rounded-3 border-0" style="background: #f8f9fa;">
-                        <div class="row g-3">
-                            <div class="col-12 d-flex align-items-center">
-                                <label for="yearSelect" class="form-label fw-semibold me-2">Choose Year:</label>
-                                <select id="yearSelect" class="form-select uniform-dropdown">
-                                </select>
-                            </div>
-                            <div class="col-12 d-flex align-items-center">
-                                <label for="monthSelect" class="form-label fw-semibold me-2">Choose Month:</label>
-                                <select id="monthSelect" class="form-select uniform-dropdown">
-                                </select>
-                            </div>
-                            <div class="col-12 d-flex align-items-center">
-                                <label for="weekSelect" class="form-label fw-semibold me-2">Choose Week:</label>
-                                <select id="weekSelect" class="form-select uniform-dropdown">
-                                </select>
-                            </div>
-                            <div class="col-12 d-flex align-items-center">
-                                <label for="companySelect" class="form-label fw-semibold me-2">Choose Company:</label>
-                                <select id="companySelect" class="form-select uniform-dropdown">
-                                </select>
-                            </div>
+            <div class="modal-body">
+                <div class="card p-3">
+                    <div class="mb-3" style="overflow-x: auto; height: 450px;">
+                        <div class="text-center p-2" 
+                            style="font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border-radius: 10px;">
+                            <b>Extracted Data</b>
                         </div>
+
+                        <div class="row my-3">
+                            <div class="col-md-8 import_buttons">
+                                <label for="file" class="btn btn-warning mt-2" style="margin-bottom: 0px;">
+                                    <i class="fa fa-file-import me-2"></i> Custom Upload
+                                </label>
+                                <input type="file" id="file" accept=".xls,.xlsx,.csv" style="display: none;" onclick="clear_import_table()">
+
+                                <button class="btn btn-primary mt-2" id="preview_xl_file" onclick="read_xl_file()">
+                                    <i class="fa fa-sync me-2"></i> Preview Data
+                                </button>
+
+                                <button class="btn btn-success mt-2" id="download_template" onclick="download_template()">
+                                    <i class="fa fa-file-download me-2"></i> Download Import Template
+                                </button>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card p-4 shadow-lg rounded-3 border-0" style="background: #f8f9fa;">
+                                    <div class="row g-3">
+                                        <div class="col-12 d-flex align-items-center">
+                                            <label for="yearSelect" class="form-label fw-semibold me-2">Choose Year:</label>
+                                            <select id="yearSelect" class="form-select uniform-dropdown">
+                                            </select>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center">
+                                            <label for="monthSelect" class="form-label fw-semibold me-2">Choose Month:</label>
+                                            <select id="monthSelect" class="form-select uniform-dropdown">
+                                            </select>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center">
+                                            <label for="weekSelect" class="form-label fw-semibold me-2">Choose Week:</label>
+                                            <select id="weekSelect" class="form-select uniform-dropdown">
+                                            </select>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center">
+                                            <label for="companySelect" class="form-label fw-semibold me-2">Choose Company:</label>
+                                            <select id="companySelect" class="form-select uniform-dropdown">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <table class="table table-bordered listdata">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th>Line #</th>
+                                    <th>Store</th>
+                                    <th>Item</th>
+                                    <th>Item Name</th>
+                                    <th>VMI Status</th>
+                                    <th>Item Class</th>
+                                    <th>Supplier</th>
+                                    <th>Group</th>
+                                    <th>Dept</th>
+                                    <th>Class</th>
+                                    <th>Sub-class</th>
+                                    <th>On Hand</th>
+                                    <th>In transit</th>
+                                    <th>Ave Sales Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody class="word_break import_table"></tbody>
+                        </table>
                     </div>
+
+                    <center class="my-2">
+                        <div class="import_pagination btn-group"></div>
+                    </center>
                 </div>
-
             </div>
-
-            <table class="table table-bordered listdata">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>Line #</th>
-                        <th>Store</th>
-                        <th>Item</th>
-                        <th>Item Name</th>
-                        <th>VMI Status</th>
-                        <th>Item Class</th>
-                        <th>Supplier</th>
-                        <th>Group</th>
-                        <th>Dept</th>
-                        <th>Class</th>
-                        <th>Sub-class</th>
-                        <th>On Hand</th>
-                        <th>In transit</th>
-                        <th>Ave Sales Unit</th>
-                    </tr>
-                </thead>
-                <tbody class="word_break import_table"></tbody>
-            </table>
-        </div>
-
-        <center class="my-2">
-            <div class="import_pagination btn-group"></div>
-        </center>
-    </div>
-</div>
 
             
             <div class="modal-footer">
                 <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
                 <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" id="export_modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">
+                    <b></b>
+                </h1>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="card p-4 shadow-lg rounded-3 border-0" style="background: #f8f9fa;">
+                    <div class="row g-3">
+                        <div class="col-12 d-flex align-items-center">
+                            <label for="year_select" class="form-label fw-semibold me-2">Choose Year:</label>
+                            <select id="year_select" class="form-select uniform-dropdown">
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex align-items-center">
+                            <label for="month_select" class="form-label fw-semibold me-2">Choose Month:</label>
+                            <select id="month_select" class="form-select uniform-dropdown">
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex align-items-center">
+                            <label for="week_select" class="form-label fw-semibold me-2">Choose Week:</label>
+                            <select id="week_select" class="form-select uniform-dropdown">
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex align-items-center">
+                            <label for="company_select" class="form-label fw-semibold me-2">Choose Company:</label>
+                            <select id="company_select" class="form-select uniform-dropdown">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="modal-footer">
+                <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
+                <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
+                <button type="button" class="btn caution" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -368,7 +422,7 @@
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
-                            html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+                            html+="<td class='center-content' style='width: 25%; min-width: 200px'>";
                             //html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -519,10 +573,10 @@
         title = addNbsp('IMPORT VMI')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $('#import_modal').modal('show');
-        get_year();
-        get_month();
-        get_company();
-        get_week();
+        get_year('yearSelect');
+        get_month('monthSelect');
+        get_company('companySelect');
+        get_week('weekSelect');
     });
 
     function populate_modal(inp_id) {
@@ -1231,7 +1285,7 @@
         $(".import_buttons").append($downloadBtn);
     }
 
-    function get_year() {
+    function get_year(selected_class) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
@@ -1261,11 +1315,11 @@
                     });
                 }
             }
-            $('#yearSelect').append(html);
+            $('#'+selected_class).html(html);
         })
     }
 
-    function get_month() {
+    function get_month(selected_class) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
@@ -1295,11 +1349,11 @@
                     });
                 }
             }
-            $('#monthSelect').append(html);
+            $('#'+selected_class).html(html);
         })
     }
 
-    function get_week() {
+    function get_week(selected_class) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
@@ -1329,11 +1383,11 @@
                     });
                 }
             }
-            $('#weekSelect').append(html);
+            $('#'+selected_class).html(html);
         })
     }
 
-    function get_company() {
+    function get_company(selected_class) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
@@ -1363,8 +1417,318 @@
                     });
                 }
             }
-            $('#companySelect').append(html);
+            $('#'+selected_class).html(html);
         })
+    }
+
+    function download_template() {
+        let formattedData = [
+            {
+                "Store":"", 
+                // "Store Name":store_map[`${store}`].description,  
+                // store name,
+                "Item":"", 
+                "Item Name":"", 
+                "VMI Status":"", 
+                "Item Class":"", 
+                "Supplier":"", 
+                "Group":"", 
+                "Dept":"", 
+                "Class":"", 
+                "Sub Class":"", 
+                "On Hand":"", 
+                "In Transit":"", 
+                "Ave Sales Unit":"", 
+                // "Company":company,
+            }
+        ]
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["VMI"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+    
+        exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
+    }
+
+    $(document).on('click', '#btn_export ', function() {
+        title = addNbsp('EXPORT VMI')
+        $("#export_modal").find('.modal-title').find('b').html(title)
+        $('#export_modal').modal('show');
+        get_year('year_select');
+        get_month('month_select');
+        get_week('week_select');
+        get_company('company_select');
+    });
+
+    function exportFilter() {
+        const year = $('#year_select').val()?.trim();
+        const month = $('#month_select').val()?.trim();
+        const week = $('#week_select').val()?.trim();
+        const company = $('#company_select').val()?.trim();
+
+        const fields = { year, month, week, company };
+
+        var formattedData = [];
+
+        for (const [key, value] of Object.entries(fields)) {
+            if (!value) {
+                return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
+            }
+        }
+
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    startExport()
+                }, 500);
+            }
+        })
+
+        const startExport = () => {
+            get_vmi_data(year, month, week, company, (res) => {
+                let store_ids = []
+                let store_map = {}
+        
+                res.forEach(stores => {
+                    store_ids.push(`'${stores.store}'`);
+                });
+        
+                get_store_branch_where_in(`"${store_ids.join(', ')}"`, (result) => {
+                    result.forEach(store => {
+                        if (!store_map[store.id]) {
+                            store_map[store.id] = {}; // Initialize as an object
+                        }
+                        store_map[store.id].description = store.description;
+                        store_map[store.id].code = store.code;
+                    });
+                });
+        
+                let newData = res.map(({ 
+                    store, 
+                    // store name,
+                    item, 
+                    item_name, 
+                    item_class, 
+                    supplier, 
+                    group, 
+                    dept, 
+                    classification, 
+                    sub_class, 
+                    on_hand, 
+                    in_transit, 
+                    average_sales_unit, 
+                    company,
+                    vmi_status, 
+                }) => ({
+                    "Store":store_map[`${store}`].code, 
+                    // "Store Name":store_map[`${store}`].description,  
+                    // store name,
+                    "Item":item, 
+                    "Item Name":item_name, 
+                    "VMI Status":vmi_status, 
+                    "Item Class":item_class, 
+                    "Supplier":supplier, 
+                    "Group":group, 
+                    "Dept":dept, 
+                    "Class":classification, 
+                    "Sub Class":sub_class, 
+                    "On Hand":on_hand, 
+                    "In Transit":in_transit, 
+                    "Ave Sales Unit":average_sales_unit, 
+                    // "Company":company,
+                }));
+
+                formattedData.push(...newData); // Append new data to formattedData array
+            })
+    
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."],
+                ["VMI"],
+                ["Date Printed: " + formatDate(new Date())],
+                [""],
+            ];
+    
+            exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
+            modal.loading_progress(false);
+        }
+    }
+
+    function handleExport() {
+        var formattedData = [];
+        var ids = [];
+
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`'${id}'`); // Collect IDs in an array
+        });
+
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    startExport()
+                }, 500);
+            }
+        })
+
+        const startExport = () => {
+            const fetchStores = (callback) => {
+                function processResponse (res) {
+                    let store_ids = []
+                    let store_map = {}
+                    res.forEach(stores => {
+                        store_ids.push(`'${stores.store}'`);
+                    });
+                    get_store_branch_where_in(`"${store_ids.join(', ')}"`, (result) => {
+                        result.forEach(store => {
+                            if (!store_map[store.id]) {
+                                store_map[store.id] = {}; // Initialize as an object
+                            }
+                            store_map[store.id].description = store.description;
+                            store_map[store.id].code = store.code;
+                        });
+                    });
+
+                    formattedData = res.map(({ 
+                        store, 
+                        // store name,
+                        item, 
+                        item_name, 
+                        item_class, 
+                        supplier, 
+                        group, 
+                        dept, 
+                        classification, 
+                        sub_class, 
+                        on_hand, 
+                        in_transit, 
+                        average_sales_unit, 
+                        company,
+                        vmi_status, 
+                    }) => ({
+                        "Store":store_map[`${store}`].code, 
+                        // "Store Name":store_map[`${store}`].description,  
+                        // store name,
+                        "Item":item, 
+                        "Item Name":item_name, 
+                        "VMI Status":vmi_status, 
+                        "Item Class":item_class, 
+                        "Supplier":supplier, 
+                        "Group":group, 
+                        "Dept":dept, 
+                        "Class":classification, 
+                        "Sub Class":sub_class, 
+                        "On Hand":on_hand, 
+                        "In Transit":in_transit, 
+                        "Ave Sales Unit":average_sales_unit, 
+                        // "Company":company,
+                    }));
+                };
+
+                ids.length > 0 
+                    ? get_vmi_where_in(`"${ids.join(', ')}"`, processResponse)
+                    : batch_export();
+            };
+
+            const batch_export = () => {
+                get_vmi_count((res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
+
+                        for (let index = 0; index < total_records; index += 100000) {
+                            get_vmi(index, (res) => {
+                                let store_ids = []
+                                let store_map = {}
+
+                                res.forEach(stores => {
+                                    store_ids.push(`'${stores.store}'`);
+                                });
+
+                                get_store_branch_where_in(`"${store_ids.join(', ')}"`, (result) => {
+                                    result.forEach(store => {
+                                        if (!store_map[store.id]) {
+                                            store_map[store.id] = {}; // Initialize as an object
+                                        }
+                                        store_map[store.id].description = store.description;
+                                        store_map[store.id].code = store.code;
+                                    });
+                                });
+
+                                let newData = res.map(({ 
+                                    store, 
+                                    // store name,
+                                    item, 
+                                    item_name, 
+                                    item_class, 
+                                    supplier, 
+                                    group, 
+                                    dept, 
+                                    classification, 
+                                    sub_class, 
+                                    on_hand, 
+                                    in_transit, 
+                                    average_sales_unit, 
+                                    company,
+                                    vmi_status, 
+                                }) => ({
+                                    "Store":store_map[`${store}`].code, 
+                                    // "Store Name":store_map[`${store}`].description,  
+                                    // store name,
+                                    "Item":item, 
+                                    "Item Name":item_name, 
+                                    "VMI Status":vmi_status, 
+                                    "Item Class":item_class, 
+                                    "Supplier":supplier, 
+                                    "Group":group, 
+                                    "Dept":dept, 
+                                    "Class":classification, 
+                                    "Sub Class":sub_class, 
+                                    "On Hand":on_hand, 
+                                    "In Transit":in_transit, 
+                                    "Ave Sales Unit":average_sales_unit, 
+                                    // "Company":company,
+                                }));
+                                formattedData.push(...newData); // Append new data to formattedData array
+                            })
+                        }
+                    } else {
+                        console.log('No data received');
+                    }
+                })
+            };
+
+            fetchStores();
+
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."],
+                ["VMI"],
+                ["Date Printed: " + formatDate(new Date())],
+                [""],
+            ];
+
+            exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
+            modal.loading_progress(false);
+        }
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
     }
     
 </script>

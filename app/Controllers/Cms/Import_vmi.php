@@ -29,7 +29,7 @@ class Import_vmi extends BaseController
 		$data['PageName'] = 'Import VMI';
 		$data['PageUrl'] = 'Import VMI';
 		$data['content'] = "cms/import/vmi.php";
-		$data['buttons'] = ['search', 'import'];
+		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(

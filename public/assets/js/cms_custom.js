@@ -1367,6 +1367,60 @@ function get_team_count(callback) {
 // ------------------------------------------------------------ Team ------------------------------------------------------------
 // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
 
+function get_vmi(vmi_offset, callback) {
+	data = {
+		event : "get_vmi",
+		vmi_offset : vmi_offset
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_vmi_where_in(vmi_codes, callback) {
+	data = {
+		event : "get_vmi_where_in",
+		vmi_codes : vmi_codes,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_vmi_count(callback) {
+	data = {
+		event : "get_vmi_count"
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
+function get_vmi_data(vmi_year, vmi_month, vmi_week, vmi_company, callback) {
+	data = {
+		event : "get_vmi_data",
+		vmi_year : vmi_year,
+		vmi_month : vmi_month,
+		vmi_week : vmi_week,
+		vmi_company : vmi_company,
+	}
+
+	aJax.post_async(url, data, (result) => {
+		var result = JSON.parse(result);
+
+		callback(result)
+	})
+}
+
 function addNbsp(inputString) {
     return inputString.split('').map(char => {
         if (char === ' ') {

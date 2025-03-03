@@ -1,3 +1,11 @@
+<style>
+    th, td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <div class="content-wrapper p-4">
     <div class="card">
         <div class="text-center page-title md-center">
@@ -72,12 +80,12 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.file_name, 10) + "</td>";
+                        html += "<td scope=\"col\">" + y.file_name + "</td>";
                         // html += "<td scope=\"col\">" + y.line_number + "</td>";
                         html += "<td scope=\"col\">" + y.store_code + "</td>";
                         html += "<td scope=\"col\">" + y.store_description + "</td>";
                         html += "<td scope=\"col\">" + y.sku_code + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.sku_description, 10) + "</td>";
+                        html += "<td scope=\"col\">" + y.sku_description + "</td>";
                         html += "<td scope=\"col\">" + y.quantity + "</td>";
                         html += "<td scope=\"col\">" + y.net_sales + "</td>";
                         
@@ -89,14 +97,6 @@
             }
             $('.table_body').html(html);
         });
-    }
-
-    function trimText(str, length) {
-        if (str.length > length) {
-            return str.substring(0, length) + "...";
-        } else {
-            return str;
-        }
     }
 
     function addNbsp(inputString) {
