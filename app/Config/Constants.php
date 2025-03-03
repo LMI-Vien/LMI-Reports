@@ -25,10 +25,13 @@ defined('APP_NAMESPACE') || define('APP_NAMESPACE', 'App');
  */
 defined('COMPOSER_PATH') || define('COMPOSER_PATH', ROOTPATH . 'vendor/autoload.php');
 $protocol = 'http://localhost:8080/';
-if(isset($_SERVER['HTTP_HOST'])){
-	$protocol = isset($_SERVER["HTTPS"]) ? 'https://' : 'http://';
-	$protocol  = $protocol.$_SERVER['HTTP_HOST'];
-	$protocol .= str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
+if (isset($_SERVER['HTTP_HOST'])) {
+    $protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? 'https://' : 'http://';
+    $protocol .= $_SERVER['HTTP_HOST'];
+
+    // Ensure the script path is properly included
+    $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
+    $protocol .= rtrim($scriptPath, '/') . '/';
 }
 defined('BASE') || define('BASE',$protocol);
 
