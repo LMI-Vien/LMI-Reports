@@ -503,13 +503,13 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_desc",
+            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description",
             query : query, 
             table : "tbl_target_sales_per_store pr",
             join: [
                 {
                     table: "tbl_store s1",
-                    query: "s1.id = pr.location",
+                    query: "s1.id = pr.location AND s1.id = pr.location_description",
                     type: "left"
                 }
             ]
@@ -518,23 +518,20 @@
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
+                    $('#location').val(d.location);
+                    $('#location_desc').val(d.location_description);
                     $('#jan').val(Math.round(d.january).toLocaleString());
-                    // $('#location').val(d.location);
-                    get_store(d.location);
-                    // $('#location_desc').val(d.location_description);
-                    get_store(d.location_description);
-                    $('#jan').val(d.january);
-                    $('#feb').val(d.february);
-                    $('#mar').val(d.march);
-                    $('#apr').val(d.april);
-                    $('#may').val(d.may);
-                    $('#jun').val(d.june);
-                    $('#jul').val(d.july);
-                    $('#aug').val(d.august);
-                    $('#sep').val(d.september);
-                    $('#oct').val(d.october);
-                    $('#nov').val(d.november);
-                    $('#dec').val(d.december);
+                    $('#feb').val(Math.round(d.february).toLocaleString());
+                    $('#mar').val(Math.round(d.march).toLocaleString());
+                    $('#apr').val(Math.round(d.april).toLocaleString());
+                    $('#may').val(Math.round(d.may).toLocaleString());
+                    $('#jun').val(Math.round(d.june).toLocaleString());
+                    $('#jul').val(Math.round(d.july).toLocaleString());
+                    $('#aug').val(Math.round(d.august).toLocaleString());
+                    $('#sep').val(Math.round(d.september).toLocaleString());
+                    $('#oct').val(Math.round(d.october).toLocaleString());
+                    $('#nov').val(Math.round(d.november).toLocaleString());
+                    $('#dec').val(Math.round(d.december).toLocaleString());
                 }); 
             }
         });

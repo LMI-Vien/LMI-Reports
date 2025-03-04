@@ -503,26 +503,44 @@
     });
 
     function populate_modal(inp_id) {
-        var query = "status >= 0 and id = " + inp_id;
+        var query = "basr.status >= 0 and basr.id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, area, store_name, brand, ba_name, date, amount",
+            select : "basr.id, a.code as area , s.description as store_name, br.brand_description as brand, bra.name as ba_name, basr.date, basr.amount",
             query : query, 
-            table : "tbl_ba_sales_report"
+            table : "tbl_ba_sales_report basr",
+            join: [
+                {
+                    table: "tbl_area a",
+                    query: "a.id = basr.area",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = basr.store_name",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand br",
+                    query: "br.id = basr.brand",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador bra",
+                    query: "bra.id = basr.ba_name",
+                    type: "left"
+                }
+            ]
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
-                    // $('#area').val(d.area);
-                    get_area(d.area);
-                    // $('#store_name').val(d.store_name);
-                    get_store(d.store_name);
-                    // $('#brand').val(d.brand);
-                    get_brand(d.brand);
-                    // $('#ba_name').val(d.ba_name);
-                    get_brand_ambassador(d.ba_name);
+                    $('#area').val(d.area); 
+                    $('#store_name').val(d.store_name);
+                    $('#brand').val(d.brand);
+                    $('#ba_name').val(d.ba_name);
                     $('#date').val(d.date);
                     $('#amount').val(d.amount);
                 }); 
