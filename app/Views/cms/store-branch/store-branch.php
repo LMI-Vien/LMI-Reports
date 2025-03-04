@@ -20,7 +20,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                    <th class='center-content'>Code</th>
+                                    <th class='center-content'>Store/Branch Code</th>
                                     <th class='center-content'>Store/Branch</th>
                                     <th class='center-content'>Status</th>
                                     <th class='center-content'>Date Created</th>
@@ -62,7 +62,7 @@
             <div class="modal-body">
                 <form id="form-modal">
                 <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">Store/Branch Code</label>
                         <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                         <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
@@ -136,7 +136,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'>Line #</th>
-                                    <th class='center-content'>Code</th>
+                                    <th class='center-content'>Store/Branch Code</th>
                                     <th class='center-content'>Store/Branch</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
@@ -575,7 +575,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'description', 'status'];
+            let td_validator = ['store/branch code', 'description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -642,8 +642,8 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Code": row["Code"] || "",
-                "Name": row["Description"] || "",
+                "Store/Branch Code": row["Store/Branch Code"] || "",
+                "Description": row["Description"] || "",
                 "Status": row["Status"] || "",
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
@@ -971,7 +971,7 @@
 
         formattedData = [
             {
-                "Code": "",
+                "Store/Branch Code": "",
                 "Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
@@ -1029,9 +1029,9 @@
                             let newData = res.map(({ 
                                 code, description, status
                             }) => ({
-                                Code: code,
-                                Description: description,
-                                Status: status === "1" ? "Active" : "Inactive",
+                                "Store/Branch Code": code,
+                                "Description": description,
+                                "Status": status === "1" ? "Active" : "Inactive",
                             }));
                             formattedData.push(...newData); // Append new data to formattedData array
                         })
