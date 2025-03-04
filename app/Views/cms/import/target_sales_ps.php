@@ -38,6 +38,25 @@
             max-width: 95%;
         }
     }
+
+    .card {
+        margin-right: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .uniform-dropdown {
+        height: 36px;
+        font-size: 14px;
+        border-radius: 5px;
+        min-width: 120px; /* Ensures uniform dropdown width */
+        flex-grow: 1; /* Makes sure dropdown takes available space */
+    }
+    
+    .d-flex {
+        gap: 10px; /* Adds space between label and dropdown */
+        margin: 5px;
+    }
 </style>
 
     <div class="content-wrapper p-4">
@@ -62,7 +81,7 @@
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
                                         <th class='center-content'>Location</th>
                                         <th class='center-content'>Location Description</th>
-                                        <!-- <th class='center-content'>Status</th> -->
+                                        <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
                                         <th class='center-content'>Action</th>
@@ -194,53 +213,66 @@
 
                 <div class="modal-body">
                     <div class="card">
-                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="mb-3">
                             <div class="text-center"
                             style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
                             >
                                 <b>Extracted Data</b>
                             </div>
 
-                            <div class="import_buttons">
-                                <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; align-items: center;">
-                                    <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                                </label>
-                                <input
-                                    type="file"
-                                    style="display: none;"
-                                    id="file"
-                                    accept=".xls,.xlsx,.csv"
-                                    aria-describedby="import_files"
-                                    onclick="clear_import_table()"
-                                >
+                            <div class="row my-3">
+                                <div class="col-md-8 import_buttons">
+                                    <label for="file" class="btn btn-warning mt-2" style="margin-bottom: 0px;">
+                                        <i class="fa fa-file-import me-2"></i> Custom Upload
+                                    </label>
+                                    <input type="file" id="file" accept=".xls,.xlsx,.csv" style="display: none;" onclick="clear_import_table()">
 
-                                <label for="preview" class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px" onclick="read_xl_file()">
-                                    <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                                </label>
+                                    <button class="btn btn-primary mt-2" id="preview_xl_file" onclick="read_xl_file()">
+                                        <i class="fa fa-sync me-2"></i> Preview Data
+                                    </button>
+
+                                    <button class="btn btn-success mt-2" id="download_template" onclick="download_template()">
+                                        <i class="fa fa-file-download me-2"></i> Download Import Template
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="card p-4 shadow-lg rounded-3 border-0" style="background: #f8f9fa;">
+                                        <div class="row g-3">
+                                            <div class="col-12 d-flex align-items-center">
+                                                <label for="yearSelect" class="form-label fw-semibold me-2">Choose Year:</label>
+                                                <select id="yearSelect" class="form-select uniform-dropdown">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
-
-                            <table class= "table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content'>Line #</th>
-                                        <th class='center-content'>Location</th>
-                                        <th class='center-content'>Location Description</th>
-                                        <th class='center-content'>January</th>
-                                        <th class='center-content'>February</th>
-                                        <th class='center-content'>March</th>
-                                        <th class='center-content'>April</th>
-                                        <th class='center-content'>May</th>
-                                        <th class='center-content'>June</th>
-                                        <th class='center-content'>July</th>
-                                        <th class='center-content'>August</th>
-                                        <th class='center-content'>September</th>
-                                        <th class='center-content'>October</th>
-                                        <th class='center-content'>November</th>
-                                        <th class='center-content'>December</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="word_break import_table"></tbody>
-                            </table>
+                            <div style="overflow-x: auto; max-height: 400px;">
+                                <table class= "table table-bordered listdata">
+                                    <thead>
+                                        <tr>
+                                            <th class='center-content'>Line #</th>
+                                            <th class='center-content'>Location</th>
+                                            <th class='center-content'>Location Description</th>
+                                            <th class='center-content'>January</th>
+                                            <th class='center-content'>February</th>
+                                            <th class='center-content'>March</th>
+                                            <th class='center-content'>April</th>
+                                            <th class='center-content'>May</th>
+                                            <th class='center-content'>June</th>
+                                            <th class='center-content'>July</th>
+                                            <th class='center-content'>August</th>
+                                            <th class='center-content'>September</th>
+                                            <th class='center-content'>October</th>
+                                            <th class='center-content'>November</th>
+                                            <th class='center-content'>December</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="word_break import_table"></tbody>
+                                </table>
+                            </div>
                         </div>
                         <center style="margin-bottom: 5px">
                             <div class="import_pagination btn-group"></div>
@@ -274,76 +306,10 @@
         get_pagination();
     });
 
-    // function get_data(new_query) {
-    //     var data = {
-    //         event : "list",
-    //         select : "id, location, location_description, january, february, march, april, may, june, july, august, september, october, november, december, status, created_date, updated_date",
-    //         query : new_query,
-    //         offset : offset,
-    //         limit : limit,
-    //         table : "tbl_target_sales_per_store",
-    //         order : {
-    //             field : "id, updated_date",
-    //             order : "asc, desc" 
-    //         }
-
-    //     }
-
-    //     aJax.post(url,data,function(result){
-    //         var result = JSON.parse(result);
-    //         var html = '';
-
-    //         if(result) {
-    //             if (result.length > 0) {
-    //                 $.each(result, function(x,y) {
-    //                     console.log(y);
-    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
-    //                     html += "<tr class='" + rowClass + "'>";
-    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-    //                     html += "<td scope=\"col\">" + trimText(y.location) + "</td>";
-    //                     html += "<td scope=\"col\">" + trimText(y.location_description, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.january) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.february) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.march) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.april) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.may) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.june) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.july) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.august) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.september) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.october) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.november) + "</td>";
-    //                     // html += "<td scope=\"col\">" + (y.december) + "</td>";
-    //                     // html += "<td scope=\"col\">" + status + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
-    //                     if (y.id == 0) {
-    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-    //                     } else {
-    //                         html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-    //                         html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-    //                         html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-    //                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-    //                         html+="</td>";
-    //                     }
-                        
-    //                     html += "</tr>";   
-    //                 });
-    //             } else {
-    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-    //             }
-    //         }
-    //         $('.table_body').html(html);
-    //     });
-    // }
-    
     function get_data(new_query) {
         var data = {
             event: "list",
-            select: "tsps.id, tsps.january, tsps.february, tsps.march, tsps.april, tsps.may, tsps.june, tsps.july, tsps.august, tsps.september, tsps.october, tsps.november, tsps.december, s1.code AS location, s2.description AS location_description, tsps.status, tsps.updated_date, tsps.created_date",
+            select: "tsps.id, tsps.january, tsps.february, tsps.march, tsps.april, tsps.may, tsps.june, tsps.july, tsps.august, tsps.september, tsps.october, tsps.november, tsps.december, s1.code AS location, s1.description AS location_desc, tsps.updated_date, tsps.created_date, tsps.status",
             query: new_query,
             offset: offset,
             limit: limit,
@@ -356,11 +322,6 @@
                 {
                     table: "tbl_store s1",
                     query: "s1.id = tsps.location",
-                    type: "left"
-                },
-                {
-                    table: "tbl_store s2",
-                    query: "s2.id = tsps.location_description",
                     type: "left"
                 }
             ]
@@ -379,23 +340,22 @@
                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                     var storeCode = y.location || 'N/A';
-                    var storeCodeLocation = y.location_description || 'NA';
-
+                    var storeDesc = y.location_desc || 'N/A';
                     html += "<tr class='" + rowClass + "'>";
                     html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
                     html += "<td scope=\"col\">" + trimText(storeCode) + "</td>";
-                    html += "<td scope=\"col\">" + trimText(storeCodeLocation) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(storeDesc) + "</td>";
+                    html += "<td scope=\"col\">" + status + "</td>";
                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                     if (y.id == 0) {
                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                     } else {
-                        html += "<td class='center-content' style='width: 25%; min-width: 300px'>";
-                        html += "<a class='btn-sm btn update' onclick=\"edit_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span></a> ";
-                        html += "<a class='btn-sm btn delete' onclick=\"delete_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Delete Item'><span class='glyphicon glyphicon-trash'>Delete</span></a> ";
-                        html += "<a class='btn-sm btn view' onclick=\"view_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Show Details'><span class='glyphicon glyphicon-eye-open'>View</span></a>";
-                        html += "</td>";
+                        html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                        html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                        html+="</td>";
                     }
 
                     html += "</tr>";
@@ -443,23 +403,10 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            var new_query = "(" + query + " AND location LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND location_description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND january LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND february LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND march LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND april LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND may LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND june LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND july LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND august LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND september LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND october LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND november LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND december LIKE '%" + keyword + "%')";
+            var new_query = "(" + query + " AND s1.code LIKE '%" + keyword + "%') OR "+
+            "(" + query + " AND s1.description LIKE '%" + keyword + "%')";
             get_data(new_query);
             get_pagination();
-            console.log('Pressed key: ' + keyword);
         }
     });
 
@@ -548,21 +495,30 @@
         title = addNbsp('IMPORT TARGET SALES PER STORE')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $('#import_modal').modal('show');
+        get_year();
     });
 
     function populate_modal(inp_id) {
-        var query = "status >= 0 and id = " + inp_id;
+        var query = "pr.status >= 0 and pr.id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, location, location_description, january, february, march, april, may, june, july, august, september, october, november, december",
+            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_desc",
             query : query, 
-            table : "tbl_target_sales_per_store"
+            table : "tbl_target_sales_per_store pr",
+            join: [
+                {
+                    table: "tbl_store s1",
+                    query: "s1.id = pr.location",
+                    type: "left"
+                }
+            ]
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
+                    $('#jan').val(Math.round(d.january).toLocaleString());
                     // $('#location').val(d.location);
                     get_store(d.location);
                     // $('#location_desc').val(d.location_description);
@@ -594,7 +550,7 @@
         return new_btn;
     }
 
-    function save_to_db(inp_location, inp_location_description, inp_january, inp_february, inp_march, inp_april, inp_may, inpt_june, inp_july, inp_august, inp_september, inp_october, inp_november, inp_december, id) {
+    function save_to_db(inp_location, inp_january, inp_february, inp_march, inp_april, inp_may, inpt_june, inp_july, inp_august, inp_september, inp_october, inp_november, inp_december, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -608,7 +564,6 @@
                 where: id,
                 data: {
                     location: inp_location,
-                    location_description: inp_location_description,
                     january: inp_january,
                     february: inp_february,
                     march: inp_march,
@@ -632,7 +587,6 @@
                 table: "tbl_target_sales_per_store",
                 data: {
                     location: inp_location,
-                    location_description: inp_location_description,
                     january: inp_january,
                     february: inp_february,
                     march: inp_march,
@@ -662,7 +616,6 @@
 
     function save_data(action, id) {
         var location = $('#location').val();
-        var location_description = $('#location_description').val();
         var january = $('#jan').val();
         var february = $('#feb').val();
         var march = $('#mar').val();
@@ -678,18 +631,12 @@
 
         if(validate.standard("form-modal")){
             if (id !== undefined && id !== null && id !== '') {
-                // check_current_db("tbl_vmi", ["store", "store_name", "item", "item_name", "item_class", "supplier", "group", "dept", "class", "sub_class", "on_hand", "in_transit", "total_qty", "average_sales_unit", "swc", "a202445"],
-                // [store, store_name, item, item_name, item_class, supplier, group, dept, classs, sub_class, on_hand, in_transit, total_qty, avg_sales_unit, swc, a202445], "status" , "id", id, true, function(exists, duplicateFields) {
-                    // if (exists) {
-                        modal.confirm(confirm_update_message, function(result){
-                            if(result){ 
-                                    modal.loading(true);
-                                save_to_db(location, location_description, january, february, march, april, may, june, july, august, september, october, november, december, id)
-                            }
-                        });
-    
-                    // }             
-                // });
+                modal.confirm(confirm_update_message, function(result){
+                    if(result){ 
+                            modal.loading(true);
+                        save_to_db(location, january, february, march, april, may, june, july, august, september, october, november, december, id)
+                    }
+                });
             }
         }
     }
@@ -836,6 +783,8 @@
     }
 
     function read_xl_file() {
+        let btn = $(".btn.save");
+        btn.prop("disabled", false); 
         clear_import_table();
         
         dataset = [];
@@ -856,8 +805,6 @@
 
             const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
 
-            //console.log('Total records to process:', jsonData.length);
-            // Process in chunks
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -866,6 +813,24 @@
     }
 
     function process_xl_file() {
+        let btn = $(".btn.save");
+        if (btn.prop("disabled")) return; // Prevent multiple clicks
+
+        btn.prop("disabled", true);
+        $(".import_buttons").find("a.download-error-log").remove();
+        setTimeout(() => {
+            btn.prop("disabled", false);
+        }, 4000);
+        const year = $('#yearSelect').val()?.trim();
+
+        const fields = { year };
+
+        for (const [key, value] of Object.entries(fields)) {
+            if (!value) {
+                return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
+            }
+        }
+
         if (dataset.length === 0) {
             modal.alert('No data to process. Please upload a file.', 'error', () => {});
             return;
@@ -892,99 +857,41 @@
             };
         });
 
-        // var table = 'tbl_vmi';
-        // var haystack = ['store', 'store_name', 'item', 'item_name', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'total_qty', 'average_sales_unit', 'swc', 'a202445'];
-        // var selected_fields = ['id', 'store', 'store_name', 'item', 'item_name', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'total_qty', 'average_sales_unit', 'swc', 'a202445'];
-        // var needle = []
-
-        console.log("jsonData before processing:", jsonData);
-
-        // jsonData.forEach(item => {
-        //     console.log("Processing item:", item);
-
-        //     if (item.store && item.Store_Name && item.Item && item.Item_Name && item.Item_Class && item.Supplier && item.Group && item.Dept && item.Class && item.Sub_class && item.on_hand && item.in_transit && item.total_qty && item.Ave_Sales_Unit && item.SWC && item.a202446) { // Ensure Code and Name are not empty
-        //         needle.push([item.store, item.Store_Name, item.Item, item.Item_Name, item.Item_Class, item.Supplier, item.Group, item.Dept, item.Class, item.Sub_class, item.on_hand, item.in_transit, item.total_qty, item.Ave_Sales_Unit, item.SWC, item.a202446  ]);
-        //     }
-        // });
-
-        // console.log("Final needle array:", needle);
-
         modal.loading_progress(true, "Validating and Saving data...");
         let worker = new Worker(base_url + "assets/cms/js/validator_target_sales_ps.js");
-        worker.postMessage(jsonData);
+        worker.postMessage({ data: jsonData, base_url });
 
         worker.onmessage = function(e) {
-            console.log("Received from worker:", e.data);
             modal.loading_progress(false);
+            const { invalid, errorLogs, valid_data, err_counter } = e.data;
 
-            let { invalid, errorLogs, valid_data, err_counter } = e.data;
             if (invalid) {
-                console.log("Error logs from worker:", errorLogs);
-                if (err_counter > 5000) {
-                    
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        '⚠️ Too many errors detected. Please download the error log for details.',
-                        '600px',
-                        () => {}
-                    );
-                } else {
-                    modal.content(
-                        'Validation Error',
-                        'error',
-                        errorLogs.join("<br>"),
-                        '600px',
-                        () => {}
-                    );
-                }
-                createErrorLogFile(errorLogs);
+                let errorMsg = err_counter > 1000 
+                    ? '⚠️ Too many errors detected. Please download the error log for details.'
+                    : errorLogs.join("<br>");
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                    read_xl_file();
+                    btn.prop("disabled", false);
+                });
+                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
             } else if (valid_data && valid_data.length > 0) {
-                updateSwalProgress("Validation Completed", 50);
-                setTimeout(() => saveValidatedData(valid_data), 500);
-                // validate contents of excel first before making a query to the database
-                // list_existing(table, selected_fields, haystack, needle, function (result) {
-                //     // if all codes and descriptions are unique start saving data
-                //     if (result.status != "error") {
-                //         // delay to let UI catch up with jquery updates
-                //         updateSwalProgress("Validation Completed", 50);
-                //         setTimeout(() => saveValidatedData(valid_data), 500);
-                //     } 
-                //     // if one of the codes and description already exists in the database
-                //     else {
-                //         var split_result = []
-                //         // stop loading ui
-                //         modal.loading_progress(false)
-                //         // split and store into array
-                //         split_result = result.message.split("<br>")
-                //         $.each(split_result, (x, y) => {
-                //             // for each message remove <b> tags
-                //             cleaned_message = y.replace("<b>", "").replace("</b>", "").replace("<b>", "").replace("</b>", "")
-                //             // add to error logs
-                //             errorLogs.push(cleaned_message)
-                //         })
-                //         // pass error logs to create text file of error logs
-                //         createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
-                //         // call popup to alert users with error messages
-                //         modal.content(
-                //             'Validation Error',
-                //             'error',
-                //             errorLogs.join("<br>"),
-                //             '600px',
-                //             () => {}
-                //         );
-                //     }
-                // })
+                btn.prop("disabled", false);
+                updateSwalProgress("Validation Completed", 10);
+                new_data = valid_data.map(record => ({
+                    ...record,
+                    year: year
+                }));
+                setTimeout(() => saveValidatedData(new_data), 500);
+                //console.log(new_data);
             } else {
-                modal.loading_progress(false);
-                console.error("No valid data returned from worker.");
+                btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
             }
         };
 
         worker.onerror = function() {
             modal.loading_progress(false);
-            modal.alert("Error processing data. Please try again.", "error", () => {});
+            modal.alert("Error processing data. Please try again.", "error");
         };
     }
 
@@ -996,7 +903,6 @@
         function nextChunk() {
             if (index >= data.length) {
                 modal.loading_progress(false);
-                console.log('Total records processed:', totalProcessed);
                 callback(); 
                 return;
             }
@@ -1006,13 +912,9 @@
             totalProcessed += chunk.length; 
             index += chunkSize;
 
-
-            // Calculate progress percentage
             let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
-            setTimeout(() => {
-                updateSwalProgress("Preview Data", progress);
-                nextChunk();
-            }, 100); // Delay for UI update
+            updateSwalProgress("Preview Data", progress);
+            requestAnimationFrame(nextChunk);
         }
         nextChunk();
     }
@@ -1060,50 +962,150 @@
         let batch_size = 5000; // Process 1000 records at a time
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
-        let retry_count = 0;
-        let max_retries = 5; 
+        let errorLogs = [];
+        let url = "<?= base_url('cms/global_controller');?>";
+        let table = 'tbl_target_sales_per_store';
 
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                modal.alert(success_save_message, 'success', () => location.reload());
-                return;
-            }
+        let selected_fields = [
+            'id', 'location', 'january', 'february', 'march', 'april',
+            'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
+            'year'
 
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let progress = Math.round(((batch_index + 1) / total_batches) * 100);
-            setTimeout(() => {
-                updateSwalProgress(`Processing batch ${batch_index + 1}/${total_batches}`, progress);
-            }, 100);
-            batch_insert(batch, function() {
-                batch_index++;
-                processNextBatch();
-            });
-        }
+        ];
 
-        function handleSaveError(batch) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000;
-                //console.log(`Error saving batch ${batch_index + 1}. Retrying in ${wait_time / 1000} seconds...`);
-                setTimeout(() => {
-                    //console.log(`Retrying batch ${batch_index + 1}, attempt ${retry_count}...`);
-                    batch_insert(batch, function(success) {
-                        if (success) {
-                            batch_index++;
-                            retry_count = 0;
-                            processNextBatch();
-                        } else {
-                            handleSaveError(batch);
-                        }
-                    });
-                }, wait_time);
-            } else {
-                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-            }
-        }
+        const matchFields = [
+            'location', 'january', 'february', 'march', 'april',
+            'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
+            'year'
+        ]; 
+
+        const floatFields = [
+            'january', 'february', 'march', 'april','may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'
+        ];
+
+        const matchType = "AND";  // Use "AND" or "OR" for matching logic
 
         modal.loading_progress(true, "Validating and Saving data...");
-        setTimeout(processNextBatch, 1000);
+
+        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+            let result = JSON.parse(response);
+            let existingMap = new Map();
+
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    let key = matchFields.map(field => {
+                        let value = record[field] || "";
+                        return floatFields.includes(field) ? parseFloat(value) || 0 : String(value).trim().toLowerCase();
+                    }).join("|");
+
+                    existingMap.set(key, record.id);
+                });
+            }
+
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
+                    if (errorLogs.length > 0) {
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info');
+                    } else {
+                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                    }
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let matchedId = null;
+
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => {
+                            let value = row[field] || "";
+                            return floatFields.includes(field) ? parseFloat(value) || 0 : String(value).trim().toLowerCase();
+                        }).join("|");
+
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else if (matchType === "OR") {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+                            for (let field of matchFields) {
+                                let value = row[field] || "";
+                                let formattedValue = floatFields.includes(field) ? parseFloat(value) || 0 : String(value).trim().toLowerCase();
+                                if (keyParts.includes(formattedValue)) {
+                                    matchedId = id;
+                                    break;
+                                }
+                            }
+                            if (matchedId) break;
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
+                        row.updated_by = user_id;
+                        row.updated_date = formatDate(new Date());
+                        delete row.created_date; // Unset created_date
+                        updateRecords.push(row);
+
+                    } else {
+                        row.created_by = user_id;
+                        row.created_date = formatDate(new Date());
+                        newRecords.push(row);
+                    }
+                });
+
+                function processUpdates() {
+                    return new Promise((resolve) => {
+                        if (updateRecords.length > 0) {
+                            batch_update(url, updateRecords, table, "id", false, (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                function processInserts() {
+                    return new Promise((resolve) => {
+                        if (newRecords.length > 0) {
+                            batch_insert(url, newRecords, table, false, (response) => {
+                                if (response.message === 'success') {
+                                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+                                } else {
+                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                }
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                processUpdates()
+                    .then(processInserts)
+                    .then(() => {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    })
+                    .catch(error => {
+                        errorLogs.push(`Unexpected error: ${error}`);
+                        processNextBatch();
+                    });
+            }
+
+            setTimeout(processNextBatch, 1000);
+        });
     }
 
     function excel_date_to_readable_date(excel_date) {
@@ -1128,8 +1130,8 @@
 
     function updatePaginationControls() {
         let paginationHtml = `
-            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}>First</button>
-            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}>Previous</button>
+            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
+            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
             
             <select onchange="goToPage(this.value)">
                 ${Array.from({ length: totalPages }, (_, i) => 
@@ -1137,94 +1139,45 @@
                 ).join('')}
             </select>
             
-            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}>Next</button>
-            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}>Last</button>
+            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
+            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
         `;
 
         $(".import_pagination").html(paginationHtml);
     }
 
-    function createErrorLogFile(errorLogs, filename) {
-        let errorText = errorLogs.join("\n");
-        let blob = new Blob([errorText], { type: "text/plain" });
-        let url = URL.createObjectURL(blob);
-
-        $(".import_buttons").find("a.download-error-log").remove();
-
-        let $downloadBtn = $("<a>", {
-            href: url,
-            download: filename+".txt",
-            text: "Download Error Logs",
-            class: "download-error-log", 
-            css: {
-                border: "1px solid white",
-                borderRadius: "10px",
-                display: "inline-block",
-                padding: "10px",
-                lineHeight: 0.5,
-                background: "#990000",
-                color: "white",
-                textAlign: "center",
-                cursor: "pointer",
-                textDecoration: "none",
-                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
-            }
-        });
-
-        $(".import_buttons").append($downloadBtn);
-    }
-
-
-    function batch_insert(insert_batch_data, cb) {
+    function get_year() {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
-            event: "batch_insert",
-            table: "tbl_target_sales_per_store",
-            insert_batch_data: insert_batch_data
-        };
-
-        let retry_count = 0;
-        let max_retries = 5; // Maximum retry attempts
-
-        // Function to make the AJAX request and handle retries
-        function attemptInsert() {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: function(result) {
-                    if (result.message === "success") {
-                        cb(true); // Success callback
-                    } else {
-                        handleSaveError(result); // Handle error if message is not success
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Save failed:", status, error);
-                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
-                }
-            });
-        }
-
-        // Handle the error and retry the request
-        function handleSaveError(result) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
-                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
-
-                setTimeout(() => {
-                    console.log(`Retrying attempt ${retry_count}...`);
-                    attemptInsert(); // Retry the insertion
-                }, wait_time);
-            } else {
-                console.error("Failed to save data after multiple attempts.");
-                cb(false); // Call callback with failure if retries exceed max attempts
+            event : "list",
+            select : "id, year, status",
+            query : 'status >= 0',
+            offset : 0,
+            limit : 0,
+            table : "tbl_year",
+            order : {
+                field : "id",
+                order : "asc" 
             }
         }
 
-        // Initiate the first attempt to insert
-        attemptInsert();
+        aJax.post(url,data,function(res){
+            var result = JSON.parse(res);
+            var html = '';
+            html += '<option id="default_val" value=" ">Select Year</option>';
+
+    
+            if(result) {
+                if (result.length > 0) {
+                    var selected = '';
+                    
+                    result.forEach(function (y) {
+                        html += `<option value="${y.id}">${y.year}</option>`;
+                    });
+                }
+            }
+            $('#yearSelect').html(html);
+        })
     }
 
     function get_store(id) {

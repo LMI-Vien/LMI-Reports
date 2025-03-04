@@ -54,6 +54,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sell_out_pa::index');
+        $routes->get('get_valid_ba_data', 'Cms\Import_target_sell_out_pa::get_valid_ba_data');
     });
 
     $routes->group('import-vmi', static function ($routes) {
@@ -68,6 +69,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-target-sales-ps', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sales_ps::index');
+        $routes->get('get_valid_ba_data', 'Cms\Import_target_sales_ps::get_valid_ba_data');
     });
 
     $routes->group('import-sales-top-list', static function ($routes) {
@@ -154,5 +156,5 @@ $routes->group('cms/', static function ($routes) {
         });
 	});
 
-    $routes->post('global_controller', 'cms\Global_controller::index');
+    $routes->post('global_controller', 'Cms\Global_controller::index');
 });

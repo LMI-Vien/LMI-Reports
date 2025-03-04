@@ -81,6 +81,9 @@
                                 <tr>
                                     <th class='center-content'><input class="selectall" type="checkbox"></th>
                                     <th class='center-content'>ID</th>
+                                    <th class='center-content'>Payment Group</th>
+                                    <th class='center-content'>Total Amount</th>
+                                    <th class='center-content'>Total Quantity</th>
                                     <th class='center-content'>Date Created</th>
                                     <th class='center-content'>Date Modified</th>
                                     <th class='center-content'>Action</th>
@@ -497,14 +500,14 @@
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
                 lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
                 january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-                status, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+                status, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta, updated_date, (january_ta + february_ta + march_ta + april_ta + may_ta + june_ta + july_ta + august_ta + september_ta + october_ta + november_ta + december_ta) AS total_amount, (january_tq + february_tq + march_tq + april_tq + may_tq + june_tq + july_tq + august_tq + september_tq + october_tq + november_tq + december_tq) as total_qty,
                 created_date`.replace(/\s+/g, ' '),
             query : new_query,
             offset : offset,
             limit : limit,
             table : "tbl_accounts_target_sellout_pa",
             order : {
-                field : "id",
+                field : "payment_group",
                 order : "asc" 
             }
 
@@ -520,11 +523,17 @@
                         // console.log(y);
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
+                        var totalAmount = parseFloat(y.total_amount);
+                        var formattedNumber = totalAmount.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
+                        });
+                        var formattedNumberTQ = Math.round(y.total_qty).toLocaleString();
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + (y.id) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.payment_group, 10) + "</td>";
+                        html += "<td scope=\"col\">" + (y.payment_group || 'N/A') + "</td>";
+
                         // html += "<td scope=\"col\">" + trimText(y.vendor, 10) + "</td>";
                         // html += "<td scope=\"col\">" + trimText(y.overall, 10) + "</td>";
                         // html += "<td scope=\"col\">" + trimText(y.kam_kas_kaa, 10) + "</td>";
@@ -568,7 +577,8 @@
                         // html += "<td scope=\"col\">" + trimText(y.october_ta, 10) + "</td>";
                         // html += "<td scope=\"col\">" + trimText(y.november_ta, 10) + "</td>";
                         // html += "<td scope=\"col\">" + trimText(y.december_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.total_amount, 10) + "</td>";
+                        html += "<td scope=\"col\">" + formattedNumber + "</td>";
+                        html += "<td scope=\"col\">" + formattedNumberTQ + "</td>";
                         // html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -577,7 +587,6 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
@@ -644,8 +653,7 @@
                 "(" + query + " AND customer_cost LIKE '%" + keyword + "%') OR " +
                 "(" + query + " AND customer_cost_net_of_vat LIKE '%" + keyword + "%')";
             get_data(new_query);
-            get_pagination();
-            console.log('Pressed key: ' + keyword);
+            get_pagination(new_query);
         }
     });
     
@@ -887,8 +895,6 @@
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
-
-        console.log(id);
         // return;
 
         if (id !== undefined && id !== null && id !== '') {
@@ -1013,7 +1019,6 @@
 
     function save_data(action, id) {
 
-        console.log("This is your action: ", action);
 
         var payment_group = $('#payment_group').val();
         var vendor = $('#vendor').val();
@@ -1059,53 +1064,6 @@
         var nov_ta = $('#nov_ta').val();
         var dec_ta = $('#dec_ta').val();
 
-        console.log("Updating record with ID:", id);
-        console.log("Input Values:", {
-            payment_group,
-            vendor,
-            overall,
-            kam_kas_kaa,
-            sales_group,
-            terms,
-            channel,
-            brand,
-            exclusivity,
-            category,
-            lmi_code,
-            rgdi_code,
-            customer_sku_code,
-            item_description,
-            item_status,
-            srp,
-            trade_discount,
-            customer_cost,
-            customer_cost_nov,
-            jan_tq,
-            feb_tq,
-            mar_tq,
-            apr_tq,
-            may_tq,
-            jun_tq,
-            jul_tq,
-            aug_tq,
-            sep_tq,
-            oct_tq,
-            nov_tq,
-            dec_tq,
-            totalQty,
-            jan_ta,
-            feb_ta,
-            mar_ta,
-            apr_ta,
-            jun_ta,
-            jul_ta,
-            aug_ta,
-            sep_ta,
-            oct_ta,
-            nov_ta,
-            dec_ta,
-            totalAmnt,
-        });
 
         // let months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
         // let monthlyTq = {};
@@ -1189,6 +1147,8 @@
 
     
     function read_xl_file() {
+        let btn = $(".btn.save");
+        btn.prop("disabled", false); 
         clear_import_table();
         
         dataset = [];
@@ -1208,9 +1168,6 @@
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-            //console.log('Total records to process:', jsonData.length);
-            // Process in chunks
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -1226,7 +1183,6 @@
         function nextChunk() {
             if (index >= data.length) {
                 modal.loading_progress(false);
-                console.log('Total records processed:', totalProcessed);
                 callback(); 
                 return;
             }
@@ -1236,13 +1192,9 @@
             totalProcessed += chunk.length; 
             index += chunkSize;
 
-
-            // Calculate progress percentage
             let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
-            setTimeout(() => {
-                updateSwalProgress("Preview Data", progress);
-                nextChunk();
-            }, 100); // Delay for UI update
+            updateSwalProgress("Preview Data", progress);
+            requestAnimationFrame(nextChunk);
         }
         nextChunk();
     }
@@ -1306,9 +1258,9 @@
 
         btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
-         setTimeout(() => {
-                btn.prop("disabled", false);
-            }, 4000);
+        setTimeout(() => {
+            btn.prop("disabled", false);
+        }, 4000);
         const year = $('#yearSelect').val()?.trim();
 
         const fields = { year };
@@ -1337,7 +1289,7 @@
                 "Exclusivity": row["Exclusivity"] || "",
                 "Category": row["Category"] || "",
                 "LMI Code": row["LMI Code"] || "",
-                "RGDI CODE": row["RGDI CODE"] || "",
+                "RGDI Code": row["RGDI Code"] || "",
                 "Customer SKU Code": row["Customer SKU Code"] || "",
                 "Item Description": row["Item Description"] || "",
                 "Item status": row["Item status"] || "",
@@ -1398,6 +1350,7 @@
                     year: year
                 }));
                 setTimeout(() => saveValidatedData(new_data), 500);
+                //console.log(new_data);
             } else {
                 btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
@@ -1425,21 +1378,34 @@
 
         let selected_fields = [
             'id', 'payment_group', 'vendor', 'overall', 'kam_kas_kaa', 'sales_group',
-            'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi_code', 
-            'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'srp', 'trade_discount',
-            'customer_cost', 'customer_cost_net_of_vat', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
+            'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi_code',
+            'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'trade_discount',
+            'customer_cost', 'customer_cost_net_of_vat',
+            'srp', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
             'may_tq', 'june_tq', 'july_tq', 'august_tq', 'september_tq', 'october_tq', 'november_tq', 'december_tq',
+            'january_ta', 'february_ta', 'march_ta', 'april_ta',
+            'may_ta', 'june_ta', 'july_ta', 'august_ta', 'september_ta', 'october_ta', 'november_ta', 'december_ta',
             'year'
         ];
 
         const matchFields = [
             'payment_group', 'vendor', 'overall', 'kam_kas_kaa', 'sales_group',
-            'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi_code', 
-            'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'srp', 'trade_discount',
-            'customer_cost', 'customer_cost_net_of_vat', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
+            'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi_code',
+            'rgdi_code', 'customer_sku_code', 'item_description', 'item_status', 'trade_discount',
+            'customer_cost', 'customer_cost_net_of_vat',
+            'srp', 'january_tq', 'february_tq', 'march_tq', 'april_tq',
             'may_tq', 'june_tq', 'july_tq', 'august_tq', 'september_tq', 'october_tq', 'november_tq', 'december_tq',
+            'january_ta', 'february_ta', 'march_ta', 'april_ta',
+            'may_ta', 'june_ta', 'july_ta', 'august_ta', 'september_ta', 'october_ta', 'november_ta', 'december_ta',
             'year'
         ]; 
+
+        const floatFields = [
+            'srp', 'january_tq', 'february_tq', 'march_tq', 'april_tq', 'may_tq', 'june_tq', 'july_tq', 'august_tq',
+            'september_tq', 'october_tq', 'november_tq', 'december_tq',
+            'january_ta', 'february_ta', 'march_ta', 'april_ta', 'may_ta', 'june_ta', 'july_ta', 'august_ta',
+            'september_ta', 'october_ta', 'november_ta', 'december_ta'
+        ];
 
         const matchType = "AND";  // Use "AND" or "OR" for matching logic
 
@@ -1451,7 +1417,11 @@
 
             if (result.existing) {
                 result.existing.forEach(record => {
-                    let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+                    let key = matchFields.map(field => {
+                        let value = record[field] || "";
+                        return floatFields.includes(field) ? parseFloat(value) || 0 : String(value).trim().toLowerCase();
+                    }).join("|");
+
                     existingMap.set(key, record.id);
                 });
             }
@@ -1476,7 +1446,11 @@
                     let matchedId = null;
 
                     if (matchType === "AND") {
-                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+                        let key = matchFields.map(field => {
+                            let value = row[field] || "";
+                            return floatFields.includes(field) ? parseFloat(value) || 0 : String(value).trim().toLowerCase();
+                        }).join("|");
+
                         if (existingMap.has(key)) {
                             matchedId = existingMap.get(key);
                         }
@@ -1484,9 +1458,11 @@
                         for (let [key, id] of existingMap.entries()) {
                             let keyParts = key.split("|");
                             for (let field of matchFields) {
-                                if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
+                                let value = row[field] || "";
+                                let formattedValue = floatFields.includes(field) ? parseFloat(value) || 0 : String(value).trim().toLowerCase();
+                                if (keyParts.includes(formattedValue)) {
                                     matchedId = id;
-                                    break; // Stop searching once a match is found
+                                    break;
                                 }
                             }
                             if (matchedId) break;
@@ -1497,7 +1473,9 @@
                         row.id = matchedId;
                         row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_date; // Unset created_date
                         updateRecords.push(row);
+
                     } else {
                         row.created_by = user_id;
                         row.created_date = formatDate(new Date());

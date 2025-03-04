@@ -339,7 +339,46 @@ class Global_controller extends BaseController
 				}
 				break;
 			// ------------------------------------------------------------ Team ------------------------------------------------------------
+			case 'get_vmi':
+				try {
+					$vmiOffset = $this->request->getPost('vmi_offset');
+					$result_data = $this->Global_model->get_vmi($vmiOffset);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_vmi_where_in':
+				try {
+					$vmiCode = $this->request->getPost('vmi_codes');
+					$result_data = $this->Global_model->get_vmi_where_in($vmiCode);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_vmi_count':
+				try {
+					$result_data = $this->Global_model->get_vmi_count();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
+			case 'get_vmi_data':
+				try {
+					$vmiYear = $this->request->getPost('vmi_year');
+					$vmiMonth = $this->request->getPost('vmi_month');
+					$vmiWeek = $this->request->getPost('vmi_week');
+					$vmiCompany = $this->request->getPost('vmi_company');
+					$result_data = $this->Global_model->get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany);
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+				break;
 			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+			
 			case 'fetch_existing':
 			    try {
 			        $table = $this->request->getPost('table');
@@ -374,50 +413,7 @@ class Global_controller extends BaseController
 		    } catch (Exception $e) {
 		        echo json_encode(['error' => $e->getMessage()]);
 		    }
-		    break; 
-			case 'store_by_area_where_in':
-				try {
-					$areaCode = $this->request->getPost('area_codes');
-					$result_data = $this->Global_model->getStoresByAreaWhereIn($areaCode);
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'store_by_area':
-				try {
-					$result_data = $this->Global_model->getStoresByArea();
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'get_asc_where_in':
-				try {
-					$ascCode = $this->request->getPost('asc_codes');
-					$result_data = $this->Global_model->get_asc_where_in($ascCode);
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'get_asc':
-				try {
-					$ascOffset = $this->request->getPost('asc_offset');
-					$result_data = $this->Global_model->get_asc($ascOffset);
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'get_asc_count':
-				try {
-					$result_data = $this->Global_model->get_asc_masterfile_count();
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
+		    break;
 			case 'insert':
 				try { 
 					$table = $_POST['table'];
@@ -595,9 +591,13 @@ class Global_controller extends BaseController
 			                "message" => "Database insert failed"
 			            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
 			        }
-
+					if (is_array($insertedCount)) {
+					    $message = 'success';
+					} else {
+					    $message = 'error';
+					}
 			        return $this->response->setJSON([
-			            "message" => "success",
+			            "message" => $message,
 			            "inserted" => $insertedCount
 			        ]);
 
