@@ -205,8 +205,8 @@
             limit : limit,
             table : "tbl_store",
             order : {
-                field : "code, updated_date",
-                order : "asc, desc" 
+                field : "code",
+                order : "asc" 
             }
 
         }
