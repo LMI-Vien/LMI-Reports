@@ -55,9 +55,9 @@
                               <thead>
                                   <tr>
                                       <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                      <th class='center-content'>Code</th>
+                                      <th class='center-content'>Agency Code</th>
                                       <th class='center-content'>Agency</th>
-                                      <th class='center-content'>Status</th>
+                                      <th class='center-content'>Agency Status</th>
                                       <th class='center-content'>Date Created</th>
                                       <th class='center-content'>Date Modified</th>
                                       <th class='center-content'>Action</th>
@@ -95,7 +95,7 @@
                 <div class="modal-body">
                     <form id="form-modal">
                     <div class="mb-3">
-                            <label for="code" class="form-label">Code</label>
+                            <label for="code" class="form-label">Agency Code</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                             <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
                             <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
@@ -171,7 +171,7 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' style='width: 5%'>Line #</th>
-                                        <th class='center-content' style='width: 10%'>Code</th>
+                                        <th class='center-content' style='width: 10%'>Agency Code</th>
                                         <th class='center-content' style='width: 20%'>Agency</th>
                                         <th class='center-content' style='width: 10%'>Status</th>
                                     </tr>
@@ -221,7 +221,7 @@
             limit : limit,
             table : "tbl_agency",
             order : {
-                field : "agency",
+                field : "code",
                 order : "asc" 
             }
 
@@ -368,6 +368,9 @@
         
         let isReadOnly = actions === 'view';
         set_field_state('#code, #agency, #status', isReadOnly);
+
+        // let isReadOnlyAdd = actions === 'add';
+        // set_field_state('#status', isReadOnlyAdd);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -597,7 +600,7 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Code": row["Code"] || "",
+                "Agency Code": row["Agency Code"] || "",
                 "Agency": row["Agency"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
@@ -870,7 +873,7 @@
             }, {});
 
             // 
-            let td_validator = ['code', 'agency', 'status'];
+            let td_validator = ['agency code', 'agency', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -1018,8 +1021,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Description": "",
+                "Agency Code": "",
+                "Agency": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
@@ -1054,7 +1057,7 @@
                     code, agency, status
                 }) => ({
                     Code: code,
-                    Description: agency,
+                    Agency: agency,
                     Status: status === "1" ? "Active" : "Inactive",
                 }));
             };
@@ -1076,9 +1079,9 @@
                             let newData = res.map(({ 
                                 code, agency, status
                             }) => ({
-                                Code: code,
-                                Description: agency,
-                                Status: status === "1" ? "Active" : "Inactive",
+                                "Agency Code": code,
+                                "Agency": agency,
+                                "Status": status === "1" ? "Active" : "Inactive",
                             }));
                             formattedData.push(...newData); // Append new data to formattedData array
                         })
