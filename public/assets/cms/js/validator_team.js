@@ -21,9 +21,8 @@ self.onmessage = async function(e) {
         for (let i = 0; i < batchSize && index < data.length; i++, index++) {
             let row = data[index];
             let tr_count = index + 1;
-            let code = row["Code"] ? row["Code"].trim() : "";
-            let team_description = row["Team_Description"] ? row["Team_Description"].trim() : "";
-
+            let code = row["Team Code"] ? row["Team Code"].trim() : "";
+            let team_description = row["Team Description"] ? row["Team Description"].trim() : "";
             let status = row["Status"] ? row["Status"].toLowerCase() : "";
             let user_id = row["Created by"] ? row["Created by"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";

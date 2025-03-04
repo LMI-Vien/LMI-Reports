@@ -21,7 +21,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                        <th class='center-content'>Code</th>
+                                        <th class='center-content'>Team Code</th>
                                         <th class='center-content'>Team Description</th>
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
@@ -61,7 +61,7 @@
             <div class="modal-body">
                 <form id="form-modal form-save-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">Team Code</label>
                         <input type="text" class="form-control required" id="code" aria-describedby="code" maxlength="25">
                         <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
@@ -136,7 +136,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'>Line #</th>
-                                    <th class='center-content'>Code</th>
+                                    <th class='center-content'>Team Code</th>
                                     <th class='center-content'>Team Description</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
@@ -699,8 +699,8 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Code": row["Code"] || "",
-                "Team_Description": row["Team_Description"] || "",
+                "Team Code": row["Team Code"] || "",
+                "Team Description": row["Team Description"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
                 "Created Date": formatDate(new Date()) || ""
@@ -756,7 +756,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'team_description', 'status'];
+            let td_validator = ['team code', 'team description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -987,8 +987,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Description": "",
+                "Team Code": "",
+                "Team Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
@@ -1045,9 +1045,9 @@
                             let newData = res.map(({ 
                                 code, team_description, status
                             }) => ({
-                                Code: code,
-                                Description: team_description,
-                                Status: status === "1" ? "Active" : "Inactive",
+                                "Team Code": code,
+                                "Team Description": team_description,
+                                "Status": status === "1" ? "Active" : "Inactive",
                             }));
                             formattedData.push(...newData); // Append new data to formattedData array
                         })
