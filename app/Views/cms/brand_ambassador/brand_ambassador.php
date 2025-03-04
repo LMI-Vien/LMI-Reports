@@ -55,8 +55,8 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                        <th class='center-content'>Code</th>
-                                        <th class='center-content'>Name</th>
+                                        <th class='center-content'>BA Code</th>
+                                        <th class='center-content'>BA Name</th>
                                         <!-- <th class='center-content'>Deployment Date</th>
                                         <th class='center-content'>Agency</th>
                                         <th class='center-content'>Brand</th>
@@ -103,14 +103,14 @@
             <div class="modal-body">
                 <form id="form-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">BA Code</label>
                         <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                         <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label">Name</label>
+                        <label for="description" class="form-label">BA Name</label>
                         <input type="text" class="form-control required" id="name" maxlength="50" aria-describedby="description">
                         <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                     </div>
@@ -247,8 +247,8 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' scope="col">Line #</th>
-                                        <th class='center-content' scope="col">Code</th>
-                                        <th class='center-content' scope="col">Name</th>
+                                        <th class='center-content' scope="col">BA Code</th>
+                                        <th class='center-content' scope="col">BA Name</th>
                                         <th class='center-content' scope="col">Deployment Date</th>
                                         <th class='center-content' scope="col">Agency</th>
                                         <th class='center-content' scope="col">Brand</th>
@@ -584,7 +584,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
+            let td_validator = ['ba code', 'ba name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -737,8 +737,8 @@
             }
 
             return {
-                "Code": row["Code"] || "",
-                "Name": row["Name"] || "",
+                "BA Code": row["BA Code"] || "",
+                "BA Name": row["BA Name"] || "",
                 "Deployment Date": row["Deployment Date"] ? row["Deployment Date"] : "",
                 "Agency": row["Agency"] || "",
                 "Brand": row["Brand"] || "",
@@ -1773,8 +1773,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Name": "",
+                "BA Code": "",
+                "BA Name": "",
                 "Deployment Date": "",
                 "Agency": "",
                 "Brand": "",
@@ -1815,8 +1815,8 @@
                 formattedData = res.map(({ 
                     code, description, deployed_date, type, status, brands, agency, store, team, area
                 }) => ({
-                    Code: code,
-                    Name: description,
+                    "BA Code": code,
+                    "BA Name": description,
                     "Deployment Date": deployed_date,
                     Agency: agency,
                     Brand: brands,
