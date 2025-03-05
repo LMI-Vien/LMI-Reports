@@ -59,7 +59,7 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                        <th class='center-content'>Code</th>
+                                        <th class='center-content'>Area Code</th>
                                         <th class='center-content'>Area</th>
                                         <!-- <th class='center-content'>Store</th> -->
                                         <th class='center-content'>Status</th>
@@ -102,7 +102,7 @@
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
-                            <label for="code" class="form-label">Code</label>
+                            <label for="code" class="form-label">Area Code</label>
                             <input type="text" class="form-control required" id="code" aria-describedby="store_code" maxlength="25">
                             <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                         </div>
@@ -214,7 +214,7 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' scope="col">Line #</th>
-                                        <th class='center-content' scope="col">Code</th>
+                                        <th class='center-content' scope="col">Area Code</th>
                                         <th class='center-content' scope="col">Area</th>
                                         <th class='center-content' scope="col">Stores/Branches</th>
                                         <th class='center-content' scope="col">Status</th>
@@ -317,7 +317,7 @@
             let html = `
             <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
                 <input id='store_${line}' class='form-control' placeholder='Select store'>
-                <button type="button" class="rmv-btn" onclick="remove_line(${line})">
+                <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
             </div>
@@ -579,7 +579,7 @@
             }, {});
 
             // 
-            let td_validator = ['code', 'description', 'stores', 'status'];
+            let td_validator = ['area code', 'description', 'stores', 'status']; 
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -684,15 +684,15 @@
         modal.loading(true);
 
         let jsonData = dataset.map(row => {
-            if (row["stores"]) {
-                let storeList = row["stores"].split(",").map(item => item.trim().toLowerCase());
-                row["stores"] = [...new Set(storeList)]; // Remove duplicates
+            if (row["Stores"]) {
+                let storeList = row["Stores"].split(",").map(item => item.trim().toLowerCase());
+                row["Stores"] = [...new Set(storeList)]; // Remove duplicates
             }
             return {
-                "Code": row["code"] || "",
-                "Name": row["description"] || "", 
-                "Status": row["status"] || "", 
-                "Stores": row["stores"] || "", 
+                "Area Code": row["Area Code"] || "",
+                "Description": row["Description"] || "", 
+                "Status": row["Status"] || "", 
+                "Stores": row["Stores"] || "", 
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
             };
@@ -1085,17 +1085,27 @@
                             })
 
                             if(valid) {
-                                save_to_db(code, description, store, status_val, id, (obj) => {
-                                    total_delete(url, 'tbl_store_group', 'area_id', id);
+                                // save_to_db(code, description, store, status_val, id, (obj) => {
+                                //     total_delete(url, 'tbl_store_group', 'area_id', id);
 
-                                    batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                //     batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                //         modal.loading(false);
+                                //         modal.alert(success_update_message, "success", function() {
+                                //             location.reload();
+                                //         });
+                                //     })
+                                // })
+                                save_to_db(code, description, store, status_val, id, (obj) => {
+                                    insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
+    
+                                    batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
                                         modal.loading(false);
                                         modal.alert(success_update_message, "success", function() {
                                             location.reload();
                                         });
                                     })
                                 })
-                                
+
                             } else {
                                 // alert('mali');
                                 modal.loading(false);
@@ -1259,14 +1269,14 @@
 
         formattedData = [
             {
-                "Code": "",
+                "Area Code": "",
                 "Description": "",
                 "Status": "",
                 "Stores": "",
                 "NOTE:": "Please do not change the column headers."
             },
             {
-                "Code": "",
+                "Area Code": "",
                 "Description": "",
                 "Status": "",
                 "Stores": "",
@@ -1330,7 +1340,7 @@
                             let newData = res.map(({ 
                                 id, area_code, area_description, status
                             }) => ({
-                                Code: area_code,
+                                "Area Code": area_code,
                                 Description: area_description,
                                 Status: status === "1" ? "Active" : "Inactive",
                                 "Stores": ano_ire[id] || '',
