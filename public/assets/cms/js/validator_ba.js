@@ -206,7 +206,7 @@ self.onmessage = async function(e) {
                         agency: agency,
                         area: area,
                         status: status.toLowerCase() === "active" ? 1 : 0,
-                        type: type.toLowerCase() === "consign" ? 1 : 0,
+                        type: type.toLowerCase() === "outright" ? 1 : 0,
                         created_by: user_id,
                         created_date: date_of_creation
                     });
