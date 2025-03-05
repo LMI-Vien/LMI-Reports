@@ -205,7 +205,7 @@
 
             <div class="modal-body">
                 <div class="card p-3">
-                    <div class="mb-3" style="overflow-x: auto; height: 450px;">
+                    <div class="mb-3">
                         <div class="text-center p-2" 
                             style="font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border-radius: 10px;">
                             <b>Extracted Data</b>
@@ -255,28 +255,29 @@
                             </div>
 
                         </div>
-
-                        <table class="table table-bordered listdata">
-                            <thead class="table-dark text-center">
-                                <tr>
-                                    <th>Line #</th>
-                                    <th>Store</th>
-                                    <th>Item</th>
-                                    <th>Item Name</th>
-                                    <th>VMI Status</th>
-                                    <th>Item Class</th>
-                                    <th>Supplier</th>
-                                    <th>Group</th>
-                                    <th>Dept</th>
-                                    <th>Class</th>
-                                    <th>Sub-class</th>
-                                    <th>On Hand</th>
-                                    <th>In transit</th>
-                                    <th>Ave Sales Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody class="word_break import_table"></tbody>
-                        </table>
+                        <div style="overflow-x: auto; max-height: 400px;">
+                            <table class="table table-bordered listdata">
+                                <thead class="table-dark text-center">
+                                    <tr>
+                                        <th>Line #</th>
+                                        <th>Store</th>
+                                        <th>Item</th>
+                                        <th>Item Name</th>
+                                        <th>VMI Status</th>
+                                        <th>Item Class</th>
+                                        <th>Supplier</th>
+                                        <th>Group</th>
+                                        <th>Dept</th>
+                                        <th>Class</th>
+                                        <th>Sub-class</th>
+                                        <th>On Hand</th>
+                                        <th>In transit</th>
+                                        <th>Ave Sales Unit</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="word_break import_table"></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <center class="my-2">
@@ -1008,9 +1009,9 @@
                     modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
                 }
             }else{
-                modal.loading(false);
-                modal.loading_progress(true); 
-                updateSwalProgress("Validating data...", progress);
+                //modal.loading(false);
+                //modal.loading_progress(true); 
+                //updateSwalProgress("Validating data...", progress);
             
             }
 

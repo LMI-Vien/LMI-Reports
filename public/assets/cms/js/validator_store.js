@@ -38,16 +38,15 @@ self.onmessage = async function(e) {
                 unique_code.add(code);
             }
 
-            if (unique_description.has(description)) {
-                invalid = true;
-                errorLogs.push(`⚠️ Duplicated Description at line #: ${tr_count}`);
-                err_counter++;
-            } else if (description.length > 50 || description === "") {
+            // if (unique_description.has(description)) {
+            //     invalid = true;
+            //     errorLogs.push(`⚠️ Duplicated Description at line #: ${tr_count}`);
+            //     err_counter++;
+            // } else 
+            if (description.length > 50 || description === "") {
                 invalid = true;
                 errorLogs.push(`⚠️ Invalid Description at line #: ${tr_count}`);
                 err_counter++;
-            } else {
-                unique_description.add(description);
             }
 
             if (!["active", "inactive"].includes(status)) {

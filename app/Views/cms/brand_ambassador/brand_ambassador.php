@@ -1493,7 +1493,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.description+"</option>"
                     })
                 }
             }
@@ -1533,7 +1533,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.agency+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.agency+"</option>"
                     })
                 }
             }
@@ -1573,7 +1573,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.description+"</option>"
                     })
                 }
             }
@@ -1613,7 +1613,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.team_description+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.team_description+"</option>"
                     })
                 }
             }

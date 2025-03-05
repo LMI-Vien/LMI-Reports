@@ -40,17 +40,19 @@ self.onmessage = async function(e) {
                 unique_code.add(code);
             }
 
-            if (unique_team_description.has(team_description)) {
-                invalid = true;
-                errorLogs.push(`⚠️ Duplicated Team Description at line #: ${tr_count}`);
-                err_counter++;
-            } else if (team_description.length > 50 || team_description === "") {
+            // if (unique_team_description.has(team_description)) {
+            //     invalid = true;
+            //     errorLogs.push(`⚠️ Duplicated Team Description at line #: ${tr_count}`);
+            //     err_counter++;
+            // } else 
+            if (team_description.length > 50 || team_description === "") {
                 invalid = true;
                 errorLogs.push(`⚠️ Invalid Team Description at line #: ${tr_count}`);
                 err_counter++;
-            } else {
-                unique_team_description.add(team_description);
             }
+            //  else {
+            //     unique_team_description.add(team_description);
+            // }
 
             if (!["active", "inactive"].includes(status)) {
                 invalid = true;

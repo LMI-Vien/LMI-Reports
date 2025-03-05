@@ -146,14 +146,14 @@ self.onmessage = async function(e) {
                     normalized_item_lookup[key.toLowerCase()] = item_lookup[key];
                 }
 
-                let item_lower = item.toLowerCase();
-                if (item_lower in normalized_item_lookup) {
-                    item = item;
-                }else {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // let item_lower = item.toLowerCase();
+                // if (item_lower in normalized_item_lookup) {
+                //     item = item;
+                // }else {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Item at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
                 if (!invalid) {
                     valid_data.push({

@@ -39,17 +39,19 @@ self.onmessage = async function(e) {
                 unique_code.add(code);
             }
 
-            if (unique_agency.has(agency)) {
-                invalid = true;
-                errorLogs.push(`⚠️ Duplicated Agency at line #: ${tr_count}`);
-                err_counter++;
-            } else if (agency.length > 50 || agency === "") {
+            // if (unique_agency.has(agency)) {
+            //     invalid = true;
+            //     errorLogs.push(`⚠️ Duplicated Agency at line #: ${tr_count}`);
+            //     err_counter++;
+            // } else 
+            if (agency.length > 50 || agency === "") {
                 invalid = true;
                 errorLogs.push(`⚠️ Invalid Agency at line #: ${tr_count}`);
                 err_counter++;
-            } else {
-                unique_agency.add(agency);
             }
+            //  else {
+            //     unique_agency.add(agency);
+            // }
 
             if (!["active", "inactive"].includes(status)) {
                 invalid = true;
