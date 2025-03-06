@@ -29,7 +29,7 @@ class Area extends BaseController
 		$data['PageName'] = 'Area';
 		$data['PageUrl'] = 'Area';
 		$data['content'] = "cms/area/area.php";
-		$data['buttons'] = ['add', 'search', 'import', 'export'];
+		$data['buttons'] = ['add', 'search', 'import', 'export', 'filter'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(

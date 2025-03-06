@@ -1,3 +1,11 @@
+<style>
+    #list-data {
+        overflow: visible !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
+</style>
 
 <div class="content-wrapper p-4">
     <div class="card">
@@ -161,6 +169,8 @@
 
 <script>
     var query = "status >= 0";
+    var column_filter = '';
+    var order_filter = '';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
@@ -173,10 +183,10 @@
 
     $(document).ready(function() {
       get_data(query);
-      get_pagination();
+      get_pagination(query);
     });
 
-    function get_data(query) {
+    function get_data(query, field = "updated_date", order = "order") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -186,10 +196,9 @@
             limit : limit,
             table : "tbl_team",
             order : {
-                field : "updated_date",
-                order : "desc" 
+                field : field,
+                order : order 
             }
-
         }
 
         aJax.post(url,data,function(result){
@@ -231,7 +240,7 @@
         });
     }
 
-    function get_pagination() {
+    function get_pagination(query, field = "updated_date", order = "desc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
@@ -241,10 +250,9 @@
             limit : limit,
             table : "tbl_team",
             order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
+                field : field, //field to order
+                order : order //asc or desc
             }
-
         }
 
         aJax.post(url,data,function(result){
@@ -256,23 +264,82 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query);
+        get_data(query, column_filter, order_filter);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
     });
 
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
+    $(document).on('keydown', '#search_query', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        if (event.key == 'Enter') {
+            search_input = $('#search_query').val();
             offset = 1;
-            // query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
-            var new_query = "("+query+" AND code like '%" + keyword + "%') OR "+
-            "("+query+" AND team_description like '%" + keyword + "%')"
+            get_pagination(query);
+            new_query = query;
+            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
             get_data(new_query);
-            get_pagination();
         }
     });
+
+    $(document).on('click', '#search_button', function(e) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        get_pagination(query);
+        new_query = query;
+        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
+        get_data(new_query);
+    });
+
+    $('#btn_filter').on('click', function(event) {
+        title = addNbsp('FILTER DATA');
+        $('#filter_modal').find('.modal-title').find('b').html(title);
+        $('#filter_modal').modal('show');
+    })
+
+    $('#button_f').on('click', function(event) {
+        let status_f = $("input[name='status_f']:checked").val();
+        let c_date_from = $("#created_date_from").val();
+        let c_date_to = $("#created_date_to").val();
+        let m_date_from = $("#modified_date_from").val();
+        let m_date_to = $("#modified_date_to").val();
+        
+        order_filter = $("input[name='order']:checked").val();
+        column_filter = $("input[name='column']:checked").val();
+        query = "status >= 0";
+        
+        query += status_f ? ` AND status = ${status_f}` : '';
+        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
+        
+        // console.log(query);
+        get_pagination(query, column_filter, order_filter);
+        get_data(query, column_filter, order_filter);
+        $('#filter_modal').modal('hide');
+    })
+    
+    $('#clear_f').on('click', function(event) {
+        order_filter = '';
+        column_filter = '';
+        query = "status >= 0";
+        get_data(query);
+        get_pagination(query);
+        
+        $("input[name='status_f']").prop('checked', false);
+        $("#created_date_from").val('');
+        $('#created_date_to').val('');
+        $('#modified_date_from').val('');
+        $('#modified_date_to').val('');
+        $("input[name='order']").prop('checked', false);
+        $("input[name='column']").prop('checked', false);
+
+        $('#filter_modal').modal('hide');
+    })
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
