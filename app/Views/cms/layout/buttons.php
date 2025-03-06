@@ -330,7 +330,7 @@
 	#filter_modal .modal-body {
 		padding: 25px;
 	}
-	.row {
+	#filter_modal .row {
 		margin-top: 0px !important;
 		margin-bottom: 30px !important;
 	}
