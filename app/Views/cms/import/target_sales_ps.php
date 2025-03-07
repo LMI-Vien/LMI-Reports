@@ -287,6 +287,59 @@
             </div>
         </div>
     </div>
+
+    <div class="modal" tabindex="-1" id="export_modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+    
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="mb-3">
+                            <div 
+                                class="text-center"
+                                style="padding: 10px;
+                                font-family: 'Courier New', Courier, monospace;
+                                font-size: large;
+                                background-color: #fdb92a;
+                                color: #333333;
+                                border: 1px solid #ffffff;
+                                border-radius: 10px;"                            
+                            >
+                                <b>Filters</b>
+                            </div>
+    
+                            <div class="col-12 row d-flex" style="margin-top: 20px;">
+                                <label 
+                                    for="year_select" 
+                                    class="form-label fw-semibold me-"
+                                    style="padding-top: 5px;"
+                                >
+                                    Choose Year:
+                                </label>
+                                <select id="year_select" class="form-select uniform-dropdown">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="modal-footer">
+                    <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
+                    <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     
 <script>
     var query = "tsps.status >= 0";
@@ -495,7 +548,7 @@
         title = addNbsp('IMPORT TARGET SALES PER STORE')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $('#import_modal').modal('show');
-        get_year();
+        get_year('yearSelect');
     });
 
     function populate_modal(inp_id) {
@@ -1143,7 +1196,7 @@
         $(".import_pagination").html(paginationHtml);
     }
 
-    function get_year() {
+    function get_year(selected_class) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
@@ -1173,8 +1226,252 @@
                     });
                 }
             }
-            $('#yearSelect').html(html);
+            $('#'+selected_class).html(html);
         })
+    }
+
+    $(document).on('click', '#btn_export ', function() {
+        title = addNbsp('EXPORT Target Sellout PS');
+        $("#export_modal").find('.modal-title').find('b').html(title)
+        $('#export_modal').modal('show');
+        get_year('year_select');
+    });
+
+    function download_template() {
+        let formattedData = [
+            {
+                "Location":"",
+                "January":"",
+                "February":"",
+                "March":"",
+                "April":"",
+                "May":"",
+                "June":"",
+                "July":"",
+                "August":"",
+                "September":"",
+                "October":"",
+                "November":"",
+                "December":"",
+            }
+        ]
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Target Sell Out per Store"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+    
+        exportArrayToCSV(formattedData, `Target Sell Out per Store - ${formatDate(new Date())}`, headerData);
+    }
+
+    function exportFilter() {
+        const year = $('#year_select').val()?.trim();
+
+        const fields = { year };
+
+        var formattedData = [];
+
+        for (const [key, value] of Object.entries(fields)) {
+            if (!value) {
+                return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
+            }
+        }
+
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    startExport()
+                }, 500);
+            }
+        })
+
+        const startExport = () => {
+            dynamic_search(
+                "'tbl_target_sales_per_store'", 
+                "''", 
+                "'location, january, february, march, april, may, june, july, august, september, october, november, december'", 
+                0, 
+                0, 
+                `"year:EQ=${year}"`,  
+                `''`, 
+                `''`,
+                (res) => {
+                    let store_ids = []
+                    let store_map = {}
+            
+                    let newData = res.map(({ 
+                        location, january, february, march, april, may, june, july, august, september, october, november, december
+                    }) => ({
+                        "Location":location,
+                        "January":january,
+                        "February":february,
+                        "March":march,
+                        "April":april,
+                        "May":may,
+                        "June":june,
+                        "July":july,
+                        "August":august,
+                        "September":september,
+                        "October":october,
+                        "November":november,
+                        "December":december,
+                    }));
+
+                    formattedData.push(...newData); // Append new data to formattedData array
+                }
+            )
+    
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."],
+                ["Target Sell Out per Store"],
+                ["Date Printed: " + formatDate(new Date())],
+                [""],
+            ];
+    
+            exportArrayToCSV(formattedData, `Target Sell Out per Store - ${formatDate(new Date())}`, headerData);
+            modal.loading_progress(false);
+        }
+    }
+
+    function handleExport() {
+        var formattedData = [];
+        var ids = [];
+
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`${id}`); // Collect IDs in an array
+        });
+
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    startExport()
+                }, 500);
+            }
+        })
+
+        const startExport = () => {
+            const fetchStores = (callback) => {
+                function processResponse (res) {
+                    formattedData = res.map(({ 
+                        location, january, february, march, april, may, june, july, august, september, october, november, december
+                    }) => ({
+                        "Location":location,
+                        "January":january,
+                        "February":february,
+                        "March":march,
+                        "April":april,
+                        "May":may,
+                        "June":june,
+                        "July":july,
+                        "August":august,
+                        "September":september,
+                        "October":october,
+                        "November":november,
+                        "December":december,
+                    }));
+                };
+
+                ids.length > 0 
+                    ? dynamic_search(
+                        "'tbl_target_sales_per_store'", 
+                        "''", 
+                        "'location, january, february, march, april, may, june, july, august, september, october, november, december'", 
+                        100000, 
+                        0, 
+                        `'id:IN=${ids.join('|')}'`,  
+                        `''`, 
+                        `''`,
+                        processResponse
+                    )
+                    : batch_export();
+            };
+
+            const batch_export = () => {
+                dynamic_search(
+                    "'tbl_target_sales_per_store'", 
+                    "''", 
+                    "'COUNT(id) as total_records'", 
+                    0, 
+                    0, 
+                    `''`,  
+                    `''`, 
+                    `''`,
+                    (res) => {
+                        if (res && res.length > 0) {
+                            let total_records = res[0].total_records;
+
+                            for (let index = 0; index < total_records; index += 100000) {
+                                dynamic_search(
+                                    "'tbl_target_sales_per_store'", 
+                                    "''", 
+                                    "'location, january, february, march, april, may, june, july, august, september, october, november, december'", 
+                                    100000, 
+                                    index, 
+                                    `''`,  
+                                    `''`, 
+                                    `''`,
+                                    (res) => {
+                                        let newData = res.map(({ 
+                                            location, january, february, march, april, may, june, july, august, september, october, november, december
+                                        }) => ({
+                                            "Location":location,
+                                            "January":january,
+                                            "February":february,
+                                            "March":march,
+                                            "April":april,
+                                            "May":may,
+                                            "June":june,
+                                            "July":july,
+                                            "August":august,
+                                            "September":september,
+                                            "October":october,
+                                            "November":november,
+                                            "December":december,
+                                        }));
+                                        formattedData.push(...newData); // Append new data to formattedData array
+                                    }
+                                )
+                            }
+                        } else {
+                            console.log('No data received');
+                        }
+                    }
+                )
+            };
+
+            fetchStores();
+
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."],
+                ["Target Sell Out per Store"],
+                ["Date Printed: " + formatDate(new Date())],
+                [""],
+            ];
+
+            exportArrayToCSV(formattedData, `Target Sell Out per Store - ${formatDate(new Date())}`, headerData);
+            modal.loading_progress(false);
+        }
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
     }
     
 </script>
