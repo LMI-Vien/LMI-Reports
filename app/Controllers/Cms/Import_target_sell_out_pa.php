@@ -29,7 +29,7 @@ class Import_target_sell_out_pa extends BaseController
 		$data['PageName'] = 'Import Target sell Out Per Account';
 		$data['PageUrl'] = 'Import Target sell Out Per Account';
 		$data['content'] = "cms/import/target_sell_out_pa.php";
-		$data['buttons'] = ['search', 'import'];
+		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(

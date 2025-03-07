@@ -1366,13 +1366,13 @@
         
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
         
         const fetchStores = (callback) => {
             const processResponse = (res) => {
                 formattedData = res.map(({ 
-                    id, area_code, area_description, status, store_description
+                    area_code, area_description, status, store_description
                 }) => ({
                     Code: area_code,
                     Description: area_description,
@@ -1382,7 +1382,18 @@
             };
 
             ids.length > 0 
-                ? get_area_where_in(`"${ids.join(', ')}"`, processResponse)
+                // ? get_area_where_in(`"${ids.join(', ')}"`, processResponse)
+                ? dynamic_search(
+                    "'tbl_area a'", 
+                    "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
+                    "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
+                    0, 
+                    0, 
+                    `'a.id:IN=${ids.join('|')}'`,  
+                    `''`, 
+                    `'a.id'`,
+                    processResponse
+                )
                 // : getStoresByArea(processResponse);
                 : batch_export();
         };

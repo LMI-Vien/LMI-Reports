@@ -339,44 +339,28 @@ class Global_controller extends BaseController
 				}
 				break;
 			// ------------------------------------------------------------ Team ------------------------------------------------------------
-			case 'get_vmi':
+			// ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
+			// ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+			// ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+			case 'dynamic_search':
 				try {
-					$vmiOffset = $this->request->getPost('vmi_offset');
-					$result_data = $this->Global_model->get_vmi($vmiOffset);
+					$tbl_name = $this->request->getPost('tbl_name');
+					$table_fields = $this->request->getPost('table_fields');
+					$join = $this->request->getPost('join');
+					$limit = $this->request->getPost('limit');
+					$offset = $this->request->getPost('offset');
+					$conditions = $this->request->getPost('conditions');
+					$order = $this->request->getPost('order');
+					$group = $this->request->getPost('group');
+					$result_data = $this->Global_model->dynamic_search($tbl_name, $join, $table_fields, $limit, $offset, $conditions, $order, $group);
 					echo json_encode($result_data);
 				} catch (Error $e) {
 					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
 				}
 				break;
-			case 'get_vmi_where_in':
-				try {
-					$vmiCode = $this->request->getPost('vmi_codes');
-					$result_data = $this->Global_model->get_vmi_where_in($vmiCode);
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'get_vmi_count':
-				try {
-					$result_data = $this->Global_model->get_vmi_count();
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'get_vmi_data':
-				try {
-					$vmiYear = $this->request->getPost('vmi_year');
-					$vmiMonth = $this->request->getPost('vmi_month');
-					$vmiWeek = $this->request->getPost('vmi_week');
-					$vmiCompany = $this->request->getPost('vmi_company');
-					$result_data = $this->Global_model->get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany);
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
+			// ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+			// ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+			// ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
 			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
 			
 			case 'fetch_existing':

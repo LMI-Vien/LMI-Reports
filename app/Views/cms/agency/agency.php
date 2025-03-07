@@ -1113,7 +1113,7 @@
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
 
         const fetchStores = (callback) => {
@@ -1128,18 +1128,28 @@
             };
 
             ids.length > 0 
-                ? get_agency_where_in(`"${ids.join(', ')}"`, processResponse)
+                ? dynamic_search(
+                    "'tbl_agency'", 
+                    "''", 
+                    "'code, agency, status'", 
+                    0, 
+                    0, 
+                    `'id:IN=${ids.join('|')}'`,  
+                    `''`, 
+                    `''`,
+                    processResponse
+                )
                 : batch_export();
         };
 
         const batch_export = () => {
-            get_agency_count((res) => {
+            dynamic_search("'tbl_agency'", "''", "'COUNT(id) as total_records'", 0, 0, `''`,  `''`, `''`, (res) => {
                 if (res && res.length > 0) {
                     let total_records = res[0].total_records;
                     console.log(total_records, 'total records');
 
                     for (let index = 0; index < total_records; index += 100000) {
-                        get_agency(index, (res) => {
+                        dynamic_search("'tbl_agency'", "''", "'code, agency, status'", 100000, index, `''`,  `''`, `''`, (res) => {
                             console.log(res, 'look here')
                             let newData = res.map(({ 
                                 code, agency, status
