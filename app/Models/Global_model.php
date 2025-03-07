@@ -826,8 +826,10 @@ class Global_model extends Model
             ->getResultArray();
     }
 
-    function getStoresByAreaWhereIn($areaCode) {
-        $query = $this->db->query("CALL get_store_per_area_where_in($areaCode)");
+    // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+    // ----------------------------------------------------------- Agency -----------------------------------------------------------
+    function get_agency_where_in($areaCode) {
+        $query = $this->db->query("CALL get_agency_where_in($areaCode)");
         return $query->getResultArray(); // Return data as an array
     }
     function get_agency($areaOffset) {
@@ -917,25 +919,15 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     // ------------------------------------------------------------ Team ------------------------------------------------------------
+    // ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
+    // ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+    // ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+    function dynamic_search($tbl_name, $join, $table_fields, $limit, $offset, $conditions, $order, $group) {
+        $query = $this->db->query("CALL SearchDynamic($tbl_name, $join, $table_fields, $limit, $offset, $conditions, $order, $group)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    // ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+    // ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+    // ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
-
-    function get_vmi($vmiOffset) {
-        $query = $this->db->query("CALL get_vmi($vmiOffset)");
-        return $query->getResultArray(); // Return data as an array
-    }
-
-    function get_vmi_where_in($vmiIds) {
-        $query = $this->db->query("CALL get_vmi_where_in($vmiIds)");
-        return $query->getResultArray(); // Return data as an array
-    }
-
-    function get_vmi_count() {
-        $query = $this->db->query("CALL get_vmi_count()");
-        return $query->getResultArray(); // Return data as an array
-    }
-
-    function get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany) {
-        $query = $this->db->query("CALL get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany)");
-        return $query->getResultArray(); // Return data as an array
-    }
 }
