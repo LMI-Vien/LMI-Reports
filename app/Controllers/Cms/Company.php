@@ -27,7 +27,7 @@ class Company extends BaseController
 		$data['title'] = "Company";
 		$data['PageName'] = 'Company';
 		$data['PageUrl'] = 'Company';
-		$data['buttons'] = ['add', 'search'];
+		$data['buttons'] = ['add', 'search', 'filter'];
 		$data['content'] = "cms/company/company.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(

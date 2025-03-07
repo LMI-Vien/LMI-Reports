@@ -28,7 +28,7 @@ class Brand_Ambassador extends BaseController
 		$data['title'] = "Brand Ambassador";
 		$data['PageName'] = 'Brand Ambassador';
 		$data['PageUrl'] = 'Brand Ambassador';
-		$data['buttons'] = ['add', 'import', 'search', 'export'];
+		$data['buttons'] = ['add', 'import', 'search', 'export', 'filter'];
 		$data['content'] = "cms/brand_ambassador/brand_ambassador.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(

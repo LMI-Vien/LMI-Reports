@@ -32,6 +32,17 @@
         background-color: gray !important;
         color: black !important;
     }
+
+    .ui-widget {
+        z-index: 1051 !important;
+    }
+
+    #list-data {
+        overflow: visible !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
 </style>
     <div class="content-wrapper p-4">
         <div class="card">
@@ -42,7 +53,6 @@
                     <div class="box">
                     <?php
                     echo view("cms/layout/buttons",$buttons);
-
                         $optionSet = '';
                         foreach($pageOption as $pageOptionLoop) {
                             $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
@@ -278,6 +288,8 @@
 
 <script>
     var query = "ba.status >= 0";
+    var column_filter = '';
+    var order_filter = '';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -295,7 +307,7 @@
 
     });
 
-    function get_data(query) {
+    function get_data(query, field = "ba.code", order = "asc") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -305,8 +317,8 @@
             limit : limit,
             table : "tbl_brand_ambassador ba",
             order : {
-                field : "ba.code",
-                order : "asc" 
+                field : field,
+                order : order 
             },
             join : [
                 {
@@ -380,7 +392,7 @@
         });
     }
     
-    function get_pagination() {
+    function get_pagination(query, field = "updated_date", order = "desc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
@@ -406,10 +418,22 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query);
+        get_data(query, column_filter, order_filter);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
     })
+
+    $(document).on('click', '#search_button', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        new_query = query;
+        new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%')";
+        //to follow OR b.brand_description LIKE '%" + search_input + "%'
+        get_data(new_query);
+        get_pagination(new_query);
+    });
 
     $(document).on('keydown', '#search_query', function(event) {
         $('.btn_status').hide();
@@ -423,7 +447,54 @@
             get_data(new_query);
             get_pagination(new_query);
         }
-    });
+    })
+
+    $('#btn_filter').on('click', function(event) {
+        title = addNbsp('FILTER DATA');
+        $('#filter_modal').find('.modal-title').find('b').html(title);
+        $('#filter_modal').modal('show');
+    })
+
+    $('#button_f').on('click', function(event) {
+        let status_f = $("input[name='status_f']:checked").val();
+        let c_date_from = $("#created_date_from").val();
+        let c_date_to = $("#created_date_to").val();
+        let m_date_from = $("#modified_date_from").val();
+        let m_date_to = $("#modified_date_to").val();
+        
+        order_filter = $("input[name='order']:checked").val();
+        column_filter = $("input[name='column']:checked").val();
+        query = "ba.status >= 0";
+        
+        query += status_f ? ` AND ba.status = ${status_f}` : '';
+        query += c_date_from ? ` AND ba.created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND ba.created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND ba.updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND ba.updated_date <= '${m_date_to} 23:59:59'` : '';
+        
+        console.log(query);
+        get_pagination(query, column_filter, order_filter);
+        get_data(query, column_filter, order_filter);
+        $('#filter_modal').modal('hide');
+    })
+    
+    $('#clear_f').on('click', function(event) {
+        order_filter = '';
+        column_filter = '';
+        query = "ba.status >= 0";
+        get_data(query);
+        get_pagination(query);
+        
+        $("input[name='status_f']").prop('checked', false);
+        $("#created_date_from").val('');
+        $('#created_date_to').val('');
+        $('#modified_date_from').val('');
+        $('#modified_date_to').val('');
+        $("input[name='order']").prop('checked', false);
+        $("input[name='column']").prop('checked', false);
+
+        $('#filter_modal').modal('hide');
+    })
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
@@ -482,7 +553,7 @@
 
 
 
-        if (['edit', 'view'].includes(actions)) populate_modal(id);
+        if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
         
         let isReadOnly = actions === 'view';
         set_field_state('#code, #name, #deployment_date, #agency, #brand, #store, #team, #area, #status', isReadOnly);
@@ -504,13 +575,23 @@
 
             let html = `
             <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
+                <input id='brand_${line}' class='form-control' placeholder='Select brand'>
                 <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
             </div>
             `;
+
             $brand_list.append(html)
+
+            $(`#brand_${line}`).autocomplete({
+                source: function(request, response) {
+                    let results = $.ui.autocomplete.filter(brandDescriptions, request.term);
+                    let uniqueResults = [...new Set(results)];
+                    response(uniqueResults.slice(0, 10));
+                }
+            })
+
             $('input[name="type"]').each(function() {
                 if ($(this).val() == 1) {
                     $(this).prop('checked', true); 
@@ -1196,7 +1277,7 @@
         });
     }
 
-    function populate_modal(inp_id) {
+    function populate_modal(inp_id, actions) {
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -1228,26 +1309,48 @@
                     var readonly = '';
                     var disabled = ''
 
-                    let $brand_list = $('#brand_list')
+                    let $brand_list = $('#brand_list');
                     $.each(get_ba_brands(ba.id), (x, y) => {
-                        if (line === 0) {
-                            disabled = 'disabled';
+                        if(actions === 'view') {
                             readonly = 'readonly';
+                            disabled = 'disabled';
                         } else {
                             readonly = '';
-                            disabled = ''
+                            disabled = '';
                         }
-                        let html = `
-                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                            <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
-                            <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
-                                <i class="fa fa-minus" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        `;
-                        $brand_list.append(html)
-                        get_brand(y.brand_id, `brand_${line}`);
-                        line++
+                        get_field_values('tbl_brand', 'brand_description', 'id', [y.brand_id], (res) => {
+                            for(let key in res) {
+                                get_field_values('tbl_brand', 'brand_code', 'id', [key], (res1) => {
+                                    for(let key1 in res1) {
+                                        if(actions === 'edit') {
+                                            readonly = (line == 0) ? 'readonly' : '';
+                                            disabled = (line == 0) ? 'disabled' : '';
+                                        }
+            
+                                        let html = `
+                                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                            <input id="brand_${line}" class="form-control" value='${res1[key1]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+                                            <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        `;
+                                        $brand_list.append(html)
+            
+                                        $(`#brand_${line}`).autocomplete({
+                                            source: function(request, response) {
+                                                let results = $.ui.autocomplete.filter(brandDescriptions, request.term);
+                                                let uniqueResults = [...new Set(results)];
+                                                response(uniqueResults.slice(0, 10));
+                                            }
+                                        })
+                                        get_brand(y.brand_id, `brand_${line}`);
+                                        line++
+                                    }
+                                })
+                            }
+                        })
+
                     })
                     $('input[name="type"]').each(function() {
                         if ($(this).val() == ba.type) {
@@ -1297,7 +1400,7 @@
         var name = $('#name').val().trim();
         var deployment_date = $('#deployment_date').val();
         var agency = $('#agency').val();
-        var brand = $('#brand').val();
+        var brand = '';
         var store = $('#store').val();
         var team = $('#team').val();
         var area = $('#area').val();
@@ -1307,12 +1410,15 @@
         var unique_brand = [];
         var brand_list = $('#brand_list');
         // add_line
-        brand_list.find('select').each(function() {
-            linenum++
+        brand_list.find('input').each(function() {
             if (!unique_brand.includes($(this).val())) {
-                unique_brand.push($(this).val())
+                brand = $(this).val().split(' - ');
+
+                unique_brand.push(brand[1]);
             }
+            linenum++
         });
+        console.log(unique_brand);
         if (chk_status) {
             status_val = 1;
         } else {
@@ -1323,59 +1429,97 @@
                 if (!exists) {
                     modal.confirm(confirm_update_message, function(result){
                         if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                total_delete(url, 'tbl_ba_brands', 'ba_id', id)
-                                let batch = [];
-                                $.each(unique_brand, (x, y) => {
-                                    let data = {
-                                        'ba_id': id,
-                                        'brand_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
-                                batch_insert(url, batch, 'tbl_ba_brands', false, () => {
-                                    modal.loading(false);
-                                    modal.alert(success_update_message, "success", function() {
-                                        location.reload();
-                                    });
-                                })
-                            });
+                            // modal.loading(true);
+                            let batch = [];
+                            let valid = true;
+
+                            $.each(unique_brand, (x, y) => {
+                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                    if(res.length == 0) {
+                                        valid = false;
+                                    } else {
+                                        $.each(res, (x, y) => {
+                                            let data = {
+                                                'ba_id': id,
+                                                'brand_id': x,
+                                                'created_by': user_id,
+                                                'created_date': formatDate(new Date())
+                                            };
+                                            batch.push(data);
+                                        })
+                                    }
+                                });
+                            })
+
+                            if(valid) {
+                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                    total_delete(url, 'tbl_ba_brands', 'ba_id', id)
+                                    
+                                    batch_insert(url, batch, 'tbl_ba_brands', false, () => {
+                                        modal.loading(false);
+                                        modal.alert(success_update_message, "success", function() {
+                                            location.reload();
+                                        });
+                                    })
+                                });
+                            } else {
+                                modal.loading(false);
+                                modal.alert('Brand not found', 'error', function() {});
+                            }
                         }
                     });
 
                 }             
             });
         }else{
-            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , null, null, true, function(exists, duplicateFields) {
+            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
-                    modal.confirm(confirm_add_message, function(result){
+                    modal.confirm(confirm_update_message, function(result){
                         if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, null, (obj) => {
-                                let batch = [];
-                                $.each(unique_brand, (x, y) => {
-                                    let data = {
-                                        'ba_id': obj.ID,
-                                        'brand_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
-                                batch_insert(url, batch, 'tbl_ba_brands', false, () => {
-                                    modal.loading(false);
-                                    modal.alert(success_save_message, "success", function() {
-                                        location.reload();
-                                    });
-                                })
-                            });
+                            // modal.loading(true);
+                            let batch = [];
+                            let valid = true;
+
+                            $.each(unique_brand, (x, y) => {
+                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                    if(res.length == 0) {
+                                        console.log('waler');
+                                        valid = false;
+                                    } else {
+                                        $.each(res, (x, y) => {
+                                            let data = {
+                                                'ba_id': null,
+                                                'brand_id': x,
+                                                'created_by': user_id,
+                                                'created_date': formatDate(new Date())
+                                            };
+                                            batch.push(data);
+                                        })
+                                    }
+                                });
+                            })
+
+                            if(valid) {
+                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                    console.log(obj.ID);
+                                    insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
+                                    console.log(insert_batch);
+
+                                    batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
+                                        modal.loading(false);
+                                        modal.alert(success_update_message, "success", function() {
+                                            location.reload();
+                                        });
+                                    })
+                                });
+                            } else {
+                                modal.loading(false);
+                                modal.alert('Brand not found', 'error', function() {});
+                            }
                         }
                     });
 
-                }                  
+                }             
             });
         }
     }
@@ -1622,7 +1766,7 @@
         });
     }
 
-    let brandDescriptions = {};
+    let brandDescriptions = [];
     function get_brand(id, dropdown_id) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -1640,25 +1784,19 @@
 
         aJax.post(url,data,function(res){
             var result = JSON.parse(res);
-            var html = '<option id="default_val" value=" ">Select Brand</option>';
-    
+            // var html = '<option id="default_val" value=" ">Select Brand</option>';
+            var html = '';
+
             if(result) {
                 if (result.length > 0) {
                     var selected = '';
-                    $.each(result, function(x,y) {
-                        brandDescriptions[y.id] = y.brand_description;
-                        if (id === y.id) {
-                            selected = 'selected'
-
-                        } else {
-                            selected = ''
-                        }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.brand_code+"</option>"
-                    })
+                    
+                    result.forEach(function (y) {
+                        brandDescriptions.push(y.brand_code + ' - ' + y.brand_description);
+                    });
                 }
             }
-            $('#'+dropdown_id).empty();
-            $('#'+dropdown_id).append(html);
+            // $('#brand').append(html);
         });
     }
 
@@ -1754,13 +1892,22 @@
 
         let html = `
         <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-            <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
+            <input id="brand_${line}" class="form-control" placeholder="Select brand">
             <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                 <i class="fa fa-minus" aria-hidden="true"></i>
             </button>
         </div>
         `;
         $('#brand_list').append(html);
+
+        $(`#brand_${line}`).autocomplete({
+            source: function(request, response) {
+                let results = $.ui.autocomplete.filter(brandDescriptions, request.term);
+                let uniqueResults = [...new Set(results)];
+                response(uniqueResults.slice(0, 10));
+            }
+        })
+
         get_brand('', `brand_${line}`);
     }
 

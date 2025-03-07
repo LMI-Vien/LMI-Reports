@@ -27,7 +27,7 @@ class Year extends BaseController
 		$data['title'] = "Year";
 		$data['PageName'] = 'Year';
 		$data['PageUrl'] = 'Year';
-		$data['buttons'] = ['add', 'search'];
+		$data['buttons'] = ['add', 'search', 'filter'];
 		$data['content'] = "cms/year/year.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(

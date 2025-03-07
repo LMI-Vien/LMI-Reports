@@ -37,6 +37,13 @@
     .ui-widget {
         z-index: 1051 !important;
     }
+
+    #list-data {
+        overflow: visible !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
 </style>
 
     <div class="content-wrapper p-4">
@@ -236,6 +243,8 @@
     
 <script>
     var query = "status >= 0";
+    var column_filter = '';
+    var order_filter = '';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -266,8 +275,8 @@
     });
     
     $(document).on('click', '#btn_add', function() {
-        open_modal('Add New Area', 'add', '');
         get_store('', 'store_0');
+        open_modal('Add New Area', 'add', '');
     });
     
     function edit_data(id) {
@@ -279,6 +288,7 @@
     }
     
     function open_modal(msg, actions, id) {
+        console.log($('#store').val());
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#popup_modal');
@@ -317,7 +327,7 @@
             let html = `
             <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
                 <input id='store_${line}' class='form-control' placeholder='Select store'>
-                <button type="button" class="rmv-btn" onclick="remove_line(${line})">
+                <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
             </div>
@@ -429,35 +439,42 @@
                             disabled = ''
                         }
                         get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
-                            $.each(res, (x, y) => {
-                                // console.log(res);
+                            console.log(res);
+                            for(let key in res) {
+                                console.log(`Key: ${key}, Value: ${res[key]}`);
 
-                                if (actions === 'edit') {
-                                    readonly = (line == 0) ? 'readonly' : '';
-                                    disabled = (line == 0) ? 'disabled' : '';
-                                }
+                                get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
+                                    for(let key1 in res1) {
+                                        console.log(`${res1[key1]} - ${res[key]}`);
 
-                                let html = `
-                                <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                    <input id='store_${line}' class='form-control' placeholder='Select store' value='${y}' ${actions === 'view' ? 'readonly' : ''}>
-                                    <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
-                                        <i class="fa fa-minus" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                                `;
-
-                                $('#store_list').append(html);
-
-                                $(`#store_${line}`).autocomplete({
-                                    source: function(request, response) {
-                                        var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
-                                        var uniqueResults = [...new Set(results)];
-                                        response(uniqueResults.slice(0, 10));
-                                    },
+                                        if (actions === 'edit') {
+                                            readonly = (line == 0) ? 'readonly' : '';
+                                            disabled = (line == 0) ? 'disabled' : '';
+                                        }
+        
+                                        let html = `
+                                        <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                            <input id='store_${line}' class='form-control' placeholder='Select store' value='${res1[key1]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+                                            <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        `;
+        
+                                        $('#store_list').append(html);
+        
+                                        $(`#store_${line}`).autocomplete({
+                                            source: function(request, response) {
+                                                var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                                                var uniqueResults = [...new Set(results)];
+                                                response(uniqueResults.slice(0, 10));
+                                            },
+                                        });
+                                        get_store(x, `store_${line}`);
+                                        line++
+                                    }
                                 });
-                                get_store(x, `store_${line}`);
-                                line++
-                            });
+                            }
                         });
                     })
                     if(d.status == 1) {
@@ -610,7 +627,7 @@
 
         $(".import_pagination").html(paginationHtml);
     }
-    
+
     let storeDescriptions = [];
     function get_store(id, dropdown_id) {
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
@@ -637,13 +654,13 @@
                     var selected = '';
                     
                     result.forEach(function (y) {
-                        storeDescriptions.push(y.description);
-                        html += `<option value="${y.description}">`;
+                        storeDescriptions.push(y.code + ' - ' + y.description);
+                        // html += `<option value="${y.code} - ${y.description}">`;
                     });
                 }
             }
             // console.log(html);
-            $('#stores').append(html);
+            // $('#stores').append(html);
         })
     }
 
@@ -962,7 +979,65 @@
         }
     });
 
-    function get_pagination(query) {
+    $(document).on('click', '#search_button', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        new_query = query;
+        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+        get_data(new_query);
+        get_pagination(new_query);
+    });
+
+    $('#btn_filter').on('click', function(event) {
+        title = addNbsp('FILTER DATA');
+        $('#filter_modal').find('.modal-title').find('b').html(title);
+        $('#filter_modal').modal('show');
+    })
+
+    $('#button_f').on('click', function(event) {
+        let status_f = $("input[name='status_f']:checked").val();
+        let c_date_from = $("#created_date_from").val();
+        let c_date_to = $("#created_date_to").val();
+        let m_date_from = $("#modified_date_from").val();
+        let m_date_to = $("#modified_date_to").val();
+        
+        order_filter = $("input[name='order']:checked").val();
+        column_filter = $("input[name='column']:checked").val();
+        query = "status >= 0";
+        
+        query += status_f ? ` AND status = ${status_f}` : '';
+        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
+        
+        // console.log(query);
+        get_pagination(query, column_filter, order_filter);
+        get_data(query, column_filter, order_filter);
+        $('#filter_modal').modal('hide');
+    })
+    
+    $('#clear_f').on('click', function(event) {
+        order_filter = '';
+        column_filter = '';
+        query = "status >= 0";
+        get_data(query);
+        get_pagination(query);
+        
+        $("input[name='status_f']").prop('checked', false);
+        $("#created_date_from").val('');
+        $('#created_date_to').val('');
+        $('#modified_date_from').val('');
+        $('#modified_date_to').val('');
+        $("input[name='order']").prop('checked', false);
+        $("input[name='column']").prop('checked', false);
+
+        $('#filter_modal').modal('hide');
+    })
+
+    function get_pagination(query, field = "updated_date", order = "desc") {
         var data = {
         event : "pagination",
             select : "id",
@@ -971,8 +1046,8 @@
             limit : limit,
             table : "tbl_area",
             order : {
-                field : "updated_date",
-                order : "desc" 
+                field : field,
+                order : order 
             }
 
         }
@@ -986,23 +1061,30 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query);
+        get_data(query, column_filter, order_by);
     })
 
     function save_data(actions, id) {
         var code = $('#code').val();
         var description = $('#description').val();
-        var store = $('#store').val();
         var chk_status = $('#status').prop('checked');
         var linenum = 0;
+        var store = '';
         var unique_store = [];
         var store_list = $('#store_list');
+        console.log(store);
         // add_line
         store_list.find('input').each(function() {
-            linenum++
             if (!unique_store.includes($(this).val())) {
-                unique_store.push($(this).val())
+                store = $(this).val().split(' - ');
+
+                if(store.length == 2) {
+                    unique_store.push(store[1]);
+                } else {
+                    unique_store.push(store[1] + ' - ' + store[2]);
+                }
             }
+            linenum++
         });
         if (chk_status) {
             status_val = 1;
@@ -1086,9 +1168,10 @@
 
                             if(valid) {
                                 save_to_db(code, description, store, status_val, id, (obj) => {
-                                    total_delete(url, 'tbl_store_group', 'area_id', id);
+                                    insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
+                                    console.log(insert_batch);
 
-                                    batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                    batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
                                         modal.loading(false);
                                         modal.alert(success_update_message, "success", function() {
                                             location.reload();
@@ -1189,17 +1272,17 @@
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
-    function get_data(new_query) {
+    function get_data(query, field = "code, updated_date", order = "asc, desc") {
         var data = {
             event : "list",
             select : "id, code, description, status, created_date, updated_date",
-            query : new_query,
+            query : query,
             offset : offset,
             limit : limit,
             table : "tbl_area",
             order : {
-                field : "code, updated_date",
-                order : "asc, desc" 
+                field : field,
+                order : order
             }
 
         }
