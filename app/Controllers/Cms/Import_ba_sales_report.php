@@ -29,7 +29,7 @@ class Import_ba_sales_report extends BaseController
 		$data['PageName'] = 'Import BA Sales Report';
 		$data['PageUrl'] = 'Import BA Sales Report';
 		$data['content'] = "cms/import/ba_sales_report.php";
-		$data['buttons'] = ['search', 'import'];
+		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
