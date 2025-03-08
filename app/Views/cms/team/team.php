@@ -1014,7 +1014,7 @@
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
 
         const fetchStores = (callback) => {
@@ -1029,33 +1029,42 @@
             };
 
             ids.length > 0 
-                ? get_team_where_in(`"${ids.join(', ')}"`, processResponse)
+                // ? get_team_where_in(`"${ids.join(', ')}"`, processResponse)
+                ? dynamic_search(
+                    "'tbl_team'", "''", "'code, team_description, status'", 0, 0, `'id:IN=${ids.join('|')}'`, `''`, `''`, 
+                    processResponse
+                )
                 : batch_export();
         };
 
         const batch_export = () => {
-            get_team_count((res) => {
-                if (res && res.length > 0) {
-                    let total_records = res[0].total_records;
-                    console.log(total_records, 'total records');
+            dynamic_search(
+                "'tbl_team'", "''", "'COUNT(id) as total_records'", 0, 0, `''`, `''`, `''`, 
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
+                        console.log(total_records, 'total records');
 
-                    for (let index = 0; index < total_records; index += 100000) {
-                        get_team(index, (res) => {
-                            console.log(res, 'look here')
-                            let newData = res.map(({ 
-                                code, team_description, status
-                            }) => ({
-                                Code: code,
-                                Description: team_description,
-                                Status: status === "1" ? "Active" : "Inactive",
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                        for (let index = 0; index < total_records; index += 100000) {
+                            dynamic_search(
+                                "'tbl_team'", "''", "'code, team_description, status'", 100000, index, `''`, `''`, `''`, 
+                                (res) => {
+                                    let newData = res.map(({ 
+                                        code, team_description, status
+                                    }) => ({
+                                        Code: code,
+                                        Description: team_description,
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                    } else {
+                        console.log('No data received');
                     }
-                } else {
-                    console.log('No data received');
                 }
-            })
+            )
         };
 
         fetchStores();
