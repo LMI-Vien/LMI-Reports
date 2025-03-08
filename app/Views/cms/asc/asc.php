@@ -1394,7 +1394,7 @@
         // Collect selected record IDs from checkboxes
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Wrap ID in single quotes
+            ids.push(`${id}`); // Wrap ID in single quotes
         });
         
         /**
@@ -1426,8 +1426,18 @@
             // If specific IDs are selected, fetch corresponding records; 
             // otherwise, perform batch export
             ids.length > 0 
-                ? get_asc_where_in(`"${ids.join(', ')}"`, processResponse)
-                : batch_export();
+            ? dynamic_search(
+                "'tbl_area_sales_coordinator a'", 
+                "'left join tbl_area b on a.area_id = b.id'", 
+                "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
+                0, 
+                0, 
+                `'a.id:IN=${ids.join('|')}'`,  
+                `''`, 
+                `''`, 
+                processResponse
+            )
+            : batch_export();
         };
 
         /**
@@ -1435,36 +1445,56 @@
          * Uses pagination to handle large datasets "efficiently".
          */
         function batch_export() {
-            get_asc_count((res) => {
-                if (res && res.length > 0) {
-                    console.log(res[0].total_records, 'asc count');
+            dynamic_search(
+                "'tbl_area_sales_coordinator a'", 
+                "''", 
+                "'COUNT(id) as total_records'", 
+                0, 
+                0, 
+                `''`,  
+                `''`, 
+                `''`, 
+                (res) => {
+                    if (res && res.length > 0) {
+                        console.log(res[0].total_records, 'asc count');
 
-                    let asc_count = res[0].total_records; // Total number of records
+                        let asc_count = res[0].total_records; // Total number of records
 
-                    // Fetch data in batches of 100,000 records
-                    for (let index = 0; index < asc_count; index += 100000) {
-                        get_asc(index, (res) => {
-                            console.log(res)
-                            let newData = res.map(({
-                                asc_code, asc_description, 
-                                status, deployment_date, 
-                                area_code, area_description 
-                            }) => ({
-                                Code: asc_code,
-                                Description: asc_description,
-                                Status: status === "1" ? "Active" : "Inactive",
-                                "Deployment Date": deployment_date,
-                                "Area Code": area_code,
-                                "Area Description": area_description,
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                        // Fetch data in batches of 100,000 records
+                        for (let index = 0; index < asc_count; index += 100000) {
+                            dynamic_search(
+                                "'tbl_area_sales_coordinator a'", 
+                                "'left join tbl_area b on a.area_id = b.id'", 
+                                "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
+                                100000, 
+                                index, 
+                                `''`,  
+                                `''`, 
+                                `''`, 
+                                (res) => {
+                                    console.log(res)
+                                    let newData = res.map(({
+                                        asc_code, asc_description, 
+                                        status, deployment_date, 
+                                        area_code, area_description 
+                                    }) => ({
+                                        Code: asc_code,
+                                        Description: asc_description,
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                        "Deployment Date": deployment_date,
+                                        "Area Code": area_code,
+                                        "Area Description": area_description,
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                        
+                    } else {
+                        console.log('No data received'); // error handling
                     }
-                    
-                } else {
-                    console.log('No data received'); // error handling
                 }
-            });
+            );
             
         }
 
