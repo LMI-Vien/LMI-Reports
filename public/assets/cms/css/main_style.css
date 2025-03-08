@@ -33,7 +33,7 @@
     }
 
     .tbl-content{
-      max-height: 530px;
+      /* max-height: 530px; */
       overflow: auto;
       margin-top: 10px;
     }

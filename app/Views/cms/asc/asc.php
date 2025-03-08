@@ -30,7 +30,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                    <th class='center-content'>Code</th>
+                                    <th class='center-content'>ASC Code</th>
                                     <th class='center-content'>ASC Name</th>
                                     <th class='center-content'>Status</th>
                                     <th class='center-content'>Created Date</th>
@@ -76,7 +76,7 @@
             <div class="modal-body">
                 <form id="form-save-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">ASC Code</label>
                         <div hidden>
                             <input type="text" class="form-control" id="id" aria-describedby="id">
                         </div>
@@ -173,7 +173,7 @@
                             <thead>
                                 <tr>
                                     <th style="width: 10%;" class='center-content'>Line #</th>
-                                    <th style="width: 20%;" class='center-content'>Code</th>
+                                    <th style="width: 20%;" class='center-content'>ASC Code</th>
                                     <th style="width: 20%;" class='center-content'>ASC Name</th>
                                     <th style="width: 10%;" class='center-content'>Status</th>
                                     <th style="width: 20%;" class='center-content'>Deployment Date</th>
@@ -934,7 +934,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'name', 'deployment date', 'status', 'area'];
+            let td_validator = ['asc code', 'asc name', 'deployment date', 'status', 'area'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -1074,8 +1074,8 @@
         }
         modal.loading(true);
         let jsonData = dataset.map(row => ({
-            "Code": row["Code"] || "",
-            "Name": row["Name"] || "",
+            "ASC Code": row["ASC Code"] || "",
+            "ASC Name": row["ASC Name"] || "",
             "Status": row["Status"] || "",
             "Deployment Date": row["Deployment Date"] || "",
             "Area": row["Area"] || "",
@@ -1340,57 +1340,57 @@
         });
     }
 
-    function batch_insert(insert_batch_data, cb) {
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event: "batch_insert",
-            table: "tbl_area_sales_coordinator",
-            insert_batch_data: insert_batch_data
-        };
+    // function batch_insert(insert_batch_data, cb) {
+    //     var url = "<?= base_url('cms/global_controller');?>";
+    //     var data = {
+    //         event: "batch_insert",
+    //         table: "tbl_area_sales_coordinator",
+    //         insert_batch_data: insert_batch_data
+    //     };
 
-        let retry_count = 0;
-        let max_retries = 5; // Maximum retry attempts
+    //     let retry_count = 0;
+    //     let max_retries = 5; // Maximum retry attempts
 
-        // Function to make the AJAX request and handle retries
-        function attemptInsert() {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: function(result) {
-                    if (result.message === "success") {
-                        cb(true); // Success callback
-                    } else {
-                        handleSaveError(result); // Handle error if message is not success
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Save failed:", status, error);
-                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
-                }
-            });
-        }
+    //     // Function to make the AJAX request and handle retries
+    //     function attemptInsert() {
+    //         $.ajax({
+    //             type: "POST",
+    //             url: url,
+    //             data: data,
+    //             success: function(result) {
+    //                 if (result.message === "success") {
+    //                     cb(true); // Success callback
+    //                 } else {
+    //                     handleSaveError(result); // Handle error if message is not success
+    //                 }
+    //             },
+    //             error: function(xhr, status, error) {
+    //                 console.error("Save failed:", status, error);
+    //                 handleSaveError({ message: 'fail' }); // Handle AJAX failure
+    //             }
+    //         });
+    //     }
 
-        // Handle the error and retry the request
-        function handleSaveError(result) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
-                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
+    //     // Handle the error and retry the request
+    //     function handleSaveError(result) {
+    //         if (retry_count < max_retries) {
+    //             retry_count++;
+    //             let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
+    //             console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
 
-                setTimeout(() => {
-                    console.log(`Retrying attempt ${retry_count}...`);
-                    attemptInsert(); // Retry the insertion
-                }, wait_time);
-            } else {
-                console.error("Failed to save data after multiple attempts.");
-                cb(false); // Call callback with failure if retries exceed max attempts
-            }
-        }
+    //             setTimeout(() => {
+    //                 console.log(`Retrying attempt ${retry_count}...`);
+    //                 attemptInsert(); // Retry the insertion
+    //             }, wait_time);
+    //         } else {
+    //             console.error("Failed to save data after multiple attempts.");
+    //             cb(false); // Call callback with failure if retries exceed max attempts
+    //         }
+    //     }
 
-        // Initiate the first attempt to insert
-        attemptInsert();
-    }
+    //     // Initiate the first attempt to insert
+    //     attemptInsert();
+    // }
 
     // This code is a fine example of reinventing the wheel—except the wheel is square, and occasionally forgets it's a wheel.
     let startTime, endTime;
@@ -1427,8 +1427,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Name": "",
+                "ASC Code": "",
+                "ASC Name": "",
                 "Status": "",
                 "Deployment Date": "",
                 "Area": "",
@@ -1483,8 +1483,8 @@
                     status, deployment_date, 
                     area_code, area_description 
                 }) => ({
-                    Code: asc_code,
-                    Description: asc_description,
+                    "ASC Code": asc_code,
+                    "ASC Name": asc_description,
                     Status: status === "1" ? "Active" : "Inactive",
                     "Deployment Date": deployment_date,
                     "Area Code": area_code,
@@ -1519,8 +1519,8 @@
                                 status, deployment_date, 
                                 area_code, area_description 
                             }) => ({
-                                Code: asc_code,
-                                Description: asc_description,
+                                "ASC Code": asc_code,
+                                "ASC Name": asc_description,
                                 Status: status === "1" ? "Active" : "Inactive",
                                 "Deployment Date": deployment_date,
                                 "Area Code": area_code,

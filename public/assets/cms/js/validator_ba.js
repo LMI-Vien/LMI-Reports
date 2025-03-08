@@ -15,7 +15,7 @@ self.onmessage = async function(e) {
 
         agency_records = ba_data.agencies;
         let agency_lookup = {};
-        agency_records.forEach(agency => agency_lookup[agency.agency] = agency.id);
+        agency_records.forEach(agency => agency_lookup[agency.code] = agency.id);
 
         brand_records = ba_data.brands;
         let brand_lookup = {};
@@ -23,15 +23,27 @@ self.onmessage = async function(e) {
 
         store_records = ba_data.stores;
         let store_lookup = {};
-        store_records.forEach(store => store_lookup[store.description] = store.id);
+        store_records.forEach(store => store_lookup[store.code] = store.id);
+
+        store_area_records = ba_data.store_area;
+        let store_area_lookup = {};
+        store_area_records.forEach(record => {
+            let storeId = String(record.store_id); // Ensure store_id is a string for consistency
+            let areaId = String(record.area_id);   // Ensure area_id is a string for consistency
+
+            if (!store_area_lookup[storeId]) {
+                store_area_lookup[storeId] = new Set();
+            }
+            store_area_lookup[storeId].add(areaId);
+        });
 
         team_records = ba_data.teams;
         let team_lookup = {};
-        team_records.forEach(team => team_lookup[team.team_description] = team.id);
+        team_records.forEach(team => team_lookup[team.code] = team.id);
 
         area_records = ba_data.areas;
         let area_lookup = {};
-        area_records.forEach(area => area_lookup[area.description] = area.id);
+        area_records.forEach(area => area_lookup[area.code] = area.id);
 
         function formatDateForDB(dateStr) {
             let [month, day, year] = dateStr.split('/');
@@ -51,8 +63,8 @@ self.onmessage = async function(e) {
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let code = row["Code"] ? row["Code"].trim() : "";
-                let name = row["Name"] ? row["Name"].trim() : "";
+                let code = row["BA Code"] ? row["BA Code"].trim() : "";
+                let name = row["BA Name"] ? row["BA Name"].trim() : "";
                 let agency = row["Agency"] ? row["Agency"].trim() : "";
                 let brand = row["Brand"] ? row["Brand"] : "";
                 let store = row["Store"] ? row["Store"].trim() : "";
@@ -184,11 +196,33 @@ self.onmessage = async function(e) {
                 }
 
                 let store_lower = store.toLowerCase();
+               
                 if (store_lower in normalized_store_lookup) {
                     store = normalized_store_lookup[store_lower];
                 }else {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
+                    err_counter++;
+                }
+                //  console.log(store, "store");
+                // console.log(store_area_lookup, "store_area_lookup");
+                // if (store in store_area_lookup) {
+                //     if (!store_area_lookup[store].has(area)) {
+                //         invalid = true;
+                //         errorLogs.push(`⚠️ Store is not allowed in Area at line #: ${tr_count}`);
+                //         err_counter++;
+                //     }
+                // }
+
+                if (store in store_area_lookup) {
+                    if (!store_area_lookup[store].has(area)) {  // Check if area_id exists in store's allowed areas
+                        invalid = true;
+                        errorLogs.push(`⚠️ Store is NOT allowed in Area at line #: ${tr_count}`);
+                        err_counter++;
+                    }
+                } else {
+                    invalid = true;
+                    errorLogs.push(`⚠️ Store has NO area mappings at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -206,7 +240,7 @@ self.onmessage = async function(e) {
                         agency: agency,
                         area: area,
                         status: status.toLowerCase() === "active" ? 1 : 0,
-                        type: type.toLowerCase() === "consign" ? 1 : 0,
+                        type: type.toLowerCase() === "outright" ? 1 : 0,
                         created_by: user_id,
                         created_date: date_of_creation
                     });

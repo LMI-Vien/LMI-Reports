@@ -930,4 +930,42 @@ class Global_model extends Model
     // ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
     // ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+    
+    function get_vmi($vmiOffset) {
+        $query = $this->db->query("CALL get_vmi($vmiOffset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_vmi_where_in($vmiIds) {
+        $query = $this->db->query("CALL get_vmi_where_in($vmiIds)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_vmi_count() {
+        $query = $this->db->query("CALL get_vmi_count()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany) {
+        $query = $this->db->query("CALL get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    //additional temp
+    function get_brand_data($order, $limit, $offset) {
+        $query = $this->db->query("CALL get_brands('$order', $limit, $offset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_valid_records_store_group() {
+
+
+        $results = $this->db->table('tbl_store_group')
+            ->select('id, area_id, store_id')
+            ->get()
+            ->getResultArray();
+
+            return $results;
+
+    }
 }

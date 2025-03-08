@@ -35,8 +35,8 @@ self.onmessage = async function(e) {
                 let row = data[index];
                 let tr_count = index + 1;
 
-                let code = row["Code"] ? row["Code"].trim() : "";
-                let description = row["Name"] ? row["Name"].trim() : "";
+                let code = row["Area Code"] ? row["Area Code"].trim() : "";
+                let description = row["Description"] ? row["Description"].trim() : "";
                 let status = row["Status"] ? row["Status"].toLowerCase() : "";
                 let stores = row["Stores"] ? row["Stores"] : "";
                 let user_id = row["Created By"] ? row["Created By"].trim() : "";

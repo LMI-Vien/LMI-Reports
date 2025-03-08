@@ -65,8 +65,8 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                        <th class='center-content'>Code</th>
-                                        <th class='center-content'>Name</th>
+                                        <th class='center-content'>BA Code</th>
+                                        <th class='center-content'>BA Name</th>
                                         <!-- <th class='center-content'>Deployment Date</th>
                                         <th class='center-content'>Agency</th>
                                         <th class='center-content'>Brand</th>
@@ -113,14 +113,14 @@
             <div class="modal-body">
                 <form id="form-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">BA Code</label>
                         <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                         <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label">Name</label>
+                        <label for="description" class="form-label">BA Name</label>
                         <input type="text" class="form-control required" id="name" maxlength="50" aria-describedby="description">
                         <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                     </div>
@@ -162,21 +162,22 @@
                             </div>
                         </div>
 
+
+                    <div class="form-group">
+                        <label>Area</label>
+                        <select name="area" class="form-control required" id="area">
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>Store</label>
-                        <select name="area" class="form-control required" id="store">
+                        <select name="store" class="form-control required" id="store">
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Team</label>
-                        <select name="area" class="form-control required" id="team">
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Area</label>
-                        <select name="area" class="form-control required" id="area">
+                        <select name="team" class="form-control required" id="team">
                         </select>
                     </div>
 
@@ -218,7 +219,7 @@
 
                 <div class="modal-body">
                     <div class="card">
-                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="mb-3">
                             <div class="text-center"
                             style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
                             >
@@ -252,25 +253,26 @@
                                     </label>
                                 </div>
                             </div>
-
-                            <table class= "table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content' scope="col">Line #</th>
-                                        <th class='center-content' scope="col">Code</th>
-                                        <th class='center-content' scope="col">Name</th>
-                                        <th class='center-content' scope="col">Deployment Date</th>
-                                        <th class='center-content' scope="col">Agency</th>
-                                        <th class='center-content' scope="col">Brand</th>
-                                        <th class='center-content' scope="col">Store</th>
-                                        <th class='center-content' scope="col">Team</th>
-                                        <th class='center-content' scope="col">Area</th>
-                                        <th class='center-content' scope="col">Type</th>
-                                        <th class='center-content' scope="col">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="word_break import_table"></tbody>
-                            </table>
+                            <div style="overflow-x: auto; max-height: 400px;">
+                                <table class= "table table-bordered listdata">
+                                    <thead>
+                                        <tr>
+                                            <th class='center-content' scope="col">Line #</th>
+                                            <th class='center-content' scope="col">Code</th>
+                                            <th class='center-content' scope="col">Name</th>
+                                            <th class='center-content' scope="col">Deployment Date</th>
+                                            <th class='center-content' scope="col">Agency</th>
+                                            <th class='center-content' scope="col">Brand</th>
+                                            <th class='center-content' scope="col">Store</th>
+                                            <th class='center-content' scope="col">Team</th>
+                                            <th class='center-content' scope="col">Area</th>
+                                            <th class='center-content' scope="col">Type</th>
+                                            <th class='center-content' scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="word_break import_table"></tbody>
+                                </table>
+                            </div>
                         </div>
                         <center style="margin-bottom: 5px">
                             <div class="import_pagination btn-group"></div>
@@ -396,15 +398,37 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id, status",
+            select : "ba.id, ba.status",
             query : query,
             offset : offset,
             limit : limit,
             table : "tbl_brand_ambassador ba",
             order : {
-                field : "updated_date", //field to order
+                field : "ba.updated_date", //field to order
                 order : "desc" //asc or desc
-            }
+            },
+            join : [
+                {
+                    table: "tbl_agency a",
+                    query: "a.id = ba.agency",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = ba.store",
+                    type: "left"
+                },
+                {
+                    table: "tbl_team t",
+                    query: "t.id = ba.team",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area ar",
+                    query: "ar.id = ba.area",
+                    type: "left"
+                }
+            ] 
 
         }
 
@@ -510,9 +534,8 @@
 
     $('#btn_add').on('click', function() {
         open_modal('Add New Brand Ambassador', 'add', '');
-        get_area('');
+        get_area('', '');
         get_agency('');
-        get_store('');
         get_team('');
         get_brand('', 'brand_0');
     });
@@ -665,7 +688,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
+            let td_validator = ['ba code', 'ba name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -818,8 +841,8 @@
             }
 
             return {
-                "Code": row["Code"] || "",
-                "Name": row["Name"] || "",
+                "BA Code": row["BA Code"] || "",
+                "BA Name": row["BA Name"] || "",
                 "Deployment Date": row["Deployment Date"] ? row["Deployment Date"] : "",
                 "Agency": row["Agency"] || "",
                 "Brand": row["Brand"] || "",
@@ -848,7 +871,10 @@
                         'error',
                         '⚠️ Too many errors detected. Please download the error log for details.',
                         '600px',
-                        () => {read_xl_file()}
+                        () => {
+                            read_xl_file();
+                            btn.prop("disabled", false);
+                        }
                     );
                 } else {
                     modal.content(
@@ -856,7 +882,10 @@
                         'error',
                         errorLogs.join("<br>"),
                         '600px',
-                        () => {read_xl_file()}
+                        () => {
+                            read_xl_file();
+                            btn.prop("disabled", false);
+                        }
                     );
                 }
                 createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
@@ -1298,12 +1327,12 @@
                     get_agency(ba.agency);
                     $('#brand').val(ba.brand);
                     $('#store').val(ba.store);
-                    get_store(ba.store);
+                    //get_store(ba.store, ba.area);
                     $('#team').val(ba.team);
                     get_team(ba.team);
                     $('#area').val(ba.area);
                     //console.log(area);
-                    get_area(ba.area);
+                    get_area(ba.store, ba.area);
 
                     var line = 0;
                     var readonly = '';
@@ -1607,7 +1636,7 @@
     }
 
     let areaDescriptions = {}; 
-    function get_area(id) {
+    function get_area(id, area_id) {
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
         var data = {
             event : "list",
@@ -1631,7 +1660,7 @@
                     var selected = '';
                     $.each(result, function(x,y) {
                         areaDescriptions[y.id] = y.description;
-                        if (id === y.id) {
+                        if (area_id === y.id) {
                             selected = 'selected'
 
                         } else {
@@ -1643,6 +1672,7 @@
             }
             $('#area').empty();
             $('#area').append(html);
+            get_store(id, area_id);
         });
     }
 
@@ -1687,17 +1717,24 @@
     }
 
     let storeDescriptions = {};
-    function get_store(id) {
+    function get_store(id, area_id) {
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
         var data = {
             event : "list",
-            select : "id, code, description, status",
-            query : 'status >= 0',
+            select : "sg.id as sgid, s.id as id, s.code as code, s.description as description, s.status",
+            query : 's.status >= 0 AND sg.area_id = '+ area_id,
             offset : 0,
             limit : 0,
-            table : "tbl_store",
+            table : "tbl_store_group sg",
+            join : [
+                {
+                    table: "tbl_store s",
+                    query: "s.id = sg.store_id",
+                    type: "left"
+                }
+            ],
             order : {
-                field : "code",
+                field : "s.code",
                 order : "asc" 
             }
         }
@@ -1807,6 +1844,12 @@
             return str;
         }
     }
+
+    $(document).on('change', '#area', function (e) {
+        area_id = $('#area').val();
+        get_store('', area_id);
+
+    });
 
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
@@ -1920,8 +1963,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Name": "",
+                "BA Code": "",
+                "BA Name": "",
                 "Deployment Date": "",
                 "Agency": "",
                 "Brand": "",
@@ -1962,8 +2005,8 @@
                 formattedData = res.map(({ 
                     code, description, deployed_date, type, status, brands, agency, store, team, area
                 }) => ({
-                    Code: code,
-                    Name: description,
+                    "BA Code": code,
+                    "BA Name": description,
                     "Deployment Date": deployed_date,
                     Agency: agency,
                     Brand: brands,

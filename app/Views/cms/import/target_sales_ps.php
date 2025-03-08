@@ -122,73 +122,73 @@
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
-                            <label for="store" class="form-label">Location</label>
+                            <label for="location" class="form-label">Location</label>
                             <input type="text" class="form-control required" id="location" aria-describedby="location">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Location Description</label>
+                            <label for="location_desc" class="form-label">Location Description</label>
                             <input type="text" class="form-control required" id="location_desc" aria-describedby="location_desc">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">January</label>
+                            <label for="jan" class="form-label">January</label>
                             <input type="text" class="form-control required" id="jan" aria-describedby="jan">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">February</label>
+                            <label for="feb" class="form-label">February</label>
                             <input type="text" class="form-control required" id="feb" aria-describedby="feb">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="code" class="form-label">March</label>
+                            <label for="mar" class="form-label">March</label>
                             <input type="text" class="form-control required" id="mar" aria-describedby="mar">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">April</label>
+                            <label for="apr" class="form-label">April</label>
                             <input type="text" class="form-control required" id="apr" aria-describedby="apr">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">May</label>
+                            <label for="may" class="form-label">May</label>
                             <input type="text" class="form-control required" id="may" aria-describedby="may">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">June</label>
+                            <label for="jun" class="form-label">June</label>
                             <input type="text" class="form-control required" id="jun" aria-describedby="jun">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">July</label>
+                            <label for="jul" class="form-label">July</label>
                             <input type="text" class="form-control required" id="jul" aria-describedby="jul">
                         </div>
 
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">August</label>
+                            <label for="aug" class="form-label">August</label>
                             <input type="text" class="form-control required" id="aug" aria-describedby="aug">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">September</label>
+                            <label for="sep" class="form-label">September</label>
                             <input type="text" class="form-control required" id="sep" aria-describedby="sep">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">October</label>
+                            <label for="oct" class="form-label">October</label>
                             <input type="text" class="form-control required" id="oct" aria-describedby="oct">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">November</label>
+                            <label for="nov" class="form-label">November</label>
                             <input type="text" class="form-control required" id="nov" aria-describedby="nov">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">December</label>
+                            <label for="dec" class="form-label">December</label>
                             <input type="text" class="form-control required" id="dec" aria-describedby="dec">
                         </div>
                     </form>
@@ -556,13 +556,13 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_desc",
+            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description",
             query : query, 
             table : "tbl_target_sales_per_store pr",
             join: [
                 {
                     table: "tbl_store s1",
-                    query: "s1.id = pr.location",
+                    query: "s1.id = pr.location AND s1.id = pr.location_description",
                     type: "left"
                 }
             ]
@@ -572,19 +572,19 @@
             if(obj){
                 $.each(obj, function(index,d) {
                     $('#location').val(d.location);
-                    $('#location_desc').val(d.location_desc);
+                    $('#location_desc').val(d.location_description);
                     $('#jan').val(Math.round(d.january).toLocaleString());
-                    $('#feb').val(d.february);
-                    $('#mar').val(d.march);
-                    $('#apr').val(d.april);
-                    $('#may').val(d.may);
-                    $('#jun').val(d.june);
-                    $('#jul').val(d.july);
-                    $('#aug').val(d.august);
-                    $('#sep').val(d.september);
-                    $('#oct').val(d.october);
-                    $('#nov').val(d.november);
-                    $('#dec').val(d.december);
+                    $('#feb').val(Math.round(d.february).toLocaleString());
+                    $('#mar').val(Math.round(d.march).toLocaleString());
+                    $('#apr').val(Math.round(d.april).toLocaleString());
+                    $('#may').val(Math.round(d.may).toLocaleString());
+                    $('#jun').val(Math.round(d.june).toLocaleString());
+                    $('#jul').val(Math.round(d.july).toLocaleString());
+                    $('#aug').val(Math.round(d.august).toLocaleString());
+                    $('#sep').val(Math.round(d.september).toLocaleString());
+                    $('#oct').val(Math.round(d.october).toLocaleString());
+                    $('#nov').val(Math.round(d.november).toLocaleString());
+                    $('#dec').val(Math.round(d.december).toLocaleString());
                 }); 
             }
         });

@@ -50,10 +50,10 @@ class Import_ba_sales_report extends BaseController
 	}
 
 	public function get_valid_ba_data(){
-		$ba = $this->Global_model->get_valid_records("tbl_brand_ambassador", 'name');
+		$ba = $this->Global_model->get_valid_records("tbl_brand_ambassador", 'code');
 		$brands = $this->Global_model->get_valid_records("tbl_brand", 'brand_description');
-		$stores = $this->Global_model->get_valid_records("tbl_store", 'description');
-		$areas = $this->Global_model->get_valid_records("tbl_area", 'description');
+		$stores = $this->Global_model->get_valid_records("tbl_store", 'code');
+		$areas = $this->Global_model->get_valid_records("tbl_area", 'code');
 		return $this->response->setJSON(["ba" => $ba, "brands" => $brands, "stores" => $stores, "areas" => $areas]);
 	}
 

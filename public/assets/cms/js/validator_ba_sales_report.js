@@ -14,7 +14,7 @@ self.onmessage = async function(e) {
         let ba_data = await get_ba_valid_response.json();
         ba_records = ba_data.ba;
         let ba_lookup = {};
-        ba_records.forEach(ba => ba_lookup[ba.name] = ba.id);
+        ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
 
         brand_records = ba_data.brands;
         let brand_lookup = {};
@@ -22,11 +22,11 @@ self.onmessage = async function(e) {
 
         store_records = ba_data.stores;
         let store_lookup = {};
-        store_records.forEach(store => store_lookup[store.description] = store.id);
+        store_records.forEach(store => store_lookup[store.code] = store.id);
 
         area_records = ba_data.areas;
         let area_lookup = {};
-        area_records.forEach(area => area_lookup[area.description] = area.id);
+        area_records.forEach(area => area_lookup[area.code] = area.id);
 
         function formatDateForDB(dateStr) {
             let [month, day, year] = dateStr.split('/');
@@ -45,10 +45,10 @@ self.onmessage = async function(e) {
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let area = row["Area"] ? row["Area"].trim() : "";
-                let store_name = row["Store Name"] ? row["Store Name"].trim() : "";
+                let ba_name = row["BA Code"] ? row["BA Code"].trim() : "";
+                let area = row["Area Code"] ? row["Area Code"].trim() : "";
+                let store_name = row["Store Code"] ? row["Store Code"].trim() : "";
                 let brand = row["Brand"] ? row["Brand"].trim() : "";
-                let ba_name = row["BA Name"] ? row["BA Name"].trim() : "";
                 let date = row["Date"] ? row["Date"]: "";
                 let amount = row["Amount"] ? row["Amount"].trim() : "";
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
@@ -56,25 +56,25 @@ self.onmessage = async function(e) {
 
                 if (store_name === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store Name at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Empty Store Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
                 if (area === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Area at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Empty Area Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
                 if (brand === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Brand at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Empty Brand at line #: ${tr_count}`);
                     err_counter++;
                 }
 
                 if (ba_name === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Brand Ambassador at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Empty Brand Ambassador Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -101,7 +101,7 @@ self.onmessage = async function(e) {
                     store_name = normalized_store_lookup[store_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Store Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -129,7 +129,7 @@ self.onmessage = async function(e) {
                     ba_name = normalized_ba_lookup[ba_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Brand Ambassador at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -143,7 +143,7 @@ self.onmessage = async function(e) {
                     area = normalized_area_lookup[area_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Area at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Area Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 

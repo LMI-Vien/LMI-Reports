@@ -108,53 +108,60 @@ class Cms_preference extends BaseController
     }
 
 	public function get_site_menu() {
-		$session = session();
-		$select = 'id, menu_url, menu_name, menu_type, menu_parent_id';
-		$query = 'status = 1';
-		$result = $this->Custom_model->get_site_menu_list('site_menu', $select, $query);
-	
-		$menuTree = [];
-		$menuLookup = [];
-	
-		foreach ($result as $menu) {
-			$menu->children = [];
-			$menuLookup[$menu->id] = $menu;
-		}
-	
-		foreach ($result as $menu) {
-			if ($menu->menu_parent_id == 0) {
-				$menuTree[$menu->id] = $menu;
-			} else {
-				if (isset($menuLookup[$menu->menu_parent_id])) {
-					$menuLookup[$menu->menu_parent_id]->children[] = $menu;
-				}
-			}
-		}
-	
-		$html = '<ul class="navbar-nav">' . $this->generateMenuHtml($menuTree) . '</ul>';
-		return $this->response->setBody($html); 
+	    $session = session();
+	    $select = 'id, menu_url, menu_name, menu_type, menu_parent_id';
+	    $query = 'status = 1';
+	    $result = $this->Custom_model->get_site_menu_list('site_menu', $select, $query);
+
+	    $menuTree = [];
+	    $menuLookup = [];
+
+	    foreach ($result as $menu) {
+	        $menu->children = [];
+	        $menuLookup[$menu->id] = $menu;
+	    }
+
+	    foreach ($result as $menu) {
+	        if ($menu->menu_parent_id == 0) {
+	            $menuTree[$menu->id] = $menu;
+	        } else {
+	            if (isset($menuLookup[$menu->menu_parent_id])) {
+	                $menuLookup[$menu->menu_parent_id]->children[] = $menu;
+	            }
+	        }
+	    }
+
+	    $html = '<ul class="navbar-nav mr-auto">' . $this->generateMenuHtml($menuTree) . '</ul>';
+	    return $this->response->setBody($html);
 	}
-	
+
 	private function generateMenuHtml($menuTree) {
-		$html = '';
-	
-		foreach ($menuTree as $menu) {
-			$new_location = $menu->menu_url;
-			if (!empty($menu->children)) {
-				$html .= '
-				<li class="nav-item dropdown">
-					<a href="#" class="nav-link dropdown-toggle" id="menu-'.$menu->id.'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						'.($menu->menu_name).'
-					</a>
-					<ul class="dropdown-menu" aria-labelledby="menu-'.$menu->id.'">
-						'.$this->generateMenuHtml($menu->children).'
-					</ul>
-				</li>';
-			} else {
-				$html .= '<li class="nav-item"><a class="nav-link" href="'.base_url().$new_location.'">'.($menu->menu_name).'</a></li>';
-			}
-		}
-	
-		return $html;
+	    $html = '';
+
+	    foreach ($menuTree as $menu) {
+	        $new_location = base_url() . $menu->menu_url;
+	        $icon = isset($menu->icon_class) ? '<i class="' . $menu->icon_class . '"></i> ' : '';
+
+	        if (!empty($menu->children)) {
+	            $html .= '<li class="nav-item dropdown">';
+	            $html .= '<a class="nav-link dropdown-toggle" href="#" id="menu-' . $menu->id . '" role="button" data-toggle="dropdown">';
+	            $html .= $icon . $menu->menu_name;
+	            $html .= '</a>';
+	            $html .= '<div class="dropdown-menu" aria-labelledby="menu-' . $menu->id . '">';
+	            foreach ($menu->children as $child) {
+	                $child_location = base_url() . $child->menu_url;
+	                $child_icon = isset($child->icon_class) ? '<i class="' . $menu->id . '"></i> ' : '';
+	                $html .= '<a class="dropdown-item" href="' . $child_location . '">' . $child_icon . $child->menu_name . '</a>';
+	            }
+	            $html .= '</div>';
+	            $html .= '</li>';
+	        } else {
+	            $html .= '<li class="nav-item">';
+	            $html .= '<a class="nav-link" href="' . $new_location . '">' . $icon . $menu->menu_name . '</a>';
+	            $html .= '</li>';
+	        }
+	    }
+
+	    return $html;
 	}
 }

@@ -71,10 +71,10 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                        <th class='center-content'>Area</th>
-                                        <th class='center-content'>Store Name</th>
-                                        <th class='center-content'>Brand</th>
                                         <th class='center-content'>BA Name</th>
+                                        <th class='center-content'>Area</th>
+                                        <th class='center-content'>Store</th>
+                                        <th class='center-content'>Brand</th>
                                         <th class='center-content'>Date</th>
                                         <th class='center-content'>Amount</th>
                                         <th class='center-content'>Status</th>
@@ -116,35 +116,35 @@
                 <div class="modal-body">
                     <form id="form-modal">
                         <div class="mb-3">
+                            <label for="ba_name" class="form-label">BA Name</label>
+                            <input type="text" class="form-control required" id="ba_name" aria-describedby="ba_name">
+                        </div>
+
+                        <div class="mb-3">
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
-                            <label for="store" class="form-label">Area</label>
+                            <label for="area" class="form-label">Area</label>
                             <input type="text" class="form-control required" id="area" aria-describedby="area">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Store Name</label>
+                            <label for="store_name" class="form-label">Store Name</label>
                             <input type="text" class="form-control required" id="store_name" aria-describedby="store_name">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Brand</label>
+                            <label for="brand" class="form-label">Brand</label>
                             <input type="text" class="form-control required" id="brand" aria-describedby="brand">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="code" class="form-label">BA Name</label>
-                            <input type="text" class="form-control required" id="ba_name" aria-describedby="ba_name">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="code" class="form-label">Date</label>
+                            <label for="date" class="form-label">Date</label>
                             <input type="date" class="form-control required" id="date" aria-describedby="date">
                         </div>
 
                         <div class="mb-3">
-                            <label for="code" class="form-label">Amount</label>
+                            <label for="amount" class="form-label">Amount</label>
                             <input type="text" class="form-control required" id="amount" aria-describedby="amount">
                         </div>
                     </form>
@@ -198,10 +198,10 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content'>Line #</th>
-                                        <th class='center-content'>Area</th>
-                                        <th class='center-content'>Store Name</th>
-                                        <th class='center-content'>Brand</th>
                                         <th class='center-content'>BA Name</th>
+                                        <th class='center-content'>Area</th>
+                                        <th class='center-content'>Store</th>
+                                        <th class='center-content'>Brand</th>
                                         <th class='center-content'>Date</th>
                                         <th class='center-content'>Amount</th>
                                     </tr>
@@ -253,23 +253,24 @@
                         <div class="d-flex flex-column">
                             <div class="p-2 row">
                                 <div class="col">
-                                    <label class="col" >Area</label>
-                                    <input id='area_input' class='form-control' onkeypress="suggest_area()" placeholder='Select Area'>
+                                    <label class="col" >BA Name</label>
+                                    <input id='ba_input' class='form-control' onkeypress="suggest_ba()" placeholder='Select BA Name'>
                                 </div>
                                 <div class="col">
-                                    <label class="col" >Store</label>
-                                    <input id='store_input' class='form-control' onkeypress="suggest_store()" placeholder='Select Store'>
+                                    <label class="col" >Area</label>
+                                    <input id='area_input' class='form-control' onkeypress="suggest_area()" placeholder='Select Area'>
                                 </div>
                             </div>
                             <div class="p-2 row">
                                 <div class="col">
+                                    <label class="col" >Store</label>
+                                    <input id='store_input' class='form-control' onkeypress="suggest_store()" placeholder='Select Store'>
+                                </div>
+                                <div class="col">
                                     <label class="col" >Brand</label>
                                     <input id='brand_input' class='form-control' onkeypress="suggest_brand()" placeholder='Select Brand'>
                                 </div>
-                                <div class="col">
-                                    <label class="col" >BA Name</label>
-                                    <input id='ba_input' class='form-control' onkeypress="suggest_ba()" placeholder='Select BA Name'>
-                                </div>
+
                             </div>
                             <div class="p-2 row">
                                 <div class="col">
@@ -584,19 +585,41 @@
     });
 
     function populate_modal(inp_id) {
-        var query = "status >= 0 and id = " + inp_id;
+        var query = "basr.status >= 0 and basr.id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, area, store_name, brand, ba_name, date, amount",
+            select : "basr.id, a.code as area , s.description as store_name, br.brand_description as brand, bra.name as ba_name, basr.date, basr.amount",
             query : query, 
-            table : "tbl_ba_sales_report"
+            table : "tbl_ba_sales_report basr",
+            join: [
+                {
+                    table: "tbl_area a",
+                    query: "a.id = basr.area",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = basr.store_name",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand br",
+                    query: "br.id = basr.brand",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador bra",
+                    query: "bra.id = basr.ba_name",
+                    type: "left"
+                }
+            ]
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
-                    $('#area').val(d.area);
+                    $('#area').val(d.area); 
                     $('#store_name').val(d.store_name);
                     $('#brand').val(d.brand);
                     $('#ba_name').val(d.ba_name);
@@ -890,10 +913,10 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Area": row["Area"] || "",
-                "Store Name": row["Store Name"] || "",
+                "BA Code": row["BA Code"] || "",
+                "Area Code": row["Area Code"] || "",
+                "Store Code": row["Store Code"] || "",
                 "Brand": row["Brand"] || "",
-                "BA Name": row["BA Name"] || "",
                 "Date": row["Date"] || "",
                 "Amount": row["Amount"] || "",
                 "Created by": user_id || "", 
@@ -913,7 +936,7 @@
                         ? '⚠️ Too many errors detected. Please download the error log for details.'
                         : errorLogs.join("<br>");
                     modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
-                        read_xl_file();
+                        //read_xl_file();
                         btn.prop("disabled", false);
                     });
                     createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
@@ -926,10 +949,9 @@
                     modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
                 }
             }else{
-                modal.loading(false);
-                modal.loading_progress(true); 
-                updateSwalProgress("Validating data...", progress);
-            
+                //modal.loading(false);
+               // modal.loading_progress(true); 
+                //updateSwalProgress("Validating data...", progress);
             }
 
         };
@@ -982,7 +1004,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['area', 'store name', 'brand', 'ba name', 'date', 'amount'];
+            let td_validator = ['ba code', 'area code', 'store code', 'brand', 'date', 'amount'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; 
 
@@ -1254,10 +1276,10 @@
     function download_template() {
         let formattedData = [
             {
-                "Area":"",
-                "Store Name":"",
+                "BA Code":"",
+                "Area Code":"",
+                "Store Code":"",
                 "Brand":"",
-                "BA Name":"",
                 "Date":"",
                 "Amount":"",
                 "Status":"",
@@ -1418,10 +1440,10 @@
                                     let newData = res.map(({ 
                                         area, store_name, brand, ba_name, date, amount, status,
                                     }) => ({
-                                        "Area":temp_area[area],
-                                        "Store Name":temp_store[store_name],
+                                        "BA Code":temp_baArr[ba_name],
+                                        "Area Code":temp_area[area],
+                                        "Store Code":temp_store[store_name],
                                         "Brand":temp_brand[brand],
-                                        "BA Name":temp_baArr[ba_name],
                                         "Date":date,
                                         "Amount":amount,
                                         "Status": parseInt(status) === 1 ? "Active" : "Inactive",
@@ -1438,10 +1460,10 @@
             if (!formattedData || formattedData.length === 0) {
                 formattedData = [
                     {
-                        "Area":"No data retrieved",
-                        "Store Name":"",
+                        "BA Code":"",
+                        "Area Code":"",
+                        "Store Code":"",
                         "Brand":"",
-                        "BA Name":"",
                         "Date":"",
                         "Amount":"",
                         "Status":"",
@@ -1537,10 +1559,10 @@
                     formattedData = res.map(({ 
                         area, store_name, brand, ba_name, date, amount, status,
                     }) => ({
-                        "Area":temp_area[area],
-                        "Store Name":temp_store[store_name],
+                        "BA Code":temp_baArr[ba_name],
+                        "Area Code":temp_area[area],
+                        "Store Code":temp_store[store_name],
                         "Brand":temp_brand[brand],
-                        "BA Name":temp_baArr[ba_name],
                         "Date":date,
                         "Amount":amount,
                         "Status": parseInt(status) === 1 ? "Active" : "Inactive",
@@ -1642,10 +1664,10 @@
                                         let newData = res.map(({ 
                                             area, store_name, brand, ba_name, date, amount, status,
                                         }) => ({
-                                            "Area":temp_area[area],
-                                            "Store Name":temp_store[store_name],
+                                            "BA Code":temp_baArr[ba_name],
+                                            "Area Code":temp_area[area],
+                                            "Store Code":temp_store[store_name],
                                             "Brand":temp_brand[brand],
-                                            "BA Name":temp_baArr[ba_name],
                                             "Date":date,
                                             "Amount":amount,
                                             "Status": parseInt(status) === 1 ? "Active" : "Inactive",

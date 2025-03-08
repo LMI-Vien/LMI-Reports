@@ -79,6 +79,8 @@ class Global_controller extends BaseController
 
 					$limit = isset($_POST['limit'])? $_POST['limit'] : 99999;
 					$offset = isset($_POST['offset'])? $_POST['offset'] : 1;
+					// print_r($limit);
+					// die();
 					$order_field = isset($_POST['order']['field'])? $_POST['order']['field'] : null;
 					$order_type = isset($_POST['order']['order']) ? $_POST['order']['order']: null;
 					$join = isset($_POST['join']) ? $_POST['join']: null;

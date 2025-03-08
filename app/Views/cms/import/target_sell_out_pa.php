@@ -442,7 +442,7 @@
                                         <th class='center-content'>October TQ</th>
                                         <th class='center-content'>November TQ</th>
                                         <th class='center-content'>December TQ</th>
-                              
+                        
                                         <th class='center-content'>January TA</th>
                                         <th class='center-content'>February TA</th>
                                         <th class='center-content'>March TA</th>
