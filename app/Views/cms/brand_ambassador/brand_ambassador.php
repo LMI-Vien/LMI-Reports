@@ -1997,78 +1997,300 @@
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
 
         const fetchStores = (callback) => {
             const processResponse = (res) => {
+                let agency_ids = [];
+                let store_ids = [];
+                let team_ids = [];
+                let area_ids = [];
+                let brand_ids = [];
+
+                let agency_map = {}
+                let store_map = {};
+                let team_map = {};
+                let area_map = {};
+                let brand_map = {};
+
+                res.forEach(item => {
+                    agency_ids.push(`${item.agency}`);
+                    store_ids.push(`${item.store}`);
+                    team_ids.push(`${item.team}`);
+                    area_ids.push(`${item.area}`);
+                    brand_ids.push(`${item.id}`);
+                });
+
+                dynamic_search(
+                    "'tbl_agency'", "''", "'id, agency'", 0, 0, `'id:IN=${agency_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!agency_map[item.id]) {
+                                    agency_map[item.id] = {};
+                                }
+                                agency_map[item.id] = item.agency;
+                            }
+                        );
+                    }
+                );
+
+                dynamic_search(
+                    "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!store_map[item.id]) {
+                                    store_map[item.id] = {};
+                                }
+                                store_map[item.id] = item.description;
+                            }
+                        );
+                    }
+                );
+
+                dynamic_search(
+                    "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!team_map[item.id]) {
+                                    team_map[item.id] = {};
+                                }
+                                team_map[item.id] = item.team_description;
+                            }
+                        );
+                    }
+                );
+
+                dynamic_search(
+                    "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!area_map[item.id]) {
+                                    area_map[item.id] = {};
+                                }
+                                area_map[item.id] = item.description;
+                            }
+                        );
+                    }
+                );
+                
+                dynamic_search(
+                    "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
+                    "'a.ba_id as id, GROUP_CONCAT(DISTINCT b.brand_code ORDER BY b.brand_code ASC SEPARATOR \", \") AS brands'", 
+                    0, 0, `'a.ba_id:IN=${brand_ids.join('|')}'`, `''`, `'a.ba_id'`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!brand_map[item.id]) {
+                                    brand_map[item.id] = {};
+                                }
+                                brand_map[item.id] = item.brands;
+                            }
+                        );
+                    }
+                );
+
+                console.log(agency_map, 'agency_map');
+                console.log(store_map, 'store_map');
+                console.log(team_map, 'team_map');
+                console.log(area_map, 'area_map');
+                console.log(brand_map, 'brand_map');
+                
                 formattedData = res.map(({ 
-                    code, description, deployed_date, type, status, brands, agency, store, team, area
+                    id, 
+                    code, description, deployed_date, type, status, 
+                    agency, store, team, area
                 }) => ({
                     "BA Code": code,
                     "BA Name": description,
                     "Deployment Date": deployed_date,
-                    Agency: agency,
-                    Brand: brands,
-                    Store: store,
-                    Team: team,
-                    Area: area,
+                    Agency: agency_map[agency],
+                    Brand: brand_map[id],
+                    Store: store_map[store],
+                    Team: team_map[team],
+                    Area: area_map[area].trim(),
                     Type: type === "1" ? "Outright" : "Consign",
                     Status: status === "1" ? "Active" : "Inactive",
                 }));
             };
 
             ids.length > 0 
-                ? get_brand_ambassador_where_in(`"${ids.join(', ')}"`, processResponse)
+                ? dynamic_search(
+                    "'tbl_brand_ambassador'", 
+                    "''", 
+                    "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
+                    0, 
+                    0, 
+                    `'id:IN=${ids.join('|')}'`,  
+                    `''`, 
+                    `''`, 
+                    processResponse
+                )
                 : batch_export();
         };
 
         const batch_export = () => {
-            get_brand_ambassador_count((res) => {
-                if (res && res.length > 0) {
-                    let total_records = res[0].total_records;
-                    console.log(total_records, 'total records');
+            dynamic_search(
+                "'tbl_brand_ambassador'", 
+                "''", 
+                "'COUNT(id) as total_records'",
+                0, 
+                0, 
+                `''`, 
+                `''`, 
+                `''`, 
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
+                        console.log(total_records, 'total records');
 
-                    for (let index = 0; index < total_records; index += 100000) {
-                        console.log(index, 'index here')
-                        var ano_ire = [];
+                        for (let index = 0; index < total_records; index += 100000) {
+                            console.log(index, 'index here')
+                            var ano_ire = [];
 
-                        get_brand_ambassador_brands(index, (result) => {
-                            console.log(result, 'result here');
+                            get_brand_ambassador_brands(index, (result) => {
+                                console.log(result, 'result here');
 
-                            result.forEach(({ id, brands }) => {
-                                ano_ire[id] = brands;  // Assign value to ano_ire array using id as index
+                                result.forEach(({ id, brands }) => {
+                                    ano_ire[id] = brands;  // Assign value to ano_ire array using id as index
+                                });
+
+                                console.log(ano_ire); // To check the final array
                             });
 
-                            console.log(ano_ire); // To check the final array
-                        });
+                            dynamic_search(
+                                "'tbl_brand_ambassador'", 
+                                "''", 
+                                "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
+                                100000, 
+                                index, 
+                                `''`, 
+                                `''`, 
+                                `''`, 
+                                (res) => {
+                                    console.log(res, 'look here');
 
-                        get_brand_ambassador(index, (res) => {
-                            console.log(res, 'look here')
-                            let newData = res.map(({ 
-                                id,
-                                code, description, deployed_date, type, status, 
-                                agency, store, team, area
-                            }) => ({
-                                ID: id,
-                                Code: code,
-                                Name: description,
-                                "Deployment Date": deployed_date,
-                                Agency: agency,
-                                Brands: ano_ire[id] || '',
-                                Store: store,
-                                Team: team,
-                                Area: area,
-                                Type: type === "1" ? "Outright" : "Consign",
-                                Status: status === "1" ? "Active" : "Inactive",
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                                    let agency_ids = [];
+                                    let store_ids = [];
+                                    let team_ids = [];
+                                    let area_ids = [];
+                                    let brand_ids = [];
+
+                                    let agency_map = {}
+                                    let store_map = {};
+                                    let team_map = {};
+                                    let area_map = {};
+                                    let brand_map = {};
+
+                                    res.forEach(item => {
+                                        agency_ids.push(`${item.agency}`);
+                                        store_ids.push(`${item.store}`);
+                                        team_ids.push(`${item.team}`);
+                                        area_ids.push(`${item.area}`);
+                                        brand_ids.push(`${item.id}`);
+                                    });
+
+                                    dynamic_search(
+                                        "'tbl_agency'", "''", "'id, agency'", 0, 0, `'id:IN=${agency_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!agency_map[item.id]) {
+                                                        agency_map[item.id] = {};
+                                                    }
+                                                    agency_map[item.id] = item.agency;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    dynamic_search(
+                                        "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!store_map[item.id]) {
+                                                        store_map[item.id] = {};
+                                                    }
+                                                    store_map[item.id] = item.description;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    dynamic_search(
+                                        "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!team_map[item.id]) {
+                                                        team_map[item.id] = {};
+                                                    }
+                                                    team_map[item.id] = item.team_description;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    dynamic_search(
+                                        "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!area_map[item.id]) {
+                                                        area_map[item.id] = {};
+                                                    }
+                                                    area_map[item.id] = item.description;
+                                                }
+                                            );
+                                        }
+                                    );
+                                    
+                                    dynamic_search(
+                                        "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
+                                        "'a.ba_id as id, GROUP_CONCAT(DISTINCT b.brand_code ORDER BY b.brand_code ASC SEPARATOR \", \") AS brands'", 
+                                        0, 0, `'a.ba_id:IN=${brand_ids.join('|')}'`, `''`, `'a.ba_id'`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!brand_map[item.id]) {
+                                                        brand_map[item.id] = {};
+                                                    }
+                                                    brand_map[item.id] = item.brands;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    let newData = res.map(({ 
+                                        id, 
+                                        code, description, deployed_date, type, status, 
+                                        agency, store, team, area
+                                    }) => ({
+                                        Code: code,
+                                        Name: description,
+                                        "Deployment Date": deployed_date,
+                                        Agency: agency_map[agency],
+                                        Brand: brand_map[id],
+                                        Store: store_map[store],
+                                        Team: team_map[team],
+                                        Area: area_map[area].trim(),
+                                        Type: type === "1" ? "Outright" : "Consign",
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                    } else {
+                        console.log('No data received');
                     }
-                } else {
-                    console.log('No data received');
                 }
-            })
+            )
         };
 
         fetchStores();

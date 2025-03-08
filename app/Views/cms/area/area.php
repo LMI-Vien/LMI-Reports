@@ -1407,43 +1407,66 @@
         };
 
         const batch_export = () => {
-            get_area_count((res) => {
-                if (res && res.length > 0) {
-                    let total_records = res[0].total_records;
+            dynamic_search(
+                "'tbl_area'", 
+                "''", 
+                "'COUNT(id) AS total_records'", 
+                0, 
+                0, 
+                `''`,  
+                `''`, 
+                `''`,
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
 
-                    for (let index = 0; index < total_records; index += 100000) {
-                        console.log(index, 'index here')
-                        var ano_ire = [];
+                        for (let index = 0; index < total_records; index += 100000) {
+                            // console.log(index, 'index here')
+                            // var ano_ire = [];
 
-                        area_stores(index, (result) => {
-                            
-                            console.log(result, 'result here');
+                            // area_stores(
+                            //     index, 
+                            //     (result) => {
+                                    
+                            //         console.log(result, 'result here');
 
-                            result.forEach(({ area_id, store_description }) => {
-                                ano_ire[area_id] = store_description;  // Assign value to ano_ire array using id as index
-                            });
+                            //         result.forEach(({ area_id, store_description }) => {
+                            //             ano_ire[area_id] = store_description;  // Assign value to ano_ire array using id as index
+                            //         });
 
-                            console.log(ano_ire, 'ano_ire'); // To check the final array
-                        })
+                            //         console.log(ano_ire, 'ano_ire'); // To check the final array
+                            //     }
+                            // )
 
-                        console.log(ano_ire, 'ano_ire');
+                            // console.log(ano_ire, 'ano_ire');
 
-                        get_area(index, (res) => {
-                            let newData = res.map(({ 
-                                id, area_code, area_description, status
-                            }) => ({
-                                "Area Code": area_code,
-                                Description: area_description,
-                                Status: status === "1" ? "Active" : "Inactive",
-                                "Stores": ano_ire[id] || '',
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                            dynamic_search(
+                                "'tbl_area a'", 
+                                "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
+                                "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT b.description ORDER BY b.description ASC SEPARATOR \", \") AS store_description'", 
+                                0, 
+                                0, 
+                                `''`,  
+                                `''`, 
+                                `'a.id'`, 
+                                (res) => {
+                                    let newData = res.map(({ 
+                                        id, area_code, area_description, status, store_description
+                                    }) => ({
+                                        Code: area_code,
+                                        Description: area_description,
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                        "Stores": store_description || '',
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                    } else {
+                        console.log('No data received');
                     }
-                } else {
-                    console.log('No data received');
                 }
-            })
+            )
         };
 
         fetchStores();
