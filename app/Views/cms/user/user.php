@@ -496,55 +496,66 @@
         }
         $('.validate_error_message').remove();
         $('.required').css('border-color', '#eee');
+        validatePassword(action, update_password_val, id);
+    }
 
-        if(action == "update" && update_password_val === 1){
-            console.log("dito");
-            var re_password = $('#password1').val().trim();
-            var new_password = $('#password2').val().trim();
-            var required_message = "<span class='validate_error_message' style='color: red;'>"+form_empty_error+"<br></span>";
-            var wrong_old_password_message = "<span class='validate_error_message' style='color: red;'>Incorrect old password.<br></span>";
-            var password_miss_match_message = "<span class='validate_error_message' style='color: red;'>New password is not matched with Confirm password.<br></span>";
-            var password_used_message = "<span class='validate_error_message' style='color: red;'>You have already used this password. Please try something new.<br></span>";
+    function validatePassword(action, update_password_val, id) {
+        if (action !== "update" && action !== "save") return;
 
-
-            /* New Password */
-            if(new_password == ''){
-              $('.new-pw-err').html(required_message);
-              $('.new-password').css('border-color','red');
-              counter++;
-            }else if(is_exists_historical(user_id, new_password) == 1){
-              $('.new-pw-err').html(password_used_message);
-              $('.new-password').css('border-color','red');
-              counter++;
-            }
-
-            /* Confirm Password */
-            if(re_password == ''){
-              $('.re-pw-err').html(required_message);
-              $('.re-password').css('border-color','red');
-              counter++;
-            }else if(re_password != new_password){
-              $('.re-pw-err').html(password_miss_match_message);
-              $('.re-password').css('border-color','red');
-              $('.new-password').css('border-color','red');
-              counter++;
-            }
-
-            $('.password_checkbox').each(function(){
-              var id = $(this).attr("id");
-              if(!$(this).is(':checked')) {
-                counter++;
-                $("."+id+"").css('color','red');
-              }else{
-                $("."+id+"").css('color','#333');
-              }
-            });
+        var counter = 0;
+        if (action === "update" && update_password_val !== 1) {
+            setTimeout(() => validate_save(id), 1000); 
+            return; 
         }
-        if(counter == 0){
-          //modal.loading(true);
-          setTimeout(() => validate_save(id), 1000);
+
+        var re_password = $('#password1').val().trim();
+        var new_password = $('#password2').val().trim();
+
+        var messages = {
+            required: "<span class='validate_error_message' style='color: red;'>" + form_empty_error + "<br></span>",
+            password_mismatch: "<span class='validate_error_message' style='color: red;'>New password does not match Confirm password.<br></span>",
+            password_used: "<span class='validate_error_message' style='color: red;'>You have already used this password. Try a new one.<br></span>"
+        };
+
+        function showError(selector, message) {
+            $(selector).html(message);
+            $(selector.replace('-err', '')).css('border-color', 'red');
+            counter++;
+        }
+
+        /* New Password */
+        if (new_password === '') {
+            showError('.new-pw-err', messages.required);
+        } else if (is_exists_historical(user_id, new_password) == 1) {
+            showError('.new-pw-err', messages.password_used);
+        }
+
+        /* Confirm Password */
+        if (re_password === '') {
+            showError('.re-pw-err', messages.required);
+        } else if (re_password !== new_password) {
+            showError('.re-pw-err', messages.password_mismatch);
+            $('.new-password').css('border-color', 'red');
+        }
+
+        /* Checkbox validation */
+        $('.password_checkbox').each(function () {
+            var id = $(this).attr("id");
+            var label = $("." + id);
+            if (!$(this).is(':checked')) {
+                counter++;
+                label.css('color', 'red');
+            } else {
+                label.css('color', '#333');
+            }
+        });
+
+        // ✅ Always call `validate_save(id)` if password validation passes OR password update is not required
+        if (counter === 0) {
+            setTimeout(() => validate_save(id), 1000);
         }
     }
+
 
     function validate_save(id){
      
@@ -603,7 +614,7 @@
                 if (chk_update_password) {
                     data = {
                         table : "cms_users",
-                        user_id: user_id,
+                        user_id: id,
                         data : {
                                 name : $('#user_modal #name').val(),
                                 username : $('#user_modal #username').val(),
