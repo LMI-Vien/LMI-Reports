@@ -1368,6 +1368,19 @@ function get_team_count(callback) {
 // ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
 // ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
 // ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+/**
+ * Performs a dynamic search request using AJAX.
+ * 
+ * @param {string} tbl_name - database table (e.g., "table_name")
+ * @param {string} join - join clause (e.g., "INNER JOIN users a ON table_name.id = a.id").
+ * @param {string} table_fields - specific fields or all of them using * (e.g., "id, code, description").
+ * @param {int} limit - maximum number of records to return.
+ * @param {int} offset - number of records to skip before starting to return results (pagination or bulk exporting).
+ * @param {string} conditions - filter conditions "field:type=value" (e.g., "status:EQ=active", "status:IN=1|0", "status:LIKE=1, status:BETWEEN=0|1").
+ * @param {string} order - ORDER BY clause for sorting (e.g., "id DESC").
+ * @param {string} group - GROUP BY clause to group (e.g., "id").
+ * @param {function} callback - function to call with the search results once the request completes.
+ */
 function dynamic_search(tbl_name, join, table_fields, limit, offset, conditions, order, group, callback) {
 	data = {
 		event : "dynamic_search",
