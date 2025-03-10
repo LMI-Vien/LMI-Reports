@@ -612,8 +612,11 @@
                     let results = $.ui.autocomplete.filter(brandDescriptions, request.term);
                     let uniqueResults = [...new Set(results)];
                     response(uniqueResults.slice(0, 10));
-                }
-            })
+                },
+                minLength: 0,
+            }).focus(function() {
+                $(this).autocomplete("search", "");
+            });
 
             $('input[name="type"]').each(function() {
                 if ($(this).val() == 1) {

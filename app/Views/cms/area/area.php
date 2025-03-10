@@ -341,6 +341,9 @@
                     var uniqueResults = [...new Set(results)];
                     response(uniqueResults.slice(0, 10));
                 },
+                minLength: 0,
+            }).focus(function () {
+                $(this).autocomplete("search", "");
             });
             $('.add_line').attr('disabled', false)
             $('.add_line').attr('readonly', false)
