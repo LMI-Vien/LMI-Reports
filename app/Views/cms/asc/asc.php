@@ -288,15 +288,35 @@
         var modal_obj = "";
         var modal_alert_success = "";
         var hasExecuted = false; // Prevents multiple executions
+
+        let id = $("input.select:checked");
+        let code = [];
+        let code_string = "selected data";
+
+        id.each(function () {
+            code.push(id.attr("data-id"));
+        });
+
+        get_field_values("tbl_area_sales_coordinator", "code", "id", code, (res) => {
+            if(code.length == 1) {
+                code_string = `Code <b><i>${res[code[0]]}</i></b>`
+            }
+        })
     
         if (parseInt(status) === -2) {
-            modal_obj = confirm_delete_message;
+            message = is_json(confirm_delete_message);
+            message.message = `Delete ${code_string} from Area Sales Coordinator Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
-            modal_obj = confirm_publish_message;
+            message = is_json(confirm_publish_message);
+            message.message = `Publish ${code_string} from Area Sales Coordinator Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
-            modal_obj = confirm_unpublish_message;
+            message = is_json(confirm_unpublish_message);
+            message.message = `Unpublish ${code_string} from Area Sales Coordinator Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
         
@@ -512,32 +532,38 @@
 
     // delete
     function delete_data(id) {
-        modal.confirm(confirm_delete_message,function(result){
-            if(result){
-                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-                var data = {
-                    event : "update", // list, insert, update, delete
-                    table : "tbl_area_sales_coordinator", //table
-                    field : "id",
-                    where : id, 
-                    data : {
-                        status : -2,
-                        updated_by : user_id,
-                        updated_date : formatDate(new Date()),
-                    }  
-                }
+        get_field_values("tbl_area_sales_coordinator", "code", "id", [id], (res) => {
+            let code = res[id];
+            let message = is_json(confirm_delete_message);
+            message.message = `Delete Code <b><i>${code}</i></b> from Area Sales Coordinator?`
 
-                aJax.post_async(url,data,function(result){
-                    var obj = is_json(result);
-                    if(obj){
-                        modal.alert(success_delete_message, 'success', () => {
-                            if (result) {
-                                location.reload();
-                            }
-                        })
+            modal.confirm(JSON.stringify(message),function(result){
+                if(result){
+                    var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                    var data = {
+                        event : "update", // list, insert, update, delete
+                        table : "tbl_area_sales_coordinator", //table
+                        field : "id",
+                        where : id, 
+                        data : {
+                            status : -2,
+                            updated_by : user_id,
+                            updated_date : formatDate(new Date()),
+                        }  
                     }
-                });
-            }
+    
+                    aJax.post_async(url,data,function(result){
+                        var obj = is_json(result);
+                        if(obj){
+                            modal.alert(success_delete_message, 'success', () => {
+                                if (result) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                    });
+                }
+            })
         })
     }
 
