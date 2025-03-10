@@ -387,17 +387,17 @@
                 },
                 {
                     table: "tbl_store s",
-                    query: "s.id = basr.store_name",
+                    query: "s.id = basr.store_id",
                     type: "left"
                 },
                 {
                     table: "tbl_brand_ambassador ba",
-                    query: "ba.id = basr.ba_name",
+                    query: "ba.id = basr.ba_id",
                     type: "left"
                 },
                 {
                     table: "tbl_area ar",
-                    query: "ar.id = basr.area",
+                    query: "ar.id = basr.area_id",
                     type: "left"
                 }
             ], 
@@ -595,12 +595,12 @@
             join: [
                 {
                     table: "tbl_area a",
-                    query: "a.id = basr.area",
+                    query: "a.id = basr.area_id",
                     type: "left"
                 },
                 {
                     table: "tbl_store s",
-                    query: "s.id = basr.store_name",
+                    query: "s.id = basr.store_id",
                     type: "left"
                 },
                 {
@@ -610,7 +610,7 @@
                 },
                 {
                     table: "tbl_brand_ambassador bra",
-                    query: "bra.id = basr.ba_name",
+                    query: "bra.id = basr.ba_id",
                     type: "left"
                 }
             ]
@@ -1026,6 +1026,7 @@
 
 
     function saveValidatedData(valid_data) {
+        //console.log(valid_data);
         let batch_size = 5000; // Process 1000 records at a time
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
@@ -1034,11 +1035,11 @@
         let table = 'tbl_ba_sales_report';
 
         let selected_fields = [
-            'id', 'area', 'store_name', 'brand', 'ba_name', 'date'
+            'id', 'area_id', 'ba_id', 'brand', 'date'
         ];
 
         const matchFields = [
-            'area', 'store_name', 'brand', 'ba_name', 'date'
+            'area_id', 'ba_id', 'brand', 'date'
         ];  
 
         const matchType = "AND";  // Use "AND" or "OR" for matching logic
@@ -1099,6 +1100,7 @@
                         row.id = matchedId;
                         row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_date; // Unset created_date
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
@@ -1342,16 +1344,16 @@
 
         // Construct filter conditions for querying the database
         if (area_id != 0) {
-            filterArr.push(`area:EQ=${area_id}`);  // Add area filter if a valid area ID was found
+            filterArr.push(`area_id:EQ=${area_id}`);  // Add area filter if a valid area ID was found
         }
         if (store_id != 0) {
-            filterArr.push(`store_name:EQ=${store_id}`);  // Add store filter if a valid store ID was found
+            filterArr.push(`store_id:EQ=${store_id}`);  // Add store filter if a valid store ID was found
         }
         if (brand_id != 0) {
             filterArr.push(`brand:EQ=${brand_id}`);  // Add brand filter if a valid brand ID was found
         }
         if (ba_id != 0) {
-            filterArr.push(`ba_name:EQ=${ba_id}`);  // Add brand ambassador filter if a valid BA ID was found
+            filterArr.push(`ba_id:EQ=${ba_id}`);  // Add brand ambassador filter if a valid BA ID was found
         }
 
         modal.confirm(confirm_export_message,function(result){
@@ -1384,7 +1386,7 @@
     
                         for (let index = 0; index < total_records; index += 100000) {
                             dynamic_search(
-                                "'tbl_ba_sales_report'", "''", "'id, area, store_name, brand, ba_name, date, amount, status'", 100000, index, 
+                                "'tbl_ba_sales_report'", "''", "'id, area_id, store_id, brand, ba_id, date, amount, status'", 100000, index, 
                                 `'${filterArr.join(',')}'`,`''`, `''`,
                                 (res) => {
                                     var areaArr = [];
@@ -1392,20 +1394,20 @@
                                     var brandArr = [];
                                     var baArr = [];
                                     res.forEach(item => {
-                                        if (!areaArr.includes(`${item.area}`)) {
-                                            areaArr.push(`${item.area}`);
+                                        if (!areaArr.includes(`${item.area_id}`)) {
+                                            areaArr.push(`${item.area_id}`);
                                         }
 
-                                        if (!storeArr.includes(`${item.store_name}`)) {
-                                            storeArr.push(`${item.store_name}`);
+                                        if (!storeArr.includes(`${item.store_id}`)) {
+                                            storeArr.push(`${item.store_id}`);
                                         }
 
                                         if (!brandArr.includes(`${item.brand}`)) {
                                             brandArr.push(`${item.brand}`);
                                         }
 
-                                        if (!baArr.includes(`${item.ba_name}`)) {
-                                            baArr.push(`${item.ba_name}`);
+                                        if (!baArr.includes(`${item.ba_id}`)) {
+                                            baArr.push(`${item.ba_id}`);
                                         }
                                     });
 
@@ -1438,11 +1440,11 @@
                                     });
                             
                                     let newData = res.map(({ 
-                                        area, store_name, brand, ba_name, date, amount, status,
+                                        area_id, store_id, brand, ba_id, date, amount, status,
                                     }) => ({
-                                        "BA Code":temp_baArr[ba_name],
-                                        "Area Code":temp_area[area],
-                                        "Store Code":temp_store[store_name],
+                                        "BA Code":temp_baArr[ba_id],
+                                        "Area Code":temp_area[area_id],
+                                        "Store Code":temp_store[store_id],
                                         "Brand":temp_brand[brand],
                                         "Date":date,
                                         "Amount":amount,
@@ -1511,20 +1513,20 @@
                     var brandArr = [];
                     var baArr = [];
                     res.forEach(item => {
-                        if (!areaArr.includes(`${item.area}`)) {
-                            areaArr.push(`${item.area}`);
+                        if (!areaArr.includes(`${item.area_id}`)) {
+                            areaArr.push(`${item.area_id}`);
                         }
 
-                        if (!storeArr.includes(`${item.store_name}`)) {
-                            storeArr.push(`${item.store_name}`);
+                        if (!storeArr.includes(`${item.store_id}`)) {
+                            storeArr.push(`${item.store_id}`);
                         }
 
                         if (!brandArr.includes(`${item.brand}`)) {
                             brandArr.push(`${item.brand}`);
                         }
 
-                        if (!baArr.includes(`${item.ba_name}`)) {
-                            baArr.push(`${item.ba_name}`);
+                        if (!baArr.includes(`${item.ba_id}`)) {
+                            baArr.push(`${item.ba_id}`);
                         }
                     });
 
@@ -1557,11 +1559,11 @@
                     });
                     
                     formattedData = res.map(({ 
-                        area, store_name, brand, ba_name, date, amount, status,
+                        area_id, store_id, brand, ba_id, date, amount, status,
                     }) => ({
-                        "BA Code":temp_baArr[ba_name],
-                        "Area Code":temp_area[area],
-                        "Store Code":temp_store[store_name],
+                        "BA Code":temp_baArr[ba_id],
+                        "Area Code":temp_area[area_id],
+                        "Store Code":temp_store[store_id],
                         "Brand":temp_brand[brand],
                         "Date":date,
                         "Amount":amount,
@@ -1573,7 +1575,7 @@
                     ? dynamic_search(
                         `'tbl_ba_sales_report'`,
                         `''`,
-                        `'area, store_name, brand, ba_name, date, amount, status'`,
+                        `'area_id, store_id, brand, ba_id, date, amount, status'`,
                         0,
                         0,
                         `'id:IN=${ids.join('|')}'`, 
@@ -1602,7 +1604,7 @@
                                 dynamic_search(
                                     `'tbl_ba_sales_report'`,
                                     `''`,
-                                    `'area, store_name, brand, ba_name, date, amount, status'`,
+                                    `'area_id, store_id, brand, ba_id, date, amount, status'`,
                                     100000,
                                     index,
                                     `''`, 
@@ -1614,20 +1616,20 @@
                                         var brandArr = [];
                                         var baArr = [];
                                         res.forEach(item => {
-                                            if (!areaArr.includes(`${item.area}`)) {
-                                                areaArr.push(`${item.area}`);
+                                            if (!areaArr.includes(`${item.area_id}`)) {
+                                                areaArr.push(`${item.area_id}`);
                                             }
 
-                                            if (!storeArr.includes(`${item.store_name}`)) {
-                                                storeArr.push(`${item.store_name}`);
+                                            if (!storeArr.includes(`${item.store_id}`)) {
+                                                storeArr.push(`${item.store_id}`);
                                             }
 
                                             if (!brandArr.includes(`${item.brand}`)) {
                                                 brandArr.push(`${item.brand}`);
                                             }
 
-                                            if (!baArr.includes(`${item.ba_name}`)) {
-                                                baArr.push(`${item.ba_name}`);
+                                            if (!baArr.includes(`${item.ba_id}`)) {
+                                                baArr.push(`${item.ba_id}`);
                                             }
                                         });
 
@@ -1662,11 +1664,11 @@
                                         });
                                         
                                         let newData = res.map(({ 
-                                            area, store_name, brand, ba_name, date, amount, status,
+                                            area_id, store_id, brand, ba_id, date, amount, status,
                                         }) => ({
-                                            "BA Code":temp_baArr[ba_name],
-                                            "Area Code":temp_area[area],
-                                            "Store Code":temp_store[store_name],
+                                            "BA Code":temp_baArr[ba_id],
+                                            "Area Code":temp_area[area_id],
+                                            "Store Code":temp_store[store_id],
                                             "Brand":temp_brand[brand],
                                             "Date":date,
                                             "Amount":amount,

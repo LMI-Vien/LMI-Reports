@@ -60,8 +60,10 @@
                                     <select class="form-control" id="brand_ambassador">
                                         <option value="0">Please select..</option>
                                         <?php
-                                            foreach ($brand_ambassador as $value) {
-                                                echo "<option value=".$value['id'].">".$value['description']."</option>";
+                                            if($brand_ambassador){
+                                                foreach ($brand_ambassador as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['description']."</option>";
+                                                }
                                             }
                                         ?>
                                     </select>
@@ -71,8 +73,10 @@
                                     <select class="form-control" id="store_name">
                                         <option value="0">Please select..</option>
                                         <?php
-                                            foreach ($store_branch as $value) {
-                                                echo "<option value=".$value['id'].">".$value['description']."</option>";
+                                            if($store_branch){
+                                                foreach ($store_branch as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['description']."</option>";
+                                                }
                                             }
                                         ?>
                                     </select>
@@ -82,8 +86,10 @@
                                     <select class="form-control" id="brand">
                                         <option value="0">Please select..</option>
                                         <?php
-                                            foreach ($brands as $value) {
-                                                echo "<option value=".$value['id'].">".$value['brand_description']."</option>";
+                                            if($brands){
+                                                foreach ($brands as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['brand_description']."</option>";
+                                                }                                                
                                             }
                                         ?>
                                     </select>
@@ -233,9 +239,7 @@
 
     $(document).on('click', '#refreshButton', function () {
         let selectedBa = $('#brand_ambassador').val();
-        console.log(selectedBa,'asd');
         if(selectedBa !== 0){
-
             get_area_asc(selectedBa);
         }
         fetchData();

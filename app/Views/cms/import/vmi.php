@@ -1160,6 +1160,7 @@
                         row.id = matchedId;
                         row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_date; // Unset created_date
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;

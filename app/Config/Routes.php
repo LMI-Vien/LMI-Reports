@@ -20,6 +20,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('info-kam-2', 'TradeDashboard::info_kam2');
     $routes->get('store-performance', 'TradeDashboard::store_performance');
     $routes->get('trade-ba', 'TradeDashboard::trade_ba');
+    $routes->get('trade-overall-ba', 'TradeDashboard::trade_overall_ba');
 });
 
 

@@ -958,8 +958,6 @@ class Global_model extends Model
     }
 
     function get_valid_records_store_group() {
-
-
         $results = $this->db->table('tbl_store_group')
             ->select('id, area_id, store_id')
             ->get()
@@ -967,5 +965,35 @@ class Global_model extends Model
 
             return $results;
 
+    }
+
+    function get_valid_records_ba_area_store_group() {
+        $results = $this->db->table('tbl_brand_ambassador')
+            ->select('id, area, store')
+            ->get()
+            ->getResultArray();
+
+            return $results;
+
+    }
+
+    function get_weeks() {
+        $query = $this->db->query("CALL get_weeks()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_months() {
+        $query = $this->db->query("CALL get_months()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_years() {
+        $query = $this->db->query("CALL get_years()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_companies() {
+        $query = $this->db->query("CALL get_companies()");
+        return $query->getResultArray(); // Return data as an array
     }
 }

@@ -562,7 +562,7 @@
             join: [
                 {
                     table: "tbl_store s1",
-                    query: "s1.id = pr.location AND s1.id = pr.location_description",
+                    query: "s1.id = pr.location AND s1.id = pr.location",
                     type: "left"
                 }
             ]

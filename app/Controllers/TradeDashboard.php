@@ -62,6 +62,14 @@ class TradeDashboard extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['month'] = $this->Global_model->get_months();
+		$data['year'] = $this->Global_model->get_years();
+		$data['weeks'] = $this->Global_model->get_weeks();
+		// print_r($data);
+		// die();
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
@@ -286,39 +294,6 @@ class TradeDashboard extends BaseController
 		return view("site/layout/template", $data);
 	}
 
-	// public function trade_ba()
-	// {
-	//     $limit = $this->request->getVar('limit');
-	//     $offset = $this->request->getVar('offset');
-	//     $type = $this->request->getVar('type');
-	//     $brand = $this->request->getVar('brands');
-	//     $brand_ambassador = $this->request->getVar('brand_ambassador');
-	//     $store_name = $this->request->getVar('store_name');
-	//     $sort = $this->request->getVar('sort');
-	//     $ba_type = 3;
-
-	//     if ($type == 'slowMoving') {
-	//         $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset, 20, 30);  // weeks > 20 and < 30
-	//     } elseif ($type == 'overStock') {
-	//         $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset, 30);  // weeks > 30
-	//     } elseif ($type == 'npd') {
-    //     	$data = $this->Dashboard_model->getItemClassData($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset);
-	//     } elseif ($type == 'hero') {
-	//         $data = $this->Dashboard_model->getHeroItemsData($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset);
-	//     } else {
-	//         $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset, 20, 30);
-	//     }
-
-	//     $filteredRecords = count($data['data']); 
-
-	//     return $this->response->setJSON([
-	//         'draw' => $this->request->getVar('draw'),
-	//         'recordsTotal' => $data['total_records'],
-	//         'recordsFiltered' => $filteredRecords,
-	//         'data' => $data['data']
-	//     ]);
-	// }
-
 	public function trade_ba()
 	{
 	    $limit = $this->request->getVar('limit') ?? 10;
@@ -354,36 +329,23 @@ class TradeDashboard extends BaseController
 		    	$store_name = null;
 		    }
 
-		    //$ba_type = 3;
-		    //echo $ba_type, $latest_month, $latest_year;
-		    //die();
-
-		    //$type = 'slowMoving';
 		    switch ($type) {
 		        case 'slowMoving':
-		            $data = $this->Dashboard_model->testing_langv1($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
-		        	//$data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset, 20, 30);
+		            $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
 		            break;
 		        case 'overStock':
-		            $data = $this->Dashboard_model->testing_langv1($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 30, null, $latest_week, $latest_month, $latest_year);
-		        	//$data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset, 20, null);
+		            $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 30, null, $latest_week, $latest_month, $latest_year);
 		            break;
 		        case 'npd':
-		           $data = $this->Dashboard_model->getItemClassDatav2($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset);
+		           $data = $this->Dashboard_model->getItemClassData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, $latest_week, $latest_month, $latest_year);
 		            break;
 		        case 'hero':
-		            $data = $this->Dashboard_model->getHeroItemsDatav2($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset);
+		            $data = $this->Dashboard_model->getHeroItemsData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, $latest_week, $latest_month, $latest_year);
 		            break;
 		        default:
-		        	$data = $this->Dashboard_model->testing_langv1($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
-		        	//$data = $this->Dashboard_model->testing_langv1(null, null, null, $ba_type, $sort, $limit, $offset, 20, 30);
-		            //$data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort, $limit, $offset, 20, 30);
+		        	$data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
 		    }
-		    // echo "<pre>";
-		    // print_r($data);
-		    // die();
-		//     echo $this->db->getLastQuery();
-	    // die();
+
 		    return $this->response->setJSON([
 		        'draw' => intval($this->request->getVar('draw')),
 		        'recordsTotal' => $data['total_records'],
@@ -391,16 +353,36 @@ class TradeDashboard extends BaseController
 		        'data' => $data['data'],
 		    ]);
 	    }
-	   
-	    //die();
+	}
+
+	public function trade_overall_ba()
+	{
+	    $limit = $this->request->getVar('limit') ?? 10;
+	    $offset = $this->request->getVar('offset') ?? 0;
+	    $store = $this->request->getVar('store');
+	    $area = $this->request->getVar('area');
+	    $month = $this->request->getVar('month');
+	    $year = $this->request->getVar('year');
+	    $sort = $this->request->getVar('sort') ?? 'ASC';
+	    $sort_field = $this->request->getVar('sort_field');
 
 
-	    // return $this->response->setJSON([
-	    //     'draw' => intval($this->request->getVar('draw')),
-	    //     'recordsTotal' => count($data),
-	    //     'recordsFiltered' => count($data),
-	    //     'data' => $data,
-	    // ]);
+
+	    $data = $this->Dashboard_model->tradeOverallBaData(null, null, null, null, null, 'ASC', 10, 0);
+	    //echo "<pre>";
+	    // print_r($data);
+	    // die();
+	    //echo $sort_field;
+
+	   // if($latest_vmi_data){
+
+		    return $this->response->setJSON([
+		        'draw' => intval($this->request->getVar('draw')),
+		        'recordsTotal' => $data['total_records'],
+		        'recordsFiltered' => $data['total_records'],
+		        'data' => $data['data'],
+		    ]);
+	   // }
 	}
 
 }
