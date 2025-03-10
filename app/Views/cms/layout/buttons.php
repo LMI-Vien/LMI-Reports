@@ -50,7 +50,7 @@
                     break;
 
 				case 'search':
-					echo '<div id="form_search" class="form-search form-horizontal pull-right">
+					echo '<div id="form_search" class="form-search">
 							<div class="form-group has-feedback ">
 						        <div class="input-group">
 									<div class="input-group-prepend">
@@ -336,6 +336,9 @@
 	}
 	.row.mb-4 {
 		margin-bottom: 50px !important;
+	}
+	#form_search {
+		margin-right: -95px !important;
 	}
 
 </style>
