@@ -28,7 +28,7 @@ class Import_ba_sales_report extends BaseController
 		$data['title'] = "Import BA Sales Report";
 		$data['PageName'] = 'Import BA Sales Report';
 		$data['PageUrl'] = 'Import BA Sales Report';
-		$data['content'] = "cms/import/ba_sales_report.php";
+		$data['content'] = "cms/import/ba-sales-report/ba_sales_report.php";
 		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
@@ -49,13 +49,40 @@ class Import_ba_sales_report extends BaseController
 		return view("cms/layout/template", $data);		
 	}
 
-	public function get_valid_ba_data(){
-		$ba = $this->Global_model->get_valid_records("tbl_brand_ambassador", 'code');
-		$brands = $this->Global_model->get_valid_records("tbl_brand", 'brand_description');
-		$stores = $this->Global_model->get_valid_records("tbl_store", 'code');
-		$areas = $this->Global_model->get_valid_records("tbl_area", 'code');
-		$ba_store_area = $this->Global_model->get_valid_records_ba_area_store_group();
-		return $this->response->setJSON(["ba" => $ba, "brands" => $brands, "stores" => $stores, "areas" => $areas, 'ba_store_area' => $ba_store_area]);
+	public function view()
+	{
+
+		$uri = current_url(true);
+		$data['uri'] =$uri;
+
+		$data['meta'] = array(
+			"title"         =>  "View Import BA Sales Report",
+			"description"   =>  "View Import BA Sales Report",
+			"keyword"       =>  ""
+		);
+		$data['title'] = "View Import BA Sales Report";
+		$data['PageName'] = 'View Import BA Sales Report';
+		$data['PageUrl'] = 'View Import BA Sales Report';
+		$data['content'] = "cms/import/ba-sales-report/view_sales_report.php";
+		$data['buttons'] = ['search', 'export'];
+		$data['session'] = session(); //for frontend accessing the session data
+		$data['standard'] = config('Standard');
+		$data['js'] = array(
+				"assets/js/xlsx.full.min.js",
+				"assets/js/bootstrap.min.js",
+				"assets/js/adminlte.min.js",
+				"assets/js/moment.js",
+				"assets/js/xlsx.full.min.js"
+                    );
+        $data['css'] = array(
+        		"assets/css/bootstrap.min.css",
+        		"assets/css/adminlte.min.css",
+        		"assets/css/all.min.css",
+        		"assets/cms/css/main_style.css",//css sa style ni master Vien
+        		"assets/css/style.css"
+                    );
+		return view("cms/layout/template", $data);	
+		return view("cms/layout/template", $data);		
 	}
 
 }

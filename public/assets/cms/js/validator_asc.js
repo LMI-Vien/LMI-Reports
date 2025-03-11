@@ -9,7 +9,7 @@ self.onmessage = async function(e) {
     var err_counter = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/brand-ambassador/get_valid_ba_data`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?areas=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         area_records = ba_data.areas;

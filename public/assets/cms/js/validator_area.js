@@ -10,7 +10,7 @@ self.onmessage = async function(e) {
     var store_per_area = {};
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/area/get_valid_ba_data`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         store_records = ba_data.stores;

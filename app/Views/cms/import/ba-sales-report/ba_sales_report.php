@@ -70,15 +70,15 @@
                             <table class="table table-bordered listdata">
                                 <thead>
                                     <tr>
-                                        <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                        <th class='center-content'>BA Name</th>
-                                        <th class='center-content'>Area</th>
-                                        <th class='center-content'>Store</th>
+                                        <!-- <th class='center-content'><input class="selectall" type="checkbox"></th> -->
+                                        <th class='center-content'>Imported Date</th>
+                                        <th class='center-content'>Imported By</th>
+                                        <th class='center-content'>Sales Date</th>
+                                        <!-- 
                                         <th class='center-content'>Brand</th>
                                         <th class='center-content'>Date</th>
                                         <th class='center-content'>Amount</th>
-                                        <th class='center-content'>Status</th>
-                                        <th class='center-content'>Date Created</th>
+                                        <th class='center-content'>Status</th> -->
                                         <th class='center-content'>Date Modified</th>
 
                                         <th class='center-content'>Action</th>
@@ -313,68 +313,10 @@
         get_pagination();
     });
 
-    // function get_data(new_query) {
-    //     var data = {
-    //         event : "list",
-    //         select : "id, area, store_name, brand, ba_name, date, amount, status, created_date, updated_date",
-    //         query : new_query,
-    //         offset : offset,
-    //         limit : limit,
-    //         table : "tbl_ba_sales_report",
-    //         order : {
-    //             field : "id, updated_date",
-    //             order : "asc, desc" 
-    //         }
-
-    //     }
-
-    //     aJax.post(url,data,function(result){
-    //         var result = JSON.parse(result);
-    //         var html = '';
-
-    //         if(result) {
-    //             if (result.length > 0) {
-    //                 $.each(result, function(x,y) {
-    //                     console.log(y);
-    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-    //                     y.amount = parseFloat(y.amount) || 0;
-
-    //                     html += "<tr class='" + rowClass + "'>";
-    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-    //                     html += "<td scope=\"col\">" + trimText(y.area) + "</td>";
-    //                     html += "<td scope=\"col\">" + trimText(y.store_name, 10) + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.brand) + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.ba_name) + "</td>";
-    //                     html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
-    //                     if (y.id == 0) {
-    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-    //                     } else {
-    //                         html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-    //                         html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-    //                         html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-    //                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-    //                         html+="</td>";
-    //                     }
-                        
-    //                     html += "</tr>";   
-    //                 });
-    //             } else {
-    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-    //             }
-    //         }
-    //         $('.table_body').html(html);
-    //     });
-    // }
-
     function get_data(new_query) {
         var data = {
             event : "list",
-            select : "basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status",
+            select : "basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status, u.name as imported_by",
             query : new_query,
             offset : offset,
             limit : limit,
@@ -399,12 +341,18 @@
                     table: "tbl_area ar",
                     query: "ar.id = basr.area_id",
                     type: "left"
+                },
+                {
+                    table: "cms_users u",
+                    query: "u.id = basr.created_by",
+                    type: "left"
                 }
             ], 
             order : {
                 field : "basr.id",
                 order : "asc" 
-            }
+            },
+            group : 'date'
 
         }
 
@@ -415,26 +363,27 @@
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        y.amount = parseFloat(y.amount) || 0;
+                        // var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+                        // var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+                        // y.amount = parseFloat(y.amount) || 0;
 
-                        var areaDescription = y.area || 'N/A';
-                        var storeDescription = y.store_name || 'N/A';
-                        var brandDescription = y.brand || 'NA';
-                        var brandAmbassadorName = y.ba_name || 'NA';
+                        // var areaDescription = y.area || 'N/A';
+                        // var storeDescription = y.store_name || 'N/A';
+                        // var brandDescription = y.brand || 'NA';
+                        // var brandAmbassadorName = y.ba_name || 'NA';
 
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(areaDescription) + "</td>"
-                        html += "<td scope=\"col\">" + trimText(storeDescription) + "</td>"
-                        html += "<td scope=\"col\">" + trimText(brandDescription) + "</td>"
-                        html += "<td scope=\"col\">" + trimText(brandAmbassadorName) + "</td>"
-                        html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
-                        html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
-                        html += "<td scope=\"col\">" + status + "</td>";
+                        // // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.imported_by) + "</td>";
+                        html += "<td scope=\"col\">" + (y.date ? ViewDateformat(y.date) : "N/A") + "</td>";
+                        // html += "<td scope=\"col\">" + trimText(storeDescription) + "</td>"
+                        // html += "<td scope=\"col\">" + trimText(brandDescription) + "</td>"
+                        // html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
+                        // html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
+                        // html += "<td scope=\"col\">" + status + "</td>";
+                        
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                         if (y.id == 0) {
@@ -442,7 +391,10 @@
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
                             html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="<a class='btn-sm btn view' href='<?= base_url()?>"
+                          +'cms/import-ba-sales-report/view/'+y.date+"' data-status='"+y.status+
+                          "' target='_blank' id='"+y.id+
+                          "' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                             html+="</td>";
                         }
                         
@@ -452,6 +404,7 @@
                     html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
                 }
             }
+
             $('.table_body').html(html);
         });
     }
