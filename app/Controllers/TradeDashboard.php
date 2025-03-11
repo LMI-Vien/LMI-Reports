@@ -107,6 +107,8 @@ class TradeDashboard extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/asc.php";
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['area'] = $this->Global_model->get_area(0);
 		$data['js'] = array(
 			// "assets/js/jquery-3.7.1.min.js",
 			// "assets/js/moment.min.js",
@@ -140,6 +142,9 @@ class TradeDashboard extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/overall_asc.php";
+		$data['asc'] = $this->Global_model->get_asc(0);
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
 		$data['js'] = array(
 			// "assets/js/jquery-3.7.1.min.js",
 			// "assets/js/moment.min.js",
@@ -173,6 +178,11 @@ class TradeDashboard extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/asc_dashboard.php";
+		$data['asc'] = $this->Global_model->get_asc(0);
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
 			// "assets/js/jquery-3.7.1.min.js",
 			// "assets/js/moment.min.js",
@@ -206,6 +216,11 @@ class TradeDashboard extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/info_kam1.php";
+		$data['asc'] = $this->Global_model->get_asc(0);
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
 			// "assets/js/jquery-3.7.1.min.js",
 			// "assets/js/moment.min.js",
@@ -239,6 +254,11 @@ class TradeDashboard extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/info_kam2.php";
+		$data['asc'] = $this->Global_model->get_asc(0);
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
 			// "assets/js/jquery-3.7.1.min.js",
 			// "assets/js/moment.min.js",

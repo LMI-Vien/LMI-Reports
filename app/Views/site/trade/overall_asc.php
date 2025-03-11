@@ -71,16 +71,19 @@
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-3">
-                                <label for="brandAmbassador">ASC Name</label>
-                                <input type="text" class="form-control" id="brandAmbassador" placeholder="Enter name">
+                                <label for="asc">ASC Name</label>
+                                <input type="text" class="form-control" id="asc" placeholder="Please select...">
+                                <input type="hidden" id="asc_id">
                             </div>
                             <div class="col-md-3">
-                                <label for="storeName">Area</label>
-                                <input type="text" class="form-control" id="storeName" placeholder="Enter area">
+                                <label for="area">Area</label>
+                                <input type="text" class="form-control" id="area" placeholder="Please select...">
+                                <input type="hidden" id="area_id">
                             </div>
                             <div class="col-md-3">
                                 <label for="brand">Brand</label>
-                                <input type="text" class="form-control" id="brand" placeholder="Enter brand">
+                                <input type="text" class="form-control" id="brand" placeholder="Please select...">
+                                <input type="hidden" id="brand_id">
                             </div>
                             <div class="col-md-3">
                                 <label for="year">Year</label>
@@ -151,11 +154,75 @@
 </div>
 
 <!-- DataTables and Script -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 $(document).ready(function () {
+    let asc = <?= json_encode($asc); ?>;
+    let area = <?= json_encode($area); ?>;
+    let brand = <?= json_encode($brand); ?>;
+
+    $("#asc").autocomplete({
+        source: function(request, response) {
+            let result = $.ui.autocomplete.filter(asc.map(asc => ({
+                label: asc.asc_description,
+                value: asc.asc_id
+            })), request.term);
+            let uniqueResults = [...new Set(result)];
+            response(uniqueResults.slice(0, 10));
+        },
+        select: function(event, ui) {
+            $("#asc").val(ui.item.label);
+            $("#asc_id").val(ui.item.value);
+            return false;
+        },
+        minLength: 0,
+    }).focus(function () {
+        $(this).autocomplete("search", "");
+    });
+
+    $("#area").autocomplete({
+        source: function(request, response) {
+            let result = $.ui.autocomplete.filter(area.map(area => ({
+                label: area.area_description,
+                value: area.id
+            })), request.term);
+            let uniqueResults = [...new Set(result)];
+            response(uniqueResults.slice(0, 10));
+        },
+        select: function(event, ui) {
+            $("#area").val(ui.item.label);
+            $("#area_id").val(ui.item.value);
+            return false;
+        },
+        minLength: 0,
+    }).focus(function() {
+        $(this).autocomplete("search", "");
+    });
+
+    $("#brand").autocomplete({
+        source: function(request, response) {
+            let result = $.ui.autocomplete.filter(brand.map(brand => ({
+                label: brand.brand_description,
+                value: brand.id
+            })), request.term);
+            let uniqueResults = [...new Set(result)];
+            response(uniqueResults.slice(0, 10));
+        },
+        select: function(event, ui) {
+            $("#brand").val(ui.item.label);
+            $("#brand_id").val(ui.item.value);
+            return false;
+        },
+        minLength: 0,
+    }).focus(function() {
+        $(this).autocomplete("search", "");
+    });
+
 
     renderCharts(); // Initial render
 
