@@ -249,63 +249,9 @@
 
     $(document).ready(function () {
         fetchData();
-
-        $("#brand_ambassadors").autocomplete({
-            source: function(request, response) {    
-                let results = $.ui.autocomplete.filter(brand_ambassadors.map(ba => ({
-                    label: ba.description,
-                    value: ba.id,
-                })), request.term);
-                let uniqueResults = [...new Set(results)];
-                response(uniqueResults.slice(0, 10));
-            },
-            select: function(event, ui) {
-                $("#brand_ambassadors").val(ui.item.label);
-                $("#ba_id").val(ui.item.value);
-                return false;
-            },
-            minLength: 0,
-        }).focus(function () {
-            $(this).autocomplete("search", "");
-        });
-
-        $("#store_branch").autocomplete({
-            source: function(request, response) {
-                let results = $.ui.autocomplete.filter(store_branch.map(store => ({
-                    label: store.description,
-                    value: store.id,
-                })), request.term);
-                let uniqueResults = [...new Set(results)];
-                response(uniqueResults.slice(0, 10));
-            },
-            select: function(event, ui) {
-                $("#store_branch").val(ui.item.label);
-                $("#store_id").val(ui.item.id);
-                return false;
-            },
-            minLength: 0,
-        }).focus(function() {
-            $(this).autocomplete("search", "");
-        });
-
-        $("#brand").autocomplete({
-            source: function(request, response) {
-                let results = $.ui.autocomplete.filter(brands.map(brand => ({
-                    label: brand.brand_description,
-                    value: brand.id,
-                })), request.term);
-                let uniqueResults = [...new Set(results)];
-                response(uniqueResults.slice(0, 10));
-            },
-            select: function(event, ui) {
-                $("#brand").val(ui.item.label);
-                $("#brand_id").val(ui.item.value);
-                return false;
-            },
-            minLength: 0
-        }).focus(function() {
-            $(this).autocomplete("search", "");
-        });
+        autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors);
+        autocomplete_field($("#store_branch"), $("#store_id"), store_branch);
+        autocomplete_field($("#brand"), $("#brand_id"), brands, "brand_description", "id");
     }); 
 
     $(document).on('click', '#refreshButton', function () {
@@ -313,7 +259,7 @@
         if(selectedBa !== 0){
             get_area_asc(selectedBa);
         }
-        fetchData();
+        // fetchData();
     });
 
     function fetchData() {

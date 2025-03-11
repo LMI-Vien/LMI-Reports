@@ -200,43 +200,8 @@ $(document).ready(function() {
     let store = <?= json_encode($store_branch); ?>;
     let area = <?= json_encode($area); ?>;
 
-    $("#store").autocomplete({
-        source: function(request, response) {
-            let result = $.ui.autocomplete.filter(store.map(store => ({
-                label: store.description,
-                value: store.id,
-            })), request.term);
-            let uniqueResults = [...new Set(result)];
-            response(uniqueResults.slice(0, 10));
-        },
-        select: function(event, ui) {
-            $("#store").val(ui.item.label);
-            $("#store_id").val(ui.item.value);
-            return false;
-        },
-        minLength: 0,
-    }).focus(function () {
-        $(this).autocomplete("search", "");
-    });
-
-    $("#area").autocomplete({
-        source: function(request, response) {
-            let result = $.ui.autocomplete.filter(area.map(area => ({
-                label: area.area_description,
-                value: area.id,
-            })), request.term);
-            let uniqueResults = [...new Set(result)];
-            response(result);
-        },
-        select: function(event, ui) {
-            $("#area").val(ui.item.label);
-            $("#area_id").val(ui.item.value);
-            return false;
-        },
-        minLength: 0,
-    }).focus(function () {
-        $(this).autocomplete("search", "");
-    })
+    autocomplete_field($("#store"), $("#store_id"), store);
+    autocomplete_field($("#area"), $("#area_id"), area, "area_description");
 
     let table = $('#dataTable4').DataTable({
         paging: true,
@@ -274,8 +239,5 @@ $(document).on('click', '#toggleColumnsButton', function (e) {
 $(document).on('click', '#refreshButton', function(e) {
     
 })
-
-
-
 
 </script>

@@ -285,100 +285,11 @@ $(document).ready(function () {
     let store_branch = <?= json_encode($store_branch); ?>;
     let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
 
-    $("#ascName").autocomplete({
-        source: function(request, response) {
-            let result = $.ui.autocomplete.filter(asc.map(asc => ({
-                label: asc.asc_description,
-                value: asc.asc_id
-            })), request.term);
-            let uniqueResults = [...new Set(result)];
-            response(uniqueResults.slice(0, 10));
-        },
-        select: function(event, ui) {
-            $("#ascName").val(ui.item.label);
-            $("#asc_id").val(ui.item.value);
-            return false;
-        },
-        minLength: 0,
-    }).focus(function () {
-        $(this).autocomplete("search", "");
-    });
-
-    $("#area").autocomplete({
-        source: function(request, response) {
-            let result = $.ui.autocomplete.filter(area.map(area => ({
-                label: area.area_description,
-                value: area.id
-            })), request.term);
-            let uniqueResults = [...new Set(result)];
-            response(uniqueResults.slice(0, 10));
-        },
-        select: function(event, ui) {
-            $("#area").val(ui.item.label);
-            $("#area_id").val(ui.item.value);
-            return false;
-        },
-        minLength: 0,
-    }).focus(function () {
-        $(this).autocomplete("search", "");
-    });
-
-    $("#brand").autocomplete({
-        source: function(request, response) {
-            let result = $.ui.autocomplete.filter(brand.map(brand => ({
-                label: brand.brand_description,
-                value: brand.id
-            })), request.term);
-            let uniqueResults = [...new Set(result)];
-            response(uniqueResults.slice(0, 10));
-        },
-        select: function(event, ui) {
-            $("#brand").val(ui.item.label);
-            $("#brand_id").val(ui.item.value);
-            return false;
-        },
-        minLength: 0,
-    }).focus(function () {
-        $(this).autocomplete("search", "");
-    });
-
-    $("#storeName").autocomplete({
-        source: function(request, response) {
-            let result = $.ui.autocomplete.filter(store_branch.map(store => ({
-                label: store.description,
-                value: store.id
-            })), request.term);
-            let uniqueResults = [...new Set(result)];
-            response(uniqueResults.slice(0, 10));
-        },
-        select: function(event, ui) {
-            $("#storeName").val(ui.item.label);
-            $("#store_id").val(ui.item.value);
-            return false;
-        },
-        minLength: 0,
-    }).focus(function () {
-        $(this).autocomplete("search", "");
-    });
-
-    $("#ba").autocomplete({
-        source: function(request, response) {
-            let result = $.ui.autocomplete.filter(brand_ambassador.map(ba => ({
-                label: ba.description,
-                value: ba.id
-            })), request.term);
-            let uniqueResults = [...new Set(result)];
-            response(uniqueResults.slice(0, 10));
-        },
-        select: function(event, ui) {
-            $("#ba").val(ui.item.label);
-            $("#ba_id").val(ui.item.value);
-            return false;
-        },
-        minLength: 0,
-    }).focus(function () {
-        $(this).autocomplete("search", "");
-    });
+    autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
+    autocomplete_field($("#area"), $("area_id"), area, "area_description");
+    autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
+    autocomplete_field($("#storeName"), $("#store_id"), store_branch);
+    autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
 
     tables.forEach(id => {
         $(id).DataTable({

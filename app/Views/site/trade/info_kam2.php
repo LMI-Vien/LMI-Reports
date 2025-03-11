@@ -247,71 +247,9 @@
         let asc = <?= json_encode($asc); ?>;
         let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
 
-        $("#brandAmbassador").autocomplete({
-            source: function(request, response) {
-                let result = $.ui.autocomplete.filter(
-                    ba.map(ba => ({
-                        label: ba.description,
-                        value: ba.id,
-                    })),
-                    request.term,
-                );
-                let uniqueResults = [...new Set(result)];
-                response(uniqueResults.slice(0, 10));
-            },
-            select: function (event, ui) {
-                $("#brandAmbassador").val(ui.item.label);
-                $("#ba_id").val(ui.item.value);
-                return false;
-            },
-            minLength: 0,
-        }).focus(function () {
-            $(this).autocomplete("search", "");
-        });
-
-        $("#storeName").autocomplete({
-            source: function(request, response) {
-                let result = $.ui.autocomplete.filter(
-                    store.map(store => ({
-                        label: store.description,
-                        value: store.id,
-                    })),
-                    request.term,
-                );
-                let uniqueResults = [...new Set(result)];
-                response(uniqueResults.slice(0, 10));
-            },
-            select: function (event, ui) {
-                $("#storeName").val(ui.item.label);
-                $("#store_id").val(ui.item.value);
-                return false;
-            },
-            minLength: 0,
-        }).focus(function () {
-            $(this).autocomplete("search", "");
-        });
-
-        $("#ascName").autocomplete({
-            source: function(request, response) {
-                let result = $.ui.autocomplete.filter(
-                    asc.map(asc => ({
-                        label: asc.asc_description,
-                        value: asc.asc_id,
-                    })),
-                    request.term,
-                );
-                let uniqueResults = [...new Set(result)];
-                response(uniqueResults.slice(0, 10));
-            },
-            select: function (event, ui) {
-                $("#ascName").val(ui.item.label);
-                $("#asc_id").val(ui.item.value);
-                return false;
-            },
-            minLength: 0,
-        }).focus(function () {
-            $(this).autocomplete("search", "");
-        });
+        autocomplete_field($("#brandAmbassador"), $("ba_id"), ba);
+        autocomplete_field($("#storeName"), $("store_id"), store);
+        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
 
         tables.forEach(id => {
             $(id).DataTable({
