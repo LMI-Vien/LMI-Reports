@@ -9,7 +9,7 @@ self.onmessage = async function(e) {
     var err_counter = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/brand-ambassador/get_valid_ba_data`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?areas=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         area_records = ba_data.areas;
@@ -34,8 +34,8 @@ self.onmessage = async function(e) {
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let code = row["Code"] ? row["Code"].trim() : "";
-                let description = row["Name"] ? row["Name"].trim() : "";
+                let code = row["ASC Code"] ? row["ASC Code"].trim() : "";
+                let description = row["ASC Name"] ? row["ASC Name"].trim() : "";
                 let status = row["Status"] ? row["Status"].toLowerCase() : "";
                 let deployment_date = row["Deployment Date"] ? row["Deployment Date"].trim() : "";
                 let user_id = row["Created By"] ? row["Created By"].trim() : "";

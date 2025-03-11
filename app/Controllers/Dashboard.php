@@ -15,7 +15,6 @@ class Dashboard extends BaseController
 	    $this->session = session();
 	    $this->auth_token = getenv('API_AUTH_TOKEN');
         helper('url');
-        // $this->db = Database::connect('application1');
 	    if (!$this->session->get('sess_site_uid')) {
 	        redirect()->to(base_url('login'))->send();
 	        exit;
@@ -45,20 +44,22 @@ class Dashboard extends BaseController
 		$data['PageUrl'] = 'Dashboard';
 		$data['content'] = "site/dashboard/dashboard.php";
 		$data['js'] = array(
-			"assets/js/jquery-3.7.1.min.js",
-			"assets/js/moment.min.js",
-			"assets/js/jquery.tablesorter.min.js",
-			"assets/js/daterangepicker.min.js",
-			"assets/js/bootstrap.min.js",
-			"assets/site/js/custom.js",
-			"assets/site/js/charts.js"
+			// "assets/js/jquery-3.7.1.min.js",
+			// "assets/js/moment.min.js",
+			// "assets/js/jquery.tablesorter.min.js",
+			// "assets/js/daterangepicker.min.js",
+			// "assets/js/bootstrap.min.js",
+			// "assets/site/js/custom.js",
+			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	"assets/css/bootstrap.min.css",
-			"assets/site/css/dashboard/style-common.css",
-			"assets/site/css/dashboard/style-header.css",
-			"assets/site/css/dashboard/style-footer.css",
-			"assets/site/css/dashboard/dashboard.css"
+        	// "assets/css/bootstrap.min.css",
+			// "assets/site/css/dashboard/style-common.css",
+			// "assets/site/css/dashboard/style-header.css",
+			// "assets/site/css/all.min.css",
+			// "assets/site/css/css.css",
+			//"assets/site/css/dashboard/style-footer.css",
+			//"assets/site/css/dashboard/dashboard.css"
 			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);

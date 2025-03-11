@@ -21,6 +21,7 @@ use App\Models\Global_model;
 use App\Models\Custom_model;
 use App\Models\Gmodel;
 use App\Models\User_model;
+use App\Models\Dashboard_model;
 
 class BaseController extends Controller
 {
@@ -37,6 +38,7 @@ class BaseController extends Controller
     protected $Custom_model;
     protected $Gmodel;
     protected $User_model;
+    protected $Dashboard_model;
 
 	/** @var Session */
 	protected $session;
@@ -60,6 +62,7 @@ class BaseController extends Controller
         $this->Custom_model = new Custom_model();
         $this->Gmodel = new Gmodel();
         $this->User_model = new User_model();
+        $this->Dashboard_model = new Dashboard_model();
 	}
 
 }

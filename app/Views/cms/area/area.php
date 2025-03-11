@@ -37,6 +37,13 @@
     .ui-widget {
         z-index: 1051 !important;
     }
+
+    #list-data {
+        overflow: visible !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
 </style>
 
     <div class="content-wrapper p-4">
@@ -59,7 +66,7 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                        <th class='center-content'>Code</th>
+                                        <th class='center-content'>Area Code</th>
                                         <th class='center-content'>Area</th>
                                         <!-- <th class='center-content'>Store</th> -->
                                         <th class='center-content'>Status</th>
@@ -102,7 +109,7 @@
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
-                            <label for="code" class="form-label">Code</label>
+                            <label for="code" class="form-label">Area Code</label>
                             <input type="text" class="form-control required" id="code" aria-describedby="store_code" maxlength="25">
                             <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                         </div>
@@ -214,7 +221,7 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' scope="col">Line #</th>
-                                        <th class='center-content' scope="col">Code</th>
+                                        <th class='center-content' scope="col">Area Code</th>
                                         <th class='center-content' scope="col">Area</th>
                                         <th class='center-content' scope="col">Stores/Branches</th>
                                         <th class='center-content' scope="col">Status</th>
@@ -236,6 +243,8 @@
     
 <script>
     var query = "status >= 0";
+    var column_filter = '';
+    var order_filter = '';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -266,8 +275,8 @@
     });
     
     $(document).on('click', '#btn_add', function() {
-        open_modal('Add New Area', 'add', '');
         get_store('', 'store_0');
+        open_modal('Add New Area', 'add', '');
     });
     
     function edit_data(id) {
@@ -279,6 +288,7 @@
     }
     
     function open_modal(msg, actions, id) {
+        console.log($('#store').val());
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#popup_modal');
@@ -317,7 +327,7 @@
             let html = `
             <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
                 <input id='store_${line}' class='form-control' placeholder='Select store'>
-                <button type="button" class="rmv-btn" onclick="remove_line(${line})">
+                <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
             </div>
@@ -429,35 +439,42 @@
                             disabled = ''
                         }
                         get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
-                            $.each(res, (x, y) => {
-                                // console.log(res);
+                            console.log(res);
+                            for(let key in res) {
+                                console.log(`Key: ${key}, Value: ${res[key]}`);
 
-                                if (actions === 'edit') {
-                                    readonly = (line == 0) ? 'readonly' : '';
-                                    disabled = (line == 0) ? 'disabled' : '';
-                                }
+                                get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
+                                    for(let key1 in res1) {
+                                        console.log(`${res1[key1]} - ${res[key]}`);
 
-                                let html = `
-                                <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                    <input id='store_${line}' class='form-control' placeholder='Select store' value='${y}' ${actions === 'view' ? 'readonly' : ''}>
-                                    <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
-                                        <i class="fa fa-minus" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                                `;
-
-                                $('#store_list').append(html);
-
-                                $(`#store_${line}`).autocomplete({
-                                    source: function(request, response) {
-                                        var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
-                                        var uniqueResults = [...new Set(results)];
-                                        response(uniqueResults.slice(0, 10));
-                                    },
+                                        if (actions === 'edit') {
+                                            readonly = (line == 0) ? 'readonly' : '';
+                                            disabled = (line == 0) ? 'disabled' : '';
+                                        }
+        
+                                        let html = `
+                                        <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                            <input id='store_${line}' class='form-control' placeholder='Select store' value='${res1[key1]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+                                            <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        `;
+        
+                                        $('#store_list').append(html);
+        
+                                        $(`#store_${line}`).autocomplete({
+                                            source: function(request, response) {
+                                                var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                                                var uniqueResults = [...new Set(results)];
+                                                response(uniqueResults.slice(0, 10));
+                                            },
+                                        });
+                                        get_store(x, `store_${line}`);
+                                        line++
+                                    }
                                 });
-                                get_store(x, `store_${line}`);
-                                line++
-                            });
+                            }
                         });
                     })
                     if(d.status == 1) {
@@ -579,7 +596,7 @@
             }, {});
 
             // 
-            let td_validator = ['code', 'description', 'stores', 'status'];
+            let td_validator = ['area code', 'description', 'stores', 'status']; 
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -610,7 +627,7 @@
 
         $(".import_pagination").html(paginationHtml);
     }
-    
+
     let storeDescriptions = [];
     function get_store(id, dropdown_id) {
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
@@ -637,13 +654,13 @@
                     var selected = '';
                     
                     result.forEach(function (y) {
-                        storeDescriptions.push(y.description);
-                        html += `<option value="${y.description}">`;
+                        storeDescriptions.push(y.code + ' - ' + y.description);
+                        // html += `<option value="${y.code} - ${y.description}">`;
                     });
                 }
             }
             // console.log(html);
-            $('#stores').append(html);
+            // $('#stores').append(html);
         })
     }
 
@@ -684,15 +701,15 @@
         modal.loading(true);
 
         let jsonData = dataset.map(row => {
-            if (row["stores"]) {
-                let storeList = row["stores"].split(",").map(item => item.trim().toLowerCase());
-                row["stores"] = [...new Set(storeList)]; // Remove duplicates
+            if (row["Stores"]) {
+                let storeList = row["Stores"].split(",").map(item => item.trim().toLowerCase());
+                row["Stores"] = [...new Set(storeList)]; // Remove duplicates
             }
             return {
-                "Code": row["code"] || "",
-                "Name": row["description"] || "", 
-                "Status": row["status"] || "", 
-                "Stores": row["stores"] || "", 
+                "Area Code": row["Area Code"] || "",
+                "Description": row["Description"] || "", 
+                "Status": row["Status"] || "", 
+                "Stores": row["Stores"] || "", 
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
             };
@@ -962,7 +979,65 @@
         }
     });
 
-    function get_pagination(query) {
+    $(document).on('click', '#search_button', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        new_query = query;
+        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+        get_data(new_query);
+        get_pagination(new_query);
+    });
+
+    $('#btn_filter').on('click', function(event) {
+        title = addNbsp('FILTER DATA');
+        $('#filter_modal').find('.modal-title').find('b').html(title);
+        $('#filter_modal').modal('show');
+    })
+
+    $('#button_f').on('click', function(event) {
+        let status_f = $("input[name='status_f']:checked").val();
+        let c_date_from = $("#created_date_from").val();
+        let c_date_to = $("#created_date_to").val();
+        let m_date_from = $("#modified_date_from").val();
+        let m_date_to = $("#modified_date_to").val();
+        
+        order_filter = $("input[name='order']:checked").val();
+        column_filter = $("input[name='column']:checked").val();
+        query = "status >= 0";
+        
+        query += status_f ? ` AND status = ${status_f}` : '';
+        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
+        
+        // console.log(query);
+        get_pagination(query, column_filter, order_filter);
+        get_data(query, column_filter, order_filter);
+        $('#filter_modal').modal('hide');
+    })
+    
+    $('#clear_f').on('click', function(event) {
+        order_filter = '';
+        column_filter = '';
+        query = "status >= 0";
+        get_data(query);
+        get_pagination(query);
+        
+        $("input[name='status_f']").prop('checked', false);
+        $("#created_date_from").val('');
+        $('#created_date_to').val('');
+        $('#modified_date_from').val('');
+        $('#modified_date_to').val('');
+        $("input[name='order']").prop('checked', false);
+        $("input[name='column']").prop('checked', false);
+
+        $('#filter_modal').modal('hide');
+    })
+
+    function get_pagination(query, field = "updated_date", order = "desc") {
         var data = {
         event : "pagination",
             select : "id",
@@ -971,8 +1046,8 @@
             limit : limit,
             table : "tbl_area",
             order : {
-                field : "updated_date",
-                order : "desc" 
+                field : field,
+                order : order 
             }
 
         }
@@ -986,23 +1061,29 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query);
+        get_data(query, column_filter, order_by);
     })
 
     function save_data(actions, id) {
         var code = $('#code').val();
         var description = $('#description').val();
-        var store = $('#store').val();
         var chk_status = $('#status').prop('checked');
         var linenum = 0;
+        var store = '';
         var unique_store = [];
         var store_list = $('#store_list');
         // add_line
         store_list.find('input').each(function() {
-            linenum++
             if (!unique_store.includes($(this).val())) {
-                unique_store.push($(this).val())
+                store = $(this).val().split(' - ');
+
+                if(store.length == 2) {
+                    unique_store.push(store[1]);
+                } else {
+                    unique_store.push(store[1] + ' - ' + store[2]);
+                }
             }
+            linenum++
         });
         if (chk_status) {
             status_val = 1;
@@ -1085,17 +1166,27 @@
                             })
 
                             if(valid) {
-                                save_to_db(code, description, store, status_val, id, (obj) => {
-                                    total_delete(url, 'tbl_store_group', 'area_id', id);
+                                // save_to_db(code, description, store, status_val, id, (obj) => {
+                                //     total_delete(url, 'tbl_store_group', 'area_id', id);
 
-                                    batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                //     batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                //         modal.loading(false);
+                                //         modal.alert(success_update_message, "success", function() {
+                                //             location.reload();
+                                //         });
+                                //     })
+                                // })
+                                save_to_db(code, description, store, status_val, id, (obj) => {
+                                    insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
+    
+                                    batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
                                         modal.loading(false);
                                         modal.alert(success_update_message, "success", function() {
                                             location.reload();
                                         });
                                     })
                                 })
-                                
+
                             } else {
                                 // alert('mali');
                                 modal.loading(false);
@@ -1153,30 +1244,36 @@
     }
 
     function delete_data(id) {
-        modal.confirm(confirm_delete_message,function(result){
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_area",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    total_delete(url, 'tbl_store_group', 'area_id', id)
-                    modal.alert(success_delete_message, "success", function() {
-                        location.reload();
+        
+        get_field_values("tbl_area", "code", "id", [id], function (res) {
+            let code = res[id];
+            let message = is_json(confirm_delete_message);
+            message.message = `Code <i><b>${code}</b></i> from Area Masterfile`;
+            modal.confirm(JSON.stringify(message),function(result){
+                if(result){ 
+                    var url = "<?= base_url('cms/global_controller');?>";
+                    var data = {
+                        event : "update",
+                        table : "tbl_area",
+                        field : "id",
+                        where : id, 
+                        data : {
+                                updated_date : formatDate(new Date()),
+                                updated_by : user_id,
+                                status : -2
+                        }  
+                    }
+                    aJax.post(url,data,function(result){
+                        var obj = is_json(result);
+                        total_delete(url, 'tbl_store_group', 'area_id', id)
+                        modal.alert(success_delete_message, "success", function() {
+                            location.reload();
+                        });
                     });
-                });
-            }
-
-        });
+                }
+    
+            });
+        })
     }
 
     function formatDate(date) {
@@ -1189,17 +1286,17 @@
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
-    function get_data(new_query) {
+    function get_data(query, field = "code, updated_date", order = "asc, desc") {
         var data = {
             event : "list",
             select : "id, code, description, status, created_date, updated_date",
-            query : new_query,
+            query : query,
             offset : offset,
             limit : limit,
             table : "tbl_area",
             order : {
-                field : "code, updated_date",
-                order : "asc, desc" 
+                field : field,
+                order : order
             }
 
         }
@@ -1259,14 +1356,14 @@
 
         formattedData = [
             {
-                "Code": "",
+                "Area Code": "",
                 "Description": "",
                 "Status": "",
                 "Stores": "",
                 "NOTE:": "Please do not change the column headers."
             },
             {
-                "Code": "",
+                "Area Code": "",
                 "Description": "",
                 "Status": "",
                 "Stores": "",
@@ -1283,13 +1380,13 @@
         
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
         
         const fetchStores = (callback) => {
             const processResponse = (res) => {
                 formattedData = res.map(({ 
-                    id, area_code, area_description, status, store_description
+                    area_code, area_description, status, store_description
                 }) => ({
                     Code: area_code,
                     Description: area_description,
@@ -1299,49 +1396,83 @@
             };
 
             ids.length > 0 
-                ? get_area_where_in(`"${ids.join(', ')}"`, processResponse)
+                // ? get_area_where_in(`"${ids.join(', ')}"`, processResponse)
+                ? dynamic_search(
+                    "'tbl_area a'", 
+                    "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
+                    "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
+                    0, 
+                    0, 
+                    `'a.id:IN=${ids.join('|')}'`,  
+                    `''`, 
+                    `'a.id'`,
+                    processResponse
+                )
                 // : getStoresByArea(processResponse);
                 : batch_export();
         };
 
         const batch_export = () => {
-            get_area_count((res) => {
-                if (res && res.length > 0) {
-                    let total_records = res[0].total_records;
+            dynamic_search(
+                "'tbl_area'", 
+                "''", 
+                "'COUNT(id) AS total_records'", 
+                0, 
+                0, 
+                `''`,  
+                `''`, 
+                `''`,
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
 
-                    for (let index = 0; index < total_records; index += 100000) {
-                        console.log(index, 'index here')
-                        var ano_ire = [];
+                        for (let index = 0; index < total_records; index += 100000) {
+                            // console.log(index, 'index here')
+                            // var ano_ire = [];
 
-                        area_stores(index, (result) => {
-                            
-                            console.log(result, 'result here');
+                            // area_stores(
+                            //     index, 
+                            //     (result) => {
+                                    
+                            //         console.log(result, 'result here');
 
-                            result.forEach(({ area_id, store_description }) => {
-                                ano_ire[area_id] = store_description;  // Assign value to ano_ire array using id as index
-                            });
+                            //         result.forEach(({ area_id, store_description }) => {
+                            //             ano_ire[area_id] = store_description;  // Assign value to ano_ire array using id as index
+                            //         });
 
-                            console.log(ano_ire, 'ano_ire'); // To check the final array
-                        })
+                            //         console.log(ano_ire, 'ano_ire'); // To check the final array
+                            //     }
+                            // )
 
-                        console.log(ano_ire, 'ano_ire');
+                            // console.log(ano_ire, 'ano_ire');
 
-                        get_area(index, (res) => {
-                            let newData = res.map(({ 
-                                id, area_code, area_description, status
-                            }) => ({
-                                Code: area_code,
-                                Description: area_description,
-                                Status: status === "1" ? "Active" : "Inactive",
-                                "Stores": ano_ire[id] || '',
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                            dynamic_search(
+                                "'tbl_area a'", 
+                                "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
+                                "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT b.description ORDER BY b.description ASC SEPARATOR \", \") AS store_description'", 
+                                0, 
+                                0, 
+                                `''`,  
+                                `''`, 
+                                `'a.id'`, 
+                                (res) => {
+                                    let newData = res.map(({ 
+                                        id, area_code, area_description, status, store_description
+                                    }) => ({
+                                        Code: area_code,
+                                        Description: area_description,
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                        "Stores": store_description || '',
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                    } else {
+                        console.log('No data received');
                     }
-                } else {
-                    console.log('No data received');
                 }
-            })
+            )
         };
 
         fetchStores();
@@ -1380,15 +1511,38 @@
         var modal_alert_success = "";
         var hasExecuted = false; // Prevents multiple executions
 
+        var id = '';
+        id = $("input.select:checked");
+        var code = [];
+        var code_string = '';
+
+        id.each(function() {
+            code.push($(this).attr('data-id'));
+        })
+
+        get_field_values('tbl_area', 'code', 'id', code, function(res) {
+            if(code.length == 1) {
+                code_string = `Code <i><b>${res[code[0]]}</b></i>`;
+            } else {
+                code_string = 'selected data';
+            }
+        })
+
         if (parseInt(status) === -2) {
-            modal_obj = confirm_delete_message;
+            message = is_json(confirm_delete_message);
+            message.message = `Delete ${code_string} from Area Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
             offset = 1;
         } else if (parseInt(status) === 1) {
-            modal_obj = confirm_publish_message;
+            message = is_json(confirm_delete_message);
+            message.message = `Publish ${code_string} from Area Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
-            modal_obj = confirm_unpublish_message;
+            message = is_json(confirm_delete_message);
+            message.message = `Unpublish ${code_string} from Area Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
         modal.confirm(modal_obj, function (result) {

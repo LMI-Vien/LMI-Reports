@@ -1,3 +1,11 @@
+<style>
+    th, td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <div class="content-wrapper p-4">
     <div class="card">
         <div class="text-center page-title md-center">
@@ -19,7 +27,7 @@
                             <table class= "table table-bordered listdata">
                                 <thead>
                                     <tr>
-                                        <!-- <th class='center-content'><input class ="selectall" type ="checkbox"></th> -->
+                                        <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                         <!-- <th class='center-content'>ID</th> -->
                                         <th class='center-content'>Month</th>
                                         <th class='center-content'>Year</th>
@@ -127,16 +135,16 @@
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         html += "<tr class='" + rowClass + "'>";
-                        // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         // html += "<td scope=\"col\">" + y.id + "</td>";
                         html += "<td scope=\"col\">" + y.month + "</td>";
                         html += "<td scope=\"col\">" + y.year + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.customer_payment_group, 10) + "</td>";
+                        html += "<td scope=\"col\">" + (y.customer_payment_group) + "</td>";
                         html += "<td scope=\"col\">" + y.template_id + "</td>";
                         html += "<td scope=\"col\">" + y.created_date + "</td>";
                         html += "<td scope=\"col\">" + y.created_by + "</td>";
                         html += "<td scope=\"col\">" + y.file_type + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.remarks, 10) + "</td>";
+                        html += "<td scope=\"col\">" + (y.remarks) + "</td>";
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
@@ -276,36 +284,295 @@
         })
     }
 
-    function export_sellout(id) {
-        var query = " data_header_id = " + id;
-        var data = {
-            event : "list",
-            select : "id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
-            query : query,
-            offset : 0,
-            limit : 0,
-            table : "tbl_sell_out_data_details",
-            order : {
-                field : "id",
-                order : "asc" 
+    $(document).on('click', '#btn_export ', function() {
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    handleExport()
+                }, 500);
             }
+        })
+    });
 
-        }
+    function handleExport() {
+        var formattedData = [];
+        var ids = [];
+        let table = '';
+        let join = '';
+        let fields = '';
+        let limit = 0;
+        let offset = 0;
+        let filter = '';
+        let order = '';
+        let group = '';
+        
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`${id}`); // Collect IDs in an array
+        });
+        
+        const fetchStores = (callback) => {
+            const processResponse = (res) => {
+                res.forEach(item => {
+                    let spacing = {
+                        "File Name": "",
+                        "Store Code": "",
+                        "Store Description": "",
+                        "SKU Code": "",
+                        "SKU Description": "",
+                        "Quantity": "",
+                        "Net Sales": "",
+                    }
+                    let newData = {
+                        "File Name": item.month,
+                        "Store Code": item.year,
+                        "Store Description": item.customer_payment_group,
+                        "SKU Code": item.created_date,
+                        "SKU Description": item.created_by,
+                        "Quantity": item.file_type,
+                        "Net Sales": item.remarks,
+                    }
+                    formattedData.push(newData); // Append new data to formattedData array
+                    table = 'tbl_sell_out_data_details';
+                    join = '';
+                    fields = 'COUNT(id) AS total_records';
+                    limit = 0;
+                    offset = 0;
+                    filter = `data_header_id:EQ=${item.id}`;
+                    order = '';
+                    group = '';
+                    dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                        (res) => {
+                            if (res && res.length > 0) {
+                                let total_records = res[0].total_records;
+                                for (let index = 0; index < total_records; index += 100000) {
+                                    table = 'tbl_sell_out_data_details';
+                                    join = '';
+                                    fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
+                                    limit = 100000;
+                                    offset = index;
+                                    filter = `data_header_id:EQ=${item.id}`;
+                                    order = '';
+                                    group = '';
+                                    dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                                        (result) => {
+                                            result.forEach(item => {
+                                                let newData = {
+                                                    "File Name": item.file_name,
+                                                    "Store Code": item.store_code,
+                                                    "Store Description": item.store_description,
+                                                    "SKU Code": item.sku_code,
+                                                    "SKU Description": item.sku_description,
+                                                    "Quantity": item.quantity,
+                                                    "Net Sales": item.net_sales,
+                                                }
+                                                formattedData.push(newData);
+                                            })
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    )
 
-        aJax.post(url,data,function(result){
-            var result = JSON.parse(result);
+                    formattedData.push(spacing); // Append new data to formattedData array
+                });
+            };
 
-            console.log(result, 'result');
+            ids.length > 0 
+                ? dynamic_search(
+                    "'tbl_sell_out_data_header a'", 
+                    "'left join tbl_month b on a.month = b.id'", 
+                    "'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks'", 
+                    0, 
+                    0, 
+                    `'a.id:IN=${ids.join('|')}'`,  
+                    `''`, 
+                    `''`,
+                    processResponse
+                )
+                : batch_export();
+        };
 
-            const formattedData = result.map(item => ({
-                "File Name": item.file_name,
-                "Store Code": item.store_code,
-                "Store Description": item.store_description,
-                "SKU Code": item.sku_code,
-                "SKU Description": item.sku_description,
-                "Quantity": item.quantity,
-                "Net Sales": item.net_sales,
-            }));
+        const batch_export = () => {
+            table = 'tbl_sell_out_data_header';
+            join = '';
+            fields = 'COUNT(id) AS total_records';
+            limit = 0;
+            offset = 0;
+            filter = '';
+            order = '';
+            group = '';
+            dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
+                        for (let index = 0; index < total_records; index += 100000) {
+                            table = 'tbl_sell_out_data_header a';
+                            join = 'left join tbl_month b on a.month = b.id';
+                            fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
+                            limit = 100000;
+                            offset = index;
+                            filter = '';
+                            order = '';
+                            group = '';
+                            dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                                (res) => {
+                                    res.forEach(item => {
+                                        let spacing = {
+                                            "File Name": "",
+                                            "Store Code": "",
+                                            "Store Description": "",
+                                            "SKU Code": "",
+                                            "SKU Description": "",
+                                            "Quantity": "",
+                                            "Net Sales": "",
+                                        }
+                                        let newData = {
+                                            "File Name": item.month,
+                                            "Store Code": item.year,
+                                            "Store Description": item.customer_payment_group,
+                                            "SKU Code": item.created_date,
+                                            "SKU Description": item.created_by,
+                                            "Quantity": item.file_type,
+                                            "Net Sales": item.remarks,
+                                        }
+                                        formattedData.push(newData); // Append new data to formattedData array
+                                        table = 'tbl_sell_out_data_details';
+                                        join = '';
+                                        fields = 'COUNT(id) AS total_records';
+                                        limit = 0;
+                                        offset = 0;
+                                        filter = `data_header_id:EQ=${item.id}`;
+                                        order = '';
+                                        group = '';
+                                        dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                                            (res) => {
+                                                if (res && res.length > 0) {
+                                                    let total_records = res[0].total_records;
+                                                    for (let index = 0; index < total_records; index += 100000) {
+                                                        table = 'tbl_sell_out_data_details a';
+                                                        join = '';
+                                                        fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
+                                                        limit = 100000;
+                                                        offset = index;
+                                                        filter = `data_header_id:EQ=${item.id}`;
+                                                        order = '';
+                                                        group = '';
+                                                        dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                                                            (result) => {
+                                                                result.forEach(item => {
+                                                                    let newData = {
+                                                                        "File Name": item.file_name,
+                                                                        "Store Code": item.store_code,
+                                                                        "Store Description": item.store_description,
+                                                                        "SKU Code": item.sku_code,
+                                                                        "SKU Description": item.sku_description,
+                                                                        "Quantity": item.quantity,
+                                                                        "Net Sales": item.net_sales,
+                                                                    }
+                                                                    formattedData.push(newData);
+                                                                })
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        )
+
+                                        formattedData.push(spacing); // Append new data to formattedData array
+                                    });
+                                }
+                            )
+                        }
+                    }
+                }
+            )
+
+            console.log(formattedData, 'formattedData')
+        };
+
+        fetchStores();
+
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."], // Row 1
+            ["Sell Out"], // Row 2
+            ["Date Printed: " + formatDate(new Date())], // Row 3
+            [""], // Empty row for spacing
+        ];
+
+        exportArrayToCSV(formattedData, `Sell Out - ${formatDate(new Date())}`, headerData);
+        modal.loading_progress(false);
+    };
+
+    function export_sellout(id) {
+        var formattedData = [];
+        const processResponse = (res) => {
+            res.forEach(item => {
+                let spacing = {
+                    "File Name": "",
+                    "Store Code": "",
+                    "Store Description": "",
+                    "SKU Code": "",
+                    "SKU Description": "",
+                    "Quantity": "",
+                    "Net Sales": "",
+                }
+                let newData = {
+                    "File Name": item.month,
+                    "Store Code": item.year,
+                    "Store Description": item.customer_payment_group,
+                    "SKU Code": item.created_date,
+                    "SKU Description": item.created_by,
+                    "Quantity": item.file_type,
+                    "Net Sales": item.remarks,
+                }
+                formattedData.push(newData); // Append new data to formattedData array
+                table = 'tbl_sell_out_data_details';
+                join = '';
+                fields = 'COUNT(id) AS total_records';
+                limit = 0;
+                offset = 0;
+                filter = `data_header_id:EQ=${item.id}`;
+                order = '';
+                group = '';
+                dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                    (res) => {
+                        if (res && res.length > 0) {
+                            let total_records = res[0].total_records;
+                            for (let index = 0; index < total_records; index += 100000) {
+                                table = 'tbl_sell_out_data_details a';
+                                join = '';
+                                fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
+                                limit = 100000;
+                                offset = index;
+                                filter = `data_header_id:EQ=${item.id}`;
+                                order = '';
+                                group = '';
+                                dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+                                    (result) => {
+                                        result.forEach(item => {
+                                            let newData = {
+                                                "File Name": item.file_name,
+                                                "Store Code": item.store_code,
+                                                "Store Description": item.store_description,
+                                                "SKU Code": item.sku_code,
+                                                "SKU Description": item.sku_description,
+                                                "Quantity": item.quantity,
+                                                "Net Sales": item.net_sales,
+                                            }
+                                            formattedData.push(newData);
+                                        })
+                                    }
+                                )
+                            }
+                        }
+                    }
+                )
+    
+                formattedData.push(spacing); // Append new data to formattedData array
+            });
 
             const headerData = [
                 ["Company Name: Lifestrong Marketing Inc."], // Row 1
@@ -315,7 +582,19 @@
             ];
 
             exportArrayToCSV(formattedData, `Sell Out - ${formatDate(new Date())}`, headerData);
-        })
+        }
+
+        table = 'tbl_sell_out_data_header a';
+        join = 'left join tbl_month b on a.month = b.id';
+        fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
+        limit = 0;
+        offset = 0;
+        filter = `a.id:EQ=${id}`;
+        order = '';
+        group = '';
+        dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
+            processResponse
+        )
     }
 
     function exportArrayToCSV(data, filename, headerData) {

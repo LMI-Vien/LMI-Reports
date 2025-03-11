@@ -10,7 +10,7 @@ self.onmessage = async function(e) {
     var store_per_area = {};
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/area/get_valid_ba_data`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         store_records = ba_data.stores;
@@ -35,8 +35,8 @@ self.onmessage = async function(e) {
                 let row = data[index];
                 let tr_count = index + 1;
 
-                let code = row["Code"] ? row["Code"].trim() : "";
-                let description = row["Name"] ? row["Name"].trim() : "";
+                let code = row["Area Code"] ? row["Area Code"].trim() : "";
+                let description = row["Description"] ? row["Description"].trim() : "";
                 let status = row["Status"] ? row["Status"].toLowerCase() : "";
                 let stores = row["Stores"] ? row["Stores"] : "";
                 let user_id = row["Created By"] ? row["Created By"].trim() : "";
@@ -82,17 +82,19 @@ self.onmessage = async function(e) {
                     unique_code.add(code);
                 }
 
-                if (unique_description.has(description)) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Duplicated Description at line #: ${tr_count}`);
-                    err_counter++;
-                } else if (description.length > 50 || description === "") {
+                // if (unique_description.has(description)) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Duplicated Description at line #: ${tr_count}`);
+                //     err_counter++;
+                // } else 
+                if (description.length > 50 || description === "") {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Description at line #: ${tr_count}`);
                     err_counter++;
-                } else {
-                    unique_description.add(description);
                 }
+                //  else {
+                //     unique_description.add(description);
+                // }
 
                 if (!["active", "inactive"].includes(status)) {
                     invalid = true;

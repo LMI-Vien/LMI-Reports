@@ -28,7 +28,7 @@ class Brand_Ambassador extends BaseController
 		$data['title'] = "Brand Ambassador";
 		$data['PageName'] = 'Brand Ambassador';
 		$data['PageUrl'] = 'Brand Ambassador';
-		$data['buttons'] = ['add', 'import', 'search', 'export'];
+		$data['buttons'] = ['add', 'import', 'search', 'export', 'filter'];
 		$data['content'] = "cms/brand_ambassador/brand_ambassador.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
@@ -45,15 +45,6 @@ class Brand_Ambassador extends BaseController
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);	
-	}
-
-	public function get_valid_ba_data(){
-		$agencies = $this->Global_model->get_valid_records("tbl_agency", 'agency');
-		$brands = $this->Global_model->get_valid_records("tbl_brand", 'brand_code');
-		$stores = $this->Global_model->get_valid_records("tbl_store", 'description');
-		$teams = $this->Global_model->get_valid_records("tbl_team", 'team_description');
-		$areas = $this->Global_model->get_valid_records("tbl_area", 'description');
-		return $this->response->setJSON(["agencies" => $agencies, "brands" => $brands, "stores" => $stores, "teams" => $teams, "areas" => $areas]);
 	}
 
 }

@@ -205,7 +205,7 @@
 
             <div class="modal-body">
                 <div class="card p-3">
-                    <div class="mb-3" style="overflow-x: auto; height: 450px;">
+                    <div class="mb-3">
                         <div class="text-center p-2" 
                             style="font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border-radius: 10px;">
                             <b>Extracted Data</b>
@@ -255,28 +255,29 @@
                             </div>
 
                         </div>
-
-                        <table class="table table-bordered listdata">
-                            <thead class="table-dark text-center">
-                                <tr>
-                                    <th>Line #</th>
-                                    <th>Store</th>
-                                    <th>Item</th>
-                                    <th>Item Name</th>
-                                    <th>VMI Status</th>
-                                    <th>Item Class</th>
-                                    <th>Supplier</th>
-                                    <th>Group</th>
-                                    <th>Dept</th>
-                                    <th>Class</th>
-                                    <th>Sub-class</th>
-                                    <th>On Hand</th>
-                                    <th>In transit</th>
-                                    <th>Ave Sales Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody class="word_break import_table"></tbody>
-                        </table>
+                        <div style="overflow-x: auto; max-height: 400px;">
+                            <table class="table table-bordered listdata">
+                                <thead class="table-dark text-center">
+                                    <tr>
+                                        <th>Line #</th>
+                                        <th>Store</th>
+                                        <th>Item</th>
+                                        <th>Item Name</th>
+                                        <th>VMI Status</th>
+                                        <th>Item Class</th>
+                                        <th>Supplier</th>
+                                        <th>Group</th>
+                                        <th>Dept</th>
+                                        <th>Class</th>
+                                        <th>Sub-class</th>
+                                        <th>On Hand</th>
+                                        <th>In transit</th>
+                                        <th>Ave Sales Unit</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="word_break import_table"></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <center class="my-2">
@@ -977,7 +978,7 @@
 
 
         let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
-        worker.postMessage({ data: jsonData, base_url });
+        worker.postMessage({ data: jsonData, base_url, company });
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
@@ -1008,9 +1009,9 @@
                     modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
                 }
             }else{
-                modal.loading(false);
-                modal.loading_progress(true); 
-                updateSwalProgress("Validating data...", progress);
+                //modal.loading(false);
+                //modal.loading_progress(true); 
+                //updateSwalProgress("Validating data...", progress);
             
             }
 
@@ -1159,6 +1160,7 @@
                         row.id = matchedId;
                         row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_date; // Unset created_date
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
@@ -1488,61 +1490,82 @@
         })
 
         const startExport = () => {
-            get_vmi_data(year, month, week, company, (res) => {
-                let store_ids = []
-                let store_map = {}
-        
-                res.forEach(stores => {
-                    store_ids.push(`'${stores.store}'`);
-                });
-        
-                get_store_branch_where_in(`"${store_ids.join(', ')}"`, (result) => {
-                    result.forEach(store => {
-                        if (!store_map[store.id]) {
-                            store_map[store.id] = {}; // Initialize as an object
-                        }
-                        store_map[store.id].description = store.description;
-                        store_map[store.id].code = store.code;
+            // year, month, week, company
+            dynamic_search(
+                "'tbl_vmi'", 
+                "''", 
+                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company,vmi_status'", 
+                0, 
+                0, 
+                `'year:EQ=${year}, month:EQ=${month}, week:EQ=${week}, company:EQ=${company}'`,  
+                `''`, 
+                `''`,
+                (res) => {
+                    let store_ids = []
+                    let store_map = {}
+            
+                    res.forEach(stores => {
+                        store_ids.push(`${stores.store}`);
                     });
-                });
-        
-                let newData = res.map(({ 
-                    store, 
-                    // store name,
-                    item, 
-                    item_name, 
-                    item_class, 
-                    supplier, 
-                    group, 
-                    dept, 
-                    classification, 
-                    sub_class, 
-                    on_hand, 
-                    in_transit, 
-                    average_sales_unit, 
-                    company,
-                    vmi_status, 
-                }) => ({
-                    "Store":store_map[`${store}`].code, 
-                    // "Store Name":store_map[`${store}`].description,  
-                    // store name,
-                    "Item":item, 
-                    "Item Name":item_name, 
-                    "VMI Status":vmi_status, 
-                    "Item Class":item_class, 
-                    "Supplier":supplier, 
-                    "Group":group, 
-                    "Dept":dept, 
-                    "Class":classification, 
-                    "Sub Class":sub_class, 
-                    "On Hand":on_hand, 
-                    "In Transit":in_transit, 
-                    "Ave Sales Unit":average_sales_unit, 
-                    // "Company":company,
-                }));
+            
+                    dynamic_search(
+                        "'tbl_store'", 
+                        "''", 
+                        "'id, code, description'", 
+                        0, 
+                        0, 
+                        `'id:IN=${store_ids.join('|')}'`,  
+                        `''`, 
+                        `''`,
+                        (result) => {
+                            result.forEach(store => {
+                                if (!store_map[store.id]) {
+                                    store_map[store.id] = {}; // Initialize as an object
+                                }
+                                store_map[store.id].description = store.description;
+                                store_map[store.id].code = store.code;
+                            });
+                        }
+                    );
+            
+                    let newData = res.map(({ 
+                        store, 
+                        // store name,
+                        item, 
+                        item_name, 
+                        item_class, 
+                        supplier, 
+                        group, 
+                        dept, 
+                        classification, 
+                        sub_class, 
+                        on_hand, 
+                        in_transit, 
+                        average_sales_unit, 
+                        company,
+                        vmi_status, 
+                    }) => ({
+                        "Store":store_map[`${store}`].code, 
+                        // "Store Name":store_map[`${store}`].description,  
+                        // store name,
+                        "Item":item, 
+                        "Item Name":item_name, 
+                        "VMI Status":vmi_status, 
+                        "Item Class":item_class, 
+                        "Supplier":supplier, 
+                        "Group":group, 
+                        "Dept":dept, 
+                        "Class":classification, 
+                        "Sub Class":sub_class, 
+                        "On Hand":on_hand, 
+                        "In Transit":in_transit, 
+                        "Ave Sales Unit":average_sales_unit, 
+                        // "Company":company,
+                    }));
 
-                formattedData.push(...newData); // Append new data to formattedData array
-            })
+                    formattedData.push(...newData); // Append new data to formattedData array
+                }
+            )
     
             const headerData = [
                 ["Company Name: Lifestrong Marketing Inc."],
@@ -1562,7 +1585,7 @@
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
 
         modal.confirm(confirm_export_message,function(result){
@@ -1580,17 +1603,27 @@
                     let store_ids = []
                     let store_map = {}
                     res.forEach(stores => {
-                        store_ids.push(`'${stores.store}'`);
+                        store_ids.push(`${stores.store}`);
                     });
-                    get_store_branch_where_in(`"${store_ids.join(', ')}"`, (result) => {
-                        result.forEach(store => {
-                            if (!store_map[store.id]) {
-                                store_map[store.id] = {}; // Initialize as an object
-                            }
-                            store_map[store.id].description = store.description;
-                            store_map[store.id].code = store.code;
-                        });
-                    });
+                    dynamic_search(
+                        "'tbl_store'", 
+                        "''", 
+                        "'id, code, description'", 
+                        0, 
+                        0, 
+                        `'id:IN=${store_ids.join('|')}'`,  
+                        `''`, 
+                        `''`,
+                        (result) => {
+                            result.forEach(store => {
+                                if (!store_map[store.id]) {
+                                    store_map[store.id] = {}; // Initialize as an object
+                                }
+                                store_map[store.id].description = store.description;
+                                store_map[store.id].code = store.code;
+                            });
+                        }
+                    );
 
                     formattedData = res.map(({ 
                         store, 
@@ -1629,75 +1662,115 @@
                 };
 
                 ids.length > 0 
-                    ? get_vmi_where_in(`"${ids.join(', ')}"`, processResponse)
+                    ? dynamic_search(
+                        "'tbl_vmi'", 
+                        "''", 
+                        `'store, item, item_name, item_class, supplier, \`group\`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status'`, 
+                        0, 
+                        0, 
+                        `'id:IN=${ids.join('|')}'`,  
+                        `''`, 
+                        `''`,
+                        processResponse
+                    )
                     : batch_export();
             };
 
             const batch_export = () => {
-                get_vmi_count((res) => {
-                    if (res && res.length > 0) {
-                        let total_records = res[0].total_records;
+                dynamic_search(
+                    "'tbl_vmi'", 
+                    "''", 
+                    `'COUNT(id) as total_records'`, 
+                    0, 
+                    0, 
+                    `''`,  
+                    `''`, 
+                    `''`,
+                    (res) => {
+                        if (res && res.length > 0) {
+                            let total_records = res[0].total_records;
 
-                        for (let index = 0; index < total_records; index += 100000) {
-                            get_vmi(index, (res) => {
-                                let store_ids = []
-                                let store_map = {}
+                            for (let index = 0; index < total_records; index += 100000) {
+                                dynamic_search(
+                                    "'tbl_vmi'", 
+                                    "''", 
+                                    `'store, item, item_name, item_class, supplier, \`group\`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status'`, 
+                                    100000, 
+                                    index, 
+                                    `''`,  
+                                    `''`, 
+                                    `''`,
+                                    (res) => {
+                                        let store_ids = []
+                                        let store_map = {}
 
-                                res.forEach(stores => {
-                                    store_ids.push(`'${stores.store}'`);
-                                });
+                                        res.forEach(stores => {
+                                            store_ids.push(`${stores.store}`);
+                                        });
 
-                                get_store_branch_where_in(`"${store_ids.join(', ')}"`, (result) => {
-                                    result.forEach(store => {
-                                        if (!store_map[store.id]) {
-                                            store_map[store.id] = {}; // Initialize as an object
-                                        }
-                                        store_map[store.id].description = store.description;
-                                        store_map[store.id].code = store.code;
-                                    });
-                                });
+                                        dynamic_search(
+                                            "'tbl_store'", 
+                                            "''", 
+                                            "'id, code, description'", 
+                                            0, 
+                                            0, 
+                                            `'id:IN=${store_ids.join('|')}'`,  
+                                            `''`, 
+                                            `''`,
+                                            (result) => {
+                                                result.forEach(store => {
+                                                    if (!store_map[store.id]) {
+                                                        store_map[store.id] = {}; // Initialize as an object
+                                                    }
+                                                    store_map[store.id].description = store.description;
+                                                    store_map[store.id].code = store.code;
+                                                });
+                                            }
+                                        );
 
-                                let newData = res.map(({ 
-                                    store, 
-                                    // store name,
-                                    item, 
-                                    item_name, 
-                                    item_class, 
-                                    supplier, 
-                                    group, 
-                                    dept, 
-                                    classification, 
-                                    sub_class, 
-                                    on_hand, 
-                                    in_transit, 
-                                    average_sales_unit, 
-                                    company,
-                                    vmi_status, 
-                                }) => ({
-                                    "Store":store_map[`${store}`].code, 
-                                    // "Store Name":store_map[`${store}`].description,  
-                                    // store name,
-                                    "Item":item, 
-                                    "Item Name":item_name, 
-                                    "VMI Status":vmi_status, 
-                                    "Item Class":item_class, 
-                                    "Supplier":supplier, 
-                                    "Group":group, 
-                                    "Dept":dept, 
-                                    "Class":classification, 
-                                    "Sub Class":sub_class, 
-                                    "On Hand":on_hand, 
-                                    "In Transit":in_transit, 
-                                    "Ave Sales Unit":average_sales_unit, 
-                                    // "Company":company,
-                                }));
-                                formattedData.push(...newData); // Append new data to formattedData array
-                            })
+                                        let newData = res.map(({ 
+                                            store, 
+                                            // store name,
+                                            item, 
+                                            item_name, 
+                                            item_class, 
+                                            supplier, 
+                                            group, 
+                                            dept, 
+                                            classification, 
+                                            sub_class, 
+                                            on_hand, 
+                                            in_transit, 
+                                            average_sales_unit, 
+                                            company,
+                                            vmi_status, 
+                                        }) => ({
+                                            "Store":store_map[`${store}`].code, 
+                                            // "Store Name":store_map[`${store}`].description,  
+                                            // store name,
+                                            "Item":item, 
+                                            "Item Name":item_name, 
+                                            "VMI Status":vmi_status, 
+                                            "Item Class":item_class, 
+                                            "Supplier":supplier, 
+                                            "Group":group, 
+                                            "Dept":dept, 
+                                            "Class":classification, 
+                                            "Sub Class":sub_class, 
+                                            "On Hand":on_hand, 
+                                            "In Transit":in_transit, 
+                                            "Ave Sales Unit":average_sales_unit, 
+                                            // "Company":company,
+                                        }));
+                                        formattedData.push(...newData); // Append new data to formattedData array
+                                    }
+                                )
+                            }
+                        } else {
+                            console.log('No data received');
                         }
-                    } else {
-                        console.log('No data received');
                     }
-                })
+                )
             };
 
             fetchStores();

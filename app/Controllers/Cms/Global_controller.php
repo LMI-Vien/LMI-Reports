@@ -79,6 +79,8 @@ class Global_controller extends BaseController
 
 					$limit = isset($_POST['limit'])? $_POST['limit'] : 99999;
 					$offset = isset($_POST['offset'])? $_POST['offset'] : 1;
+					// print_r($limit);
+					// die();
 					$order_field = isset($_POST['order']['field'])? $_POST['order']['field'] : null;
 					$order_type = isset($_POST['order']['order']) ? $_POST['order']['order']: null;
 					$join = isset($_POST['join']) ? $_POST['join']: null;
@@ -339,44 +341,28 @@ class Global_controller extends BaseController
 				}
 				break;
 			// ------------------------------------------------------------ Team ------------------------------------------------------------
-			case 'get_vmi':
+			// ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
+			// ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+			// ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+			case 'dynamic_search':
 				try {
-					$vmiOffset = $this->request->getPost('vmi_offset');
-					$result_data = $this->Global_model->get_vmi($vmiOffset);
+					$tbl_name = $this->request->getPost('tbl_name');
+					$table_fields = $this->request->getPost('table_fields');
+					$join = $this->request->getPost('join');
+					$limit = $this->request->getPost('limit');
+					$offset = $this->request->getPost('offset');
+					$conditions = $this->request->getPost('conditions');
+					$order = $this->request->getPost('order');
+					$group = $this->request->getPost('group');
+					$result_data = $this->Global_model->dynamic_search($tbl_name, $join, $table_fields, $limit, $offset, $conditions, $order, $group);
 					echo json_encode($result_data);
 				} catch (Error $e) {
 					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
 				}
 				break;
-			case 'get_vmi_where_in':
-				try {
-					$vmiCode = $this->request->getPost('vmi_codes');
-					$result_data = $this->Global_model->get_vmi_where_in($vmiCode);
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'get_vmi_count':
-				try {
-					$result_data = $this->Global_model->get_vmi_count();
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
-			case 'get_vmi_data':
-				try {
-					$vmiYear = $this->request->getPost('vmi_year');
-					$vmiMonth = $this->request->getPost('vmi_month');
-					$vmiWeek = $this->request->getPost('vmi_week');
-					$vmiCompany = $this->request->getPost('vmi_company');
-					$result_data = $this->Global_model->get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany);
-					echo json_encode($result_data);
-				} catch (Error $e) {
-					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
-				}
-				break;
+			// ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+			// ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+			// ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
 			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
 			
 			case 'fetch_existing':
@@ -685,4 +671,39 @@ class Global_controller extends BaseController
 	  	$table = 'cms_audit_trail';
 	  	$this->Global_model->save_data($table,$data);
 	}
+
+	public function get_valid_ba_data() {
+	    $request = $this->request->getGet(); 
+	    $responseData = [];
+
+	    if (!empty($request['ba'])) {
+	        $responseData['ba'] = $this->Global_model->get_valid_records("tbl_brand_ambassador", 'code');
+	    }
+	    if (!empty($request['brands'])) {
+	        $responseData['brands'] = $this->Global_model->get_valid_records("tbl_brand", 'brand_description');
+	    }
+	    if (!empty($request['stores'])) {
+	        $responseData['stores'] = $this->Global_model->get_valid_records("tbl_store", ['code', 'description']);
+	    }
+	    if (!empty($request['areas'])) {
+	        $responseData['areas'] = $this->Global_model->get_valid_records("tbl_area", 'code');
+	    }
+	    if (!empty($request['ba_store_area'])) {
+	        $responseData['ba_store_area'] = $this->Global_model->get_valid_records_ba_area_store_group();
+	    }
+	    if (!empty($request['payment_group'])) {
+	        $responseData['payment_group'] = $this->Global_model->get_valid_records("tbl_payment_group", 'customer_group_code');
+	    }
+	    if (!empty($request['customer_sku_code_lmi'])) {
+	        $responseData['customer_sku_code_lmi'] = $this->Global_model->get_valid_records_tracc_data("pricecodefile2", 'cusitmcde');
+	    }
+	    if (!empty($request['customer_sku_code_rgdi'])) {
+	        $responseData['customer_sku_code_rgdi'] = $this->Global_model->get_valid_records_tracc_data("pricecodefile2rgdi", 'cusitmcde');
+	    }
+	    if (!empty($request['store_area'])) {
+	        $responseData['store_area'] = $this->Global_model->get_valid_records_store_group();
+	    }
+	    return $this->response->setJSON($responseData);
+	}
+
 }

@@ -50,13 +50,13 @@
                     break;
 
 				case 'search':
-					echo '<div id="form_search" class="form-search form-horizontal pull-right">
+					echo '<div id="form_search" class="form-search">
 							<div class="form-group has-feedback ">
 						        <div class="input-group">
 									<div class="input-group-prepend">
-										<span class="input-group-text">
+										<button id="search_button" class="input-group-text">
 											<i class="fa fa-search"></i>
-										</span>
+										</button>
 									</div>
 									<input 
 										type="text" 
@@ -75,6 +75,112 @@
                 case 'import':
                       echo '<a href="#" id="btn_import" class="btn_import btn-sm btn-success cms-btn" ><span class="fas fa-file-export"></span> Import </a>';
                       break;
+				case 'filter':
+					  echo '<a href="#" id="btn_filter" class="btn_filter btn-sm btn-success cms-btn"><span class="fas fa-filter"></span> Filter</a>
+								<div class="modal" id="filter_modal">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h1 class="modal-title">
+													<b></b>
+												</h1>
+												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+													<span>&times;</span>
+												</button>
+											</div>
+											<div class="modal-body">
+												<form id="form-modal">
+													<div class="row">
+														<div class="col-2">
+															<label class="form-label">Status:</label>
+														</div>
+														<div class="col">
+															<div class="m-2">
+																<div class="form-check">
+																	<input type="radio" id="active_f" name="status_f" class="form-check-input" value=1>
+																	<label for="active_f" class="form-check-label">Active</label>
+																</div>
+																<div class="form-check">
+																	<input type="radio" id="inactive_f" name="status_f" class="form-check-input" value=0>
+																	<label for="inactive_f" class="form-check-label">Inactive</label>
+																</div>
+															</div>
+														</div>
+													</div>
+													
+													<div class="row mb-4">
+														<div class="col-3">
+															<label class="form-label">Creation Date:</label>
+														</div>
+														<div class="col">
+															<label for="created_date_from" class="form-label">From:</label>
+															<input type="date" id="created_date_from" class="form-control">
+														</div>
+														<div class="col">
+															<label for="created_date_to" class="form-label">To:</label>
+															<input type="date" id="created_date_to" class="form-control">
+														</div>
+													</div>
+													
+													<div class="row mb-4">
+														<div class="col-3">
+															<label class="form-label">Modified Date:</label>
+														</div>
+														<div class="col">
+															<label for="modified_date_from" class="form-label">From:</label>
+															<input type="date" id="modified_date_from" class="form-control">
+														</div>
+														<div class="col">
+															<label for="modified_date_to" class="form-label">To:</label>
+															<input type="date" id="modified_date_to" class="form-control">
+														</div>
+													</div>
+													
+													<div class="row">
+														<div class="col-3">
+															<label class="form-label">Order By:</label>
+															<div class="m-2">
+																<div class="form-check">
+																	<input type="radio" id="asc" name="order" class="form-check-input" value="ASC">
+																	<label for="asc" class="form-check-label">Ascending</label>
+																</div>
+																<div class="form-check">
+																	<input type="radio" id="desc" name="order" class="form-check-input" value="DESC">
+																	<label for="desc" class="form-check-label">Descending</label>
+																</div>
+															</div>
+														</div>
+
+														<div class="col">
+															<label class="form-label">Column:</label>
+															<div class="m-2">
+																<div class="form-check">
+																	<input type="radio" id="status_column" name="column" class="form-check-input" value="status">
+																	<label for="status_column" class="form-check-label">Status</label>
+																</div>
+																<div class="form-check">
+																	<input type="radio" id="creation_date_column" name="column" class="form-check-input" value="created_date">
+																	<label for="creation_date_column" class="form-check-label">Creation Date</label>
+																</div>
+																<div class="form-check">
+																	<input type="radio" id="modified_date_column" name="column" class="form-check-input" value="updated_date">
+																	<label for="modified_date_column" class="form-check-label">Modified Date</label>
+																</div>
+															</div>
+														</div>
+													</div>
+
+												</form>
+											</div>
+											<div class="modal-footer">
+												<button id="button_f" class="btn save">Filter</button>
+												<button id="clear_f" class="btn caution">Clear Filter</button>
+											</div>
+											
+										</div>
+									</div>
+								</div>';
+					  break;
 
                 case 'date_range':
                       echo '<div class="form-group drange">
@@ -216,6 +322,24 @@
         /* background-color: #8c8f8c !important ;  */
         border: 0px solid #339933 !important ; 
     }
+	#filter_modal .modal-dialog {
+		text-align: left;
+		max-width: 550px;
+	}
+
+	#filter_modal .modal-body {
+		padding: 25px;
+	}
+	#filter_modal .row {
+		margin-top: 0px !important;
+		margin-bottom: 30px !important;
+	}
+	.row.mb-4 {
+		margin-bottom: 50px !important;
+	}
+	#form_search {
+		margin-right: -95px !important;
+	}
 
 </style>
 

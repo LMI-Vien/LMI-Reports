@@ -826,8 +826,10 @@ class Global_model extends Model
             ->getResultArray();
     }
 
-    function getStoresByAreaWhereIn($areaCode) {
-        $query = $this->db->query("CALL get_store_per_area_where_in($areaCode)");
+    // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
+    // ----------------------------------------------------------- Agency -----------------------------------------------------------
+    function get_agency_where_in($areaCode) {
+        $query = $this->db->query("CALL get_agency_where_in($areaCode)");
         return $query->getResultArray(); // Return data as an array
     }
     function get_agency($areaOffset) {
@@ -917,8 +919,18 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     // ------------------------------------------------------------ Team ------------------------------------------------------------
+    // ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
+    // ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+    // ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+    function dynamic_search($tbl_name, $join, $table_fields, $limit, $offset, $conditions, $order, $group) {
+        $query = $this->db->query("CALL SearchDynamic($tbl_name, $join, $table_fields, $limit, $offset, $conditions, $order, $group)");
+        return $query->getResultArray(); // Return data as an array
+    }
+    // ------------------------------------------------------- Dynamic Search -------------------------------------------------------
+    // ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
+    // ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
-
+    
     function get_vmi($vmiOffset) {
         $query = $this->db->query("CALL get_vmi($vmiOffset)");
         return $query->getResultArray(); // Return data as an array
@@ -936,6 +948,52 @@ class Global_model extends Model
 
     function get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany) {
         $query = $this->db->query("CALL get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    //additional temp
+    function get_brand_data($order, $limit, $offset) {
+        $query = $this->db->query("CALL get_brands('$order', $limit, $offset)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_valid_records_store_group() {
+        $results = $this->db->table('tbl_store_group')
+            ->select('id, area_id, store_id')
+            ->get()
+            ->getResultArray();
+
+            return $results;
+
+    }
+
+    function get_valid_records_ba_area_store_group() {
+        $results = $this->db->table('tbl_brand_ambassador')
+            ->select('id, area, store')
+            ->get()
+            ->getResultArray();
+
+            return $results;
+
+    }
+
+    function get_weeks() {
+        $query = $this->db->query("CALL get_weeks()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_months() {
+        $query = $this->db->query("CALL get_months()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_years() {
+        $query = $this->db->query("CALL get_years()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function get_companies() {
+        $query = $this->db->query("CALL get_companies()");
         return $query->getResultArray(); // Return data as an array
     }
 }

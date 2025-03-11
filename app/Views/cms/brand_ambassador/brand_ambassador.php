@@ -32,6 +32,17 @@
         background-color: gray !important;
         color: black !important;
     }
+
+    .ui-widget {
+        z-index: 1051 !important;
+    }
+
+    #list-data {
+        overflow: visible !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
 </style>
     <div class="content-wrapper p-4">
         <div class="card">
@@ -42,7 +53,6 @@
                     <div class="box">
                     <?php
                     echo view("cms/layout/buttons",$buttons);
-
                         $optionSet = '';
                         foreach($pageOption as $pageOptionLoop) {
                             $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
@@ -55,8 +65,8 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                        <th class='center-content'>Code</th>
-                                        <th class='center-content'>Name</th>
+                                        <th class='center-content'>BA Code</th>
+                                        <th class='center-content'>BA Name</th>
                                         <!-- <th class='center-content'>Deployment Date</th>
                                         <th class='center-content'>Agency</th>
                                         <th class='center-content'>Brand</th>
@@ -103,14 +113,14 @@
             <div class="modal-body">
                 <form id="form-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">BA Code</label>
                         <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                         <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label">Name</label>
+                        <label for="description" class="form-label">BA Name</label>
                         <input type="text" class="form-control required" id="name" maxlength="50" aria-describedby="description">
                         <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                     </div>
@@ -152,21 +162,22 @@
                             </div>
                         </div>
 
+
+                    <div class="form-group">
+                        <label>Area</label>
+                        <select name="area" class="form-control required" id="area">
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>Store</label>
-                        <select name="area" class="form-control required" id="store">
+                        <select name="store" class="form-control required" id="store">
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Team</label>
-                        <select name="area" class="form-control required" id="team">
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Area</label>
-                        <select name="area" class="form-control required" id="area">
+                        <select name="team" class="form-control required" id="team">
                         </select>
                     </div>
 
@@ -208,7 +219,7 @@
 
                 <div class="modal-body">
                     <div class="card">
-                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="mb-3">
                             <div class="text-center"
                             style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
                             >
@@ -242,25 +253,26 @@
                                     </label>
                                 </div>
                             </div>
-
-                            <table class= "table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content' scope="col">Line #</th>
-                                        <th class='center-content' scope="col">Code</th>
-                                        <th class='center-content' scope="col">Name</th>
-                                        <th class='center-content' scope="col">Deployment Date</th>
-                                        <th class='center-content' scope="col">Agency</th>
-                                        <th class='center-content' scope="col">Brand</th>
-                                        <th class='center-content' scope="col">Store</th>
-                                        <th class='center-content' scope="col">Team</th>
-                                        <th class='center-content' scope="col">Area</th>
-                                        <th class='center-content' scope="col">Type</th>
-                                        <th class='center-content' scope="col">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="word_break import_table"></tbody>
-                            </table>
+                            <div style="overflow-x: auto; max-height: 400px;">
+                                <table class= "table table-bordered listdata">
+                                    <thead>
+                                        <tr>
+                                            <th class='center-content' scope="col">Line #</th>
+                                            <th class='center-content' scope="col">Code</th>
+                                            <th class='center-content' scope="col">Name</th>
+                                            <th class='center-content' scope="col">Deployment Date</th>
+                                            <th class='center-content' scope="col">Agency</th>
+                                            <th class='center-content' scope="col">Brand</th>
+                                            <th class='center-content' scope="col">Store</th>
+                                            <th class='center-content' scope="col">Team</th>
+                                            <th class='center-content' scope="col">Area</th>
+                                            <th class='center-content' scope="col">Type</th>
+                                            <th class='center-content' scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="word_break import_table"></tbody>
+                                </table>
+                            </div>
                         </div>
                         <center style="margin-bottom: 5px">
                             <div class="import_pagination btn-group"></div>
@@ -278,6 +290,8 @@
 
 <script>
     var query = "ba.status >= 0";
+    var column_filter = '';
+    var order_filter = '';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -295,7 +309,7 @@
 
     });
 
-    function get_data(query) {
+    function get_data(query, field = "ba.code", order = "asc") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -305,8 +319,8 @@
             limit : limit,
             table : "tbl_brand_ambassador ba",
             order : {
-                field : "ba.code",
-                order : "asc" 
+                field : field,
+                order : order 
             },
             join : [
                 {
@@ -380,19 +394,41 @@
         });
     }
     
-    function get_pagination() {
+    function get_pagination(query, field = "updated_date", order = "desc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id, status",
+            select : "ba.id, ba.status",
             query : query,
             offset : offset,
             limit : limit,
             table : "tbl_brand_ambassador ba",
             order : {
-                field : "updated_date", //field to order
+                field : "ba.updated_date", //field to order
                 order : "desc" //asc or desc
-            }
+            },
+            join : [
+                {
+                    table: "tbl_agency a",
+                    query: "a.id = ba.agency",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = ba.store",
+                    type: "left"
+                },
+                {
+                    table: "tbl_team t",
+                    query: "t.id = ba.team",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area ar",
+                    query: "ar.id = ba.area",
+                    type: "left"
+                }
+            ] 
 
         }
 
@@ -406,10 +442,22 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query);
+        get_data(query, column_filter, order_filter);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
     })
+
+    $(document).on('click', '#search_button', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        new_query = query;
+        new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%')";
+        //to follow OR b.brand_description LIKE '%" + search_input + "%'
+        get_data(new_query);
+        get_pagination(new_query);
+    });
 
     $(document).on('keydown', '#search_query', function(event) {
         $('.btn_status').hide();
@@ -423,7 +471,54 @@
             get_data(new_query);
             get_pagination(new_query);
         }
-    });
+    })
+
+    $('#btn_filter').on('click', function(event) {
+        title = addNbsp('FILTER DATA');
+        $('#filter_modal').find('.modal-title').find('b').html(title);
+        $('#filter_modal').modal('show');
+    })
+
+    $('#button_f').on('click', function(event) {
+        let status_f = $("input[name='status_f']:checked").val();
+        let c_date_from = $("#created_date_from").val();
+        let c_date_to = $("#created_date_to").val();
+        let m_date_from = $("#modified_date_from").val();
+        let m_date_to = $("#modified_date_to").val();
+        
+        order_filter = $("input[name='order']:checked").val();
+        column_filter = $("input[name='column']:checked").val();
+        query = "ba.status >= 0";
+        
+        query += status_f ? ` AND ba.status = ${status_f}` : '';
+        query += c_date_from ? ` AND ba.created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND ba.created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND ba.updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND ba.updated_date <= '${m_date_to} 23:59:59'` : '';
+        
+        console.log(query);
+        get_pagination(query, column_filter, order_filter);
+        get_data(query, column_filter, order_filter);
+        $('#filter_modal').modal('hide');
+    })
+    
+    $('#clear_f').on('click', function(event) {
+        order_filter = '';
+        column_filter = '';
+        query = "ba.status >= 0";
+        get_data(query);
+        get_pagination(query);
+        
+        $("input[name='status_f']").prop('checked', false);
+        $("#created_date_from").val('');
+        $('#created_date_to').val('');
+        $('#modified_date_from').val('');
+        $('#modified_date_to').val('');
+        $("input[name='order']").prop('checked', false);
+        $("input[name='column']").prop('checked', false);
+
+        $('#filter_modal').modal('hide');
+    })
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
@@ -439,9 +534,8 @@
 
     $('#btn_add').on('click', function() {
         open_modal('Add New Brand Ambassador', 'add', '');
-        get_area('');
+        get_area('', '');
         get_agency('');
-        get_store('');
         get_team('');
         get_brand('', 'brand_0');
     });
@@ -482,7 +576,7 @@
 
 
 
-        if (['edit', 'view'].includes(actions)) populate_modal(id);
+        if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
         
         let isReadOnly = actions === 'view';
         set_field_state('#code, #name, #deployment_date, #agency, #brand, #store, #team, #area, #status', isReadOnly);
@@ -504,13 +598,23 @@
 
             let html = `
             <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
+                <input id='brand_${line}' class='form-control' placeholder='Select brand'>
                 <button type="button" class="rmv-btn" disabled readonly onclick="remove_line(${line})">
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
             </div>
             `;
+
             $brand_list.append(html)
+
+            $(`#brand_${line}`).autocomplete({
+                source: function(request, response) {
+                    let results = $.ui.autocomplete.filter(brandDescriptions, request.term);
+                    let uniqueResults = [...new Set(results)];
+                    response(uniqueResults.slice(0, 10));
+                }
+            })
+
             $('input[name="type"]').each(function() {
                 if ($(this).val() == 1) {
                     $(this).prop('checked', true); 
@@ -584,7 +688,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
+            let td_validator = ['ba code', 'ba name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -737,8 +841,8 @@
             }
 
             return {
-                "Code": row["Code"] || "",
-                "Name": row["Name"] || "",
+                "BA Code": row["BA Code"] || "",
+                "BA Name": row["BA Name"] || "",
                 "Deployment Date": row["Deployment Date"] ? row["Deployment Date"] : "",
                 "Agency": row["Agency"] || "",
                 "Brand": row["Brand"] || "",
@@ -767,7 +871,10 @@
                         'error',
                         '⚠️ Too many errors detected. Please download the error log for details.',
                         '600px',
-                        () => {read_xl_file()}
+                        () => {
+                            read_xl_file();
+                            btn.prop("disabled", false);
+                        }
                     );
                 } else {
                     modal.content(
@@ -775,7 +882,10 @@
                         'error',
                         errorLogs.join("<br>"),
                         '600px',
-                        () => {read_xl_file()}
+                        () => {
+                            read_xl_file();
+                            btn.prop("disabled", false);
+                        }
                     );
                 }
                 createErrorLogFile(errorLogs, "Error "+formatReadableDate(new Date(), true));
@@ -1196,7 +1306,7 @@
         });
     }
 
-    function populate_modal(inp_id) {
+    function populate_modal(inp_id, actions) {
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -1217,37 +1327,59 @@
                     get_agency(ba.agency);
                     $('#brand').val(ba.brand);
                     $('#store').val(ba.store);
-                    get_store(ba.store);
+                    //get_store(ba.store, ba.area);
                     $('#team').val(ba.team);
                     get_team(ba.team);
                     $('#area').val(ba.area);
                     //console.log(area);
-                    get_area(ba.area);
+                    get_area(ba.store, ba.area);
 
                     var line = 0;
                     var readonly = '';
                     var disabled = ''
 
-                    let $brand_list = $('#brand_list')
+                    let $brand_list = $('#brand_list');
                     $.each(get_ba_brands(ba.id), (x, y) => {
-                        if (line === 0) {
-                            disabled = 'disabled';
+                        if(actions === 'view') {
                             readonly = 'readonly';
+                            disabled = 'disabled';
                         } else {
                             readonly = '';
-                            disabled = ''
+                            disabled = '';
                         }
-                        let html = `
-                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                            <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
-                            <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
-                                <i class="fa fa-minus" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        `;
-                        $brand_list.append(html)
-                        get_brand(y.brand_id, `brand_${line}`);
-                        line++
+                        get_field_values('tbl_brand', 'brand_description', 'id', [y.brand_id], (res) => {
+                            for(let key in res) {
+                                get_field_values('tbl_brand', 'brand_code', 'id', [key], (res1) => {
+                                    for(let key1 in res1) {
+                                        if(actions === 'edit') {
+                                            readonly = (line == 0) ? 'readonly' : '';
+                                            disabled = (line == 0) ? 'disabled' : '';
+                                        }
+            
+                                        let html = `
+                                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                            <input id="brand_${line}" class="form-control" value='${res1[key1]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+                                            <button type="button" class="rmv-btn" ${disabled} ${readonly} onclick="remove_line(${line})">
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        `;
+                                        $brand_list.append(html)
+            
+                                        $(`#brand_${line}`).autocomplete({
+                                            source: function(request, response) {
+                                                let results = $.ui.autocomplete.filter(brandDescriptions, request.term);
+                                                let uniqueResults = [...new Set(results)];
+                                                response(uniqueResults.slice(0, 10));
+                                            }
+                                        })
+                                        get_brand(y.brand_id, `brand_${line}`);
+                                        line++
+                                    }
+                                })
+                            }
+                        })
+
                     })
                     $('input[name="type"]').each(function() {
                         if ($(this).val() == ba.type) {
@@ -1297,7 +1429,7 @@
         var name = $('#name').val().trim();
         var deployment_date = $('#deployment_date').val();
         var agency = $('#agency').val();
-        var brand = $('#brand').val();
+        var brand = '';
         var store = $('#store').val();
         var team = $('#team').val();
         var area = $('#area').val();
@@ -1307,12 +1439,15 @@
         var unique_brand = [];
         var brand_list = $('#brand_list');
         // add_line
-        brand_list.find('select').each(function() {
-            linenum++
+        brand_list.find('input').each(function() {
             if (!unique_brand.includes($(this).val())) {
-                unique_brand.push($(this).val())
+                brand = $(this).val().split(' - ');
+
+                unique_brand.push(brand[1]);
             }
+            linenum++
         });
+        console.log(unique_brand);
         if (chk_status) {
             status_val = 1;
         } else {
@@ -1323,59 +1458,97 @@
                 if (!exists) {
                     modal.confirm(confirm_update_message, function(result){
                         if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                total_delete(url, 'tbl_ba_brands', 'ba_id', id)
-                                let batch = [];
-                                $.each(unique_brand, (x, y) => {
-                                    let data = {
-                                        'ba_id': id,
-                                        'brand_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
-                                batch_insert(url, batch, 'tbl_ba_brands', false, () => {
-                                    modal.loading(false);
-                                    modal.alert(success_update_message, "success", function() {
-                                        location.reload();
-                                    });
-                                })
-                            });
+                            // modal.loading(true);
+                            let batch = [];
+                            let valid = true;
+
+                            $.each(unique_brand, (x, y) => {
+                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                    if(res.length == 0) {
+                                        valid = false;
+                                    } else {
+                                        $.each(res, (x, y) => {
+                                            let data = {
+                                                'ba_id': id,
+                                                'brand_id': x,
+                                                'created_by': user_id,
+                                                'created_date': formatDate(new Date())
+                                            };
+                                            batch.push(data);
+                                        })
+                                    }
+                                });
+                            })
+
+                            if(valid) {
+                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                    total_delete(url, 'tbl_ba_brands', 'ba_id', id)
+                                    
+                                    batch_insert(url, batch, 'tbl_ba_brands', false, () => {
+                                        modal.loading(false);
+                                        modal.alert(success_update_message, "success", function() {
+                                            location.reload();
+                                        });
+                                    })
+                                });
+                            } else {
+                                modal.loading(false);
+                                modal.alert('Brand not found', 'error', function() {});
+                            }
                         }
                     });
 
                 }             
             });
         }else{
-            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , null, null, true, function(exists, duplicateFields) {
+            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
-                    modal.confirm(confirm_add_message, function(result){
+                    modal.confirm(confirm_update_message, function(result){
                         if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, null, (obj) => {
-                                let batch = [];
-                                $.each(unique_brand, (x, y) => {
-                                    let data = {
-                                        'ba_id': obj.ID,
-                                        'brand_id': y,
-                                        'created_by': user_id,
-                                        'created_date': formatDate(new Date())
-                                    };
-                                    batch.push(data);
-                                })
-                                batch_insert(url, batch, 'tbl_ba_brands', false, () => {
-                                    modal.loading(false);
-                                    modal.alert(success_save_message, "success", function() {
-                                        location.reload();
-                                    });
-                                })
-                            });
+                            // modal.loading(true);
+                            let batch = [];
+                            let valid = true;
+
+                            $.each(unique_brand, (x, y) => {
+                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                    if(res.length == 0) {
+                                        console.log('waler');
+                                        valid = false;
+                                    } else {
+                                        $.each(res, (x, y) => {
+                                            let data = {
+                                                'ba_id': null,
+                                                'brand_id': x,
+                                                'created_by': user_id,
+                                                'created_date': formatDate(new Date())
+                                            };
+                                            batch.push(data);
+                                        })
+                                    }
+                                });
+                            })
+
+                            if(valid) {
+                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                    console.log(obj.ID);
+                                    insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
+                                    console.log(insert_batch);
+
+                                    batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
+                                        modal.loading(false);
+                                        modal.alert(success_update_message, "success", function() {
+                                            location.reload();
+                                        });
+                                    })
+                                });
+                            } else {
+                                modal.loading(false);
+                                modal.alert('Brand not found', 'error', function() {});
+                            }
                         }
                     });
 
-                }                  
+                }             
             });
         }
     }
@@ -1437,33 +1610,39 @@
     }
 
     function delete_data(id) {
-        modal.confirm(confirm_delete_message,function(result){
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_brand_ambassador",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(success_delete_message, 'success', function() {
-                        location.reload();
-                    });
-                });
-            }
+        get_field_values("tbl_brand_ambassador", "code", "id", [id], (res) => {
+            let code = res[id];
+            let message = is_json(confirm_delete_message);
+            message.message = `Delete Code <b><i>${code}</i></b> from Brand Ambassador Masterfile?`;
 
-        });
+            modal.confirm(JSON.stringify(message),function(result){
+                if(result){ 
+                    var url = "<?= base_url('cms/global_controller');?>";
+                    var data = {
+                        event : "update",
+                        table : "tbl_brand_ambassador",
+                        field : "id",
+                        where : id, 
+                        data : {
+                                updated_date : formatDate(new Date()),
+                                updated_by : user_id,
+                                status : -2
+                        }  
+                    }
+                    aJax.post(url,data,function(result){
+                        var obj = is_json(result);
+                        modal.alert(success_delete_message, 'success', function() {
+                            location.reload();
+                        });
+                    });
+                }
+    
+            });
+        })
     }
 
     let areaDescriptions = {}; 
-    function get_area(id) {
+    function get_area(id, area_id) {
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
         var data = {
             event : "list",
@@ -1487,18 +1666,19 @@
                     var selected = '';
                     $.each(result, function(x,y) {
                         areaDescriptions[y.id] = y.description;
-                        if (id === y.id) {
+                        if (area_id === y.id) {
                             selected = 'selected'
 
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.description+"</option>"
                     })
                 }
             }
             $('#area').empty();
             $('#area').append(html);
+            get_store(id, area_id);
         });
     }
 
@@ -1533,7 +1713,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.agency+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.agency+"</option>"
                     })
                 }
             }
@@ -1543,17 +1723,24 @@
     }
 
     let storeDescriptions = {};
-    function get_store(id) {
+    function get_store(id, area_id) {
         var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
         var data = {
             event : "list",
-            select : "id, code, description, status",
-            query : 'status >= 0',
+            select : "sg.id as sgid, s.id as id, s.code as code, s.description as description, s.status",
+            query : 's.status >= 0 AND sg.area_id = '+ area_id,
             offset : 0,
             limit : 0,
-            table : "tbl_store",
+            table : "tbl_store_group sg",
+            join : [
+                {
+                    table: "tbl_store s",
+                    query: "s.id = sg.store_id",
+                    type: "left"
+                }
+            ],
             order : {
-                field : "code",
+                field : "s.code",
                 order : "asc" 
             }
         }
@@ -1573,7 +1760,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.description+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.description+"</option>"
                     })
                 }
             }
@@ -1613,7 +1800,7 @@
                         } else {
                             selected = ''
                         }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.team_description+"</option>"
+                        html += "<option value='"+y.id+"' "+selected+">"+y.code+" - "+y.team_description+"</option>"
                     })
                 }
             }
@@ -1622,7 +1809,7 @@
         });
     }
 
-    let brandDescriptions = {};
+    let brandDescriptions = [];
     function get_brand(id, dropdown_id) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -1640,25 +1827,19 @@
 
         aJax.post(url,data,function(res){
             var result = JSON.parse(res);
-            var html = '<option id="default_val" value=" ">Select Brand</option>';
-    
+            // var html = '<option id="default_val" value=" ">Select Brand</option>';
+            var html = '';
+
             if(result) {
                 if (result.length > 0) {
                     var selected = '';
-                    $.each(result, function(x,y) {
-                        brandDescriptions[y.id] = y.brand_description;
-                        if (id === y.id) {
-                            selected = 'selected'
-
-                        } else {
-                            selected = ''
-                        }
-                        html += "<option value='"+y.id+"' "+selected+">"+y.brand_code+"</option>"
-                    })
+                    
+                    result.forEach(function (y) {
+                        brandDescriptions.push(y.brand_code + ' - ' + y.brand_description);
+                    });
                 }
             }
-            $('#'+dropdown_id).empty();
-            $('#'+dropdown_id).append(html);
+            // $('#brand').append(html);
         });
     }
 
@@ -1670,20 +1851,46 @@
         }
     }
 
+    $(document).on('change', '#area', function (e) {
+        area_id = $('#area').val();
+        get_store('', area_id);
+
+    });
+
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
         var modal_obj = "";
         var modal_alert_success = "";
         var hasExecuted = false; // Prevents multiple executions
 
+        let id = $("input.select:checked");
+        let code = [];
+        let code_string = "selected data"
+
+        id.each(function() {
+            code.push($(this).attr("data-id"));
+        });
+
+        get_field_values("tbl_brand_ambassador", "code", "id", code, (res) => {
+            if(code.length == 1) {
+                code_string = `Code <b><i>${res[code[0]]}</i></b>`;
+            }
+        })
+
         if (parseInt(status) === -2) {
-            modal_obj = confirm_delete_message;
+            message = is_json(confirm_delete_message);
+            message.message = `Delete ${code_string} from Brand Ambassador Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
-            modal_obj = confirm_publish_message;
+            message = is_json(confirm_publish_message);
+            message.message = `Publish ${code_string} from Brand Ambassador Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
-            modal_obj = confirm_unpublish_message;
+            message = is_json(confirm_unpublish_message);
+            message.message = `Unpublish ${code_string} from Brand Ambassador Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
 
@@ -1754,13 +1961,22 @@
 
         let html = `
         <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-            <select name="brand" class="form-control brand_drop required" id="brand_${line}"></select>
+            <input id="brand_${line}" class="form-control" placeholder="Select brand">
             <button type="button" class="rmv-btn" onclick="remove_line(${line})">
                 <i class="fa fa-minus" aria-hidden="true"></i>
             </button>
         </div>
         `;
         $('#brand_list').append(html);
+
+        $(`#brand_${line}`).autocomplete({
+            source: function(request, response) {
+                let results = $.ui.autocomplete.filter(brandDescriptions, request.term);
+                let uniqueResults = [...new Set(results)];
+                response(uniqueResults.slice(0, 10));
+            }
+        })
+
         get_brand('', `brand_${line}`);
     }
 
@@ -1773,8 +1989,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Name": "",
+                "BA Code": "",
+                "BA Name": "",
                 "Deployment Date": "",
                 "Agency": "",
                 "Brand": "",
@@ -1807,78 +2023,300 @@
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
 
         const fetchStores = (callback) => {
             const processResponse = (res) => {
+                let agency_ids = [];
+                let store_ids = [];
+                let team_ids = [];
+                let area_ids = [];
+                let brand_ids = [];
+
+                let agency_map = {}
+                let store_map = {};
+                let team_map = {};
+                let area_map = {};
+                let brand_map = {};
+
+                res.forEach(item => {
+                    agency_ids.push(`${item.agency}`);
+                    store_ids.push(`${item.store}`);
+                    team_ids.push(`${item.team}`);
+                    area_ids.push(`${item.area}`);
+                    brand_ids.push(`${item.id}`);
+                });
+
+                dynamic_search(
+                    "'tbl_agency'", "''", "'id, agency'", 0, 0, `'id:IN=${agency_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!agency_map[item.id]) {
+                                    agency_map[item.id] = {};
+                                }
+                                agency_map[item.id] = item.agency;
+                            }
+                        );
+                    }
+                );
+
+                dynamic_search(
+                    "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!store_map[item.id]) {
+                                    store_map[item.id] = {};
+                                }
+                                store_map[item.id] = item.description;
+                            }
+                        );
+                    }
+                );
+
+                dynamic_search(
+                    "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!team_map[item.id]) {
+                                    team_map[item.id] = {};
+                                }
+                                team_map[item.id] = item.team_description;
+                            }
+                        );
+                    }
+                );
+
+                dynamic_search(
+                    "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!area_map[item.id]) {
+                                    area_map[item.id] = {};
+                                }
+                                area_map[item.id] = item.description;
+                            }
+                        );
+                    }
+                );
+                
+                dynamic_search(
+                    "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
+                    "'a.ba_id as id, GROUP_CONCAT(DISTINCT b.brand_code ORDER BY b.brand_code ASC SEPARATOR \", \") AS brands'", 
+                    0, 0, `'a.ba_id:IN=${brand_ids.join('|')}'`, `''`, `'a.ba_id'`,
+                    (result) => {
+                        result.forEach(
+                            item => {
+                                if (!brand_map[item.id]) {
+                                    brand_map[item.id] = {};
+                                }
+                                brand_map[item.id] = item.brands;
+                            }
+                        );
+                    }
+                );
+
+                console.log(agency_map, 'agency_map');
+                console.log(store_map, 'store_map');
+                console.log(team_map, 'team_map');
+                console.log(area_map, 'area_map');
+                console.log(brand_map, 'brand_map');
+                
                 formattedData = res.map(({ 
-                    code, description, deployed_date, type, status, brands, agency, store, team, area
+                    id, 
+                    code, description, deployed_date, type, status, 
+                    agency, store, team, area
                 }) => ({
-                    Code: code,
-                    Name: description,
+                    "BA Code": code,
+                    "BA Name": description,
                     "Deployment Date": deployed_date,
-                    Agency: agency,
-                    Brand: brands,
-                    Store: store,
-                    Team: team,
-                    Area: area,
+                    Agency: agency_map[agency],
+                    Brand: brand_map[id],
+                    Store: store_map[store],
+                    Team: team_map[team],
+                    Area: area_map[area].trim(),
                     Type: type === "1" ? "Outright" : "Consign",
                     Status: status === "1" ? "Active" : "Inactive",
                 }));
             };
 
             ids.length > 0 
-                ? get_brand_ambassador_where_in(`"${ids.join(', ')}"`, processResponse)
+                ? dynamic_search(
+                    "'tbl_brand_ambassador'", 
+                    "''", 
+                    "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
+                    0, 
+                    0, 
+                    `'id:IN=${ids.join('|')}'`,  
+                    `''`, 
+                    `''`, 
+                    processResponse
+                )
                 : batch_export();
         };
 
         const batch_export = () => {
-            get_brand_ambassador_count((res) => {
-                if (res && res.length > 0) {
-                    let total_records = res[0].total_records;
-                    console.log(total_records, 'total records');
+            dynamic_search(
+                "'tbl_brand_ambassador'", 
+                "''", 
+                "'COUNT(id) as total_records'",
+                0, 
+                0, 
+                `''`, 
+                `''`, 
+                `''`, 
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
+                        console.log(total_records, 'total records');
 
-                    for (let index = 0; index < total_records; index += 100000) {
-                        console.log(index, 'index here')
-                        var ano_ire = [];
+                        for (let index = 0; index < total_records; index += 100000) {
+                            console.log(index, 'index here')
+                            var ano_ire = [];
 
-                        get_brand_ambassador_brands(index, (result) => {
-                            console.log(result, 'result here');
+                            get_brand_ambassador_brands(index, (result) => {
+                                console.log(result, 'result here');
 
-                            result.forEach(({ id, brands }) => {
-                                ano_ire[id] = brands;  // Assign value to ano_ire array using id as index
+                                result.forEach(({ id, brands }) => {
+                                    ano_ire[id] = brands;  // Assign value to ano_ire array using id as index
+                                });
+
+                                console.log(ano_ire); // To check the final array
                             });
 
-                            console.log(ano_ire); // To check the final array
-                        });
+                            dynamic_search(
+                                "'tbl_brand_ambassador'", 
+                                "''", 
+                                "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
+                                100000, 
+                                index, 
+                                `''`, 
+                                `''`, 
+                                `''`, 
+                                (res) => {
+                                    console.log(res, 'look here');
 
-                        get_brand_ambassador(index, (res) => {
-                            console.log(res, 'look here')
-                            let newData = res.map(({ 
-                                id,
-                                code, description, deployed_date, type, status, 
-                                agency, store, team, area
-                            }) => ({
-                                ID: id,
-                                Code: code,
-                                Name: description,
-                                "Deployment Date": deployed_date,
-                                Agency: agency,
-                                Brands: ano_ire[id] || '',
-                                Store: store,
-                                Team: team,
-                                Area: area,
-                                Type: type === "1" ? "Outright" : "Consign",
-                                Status: status === "1" ? "Active" : "Inactive",
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                                    let agency_ids = [];
+                                    let store_ids = [];
+                                    let team_ids = [];
+                                    let area_ids = [];
+                                    let brand_ids = [];
+
+                                    let agency_map = {}
+                                    let store_map = {};
+                                    let team_map = {};
+                                    let area_map = {};
+                                    let brand_map = {};
+
+                                    res.forEach(item => {
+                                        agency_ids.push(`${item.agency}`);
+                                        store_ids.push(`${item.store}`);
+                                        team_ids.push(`${item.team}`);
+                                        area_ids.push(`${item.area}`);
+                                        brand_ids.push(`${item.id}`);
+                                    });
+
+                                    dynamic_search(
+                                        "'tbl_agency'", "''", "'id, agency'", 0, 0, `'id:IN=${agency_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!agency_map[item.id]) {
+                                                        agency_map[item.id] = {};
+                                                    }
+                                                    agency_map[item.id] = item.agency;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    dynamic_search(
+                                        "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!store_map[item.id]) {
+                                                        store_map[item.id] = {};
+                                                    }
+                                                    store_map[item.id] = item.description;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    dynamic_search(
+                                        "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!team_map[item.id]) {
+                                                        team_map[item.id] = {};
+                                                    }
+                                                    team_map[item.id] = item.team_description;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    dynamic_search(
+                                        "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!area_map[item.id]) {
+                                                        area_map[item.id] = {};
+                                                    }
+                                                    area_map[item.id] = item.description;
+                                                }
+                                            );
+                                        }
+                                    );
+                                    
+                                    dynamic_search(
+                                        "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
+                                        "'a.ba_id as id, GROUP_CONCAT(DISTINCT b.brand_code ORDER BY b.brand_code ASC SEPARATOR \", \") AS brands'", 
+                                        0, 0, `'a.ba_id:IN=${brand_ids.join('|')}'`, `''`, `'a.ba_id'`,
+                                        (result) => {
+                                            result.forEach(
+                                                item => {
+                                                    if (!brand_map[item.id]) {
+                                                        brand_map[item.id] = {};
+                                                    }
+                                                    brand_map[item.id] = item.brands;
+                                                }
+                                            );
+                                        }
+                                    );
+
+                                    let newData = res.map(({ 
+                                        id, 
+                                        code, description, deployed_date, type, status, 
+                                        agency, store, team, area
+                                    }) => ({
+                                        Code: code,
+                                        Name: description,
+                                        "Deployment Date": deployed_date,
+                                        Agency: agency_map[agency],
+                                        Brand: brand_map[id],
+                                        Store: store_map[store],
+                                        Team: team_map[team],
+                                        Area: area_map[area].trim(),
+                                        Type: type === "1" ? "Outright" : "Consign",
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                    } else {
+                        console.log('No data received');
                     }
-                } else {
-                    console.log('No data received');
                 }
-            })
+            )
         };
 
         fetchStores();

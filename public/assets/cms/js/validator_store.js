@@ -21,8 +21,8 @@ self.onmessage = async function(e) {
         for (let i = 0; i < batchSize && index < data.length; i++, index++) {
             let row = data[index];
             let tr_count = index + 1;
-            let code = row["Code"] ? row["Code"].trim() : "";
-            let description = row["Name"] ? row["Name"].trim() : "";
+            let code = row["Store/Branch Code"] ? row["Store/Branch Code"].trim() : "";
+            let description = row["Description"] ? row["Description"].trim() : "";
             let status = row["Status"] ? row["Status"].toLowerCase() : "";
             let user_id = row["Created By"] ? row["Created By"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
@@ -38,16 +38,15 @@ self.onmessage = async function(e) {
                 unique_code.add(code);
             }
 
-            if (unique_description.has(description)) {
-                invalid = true;
-                errorLogs.push(`⚠️ Duplicated Description at line #: ${tr_count}`);
-                err_counter++;
-            } else if (description.length > 50 || description === "") {
+            // if (unique_description.has(description)) {
+            //     invalid = true;
+            //     errorLogs.push(`⚠️ Duplicated Description at line #: ${tr_count}`);
+            //     err_counter++;
+            // } else 
+            if (description.length > 50 || description === "") {
                 invalid = true;
                 errorLogs.push(`⚠️ Invalid Description at line #: ${tr_count}`);
                 err_counter++;
-            } else {
-                unique_description.add(description);
             }
 
             if (!["active", "inactive"].includes(status)) {

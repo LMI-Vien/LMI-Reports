@@ -21,7 +21,7 @@ self.onmessage = async function(e) {
         for (let i = 0; i < batchSize && index < data.length; i++, index++) {
             let row = data[index];
             let tr_count = index + 1;
-            let code = row["Code"] ? row["Code"].trim() : "";
+            let code = row["Agency Code"] ? row["Agency Code"].trim() : "";
             let agency = row["Agency"] ? row["Agency"].trim() : "";
             let status = row["Status"] ? row["Status"].toLowerCase() : "";
             let user_id = row["Created by"] ? row["Created by"].trim() : "";
@@ -39,17 +39,19 @@ self.onmessage = async function(e) {
                 unique_code.add(code);
             }
 
-            if (unique_agency.has(agency)) {
-                invalid = true;
-                errorLogs.push(`⚠️ Duplicated Agency at line #: ${tr_count}`);
-                err_counter++;
-            } else if (agency.length > 50 || agency === "") {
+            // if (unique_agency.has(agency)) {
+            //     invalid = true;
+            //     errorLogs.push(`⚠️ Duplicated Agency at line #: ${tr_count}`);
+            //     err_counter++;
+            // } else 
+            if (agency.length > 50 || agency === "") {
                 invalid = true;
                 errorLogs.push(`⚠️ Invalid Agency at line #: ${tr_count}`);
                 err_counter++;
-            } else {
-                unique_agency.add(agency);
             }
+            //  else {
+            //     unique_agency.add(agency);
+            // }
 
             if (!["active", "inactive"].includes(status)) {
                 invalid = true;

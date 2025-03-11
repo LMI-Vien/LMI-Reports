@@ -1,3 +1,12 @@
+<style>
+    #list-data {
+        overflow: visible !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
+</style>
+
 <div class="content-wrapper p-4">
     <div class="card">
         <div class="text-center page-title md-center">
@@ -21,7 +30,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                    <th class='center-content'>Code</th>
+                                    <th class='center-content'>ASC Code</th>
                                     <th class='center-content'>ASC Name</th>
                                     <th class='center-content'>Status</th>
                                     <th class='center-content'>Created Date</th>
@@ -67,7 +76,7 @@
             <div class="modal-body">
                 <form id="form-save-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">ASC Code</label>
                         <div hidden>
                             <input type="text" class="form-control" id="id" aria-describedby="id">
                         </div>
@@ -164,7 +173,7 @@
                             <thead>
                                 <tr>
                                     <th style="width: 10%;" class='center-content'>Line #</th>
-                                    <th style="width: 20%;" class='center-content'>Code</th>
+                                    <th style="width: 20%;" class='center-content'>ASC Code</th>
                                     <th style="width: 20%;" class='center-content'>ASC Name</th>
                                     <th style="width: 10%;" class='center-content'>Status</th>
                                     <th style="width: 20%;" class='center-content'>Deployment Date</th>
@@ -191,6 +200,8 @@
 
 <script>
     var query = "status >= 0";
+    var column_filter = '';
+    var order_filter = '';
     var limit = 10;
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -204,20 +215,20 @@
 
     $(document).ready(function() {
         get_data(query);
-        get_pagination();
+        get_pagination(query);
     });
 
-    function get_data(new_query) {
+    function get_data(query, field = "code", order = "asc") {
         var data = {
             event : "list",
             select : "id, code, description, status, created_date, updated_date, area_id",
-            query : new_query,
+            query : query,
             offset : offset,
             limit : limit,
             table : "tbl_area_sales_coordinator",
             order : {
-                field : "code",
-                order : "asc" 
+                field : field,
+                order : order
             }
         }
     
@@ -277,15 +288,35 @@
         var modal_obj = "";
         var modal_alert_success = "";
         var hasExecuted = false; // Prevents multiple executions
+
+        let id = $("input.select:checked");
+        let code = [];
+        let code_string = "selected data";
+
+        id.each(function () {
+            code.push(id.attr("data-id"));
+        });
+
+        get_field_values("tbl_area_sales_coordinator", "code", "id", code, (res) => {
+            if(code.length == 1) {
+                code_string = `Code <b><i>${res[code[0]]}</i></b>`
+            }
+        })
     
         if (parseInt(status) === -2) {
-            modal_obj = confirm_delete_message;
+            message = is_json(confirm_delete_message);
+            message.message = `Delete ${code_string} from Area Sales Coordinator Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
-            modal_obj = confirm_publish_message;
+            message = is_json(confirm_publish_message);
+            message.message = `Publish ${code_string} from Area Sales Coordinator Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
-            modal_obj = confirm_unpublish_message;
+            message = is_json(confirm_unpublish_message);
+            message.message = `Unpublish ${code_string} from Area Sales Coordinator Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
         
@@ -374,7 +405,7 @@
         })
     }
 
-    function get_pagination() {
+    function get_pagination(query, field = "updated_date", order = "desc") {
         var data = {
         event : "pagination",
             select : "id",
@@ -383,8 +414,8 @@
             limit : limit,
             table : "tbl_area_sales_coordinator",
             order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
+                field : field, //field to order
+                order : order //asc or desc
             }
     
         }
@@ -398,7 +429,7 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query);
+        get_data(query, column_filter, order_filter);
     });
 
     $(document).on("change", ".record-entries", function(e) {
@@ -410,7 +441,7 @@
         offset = 1;
         modal.loading(true); 
         get_data(query);
-        get_pagination()
+        get_pagination(query)
         modal.loading(false);
     });
 
@@ -423,6 +454,64 @@
             get_data(new_query);
         }
     });
+
+    $(document).on('click', '#search_button', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        new_query = query;
+        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+        get_data(new_query);
+        get_pagination(new_query);
+    });
+
+    $('#btn_filter').on('click', function(event) {
+        title = addNbsp('FILTER DATA');
+        $('#filter_modal').find('.modal-title').find('b').html(title);
+        $('#filter_modal').modal('show');
+    })
+
+    $('#button_f').on('click', function(event) {
+        let status_f = $("input[name='status_f']:checked").val();
+        let c_date_from = $("#created_date_from").val();
+        let c_date_to = $("#created_date_to").val();
+        let m_date_from = $("#modified_date_from").val();
+        let m_date_to = $("#modified_date_to").val();
+        
+        order_filter = $("input[name='order']:checked").val();
+        column_filter = $("input[name='column']:checked").val();
+        query = "status >= 0";
+        
+        query += status_f ? ` AND status = ${status_f}` : '';
+        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
+        
+        // console.log(query);
+        get_pagination(query, column_filter, order_filter);
+        get_data(query, column_filter, order_filter);
+        $('#filter_modal').modal('hide');
+    })
+    
+    $('#clear_f').on('click', function(event) {
+        order_filter = '';
+        column_filter = '';
+        query = "status >= 0";
+        get_data(query);
+        get_pagination(query);
+        
+        $("input[name='status_f']").prop('checked', false);
+        $("#created_date_from").val('');
+        $('#created_date_to').val('');
+        $('#modified_date_from').val('');
+        $('#modified_date_to').val('');
+        $("input[name='order']").prop('checked', false);
+        $("input[name='column']").prop('checked', false);
+
+        $('#filter_modal').modal('hide');
+    })
 
     // add
     $('#btn_add').on('click', function() {
@@ -443,32 +532,38 @@
 
     // delete
     function delete_data(id) {
-        modal.confirm(confirm_delete_message,function(result){
-            if(result){
-                var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
-                var data = {
-                    event : "update", // list, insert, update, delete
-                    table : "tbl_area_sales_coordinator", //table
-                    field : "id",
-                    where : id, 
-                    data : {
-                        status : -2,
-                        updated_by : user_id,
-                        updated_date : formatDate(new Date()),
-                    }  
-                }
+        get_field_values("tbl_area_sales_coordinator", "code", "id", [id], (res) => {
+            let code = res[id];
+            let message = is_json(confirm_delete_message);
+            message.message = `Delete Code <b><i>${code}</i></b> from Area Sales Coordinator?`
 
-                aJax.post_async(url,data,function(result){
-                    var obj = is_json(result);
-                    if(obj){
-                        modal.alert(success_delete_message, 'success', () => {
-                            if (result) {
-                                location.reload();
-                            }
-                        })
+            modal.confirm(JSON.stringify(message),function(result){
+                if(result){
+                    var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                    var data = {
+                        event : "update", // list, insert, update, delete
+                        table : "tbl_area_sales_coordinator", //table
+                        field : "id",
+                        where : id, 
+                        data : {
+                            status : -2,
+                            updated_by : user_id,
+                            updated_date : formatDate(new Date()),
+                        }  
                     }
-                });
-            }
+    
+                    aJax.post_async(url,data,function(result){
+                        var obj = is_json(result);
+                        if(obj){
+                            modal.alert(success_delete_message, 'success', () => {
+                                if (result) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                    });
+                }
+            })
         })
     }
 
@@ -865,7 +960,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'name', 'deployment date', 'status', 'area'];
+            let td_validator = ['asc code', 'asc name', 'deployment date', 'status', 'area'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -1005,8 +1100,8 @@
         }
         modal.loading(true);
         let jsonData = dataset.map(row => ({
-            "Code": row["Code"] || "",
-            "Name": row["Name"] || "",
+            "ASC Code": row["ASC Code"] || "",
+            "ASC Name": row["ASC Name"] || "",
             "Status": row["Status"] || "",
             "Deployment Date": row["Deployment Date"] || "",
             "Area": row["Area"] || "",
@@ -1271,57 +1366,57 @@
         });
     }
 
-    function batch_insert(insert_batch_data, cb) {
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event: "batch_insert",
-            table: "tbl_area_sales_coordinator",
-            insert_batch_data: insert_batch_data
-        };
+    // function batch_insert(insert_batch_data, cb) {
+    //     var url = "<?= base_url('cms/global_controller');?>";
+    //     var data = {
+    //         event: "batch_insert",
+    //         table: "tbl_area_sales_coordinator",
+    //         insert_batch_data: insert_batch_data
+    //     };
 
-        let retry_count = 0;
-        let max_retries = 5; // Maximum retry attempts
+    //     let retry_count = 0;
+    //     let max_retries = 5; // Maximum retry attempts
 
-        // Function to make the AJAX request and handle retries
-        function attemptInsert() {
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: function(result) {
-                    if (result.message === "success") {
-                        cb(true); // Success callback
-                    } else {
-                        handleSaveError(result); // Handle error if message is not success
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Save failed:", status, error);
-                    handleSaveError({ message: 'fail' }); // Handle AJAX failure
-                }
-            });
-        }
+    //     // Function to make the AJAX request and handle retries
+    //     function attemptInsert() {
+    //         $.ajax({
+    //             type: "POST",
+    //             url: url,
+    //             data: data,
+    //             success: function(result) {
+    //                 if (result.message === "success") {
+    //                     cb(true); // Success callback
+    //                 } else {
+    //                     handleSaveError(result); // Handle error if message is not success
+    //                 }
+    //             },
+    //             error: function(xhr, status, error) {
+    //                 console.error("Save failed:", status, error);
+    //                 handleSaveError({ message: 'fail' }); // Handle AJAX failure
+    //             }
+    //         });
+    //     }
 
-        // Handle the error and retry the request
-        function handleSaveError(result) {
-            if (retry_count < max_retries) {
-                retry_count++;
-                let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
-                console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
+    //     // Handle the error and retry the request
+    //     function handleSaveError(result) {
+    //         if (retry_count < max_retries) {
+    //             retry_count++;
+    //             let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
+    //             console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
 
-                setTimeout(() => {
-                    console.log(`Retrying attempt ${retry_count}...`);
-                    attemptInsert(); // Retry the insertion
-                }, wait_time);
-            } else {
-                console.error("Failed to save data after multiple attempts.");
-                cb(false); // Call callback with failure if retries exceed max attempts
-            }
-        }
+    //             setTimeout(() => {
+    //                 console.log(`Retrying attempt ${retry_count}...`);
+    //                 attemptInsert(); // Retry the insertion
+    //             }, wait_time);
+    //         } else {
+    //             console.error("Failed to save data after multiple attempts.");
+    //             cb(false); // Call callback with failure if retries exceed max attempts
+    //         }
+    //     }
 
-        // Initiate the first attempt to insert
-        attemptInsert();
-    }
+    //     // Initiate the first attempt to insert
+    //     attemptInsert();
+    // }
 
     // This code is a fine example of reinventing the wheel—except the wheel is square, and occasionally forgets it's a wheel.
     let startTime, endTime;
@@ -1358,8 +1453,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Name": "",
+                "ASC Code": "",
+                "ASC Name": "",
                 "Status": "",
                 "Deployment Date": "",
                 "Area": "",
@@ -1394,7 +1489,7 @@
         // Collect selected record IDs from checkboxes
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Wrap ID in single quotes
+            ids.push(`${id}`); // Wrap ID in single quotes
         });
         
         /**
@@ -1414,8 +1509,8 @@
                     status, deployment_date, 
                     area_code, area_description 
                 }) => ({
-                    Code: asc_code,
-                    Description: asc_description,
+                    "ASC Code": asc_code,
+                    "ASC Name": asc_description,
                     Status: status === "1" ? "Active" : "Inactive",
                     "Deployment Date": deployment_date,
                     "Area Code": area_code,
@@ -1426,8 +1521,18 @@
             // If specific IDs are selected, fetch corresponding records; 
             // otherwise, perform batch export
             ids.length > 0 
-                ? get_asc_where_in(`"${ids.join(', ')}"`, processResponse)
-                : batch_export();
+            ? dynamic_search(
+                "'tbl_area_sales_coordinator a'", 
+                "'left join tbl_area b on a.area_id = b.id'", 
+                "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
+                0, 
+                0, 
+                `'a.id:IN=${ids.join('|')}'`,  
+                `''`, 
+                `''`, 
+                processResponse
+            )
+            : batch_export();
         };
 
         /**
@@ -1435,36 +1540,56 @@
          * Uses pagination to handle large datasets "efficiently".
          */
         function batch_export() {
-            get_asc_count((res) => {
-                if (res && res.length > 0) {
-                    console.log(res[0].total_records, 'asc count');
+            dynamic_search(
+                "'tbl_area_sales_coordinator a'", 
+                "''", 
+                "'COUNT(id) as total_records'", 
+                0, 
+                0, 
+                `''`,  
+                `''`, 
+                `''`, 
+                (res) => {
+                    if (res && res.length > 0) {
+                        console.log(res[0].total_records, 'asc count');
 
-                    let asc_count = res[0].total_records; // Total number of records
+                        let asc_count = res[0].total_records; // Total number of records
 
-                    // Fetch data in batches of 100,000 records
-                    for (let index = 0; index < asc_count; index += 100000) {
-                        get_asc(index, (res) => {
-                            console.log(res)
-                            let newData = res.map(({
-                                asc_code, asc_description, 
-                                status, deployment_date, 
-                                area_code, area_description 
-                            }) => ({
-                                Code: asc_code,
-                                Description: asc_description,
-                                Status: status === "1" ? "Active" : "Inactive",
-                                "Deployment Date": deployment_date,
-                                "Area Code": area_code,
-                                "Area Description": area_description,
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                        // Fetch data in batches of 100,000 records
+                        for (let index = 0; index < asc_count; index += 100000) {
+                            dynamic_search(
+                                "'tbl_area_sales_coordinator a'", 
+                                "'left join tbl_area b on a.area_id = b.id'", 
+                                "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
+                                100000, 
+                                index, 
+                                `''`,  
+                                `''`, 
+                                `''`, 
+                                (res) => {
+                                    console.log(res)
+                                    let newData = res.map(({
+                                        asc_code, asc_description, 
+                                        status, deployment_date, 
+                                        area_code, area_description 
+                                    }) => ({
+                                        Code: asc_code,
+                                        Description: asc_description,
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                        "Deployment Date": deployment_date,
+                                        "Area Code": area_code,
+                                        "Area Description": area_description,
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                        
+                    } else {
+                        console.log('No data received'); // error handling
                     }
-                    
-                } else {
-                    console.log('No data received'); // error handling
                 }
-            });
+            );
             
         }
 

@@ -236,6 +236,7 @@ $('.brand-link').on('click', function (e) {
                   if ($('table td:last-child').has(".edit").length > 0) {
                     $('table th:last-child,td:last-child').remove();
                   }
+                  $('.close').removeAttr('disabled');
                 } else if (role_write == 0 && role_delete == 1) {
                   $('.btn_add').remove();
                   $('.box-header a[data-status="1"]').remove();

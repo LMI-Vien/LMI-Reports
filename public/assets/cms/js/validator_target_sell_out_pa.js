@@ -6,7 +6,7 @@ self.onmessage = async function (e) {
     let err_counter = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/import-target-sell-out-pa/get_valid_ba_data`);
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brands=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1`);
         let ba_data = await get_ba_valid_response.json();
 
         let brand_lookup = createLookup(ba_data.brands, "brand_code", "brand_code");

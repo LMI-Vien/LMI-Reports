@@ -29,7 +29,7 @@ class Import_target_sales_ps extends BaseController
 		$data['PageName'] = 'Import Target Sales Per Store';
 		$data['PageUrl'] = 'Import Target Sales Per Store';
 		$data['content'] = "cms/import/target_sales_ps.php";
-		$data['buttons'] = ['search', 'import'];
+		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -47,11 +47,6 @@ class Import_target_sales_ps extends BaseController
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		
-	}
-
-	public function get_valid_ba_data() {
-		$stores = $this->Global_model->get_valid_records("tbl_store", ['code', 'description']);
-		return $this->response->setJSON(["stores" => $stores]);
 	}
 
 }

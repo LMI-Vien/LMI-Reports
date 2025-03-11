@@ -12,6 +12,33 @@
             <b id="sell_out_title"></b>
         </div>
         <div class="card-body text-center">
+            <div class="d-flex flex-column text-left" style="margin-top: 20px;">
+                <div class="d-flex flex-row">
+                    <label for="paygroup" class="form-label p-2 col-2">Payment Group</label>
+                    <input type="text" class="form-control p-2 col-3" id="paygroup" readonly disabled>
+                    <div class="p-2 col-1"></div>
+                    <label for="uploaddte" class="form-label p-2 col-3">Date and Time Uploaded</label>
+                    <input type="text" class="form-control p-2 col-3" id="uploaddte" readonly disabled>
+                </div>
+                <div class="d-flex flex-row">
+                    <label for="uploader" class="form-label p-2 col-2">Uploader</label>
+                    <input type="text" class="form-control p-2 col-3" id="uploader" readonly disabled>
+                    <div class="p-2 col-1"></div>
+                    <label for="month" class="form-label p-2 col-3">Month</label>
+                    <input type="text" class="form-control p-2 col-3" id="month" readonly disabled>
+                </div>
+                <div class="d-flex flex-row">
+                    <label for="filetype" class="form-label p-2 col-2">File Type</label>
+                    <input type="text" class="form-control p-2 col-3" id="filetype" readonly disabled>
+                    <div class="p-2 col-1"></div>
+                    <label for="year" class="form-label p-2 col-3">Year</label>
+                    <input type="text" class="form-control p-2 col-3" id="year" readonly disabled>
+                </div>
+                <div class="d-flex flex-row" style="margin-top: 30px;">
+                    <label for="remarks" class="form-label p-2 col-2">Remarks</label>
+                    <input type="text" class="form-control p-2 col" id="remarks" readonly disabled>
+                </div>
+            </div>
             <div class="box" style="max-height: 500px; overflow-y: auto; margin-top: 20px;">
                 <table class= "table table-bordered listdata" style="width: 100%">
                     <thead>
@@ -36,67 +63,84 @@
 
 
 <script>
-    var query = "";
-    var limit = 10; 
-    var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
 
     $(document).ready(function() {
         var import_sellout_id = "<?=$uri->getSegment(4);?>";
 
-        console.log(import_sellout_id)
-
         $("#sell_out_title").html(addNbsp("VIEW SELLOUT DATA"));
 
-        var query = " data_header_id = " + import_sellout_id;
-        get_data(query);
-        get_pagination();
+        renderHeader(import_sellout_id)
+        renderDetails(import_sellout_id)
     });
 
-    function get_data(query) {
-        var data = {
-            event : "list",
-            select : "id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
-            query : query,
-            offset : 0,
-            limit : 0,
-            table : "tbl_sell_out_data_details",
-            order : {
-                field : "id",
-                order : "asc" 
+    function renderHeader(header_id) {
+        table = 'tbl_sell_out_data_header a';
+        join = 'left join tbl_month b on a.month = b.id';
+        fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
+        limit = 0;
+        offset = 0;
+        filter = `a.id:EQ=${header_id}`;
+        order = '';
+        group = '';
+        dynamic_search(
+            `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
+            (result) => {
+                $.each(result, function(x,y) {
+                    $('#paygroup').val(y.customer_payment_group);
+                    $('#uploaddte').val(y.created_date);
+
+                    $('#uploader').val(y.created_by);
+                    $('#month').val(y.month);
+
+                    $('#filetype').val(y.file_type);
+                    $('#year').val(y.year);
+
+                    $('#remarks').val(y.remarks);
+                })
             }
+        )
+    }
 
-        }
+    function renderDetails(header_id) {
+        table = 'tbl_sell_out_data_details a';
+        join = '';
+        fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
+        limit = 0;
+        offset = 0;
+        filter = `data_header_id:EQ=${header_id}`;
+        order = '';
+        group = '';
+        dynamic_search(
+            `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
+            (result) => {
+                var html = '';
+                if(result) {
+                    if (result.length > 0) {
+                        $.each(result, function(x,y) {
+                            var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+                            var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
-        aJax.post(url,data,function(result){
-            var result = JSON.parse(result);
-            var html = '';
-
-            if(result) {
-                if (result.length > 0) {
-                    $.each(result, function(x,y) {
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
-                        html += "<tr class='" + rowClass + "'>";
-                        // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + y.file_name + "</td>";
-                        // html += "<td scope=\"col\">" + y.line_number + "</td>";
-                        html += "<td scope=\"col\">" + y.store_code + "</td>";
-                        html += "<td scope=\"col\">" + y.store_description + "</td>";
-                        html += "<td scope=\"col\">" + y.sku_code + "</td>";
-                        html += "<td scope=\"col\">" + y.sku_description + "</td>";
-                        html += "<td scope=\"col\">" + y.quantity + "</td>";
-                        html += "<td scope=\"col\">" + y.net_sales + "</td>";
-                        
-                        html += "</tr>";   
-                    });
-                } else {
-                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-                }
+                            html += "<tr class='" + rowClass + "'>";
+                            // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                            html += "<td scope=\"col\">" + y.file_name + "</td>";
+                            // html += "<td scope=\"col\">" + y.line_number + "</td>";
+                            html += "<td scope=\"col\">" + y.store_code + "</td>";
+                            html += "<td scope=\"col\">" + y.store_description + "</td>";
+                            html += "<td scope=\"col\">" + y.sku_code + "</td>";
+                            html += "<td scope=\"col\">" + y.sku_description + "</td>";
+                            html += "<td scope=\"col\">" + y.quantity + "</td>";
+                            html += "<td scope=\"col\">" + y.net_sales + "</td>";
+                            
+                            html += "</tr>";   
+                        });
+                    } else {
+                        html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+                    }
+                };
+                $('.table_body').html(html);
             }
-            $('.table_body').html(html);
-        });
+        )
     }
 
     function addNbsp(inputString) {

@@ -1,3 +1,11 @@
+<style>
+    #list-data {
+        overflow: visible !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+    }
+</style>
 
 <div class="content-wrapper p-4">
     <div class="card">
@@ -21,7 +29,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                        <th class='center-content'>Code</th>
+                                        <th class='center-content'>Team Code</th>
                                         <th class='center-content'>Team Description</th>
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
@@ -61,7 +69,7 @@
             <div class="modal-body">
                 <form id="form-modal form-save-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
+                        <label for="code" class="form-label">Team Code</label>
                         <input type="text" class="form-control required" id="code" aria-describedby="code" maxlength="25">
                         <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
@@ -136,7 +144,7 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'>Line #</th>
-                                    <th class='center-content'>Code</th>
+                                    <th class='center-content'>Team Code</th>
                                     <th class='center-content'>Team Description</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
@@ -161,6 +169,8 @@
 
 <script>
     var query = "status >= 0";
+    var column_filter = '';
+    var order_filter = '';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
@@ -173,10 +183,10 @@
 
     $(document).ready(function() {
       get_data(query);
-      get_pagination();
+      get_pagination(query);
     });
 
-    function get_data(query) {
+    function get_data(query, field = "updated_date", order = "order") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -186,10 +196,9 @@
             limit : limit,
             table : "tbl_team",
             order : {
-                field : "updated_date",
-                order : "desc" 
+                field : field,
+                order : order 
             }
-
         }
 
         aJax.post(url,data,function(result){
@@ -231,7 +240,7 @@
         });
     }
 
-    function get_pagination() {
+    function get_pagination(query, field = "updated_date", order = "desc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
@@ -241,10 +250,9 @@
             limit : limit,
             table : "tbl_team",
             order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
+                field : field, //field to order
+                order : order //asc or desc
             }
-
         }
 
         aJax.post(url,data,function(result){
@@ -256,23 +264,82 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query);
+        get_data(query, column_filter, order_filter);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
     });
 
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
+    $(document).on('keydown', '#search_query', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        if (event.key == 'Enter') {
+            search_input = $('#search_query').val();
             offset = 1;
-            // query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
-            var new_query = "("+query+" AND code like '%" + keyword + "%') OR "+
-            "("+query+" AND team_description like '%" + keyword + "%')"
+            get_pagination(query);
+            new_query = query;
+            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
             get_data(new_query);
-            get_pagination();
         }
     });
+
+    $(document).on('click', '#search_button', function(e) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        get_pagination(query);
+        new_query = query;
+        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
+        get_data(new_query);
+    });
+
+    $('#btn_filter').on('click', function(event) {
+        title = addNbsp('FILTER DATA');
+        $('#filter_modal').find('.modal-title').find('b').html(title);
+        $('#filter_modal').modal('show');
+    })
+
+    $('#button_f').on('click', function(event) {
+        let status_f = $("input[name='status_f']:checked").val();
+        let c_date_from = $("#created_date_from").val();
+        let c_date_to = $("#created_date_to").val();
+        let m_date_from = $("#modified_date_from").val();
+        let m_date_to = $("#modified_date_to").val();
+        
+        order_filter = $("input[name='order']:checked").val();
+        column_filter = $("input[name='column']:checked").val();
+        query = "status >= 0";
+        
+        query += status_f ? ` AND status = ${status_f}` : '';
+        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
+        
+        // console.log(query);
+        get_pagination(query, column_filter, order_filter);
+        get_data(query, column_filter, order_filter);
+        $('#filter_modal').modal('hide');
+    })
+    
+    $('#clear_f').on('click', function(event) {
+        order_filter = '';
+        column_filter = '';
+        query = "status >= 0";
+        get_data(query);
+        get_pagination(query);
+        
+        $("input[name='status_f']").prop('checked', false);
+        $("#created_date_from").val('');
+        $('#created_date_to').val('');
+        $('#modified_date_from').val('');
+        $('#modified_date_to').val('');
+        $("input[name='order']").prop('checked', false);
+        $("input[name='column']").prop('checked', false);
+
+        $('#filter_modal').modal('hide');
+    })
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
@@ -481,29 +548,35 @@
     }
 
     function delete_data(id) {
-        modal.confirm(confirm_delete_message,function(result){
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_team",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(success_delete_message, 'success', function() {
-                        location.reload();
-                    });
-                });
-            }
+        get_field_values("tbl_team", "code", "id", [id], (res) => {
+            let code = res[id];
+            let message = is_json(confirm_delete_message);
+            message.message = `Delete <b><i>${code}</i></b> from Team Masterfile?`;            
 
-        });
+            modal.confirm(JSON.stringify(message),function(result){
+                if(result){ 
+                    var url = "<?= base_url('cms/global_controller');?>";
+                    var data = {
+                        event : "update",
+                        table : "tbl_team",
+                        field : "id",
+                        where : id, 
+                        data : {
+                                updated_date : formatDate(new Date()),
+                                updated_by : user_id,
+                                status : -2
+                        }  
+                    }
+                    aJax.post(url,data,function(result){
+                        var obj = is_json(result);
+                        modal.alert(success_delete_message, 'success', function() {
+                            location.reload();
+                        });
+                    });
+                }
+    
+            });
+        })
     }
 
     function formatDate(date) {
@@ -542,14 +615,34 @@
         var modal_alert_success = "";
         var hasExecuted = false; // Prevents multiple executions
 
+        let id = $("input.select:checked");
+        let code = [];
+        let code_string = "";
+
+        id.each(function () {
+            code.push($(this).attr("data-id"));
+        })
+
+        get_field_values("tbl_team", "code", "id", code, (res) => {
+            if(code.length == 1) {
+                code_string = `Code <b><i>${res[code[0]]}</b></i>`;
+            }
+        })
+
         if (parseInt(status) === -2) {
-            modal_obj = confirm_delete_message;
+            message = is_json(confirm_delete_message);
+            message.message = `Delete ${code_string} from Team Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
-            modal_obj = confirm_publish_message;
+            message = is_json(confirm_publish_message);
+            message.message = `Publish ${code_string} from Team Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
-            modal_obj = confirm_unpublish_message;
+            message = is_json(confirm_unpublish_message);
+            message.message = `Unpublish ${code_string} from Team Masterfile?`;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
         // var counter = 0; 
@@ -699,8 +792,8 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Code": row["Code"] || "",
-                "Team_Description": row["Team_Description"] || "",
+                "Team Code": row["Team Code"] || "",
+                "Team Description": row["Team Description"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
                 "Created Date": formatDate(new Date()) || ""
@@ -756,7 +849,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['code', 'team_description', 'status'];
+            let td_validator = ['team code', 'team description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -987,8 +1080,8 @@
 
         formattedData = [
             {
-                "Code": "",
-                "Description": "",
+                "Team Code": "",
+                "Team Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
@@ -1014,7 +1107,7 @@
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`); // Collect IDs in an array
         });
 
         const fetchStores = (callback) => {
@@ -1029,33 +1122,42 @@
             };
 
             ids.length > 0 
-                ? get_team_where_in(`"${ids.join(', ')}"`, processResponse)
+                // ? get_team_where_in(`"${ids.join(', ')}"`, processResponse)
+                ? dynamic_search(
+                    "'tbl_team'", "''", "'code, team_description, status'", 0, 0, `'id:IN=${ids.join('|')}'`, `''`, `''`, 
+                    processResponse
+                )
                 : batch_export();
         };
 
         const batch_export = () => {
-            get_team_count((res) => {
-                if (res && res.length > 0) {
-                    let total_records = res[0].total_records;
-                    console.log(total_records, 'total records');
+            dynamic_search(
+                "'tbl_team'", "''", "'COUNT(id) as total_records'", 0, 0, `''`, `''`, `''`, 
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
+                        console.log(total_records, 'total records');
 
-                    for (let index = 0; index < total_records; index += 100000) {
-                        get_team(index, (res) => {
-                            console.log(res, 'look here')
-                            let newData = res.map(({ 
-                                code, team_description, status
-                            }) => ({
-                                Code: code,
-                                Description: team_description,
-                                Status: status === "1" ? "Active" : "Inactive",
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
+                        for (let index = 0; index < total_records; index += 100000) {
+                            dynamic_search(
+                                "'tbl_team'", "''", "'code, team_description, status'", 100000, index, `''`, `''`, `''`, 
+                                (res) => {
+                                    let newData = res.map(({ 
+                                        code, team_description, status
+                                    }) => ({
+                                        Code: code,
+                                        Description: team_description,
+                                        Status: status === "1" ? "Active" : "Inactive",
+                                    }));
+                                    formattedData.push(...newData); // Append new data to formattedData array
+                                }
+                            )
+                        }
+                    } else {
+                        console.log('No data received');
                     }
-                } else {
-                    console.log('No data received');
                 }
-            })
+            )
         };
 
         fetchStores();

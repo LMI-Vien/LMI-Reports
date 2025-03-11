@@ -442,7 +442,7 @@
                                         <th class='center-content'>October TQ</th>
                                         <th class='center-content'>November TQ</th>
                                         <th class='center-content'>December TQ</th>
-                              
+                        
                                         <th class='center-content'>January TA</th>
                                         <th class='center-content'>February TA</th>
                                         <th class='center-content'>March TA</th>
@@ -471,6 +471,58 @@
                 <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
                 <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" id="export_modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">
+                    <b></b>
+                </h1>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="card">
+                    <div class="mb-3">
+                        <div 
+                            class="text-center"
+                            style="padding: 10px;
+                            font-family: 'Courier New', Courier, monospace;
+                            font-size: large;
+                            background-color: #fdb92a;
+                            color: #333333;
+                            border: 1px solid #ffffff;
+                            border-radius: 10px;"                            
+                        >
+                            <b>Filters</b>
+                        </div>
+
+                        <div class="col-12 row d-flex" style="margin-top: 20px;">
+                            <label 
+                                for="year_select" 
+                                class="form-label fw-semibold me-"
+                                style="padding-top: 5px;"
+                            >
+                                Choose Year:
+                            </label>
+                            <select id="year_select" class="form-select uniform-dropdown">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="modal-footer">
+                <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
+                <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
+                <button type="button" class="btn caution" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -796,7 +848,7 @@
         $("#import_modal").find('.modal-title').find('b').html(title)
         $("#import_modal").modal('show')
         clear_import_table();
-        get_year();
+        get_year('yearSelect');
     });
     
     function populate_modal(inp_id) {
@@ -1723,7 +1775,7 @@
         }
     }
 
-    function get_year() {
+    function get_year(selected_class) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
@@ -1753,7 +1805,422 @@
                     });
                 }
             }
-            $('#yearSelect').html(html);
+            $('#'+selected_class).html(html);
         })
     }
+
+    $(document).on('click', '#btn_export ', function() {
+        title = addNbsp('EXPORT Target Sellout PA');
+        $("#export_modal").find('.modal-title').find('b').html(title)
+        $('#export_modal').modal('show');
+        get_year('year_select');
+    });
+
+    function download_template() {
+        let formattedData = [
+            {
+                "Payment Group":"",
+                "Vendor":"",
+                "Overall":"",
+                "KAM/KAS/KAA":"",
+                "Sales Group":"",
+                "Terms":"",
+                "Channel":"",
+                "Brand":"",
+                "Exclusivity":"",
+                "Category":"",
+                "LMI Code":"",
+                "RGDI Code":"",
+                "Customer SKU Code":"",
+                "Item Description":"",
+                "Item status":"",
+                "SRP":"",
+                "Trade Discount":"",
+                "Customer Cost":"",
+                "Customer Cost (Net of Vat)":"",
+                "January":"",
+                "February":"",
+                "March":"",
+                "April":"",
+                "May":"",
+                "June":"",
+                "July":"",
+                "August":"",
+                "September":"",
+                "October":"",
+                "November":"",
+                "December":"",
+                "JanuaryTA":"",
+                "FebruaryTA":"",
+                "MarchTA":"",
+                "AprilTA":"",
+                "MayTA":"",
+                "JuneTA":"",
+                "JulyTA":"",
+                "AugustTA":"",
+                "SeptemberTA":"",
+                "OctoberTA":"",
+                "NovemberTA":"",
+                "DecemberTA":"",
+            }
+        ]
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Target Sell Out per Account"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+    
+        exportArrayToCSV(formattedData, `Target Sell Out per Account - ${formatDate(new Date())}`, headerData);
+    }
+
+    function exportFilter() {
+        const year = $('#year_select').val()?.trim();
+
+        const fields = { year };
+
+        var formattedData = [];
+
+        for (const [key, value] of Object.entries(fields)) {
+            if (!value) {
+                return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
+            }
+        }
+
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    startExport()
+                }, 500);
+            }
+        })
+
+        const startExport = () => {
+            dynamic_search(
+                "'tbl_accounts_target_sellout_pa'", 
+                "''", 
+                `'payment_group, vendor, overall, kam_kas_kaa, sales_group, 
+                terms, channel, brand, exclusivity, 
+                category, lmi_code, rgdi_code, 
+                customer_sku_code, item_description, item_status, srp, trade_discount,
+                customer_cost, customer_cost_net_of_vat, 
+                january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, 
+                july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, 
+                july_ta, august_ta, september_ta, october_ta, november_ta, december_ta'`, 
+                0, 
+                0, 
+                `"year:EQ=${year}"`,  
+                `''`, 
+                `''`,
+                (res) => {
+                    console.log(year, res);
+                    let store_ids = []
+                    let store_map = {}
+            
+                    let newData = res.map(({ 
+                        payment_group, vendor, overall, kam_kas_kaa, sales_group, 
+                        terms, channel, brand, exclusivity, 
+                        category, lmi_code, rgdi_code, 
+                        customer_sku_code, item_description, item_status, srp, trade_discount,
+                        customer_cost, customer_cost_net_of_vat, 
+                        january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, 
+                        july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                        january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, 
+                        july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+                    }) => ({
+                        "Payment Group":payment_group,
+                        "Vendor":vendor,
+                        "Overall":overall,
+                        "KAM/KAS/KAA":kam_kas_kaa,
+                        "Sales Group":sales_group,
+                        "Terms":terms,
+                        "Channel":channel,
+                        "Brand":brand,
+                        "Exclusivity":exclusivity,
+                        "Category":category,
+                        "LMI Code":lmi_code,
+                        "RGDI Code":rgdi_code,
+                        "Customer SKU Code":customer_sku_code,
+                        "Item Description":item_description,
+                        "Item status":item_status,
+                        "SRP":srp,
+                        "Trade Discount":trade_discount,
+                        "Customer Cost":customer_cost,
+                        "Customer Cost (Net of Vat)":customer_cost_net_of_vat,
+                        "January":january_tq,
+                        "February":february_tq,
+                        "March":march_tq,
+                        "April":april_tq,
+                        "May":may_tq,
+                        "June":june_tq,
+                        "July":july_tq,
+                        "August":august_tq,
+                        "September":september_tq,
+                        "October":october_tq,
+                        "November":november_tq,
+                        "December":december_tq,
+                        "JanuaryTA":january_ta,
+                        "FebruaryTA":february_ta,
+                        "MarchTA":march_ta,
+                        "AprilTA":april_ta,
+                        "MayTA":may_ta,
+                        "JuneTA":june_ta,
+                        "JulyTA":july_ta,
+                        "AugustTA":august_ta,
+                        "SeptemberTA":september_ta,
+                        "OctoberTA":october_ta,
+                        "NovemberTA":november_ta,
+                        "DecemberTA":december_ta,
+                    }));
+
+                    formattedData.push(...newData); // Append new data to formattedData array
+                }
+            )
+    
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."],
+                ["Target Sell Out per Account"],
+                ["Date Printed: " + formatDate(new Date())],
+                [""],
+            ];
+    
+            exportArrayToCSV(formattedData, `Target Sell Out per Account - ${formatDate(new Date())}`, headerData);
+            modal.loading_progress(false);
+        }
+    }
+
+    function handleExport() {
+        var formattedData = [];
+        var ids = [];
+
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`${id}`); // Collect IDs in an array
+            // ids.push(`'${id}'`); // Collect IDs in an array
+        });
+
+        modal.confirm(confirm_export_message,function(result){
+            if (result) {
+                modal.loading_progress(true, "Reviewing Data...");
+                setTimeout(() => {
+                    startExport()
+                }, 500);
+            }
+        })
+
+        const startExport = () => {
+            const fetchStores = (callback) => {
+                function processResponse (res) {
+                    formattedData = res.map(({ 
+                        payment_group, vendor, overall, kam_kas_kaa, sales_group, 
+                        terms, channel, brand, exclusivity, 
+                        category, lmi_code, rgdi_code, 
+                        customer_sku_code, item_description, item_status, srp, trade_discount,
+                        customer_cost, customer_cost_net_of_vat, 
+                        january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, 
+                        july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                        january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, 
+                        july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+                    }) => ({
+                        "Payment Group":payment_group,
+                        "Vendor":vendor,
+                        "Overall":overall,
+                        "KAM/KAS/KAA":kam_kas_kaa,
+                        "Sales Group":sales_group,
+                        "Terms":terms,
+                        "Channel":channel,
+                        "Brand":brand,
+                        "Exclusivity":exclusivity,
+                        "Category":category,
+                        "LMI Code":lmi_code,
+                        "RGDI Code":rgdi_code,
+                        "Customer SKU Code":customer_sku_code,
+                        "Item Description":item_description,
+                        "Item status":item_status,
+                        "SRP":srp,
+                        "Trade Discount":trade_discount,
+                        "Customer Cost":customer_cost,
+                        "Customer Cost (Net of Vat)":customer_cost_net_of_vat,
+                        "January":january_tq,
+                        "February":february_tq,
+                        "March":march_tq,
+                        "April":april_tq,
+                        "May":may_tq,
+                        "June":june_tq,
+                        "July":july_tq,
+                        "August":august_tq,
+                        "September":september_tq,
+                        "October":october_tq,
+                        "November":november_tq,
+                        "December":december_tq,
+                        "JanuaryTA":january_ta,
+                        "FebruaryTA":february_ta,
+                        "MarchTA":march_ta,
+                        "AprilTA":april_ta,
+                        "MayTA":may_ta,
+                        "JuneTA":june_ta,
+                        "JulyTA":july_ta,
+                        "AugustTA":august_ta,
+                        "SeptemberTA":september_ta,
+                        "OctoberTA":october_ta,
+                        "NovemberTA":november_ta,
+                        "DecemberTA":december_ta,
+                    }));
+                };
+
+                ids.length > 0 
+                    ? dynamic_search(
+                        "'tbl_accounts_target_sellout_pa'", 
+                        "''", 
+                        `'payment_group, vendor, overall, kam_kas_kaa, sales_group, 
+                        terms, channel, brand, exclusivity, 
+                        category, lmi_code, rgdi_code, 
+                        customer_sku_code, item_description, item_status, srp, trade_discount,
+                        customer_cost, customer_cost_net_of_vat, 
+                        january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, 
+                        july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                        january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, 
+                        july_ta, august_ta, september_ta, october_ta, november_ta, december_ta'`, 
+                        0, 
+                        0, 
+                        `"id:IN=${ids.join('|')}"`,  
+                        `''`,
+                        `''`,
+                        processResponse
+                    )
+                    : batch_export();
+            };
+
+            const batch_export = () => {
+                dynamic_search(
+                    "'tbl_accounts_target_sellout_pa'", 
+                    "''", 
+                    `'COUNT(id) as total_records'`, 
+                    0, 
+                    0, 
+                    `''`,  
+                    `''`,
+                    `''`,
+                    (res) => {
+                        if (res && res.length > 0) {
+                            let total_records = res[0].total_records;
+
+                            for (let index = 0; index < total_records; index += 100000) {
+                                dynamic_search(
+                                    "'tbl_accounts_target_sellout_pa'", 
+                                    "''", 
+                                    `'payment_group, vendor, overall, kam_kas_kaa, sales_group, 
+                                    terms, channel, brand, exclusivity, 
+                                    category, lmi_code, rgdi_code, 
+                                    customer_sku_code, item_description, item_status, srp, trade_discount,
+                                    customer_cost, customer_cost_net_of_vat, 
+                                    january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, 
+                                    july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                                    january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, 
+                                    july_ta, august_ta, september_ta, october_ta, november_ta, december_ta'`, 
+                                    100000, 
+                                    index, 
+                                    `''`,  
+                                    `''`,
+                                    `''`,
+                                    (res) => {
+                                        let newData = res.map(({ 
+                                            payment_group, vendor, overall, kam_kas_kaa, sales_group, 
+                                            terms, channel, brand, exclusivity, 
+                                            category, lmi_code, rgdi_code, 
+                                            customer_sku_code, item_description, item_status, srp, trade_discount,
+                                            customer_cost, customer_cost_net_of_vat, 
+                                            january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, 
+                                            july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                                            january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, 
+                                            july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+                                        }) => ({
+                                            "Payment Group":payment_group,
+                                            "Vendor":vendor,
+                                            "Overall":overall,
+                                            "KAM/KAS/KAA":kam_kas_kaa,
+                                            "Sales Group":sales_group,
+                                            "Terms":terms,
+                                            "Channel":channel,
+                                            "Brand":brand,
+                                            "Exclusivity":exclusivity,
+                                            "Category":category,
+                                            "LMI Code":lmi_code,
+                                            "RGDI Code":rgdi_code,
+                                            "Customer SKU Code":customer_sku_code,
+                                            "Item Description":item_description,
+                                            "Item status":item_status,
+                                            "SRP":srp,
+                                            "Trade Discount":trade_discount,
+                                            "Customer Cost":customer_cost,
+                                            "Customer Cost (Net of Vat)":customer_cost_net_of_vat,
+                                            "January":january_tq,
+                                            "February":february_tq,
+                                            "March":march_tq,
+                                            "April":april_tq,
+                                            "May":may_tq,
+                                            "June":june_tq,
+                                            "July":july_tq,
+                                            "August":august_tq,
+                                            "September":september_tq,
+                                            "October":october_tq,
+                                            "November":november_tq,
+                                            "December":december_tq,
+                                            "JanuaryTA":january_ta,
+                                            "FebruaryTA":february_ta,
+                                            "MarchTA":march_ta,
+                                            "AprilTA":april_ta,
+                                            "MayTA":may_ta,
+                                            "JuneTA":june_ta,
+                                            "JulyTA":july_ta,
+                                            "AugustTA":august_ta,
+                                            "SeptemberTA":september_ta,
+                                            "OctoberTA":october_ta,
+                                            "NovemberTA":november_ta,
+                                            "DecemberTA":december_ta,
+                                        }));
+                                        formattedData.push(...newData); // Append new data to formattedData array
+                                    }
+                                )
+                            }
+                        } else {
+                            console.log('No data received');
+                        }
+                    }
+                )
+            };
+
+            fetchStores();
+
+            const headerData = [
+                ["Company Name: Lifestrong Marketing Inc."],
+                ["Target Sell Out per Account"],
+                ["Date Printed: " + formatDate(new Date())],
+                [""],
+            ];
+
+            exportArrayToCSV(formattedData, `Target Sell Out per Account - ${formatDate(new Date())}`, headerData);
+            modal.loading_progress(false);
+        }
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
+    }
+    
 </script>
