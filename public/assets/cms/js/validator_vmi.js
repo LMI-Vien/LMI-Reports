@@ -1,22 +1,30 @@
 self.onmessage = async function(e) {
     let data = e.data.data;
     let BASE_URL = e.data.base_url;
+    let company = e.data.company;
     let invalid = false;
     let errorLogs = [];
     let valid_data = [];
     var err_counter = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/import-vmi/get_valid_ba_data`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         store_records = ba_data.stores;
         let store_lookup = {};
         store_records.forEach(store => store_lookup[store.code] = store.id);
 
-        item_records = ba_data.items;
-        let item_lookup = {};
-        item_records.forEach(item => item_lookup[item.cusitmcde] = item.recid);
+        if(company == 1){
+            item_records = ba_data.customer_sku_code_rgdi;
+            let item_lookup = {};
+            item_records.forEach(item => item_lookup[item.cusitmcde] = item.recid);            
+        }else{
+            item_records = ba_data.customer_sku_code_lmi;
+            let item_lookup = {};
+            item_records.forEach(item => item_lookup[item.cusitmcde] = item.recid);
+        }
+
         let batchSize = 2000;
         let index = 0;
 

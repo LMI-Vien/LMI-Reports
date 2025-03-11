@@ -10,7 +10,7 @@ self.onmessage = async function(e) {
     var brand_per_ba = {};
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/brand-ambassador/get_valid_ba_data`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?agencies=1&brands=1&stores=1&store_area=1&teams=1&areas=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         agency_records = ba_data.agencies;

@@ -47,14 +47,4 @@ class Brand_Ambassador extends BaseController
 		return view("cms/layout/template", $data);	
 	}
 
-	public function get_valid_ba_data(){
-		$agencies = $this->Global_model->get_valid_records("tbl_agency", 'code');
-		$brands = $this->Global_model->get_valid_records("tbl_brand", 'brand_description');
-		$store_area = $this->Global_model->get_valid_records_store_group();
-		$stores = $this->Global_model->get_valid_records("tbl_store", 'code');
-		$teams = $this->Global_model->get_valid_records("tbl_team", 'code');
-		$areas = $this->Global_model->get_valid_records("tbl_area", 'code');
-		return $this->response->setJSON(["agencies" => $agencies, "brands" => $brands, "stores" => $stores, "store_area" => $store_area, "teams" => $teams, "areas" => $areas]);
-	}
-
 }

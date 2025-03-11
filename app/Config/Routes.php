@@ -71,22 +71,19 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sell_out_pa::index');
-        $routes->get('get_valid_ba_data', 'Cms\Import_target_sell_out_pa::get_valid_ba_data');
     });
 
     $routes->group('import-vmi', static function ($routes) {
         $routes->get('/', 'Cms\Import_vmi::index');
-        $routes->get('get_valid_ba_data', 'Cms\Import_vmi::get_valid_ba_data');
     });
 
     $routes->group('import-ba-sales-report', static function ($routes) {
         $routes->get('/', 'Cms\Import_ba_sales_report::index');
-        $routes->get('get_valid_ba_data', 'Cms\Import_ba_sales_report::get_valid_ba_data');
+        $routes->get('view/(:any)', 'Cms\Import_ba_sales_report::view');
     });
 
     $routes->group('import-target-sales-ps', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sales_ps::index');
-        $routes->get('get_valid_ba_data', 'Cms\Import_target_sales_ps::get_valid_ba_data');
     });
 
     $routes->group('import-sales-top-list', static function ($routes) {
@@ -113,7 +110,6 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('brand-ambassador', static function ($routes) {
         $routes->get('/', 'Cms\Brand_Ambassador::index');
-        $routes->get('get_valid_ba_data', 'Cms\Brand_Ambassador::get_valid_ba_data');
     });
     
     $routes->get('team', 'Cms\Team::index');
@@ -122,13 +118,10 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('area', static function ($routes) {
         $routes->get('/', 'Cms\Area::index');
-        $routes->get('get_valid_ba_data', 'Cms\Area::get_valid_ba_data');
     });
-
 
     $routes->group('asc', static function ($routes) {
         $routes->get('/', 'Cms\Asc::index');
-        $routes->get('get_valid_ba_data', 'Cms\Asc::get_valid_ba_data');
     });
 
     $routes->get('year', 'Cms\Year::index');
@@ -154,6 +147,10 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('/', 'Cms\Error_logs::index');
     });
         
+    $routes->group('global_controller/', static function ($routes) {
+        $routes->post('/', 'Cms\Global_controller::index');
+        $routes->get('get_valid_ba_data', 'Cms\Global_controller::get_valid_ba_data');
+    });
 
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');
@@ -173,5 +170,4 @@ $routes->group('cms/', static function ($routes) {
         });
 	});
 
-    $routes->post('global_controller', 'Cms\Global_controller::index');
 });

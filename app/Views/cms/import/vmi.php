@@ -978,7 +978,7 @@
 
 
         let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
-        worker.postMessage({ data: jsonData, base_url });
+        worker.postMessage({ data: jsonData, base_url, company });
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);

@@ -671,4 +671,39 @@ class Global_controller extends BaseController
 	  	$table = 'cms_audit_trail';
 	  	$this->Global_model->save_data($table,$data);
 	}
+
+	public function get_valid_ba_data() {
+	    $request = $this->request->getGet(); 
+	    $responseData = [];
+
+	    if (!empty($request['ba'])) {
+	        $responseData['ba'] = $this->Global_model->get_valid_records("tbl_brand_ambassador", 'code');
+	    }
+	    if (!empty($request['brands'])) {
+	        $responseData['brands'] = $this->Global_model->get_valid_records("tbl_brand", 'brand_description');
+	    }
+	    if (!empty($request['stores'])) {
+	        $responseData['stores'] = $this->Global_model->get_valid_records("tbl_store", ['code', 'description']);
+	    }
+	    if (!empty($request['areas'])) {
+	        $responseData['areas'] = $this->Global_model->get_valid_records("tbl_area", 'code');
+	    }
+	    if (!empty($request['ba_store_area'])) {
+	        $responseData['ba_store_area'] = $this->Global_model->get_valid_records_ba_area_store_group();
+	    }
+	    if (!empty($request['payment_group'])) {
+	        $responseData['payment_group'] = $this->Global_model->get_valid_records("tbl_payment_group", 'customer_group_code');
+	    }
+	    if (!empty($request['customer_sku_code_lmi'])) {
+	        $responseData['customer_sku_code_lmi'] = $this->Global_model->get_valid_records_tracc_data("pricecodefile2", 'cusitmcde');
+	    }
+	    if (!empty($request['customer_sku_code_rgdi'])) {
+	        $responseData['customer_sku_code_rgdi'] = $this->Global_model->get_valid_records_tracc_data("pricecodefile2rgdi", 'cusitmcde');
+	    }
+	    if (!empty($request['store_area'])) {
+	        $responseData['store_area'] = $this->Global_model->get_valid_records_store_group();
+	    }
+	    return $this->response->setJSON($responseData);
+	}
+
 }

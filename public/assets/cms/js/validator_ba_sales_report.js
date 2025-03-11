@@ -10,7 +10,7 @@ self.onmessage = async function(e) {
     let batchSize = 2000;
     let index = 0;
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/import-ba-sales-report/get_valid_ba_data`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?ba=1&brands=1&stores=1&areas=1&ba_store_area=1`);   
         let ba_data = await get_ba_valid_response.json();
         ba_records = ba_data.ba;
         let ba_lookup = {};

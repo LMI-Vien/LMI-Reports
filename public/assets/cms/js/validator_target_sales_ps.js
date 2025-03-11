@@ -7,7 +7,7 @@ self.onmessage = async function(e) {
     let err_counter = 0;
 
     try {
-        let get_tsp_valid_response = await fetch(`${BASE_URL}cms/import-target-sales-ps/get_valid_ba_data`);
+        let get_tsp_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1`);
         let store_data = await get_tsp_valid_response.json();
 
         let store_lookup = createLookup(store_data.stores, "code", "code");
