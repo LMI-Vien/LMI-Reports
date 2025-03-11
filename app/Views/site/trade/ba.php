@@ -60,6 +60,8 @@
                                     <select class="form-control" id="brand_ambassador">
                                         <option value="0">Please select..</option>
                                         <?php
+                                        // print_r($brand_ambassador);
+                                        // die();
                                             if($brand_ambassador){
                                                 foreach ($brand_ambassador as $value) {
                                                     echo "<option value=".$value['id'].">".$value['description']."</option>";
@@ -232,7 +234,8 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     var base_url = "<?= base_url(); ?>";
-
+    var jsarray =  '<?php echo json_encode($brand_ambassador); ?>';
+    console.log(jsarray);
     $(document).ready(function () {
         fetchData();
     });
