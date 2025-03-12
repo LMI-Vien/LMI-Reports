@@ -547,8 +547,9 @@ class Global_controller extends BaseController
 				$order_field = isset($_POST['order']['field'])? $_POST['order']['field'] : null;
 				$order_type = isset($_POST['order']['order']) ? $_POST['order']['order']: null;
 				$join = isset($_POST['join']) ? $_POST['join']: null;
+				$group = isset($_POST['group']) ? $_POST['group']: null;
 
-				$result_data = $this->Global_model->get_data_list($table, $query, 9999999, ($offset - 1) * 9999999, $select,$order_field,$order_type, $join);
+				$result_data = $this->Global_model->get_data_list($table, $query, 9999999, ($offset - 1) * 9999999, $select,$order_field,$order_type, $join, $group);
 				$result_return = array(
 					"total_record"=> count($result_data),
 					"total_page"=>ceil(count($result_data) / $limit)
@@ -646,7 +647,7 @@ class Global_controller extends BaseController
 	public function audit_trail_controller($action, $new_data = null, $old_data = null)
 	{
 		$session = session();
-		$data2['site_id'] = isset($new_data['site_id'])?$new_data['site_id']:null;
+		// $data2['site_id'] = isset($new_data['site_id'])?$new_data['site_id']:null;
 	    $data2['user_id'] = $session->sess_uid;
 	  	$data2['url'] =str_replace(base_url("cms") . '/', "", $_SERVER['HTTP_REFERER']); ;
 	  	$data2['action'] = strip_tags(ucwords($action));
