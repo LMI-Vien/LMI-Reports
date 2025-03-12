@@ -247,8 +247,8 @@
         let asc = <?= json_encode($asc); ?>;
         let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
 
-        autocomplete_field($("#brandAmbassador"), $("ba_id"), ba);
-        autocomplete_field($("#storeName"), $("store_id"), store);
+        autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
+        autocomplete_field($("#storeName"), $("#store_id"), store);
         autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
 
         tables.forEach(id => {

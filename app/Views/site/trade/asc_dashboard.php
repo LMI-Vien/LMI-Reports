@@ -286,7 +286,7 @@ $(document).ready(function () {
     let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
 
     autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
-    autocomplete_field($("#area"), $("area_id"), area, "area_description");
+    autocomplete_field($("#area"), $("#area_id"), area, "area_description");
     autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
     autocomplete_field($("#storeName"), $("#store_id"), store_branch);
     autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
