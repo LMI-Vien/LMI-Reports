@@ -59,11 +59,13 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <label for="brandAmbassador">Brand Ambassador</label>
-                                <input type="text" class="form-control" id="brandAmbassador" placeholder="Enter name">
+                                <input type="text" class="form-control" id="brandAmbassador" placeholder="Please select...">
+                                <input type="hidden" id="ba_id">
                             </div>
                             <div class="col-md-3">
                                 <label for="storeName">Store Name</label>
-                                <input type="text" class="form-control" id="storeName" placeholder="Enter area">
+                                <input type="text" class="form-control" id="storeName" placeholder="Please select...">
+                                <input type="hidden" id="store_id">
                             </div>
                             <div class="col-md-3">
                             </div>
@@ -72,6 +74,7 @@
                                 <div style="margin-top: 15px;">
                                     <label for="ascName">SKU</label>
                                     <input type="text" class="form-control" id="ascName" placeholder="ASC Name">
+                                    <input type="hidden" id="asc_id">
                                 </div>
                                 <div class="d-flex">
                                     <input type="radio" name="sortOrder" value="asc" checked> Acsending
@@ -232,11 +235,21 @@
 </div>
 
 <!-- DataTables and Script -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
+        let ba = <?= json_encode($brand_ambassador); ?>;
+        let store = <?= json_encode($store_branch); ?>;
+        let asc = <?= json_encode($asc); ?>;
         let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
+
+        autocomplete_field($("#brandAmbassador"), $("ba_id"), ba);
+        autocomplete_field($("#storeName"), $("store_id"), store);
+        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
 
         tables.forEach(id => {
             $(id).DataTable({

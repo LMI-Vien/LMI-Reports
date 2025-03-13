@@ -101,8 +101,10 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
                         <div class="col-md-9">
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <label for="brandAmbassador">Store Name</label>
-                                    <select class="form-control" id="store">
+                                    <label for="store">Store Name</label>
+                                    <input id="store" class="form-control" placeholder="Please select...">
+                                    <input type="hidden" id="store_id">
+                                    <!-- <select class="form-control" id="store">
                                         <option value="0">Please select..</option>
                                         <?php
                                             if($store_branch){
@@ -111,11 +113,13 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
                                                 }                                                
                                             }
                                         ?>
-                                    </select>
+                                    </select> -->
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="storeName">Area</label>
-                                    <select class="form-control" id="area">
+                                    <label for="area">Area</label>
+                                    <input id="area" class="form-control" placeholder="Please select...">
+                                    <input type="hidden" id="area_id">
+                                    <!-- <select class="form-control" id="area">
                                         <option value="0">Please select..</option>
                                         <?php
                                             if($area){
@@ -124,7 +128,7 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
                                                 }                                                
                                             }
                                         ?>
-                                    </select>
+                                    </select> -->
                                 </div>
                                 <div class="col-md-4 d-flex gap-2">
                                     <div>
@@ -225,6 +229,9 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
 </div>
 
 <!-- DataTables and Script -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
@@ -233,6 +240,8 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
 <script>
     $(document).ready(function() {
          let table = $('#overall_ba_sales_tbl');
+         let store_branch = <?= json_encode($store_branch) ?>;
+         let area = <?= json_encode($area) ?>;
          //.DataTable({
         //     paging: true,
         //     searching: false,
@@ -266,12 +275,19 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
         //     }
         // });
 
+        autocomplete_field($("#store"), $("#store_id"), store_branch);
+        autocomplete_field($("#area"), $("area_id"), area, "area_description");
+
         $('#columnToggleContainer').hide();
-        fetchData();
+        // fetchData();
     });
 
     $(document).on('click', '#toggleColumnsButton', function (e) {
         $('#columnToggleContainer').toggle();
+    });
+
+    $(document).on('click', '#refreshButton', function(e) {
+        
     });
 
     function fetchData() {

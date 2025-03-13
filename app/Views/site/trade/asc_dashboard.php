@@ -71,16 +71,19 @@
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-3">
-                                <label for="brandAmbassador">ASC Name</label>
-                                <input type="text" class="form-control" id="brandAmbassador" placeholder="Enter name">
+                                <label for="ascName">ASC Name</label>
+                                <input type="text" class="form-control" id="ascName" placeholder="Enter name">
+                                <input type="hidden" id="asc_id">
                             </div>
                             <div class="col-md-3">
-                                <label for="storeName">Area</label>
-                                <input type="text" class="form-control" id="storeName" placeholder="Enter area">
+                                <label for="area">Area</label>
+                                <input type="text" class="form-control" id="area" placeholder="Enter area">
+                                <input type="hidden" id="area_id">
                             </div>
                             <div class="col-md-3">
                                 <label for="brand">Brand</label>
                                 <input type="text" class="form-control" id="brand" placeholder="Enter brand">
+                                <input type="hidden" id="brand_id">
                             </div>
                             <div class="col-md-3">
                                 <label for="year">Year</label>
@@ -93,12 +96,14 @@
 
                         <div class="row mt-3">
                             <div class="col-md-3">
-                                <label for="storeName2">Store Name</label>
-                                <input type="text" class="form-control" id="storeName2" placeholder="Enter store">
+                                <label for="storeName">Store Name</label>
+                                <input type="text" class="form-control" id="storeName" placeholder="Enter store">
+                                <input type="hidden" id="store_id">
                             </div>
                             <div class="col-md-3">
-                                <label for="baName">BA Name</label>
-                                <input type="text" class="form-control" id="baName" placeholder="Enter BA name">
+                                <label for="ba">BA Name</label>
+                                <input type="text" class="form-control" id="ba" placeholder="Enter BA name">
+                                <input type="hidden" id="ba_id">
                             </div>
                             <div class="col-md-3 position-relative p-3" style="border-radius: 7px; background-color: #edf1f1;">
                                 <label class="position-absolute" style="top: 5px; left: 10px; font-size: 12px; font-weight: bold; background-color: #edf1f1; padding: 0 5px;">Covered by Selected ASC</label>
@@ -263,12 +268,28 @@
 </div>
 
 <!-- DataTables and Script -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 $(document).ready(function () {
     let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
+
+    let asc = <?= json_encode($asc); ?>;
+    let area = <?= json_encode($area); ?>;
+    let brand = <?= json_encode($brand); ?>;
+    let store_branch = <?= json_encode($store_branch); ?>;
+    let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
+
+    autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
+    autocomplete_field($("#area"), $("area_id"), area, "area_description");
+    autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
+    autocomplete_field($("#storeName"), $("#store_id"), store_branch);
+    autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
 
     tables.forEach(id => {
         $(id).DataTable({

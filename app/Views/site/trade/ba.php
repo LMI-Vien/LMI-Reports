@@ -57,7 +57,9 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label for="brandAmbassador">Brand Ambassador</label>
-                                    <select class="form-control" id="brand_ambassador">
+                                    <input id="brand_ambassadors" class="form-control" placeholder="Please select...">
+                                    <input type="hidden" id="ba_id">
+                                    <!-- <select class="form-control" id="brand_ambassador">
                                         <option value="0">Please select..</option>
                                         <?php
                                         // print_r($brand_ambassador);
@@ -68,11 +70,13 @@
                                                 }
                                             }
                                         ?>
-                                    </select>
+                                    </select> -->
                                 </div>
                                 <div class="col-md-4">
                                     <label for="storeName">Store Name</label>
-                                    <select class="form-control" id="store_name">
+                                    <input id="store_branch" class="form-control" placeholder="Please select...">
+                                    <input type="hidden" id="store_id">
+                                    <!-- <select class="form-control" id="store_name">
                                         <option value="0">Please select..</option>
                                         <?php
                                             if($store_branch){
@@ -81,11 +85,13 @@
                                                 }
                                             }
                                         ?>
-                                    </select>
+                                    </select> -->
                                 </div>
                                 <div class="col-md-4">
                                     <label for="brand">Brand</label>
-                                    <select class="form-control" id="brand">
+                                    <input id="brand" class="form-control" placeholder="Please select...">
+                                    <input type="hidden" id="brand_id">
+                                    <!-- <select class="form-control" id="brand">
                                         <option value="0">Please select..</option>
                                         <?php
                                             if($brands){
@@ -94,7 +100,7 @@
                                                 }                                                
                                             }
                                         ?>
-                                    </select>
+                                    </select> -->
                                 </div>
                             </div>
                             <div class="row mt-3">
@@ -231,21 +237,29 @@
 
 <!-- DataTables and Script -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     var base_url = "<?= base_url(); ?>";
-    var jsarray =  '<?php echo json_encode($brand_ambassador); ?>';
-    console.log(jsarray);
+    let brand_ambassadors = <?= json_encode($brand_ambassador) ?>;
+    let store_branch = <?= json_encode($store_branch) ?>;
+    let brands = <?= json_encode($brands) ?>;
+
     $(document).ready(function () {
         fetchData();
-    });
+        autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors);
+        autocomplete_field($("#store_branch"), $("#store_id"), store_branch);
+        autocomplete_field($("#brand"), $("#brand_id"), brands, "brand_description", "id");
+    }); 
 
     $(document).on('click', '#refreshButton', function () {
-        let selectedBa = $('#brand_ambassador').val();
+        let selectedBa = $('#ba_id').val();
         if(selectedBa !== 0){
             get_area_asc(selectedBa);
         }
-        fetchData();
+        // fetchData();
     });
 
     function fetchData() {

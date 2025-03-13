@@ -92,12 +92,14 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                         <div class="col-md-9">
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <label for="brandAmbassador">Store Name</label>
-                                    <input type="text" class="form-control" id="brandAmbassador" placeholder="Enter name">
+                                    <label for="store">Store Name</label>
+                                    <input type="text" class="form-control" id="store" placeholder="Enter store">
+                                    <input type="hidden" id="store_id">
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="storeName">Area</label>
-                                    <input type="text" class="form-control" id="storeName" placeholder="Enter store">
+                                    <label for="area">Area</label>
+                                    <input type="text" class="form-control" id="area" placeholder="Enter area">
+                                    <input type="hidden" id="area_id">
                                 </div>
                                 <div class="col-md-4 d-flex gap-2">
                                     <div>
@@ -185,6 +187,9 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
 </div>
 
 <!-- DataTables and Script -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
@@ -192,6 +197,12 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
 
 <script>
 $(document).ready(function() {
+    let store = <?= json_encode($store_branch); ?>;
+    let area = <?= json_encode($area); ?>;
+
+    autocomplete_field($("#store"), $("#store_id"), store);
+    autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+
     let table = $('#dataTable4').DataTable({
         paging: true,
         searching: false,
@@ -225,7 +236,8 @@ $(document).on('click', '#toggleColumnsButton', function (e) {
     $('#columnToggleContainer').toggle();
 });
 
-
-
+$(document).on('click', '#refreshButton', function(e) {
+    
+})
 
 </script>
