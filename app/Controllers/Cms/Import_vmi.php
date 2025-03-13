@@ -28,8 +28,42 @@ class Import_vmi extends BaseController
 		$data['title'] = "Import VMI";
 		$data['PageName'] = 'Import VMI';
 		$data['PageUrl'] = 'Import VMI';
-		$data['content'] = "cms/import/vmi.php";
+		$data['content'] = "cms/import/vmi/vmi.php";
 		$data['buttons'] = ['search', 'import', 'export'];
+		$data['session'] = session(); //for frontend accessing the session data
+		$data['standard'] = config('Standard');
+		$data['js'] = array(
+				"assets/js/xlsx.full.min.js",
+				"assets/js/bootstrap.min.js",
+				"assets/js/adminlte.min.js",
+				"assets/js/moment.js",
+				"assets/js/xlsx.full.min.js"
+                    );
+        $data['css'] = array(
+        		"assets/css/bootstrap.min.css",
+        		"assets/css/adminlte.min.css",
+        		"assets/css/all.min.css",
+        		"assets/cms/css/main_style.css",//css sa style ni master Vien
+        		"assets/css/style.css"
+                    );
+		return view("cms/layout/template", $data);		
+	}
+	public function view()
+	{
+
+		$uri = current_url(true);
+		$data['uri'] =$uri;
+
+		$data['meta'] = array(
+			"title"         =>  "Import VMI",
+			"description"   =>  "Import VMI",
+			"keyword"       =>  ""
+		);
+		$data['title'] = "Import VMI";
+		$data['PageName'] = 'Import VMI';
+		$data['PageUrl'] = 'Import VMI';
+		$data['content'] = "cms/import/vmi/view_vmi.php";
+		$data['buttons'] = ['search'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(

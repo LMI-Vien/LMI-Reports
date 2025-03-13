@@ -17,14 +17,12 @@ self.onmessage = async function(e) {
 
         if(company == 1){
             item_records = ba_data.customer_sku_code_rgdi;
-            let item_lookup = {};
-            item_records.forEach(item => item_lookup[item.cusitmcde] = item.recid);            
         }else{
             item_records = ba_data.customer_sku_code_lmi;
-            let item_lookup = {};
-            item_records.forEach(item => item_lookup[item.cusitmcde] = item.recid);
         }
-
+        let item_lookup = {};
+        item_records.forEach(item => item_lookup[item.cusitmcde] = item.recid);     
+        
         let batchSize = 2000;
         let index = 0;
 

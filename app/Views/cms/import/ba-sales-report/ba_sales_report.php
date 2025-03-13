@@ -287,7 +287,7 @@
                 </div>
         
                 <div class="modal-footer">
-                    <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
+                    <button type="button" class="btn save" onclick="handleExport()">Export All</button>
                     <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
                     <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 </div>
@@ -363,38 +363,30 @@
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
-                        // var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                          var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-                        // var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        // y.amount = parseFloat(y.amount) || 0;
-
-                        // var areaDescription = y.area || 'N/A';
-                        // var storeDescription = y.store_name || 'N/A';
-                        // var brandDescription = y.brand || 'NA';
-                        // var brandAmbassadorName = y.ba_name || 'NA';
 
                         html += "<tr class='" + rowClass + "'>";
-                        // // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + trimText(y.imported_by) + "</td>";
-                        html += "<td scope=\"col\">" + (y.date ? ViewDateformat(y.date) : "N/A") + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(storeDescription) + "</td>"
-                        // html += "<td scope=\"col\">" + trimText(brandDescription) + "</td>"
-                        // html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
-                        // html += "<td scope=\"col\">" + status + "</td>";
-                        
+                        html += "<td scope=\"col\">" + (y.date ? formatReadableDate(y.date, false) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.date+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            
                             html+="<a class='btn-sm btn view' href='<?= base_url()?>"
                           +'cms/import-ba-sales-report/view/'+y.date+"' data-status='"+y.status+
                           "' target='_blank' id='"+y.id+
                           "' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+
+                          html+="<a class='btn-sm btn save' onclick=\"export_ba_date_group('"
+                          +y.date+"')\" data-status='"
+                          +y.status+"' id='"
+                          +y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Export</span>";
+
                             html+="</td>";
                         }
                         
@@ -412,17 +404,50 @@
     function get_pagination() {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
-          event : "pagination",
-            select : "basr.id, basr.status",
+            event : "pagination",
+            select : "basr.id, basr.status, date",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_ba_sales_report as basr"
+            table : "tbl_ba_sales_report as basr",
+            join : [
+                {
+                    table: "tbl_brand b",
+                    query: "b.id = basr.brand",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = basr.store_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.id = basr.ba_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area ar",
+                    query: "ar.id = basr.area_id",
+                    type: "left"
+                },
+                {
+                    table: "cms_users u",
+                    query: "u.id = basr.created_by",
+                    type: "left"
+                }
+            ], 
+            order : {
+                field : "basr.id",
+                order : "asc" 
+            },
+            group : 'basr.date'
         }
 
         aJax.post(url,data,function(result){
             var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
             modal.loading(false);
+            console.log(obj, 'obj')
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
     }
@@ -432,22 +457,6 @@
         get_data(query);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
-        $("#search_query").val("");
-    });
-
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
-            offset = 1;
-            var new_query = "(" + query + " AND ar.description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND s.description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND b.brand_description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND ba.name LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND basr.date LIKE '%" + keyword + "%')"; 
-                
-            get_data(new_query);
-            get_pagination();
-        }
     });
 
     $(document).on("change", ".record-entries", function(e) {
@@ -463,60 +472,6 @@
         modal.loading(false);
     });
 
-    $(document).on('click', '#btn_add', function() {
-        open_modal('Add New BA Sales Report', 'add', '');
-    });
-
-    function edit_data(id) {
-        open_modal('Edit BA Sales Report', 'edit', id);
-    }
-
-    function view_data(id) {
-        open_modal('View BA Sales Report', 'view', id);
-    }
-
-    function open_modal(msg, actions, id) {
-        $(".form-control").css('border-color','#ccc');
-        $(".validate_error_message").remove();
-        let $modal = $('#popup_modal');
-        let $footer = $modal.find('.modal-footer');
-
-        $modal.find('.modal-title b').html(addNbsp(msg));
-        reset_modal_fields();
-
-        let buttons = {
-            save: create_button('Save', 'save_data', 'btn save', function () {
-                if (validate.standard("form-modal")) {
-                    save_data('save', null);
-                }
-            }),
-            edit: create_button('Update', 'edit_data', 'btn update', function () {
-                save_data('update', id);
-               
-            }),
-            close: create_button('Close', 'close_data', 'btn caution', function () {
-                $modal.modal('hide');
-            })
-        };
-
-        if (['edit', 'view'].includes(actions)) populate_modal(id);
-        
-        let isReadOnly = actions === 'view';
-        set_field_state('#area, #store_name, #brand, #ba_name, #date, #amount', isReadOnly);
-
-        $footer.empty();
-        if (actions === 'add') $footer.append(buttons.save);
-        if (actions === 'edit') $footer.append(buttons.edit);
-        $footer.append(buttons.close);
-
-        $modal.modal('show');
-    }
-
-    function reset_modal_fields() {
-        $('#popup_modal #area, #popup_modal #store_name, #popup_modal #brand, #popup_modal #ba_name, #popup_modal #date, #popup_modal #amount').val('');
-        $('#popup_modal #status').prop('checked', true);
-    }
-
     function clear_import_table() {
         $(".import_table").empty();
     }
@@ -527,169 +482,46 @@
         display_imported_data();
     }
 
-    function set_field_state(selector, isReadOnly) {
-        $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
-    }
-
     $(document).on('click', '#btn_import ', function() {
         title = addNbsp('IMPORT BA SALES REPORT')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $('#import_modal').modal('show');
     });
 
-    function populate_modal(inp_id) {
-        var query = "basr.status >= 0 and basr.id = " + inp_id;
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event : "list", 
-            select : "basr.id, a.code as area , s.description as store_name, br.brand_description as brand, bra.name as ba_name, basr.date, basr.amount",
-            query : query, 
-            table : "tbl_ba_sales_report basr",
-            join: [
-                {
-                    table: "tbl_area a",
-                    query: "a.id = basr.area_id",
-                    type: "left"
-                },
-                {
-                    table: "tbl_store s",
-                    query: "s.id = basr.store_id",
-                    type: "left"
-                },
-                {
-                    table: "tbl_brand br",
-                    query: "br.id = basr.brand",
-                    type: "left"
-                },
-                {
-                    table: "tbl_brand_ambassador bra",
-                    query: "bra.id = basr.ba_id",
-                    type: "left"
-                }
-            ]
-        }
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            if(obj){
-                $.each(obj, function(index,d) {
-                    $('#area').val(d.area); 
-                    $('#store_name').val(d.store_name);
-                    $('#brand').val(d.brand);
-                    $('#ba_name').val(d.ba_name);
-                    $('#date').val(d.date);
-                    $('#amount').val(d.amount);
-                }); 
-            }
-        });
-    }
-
-    function create_button(btn_txt, btn_id, btn_class, onclick_event) {
-        var new_btn = $('<button>', {
-            text: btn_txt,
-            id: btn_id,
-            class: btn_class,
-            click: onclick_event // Attach the onclick event
-        });
-        return new_btn;
-    }
-
-    function save_to_db(inp_area, inp_store_name, inp_brand, inp_ba_name, inp_date, inp_amount, id) {
-        const url = "<?= base_url('cms/global_controller'); ?>";
-        let data = {}; 
-        let modal_alert_success;
-
-        if (id !== undefined && id !== null && id !== '') {
-            modal_alert_success = success_update_message;
-            data = {
-                event: "update",
-                table: "tbl_ba_sales_report",
-                field: "id",
-                where: id,
-                data: {
-                    area: inp_area,
-                    store_name: inp_store_name,
-                    brand: inp_brand,
-                    ba_name: inp_ba_name,
-                    date: inp_date,
-                    amount: inp_amount,
-                    updated_date: formatDate(new Date()),
-                    updated_by: user_id,
-                }
-            };
-        } else {
-            modal_alert_success = success_save_message;
-            data = {
-                event: "insert",
-                table: "tbl_ba_sales_report",
-                data: {
-                    area: inp_area,
-                    store_name: inp_store_name,
-                    brand: inp_brand,
-                    ba_name: inp_ba_name,
-                    date: inp_date,
-                    amount: inp_amount,
-                    created_date: formatDate(new Date()),
-                    created_by: user_id,
-                }
-            };
-        }
-
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function() {
-                location.reload();
-            });
-        });
-    }
-
-    function save_data(action, id) {
-        var area = $('#area').val();
-        var store_name = $('#store_name').val();
-        var brand = $('#brand').val();
-        var ba_name = $('#ba_name').val();
-        var date = $('#date').val();
-        var amount = $('#amount').val();
-
-        if(validate.standard("form-modal")){
-            if (id !== undefined && id !== null && id !== '') {
-                // check_current_db("tbl_vmi", ["store", "store_name", "item", "item_name", "item_class", "supplier", "group", "dept", "class", "sub_class", "on_hand", "in_transit", "total_qty", "average_sales_unit", "swc", "a202445"],
-                // [store, store_name, item, item_name, item_class, supplier, group, dept, classs, sub_class, on_hand, in_transit, total_qty, avg_sales_unit, swc, a202445], "status" , "id", id, true, function(exists, duplicateFields) {
-                    // if (exists) {
-                        modal.confirm(confirm_update_message, function(result){
-                            if(result){ 
-                                    modal.loading(true);
-                                save_to_db(area, store_name, brand, ba_name, date, amount, id)
-                            }
-                        });
-    
-                    // }             
-                // });
-            }
-        }
-    }
-
-    function delete_data(id) {
+    function delete_data(date) {
         modal.confirm(confirm_delete_message,function(result){
             if(result){ 
                 var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_ba_sales_report",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(success_delete_message, "success", function() {
-                        location.reload();
-                    });
-                });
+                dynamic_search(
+                    "'tbl_ba_sales_report'", 
+                    "''", 
+                    "'id'", 
+                    0, 
+                    0, 
+                    `'date:EQ=${date}'`,  
+                    `''`, 
+                    `''`, 
+                    (res) => {
+                        res.forEach(item => {
+                            let updateRecords = [];
+                            res.forEach(item => {
+                                item.updated_date = formatDate(new Date());
+                                item.updated_by = user_id;
+                                item.status = -2;
+                                updateRecords.push(item);
+                            })
+                            console.log(updateRecords, 'updateRecords')
+                            batch_update(url, updateRecords, "tbl_ba_sales_report", "id", false, (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                modal.alert(success_delete_message, "success", function() {
+                                    location.reload();
+                                });
+                            });
+                        });
+                    }
+                );
             }
 
         });
@@ -724,78 +556,6 @@
             return str;
         }
     }
-
-    $(document).on('click', '.btn_status', function (e) {
-        var status = $(this).attr("data-status");
-        var modal_obj = "";
-        var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
-
-        if (parseInt(status) === -2) {
-            modal_obj = confirm_delete_message;
-            modal_alert_success = success_delete_message;
-        } else if (parseInt(status) === 1) {
-            modal_obj = confirm_publish_message;
-            modal_alert_success = success_publish_message;
-        } else {
-            modal_obj = confirm_unpublish_message;
-            modal_alert_success = success_unpublish_message;
-        }
-        // var counter = 0; 
-        // $('.select:checked').each(function () {
-        //     var id = $(this).attr('data-id');
-        //     if(id){
-        //         counter++;
-        //     }
-        //  });
-        modal.confirm(modal_obj, function (result) {
-            if (result) {
-                var url = "<?= base_url('cms/global_controller');?>";
-                var dataList = [];
-                
-                $('.select:checked').each(function () {
-                    var id = $(this).attr('data-id');
-                    dataList.push({
-                        event: "update",
-                        table: "tbl_ba_sales_report",
-                        field: "id",
-                        where: id,
-                        data: {
-                            status: status,
-                            updated_date: formatDate(new Date())
-                        }
-                    });
-                });
-
-                if (dataList.length === 0) return;
-
-                var processed = 0;
-                dataList.forEach(function (data, index) {
-                    aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; // Prevents multiple executions
-
-                        modal.loading(false);
-                        processed++;
-
-                        if (result === "success") {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                $('.btn_status').hide();
-                                modal.alert(modal_alert_success, 'success', function () {
-                                    location.reload();
-                                });
-                            }
-                        } else {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                modal.alert(failed_transaction_message, function () {});
-                            }
-                        }
-                    });
-                });
-            }
-        });
-    });
 
     function ViewDateformat(dateString) {
         let date = new Date(dateString);
@@ -1240,12 +1000,7 @@
                 "Status":"",
             }
         ]
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["BA Sales Report"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
+        const headerData = [];
     
         exportArrayToCSV(formattedData, `BA Sales Report - ${formatDate(new Date())}`, headerData);
     }
@@ -1392,19 +1147,37 @@
                                         });
                                     });
                             
-                                    let newData = res.map(({ 
-                                        area_id, store_id, brand, ba_id, date, amount, status,
-                                    }) => ({
-                                        "BA Code":temp_baArr[ba_id],
-                                        "Area Code":temp_area[area_id],
-                                        "Store Code":temp_store[store_id],
-                                        "Brand":temp_brand[brand],
-                                        "Date":date,
-                                        "Amount":amount,
-                                        "Status": parseInt(status) === 1 ? "Active" : "Inactive",
-                                    }));
+                                    let previousDate = null; // To track the last processed date
+                                    
+                                    let spacing = {
+                                        "BA Code": "",
+                                        "Area Code": "",
+                                        "Store Code": "",
+                                        "Brand": "",
+                                        "Date": "",
+                                        "Amount": "",
+                                        "Status": "",
+                                    };
 
-                                    formattedData.push(...newData); // Append new data to formattedData array
+                                    res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }) => {
+                                        // Check if the date has changed
+                                        if (previousDate !== null && previousDate !== date) {
+                                            formattedData.push({ ...spacing }); // Push spacing object
+                                        }
+
+                                        // Format and push the current data
+                                        formattedData.push({
+                                            "BA Code": temp_baArr[ba_id],
+                                            "Area Code": temp_area[area_id],
+                                            "Store Code": temp_store[store_id],
+                                            "Brand": temp_brand[brand],
+                                            "Date": date,
+                                            "Amount": amount,
+                                            "Status": parseInt(status) === 1 ? "Active" : "Inactive",
+                                        });
+
+                                        previousDate = date; // Update previousDate for the next iteration
+                                    });
                                 }
                             );
                         }
@@ -1441,12 +1214,6 @@
 
     function handleExport() {
         var formattedData = [];
-        var ids = [];
-
-        $('.select:checked').each(function () {
-            var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Collect IDs in an array
-        });
 
         modal.confirm(confirm_export_message,function(result){
             if (result) {
@@ -1458,87 +1225,6 @@
         })
 
         const startExport = () => {
-            const fetchStores = (callback) => {
-                function processResponse (res) {
-                    console.log(res)
-                    var areaArr = [];
-                    var storeArr = [];
-                    var brandArr = [];
-                    var baArr = [];
-                    res.forEach(item => {
-                        if (!areaArr.includes(`${item.area_id}`)) {
-                            areaArr.push(`${item.area_id}`);
-                        }
-
-                        if (!storeArr.includes(`${item.store_id}`)) {
-                            storeArr.push(`${item.store_id}`);
-                        }
-
-                        if (!brandArr.includes(`${item.brand}`)) {
-                            brandArr.push(`${item.brand}`);
-                        }
-
-                        if (!baArr.includes(`${item.ba_id}`)) {
-                            baArr.push(`${item.ba_id}`);
-                        }
-                    });
-
-                    temp_area = {};
-                    dynamic_search("'tbl_area'", "''", "'id, code, description, status'", 100000, 0, `"status:IN=1|0,id:IN=${areaArr.join('|')}"`,  `''`, `''`, (res) => {
-                        res.forEach(item => {
-                            temp_area[item.id] = item.description.trim();
-                        });
-                    });
-
-                    temp_store = {};
-                    dynamic_search("'tbl_store'", "''", "'id, code, description, status'", 100000, 0, `"status:IN=1|0,id:IN=${storeArr.join('|')}"`,  `''`, `''`, (res) => {
-                        res.forEach(item => {
-                            temp_store[item.id] = item.description.trim();
-                        });
-                    });
-
-                    temp_brand = {};
-                    dynamic_search("'tbl_brand'", "''", "'id, brand_code, brand_description, status'", 100000, 0, `"status:IN=1|0,id:IN=${brandArr.join('|')}"`,  `''`, `''`, (res) => {
-                        res.forEach(item => {
-                            temp_brand[item.id] = item.brand_description.trim();
-                        });
-                    });
-
-                    temp_baArr = {};
-                    dynamic_search("'tbl_brand_ambassador'", "''", "'id, code, name, status'", 100000, 0, `"status:IN=1|0,id:IN=${baArr.join('|')}"`,  `''`, `''`, (res) => {
-                        res.forEach(item => {
-                            temp_baArr[item.id] = item.name.trim();
-                        });
-                    });
-                    
-                    formattedData = res.map(({ 
-                        area_id, store_id, brand, ba_id, date, amount, status,
-                    }) => ({
-                        "BA Code":temp_baArr[ba_id],
-                        "Area Code":temp_area[area_id],
-                        "Store Code":temp_store[store_id],
-                        "Brand":temp_brand[brand],
-                        "Date":date,
-                        "Amount":amount,
-                        "Status": parseInt(status) === 1 ? "Active" : "Inactive",
-                    }));
-                };
-
-                ids.length > 0 
-                    ? dynamic_search(
-                        `'tbl_ba_sales_report'`,
-                        `''`,
-                        `'area_id, store_id, brand, ba_id, date, amount, status'`,
-                        0,
-                        0,
-                        `'id:IN=${ids.join('|')}'`, 
-                        `''`, 
-                        `''`,
-                        processResponse
-                    )
-                    : batch_export();
-            };
-
             const batch_export = () => {
                 dynamic_search(
                     `'tbl_ba_sales_report'`,
@@ -1615,19 +1301,38 @@
                                                 temp_baArr[item.id] = item.name.trim();
                                             });
                                         });
-                                        
-                                        let newData = res.map(({ 
-                                            area_id, store_id, brand, ba_id, date, amount, status,
-                                        }) => ({
-                                            "BA Code":temp_baArr[ba_id],
-                                            "Area Code":temp_area[area_id],
-                                            "Store Code":temp_store[store_id],
-                                            "Brand":temp_brand[brand],
-                                            "Date":date,
-                                            "Amount":amount,
-                                            "Status": parseInt(status) === 1 ? "Active" : "Inactive",
-                                        }));
-                                        formattedData.push(...newData); // Append new data to formattedData array
+
+                                        let previousDate = null; // To track the last processed date
+
+                                        let spacing = {
+                                            "BA Code": "",
+                                            "Area Code": "",
+                                            "Store Code": "",
+                                            "Brand": "",
+                                            "Date": "",
+                                            "Amount": "",
+                                            "Status": "",
+                                        };
+
+                                        res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }) => {
+                                            // Check if the date has changed
+                                            if (previousDate !== null && previousDate !== date) {
+                                                formattedData.push({ ...spacing }); // Push spacing object
+                                            }
+
+                                            // Format and push the current data
+                                            formattedData.push({
+                                                "BA Code": temp_baArr[ba_id],
+                                                "Area Code": temp_area[area_id],
+                                                "Store Code": temp_store[store_id],
+                                                "Brand": temp_brand[brand],
+                                                "Date": date,
+                                                "Amount": amount,
+                                                "Status": parseInt(status) === 1 ? "Active" : "Inactive",
+                                            });
+
+                                            previousDate = date; // Update previousDate for the next iteration
+                                        });
                                     }
                                 )
                             }
@@ -1638,7 +1343,7 @@
                 )
             };
 
-            fetchStores();
+            batch_export()
 
             const headerData = [
                 ["Company Name: Lifestrong Marketing Inc."],
@@ -1651,6 +1356,53 @@
             modal.loading_progress(false);
         }
 
+    }
+
+    function export_ba_date_group(date) {
+        var formattedData = [];
+        dynamic_search(
+            "'tbl_ba_sales_report basr'", 
+
+            "'left join tbl_brand b on b.id = basr.brand"+
+            " left join tbl_store s on s.id = basr.store_id"+
+            " left join tbl_brand_ambassador ba on ba.id = basr.ba_id"+
+            " left join tbl_area ar on ar.id = basr.area_id'", 
+
+            "'basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name,"+
+            "basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status'", 
+
+            0, 
+            0, 
+
+            `"basr.date:EQ=${date}"`,  
+            `'basr.id asc'`, 
+            `''`, 
+            (res) => {
+                let newData = res.map(({ 
+                    area, store_name, brand, ba_name, date, amount, status,
+                }) => ({
+                    "BA Code":ba_name,
+                    "Area Code":area,
+                    "Store Code":store_name,
+                    "Brand":brand,
+                    "Date":date,
+                    "Amount":amount,
+                    "Status": parseInt(status) === 1 ? "Active" : "Inactive",
+                }));
+    
+                formattedData.push(...newData); 
+                console.log(formattedData)
+            }
+        );
+
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["BA Sales Report"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+    
+        exportArrayToCSV(formattedData, `BA Sales Report - ${formatDate(new Date())}`, headerData);
     }
 
     function exportArrayToCSV(data, filename, headerData) {

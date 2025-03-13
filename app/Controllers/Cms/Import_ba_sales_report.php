@@ -29,7 +29,7 @@ class Import_ba_sales_report extends BaseController
 		$data['PageName'] = 'Import BA Sales Report';
 		$data['PageUrl'] = 'Import BA Sales Report';
 		$data['content'] = "cms/import/ba-sales-report/ba_sales_report.php";
-		$data['buttons'] = ['search', 'import', 'export'];
+		$data['buttons'] = ['import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -64,7 +64,7 @@ class Import_ba_sales_report extends BaseController
 		$data['PageName'] = 'View Import BA Sales Report';
 		$data['PageUrl'] = 'View Import BA Sales Report';
 		$data['content'] = "cms/import/ba-sales-report/view_sales_report.php";
-		$data['buttons'] = ['search', 'export'];
+		$data['buttons'] = [];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -82,7 +82,6 @@ class Import_ba_sales_report extends BaseController
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);	
-		return view("cms/layout/template", $data);		
 	}
 
 }
