@@ -58,6 +58,12 @@
         margin: 5px;
     }
 
+    th, td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
 </style>
 
 <div class="content-wrapper p-4">
@@ -79,12 +85,9 @@
                         <table class="table table-bordered listdata">
                             <thead>
                                 <tr>
-                                    <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                    <th class='center-content'>ID</th>
-                                    <th class='center-content'>Payment Group</th>
-                                    <th class='center-content'>Total Amount</th>
-                                    <th class='center-content'>Total Quantity</th>
-                                    <th class='center-content'>Date Created</th>
+                                    <th class='center-content'>Imported Date</th>
+                                    <th class='center-content'>Imported By</th>
+                                    <th class='center-content'>Year</th>
                                     <th class='center-content'>Date Modified</th>
                                     <th class='center-content'>Action</th>
                                 </tr>
@@ -520,7 +523,7 @@
             </div>
     
             <div class="modal-footer">
-                <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
+                <button type="button" class="btn save" onclick="handleExport()">Export All</button>
                 <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
                 <button type="button" class="btn caution" data-dismiss="modal">Close</button>
             </div>
@@ -529,7 +532,7 @@
 </div>
 
 <script>
-    var query = "status >= 0";
+    var query = "a.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -542,27 +545,31 @@
     
     $(document).ready(function() {
         get_data(query);
-        get_pagination();
+        get_pagination(query);
     });
 
 
     function get_data(new_query) {
         var data = {
             event : "list",
-            select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
-                lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-                january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-                status, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta, updated_date, (january_ta + february_ta + march_ta + april_ta + may_ta + june_ta + july_ta + august_ta + september_ta + october_ta + november_ta + december_ta) AS total_amount, (january_tq + february_tq + march_tq + april_tq + may_tq + june_tq + july_tq + august_tq + september_tq + october_tq + november_tq + december_tq) as total_qty,
-                created_date`.replace(/\s+/g, ' '),
+            select : "a.created_date, u.name imported_by, b.year, a.updated_date",
             query : new_query,
             offset : offset,
             limit : limit,
-            table : "tbl_accounts_target_sellout_pa",
-            order : {
-                field : "payment_group",
-                order : "asc" 
-            }
-
+            table : "tbl_accounts_target_sellout_pa a",
+            join: [
+                {
+                    table: "tbl_year b",
+                    query: "a.year = b.id",
+                    type: "left"
+                },
+                {
+                    table: "cms_users u",
+                    query: "u.id = a.created_by",
+                    type: "left"
+                }
+            ],
+            group : "a.year"
         }
 
         aJax.post(url,data,function(result){
@@ -582,65 +589,30 @@
                         });
                         var formattedNumberTQ = Math.round(y.total_qty).toLocaleString();
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + (y.id) + "</td>";
-                        html += "<td scope=\"col\">" + (y.payment_group || 'N/A') + "</td>";
-
-                        // html += "<td scope=\"col\">" + trimText(y.vendor, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.overall, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.kam_kas_kaa, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.sales_group, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.terms, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.channel, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.brand, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.exclusivity, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.category, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.lmi_code, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.rgdi_code, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.customer_sku_code, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.item_description, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.item_status, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.srp, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.trade_discount, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.customer_cost, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.customer_cost_net_of_vat, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.january_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.february_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.march_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.april_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.may_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.june_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.july_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.august_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.september_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.october_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.november_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.december_tq, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.total_quantity, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.january_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.february_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.march_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.april_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.may_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.june_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.july_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.august_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.september_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.october_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.november_ta, 10) + "</td>";
-                        // html += "<td scope=\"col\">" + trimText(y.december_ta, 10) + "</td>";
-                        html += "<td scope=\"col\">" + formattedNumber + "</td>";
-                        html += "<td scope=\"col\">" + formattedNumberTQ + "</td>";
-                        // html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
+                        html += "<td scope=\"col\">" + (y.year) + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+                        let href = "<?= base_url()?>"+"cms/import-target-sell-out-pa/view/"+`${y.year}`;
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year+
+                            "')\" data-status='"+y.status+"' id='"+y.id+
+                            "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+
+                            html+="<a class='btn-sm btn view' href='"+ href +"' data-status='"+y.status+
+                            "' target='_blank' id='"+y.id+
+                            "' title='View'><span class='glyphicon glyphicon-pencil'>View</span>";
+
+                            html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.year+
+                            "')\" data-status='"+y.status+"' id='"+y.id+
+                            "' title='Export Data'><span class='glyphicon glyphicon-pencil'>Export</span>";
+
                             html+="</td>";
                         }
                         
@@ -654,19 +626,28 @@
         });
     }
 
-    function get_pagination() {
+    function get_pagination(new_query) {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id",
-            query : query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_accounts_target_sellout_pa",
-            order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
-            }
+          select : "a.created_date, u.name imported_by, b.year, a.updated_date",
+          query : new_query,
+          offset : offset,
+          limit : limit,
+          table : "tbl_accounts_target_sellout_pa a",
+          join: [
+              {
+                  table: "tbl_year b",
+                  query: "a.year = b.id",
+                  type: "left"
+              },
+              {
+                  table: "cms_users u",
+                  query: "u.id = a.created_by",
+                  type: "left"
+              }
+          ],
+          group : "a.year"
 
         }
 
@@ -689,21 +670,9 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            var new_query = "(" + query + " AND payment_group LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND vendor LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND kam_kas_kaa LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND sales_group LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND terms LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND brand LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND lmi_code LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND rgdi_code LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND customer_sku_code LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND item_description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND item_status LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND srp LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND trade_discount LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND customer_cost LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND customer_cost_net_of_vat LIKE '%" + keyword + "%')";
+            // a.created_date, u.name imported_by, b.year, a.updated_date
+            var new_query = "(" + query + " AND u.name LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND b.year LIKE '%" + keyword + "%')";
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -775,44 +744,6 @@
         $modal.modal('show');
     }
 
-    // function open_modal(msg, actions, id) {
-    //     $(".form-control").css('border-color','#ccc');
-    //     $(".validate_error_message").remove();
-    //     let $modal = $('#popup_modal');
-    //     let $footer = $modal.find('.modal-footer');
-
-    //     $modal.find('.modal-title b').html(addNbsp(msg));
-    //     reset_modal_fields();
-
-    //     let buttons = {
-    //         save: create_button('Save', 'save_data', 'btn save', function () {
-    //             if (validate.standard("form-modal")) {
-    //                 save_data('save', null);
-    //             }
-    //         }),
-    //         edit: create_button('Update', 'edit_data', 'btn update', function () {
-    //             save_data('update', id);
-               
-    //         }),
-    //         close: create_button('Close', 'close_data', 'btn caution', function () {
-    //             $modal.modal('hide');
-    //         })
-    //     };
-
-    //     if (['edit', 'view'].includes(actions)) populate_modal(id);
-        
-    //     let isReadOnly = actions === 'view';
-    //     set_field_state('#store, #store_name, #item, #item_name, #item_class, #supplier, #group, #dept, #class, #sub_class, #on_hand, #in_transit, #total_qty, #avg_sales_unit, #swc, #202445, #status', isReadOnly);
-
-    //     $footer.empty();
-    //     if (actions === 'add') $footer.append(buttons.save);
-    //     if (actions === 'edit') $footer.append(buttons.edit);
-    //     $footer.append(buttons.close);
-
-    //     $modal.modal('show');
-    // }
-
-    
     function reset_modal_fields() {
         let fields = [
             "payment_group", "vendor", "overall", "kam_kas_kaa", "sales_group", "terms", "channel", "brand", "exclusivity", "category",
@@ -1171,33 +1102,69 @@
         }
     }
 
-    function delete_data(id) {
+    function delete_data(year) {
         modal.confirm(confirm_delete_message,function(result){
-            if(result){ 
+            if(result){
                 var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_accounts_target_sellout_pa",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(success_delete_message, "success", function() {
-                        location.reload();
-                    });
-                });
+                var formattedData = [];
+        
+                dynamic_search(
+                    "'tbl_accounts_target_sellout_pa a'", 
+                    "'left join tbl_year y on y.id = a.year'", 
+                    "'a.id'", 
+                    0, 
+                    0, 
+                    `'y.year:EQ=${year}'`,  
+                    `''`, 
+                    `''`,
+                    (res) => {
+                        let updateRecords = [];
+                        res.forEach(item => {
+                            item.updated_date = formatDate(new Date());
+                            item.updated_by = user_id;
+                            item.status = -2;
+                            updateRecords.push(item);
+                        })
+                        console.log(updateRecords, 'updateRecords')
+                        batch_update(url, updateRecords, "tbl_accounts_target_sellout_pa", "id", false, (response) => {
+                            if (response.message !== 'success') {
+                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                            }
+                            modal.alert(success_delete_message, "success", function() {
+                                location.reload();
+                            });
+                        });
+                    }
+                )
             }
-
-        });
+        })
     }
+    // function delete_data(id) {
+    //     modal.confirm(confirm_delete_message,function(result){
+    //         if(result){ 
+    //             var url = "<?= base_url('cms/global_controller');?>";
+    //             var data = {
+    //                 event : "update",
+    //                 table : "tbl_accounts_target_sellout_pa",
+    //                 field : "id",
+    //                 where : id, 
+    //                 data : {
+    //                         updated_date : formatDate(new Date()),
+    //                         updated_by : user_id,
+    //                         status : -2
+    //                 }  
+    //             }
+    //             aJax.post(url,data,function(result){
+    //                 var obj = is_json(result);
+    //                 modal.alert(success_delete_message, "success", function() {
+    //                     location.reload();
+    //                 });
+    //             });
+    //         }
 
-    
+    //     });
+    // }
+
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false); 
@@ -1593,113 +1560,6 @@
         const seconds = String(date.getSeconds()).padStart(2, '0');
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
-
-    // function get_data(new_query) {
-    //     var data = {
-    //         event : "list",
-    //         // select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
-    //         // lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-    //         // january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-    //         // total_quantity, january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
-    //         // total_amount, created_date, updated_date`.replace(/\s+/g, ' '),
-    //         select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
-    //         lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-    //         january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-    //         total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
-    //         query : new_query,
-    //         offset : offset,
-    //         limit : limit,
-    //         table : "tbl_accounts_target_sellout_pa",
-    //         order : {
-    //             field : "id, updated_date",
-    //             order : "asc, desc" 
-    //         }
-
-    //     }
-
-    //     console.log(data);
-
-    //     aJax.post(url,data,function(result){
-    //         var result = JSON.parse(result);
-    //         var html = '';
-
-    //         if(result) {
-    //             if (result.length > 0) {
-    //                 $.each(result, function(x,y) {
-    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
-    //                     html += "<tr class='" + rowClass + "'>";
-    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-    //                     html += "<td scope=\"col\">" + (y.id) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.payment_group, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.vendor, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.overall, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.kam_kas_kaa, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.sales_group, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.terms, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.channel, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.brand, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.exclusivity, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.category, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.lmi_code, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.rgdi_code, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.customer_sku_code, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.item_description, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.item_status, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.srp, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.trade_discount, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.customer_cost, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.customer_cost_net_of_vat, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.january_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.february_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.march_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.april_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.may_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.june_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.july_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.august_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.september_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.october_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.november_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.december_tq, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.total_quantity, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.january_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.february_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.march_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.april_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.may_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.june_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.july_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.august_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.september_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.october_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.november_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.december_ta, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + trimText(y.total_amount, 10) + "</td>";
-    //                     // html += "<td scope=\"col\">" + status + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-    //                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
-    //                     if (y.id == 0) {
-    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-    //                     } else {
-    //                         html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-    //                         html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-    //                         html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-    //                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-    //                         html+="</td>";
-    //                     }
-                        
-    //                     html += "</tr>";   
-    //                 });
-    //             } else {
-    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-    //             }
-    //         }
-    //         $('.table_body').html(html);
-    //     });
-    // }
 
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
@@ -2223,4 +2083,107 @@
         saveAs(blob, filename + ".csv");
     }
     
+    function export_data(year) {
+        var formattedData = [];
+        dynamic_search(
+            "'tbl_accounts_target_sellout_pa a'", 
+            "'left join tbl_year y on y.id = a.year'", 
+            "'COUNT(a.id) as total_records'", 
+            0, 
+            0, 
+            `'y.year:EQ=${year}'`,  
+            `''`, 
+            `''`,
+            (result) => {
+                let total_records = result[0].total_records;
+                for (let index = 0; index < total_records; index += 100000) {
+                    dynamic_search(
+                        "'tbl_accounts_target_sellout_pa a'", 
+                        "'left join tbl_year y on y.id = a.year'", 
+                        "'a.payment_group, a.vendor, a.overall, a.kam_kas_kaa, a.sales_group, "+
+                        "a.terms, a.channel, a.brand, a.exclusivity, "+
+                        "a.category, a.lmi_code, a.rgdi_code, "+
+                        "a.customer_sku_code, a.item_description, a.item_status, a.srp, a.trade_discount,"+
+                        "a.customer_cost, a.customer_cost_net_of_vat, "+
+                        "a.january_tq, a.february_tq, a.march_tq, a.april_tq, a.may_tq, a.june_tq, "+
+                        "a.july_tq, a.august_tq, a.september_tq, a.october_tq, a.november_tq, a.december_tq,"+
+                        "a.january_ta, a.february_ta, a.march_ta, a.april_ta, a.may_ta, a.june_ta, "+
+                        "a.july_ta, a.august_ta, a.september_ta, a.october_ta, a.november_ta, a.december_ta'", 
+                        100000, 
+                        index, 
+                        `'y.year:EQ=${year}'`,  
+                        `''`, 
+                        `''`,
+                        (result) => {
+                            let newData = result.map(({ 
+                                payment_group, vendor, overall, kam_kas_kaa, sales_group, 
+                                terms, channel, brand, exclusivity, 
+                                category, lmi_code, rgdi_code, 
+                                customer_sku_code, item_description, item_status, srp, trade_discount,
+                                customer_cost, customer_cost_net_of_vat, 
+                                january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, 
+                                july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
+                                january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, 
+                                july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
+                            }) => ({
+                                "Payment Group":payment_group,
+                                "Vendor":vendor,
+                                "Overall":overall,
+                                "KAM/KAS/KAA":kam_kas_kaa,
+                                "Sales Group":sales_group,
+                                "Terms":terms,
+                                "Channel":channel,
+                                "Brand":brand,
+                                "Exclusivity":exclusivity,
+                                "Category":category,
+                                "LMI Code":lmi_code,
+                                "RGDI Code":rgdi_code,
+                                "Customer SKU Code":customer_sku_code,
+                                "Item Description":item_description,
+                                "Item status":item_status,
+                                "SRP":srp,
+                                "Trade Discount":trade_discount,
+                                "Customer Cost":customer_cost,
+                                "Customer Cost (Net of Vat)":customer_cost_net_of_vat,
+                                "January":january_tq,
+                                "February":february_tq,
+                                "March":march_tq,
+                                "April":april_tq,
+                                "May":may_tq,
+                                "June":june_tq,
+                                "July":july_tq,
+                                "August":august_tq,
+                                "September":september_tq,
+                                "October":october_tq,
+                                "November":november_tq,
+                                "December":december_tq,
+                                "JanuaryTA":january_ta,
+                                "FebruaryTA":february_ta,
+                                "MarchTA":march_ta,
+                                "AprilTA":april_ta,
+                                "MayTA":may_ta,
+                                "JuneTA":june_ta,
+                                "JulyTA":july_ta,
+                                "AugustTA":august_ta,
+                                "SeptemberTA":september_ta,
+                                "OctoberTA":october_ta,
+                                "NovemberTA":november_ta,
+                                "DecemberTA":december_ta,
+                            }));
+                            formattedData.push(...newData); 
+                        }
+                    );
+                }
+            }
+        )
+        
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Target Sell Out per Account"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+    
+        exportArrayToCSV(formattedData, `Target Sell Out per Account - ${formatDate(new Date())}`, headerData);
+    }
 </script>

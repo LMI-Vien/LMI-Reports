@@ -4,12 +4,13 @@ self.onmessage = async function (e) {
     let errorLogs = [];
     let valid_data = [];
     let err_counter = 0;
+    let invalid = false;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brands=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1`);
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brandssopa=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1&payment_group=1`);
         let ba_data = await get_ba_valid_response.json();
 
-        let brand_lookup = createLookup(ba_data.brands, "brand_code", "brand_code");
+        let brand_lookup = createLookup(ba_data.brandssopa, "brand_code", "brand_code");
         let payment_group_lookup = createLookup(ba_data.payment_group, "customer_group_code", "customer_group_code");
 
         let customer_sku_code_lmi_lookup = ba_data.customer_sku_code_lmi.reduce((acc, item) => {
@@ -30,8 +31,8 @@ self.onmessage = async function (e) {
         function createLookup(records, key1, key2) {
             let lookup = {};
             records.forEach(record => {
-                lookup[record[key1].toLowerCase()] = record.id;
-                lookup[record[key2].toLowerCase()] = record.id;
+                lookup[String(record[key1]).toLowerCase()] = record.id;
+                lookup[String(record[key2]).toLowerCase()] = record.id;
             });
             return lookup;
         }

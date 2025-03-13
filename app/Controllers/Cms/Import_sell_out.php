@@ -28,7 +28,7 @@ class Import_sell_out extends BaseController
 		$data['title'] = "Import Sell Out";
 		$data['PageName'] = 'Import Sell Out';
 		$data['PageUrl'] = 'Import Sell Out';
-		$data['content'] = "cms/import/sell_out.php";
+		$data['content'] = "cms/import/sell-out/sell_out.php";
 		$data['buttons'] = ['export', 'search'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
@@ -63,7 +63,7 @@ class Import_sell_out extends BaseController
 		$data['title'] = "Import Sell Out";
 		$data['PageName'] = 'Import Sell Out';
 		$data['PageUrl'] = 'Import Sell Out';
-		$data['content'] = "cms/import/view_sell_out.php";
+		$data['content'] = "cms/import/sell-out/view_sell_out.php";
 		$data['buttons'] = ['search'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');

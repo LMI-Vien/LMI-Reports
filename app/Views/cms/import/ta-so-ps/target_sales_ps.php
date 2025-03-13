@@ -78,13 +78,18 @@
                             <table class="table table-bordered listdata">
                                 <thead>
                                     <tr>
-                                        <th class='center-content'><input class="selectall" type="checkbox"></th>
+                                        <th class='center-content'>Imported Date</th>
+                                        <th class='center-content'>Imported By</th>
+                                        <th class='center-content'>Year</th>
+                                        <th class='center-content'>Date Modified</th>
+                                        <th class='center-content'>Action</th>
+                                        <!-- <th class='center-content'><input class="selectall" type="checkbox"></th>
                                         <th class='center-content'>Location</th>
                                         <th class='center-content'>Location Description</th>
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
-                                        <th class='center-content'>Action</th>
+                                        <th class='center-content'>Action</th> -->
                                     </tr>
                                 </thead>
                                 <tbody class="table_body word_break"></tbody>
@@ -332,7 +337,7 @@
                 </div>
         
                 <div class="modal-footer">
-                    <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
+                    <button type="button" class="btn save" onclick="handleExport()">Export All</button>
                     <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
                     <button type="button" class="btn caution" data-dismiss="modal">Close</button>
                 </div>
@@ -342,7 +347,7 @@
 
     
 <script>
-    var query = "tsps.status >= 0";
+    var query = "a.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
@@ -356,28 +361,42 @@
 
     $(document).ready(function() {
         get_data(query);
-        get_pagination();
+        get_pagination(query);
     });
 
     function get_data(new_query) {
         var data = {
             event: "list",
-            select: "tsps.id, tsps.january, tsps.february, tsps.march, tsps.april, tsps.may, tsps.june, tsps.july, tsps.august, tsps.september, tsps.october, tsps.november, tsps.december, s1.code AS location, s1.description AS location_desc, tsps.updated_date, tsps.created_date, tsps.status",
+            // select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
+            // "a.july, a.august, a.september, a.october, a.november, a.december, "+
+            // "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status",
+            select: "a.created_date, u.name imported_by, b.year, a.updated_date, a.year yearval",
             query: new_query,
             offset: offset,
             limit: limit,
-            table: "tbl_target_sales_per_store tsps",
+            table: "tbl_target_sales_per_store a",
             order : {
-                field : "tsps.id",
+                field : "a.id",
                 order : "asc" 
             },
             join: [
                 {
                     table: "tbl_store s1",
-                    query: "s1.id = tsps.location",
+                    query: "s1.id = a.location",
+                    type: "left"
+                },
+                {
+                    table: "tbl_year b",
+                    query: "a.year = b.id",
+                    type: "left"
+                },
+                {
+                    table: "cms_users u",
+                    query: "u.id = a.created_by",
                     type: "left"
                 }
-            ]
+            ],
+            group: "b.year"
         };
 
         aJax.post(url, data, function(result) {
@@ -388,26 +407,34 @@
 
             if (result && result.length > 0) {
                 $.each(result, function(x, y) {
-                    // console.log(y);
                     var status = (parseInt(y.status) === 1) ? "Active" : "Inactive";
                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
-                    var storeCode = y.location || 'N/A';
-                    var storeDesc = y.location_desc || 'N/A';
                     html += "<tr class='" + rowClass + "'>";
-                    html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
-                    html += "<td scope=\"col\">" + trimText(storeCode) + "</td>";
-                    html += "<td scope=\"col\">" + trimText(storeDesc) + "</td>";
-                    html += "<td scope=\"col\">" + status + "</td>";
                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                    html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
+                    html += "<td scope=\"col\">" + (y.year) + "</td>";
                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+                    let href = "<?= base_url()?>"+"cms/import-target-sales-ps/view/"+`${y.year}`;
 
                     if (y.id == 0) {
                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                     } else {
-                        html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                        html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                        html+="<td class='center-content'>";
+                        
+                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.yearval+
+                        "')\" data-status='"+y.status+"' id='"+y.id+
+                        "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+
+                        html+="<a class='btn-sm btn view' href='"+ href +"' data-status='"+y.status+
+                        "' target='_blank' id='"+y.id+
+                        "' title='View'><span class='glyphicon glyphicon-pencil'>View</span>";
+
+                        html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.yearval+
+                        "')\" data-status='"+y.status+"' id='"+y.id+
+                        "' title='Export Details'><span class='glyphicon glyphicon-pencil'>Export</span>";
+
                         html+="</td>";
                     }
 
@@ -421,20 +448,37 @@
         });
     }
 
-    function get_pagination() {
+    function get_pagination(new_query) {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id",
-            query : query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_target_sales_per_store tsps",
-            order : {
-                field : "tsps.updated_date", //field to order
-                order : "desc" //asc or desc
-            }
-
+          select: "a.created_date, u.name imported_by, b.year, a.updated_date",
+          query: new_query,
+          offset: offset,
+          limit: limit,
+          table: "tbl_target_sales_per_store a",
+          order : {
+              field : "a.id",
+              order : "asc" 
+          },
+          join: [
+              {
+                  table: "tbl_store s1",
+                  query: "s1.id = a.location",
+                  type: "left"
+              },
+              {
+                  table: "tbl_year b",
+                  query: "a.year = b.id",
+                  type: "left"
+              },
+              {
+                  table: "cms_users u",
+                  query: "u.id = a.created_by",
+                  type: "left"
+              }
+          ],
+          group: "b.year"
         }
 
         aJax.post(url,data,function(result){
@@ -456,10 +500,9 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            var new_query = "(" + query + " AND s1.code LIKE '%" + keyword + "%') OR "+
-            "(" + query + " AND s1.description LIKE '%" + keyword + "%')";
+            var new_query = "(" + query + " AND b.year LIKE '%" + keyword + "%')";
             get_data(new_query);
-            get_pagination();
+            get_pagination(new_query);
         }
     });
 
@@ -691,30 +734,42 @@
         }
     }
 
-    function delete_data(id) {
+    function delete_data(year) {
         modal.confirm(confirm_delete_message,function(result){
-            if(result){ 
+            if(result){
                 var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_target_sales_per_store",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(success_delete_message, "success", function() {
-                        location.reload();
-                    });
-                });
+                var formattedData = [];
+        
+                dynamic_search(
+                    "'tbl_target_sales_per_store'", 
+                    "''", 
+                    "'id'", 
+                    0, 
+                    0, 
+                    `'year:EQ=${year}'`,  
+                    `''`, 
+                    `''`,
+                    (res) => {
+                        let updateRecords = [];
+                        res.forEach(item => {
+                            item.updated_date = formatDate(new Date());
+                            item.updated_by = user_id;
+                            item.status = -2;
+                            updateRecords.push(item);
+                        })
+                        console.log(updateRecords, 'updateRecords')
+                        batch_update(url, updateRecords, "tbl_target_sales_per_store", "id", false, (response) => {
+                            if (response.message !== 'success') {
+                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                            }
+                            modal.alert(success_delete_message, "success", function() {
+                                location.reload();
+                            });
+                        });
+                    }
+                )
             }
-
-        });
+        })
     }
 
     function formatDate(date) {
@@ -1257,12 +1312,12 @@
         ]
         const headerData = [
             ["Company Name: Lifestrong Marketing Inc."],
-            ["Target Sell Out per Store"],
+            ["Target Sales per Store"],
             ["Date Printed: " + formatDate(new Date())],
             [""],
         ];
     
-        exportArrayToCSV(formattedData, `Target Sell Out per Store - ${formatDate(new Date())}`, headerData);
+        exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
     }
 
     function exportFilter() {
@@ -1289,9 +1344,9 @@
 
         const startExport = () => {
             dynamic_search(
-                "'tbl_target_sales_per_store'", 
-                "''", 
-                "'location, january, february, march, april, may, june, july, august, september, october, november, december'", 
+                "'tbl_target_sales_per_store a'", 
+                "'left join tbl_store s1 on s1.id = a.location'", 
+                "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
                 0, 
                 0, 
                 `"year:EQ=${year}"`,  
@@ -1325,12 +1380,12 @@
     
             const headerData = [
                 ["Company Name: Lifestrong Marketing Inc."],
-                ["Target Sell Out per Store"],
+                ["Target Sales per Store"],
                 ["Date Printed: " + formatDate(new Date())],
                 [""],
             ];
     
-            exportArrayToCSV(formattedData, `Target Sell Out per Store - ${formatDate(new Date())}`, headerData);
+            exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
             modal.loading_progress(false);
         }
     }
@@ -1377,9 +1432,9 @@
 
                 ids.length > 0 
                     ? dynamic_search(
-                        "'tbl_target_sales_per_store'", 
-                        "''", 
-                        "'location, january, february, march, april, may, june, july, august, september, october, november, december'", 
+                        "'tbl_target_sales_per_store a'", 
+                        "'left join tbl_store s1 on s1.id = a.location'", 
+                        "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
                         100000, 
                         0, 
                         `'id:IN=${ids.join('|')}'`,  
@@ -1406,9 +1461,9 @@
 
                             for (let index = 0; index < total_records; index += 100000) {
                                 dynamic_search(
-                                    "'tbl_target_sales_per_store'", 
-                                    "''", 
-                                    "'location, january, february, march, april, may, june, july, august, september, october, november, december'", 
+                                    "'tbl_target_sales_per_store a'", 
+                                    "'left join tbl_store s1 on s1.id = a.location'", 
+                                    "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
                                     100000, 
                                     index, 
                                     `''`,  
@@ -1447,14 +1502,80 @@
 
             const headerData = [
                 ["Company Name: Lifestrong Marketing Inc."],
-                ["Target Sell Out per Store"],
+                ["Target Sales per Store"],
                 ["Date Printed: " + formatDate(new Date())],
                 [""],
             ];
 
-            exportArrayToCSV(formattedData, `Target Sell Out per Store - ${formatDate(new Date())}`, headerData);
+            exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
             modal.loading_progress(false);
         }
+    }
+
+    function export_data(year) {
+        var formattedData = [];
+
+        const startExport = (res) => {
+            let newData = res.map(({ 
+                location, january, february, march, april, may, june, july, august, september, october, november, december
+            }) => ({
+                "Location":location,
+                "January":january,
+                "February":february,
+                "March":march,
+                "April":april,
+                "May":may,
+                "June":june,
+                "July":july,
+                "August":august,
+                "September":september,
+                "October":october,
+                "November":november,
+                "December":december,
+            }));
+            formattedData.push(...newData);
+        }
+
+        const startCount = (res) => {
+            if (res && res.length > 0) {
+                let total_records = res[0].total_records;
+    
+                for (let index = 0; index < total_records; index += 100000) {
+                    dynamic_search(
+                        "'tbl_target_sales_per_store a'", 
+                        "'left join tbl_store s1 on s1.id = a.location'", 
+                        "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
+                        100000, 
+                        index, 
+                        `'a.year:EQ=${year}'`, 
+                        `''`,  
+                        `''`,
+                        startExport
+                    )
+                }
+            }
+        }
+
+        dynamic_search(
+            "'tbl_target_sales_per_store'", 
+            "''", 
+            "'COUNT(id) as total_records'", 
+            0, 
+            0, 
+            `'year:EQ=${year}'`, 
+            `''`,  
+            `''`,
+            startCount
+        )
+
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["Target Sales per Store"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+    
+        exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
     }
 
     function exportArrayToCSV(data, filename, headerData) {

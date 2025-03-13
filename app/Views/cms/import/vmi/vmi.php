@@ -51,28 +51,14 @@
                         <table class="table table-bordered listdata">
                             <thead>
                                 <tr>
-                                    <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                    <th class='center-content'>Store</th>
-                                    <th class='center-content'>Store Name</th>
-                                    <th class='center-content'>Item</th>
-                                    <th class='center-content'>Item Name</th>
-                                    <th class='center-content'>VMI Status</th>
-                                    <th class='center-content'>Status</th>
-                                    <th class='center-content'>Item Class</th>
-                                    <th class='center-content'>Supplier</th>
-                                    <th class='center-content'>Group</th>
-                                    <th class='center-content'>Dept</th>
-                                    <th class='center-content'>Class</th>
-                                    <th class='center-content'>Sub-class</th>
-                                    <th class='center-content'>On Hand</th>
-                                    <th class='center-content'>In transit</th>
-                                    <th class='center-content'>Total Qty</th>
-                                    <th class='center-content'>Ave Sales Unit</th>
-                                    
-                                    <th class='center-content'>Date Created</th>
-                                    <th class='center-content'>Date Modified</th>
+                                    <th class='center-content'>Imported Date</th>
+                                    <th class='center-content'>Imported By</th>
                                     <th class='center-content'>Company</th>
-                                    <th class='center-content'>Action</th>
+                                    <th class='center-content'>Year</th>
+                                    <th class='center-content'>Month</th>
+                                    <th class='center-content'>Week</th>
+                                    <th class='center-content'>Date Modified</th>
+                                    <th class='center-content'>Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="table_body word_break"></tbody>
@@ -88,104 +74,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL -->
-<div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title">
-                    <b></b>
-                </h1>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="form-modal">
-                    <div class="mb-3">
-                        <div hidden>
-                            <input type="text" class="form-control" id="id" aria-describedby="id">
-                        </div>
-                        <label for="store" class="form-label">Store</label>
-                        <input type="text" class="form-control required" id="store" aria-describedby="store">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="store_name" class="form-label">Store Name</label>
-                        <input type="text" class="form-control required" id="store_name" aria-describedby="store_name">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="item" class="form-label">Item</label>
-                        <input type="text" class="form-control required numbersonly" id="item" aria-describedby="item">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="item_name" class="form-label">Item Name</label>
-                        <input type="text" class="form-control required" id="item_name" aria-describedby="item_name">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="item_class" class="form-label">Item Class</label>
-                        <input type="text" class="form-control required" id="item_class" aria-describedby="item_class">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="supplier" class="form-label">Supplier</label>
-                        <input type="text" class="form-control required numbersonly" id="supplier" aria-describedby="supplier">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="group" class="form-label">Group</label>
-                        <input type="text" class="form-control required numbersonly" id="group" aria-describedby="group">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="dept" class="form-label">Dept</label>
-                        <input type="text" class="form-control required numbersonly" id="dept" aria-describedby="dept">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="class" class="form-label">Class</label>
-                        <input type="text" class="form-control required numbersonly" id="class" aria-describedby="class">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="sub_class" class="form-label">Sub Class</label>
-                        <input type="text" class="form-control required numbersonly" id="sub_class" aria-describedby="sub_class">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="on_hand" class="form-label">On Hand</label>
-                        <input type="text" class="form-control required numbersonly" id="on_hand" aria-describedby="on_hand">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="in_transit" class="form-label">In Transit</label>
-                        <input type="text" class="form-control required numbersonly" id="in_transit" aria-describedby="in_transit">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="avg_sales_unit" class="form-label">Average Sales Unit</label>
-                        <input type="text" class="form-control required numbersdecimalonly" id="avg_sales_unit" aria-describedby="avg_sales_unit">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="company" class="form-label">Company</label>
-                        <input type="text" class="form-control required" id="company" aria-describedby="company">
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="status" checked>
-                        <label class="form-check-label" for="status">Active</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer"></div>
         </div>
     </div>
 </div>
@@ -336,7 +224,7 @@
             </div>
     
             <div class="modal-footer">
-                <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
+                <button type="button" class="btn save" onclick="handleExport()">Export All</button>
                 <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
                 <button type="button" class="btn caution" data-dismiss="modal">Close</button>
             </div>
@@ -358,35 +246,51 @@
 
     $(document).ready(function() {
       get_data(query);
-      get_pagination();
+      get_pagination(query);
     });
 
     function get_data(new_query) {
         var data = {
             event: "list",
-            select: "v.id, s.code AS store, s.description AS store_name, v.item, v.item_name, v.status, v.item_class, v.supplier, v.group, v.dept, v.class, v.sub_class, v.on_hand, v.in_transit, (v.on_hand + v.in_transit) AS total_qty, v.average_sales_unit, v.vmi_status, v.created_date, v.updated_date, c.name AS company",
+            select: "c.name AS company, y.year as year, m.month, w.name week, v.created_date, v.updated_date, u.name as imported_by",
             query: new_query,
             offset: offset,
             limit: limit,
             table: "tbl_vmi v",
             join: [
                 {
-                    table: "tbl_store s",
-                    query: "s.id = v.store",
+                    table: "cms_users u",
+                    query: "u.id = v.created_by",
                     type: "left"
                 },
                 {
                     table: "tbl_company c",
                     query: "c.id = v.company",
                     type: "left"
+                },
+                {
+                    table: "tbl_year y",
+                    query: "y.id = v.year",
+                    type: "left"
+                },
+                {
+                    table: "tbl_month m",
+                    query: "m.id = v.month",
+                    type: "left"
+                },
+                {
+                    table: "tbl_week w",
+                    query: "w.id = v.week",
+                    type: "left"
                 }
             ],
             order: {
                 field: "v.year",
                 order: "asc"
-            }
+            },
+            group : "v.year, v.month, v.week, c.name"
         };
-
+        console.log(data, 'data')
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
@@ -399,34 +303,32 @@
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + (y.store) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.store_name, 10) + "</td>";
-                        html += "<td scope=\"col\">" + (y.item) + "</td>";
-                        html += "<td scope=\"col\">" + y.item_name + "</td>";
-                        html += "<td scope=\"col\">" + (y.vmi_status) + "</td>";
-                        html += "<td scope=\"col\">" + status + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.item_class, 10) + "</td>";
-                        html += "<td scope=\"col\">" + (y.supplier) + "</td>";
-                        html += "<td scope=\"col\">" + (y.group) + "</td>";
-                        html += "<td scope=\"col\">" + (y.dept) + "</td>";
-                        html += "<td scope=\"col\">" + (y.class) + "</td>";
-                        html += "<td scope=\"col\">" + (y.sub_class) + "</td>";
-                        html += "<td scope=\"col\">" + (y.on_hand) + "</td>";
-                        html += "<td scope=\"col\">" + (y.in_transit) + "</td>";
-                        html += "<td scope=\"col\">" + (y.total_qty) + "</td>";
-                        html += "<td scope=\"col\">" + (y.average_sales_unit) + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+                        html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
                         html += "<td scope=\"col\">" + (y.company) + "</td>";
+                        html += "<td scope=\"col\">" + (y.year) + "</td>";
+                        html += "<td scope=\"col\">" + (y.month) + "</td>";
+                        html += "<td scope=\"col\">" + (y.week) + "</td>";
+                        html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+                        let href = "<?= base_url()?>"+"cms/import-vmi/view/"+`${y.company}-${y.year}-${y.month}-${y.week}`;
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 200px'>";
-                            //html+="<a class='btn-sm btn update' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.company+"','"+y.year+"','"+y.month+"','"+y.week+
+                            "')\" data-status='"+y.status+"' id='"+y.id+
+                            "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            
+                            html+="<a class='btn-sm btn view' href='"+ href +"' data-status='"+y.status+
+                            "' target='_blank' id='"+y.id+
+                            "' title='View'><span class='glyphicon glyphicon-pencil'>View</span>";
+
+                            html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.company+"','"+y.year+"','"+y.month+"','"+y.week+
+                            "')\" data-status='"+y.status+"' id='"+y.id+
+                            "' title='Export Batch'><span class='glyphicon glyphicon-pencil'>Export</span>";
+
                             html+="</td>";
                         }
                         
@@ -440,16 +342,42 @@
         });
     }
 
-    function get_pagination() {
+    function get_pagination(new_query) {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id",
-            query : query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_vmi v",
-
+          select: "c.name AS company, y.year as year, m.month, w.name week",
+          query: new_query,
+          offset: offset,
+          limit: limit,
+          table: "tbl_vmi v",
+          join: [
+              {
+                  table: "tbl_company c",
+                  query: "c.id = v.company",
+                  type: "left"
+              },
+              {
+                  table: "tbl_year y",
+                  query: "y.id = v.year",
+                  type: "left"
+              },
+              {
+                  table: "tbl_month m",
+                  query: "m.id = v.month",
+                  type: "left"
+              },
+              {
+                  table: "tbl_week w",
+                  query: "w.id = v.week",
+                  type: "left"
+              }
+          ],
+          order: {
+              field: "v.year",
+              order: "asc"
+          },
+          group : "v.year, v.month, v.week, c.name"
         }
 
         aJax.post(url,data,function(result){
@@ -471,21 +399,12 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            var new_query = "(" + query + " AND s.code LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND s.description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.item LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.item_name LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.item_class LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.supplier LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND `v.group` LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.dept LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.class LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.sub_class LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.on_hand LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND v.in_transit LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND average_sales_unit LIKE '%" + keyword + "%')";
+            var new_query = "(" + query + " AND c.name LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND y.year LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND m.month LIKE '%" + keyword + "%') OR " +
+                "(" + query + " AND w.name LIKE '%" + keyword + "%')";
             get_data(new_query);
-            get_pagination();
+            get_pagination(new_query);
         }
     });
 
@@ -502,60 +421,6 @@
         modal.loading(false);
     });
 
-    $(document).on('click', '#btn_add', function() {
-        open_modal('Add New VMI', 'add', '');
-    });
-
-    function edit_data(id) {
-        open_modal('Edit VMI', 'edit', id);
-    }
-
-    function view_data(id) {
-        open_modal('View VMI', 'view', id);
-    }
-
-    function open_modal(msg, actions, id) {
-        $(".form-control").css('border-color','#ccc');
-        $(".validate_error_message").remove();
-        let $modal = $('#popup_modal');
-        let $footer = $modal.find('.modal-footer');
-
-        $modal.find('.modal-title b').html(addNbsp(msg));
-        reset_modal_fields();
-
-        let buttons = {
-            save: create_button('Save', 'save_data', 'btn save', function () {
-                if (validate.standard("form-modal")) {
-                    save_data('save', null);
-                }
-            }),
-            edit: create_button('Update', 'edit_data', 'btn update', function () {
-                save_data('update', id);
-               
-            }),
-            close: create_button('Close', 'close_data', 'btn caution', function () {
-                $modal.modal('hide');
-            })
-        };
-
-        if (['edit', 'view'].includes(actions)) populate_modal(id);
-        
-        let isReadOnly = actions === 'view';
-        set_field_state('#store, #store_name, #item, #item_name, #item_class, #supplier, #group, #dept, #class, #sub_class, #on_hand, #in_transit, #total_qty, #avg_sales_unit, #swc, #202445, #status, #company', isReadOnly);
-
-        $footer.empty();
-        if (actions === 'add') $footer.append(buttons.save);
-        if (actions === 'edit') $footer.append(buttons.edit);
-        $footer.append(buttons.close);
-
-        $modal.modal('show');
-    }
-
-    function reset_modal_fields() {
-        $('#popup_modal #store, #popup_modal #store_name, #popup_modal #item, #popup_modal #item_name, #popup_modal #item_class, #popup_modal #supplier, #popup_modal #group, #popup_modal #dept, #popup_modal #class, #popup_modal #sub_class, #popup_modal #on_hand, #popup_modal #in_transit, #popup_modal #total_qty, #popup_modal #avg_sales_unit, #popup_modal #swc, #popup_modal #202445').val('');
-        $('#popup_modal #status').prop('checked', true);
-    }
-
     function clear_import_table() {
         $(".import_table").empty();
     }
@@ -566,9 +431,6 @@
         display_imported_data();
     }
 
-    function set_field_state(selector, isReadOnly) {
-        $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
-    }
 
     $(document).on('click', '#btn_import ', function() {
         title = addNbsp('IMPORT VMI')
@@ -579,210 +441,6 @@
         get_company('companySelect');
         get_week('weekSelect');
     });
-
-    function populate_modal(inp_id) {
-        var query = "v.status >= 0 and v.id = " + inp_id;
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event : "list", 
-            select : "v.id, s.code as store,, s.description as store_name, v.item, v.item_name, v.status, v.item_class, v.supplier, v.group, v.dept, v.class, v.sub_class, v.on_hand, v.in_transit, v.average_sales_unit, c.name AS company",
-            query : query, 
-            table : "tbl_vmi v",
-            join : [
-                {
-                    table: "tbl_store s",
-                    query: "s.id = v.store",
-                    type: "left"
-                },
-                {
-                    table: "tbl_company c",
-                    query: "c.id = v.company",
-                    type: "left"
-                }
-            ], 
-        }
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            if(obj){
-                $.each(obj, function(index,d) {
-                    $('#id').val(d.id);
-                    $('#store').val(d.store);
-                    $('#store_name').val(d.store_name);
-                    $('#item').val(d.item);
-                    $('#item_name').val(d.item_name);
-                    $('#item_class').val(d.item_class);
-                    $('#supplier').val(d.supplier);
-                    $('#group').val(d.group);
-                    $('#dept').val(d.dept);
-                    $('#class').val(d.class);
-                    $('#sub_class').val(d.sub_class);
-                    $('#on_hand').val(d.on_hand);
-                    $('#in_transit').val(d.in_transit);
-                    // $('#total_qty').val(d.total_qty);
-                    $('#avg_sales_unit').val(d.average_sales_unit);
-                    $('#company').val(d.company);
-                    // $('#swc').val(d.swc);
-                    $('#202445').val(d.a202445);
-                    if(d.status == 1) {
-                        $('#status').prop('checked', true)
-                    } else {
-                        $('#status').prop('checked', false)
-                    }
-                }); 
-            }
-        });
-    }
-
-    function create_button(btn_txt, btn_id, btn_class, onclick_event) {
-        var new_btn = $('<button>', {
-            text: btn_txt,
-            id: btn_id,
-            class: btn_class,
-            click: onclick_event // Attach the onclick event
-        });
-        return new_btn;
-    }
-
-    function save_to_db(inp_store, inp_item, inp_item_name, inp_item_class, inp_supplier, inp_group, inpt_dept, inp_class, inp_sub_class, inp_on_hand, inp_in_transit, inp_total_qty, inp_avg_sales_unit, status_val, id) {
-        const url = "<?= base_url('cms/global_controller'); ?>";
-        let data = {}; 
-        let modal_alert_success;
-
-        if (id !== undefined && id !== null && id !== '') {
-            modal_alert_success = success_update_message;
-            data = {
-                event: "update",
-                table: "tbl_vmi",
-                field: "id",
-                where: id,
-                data: {
-                    store: inp_store,
-                    // store_name: inp_store_name,
-                    item: inp_item,
-                    item_name: inp_item_name,
-                    item_class: inp_item_class,
-                    supplier: inp_supplier,
-                    group: inp_group, 
-                    dept: inpt_dept,
-                    class: inp_class,
-                    sub_class: inp_sub_class,
-                    on_hand: inp_on_hand,
-                    in_transit: inp_in_transit,
-                    // total_qty: inp_total_qty,
-                    average_sales_unit: inp_avg_sales_unit,
-                    // swc: inp_swc,
-                    // a202445: inp_a202445,
-                    updated_date: formatDate(new Date()),
-                    updated_by: user_id,
-                    status: status_val
-                }
-            };
-        } else {
-            modal_alert_success = success_save_message;
-            data = {
-                event: "insert",
-                table: "tbl_vmi",
-                data: {
-                    store: inp_store,
-                    // store_name: inp_store_name,
-                    item: inp_item,
-                    item_name: inp_item_name,
-                    item_class: inp_item_class,
-                    supplier: inp_supplier,
-                    group: inp_group, 
-                    dept: inpt_dept,
-                    class: inp_class,
-                    sub_class: inp_sub_class,
-                    on_hand: inp_on_hand,
-                    in_transit: inp_in_transit,
-                    // total_qty: inp_total_qty,
-                    average_sales_unit: inp_avg_sales_unit,
-                    // swc: inp_swc,
-                    // a202445: inp_a202445,
-                    created_date: formatDate(new Date()),
-                    created_by: user_id,
-                    status: status_val
-                }
-            };
-        }
-
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function() {
-                location.reload();
-            });
-        });
-    }
-
-    function save_data(action, id) {
-        var store = $('#store').val();
-        // var store_name = $('#store_name').val();
-        var item = $('#item').val();
-        var item_name = $('#item_name').val();
-        var item_class = $('#item_class').val();
-        var supplier = $('#supplier').val();
-        var group = $('#group').val();
-        var dept = $('#dept').val();
-        var classs = $('#class').val();
-        var sub_class = $('#sub_class').val();
-        var on_hand = $('#on_hand').val();
-        var in_transit = $('#in_transit').val();
-        var total_qty = $('#total_qty').val();
-        var avg_sales_unit = $('#avg_sales_unit').val();
-        // var swc = $('#swc').val();
-        // var a202445 = $('#202445').val();
-
-
-        var chk_status = $('#status').prop('checked');
-        if (chk_status) {
-            status_val = 1;
-        } else {
-            status_val = 3;
-        }
-        if(validate.standard("form-modal")){
-            if (id !== undefined && id !== null && id !== '') {
-                // check_current_db("tbl_vmi", ["store", "store_name", "item", "item_name", "item_class", "supplier", "group", "dept", "class", "sub_class", "on_hand", "in_transit", "total_qty", "average_sales_unit", "swc", "a202445"],
-                // [store, store_name, item, item_name, item_class, supplier, group, dept, classs, sub_class, on_hand, in_transit, total_qty, avg_sales_unit, swc, a202445], "status" , "id", id, true, function(exists, duplicateFields) {
-                    // if (exists) {
-                        modal.confirm(confirm_update_message, function(result){
-                            if(result){ 
-                                    modal.loading(true);
-                                save_to_db(store, item, item_name, item_class, supplier, group, dept, classs, sub_class, on_hand, in_transit, total_qty, avg_sales_unit, status_val, id)
-                            }
-                        });
-    
-                    // }             
-                // });
-            }
-        }
-    }
-
-    function delete_data(id) {
-        modal.confirm(confirm_delete_message,function(result){
-            if(result){ 
-                var url = "<?= base_url('cms/global_controller');?>";
-                var data = {
-                    event : "update",
-                    table : "tbl_vmi",
-                    field : "id",
-                    where : id, 
-                    data : {
-                            updated_date : formatDate(new Date()),
-                            updated_by : user_id,
-                            status : -2
-                    }  
-                }
-                aJax.post(url,data,function(result){
-                    var obj = is_json(result);
-                    modal.alert(success_delete_message, "success", function() {
-                        location.reload();
-                    });
-                });
-            }
-
-        });
-    }
 
     function formatDate(date) {
         // Get components of the date
@@ -804,99 +462,6 @@
             }
             return char + '&nbsp;';
         }).join('');
-    }
-
-    function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
-        } else {
-            return str;
-        }
-    }
-
-    $(document).on('click', '.btn_status', function (e) {
-        var status = $(this).attr("data-status");
-        var modal_obj = "";
-        var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
-
-        if (parseInt(status) === -2) {
-            modal_obj = confirm_delete_message;
-            modal_alert_success = success_delete_message;
-        } else if (parseInt(status) === 1) {
-            modal_obj = confirm_publish_message;
-            modal_alert_success = success_publish_message;
-        } else {
-            modal_obj = confirm_unpublish_message;
-            modal_alert_success = success_unpublish_message;
-        }
-        // var counter = 0; 
-        // $('.select:checked').each(function () {
-        //     var id = $(this).attr('data-id');
-        //     if(id){
-        //         counter++;
-        //     }
-        //  });
-        modal.confirm(modal_obj, function (result) {
-            if (result) {
-                var url = "<?= base_url('cms/global_controller');?>";
-                var dataList = [];
-                
-                $('.select:checked').each(function () {
-                    var id = $(this).attr('data-id');
-                    dataList.push({
-                        event: "update",
-                        table: "tbl_vmi",
-                        field: "id",
-                        where: id,
-                        data: {
-                            status: status,
-                            updated_date: formatDate(new Date())
-                        }
-                    });
-                });
-
-                if (dataList.length === 0) return;
-
-                var processed = 0;
-                dataList.forEach(function (data, index) {
-                    aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; // Prevents multiple executions
-
-                        modal.loading(false);
-                        processed++;
-
-                        if (result === "success") {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                $('.btn_status').hide();
-                                modal.alert(modal_alert_success, 'success', function () {
-                                    location.reload();
-                                });
-                            }
-                        } else {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                modal.alert(failed_transaction_message, function () {});
-                            }
-                        }
-                    });
-                });
-            }
-        });
-    });
-
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
     }
 
     function read_xl_file() {
@@ -938,12 +503,12 @@
          setTimeout(() => {
                 btn.prop("disabled", false);
             }, 4000);
-        const year = $('#yearSelect').val()?.trim();
-        const month = $('#monthSelect').val()?.trim();
-        const week = $('#weekSelect').val()?.trim();
-        const company = $('#companySelect').val()?.trim();
+        const inp_year = $('#yearSelect').val()?.trim();
+        const inp_month = $('#monthSelect').val()?.trim();
+        const inp_week = $('#weekSelect').val()?.trim();
+        const inp_company = $('#companySelect').val()?.trim();
 
-        const fields = { year, month, week, company };
+        const fields = { inp_year, inp_month, inp_week, inp_company };
 
         for (const [key, value] of Object.entries(fields)) {
             if (!value) {
@@ -978,7 +543,7 @@
 
 
         let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
-        worker.postMessage({ data: jsonData, base_url, company });
+        worker.postMessage({ data: jsonData, base_url, inp_company });
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
@@ -998,10 +563,10 @@
                     updateSwalProgress("Validation Completed", 10);
                     new_data = valid_data.map(record => ({
                         ...record,
-                        year: year,
-                        month: month,
-                        week: week,
-                        company: company
+                        year: inp_year,
+                        month: inp_month,
+                        week: inp_week,
+                        company: inp_company
                     }));
                     setTimeout(() => saveValidatedData(new_data), 500);
                 } else {
@@ -1096,12 +661,12 @@
         let selected_fields = [
             'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
             'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 
-            'in_transit', 'year', 'month', 'company'
+            'in_transit', 'year', 'month', 'week', 'company'
         ];
 
         const matchFields = [
             'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 
-            'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'company'
+            'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'
         ];  
 
         const matchType = "AND";  // Use "AND" or "OR" for matching logic
@@ -1188,6 +753,7 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
+                            console.log(newRecords, 'newRecords')
                             batch_insert(url, newRecords, table, false, (response) => {
                                 if (response.message === 'success') {
                                     updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
@@ -1215,27 +781,6 @@
             }
 
             setTimeout(processNextBatch, 1000);
-        });
-    }
-
-
-    function excel_date_to_readable_date(excel_date) {
-        var dateStr = excel_date.split('/').map((part, index) => {
-            if (index === 2 && part.length === 2) {
-            }
-            return part;
-        }).join('/');
-
-        var date = new Date(dateStr);
-        
-        if (isNaN(date)) {
-            return "Invalid Date";
-        }
-        
-        return date.toLocaleDateString("en-US", { 
-            year: "numeric", 
-            month: "long", 
-            day: "numeric" 
         });
     }
 
@@ -1444,12 +989,7 @@
                 // "Company":company,
             }
         ]
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["VMI"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
+        const headerData = [];
     
         exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
     }
@@ -1465,20 +1005,28 @@
     });
 
     function exportFilter() {
+        var formattedData = [];
+
+        const company = $('#company_select').val()?.trim();
         const year = $('#year_select').val()?.trim();
         const month = $('#month_select').val()?.trim();
         const week = $('#week_select').val()?.trim();
-        const company = $('#company_select').val()?.trim();
 
-        const fields = { year, month, week, company };
-
-        var formattedData = [];
-
-        for (const [key, value] of Object.entries(fields)) {
-            if (!value) {
-                return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
-            }
+        let filterArr = []
+        if(company) {
+            filterArr.push(`company:EQ=${company}`);
         }
+        if(year) {
+            filterArr.push(`year:EQ=${year}`);
+        }
+        if(month) {
+            filterArr.push(`month:EQ=${month}`);
+        }
+        if(week) {
+            filterArr.push(`week:EQ=${week}`);
+        }
+
+        let filter = filterArr.join(',')
 
         modal.confirm(confirm_export_message,function(result){
             if (result) {
@@ -1490,14 +1038,13 @@
         })
 
         const startExport = () => {
-            // year, month, week, company
             dynamic_search(
                 "'tbl_vmi'", 
                 "''", 
-                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company,vmi_status'", 
+                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'", 
                 0, 
                 0, 
-                `'year:EQ=${year}, month:EQ=${month}, week:EQ=${week}, company:EQ=${company}'`,  
+                `'${filter}'`,  
                 `''`, 
                 `''`,
                 (res) => {
@@ -1527,43 +1074,65 @@
                             });
                         }
                     );
-            
-                    let newData = res.map(({ 
-                        store, 
-                        // store name,
-                        item, 
-                        item_name, 
-                        item_class, 
-                        supplier, 
-                        group, 
-                        dept, 
-                        classification, 
-                        sub_class, 
-                        on_hand, 
-                        in_transit, 
-                        average_sales_unit, 
-                        company,
-                        vmi_status, 
-                    }) => ({
-                        "Store":store_map[`${store}`].code, 
-                        // "Store Name":store_map[`${store}`].description,  
-                        // store name,
-                        "Item":item, 
-                        "Item Name":item_name, 
-                        "VMI Status":vmi_status, 
-                        "Item Class":item_class, 
-                        "Supplier":supplier, 
-                        "Group":group, 
-                        "Dept":dept, 
-                        "Class":classification, 
-                        "Sub Class":sub_class, 
-                        "On Hand":on_hand, 
-                        "In Transit":in_transit, 
-                        "Ave Sales Unit":average_sales_unit, 
-                        // "Company":company,
-                    }));
 
-                    formattedData.push(...newData); // Append new data to formattedData array
+                    spacing = {
+                        "Store":"", 
+                        "Item":"", 
+                        "Item Name":"", 
+                        "VMI Status":"", 
+                        "Item Class":"", 
+                        "Supplier":"", 
+                        "Group":"", 
+                        "Dept":"", 
+                        "Class":"", 
+                        "Sub Class":"", 
+                        "On Hand":"", 
+                        "In Transit":"", 
+                        "Ave Sales Unit":"", 
+                    }
+
+                    let previousRecord = null;
+                    let count = 0;
+                    res.forEach(det => {
+                        let rec_company = det.company;
+                        let rec_year = det.year;
+                        let rec_month = det.month;
+                        let rec_week = det.week;
+                        let currentRecord = { rec_company, rec_year, rec_month, rec_week };
+
+                        console.log(currentRecord, count+1)
+                        count+=1;
+
+                        let newData = {
+                            "Store":store_map[`${det.store}`].code, 
+                            "Item":det.item, 
+                            "Item Name":det.item_name, 
+                            "VMI Status":det.vmi_status, 
+                            "Item Class":det.item_class, 
+                            "Supplier":det.supplier, 
+                            "Group":det.group, 
+                            "Dept":det.dept, 
+                            "Class":det.classification, 
+                            "Sub Class":det.sub_class, 
+                            "On Hand":det.on_hand, 
+                            "In Transit":det.in_transit, 
+                            "Ave Sales Unit":det.average_sales_unit, 
+                        }
+
+                        if (previousRecord && 
+                            (
+                                previousRecord.rec_company !== det.company || 
+                                previousRecord.rec_year !== det.year || 
+                                previousRecord.rec_month !== det.month || 
+                                previousRecord.rec_week !== det.week
+                            )
+                        ) {
+                            formattedData.push(spacing)
+                            console.log('spaced')
+                        }
+                        formattedData.push(newData)
+                        previousRecord = currentRecord;
+                    })
                 }
             )
     
@@ -1581,12 +1150,6 @@
 
     function handleExport() {
         var formattedData = [];
-        var ids = [];
-
-        $('.select:checked').each(function () {
-            var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Collect IDs in an array
-        });
 
         modal.confirm(confirm_export_message,function(result){
             if (result) {
@@ -1598,84 +1161,6 @@
         })
 
         const startExport = () => {
-            const fetchStores = (callback) => {
-                function processResponse (res) {
-                    let store_ids = []
-                    let store_map = {}
-                    res.forEach(stores => {
-                        store_ids.push(`${stores.store}`);
-                    });
-                    dynamic_search(
-                        "'tbl_store'", 
-                        "''", 
-                        "'id, code, description'", 
-                        0, 
-                        0, 
-                        `'id:IN=${store_ids.join('|')}'`,  
-                        `''`, 
-                        `''`,
-                        (result) => {
-                            result.forEach(store => {
-                                if (!store_map[store.id]) {
-                                    store_map[store.id] = {}; // Initialize as an object
-                                }
-                                store_map[store.id].description = store.description;
-                                store_map[store.id].code = store.code;
-                            });
-                        }
-                    );
-
-                    formattedData = res.map(({ 
-                        store, 
-                        // store name,
-                        item, 
-                        item_name, 
-                        item_class, 
-                        supplier, 
-                        group, 
-                        dept, 
-                        classification, 
-                        sub_class, 
-                        on_hand, 
-                        in_transit, 
-                        average_sales_unit, 
-                        company,
-                        vmi_status, 
-                    }) => ({
-                        "Store":store_map[`${store}`].code, 
-                        // "Store Name":store_map[`${store}`].description,  
-                        // store name,
-                        "Item":item, 
-                        "Item Name":item_name, 
-                        "VMI Status":vmi_status, 
-                        "Item Class":item_class, 
-                        "Supplier":supplier, 
-                        "Group":group, 
-                        "Dept":dept, 
-                        "Class":classification, 
-                        "Sub Class":sub_class, 
-                        "On Hand":on_hand, 
-                        "In Transit":in_transit, 
-                        "Ave Sales Unit":average_sales_unit, 
-                        // "Company":company,
-                    }));
-                };
-
-                ids.length > 0 
-                    ? dynamic_search(
-                        "'tbl_vmi'", 
-                        "''", 
-                        `'store, item, item_name, item_class, supplier, \`group\`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status'`, 
-                        0, 
-                        0, 
-                        `'id:IN=${ids.join('|')}'`,  
-                        `''`, 
-                        `''`,
-                        processResponse
-                    )
-                    : batch_export();
-            };
-
             const batch_export = () => {
                 dynamic_search(
                     "'tbl_vmi'", 
@@ -1694,7 +1179,7 @@
                                 dynamic_search(
                                     "'tbl_vmi'", 
                                     "''", 
-                                    `'store, item, item_name, item_class, supplier, \`group\`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status'`, 
+                                    `'store, item, item_name, item_class, supplier, \`group\`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'`, 
                                     100000, 
                                     index, 
                                     `''`,  
@@ -1728,41 +1213,64 @@
                                             }
                                         );
 
-                                        let newData = res.map(({ 
-                                            store, 
-                                            // store name,
-                                            item, 
-                                            item_name, 
-                                            item_class, 
-                                            supplier, 
-                                            group, 
-                                            dept, 
-                                            classification, 
-                                            sub_class, 
-                                            on_hand, 
-                                            in_transit, 
-                                            average_sales_unit, 
-                                            company,
-                                            vmi_status, 
-                                        }) => ({
-                                            "Store":store_map[`${store}`].code, 
-                                            // "Store Name":store_map[`${store}`].description,  
-                                            // store name,
-                                            "Item":item, 
-                                            "Item Name":item_name, 
-                                            "VMI Status":vmi_status, 
-                                            "Item Class":item_class, 
-                                            "Supplier":supplier, 
-                                            "Group":group, 
-                                            "Dept":dept, 
-                                            "Class":classification, 
-                                            "Sub Class":sub_class, 
-                                            "On Hand":on_hand, 
-                                            "In Transit":in_transit, 
-                                            "Ave Sales Unit":average_sales_unit, 
-                                            // "Company":company,
-                                        }));
-                                        formattedData.push(...newData); // Append new data to formattedData array
+                                        spacing = {
+                                            "Store":"", 
+                                            "Item":"", 
+                                            "Item Name":"", 
+                                            "VMI Status":"", 
+                                            "Item Class":"", 
+                                            "Supplier":"", 
+                                            "Group":"", 
+                                            "Dept":"", 
+                                            "Class":"", 
+                                            "Sub Class":"", 
+                                            "On Hand":"", 
+                                            "In Transit":"", 
+                                            "Ave Sales Unit":"", 
+                                        }
+
+                                        let previousRecord = null;
+                                        let count = 0;
+                                        res.forEach(det => {
+                                            let rec_company = det.company;
+                                            let rec_year = det.year;
+                                            let rec_month = det.month;
+                                            let rec_week = det.week;
+                                            let currentRecord = { rec_company, rec_year, rec_month, rec_week };
+
+                                            console.log(currentRecord, count+1)
+                                            count+=1;
+
+                                            let newData = {
+                                                "Store":store_map[`${det.store}`].code, 
+                                                "Item":det.item, 
+                                                "Item Name":det.item_name, 
+                                                "VMI Status":det.vmi_status, 
+                                                "Item Class":det.item_class, 
+                                                "Supplier":det.supplier, 
+                                                "Group":det.group, 
+                                                "Dept":det.dept, 
+                                                "Class":det.classification, 
+                                                "Sub Class":det.sub_class, 
+                                                "On Hand":det.on_hand, 
+                                                "In Transit":det.in_transit, 
+                                                "Ave Sales Unit":det.average_sales_unit, 
+                                            }
+
+                                            if (previousRecord && 
+                                                (
+                                                    previousRecord.rec_company !== det.company || 
+                                                    previousRecord.rec_year !== det.year || 
+                                                    previousRecord.rec_month !== det.month || 
+                                                    previousRecord.rec_week !== det.week
+                                                )
+                                            ) {
+                                                formattedData.push(spacing)
+                                                console.log('spaced')
+                                            }
+                                            formattedData.push(newData)
+                                            previousRecord = currentRecord;
+                                        })
                                     }
                                 )
                             }
@@ -1773,7 +1281,7 @@
                 )
             };
 
-            fetchStores();
+            batch_export();
 
             const headerData = [
                 ["Company Name: Lifestrong Marketing Inc."],
@@ -1785,6 +1293,165 @@
             exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
             modal.loading_progress(false);
         }
+    }
+
+    function export_data(company, year, month, week) {
+        var formattedData = [];
+        let filterArr = []
+        filterArr.push(`c.name:EQ=${company}`);
+        filterArr.push(`y.year:EQ=${year}`);
+        filterArr.push(`m.month:EQ=${month}`);
+        filterArr.push(`w.name:EQ=${week}`);
+
+        let filter = filterArr.join(',')
+
+        dynamic_search(
+                "'tbl_vmi v'", 
+                "'left join tbl_company c on v.company = c.id "+
+                "left join tbl_year y on v.year = y.id "+
+                "left join tbl_month m on v.month = m.id "+
+                "left join tbl_week w on v.week = w.id'", 
+                "'COUNT(v.id) as total_records'", 
+                0, 
+                0, 
+                `'${filter}'`,  
+                `''`, 
+                `''`,
+                (res) => {
+                    if (res && res.length > 0) {
+                        let total_records = res[0].total_records;
+
+                        for (let index = 0; index < total_records; index += 100000) {
+                            dynamic_search(
+                                "'tbl_vmi v'", 
+
+                                "'left join tbl_company c on v.company = c.id "+
+                                "left join tbl_year y on v.year = y.id "+
+                                "left join tbl_month m on v.month = m.id "+
+                                "left join tbl_week w on v.week = w.id'", 
+
+                                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, "+
+                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'", 
+
+                                100000, 
+                                index, 
+                                `'${filter}'`,  
+                                `''`, 
+                                `''`,
+                                (res) => {
+                                    let store_ids = []
+                                    let store_map = {}
+                            
+                                    res.forEach(stores => {
+                                        store_ids.push(`${stores.store}`);
+                                    });
+                            
+                                    dynamic_search(
+                                        "'tbl_store'", 
+                                        "''", 
+                                        "'id, code, description'", 
+                                        0, 
+                                        0, 
+                                        `'id:IN=${store_ids.join('|')}'`,  
+                                        `''`, 
+                                        `''`,
+                                        (result) => {
+                                            result.forEach(store => {
+                                                if (!store_map[store.id]) {
+                                                    store_map[store.id] = {}; // Initialize as an object
+                                                }
+                                                store_map[store.id].description = store.description;
+                                                store_map[store.id].code = store.code;
+                                            });
+                                        }
+                                    );
+
+                                    res.forEach(det => {
+                                        let newData = {
+                                            "Store":store_map[`${det.store}`].code, 
+                                            "Item":det.item, 
+                                            "Item Name":det.item_name, 
+                                            "VMI Status":det.vmi_status, 
+                                            "Item Class":det.item_class, 
+                                            "Supplier":det.supplier, 
+                                            "Group":det.group, 
+                                            "Dept":det.dept, 
+                                            "Class":det.classification, 
+                                            "Sub Class":det.sub_class, 
+                                            "On Hand":det.on_hand, 
+                                            "In Transit":det.in_transit, 
+                                            "Ave Sales Unit":det.average_sales_unit, 
+                                        }
+
+                                        formattedData.push(newData)
+                                    })
+                                }
+                            )
+                        }
+                    }
+                }
+        )
+
+        const headerData = [
+            ["Company Name: Lifestrong Marketing Inc."],
+            ["VMI"],
+            ["Date Printed: " + formatDate(new Date())],
+            [""],
+        ];
+    
+        exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
+    }
+
+    function delete_data(company, year, month, week) {
+        modal.confirm(confirm_delete_message,function(result){
+            if(result){ 
+                var url = "<?= base_url('cms/global_controller');?>";
+                var formattedData = [];
+                let filterArr = []
+                filterArr.push(`c.name:EQ=${company}`);
+                filterArr.push(`y.year:EQ=${year}`);
+                filterArr.push(`m.month:EQ=${month}`);
+                filterArr.push(`w.name:EQ=${week}`);
+
+                let filter = filterArr.join(',')
+
+                dynamic_search(
+                    "'tbl_vmi v'", 
+    
+                    "'left join tbl_company c on v.company = c.id "+
+                    "left join tbl_year y on v.year = y.id "+
+                    "left join tbl_month m on v.month = m.id "+
+                    "left join tbl_week w on v.week = w.id'", 
+    
+                    "'v.id'", 
+    
+                    0, 
+                    0, 
+                    `'${filter}'`,  
+                    `''`, 
+                    `''`,
+                    (res) => {
+                        let updateRecords = [];
+                        res.forEach(item => {
+                            item.updated_date = formatDate(new Date());
+                            item.updated_by = user_id;
+                            item.status = -2;
+                            updateRecords.push(item);
+                            console.log(item.id)
+                        })
+                        console.log(updateRecords, 'updateRecords')
+                        batch_update(url, updateRecords, "tbl_vmi", "id", false, (response) => {
+                            if (response.message !== 'success') {
+                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                            }
+                            modal.alert(success_delete_message, "success", function() {
+                                location.reload();
+                            });
+                        });
+                    }
+                );
+            }
+        });
     }
 
     function exportArrayToCSV(data, filename, headerData) {
