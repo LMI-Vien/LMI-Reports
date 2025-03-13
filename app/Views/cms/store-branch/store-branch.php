@@ -528,45 +528,199 @@
         });
     };
 
-    function delete_data(id) {
-        get_field_values("tbl_store", "code", "id", [id], (res) => {
-            let code = res[id];
-            let message = is_json(confirm_delete_message);
-            message.message = `Delete <b><i>${code}</i></b> from Store/Branch Masterfile?`;
+    // function delete_data(id) {
+    //     get_field_values("tbl_store", "code", "id", [id], (res) => {
+    //         let code = res[id];
+    //         let message = is_json(confirm_delete_message);
+    //         message.message = `Delete <b><i>${code}</i></b> from Store/Branch Masterfile?`;
 
-            modal.confirm(JSON.stringify(message),function(result){
-                if(result){ 
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var data = {
-                        event : "update",
-                        table : "tbl_store",
-                        field : "id",
-                        where : id, 
-                        data : {
-                                updated_date : formatDate(new Date()),
-                                updated_by : user_id,
-                                status : -2
-                        }  
-                    }
-                    aJax.post(url,data,function(result){
-                        var obj = is_json(result);
-                        modal.alert(success_delete_message, 'success', function() {
-                            location.reload();
-                        });
-                    });
-                }
+    //         modal.confirm(JSON.stringify(message),function(result){
+    //             if(result){ 
+    //                 var url = "<?= base_url('cms/global_controller');?>";
+    //                 var data = {
+    //                     event : "update",
+    //                     table : "tbl_store",
+    //                     field : "id",
+    //                     where : id, 
+    //                     data : {
+    //                             updated_date : formatDate(new Date()),
+    //                             updated_by : user_id,
+    //                             status : -2
+    //                     }  
+    //                 }
+    //                 aJax.post(url,data,function(result){
+    //                     var obj = is_json(result);
+    //                     modal.alert(success_delete_message, 'success', function() {
+    //                         location.reload();
+    //                     });
+    //                 });
+    //             }
     
-            });
-        })
-    };
+    //         });
+    //     })
+    // };
+
+    // working CTE
+    // function delete_data(id){
+    //     modal.confirm(confirm_delete_message, function(result) {
+    //         if (result) {
+    //             var checkUrl = "<?= base_url('cms/global_controller'); ?>";
+    //             var checkData = {
+    //                 event: "GetKailanganTeam", 
+    //                 table_fields: "s.id, sg.store_id",
+    //                 table_name: "tbl_store_group sg",
+    //                 table_joins: "JOIN tbl_store s ON s.id = sg.store_id",
+    //                 table_select: "store_id",
+    //                 value: id  
+    //             };
+
+    //             console.log("Checking usage:", checkData);
+
+    //             aJax.post(checkUrl, checkData, function(response) {
+    //                 var obj = is_json(response);
+    //                 console.log("Raw Response: ", response);
+    //                 console.log("Parsed Object: ", obj);
+
+    //                 // Check if the team exists in the response
+    //                 var found = obj.data && obj.data.some(item => item.store_id == id);
+
+    //                 console.log(found);
+
+    //                 if (found) { 
+    //                     modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+    //                 } else {
+    //                     proceed_delete(id);
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
+    // function delete_data(id) {
+    //     modal.confirm(confirm_delete_message, function(result) {
+    //         if (result) {
+    //             var url = "<?= base_url('cms/global_controller');?>"; 
+    //             var data = {
+    //                 event: "list",
+    //                 select: "s.id, s.code, s.description, COUNT(asg.store_id) AS storeid_count, COUNT(ba.store) as bra_count",
+    //                 query: "s.id = " + id, 
+    //                 offset: offset,  
+    //                 limit: limit,   
+    //                 table: "tbl_store s",
+    //                 join: [
+    //                     {
+    //                         table: "tbl_store_group asg",
+    //                         query: "asg.store_id = s.id",
+    //                         type: "left"
+    //                     },
+    //                     {
+    //                         table: "tbl_brand_ambassador ba",
+    //                         query: "ba.store = s.id",
+    //                         type: "left"
+    //                     }
+    //                 ],
+    //                 group: "s.id, s.code, s.description"  
+    //             };
+
+    //             aJax.post(url, data, function(response) {
+    //                 console.log("Raw Response:", response);
+
+    //                 try {
+    //                     var obj = JSON.parse(response);
+    //                     console.log("Parsed Response Data:", obj);
+
+    //                     if (!obj || obj.length === 0) { 
+    //                         console.error("Invalid or empty response:", response);
+    //                         return;
+    //                     }
+
+    //                     // Convert team_count to an integer
+    //                     var Count = Number(obj[0].storeid_count) || 0;
+    //                     console.log("Count:", Count);
+
+    //                     var count2 = Number(obj[0].bra_count) || 0;
+
+    //                     if (Count > 0 || count2 > 0) { 
+    //                         modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+    //                     } else {
+    //                         proceed_delete(id); 
+    //                     }
+    //                 } catch (e) {
+    //                     console.error("Error parsing response:", e, response);
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
+    // function proceed_delete(id) {
+    //     var url = "<?= base_url('cms/global_controller');?>";
+    //     var data = {
+    //         event : "update",
+    //         table : "tbl_store",
+    //         field : "id",
+    //         where : id, 
+    //         data : {
+    //                 updated_date : formatDate(new Date()),
+    //                 updated_by : user_id,
+    //                 status : -2
+    //         }  
+    //     }
+    //     aJax.post(url,data,function(result){
+    //         var obj = is_json(result);
+    //         modal.alert(success_delete_message, 'success', function() {
+    //             location.reload();
+    //         });
+    //     }); 
+    // }
 
     function clear_import_table() {
         $(".import_table").empty()
     };
 
+    // og function
+    // function read_xl_file() {
+    //     let btn = $(".btn.save");
+    //     btn.prop("disabled", false); 
+    //     clear_import_table();
+        
+    //     dataset = [];
+
+    //     const file = $("#file")[0].files[0];
+    //     if (!file) {
+    //         modal.loading_progress(false);
+    //         modal.alert('Please select a file to upload', 'error', ()=>{});
+    //         return;
+    //     }
+
+    //     // File Size Validation (Limit: 30MB) temp
+    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+    //     if (file.size > maxFileSize) {
+    //         modal.loading_progress(false);
+    //         modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+    //         return;
+    //     }
+
+    //     modal.loading_progress(true, "Reviewing Data...");
+
+    //     const reader = new FileReader();
+    //     reader.onload = function(e) {
+    //         const data = new Uint8Array(e.target.result);
+    //         const workbook = XLSX.read(data, { type: "array" });
+    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
+    //         processInChunks(jsonData, 5000, () => {
+    //             paginateData(rowsPerPage);
+    //         });
+    //     };
+    //     reader.readAsArrayBuffer(file);
+    // }
+
+    // try function
     function read_xl_file() {
         let btn = $(".btn.save");
-        btn.prop("disabled", false); 
+        btn.prop("disabled", false);
         clear_import_table();
         
         dataset = [];
@@ -578,11 +732,10 @@
             return;
         }
 
-        // File Size Validation (Limit: 30MB) temp
         const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
         if (file.size > maxFileSize) {
             modal.loading_progress(false);
-            modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
             return;
         }
 
@@ -590,16 +743,38 @@
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
+            const text = e.target.result;
+
+            // Read CSV manually to avoid auto-conversion
+            const workbook = XLSX.read(text, { type: "string", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
+            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+            // Ensure only numbers are treated as text, keeping dates unchanged
+            jsonData = jsonData.map(row => {
+                let fixedRow = {};
+                Object.keys(row).forEach(key => {
+                    let value = row[key];
+
+                    // Convert numbers to text while keeping dates unchanged
+                    if (typeof value === "number") {
+                        value = String(value); // Convert numbers to string
+                    }
+
+                    fixedRow[key] = value !== null && value !== undefined ? value : "";
+                });
+                return fixedRow;
+            });
+
+            console.log(jsonData);
+
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
         };
-        reader.readAsArrayBuffer(file);
+
+        reader.readAsText(file); 
     }
 
     function processInChunks(data, chunkSize, callback) {
@@ -725,6 +900,9 @@
             };
         });
 
+        console.log(jsonData);
+        // return;
+
         let worker = new Worker(base_url + "assets/cms/js/validator_store.js");
         worker.postMessage({ data: jsonData, base_url: base_url });
 
@@ -831,6 +1009,7 @@
                     if (matchedId) {
                         row.id = matchedId;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_date;
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;

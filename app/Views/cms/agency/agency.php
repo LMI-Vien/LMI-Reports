@@ -547,38 +547,109 @@
         });
     }
 
-    function delete_data(id) {
-        var code = '';
+    // function delete_data(id) {
+    //     var code = '';
 
-        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-            code = res;
-            message = is_json(confirm_delete_message);
-            message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
-            modal.confirm(JSON.stringify(message), function(result){
-                if(result){ 
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var data = {
-                        event : "update",
-                        table : "tbl_agency",
-                        field : "id",
-                        where : id, 
-                        data : {
-                                updated_date : formatDate(new Date()),
-                                updated_by : user_id,
-                                status : -2
-                        }  
-                    }
-                    aJax.post(url,data,function(result){
-                        var obj = is_json(result);
-                        modal.alert(success_delete_message, 'success', function() {
-                            location.reload();
-                        });
-                    });
-                }
+    //     get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
+    //         code = res;
+    //         message = is_json(confirm_delete_message);
+    //         message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
+    //         modal.confirm(JSON.stringify(message), function(result){
+    //             if(result){ 
+    //                 var url = "<?= base_url('cms/global_controller');?>";
+    //                 var data = {
+    //                     event : "update",
+    //                     table : "tbl_agency",
+    //                     field : "id",
+    //                     where : id, 
+    //                     data : {
+    //                             updated_date : formatDate(new Date()),
+    //                             updated_by : user_id,
+    //                             status : -2
+    //                     }  
+    //                 }
+    //                 aJax.post(url,data,function(result){
+    //                     var obj = is_json(result);
+    //                     modal.alert(success_delete_message, 'success', function() {
+    //                         location.reload();
+    //                     });
+    //                 });
+    //             }
     
-            });
-        });
-    }
+    //         });
+    //     });
+    // }
+
+    // function delete_data(id) {
+    //     modal.confirm(confirm_delete_message, function(result) {
+    //         if (result) {
+    //             var url = "<?= base_url('cms/global_controller');?>"; 
+    //             var data = {
+    //                 event: "list",
+    //                 select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
+    //                 query: "a.id = " + id, 
+    //                 offset: offset,  
+    //                 limit: limit,   
+    //                 table: "tbl_agency a",
+    //                 join: [
+    //                     {
+    //                         table: "tbl_brand_ambassador bra",
+    //                         query: "bra.agency = a.id",
+    //                         type: "left"
+    //                     }
+    //                 ],
+    //                 group: "a.id, a.code, a.agency"  
+    //             };
+
+    //             aJax.post(url, data, function(response) {
+    //                 console.log("Raw Response:", response);
+
+    //                 try {
+    //                     var obj = JSON.parse(response);
+    //                     console.log("Parsed Response Data:", obj);
+
+    //                     if (!obj || obj.length === 0) { 
+    //                         console.error("Invalid or empty response:", response);
+    //                         return;
+    //                     }
+
+    //                     // Convert team_count to an integer
+    //                     var Count = Number(obj[0].agency_count) || 0;
+    //                     console.log("Count:", Count);
+
+    //                     if (Count > 0) { 
+    //                         modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+    //                     } else {
+    //                         proceed_delete(id); 
+    //                     }
+    //                 } catch (e) {
+    //                     console.error("Error parsing response:", e, response);
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
+    // function proceed_delete(id) {
+    //     var url = "<?= base_url('cms/global_controller');?>";
+    //     var data = {
+    //         event : "update",
+    //         table : "tbl_agency",
+    //         field : "id",
+    //         where : id, 
+    //         data : {
+    //                 updated_date : formatDate(new Date()),
+    //                 updated_by : user_id,
+    //                 status : -2
+    //         }  
+    //     }
+    //     aJax.post(url,data,function(result){
+    //         var obj = is_json(result);
+    //         modal.alert(success_delete_message, 'success', function() {
+    //             location.reload();
+    //         });
+    //     }); 
+    // }
 
     function populate_modal(inp_id) {
         var query = "status >= 0 and id = " + inp_id;
@@ -790,6 +861,7 @@
                     if (matchedId) {
                         row.id = matchedId;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_date;
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
@@ -860,9 +932,48 @@
         });
     }
 
+    // function read_xl_file() {
+    //     let btn = $(".btn.save");
+    //     btn.prop("disabled", false); 
+    //     clear_import_table();
+        
+    //     dataset = [];
+
+    //     const file = $("#file")[0].files[0];
+    //     if (!file) {
+    //         modal.loading_progress(false);
+    //         modal.alert('Please select a file to upload', 'error', ()=>{});
+    //         return;
+    //     }
+
+    //     // File Size Validation (Limit: 30MB) temp
+    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+    //     if (file.size > maxFileSize) {
+    //         modal.loading_progress(false);
+    //         modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+    //         return;
+    //     }
+
+    //     modal.loading_progress(true, "Reviewing Data...");
+
+    //     const reader = new FileReader();
+    //     reader.onload = function(e) {
+    //         const data = new Uint8Array(e.target.result);
+    //         const workbook = XLSX.read(data, { type: "array" });
+    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
+    //         processInChunks(jsonData, 5000, () => {
+    //             paginateData(rowsPerPage);
+    //         });
+    //     };
+    //     reader.readAsArrayBuffer(file);
+    // }
+
+    // try function
     function read_xl_file() {
         let btn = $(".btn.save");
-        btn.prop("disabled", false); 
+        btn.prop("disabled", false);
         clear_import_table();
         
         dataset = [];
@@ -874,11 +985,10 @@
             return;
         }
 
-        // File Size Validation (Limit: 30MB) temp
         const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
         if (file.size > maxFileSize) {
             modal.loading_progress(false);
-            modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
             return;
         }
 
@@ -886,17 +996,40 @@
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
+            const text = e.target.result;
+
+            // Read CSV manually to avoid auto-conversion
+            const workbook = XLSX.read(text, { type: "string", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
+            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+            // Ensure only numbers are treated as text, keeping dates unchanged
+            jsonData = jsonData.map(row => {
+                let fixedRow = {};
+                Object.keys(row).forEach(key => {
+                    let value = row[key];
+
+                    // Convert numbers to text while keeping dates unchanged
+                    if (typeof value === "number") {
+                        value = String(value); // Convert numbers to string
+                    }
+
+                    fixedRow[key] = value !== null && value !== undefined ? value : "";
+                });
+                return fixedRow;
+            });
+
+            console.log(jsonData);
+
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
         };
-        reader.readAsArrayBuffer(file);
+
+        reader.readAsText(file); 
     }
+
 
     function processInChunks(data, chunkSize, callback) {
         let index = 0;

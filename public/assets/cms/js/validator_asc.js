@@ -14,7 +14,7 @@ self.onmessage = async function(e) {
 
         area_records = ba_data.areas;
         let area_lookup = {};
-        area_records.forEach(area => area_lookup[area.description] = area.id);
+        area_records.forEach(area => area_lookup[area.code] = area.id);
 
         function formatDateForDB(dateStr) {
             let [month, day, year] = dateStr.split('/');

@@ -756,9 +756,48 @@
         $(".import_buttons").append($downloadBtn);
     }
 
-    function read_xl_file() {
-        clear_import_table();
+    // function read_xl_file() {
+    //     clear_import_table();
         
+    //     dataset = [];
+
+    //     const file = $("#file")[0].files[0];
+    //     if (!file) {
+    //         modal.loading_progress(false);
+    //         modal.alert('Please select a file to upload', 'error', ()=>{});
+    //         return;
+    //     }
+    //     // File Size Validation (Limit: 30MB) temp
+    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+    //     if (file.size > maxFileSize) {
+    //         modal.loading_progress(false);
+    //         modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+    //         return;
+    //     }
+
+    //     modal.loading_progress(true, "Reviewing Data...");
+
+    //     const reader = new FileReader();
+    //     reader.onload = function(e) {
+    //         const data = new Uint8Array(e.target.result);
+    //         const workbook = XLSX.read(data, { type: "array" });
+    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
+    //         // Process in chunks
+    //         processInChunks(jsonData, 5000, () => {
+    //             paginateData(rowsPerPage);
+    //         });
+    //     };
+    //     reader.readAsArrayBuffer(file);
+    // }
+
+    // try function
+    function read_xl_file() {
+        let btn = $(".btn.save");
+        btn.prop("disabled", false);
+        clear_import_table();
+
         dataset = [];
 
         const file = $("#file")[0].files[0];
@@ -767,11 +806,11 @@
             modal.alert('Please select a file to upload', 'error', ()=>{});
             return;
         }
-        // File Size Validation (Limit: 30MB) temp
+
         const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
         if (file.size > maxFileSize) {
             modal.loading_progress(false);
-            modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
             return;
         }
 
@@ -779,18 +818,40 @@
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
+            const text = e.target.result;
+
+            // Read CSV manually to avoid auto-conversion
+            const workbook = XLSX.read(text, { type: "string", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-            // Process in chunks
+            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+            // Ensure only numbers are treated as text, keeping dates unchanged
+            jsonData = jsonData.map(row => {
+                let fixedRow = {};
+                Object.keys(row).forEach(key => {
+                    let value = row[key];
+
+                    // Convert numbers to text while keeping dates unchanged
+                    if (typeof value === "number") {
+                        value = String(value); // Convert numbers to string
+                    }
+
+                    fixedRow[key] = value !== null && value !== undefined ? value : "";
+                });
+                return fixedRow;
+            });
+
+            console.log(jsonData);
+
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
         };
-        reader.readAsArrayBuffer(file);
+
+        reader.readAsText(file, 'UTF-8');
     }
+
 
     function processInChunks(data, chunkSize, callback) {
         let index = 0;
@@ -1162,6 +1223,7 @@
                     if (matchFound) {
                         row.id = existingId;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_date;
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
