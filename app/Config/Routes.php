@@ -21,6 +21,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('store-performance', 'TradeDashboard::store_performance');
     $routes->get('trade-ba', 'TradeDashboard::trade_ba');
     $routes->get('trade-overall-ba', 'TradeDashboard::trade_overall_ba');
+    $routes->get('trade-info-asc', 'TradeDashboard::trade_info_asc');
 });
 
 

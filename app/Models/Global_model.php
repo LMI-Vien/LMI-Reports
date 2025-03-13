@@ -974,7 +974,6 @@ class Global_model extends Model
             ->getResultArray();
 
             return $results;
-
     }
 
     function get_weeks() {

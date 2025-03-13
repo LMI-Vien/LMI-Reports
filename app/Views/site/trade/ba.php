@@ -59,48 +59,16 @@
                                     <label for="brandAmbassador">Brand Ambassador</label>
                                     <input id="brand_ambassadors" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="ba_id">
-                                    <!-- <select class="form-control" id="brand_ambassador">
-                                        <option value="0">Please select..</option>
-                                        <?php
-                                        // print_r($brand_ambassador);
-                                        // die();
-                                            if($brand_ambassador){
-                                                foreach ($brand_ambassador as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['description']."</option>";
-                                                }
-                                            }
-                                        ?>
-                                    </select> -->
                                 </div>
                                 <div class="col-md-4">
                                     <label for="storeName">Store Name</label>
                                     <input id="store_branch" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="store_id">
-                                    <!-- <select class="form-control" id="store_name">
-                                        <option value="0">Please select..</option>
-                                        <?php
-                                            if($store_branch){
-                                                foreach ($store_branch as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['description']."</option>";
-                                                }
-                                            }
-                                        ?>
-                                    </select> -->
                                 </div>
                                 <div class="col-md-4">
                                     <label for="brand">Brand</label>
                                     <input id="brand" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="brand_id">
-                                    <!-- <select class="form-control" id="brand">
-                                        <option value="0">Please select..</option>
-                                        <?php
-                                            if($brands){
-                                                foreach ($brands as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['brand_description']."</option>";
-                                                }                                                
-                                            }
-                                        ?>
-                                    </select> -->
                                 </div>
                             </div>
                             <div class="row mt-3">
@@ -290,6 +258,9 @@
             ajax: {
                 url: base_url + 'trade-dashboard/trade-ba',
                 type: 'GET',
+                // beforeSend: function() {
+                //     $(tableId).DataTable().processing(true); // Show loading
+                // },
                 data: function (d) {
                     d.sort_field = selectedSortField;
                     d.sort = selectedSortOrder;
@@ -301,7 +272,10 @@
                     d.limit = d.length;
                     d.offset = d.start;
                 },
-                dataSrc: 'data'
+                dataSrc: function(json) {
+                  //  $(tableId).DataTable().processing(false); // Hide loading
+                    return json.data.length ? json.data : [];
+                }
             },
             columns: [
                 { data: 'item_name' },

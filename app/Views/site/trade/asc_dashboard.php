@@ -87,10 +87,16 @@
                             </div>
                             <div class="col-md-3">
                                 <label for="year">Year</label>
-                                <select class="form-control" id="year">
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
-                                </select>
+                                    <select class="form-control" id="year">
+                                        <option value="0">Please select..</option>
+                                        <?php
+                                            if($year){
+                                                foreach ($year as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['year']."</option>";
+                                                }                                                
+                                            }
+                                        ?>
+                                    </select>
                             </div>
                         </div>
 
@@ -132,10 +138,12 @@
                 </div>
 
                 <!-- Chart Container (Will be dynamically filled) -->
-                <div id="chartContainer" class="row"></div>
-
+                <div class="mb-3" style="overflow-x: auto; padding: 0px;">
+                    <div id="chartContainer" class="d-flex flex-row"></div>
+                </div>
                 <!-- Data Table -->
                 <div class="table-responsive mt-4">
+                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
                     <table class="table table-bordered text-center">
                         <thead class="thead-light">
                             <tr>
@@ -152,6 +160,7 @@
                             <tr><td>% Achieved</td><td colspan="12"></td></tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
 

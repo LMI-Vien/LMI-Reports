@@ -93,27 +93,39 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label for="store">Store Name</label>
-                                    <input type="text" class="form-control" id="store" placeholder="Enter store">
+                                    <input id="store" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="store_id">
                                 </div>
                                 <div class="col-md-4">
                                     <label for="area">Area</label>
-                                    <input type="text" class="form-control" id="area" placeholder="Enter area">
+                                    <input id="area" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="area_id">
                                 </div>
                                 <div class="col-md-4 d-flex gap-2">
                                     <div>
                                         <label for="month">Month</label>
                                         <select class="form-control" id="month">
-                                            <option>January</option>
-                                            <option>February</option>
+                                            <option value="0">Please select..</option>
+                                            <?php
+                                                if($month){
+                                                    foreach ($month as $value) {
+                                                        echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                                    }                                                
+                                                }
+                                            ?>
                                         </select>
                                     </div>
                                     <div>
                                         <label for="year">Year</label>
                                         <select class="form-control" id="year">
-                                            <option>2024</option>
-                                            <option>2025</option>
+                                            <option value="0">Please select..</option>
+                                            <?php
+                                                if($year){
+                                                    foreach ($year as $value) {
+                                                        echo "<option value=".$value['id'].">".$value['year']."</option>";
+                                                    }                                                
+                                                }
+                                            ?>
                                         </select>
                                     </div>
                                 </div>
@@ -143,37 +155,25 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                 <!-- DataTables Section -->
                 <div class="card mt-4 p-4 shadow-sm">
                     <div class="tbl-title-bg"><h5>OVERALL BA SALES TARGET</h5></div>
+                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <table id="info_for_asc" class="table table-bordered table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Area</th>
+                                    <th>Area Sales Coordinator</th>
+                                    <th>Actual Sales Report</th>
+                                    <th>Target</th>
+                                    <th>% Achieved</th>
+                                    <th>Balance To Target</th>
+                                    <th>Target per Remaining days</th>
 
-                    <table id="dataTable4" class="table table-bordered table-responsive">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Area</th>
-                                <th>Area Sales Coordinator</th>
-                                <th>Actual Sales Report</th>
-                                <th>Target</th>
-                                <th>% Achieved</th>
-                                <th>Balance To Target</th>
-                                <th>Target per Remaining days</th>
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Alice Brown</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                        </tbody>
-                    </table>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 
                 <!-- Buttons -->
@@ -192,52 +192,85 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
-<script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js"></script>
+<!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
+<script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js"></script> -->
 
 <script>
-$(document).ready(function() {
-    let store = <?= json_encode($store_branch); ?>;
-    let area = <?= json_encode($area); ?>;
+    var base_url = "<?= base_url(); ?>";
+    let store_branch = <?= json_encode($store_branch) ?>;
+    let area = <?= json_encode($area) ?>;
 
-    autocomplete_field($("#store"), $("#store_id"), store);
-    autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+    $(document).ready(function() {
 
-    let table = $('#dataTable4').DataTable({
-        paging: true,
-        searching: false,
-        ordering: true,
-        info: true,
-        lengthChange: false,
-        colReorder: true, // Enable column reordering
-    });
+        initializeTable();
+        autocomplete_field($("#store"), $("#store_id"), store_branch);
+        autocomplete_field($("#area"), $("area_id"), area, "area_description");
 
-    // Column Toggle Feature
-    table.columns().every(function(index) {
-        let column = this;
-        let columnTitle = $(column.header()).text();
-
-        let checkbox = $('<input>', {
-            type: 'checkbox',
-            checked: true,
-            change: function() {
-                column.visible($(this).prop('checked'));
-            }
+        $(document).on('click', '#refreshButton', function () {
+            fetchData();
         });
-
-        $('#columnToggleContainer').append(
-            $('<label class="mx-2">').append(checkbox, " " + columnTitle)
-        );
-        $('#columnToggleContainer').hide();
     });
-});
 
-$(document).on('click', '#toggleColumnsButton', function (e) {
-    $('#columnToggleContainer').toggle();
-});
+    function fetchData() {
+        let selectedStore = $('#store_id').val();
+        let selectedArea = $('#area_id').val();
+        let selectedMonth = $('#month').val();
+        let selectedYear = $('#year').val();
+        let selectedSortField = $('#sortBy').val();
+        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
-$(document).on('click', '#refreshButton', function(e) {
-    
-})
+        initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
+    }
+
+    function initializeTable(selectedStore = null, selectedArea = null, selectedMonth = null, selectedYear = null, selectedSortField = null, selectedSortOrder = null) {
+        
+        if ($.fn.DataTable.isDataTable('#info_for_asc')) {
+            let existingTable = $('#info_for_asc').DataTable();
+            existingTable.clear().destroy();
+        }
+
+        let table = $('#info_for_asc').DataTable({
+            paging: true,
+            searching: false,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            colReorder: true, 
+            ajax: {
+                url: base_url + 'trade-dashboard/trade-info-asc',
+                type: 'GET',
+                data: function(d) {
+                    d.sort_field = selectedSortField;
+                    d.sort = selectedSortOrder;
+                    d.year = selectedYear === "0" ? null : selectedYear;
+                    d.month = selectedMonth === "0" ? null : selectedMonth;
+                    d.area = selectedArea === "0" ? null : selectedArea;
+                    d.store = selectedStore === "0" ? null : selectedStore;
+                    d.limit = d.length;
+                    d.offset = d.start;
+                },
+                dataSrc: function(json) {
+                    console.log(json.data);
+                    return json.data.length ? json.data : [];
+                }
+            },
+            columns: [
+                { data: 'rank' },
+                { data: 'area' },
+                { data: 'asc_names' },
+                { data: 'actual_sales' },
+                { data: 'target_sales' },
+                { data: 'percent_ach' },
+                { data: 'balance_to_target' },
+                { data: 'target_per_remaining_days' }
+            ].filter(Boolean),
+            pagingType: "full_numbers",
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            lengthChange: false
+        });
+    }
 
 </script>
