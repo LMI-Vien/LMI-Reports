@@ -1444,119 +1444,96 @@
     //     })
     // }
 
-    // trying CTE
-    // function delete_data(id) {
-    //     modal.confirm(confirm_delete_message, function(result) {
-    //         if (result) {
-    //             var checkUrl = "<?= base_url('cms/global_controller'); ?>";
-    //             var checkData = {
-    //                 event: "GetKailanganTeam", 
-    //                 table_fields: "s.id, sg.store_id",
-    //                 table_name: "tbl_store_group sg",
-    //                 table_joins: "JOIN tbl_store s ON s.id = sg.store_id",
-    //                 table_select: "store_id",
-    //                 value: id  
-    //             };
+    function delete_data(id) {
+        get_field_values("tbl_area", "code", "id", [id], function (res) {
+            let code = res[id];
+            let message = is_json(confirm_delete_message);
+            message.message = `Code <i><b>${code}</b></i> from Area Masterfile`;
+            modal.confirm(JSON.stringify(message),function(result){
+                if (result) {
+                    var url = "<?= base_url('cms/global_controller');?>"; 
+                    var data = {
+                        event: "list",
+                        select: "a.id, a.code, COUNT(arsc.area_id) AS arsc_count, COUNT(bra.area) AS bra_count",
+                        query: "a.id = " + id, 
+                        offset: offset,  
+                        limit: limit,   
+                        table: "tbl_area a",
+                        join: [
+                            {
+                                table: "tbl_area_sales_coordinator arsc",
+                                query: "arsc.area_id = a.id",
+                                type: "left"
+                            },
+                            {
+                                table: "tbl_brand_ambassador bra",
+                                query: "bra.area = a.id",
+                                type: "left"
+                            }
+                        ],
+                        group: "a.id, a.code"  
+                    };
 
-    //             console.log("Checking usage:", checkData);
+                    aJax.post(url, data, function(response) {
+                        console.log("Raw Response:", response);
 
-    //             aJax.post(checkUrl, checkData, function(response) {
-    //                 var obj = is_json(response);
-    //                 console.log("Raw Response: ", response);
-    //                 console.log("Parsed Object: ", obj);
+                        try {
+                            var obj = JSON.parse(response);
+                            console.log("Parsed Response Data:", obj);
 
-    //                 // Check if the team exists in the response
-    //                 var found = obj.data && obj.data.some(item => item.store_id == id);
+                            if (!Array.isArray(obj)) { 
+                                console.error("Invalid response format:", response);
+                                modal.alert("Error processing response data.", "error", ()=>{});
+                                return;
+                            }
 
-    //                 console.log(found);
+                            if (obj.length === 0) {
+                                proceed_delete(id); 
+                                return;
+                            }
 
-    //                 if (found) { 
-    //                     modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                 } else {
-    //                     proceed_delete(id);
-    //                 }
-    //             });
-    //         }
-    //     });
-    // }
+                            // Convert team_count to an integer
+                            var Count = Number(obj[0].arsc_count) || 0;
+                            var bracount = Number(obj[0].bra_count) || 0;
 
-    // function delete_data(id) {
-    //     modal.confirm(confirm_delete_message, function(result) {
-    //         if (result) {
-    //             var url = "<?= base_url('cms/global_controller');?>"; 
-    //             var data = {
-    //                 event: "list",
-    //                 select: "a.id, a.code, COUNT(arsc.area_id) AS arsc_count, COUNT(bra.area) AS bra_count",
-    //                 query: "a.id = " + id, 
-    //                 offset: offset,  
-    //                 limit: limit,   
-    //                 table: "tbl_area a",
-    //                 join: [
-    //                     {
-    //                         table: "tbl_area_sales_coordinator arsc",
-    //                         query: "arsc.area_id = a.id",
-    //                         type: "left"
-    //                     },
-    //                     {
-    //                         table: "tbl_brand_ambassador bra",
-    //                         query: "bra.area = a.id",
-    //                         type: "left"
-    //                     }
-    //                 ],
-    //                 group: "a.id, a.code"  
-    //             };
+                            console.log("ASC COUNT MOTO: ",Count);
+                            console.log("BRA AMBA COUNT MOTO",bracount);
 
-    //             aJax.post(url, data, function(response) {
-    //                 console.log("Raw Response:", response);
+                            if (Count > 0 || bracount > 0) { 
+                                modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+                            } else {
+                                proceed_delete(id); 
+                            }
+                        } catch (e) {
+                            console.error("Error parsing response:", e, response);
+                            modal.alert("Error processing response data.", "error", ()=>{});
+                        }
+                    });
+                }
+            });
+        });
+    }
 
-    //                 try {
-    //                     var obj = JSON.parse(response);
-    //                     console.log("Parsed Response Data:", obj);
-
-    //                     if (!obj || obj.length === 0) { 
-    //                         console.error("Invalid or empty response:", response);
-    //                         return;
-    //                     }
-
-    //                     // Convert team_count to an integer
-    //                     var Count = Number(obj[0].arsc_count) || 0;
-    //                     console.log("Count:", Count);
-
-    //                     var bracount = Number(obj[0].bra_count) || 0;
-
-    //                     if (Count > 0 || bracount > 0) { 
-    //                         modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                     } else {
-    //                         proceed_delete(id); 
-    //                     }
-    //                 } catch (e) {
-    //                     console.error("Error parsing response:", e, response);
-    //                 }
-    //             });
-    //         }
-    //     });
-    // }
-
-    // function proceed_delete(id) {
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event : "update",
-    //         table : "tbl_area",
-    //         field : "id",
-    //         where : id, 
-    //         data : {
-    //                 updated_date : formatDate(new Date()),
-    //                 updated_by : user_id,
-    //                 status : -2
-    //         }  
-    //     }
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result);
-    //         modal.alert(success_delete_message, 'success', function() {
-    //             location.reload();
-    //         });
-    //     }); 
-    // }
+    function proceed_delete(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "update",
+            table : "tbl_area",
+            field : "id",
+            where : id, 
+            data : {
+                    updated_date : formatDate(new Date()),
+                    updated_by : user_id,
+                    status : -2
+            }  
+        }
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            modal.alert(success_delete_message, 'success', function() {
+                location.reload();
+            });
+        }); 
+    }
 
     function formatDate(date) {
         const year = date.getFullYear();
