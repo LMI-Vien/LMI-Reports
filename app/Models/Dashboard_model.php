@@ -285,164 +285,76 @@ class Dashboard_model extends Model
     }
 
     //actual
-	public function tradeOverallBaData($store = null, $area = null, $date = null, $sort_field = null, $sort = 'ASC', $limit = 10, $offset = 0, $parameter_from_function = 25)
-	{
-	    // Step 1: Optimized subquery for actual sales
-	    $subquery = $this->db->table('tbl_ba_sales_report')
-	        ->select("area_id, SUM(amount) AS actual_sales, date")
-	        ->where('status', 1)
-	        ->groupBy('area_id')
-	        ->getCompiledSelect();
-
-	    // Step 2: Main query with proper ranking and sorting
-	    $query = $this->db->table("($subquery) AS aggregated_sps")
-	        ->select("
-	            aggregated_sps.area_id,
-	            tbl_area.description as area,
-	            tbl_store.code as store_code,
-	            tbl_store.description as store_name,
-	            aggregated_sps.actual_sales,
-	            aggregated_sps.date,
-	            COUNT(tbl_ba_sales_report.area_id) OVER() AS total_records,
-	            GROUP_CONCAT(DISTINCT tbl_brand.brand_description ORDER BY tbl_brand.brand_description SEPARATOR ', ') AS brands,
-	            COALESCE(SUM(tbl_target_sales_per_store.january), 0) AS target,
-	            ROUND((aggregated_sps.actual_sales / NULLIF(COALESCE(SUM(tbl_target_sales_per_store.january), 0), 0)) * 100, 2) AS arch,
-	            COALESCE(SUM(tbl_target_sales_per_store.january), 0) - aggregated_sps.actual_sales AS balance_to_target,
-	            COALESCE(aggregated_sps.actual_sales, 0) * 0.01 AS possible_incentives,
-	            CEIL((COALESCE(SUM(tbl_target_sales_per_store.january), 0) - aggregated_sps.actual_sales) / NULLIF($parameter_from_function, 0)) AS target_per_rem_days,
-	            ROUND(COALESCE(SUM(tbl_sell_out_data_details.net_sales), 0), 2) AS ly_scanned_data,
-	            tbl_brand_ambassador.name AS brand_ambassador_name,
-	            tbl_brand_ambassador.deployment_date AS ba_deployment_date,
-	            ROW_NUMBER() OVER (
-	                ORDER BY 
-	                    CASE 
-	                        WHEN aggregated_sps.actual_sales IS NULL OR aggregated_sps.actual_sales = 0 
-	                        THEN NULL
-	                        ELSE ROUND((aggregated_sps.actual_sales / NULLIF(COALESCE(SUM(tbl_target_sales_per_store.january), 0), 0)) * 100, 2)
-	                    END DESC
-	            ) AS rank,
-	            ROUND(COALESCE(aggregated_sps.actual_sales, 0) / NULLIF(SUM(tbl_sell_out_data_details.net_sales), 0), 2) AS growth
-	        ")
-	        ->join('tbl_ba_sales_report', 'aggregated_sps.area_id = tbl_ba_sales_report.area_id', 'left')
-	        ->join('tbl_store', 'tbl_ba_sales_report.store_id = tbl_store.id', 'inner')
-	        ->join('tbl_area', 'tbl_ba_sales_report.area_id = tbl_area.id', 'inner')
-	        ->join('tbl_brand', 'tbl_ba_sales_report.brand = tbl_brand.id', 'left')
-	        ->join('tbl_target_sales_per_store', 'tbl_ba_sales_report.store_id = tbl_target_sales_per_store.location', 'left')
-	        ->join('tbl_brand_ambassador', 'tbl_ba_sales_report.ba_id = tbl_brand_ambassador.id', 'inner')
-	        ->join('tbl_sell_out_data_details', 'tbl_ba_sales_report.store_id = tbl_sell_out_data_details.store_code', 'left')
-	        ->groupBy('aggregated_sps.area_id');
-
-	    if (!empty($store)) {
-	        $query->where('tbl_store.id', $store);
-	    }
-
-	    if (!empty($area)) {
-	        $query->where('tbl_area.id', $area);
-	    }
-
-	    if (!empty($date)) {
-	        //$query->where('aggregated_sps.date LIKE', '%' . $date . '%');
-	    }
-
-	    if (in_array($sort_field, ['rank', 'store_code', 'area', 'store', 'actual_sales', 'target', 'arch', 'balance_to_target', 'possible_incentives', 'target_per_rem_days'])) {
-	        $query->orderBy($sort_field, $sort);
-	    } else {
-	        $query->orderBy('rank', 'ASC'); 
-	    }
-
-	    $query->limit($limit, $offset);
-
-	    $data = $query->get()->getResult();
-
-	    $totalRecords = count($data) > 0 ? $data[0]->total_records : 0;
-
-	    return [
-	        'total_records' => $totalRecords,
-	        'data' => $data
-	    ];
-	}
-
-	// public function tradeOverallBaData2($store = null, $area = null, $date = null, $month = null, $year = null, $lyear = null, $lookup_month = null, $sort_field = null, $sort = 'ASC', $limit = 10, $offset = 0, $rem_days = 25)
+	// public function tradeOverallBaData($store = null, $area = null, $date = null, $sort_field = null, $sort = 'ASC', $limit = 10, $offset = 0, $parameter_from_function = 25)
 	// {
-	// 	// $lyear = 1;
-	// 	//$year = 1;
-	//     $query = $this->db->table("tbl_trade_db_overall_ba")
-	//         ->select("
-	//             area_id, 
-	//             area, 
-	//             store_code, 
-	//             store_name, 
-	//             actual_sales, 
-	//             date, 
-	//             brands, 
-	//             brand_ambassador_name, 
-	//             ba_deployment_date,
-	//             possible_incentives
-	//         ");
+	//     // Step 1: Optimized subquery for actual sales
+	//     $subquery = $this->db->table('tbl_ba_sales_report')
+	//         ->select("area_id, SUM(amount) AS actual_sales, date")
+	//         ->where('status', 1)
+	//         ->groupBy('area_id')
+	//         ->getCompiledSelect();
 
-	//     if ($lookup_month !== null) {
-	//         // Include computed columns only if $lookup_month is provided
-	//         $query->select("
-	//             $lookup_month AS target,
-	//             ROUND((actual_sales / NULLIF($lookup_month, 0)) * 100, 2) AS arch,
-	//             COALESCE($lookup_month, 0) - actual_sales AS balance_to_target,
-	//             CEIL((COALESCE($lookup_month, 0) - actual_sales) / NULLIF($rem_days, 0)) AS target_per_rem_days,
+	//     // Step 2: Main query with proper ranking and sorting
+	//     $query = $this->db->table("($subquery) AS aggregated_sps")
+	//         ->select("
+	//             aggregated_sps.area_id,
+	//             tbl_area.description as area,
+	//             tbl_store.code as store_code,
+	//             tbl_store.description as store_name,
+	//             aggregated_sps.actual_sales,
+	//             aggregated_sps.date,
+	//             COUNT(tbl_ba_sales_report.area_id) OVER() AS total_records,
+	//             GROUP_CONCAT(DISTINCT tbl_brand.brand_description ORDER BY tbl_brand.brand_description SEPARATOR ', ') AS brands,
+	//             COALESCE(SUM(tbl_target_sales_per_store.january), 0) AS target,
+	//             ROUND((aggregated_sps.actual_sales / NULLIF(COALESCE(SUM(tbl_target_sales_per_store.january), 0), 0)) * 100, 2) AS arch,
+	//             COALESCE(SUM(tbl_target_sales_per_store.january), 0) - aggregated_sps.actual_sales AS balance_to_target,
+	//             COALESCE(aggregated_sps.actual_sales, 0) * 0.01 AS possible_incentives,
+	//             CEIL((COALESCE(SUM(tbl_target_sales_per_store.january), 0) - aggregated_sps.actual_sales) / NULLIF($parameter_from_function, 0)) AS target_per_rem_days,
+	//             ROUND(COALESCE(SUM(tbl_sell_out_data_details.net_sales), 0), 2) AS ly_scanned_data,
+	//             tbl_brand_ambassador.name AS brand_ambassador_name,
+	//             tbl_brand_ambassador.deployment_date AS ba_deployment_date,
 	//             ROW_NUMBER() OVER (
-	//             ORDER BY 
-	//                 CASE 
-	//                     WHEN actual_sales IS NULL OR actual_sales = 0 
-	//                     THEN NULL
-	//                     ELSE ROUND((actual_sales / NULLIF(COALESCE($lookup_month, 0), 0)) * 100, 2)
-	//                 END DESC
-	//         ) AS rank
-	//         ");
-	//     } else {
-	//         // Add empty values as default when $lookup_month is null
-	//         $query->select("
-	//             '' AS ly_scanned_data,
-	//             '' AS growth,
-	//             '' AS target,
-	//             '' AS arch,
-	//             '' AS balance_to_target,
-	//             '' AS target_per_rem_days,
-	//             '' AS rank
-	//         ");
-	//     }
+	//                 ORDER BY 
+	//                     CASE 
+	//                         WHEN aggregated_sps.actual_sales IS NULL OR aggregated_sps.actual_sales = 0 
+	//                         THEN NULL
+	//                         ELSE ROUND((aggregated_sps.actual_sales / NULLIF(COALESCE(SUM(tbl_target_sales_per_store.january), 0), 0)) * 100, 2)
+	//                     END DESC
+	//             ) AS rank,
+	//             ROUND(COALESCE(aggregated_sps.actual_sales, 0) / NULLIF(SUM(tbl_sell_out_data_details.net_sales), 0), 2) AS growth
+	//         ")
+	//         ->join('tbl_ba_sales_report', 'aggregated_sps.area_id = tbl_ba_sales_report.area_id', 'left')
+	//         ->join('tbl_store', 'tbl_ba_sales_report.store_id = tbl_store.id', 'inner')
+	//         ->join('tbl_area', 'tbl_ba_sales_report.area_id = tbl_area.id', 'inner')
+	//         ->join('tbl_brand', 'tbl_ba_sales_report.brand = tbl_brand.id', 'left')
+	//         ->join('tbl_target_sales_per_store', 'tbl_ba_sales_report.store_id = tbl_target_sales_per_store.location', 'left')
+	//         ->join('tbl_brand_ambassador', 'tbl_ba_sales_report.ba_id = tbl_brand_ambassador.id', 'inner')
+	//         ->join('tbl_sell_out_data_details', 'tbl_ba_sales_report.store_id = tbl_sell_out_data_details.store_code', 'left')
+	//         ->groupBy('aggregated_sps.area_id');
 
 	//     if (!empty($store)) {
-	//         $query->where('store_code', $store);
+	//         $query->where('tbl_store.id', $store);
 	//     }
 
 	//     if (!empty($area)) {
-	//         $query->where('area_id', $area);
+	//         $query->where('tbl_area.id', $area);
 	//     }
 
 	//     if (!empty($date)) {
-	//         $query->where('date LIKE', '%' . $date . '%');
+	//         //$query->where('aggregated_sps.date LIKE', '%' . $date . '%');
 	//     }
-	//     // print_r($year);
-	//     // die();
-	//     if (!empty($year) || !empty($month)) {
-	//     	if (!empty($year)){
-	//     		$query->where('yr_ts_per_store', $year);
-	//     		$query->where('ly_year_sell_out', $lyear);
-	//     	}
-	//     	if (!empty($month)){
-	//     		$query->where('ly_month_sell_out', $month);
-	//     	}
-	//     }
-	//     //yr_ts_per_store
 
-	//     if (in_array($sort_field, ['rank', 'store_code', 'area', 'store_name', 'actual_sales', 'target', 'arch', 'balance_to_target', 'possible_incentives', 'target_per_rem_days'])) {
+	//     if (in_array($sort_field, ['rank', 'store_code', 'area', 'store', 'actual_sales', 'target', 'arch', 'balance_to_target', 'possible_incentives', 'target_per_rem_days'])) {
 	//         $query->orderBy($sort_field, $sort);
 	//     } else {
-	//         $query->orderBy('rank', 'ASC');
+	//         $query->orderBy('rank', 'ASC'); 
 	//     }
 
 	//     $query->limit($limit, $offset);
 
 	//     $data = $query->get()->getResult();
-	//     $totalRecords = count($data);
+
+	//     $totalRecords = count($data) > 0 ? $data[0]->total_records : 0;
 
 	//     return [
 	//         'total_records' => $totalRecords,
