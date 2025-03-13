@@ -64,10 +64,9 @@
 
 <script>
     var url = "<?= base_url('cms/global_controller');?>";
+    var import_sellout_id = "<?=$uri->getSegment(4);?>";
 
     $(document).ready(function() {
-        var import_sellout_id = "<?=$uri->getSegment(4);?>";
-
         $("#sell_out_title").html(addNbsp("VIEW SELLOUT DATA"));
 
         renderHeader(import_sellout_id)
@@ -79,12 +78,12 @@
         join = 'left join tbl_month b on a.month = b.id';
         fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
         limit = 0;
-        offset = 0;
+        dynaoffset = 0;
         filter = `a.id:EQ=${header_id}`;
         order = '';
         group = '';
         dynamic_search(
-            `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
+            `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${dynaoffset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
             (result) => {
                 $.each(result, function(x,y) {
                     $('#paygroup').val(y.customer_payment_group);
@@ -107,12 +106,12 @@
         join = '';
         fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
         limit = 0;
-        offset = 0;
+        dynaoffset = 0;
         filter = `data_header_id:EQ=${header_id}`;
         order = '';
         group = '';
         dynamic_search(
-            `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
+            `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${dynaoffset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
             (result) => {
                 var html = '';
                 if(result) {

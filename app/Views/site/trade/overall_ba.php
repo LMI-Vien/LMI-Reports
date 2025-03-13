@@ -91,44 +91,22 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
     <div class="content-wrapper">
         <div class="content">
             <div class="container-fluid py-4">
-                <!-- Filters Section -->
                 <div class="card p-4 shadow-sm">
                     <div class="md-center mb-3">
                         <h5><i class="fas fa-filter"></i> Filter</h5>
                     </div>
                     <div class="row g-3">
-                        <!-- Left Side: Inputs -->
                         <div class="col-md-9">
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label for="store">Store Name</label>
                                     <input id="store" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="store_id">
-                                    <!-- <select class="form-control" id="store">
-                                        <option value="0">Please select..</option>
-                                        <?php
-                                            if($store_branch){
-                                                foreach ($store_branch as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['description']."</option>";
-                                                }                                                
-                                            }
-                                        ?>
-                                    </select> -->
                                 </div>
                                 <div class="col-md-4">
                                     <label for="area">Area</label>
                                     <input id="area" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="area_id">
-                                    <!-- <select class="form-control" id="area">
-                                        <option value="0">Please select..</option>
-                                        <?php
-                                            if($area){
-                                                foreach ($area as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['area_description']."</option>";
-                                                }                                                
-                                            }
-                                        ?>
-                                    </select> -->
                                 </div>
                                 <div class="col-md-4 d-flex gap-2">
                                     <div>
@@ -167,7 +145,15 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
                             <div class="d-flex gap-3">
                                 <select class="form-control" id="sortBy">
                                     <option value="rank">Rank</option>
-                                    <option value="store">Store</option>
+                                    <option value="store_code">Store Code</option>
+                                    <option value="area">Area</option>
+                                    <option value="store_name">Store Name</option>
+                                    <option value="actual_sales">Actual Sales</option>
+                                    <option value="target">Target</option>
+                                    <option value="arch">%Arch</option>
+                                    <option value="balance_to_target">Balance to Target</option>
+                                    <option value="Possible_incentives">Possible Incentives</option>
+                                    <option value="target_per_rem_days">Target per Remaining Days</option>
                                 </select>
                                 <div class="d-flex align-items-center gap-3">
                                     <input type="radio" name="sortOrder" value="asc" checked> Asc
@@ -234,67 +220,32 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
+<!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
 <script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js"></script>
-
+ -->
 <script>
+    var base_url = "<?= base_url(); ?>";
+    let store_branch = <?= json_encode($store_branch) ?>;
+    let area = <?= json_encode($area) ?>;
+
     $(document).ready(function() {
-         let table = $('#overall_ba_sales_tbl');
-         let store_branch = <?= json_encode($store_branch) ?>;
-         let area = <?= json_encode($area) ?>;
-         //.DataTable({
-        //     paging: true,
-        //     searching: false,
-        //     ordering: true,
-        //     info: true,
-        //     lengthChange: false,
-        //     colReorder: true, // Enable column reordering
-        // });
 
-        // Column Toggle Feature
-
-        // table.columns().every(function(index) {
-        //     let column = this;
-        //     let columnHeader = $(column.header());
-
-        //     // Check if the column has the 'sort' class
-        //     if (columnHeader.hasClass('sort')) {
-        //         let columnTitle = columnHeader.text();
-
-        //         let checkbox = $('<input>', {
-        //             type: 'checkbox',
-        //             checked: true,
-        //             change: function() {
-        //                 column.visible($(this).prop('checked'));
-        //             }
-        //         });
-
-        //         $('#columnToggleContainer').append(
-        //             $('<label class="mx-2">').append(checkbox, " " + columnTitle)
-        //         );
-        //     }
-        // });
-
+        initializeTable();
         autocomplete_field($("#store"), $("#store_id"), store_branch);
         autocomplete_field($("#area"), $("area_id"), area, "area_description");
 
-        $('#columnToggleContainer').hide();
-        // fetchData();
-    });
+        $(document).on('click', '#toggleColumnsButton', function() {
+            $('#columnToggleContainer').toggle();
+        });
 
-    $(document).on('click', '#toggleColumnsButton', function (e) {
-        $('#columnToggleContainer').toggle();
-    });
-
-    $(document).on('click', '#refreshButton', function(e) {
-        
+        $(document).on('click', '#refreshButton', function () {
+            fetchData();
+        });
     });
 
     function fetchData() {
-      //  let selectedType = $('input[name="filterType"]:checked').val();
-       // let selectedBa = $('#brand_ambassador').val();
-        let selectedStore = $('#store').val();
-        let selectedArea = $('#area').val();
+        let selectedStore = $('#store_id').val();
+        let selectedArea = $('#area_id').val();
         let selectedMonth = $('#month').val();
         let selectedYear = $('#year').val();
         let selectedSortField = $('#sortBy').val();
@@ -303,13 +254,24 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
         initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
     }
 
-    function initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder) {
-        $('#overall_ba_sales_tbl').DataTable({
-            destroy: true, 
+    function initializeTable(selectedStore = null, selectedArea = null, selectedMonth = null, selectedYear = null, selectedSortField = null, selectedSortOrder = null) {
+        
+        if ($.fn.DataTable.isDataTable('#overall_ba_sales_tbl')) {
+            let existingTable = $('#overall_ba_sales_tbl').DataTable();
+            existingTable.clear().destroy();
+        }
+
+        let table = $('#overall_ba_sales_tbl').DataTable({
+            paging: true,
+            searching: false,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            colReorder: true, 
             ajax: {
                 url: base_url + 'trade-dashboard/trade-overall-ba',
                 type: 'GET',
-                data: function (d) {
+                data: function(d) {
                     d.sort_field = selectedSortField;
                     d.sort = selectedSortOrder;
                     d.year = selectedYear === "0" ? null : selectedYear;
@@ -319,34 +281,57 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
                     d.limit = d.length;
                     d.offset = d.start;
                 },
-                dataSrc: 'data'
+                dataSrc: function(json) {
+                    console.log(json.data);
+                    return json.data.length ? json.data : [];
+                }
             },
             columns: [
                 { data: 'rank' },
                 { data: 'store_code' },
                 { data: 'area' },
-                { data: 'store' },
+                { data: 'store_name' },
                 { data: 'actual_sales' },
-                { data: 'target' },
-                { data: 'arch' },
+                { data: 'target_sales' },
+                { data: 'percent_ach' },
                 { data: 'balance_to_target' },
                 { data: 'possible_incentives' },
-                { data: 'target_per_rem_days' },
+                { data: 'target_per_remaining_days' },
                 { data: 'ly_scanned_data' },
-                { data: 'brand_ambassador_name' },
-                { data: 'ba_deployment_date' },
+                { data: 'brand_ambassadors' },
+                { data: 'deployment_date' },
                 { data: 'brands' },
-                { data: 'growth' },
-            ].filter(Boolean), // Remove `null` entries
+                { data: 'growth' }
+            ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
             serverSide: true,
             searching: false,
-            colReorder: true,
             lengthChange: false
         });
+        addColumnToggle(table);
     }
 
+    function addColumnToggle(table) {
+        $('.mx-2').remove();
+        table.columns().every(function(index) {
+            let column = this;
+            let columnHeader = $(column.header());
+            if (columnHeader.hasClass('sort')) {
+                let columnTitle = columnHeader.text();
 
+                let checkbox = $('<input>', {
+                    type: 'checkbox',
+                    checked: true,
+                    change: function() {
+                        column.visible($(this).prop('checked'));
+                    }
+                });
+                $('#columnToggleContainer').append(
+                    $('<label class="mx-2">').append(checkbox, " " + columnTitle)
+                );
+            }
+        });
+    }
 </script>

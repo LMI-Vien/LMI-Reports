@@ -146,13 +146,14 @@
                         html += "<td scope=\"col\">" + y.file_type + "</td>";
                         html += "<td scope=\"col\">" + (y.remarks) + "</td>";
 
+                        let href = "<?= base_url()?>"+"cms/import-sell-out/view/"+y.id;
+
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' style='width: 25%'>";
                           //   html+="<td class='center-content' style='width: 25%'>";
-                          html+="<a class='btn-sm btn view' href='<?= base_url()?>"
-                          +'cms/import-sell-out/view/'+y.id+"' data-status='"+y.status+
+                          html+="<a class='btn-sm btn view' href='"+ href +"' data-status='"+y.status+
                           "' target='_blank' id='"+y.id+
                           "' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
 

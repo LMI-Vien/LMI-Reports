@@ -21,6 +21,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('store-performance', 'TradeDashboard::store_performance');
     $routes->get('trade-ba', 'TradeDashboard::trade_ba');
     $routes->get('trade-overall-ba', 'TradeDashboard::trade_overall_ba');
+    $routes->get('trade-info-asc', 'TradeDashboard::trade_info_asc');
 });
 
 
@@ -66,15 +67,17 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-sell-out', static function ($routes) {
         $routes->get('/', 'Cms\Import_sell_out::index');
-        $routes->get('view/(:num)', 'Cms\Import_sell_out::view');
+        $routes->get('view/(:any)', 'Cms\Import_sell_out::view');
     });
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sell_out_pa::index');
+        $routes->get('view/(:any)', 'Cms\Import_target_sell_out_pa::view');
     });
 
     $routes->group('import-vmi', static function ($routes) {
         $routes->get('/', 'Cms\Import_vmi::index');
+        $routes->get('view/(:any)', 'Cms\Import_vmi::view');
     });
 
     $routes->group('import-ba-sales-report', static function ($routes) {
@@ -84,6 +87,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('import-target-sales-ps', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sales_ps::index');
+        $routes->get('view/(:any)', 'Cms\Import_target_sales_ps::view');
     });
 
     $routes->group('import-sales-top-list', static function ($routes) {

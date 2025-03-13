@@ -49,6 +49,10 @@
         text-overflow: ellipsis;
     }
 
+    .tbl-content {
+      max-height: 500px;
+    }
+
     .box-header{
         margin-bottom: 20px !important;
     }
@@ -62,13 +66,13 @@
             </div>
             <div class="card-body text-center">
                 <div class="box">
-                    <?php
+                    <!-- <?php
                         echo view("cms/layout/buttons",$buttons);
                         $optionSet = '';
                         foreach($pageOption as $pageOptionLoop) {
                             $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
                         }
-                    ?>
+                    ?> -->
                     <div class="box-body">
                         <div class="col-md-12 list-data tbl-content" id="list-data">
                             <table class="table table-bordered listdata">
@@ -85,220 +89,25 @@
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
 
-                                        <th class='center-content'>Action</th>
+                                        <!-- <th class='center-content'>Action</th> -->
                                     </tr>
                                 </thead>
                                 <tbody class="table_body word_break"></tbody>
                             </table>
                         </div>
-                        <div class="list_pagination"></div>
+                        <!-- <div class="list_pagination"></div>
                         <div class="form-group pull-right">
                             <label>Show</label>
                             <select class="record-entries">
                                 <?= $optionSet; ?>
                             </select>
                             <label>Entries</label>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- MODAL -->
-    <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">
-                        <b></b>
-                    </h1>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="form-modal">
-                        <div class="mb-3">
-                            <label for="ba_name" class="form-label">BA Name</label>
-                            <input type="text" class="form-control required" id="ba_name" aria-describedby="ba_name">
-                        </div>
-
-                        <div class="mb-3">
-                            <div hidden>
-                                <input type="text" class="form-control" id="id" aria-describedby="id">
-                            </div>
-                            <label for="area" class="form-label">Area</label>
-                            <input type="text" class="form-control required" id="area" aria-describedby="area">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="store_name" class="form-label">Store Name</label>
-                            <input type="text" class="form-control required" id="store_name" aria-describedby="store_name">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="brand" class="form-label">Brand</label>
-                            <input type="text" class="form-control required" id="brand" aria-describedby="brand">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="date" class="form-control required" id="date" aria-describedby="date">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">Amount</label>
-                            <input type="text" class="form-control required" id="amount" aria-describedby="amount">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer"></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- IMPORT MODAL -->
-    <div class="modal" tabindex="-1" id="import_modal">
-        <div class="modal-dialog modal-xxl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">
-                        <b></b>
-                    </h1>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="card">
-                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
-                            <div class="text-center"
-                            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
-                            >
-                                <b>Extracted Data</b>
-                            </div>
-
-                        <div class="row my-3">
-                            <div class="col-md-8 import_buttons">
-                                <label for="file" class="btn btn-warning mt-2" style="margin-bottom: 0px;">
-                                    <i class="fa fa-file-import me-2"></i> Custom Upload
-                                </label>
-                                <input type="file" id="file" accept=".xls,.xlsx,.csv" style="display: none;" onclick="clear_import_table()">
-
-                                <button class="btn btn-primary mt-2" id="preview_xl_file" onclick="read_xl_file()">
-                                    <i class="fa fa-sync me-2"></i> Preview Data
-                                </button>
-
-                                <button class="btn btn-success mt-2" id="download_template" onclick="download_template()">
-                                    <i class="fa fa-file-download me-2"></i> Download Import Template
-                                </button>
-                            </div>
-
-                        </div>
-
-                            <table class= "table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content'>Line #</th>
-                                        <th class='center-content'>BA Name</th>
-                                        <th class='center-content'>Area</th>
-                                        <th class='center-content'>Store</th>
-                                        <th class='center-content'>Brand</th>
-                                        <th class='center-content'>Date</th>
-                                        <th class='center-content'>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="word_break import_table"></tbody>
-                            </table>
-                        </div>
-                        <center style="margin-bottom: 5px">
-                            <div class="import_pagination btn-group"></div>
-                        </center>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
-                    
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" tabindex="-1" id="export_modal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">
-                        <b></b>
-                    </h1>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-    
-                <div class="modal-body">
-                    <div class="card">
-                        <div 
-                            class="text-center"
-                            style="padding: 10px;
-                            font-family: 'Courier New', Courier, monospace;
-                            font-size: large;
-                            background-color: #fdb92a;
-                            color: #333333;
-                            border: 1px solid #ffffff;
-                            border-radius: 10px;"                            
-                        >
-                            <b>Filters</b>
-                        </div>
-                        
-                        <div class="d-flex flex-column">
-                            <div class="p-2 row">
-                                <div class="col">
-                                    <label class="col" >BA Name</label>
-                                    <input id='ba_input' class='form-control' onkeypress="suggest_ba()" placeholder='Select BA Name'>
-                                </div>
-                                <div class="col">
-                                    <label class="col" >Area</label>
-                                    <input id='area_input' class='form-control' onkeypress="suggest_area()" placeholder='Select Area'>
-                                </div>
-                            </div>
-                            <div class="p-2 row">
-                                <div class="col">
-                                    <label class="col" >Store</label>
-                                    <input id='store_input' class='form-control' onkeypress="suggest_store()" placeholder='Select Store'>
-                                </div>
-                                <div class="col">
-                                    <label class="col" >Brand</label>
-                                    <input id='brand_input' class='form-control' onkeypress="suggest_brand()" placeholder='Select Brand'>
-                                </div>
-
-                            </div>
-                            <div class="p-2 row">
-                                <div class="col">
-                                    <label>Date From</label>
-                                    <input type="date" class="form-control" id="date_from">
-                                </div>
-                                <div class="col">
-                                    <label>Date To</label>
-                                    <input type="date" class="form-control" id="date_to">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="modal-footer">
-                    <button type="button" class="btn save" onclick="handleExport()">Export All/Selected</button>
-                    <button type="button" class="btn save" onclick="exportFilter()">Export Filter</button>
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
 <script>
     
     var limit = 10; 
@@ -318,8 +127,8 @@
             event : "list",
             select : "basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status",
             query : new_query,
-            offset : offset,
-            limit : limit,
+            offset : 0,
+            limit : 0,
             table : "tbl_ba_sales_report basr",
             join : [
                 {
@@ -379,14 +188,14 @@
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
-                        if (y.id == 0) {
-                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-                        } else {
-                            html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                            html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-                            html+="</td>";
-                        }
+                        // if (y.id == 0) {
+                        //     html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+                        // } else {
+                        //     html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
+                        //     html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                        //     html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                        //     html+="</td>";
+                        // }
                         
                         html += "</tr>";   
                     });

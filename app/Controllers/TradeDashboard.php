@@ -27,30 +27,13 @@ class TradeDashboard extends BaseController
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brands'] = $this->Global_model->get_brand_data("ASC", 10, 0);
 		
-		// print_r($data);
-		// die();
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/ba.php";
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -67,31 +50,14 @@ class TradeDashboard extends BaseController
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['month'] = $this->Global_model->get_months();
 		$data['year'] = $this->Global_model->get_years();
-		$data['weeks'] = $this->Global_model->get_weeks();
-		// print_r($data);
-		// die();
+
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/overall_ba.php";
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -103,30 +69,19 @@ class TradeDashboard extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['month'] = $this->Global_model->get_months();
+		$data['year'] = $this->Global_model->get_years();
+
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/asc.php";
-		$data['store_branch'] = $this->Global_model->get_store_branch(0);
-		$data['area'] = $this->Global_model->get_area(0);
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -138,6 +93,8 @@ class TradeDashboard extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+
+		$data['year'] = $this->Global_model->get_years();
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
@@ -146,23 +103,8 @@ class TradeDashboard extends BaseController
 		$data['area'] = $this->Global_model->get_area(0);
 		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -174,6 +116,7 @@ class TradeDashboard extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+		$data['year'] = $this->Global_model->get_years();
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
@@ -184,23 +127,8 @@ class TradeDashboard extends BaseController
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -376,33 +304,120 @@ class TradeDashboard extends BaseController
 	}
 
 	public function trade_overall_ba()
-	{
+	{	
+		$days = $this->getDaysInMonth(2, $this->getCurrentYear());
+
 	    $limit = $this->request->getVar('limit') ?? 10;
 	    $offset = $this->request->getVar('offset') ?? 0;
-	    $store = $this->request->getVar('store');
-	    $area = $this->request->getVar('area');
 	    $month = $this->request->getVar('month');
 	    $year = $this->request->getVar('year');
+	    $area = $this->request->getVar('area');
+	    $store = $this->request->getVar('store');
 	    $sort = $this->request->getVar('sort') ?? 'ASC';
 	    $sort_field = $this->request->getVar('sort_field');
+	    $formatted_month = str_pad($month, 2, '0', STR_PAD_LEFT);
+	    $date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $lyMonth = null;
+	    $targetYear = null;
+	    $date = null;
+
+	    if($year){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$lyYear = $selected_year - 1;
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
+
+	    if($month){
+	    	$date = $formatted_month;
+	    	$lyMonth = $month;
+	    }
+
+		if($year && $month){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+	    }
+
+	    if(empty($area)){
+	    	$area = null;
+	    }
+	    if(empty($store)){
+	    	$store = null;
+	    }
+	     $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $days, $date);
+	    return $this->response->setJSON([
+	        'draw' => intval($this->request->getVar('draw')),
+	        'recordsTotal' => $data['total_records'],
+	        'recordsFiltered' => $data['total_records'],
+	        'data' => $data['data'],
+	    ]);
+	}
 
 
+	public function trade_info_asc()
+	{	
+		$days = $this->getDaysInMonth(2, $this->getCurrentYear());
 
-	    $data = $this->Dashboard_model->tradeOverallBaData(null, null, null, null, null, 'ASC', 10, 0);
-	    //echo "<pre>";
-	    // print_r($data);
-	    // die();
-	    //echo $sort_field;
+	    $limit = $this->request->getVar('limit') ?? 10;
+	    $offset = $this->request->getVar('offset') ?? 0;
+	    $month = $this->request->getVar('month');
+	    $year = $this->request->getVar('year');
+	    $area = $this->request->getVar('area');
+	    $store = $this->request->getVar('store');
+	    $sort = $this->request->getVar('sort') ?? 'ASC';
+	    $sort_field = $this->request->getVar('sort_field');
+	    $formatted_month = str_pad($month, 2, '0', STR_PAD_LEFT);
+	    $date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $lyMonth = null;
+	    $targetYear = null;
+	    $date = null;
 
-	   // if($latest_vmi_data){
+	    if($year){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$lyYear = $selected_year - 1;
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
 
-		    return $this->response->setJSON([
-		        'draw' => intval($this->request->getVar('draw')),
-		        'recordsTotal' => $data['total_records'],
-		        'recordsFiltered' => $data['total_records'],
-		        'data' => $data['data'],
-		    ]);
-	   // }
+	    if($month){
+	    	$date = $formatted_month;
+	    	$lyMonth = $month;
+	    }
+
+		if($year && $month){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+	    }
+
+	    if(empty($area)){
+	    	$area = null;
+	    }
+	    if(empty($store)){
+	    	$store = null;
+	    }
+	     $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $days, $date);
+	    return $this->response->setJSON([
+	        'draw' => intval($this->request->getVar('draw')),
+	        'recordsTotal' => $data['total_records'],
+	        'recordsFiltered' => $data['total_records'],
+	        'data' => $data['data'],
+	    ]);
+	}
+
+	private function getDaysInMonth($month, $year) {
+	    return cal_days_in_month(CAL_GREGORIAN, $month, $year);
+	}
+
+	private function getCurrentYear() {
+	    return date("Y");
 	}
 
 }

@@ -400,6 +400,21 @@ class Global_controller extends BaseController
 		        echo json_encode(['error' => $e->getMessage()]);
 		    }
 		    break;
+
+			case 'GetKailanganTeam':
+				try {
+					$value = $this->request->getPost('value');
+					$table_fields = $this->request->getPost('table_fields');
+					$table_name = $this->request->getPost('table_name');
+					$table_joins = $this->request->getPost('table_joins');
+					$table_select = $this->request->getPost('table_select');
+
+					$result_data = $this->Global_model->GetKailanganTeam($table_fields, $table_name, $table_joins, $table_select);
+					echo json_encode(["data" => $result_data]);
+				} catch (Exception $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+			break;
 			case 'insert':
 				try { 
 					$table = $_POST['table'];
@@ -682,6 +697,15 @@ class Global_controller extends BaseController
 	    }
 	    if (!empty($request['brands'])) {
 	        $responseData['brands'] = $this->Global_model->get_valid_records("tbl_brand", 'brand_description');
+	    }
+		if (!empty($request['brandssopa'])) {
+	        $responseData['brandssopa'] = $this->Global_model->get_valid_records("tbl_brand", 'brand_code');
+	    }
+		if (!empty($request['agencies'])) {
+	        $responseData['agencies'] = $this->Global_model->get_valid_records("tbl_agency", 'agency');
+	    }
+		if (!empty($request['teams'])) {
+	        $responseData['teams'] = $this->Global_model->get_valid_records("tbl_team", 'team_description');
 	    }
 	    if (!empty($request['stores'])) {
 	        $responseData['stores'] = $this->Global_model->get_valid_records("tbl_store", ['code', 'description']);

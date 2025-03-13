@@ -19,7 +19,7 @@ self.onmessage = async function(e) {
 
         brand_records = ba_data.brands;
         let brand_lookup = {};
-        brand_records.forEach(brand => brand_lookup[brand.brand_code] = brand.id);
+        brand_records.forEach(brand => brand_lookup[brand.brand_description] = brand.id);
 
         store_records = ba_data.stores;
         let store_lookup = {};
