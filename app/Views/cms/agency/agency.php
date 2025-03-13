@@ -547,109 +547,122 @@
         });
     }
 
-    // function delete_data(id) {
-    //     var code = '';
+    function delete_data(id) {
+        var code = '';
 
-    //     get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-    //         code = res;
-    //         message = is_json(confirm_delete_message);
-    //         message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
-    //         modal.confirm(JSON.stringify(message), function(result){
-    //             if(result){ 
-    //                 var url = "<?= base_url('cms/global_controller');?>";
-    //                 var data = {
-    //                     event : "update",
-    //                     table : "tbl_agency",
-    //                     field : "id",
-    //                     where : id, 
-    //                     data : {
-    //                             updated_date : formatDate(new Date()),
-    //                             updated_by : user_id,
-    //                             status : -2
-    //                     }  
-    //                 }
-    //                 aJax.post(url,data,function(result){
-    //                     var obj = is_json(result);
-    //                     modal.alert(success_delete_message, 'success', function() {
-    //                         location.reload();
-    //                     });
-    //                 });
-    //             }
+        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
+            code = res;
+            message = is_json(confirm_delete_message);
+            message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
+            modal.confirm(JSON.stringify(message), function(result){
+                if(result){ 
+                    var url = "<?= base_url('cms/global_controller');?>";
+                    var data = {
+                        event : "update",
+                        table : "tbl_agency",
+                        field : "id",
+                        where : id, 
+                        data : {
+                                updated_date : formatDate(new Date()),
+                                updated_by : user_id,
+                                status : -2
+                        }  
+                    }
+                    aJax.post(url,data,function(result){
+                        var obj = is_json(result);
+                        modal.alert(success_delete_message, 'success', function() {
+                            location.reload();
+                        });
+                    });
+                }
     
-    //         });
-    //     });
-    // }
+            });
+        });
+    }
 
-    // function delete_data(id) {
-    //     modal.confirm(confirm_delete_message, function(result) {
-    //         if (result) {
-    //             var url = "<?= base_url('cms/global_controller');?>"; 
-    //             var data = {
-    //                 event: "list",
-    //                 select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
-    //                 query: "a.id = " + id, 
-    //                 offset: offset,  
-    //                 limit: limit,   
-    //                 table: "tbl_agency a",
-    //                 join: [
-    //                     {
-    //                         table: "tbl_brand_ambassador bra",
-    //                         query: "bra.agency = a.id",
-    //                         type: "left"
-    //                     }
-    //                 ],
-    //                 group: "a.id, a.code, a.agency"  
-    //             };
+    function delete_data(id) {
+        var code = '';
 
-    //             aJax.post(url, data, function(response) {
-    //                 console.log("Raw Response:", response);
+        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
+            code = res;
+            message = is_json(confirm_delete_message);
+            message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
+            modal.confirm(JSON.stringify(message), function(result){
+                if (result) {
+                    var url = "<?= base_url('cms/global_controller');?>"; 
+                    var data = {
+                        event: "list",
+                        select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
+                        query: "a.id = " + id, 
+                        offset: offset,  
+                        limit: limit,   
+                        table: "tbl_agency a",
+                        join: [
+                            {
+                                table: "tbl_brand_ambassador bra",
+                                query: "bra.agency = a.id",
+                                type: "left"
+                            }
+                        ],
+                        group: "a.id, a.code, a.agency"  
+                    };
 
-    //                 try {
-    //                     var obj = JSON.parse(response);
-    //                     console.log("Parsed Response Data:", obj);
+                    aJax.post(url, data, function(response) {
+                        console.log("Raw Response:", response);
 
-    //                     if (!obj || obj.length === 0) { 
-    //                         console.error("Invalid or empty response:", response);
-    //                         return;
-    //                     }
+                        try {
+                            var obj = JSON.parse(response);
+                            console.log("Parsed Response Data:", obj);
 
-    //                     // Convert team_count to an integer
-    //                     var Count = Number(obj[0].agency_count) || 0;
-    //                     console.log("Count:", Count);
+                            if (!Array.isArray(obj)) { 
+                                console.error("Invalid response format:", response);
+                                modal.alert("Error processing response data.", "error", ()=>{});
+                                return;
+                            }
 
-    //                     if (Count > 0) { 
-    //                         modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                     } else {
-    //                         proceed_delete(id); 
-    //                     }
-    //                 } catch (e) {
-    //                     console.error("Error parsing response:", e, response);
-    //                 }
-    //             });
-    //         }
-    //     });
-    // }
+                            if (obj.length === 0) {
+                                proceed_delete(id); 
+                                return;
+                            }
 
-    // function proceed_delete(id) {
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event : "update",
-    //         table : "tbl_agency",
-    //         field : "id",
-    //         where : id, 
-    //         data : {
-    //                 updated_date : formatDate(new Date()),
-    //                 updated_by : user_id,
-    //                 status : -2
-    //         }  
-    //     }
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result);
-    //         modal.alert(success_delete_message, 'success', function() {
-    //             location.reload();
-    //         });
-    //     }); 
-    // }
+                            var Count = Number(obj[0].agency_count) || 0;
+                            console.log("Count:", Count);
+
+                            if (Count > 0) { 
+                                modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+                            } else {
+                                proceed_delete(id); 
+                            }
+                        } catch (e) {
+                            console.error("Error parsing response:", e, response);
+                            modal.alert("Error processing response data.", "error", ()=>{});
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    function proceed_delete(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "update",
+            table : "tbl_agency",
+            field : "id",
+            where : id, 
+            data : {
+                    updated_date : formatDate(new Date()),
+                    updated_by : user_id,
+                    status : -2
+            }  
+        }
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            modal.alert(success_delete_message, 'success', function() {
+                location.reload();
+            });
+        }); 
+    }
 
     function populate_modal(inp_id) {
         var query = "status >= 0 and id = " + inp_id;

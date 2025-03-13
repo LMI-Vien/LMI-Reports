@@ -560,119 +560,98 @@
     //     })
     // };
 
-    // working CTE
-    // function delete_data(id){
-    //     modal.confirm(confirm_delete_message, function(result) {
-    //         if (result) {
-    //             var checkUrl = "<?= base_url('cms/global_controller'); ?>";
-    //             var checkData = {
-    //                 event: "GetKailanganTeam", 
-    //                 table_fields: "s.id, sg.store_id",
-    //                 table_name: "tbl_store_group sg",
-    //                 table_joins: "JOIN tbl_store s ON s.id = sg.store_id",
-    //                 table_select: "store_id",
-    //                 value: id  
-    //             };
+    function delete_data(id) {
+        get_field_values("tbl_store", "code", "id", [id], (res) => {
+            let code = res[id];
+            let message = is_json(confirm_delete_message);
+            message.message = `Delete <b><i>${code}</i></b> from Store/Branch Masterfile?`;
 
-    //             console.log("Checking usage:", checkData);
+            modal.confirm(JSON.stringify(message),function(result){
+                if (result) {
+                    var url = "<?= base_url('cms/global_controller');?>"; 
+                    var data = {
+                        event: "list",
+                        select: "s.id, s.code, s.description, COUNT(asg.store_id) AS storeid_count, COUNT(ba.store) as bra_count",
+                        query: "s.id = " + id, 
+                        offset: offset,  
+                        limit: limit,   
+                        table: "tbl_store s",
+                        join: [
+                            {
+                                table: "tbl_store_group asg",
+                                query: "asg.store_id = s.id",
+                                type: "left"
+                            },
+                            {
+                                table: "tbl_brand_ambassador ba",
+                                query: "ba.store = s.id",
+                                type: "left"
+                            }
+                        ],
+                        group: "s.id, s.code, s.description"  
+                    };
 
-    //             aJax.post(checkUrl, checkData, function(response) {
-    //                 var obj = is_json(response);
-    //                 console.log("Raw Response: ", response);
-    //                 console.log("Parsed Object: ", obj);
+                    aJax.post(url, data, function(response) {
+                        console.log("Raw Response:", response);
 
-    //                 // Check if the team exists in the response
-    //                 var found = obj.data && obj.data.some(item => item.store_id == id);
+                        try {
+                            var obj = JSON.parse(response);
+                            console.log("Parsed Response Data:", obj);
 
-    //                 console.log(found);
+                            // Handle empty or invalid response more gracefully
+                            if (!Array.isArray(obj)) { 
+                                console.error("Invalid response format:", response);
+                                modal.alert("Error processing response data.", "error", ()=>{});
+                                return;
+                            }
 
-    //                 if (found) { 
-    //                     modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                 } else {
-    //                     proceed_delete(id);
-    //                 }
-    //             });
-    //         }
-    //     });
-    // }
+                            // If the response is empty, proceed to deletion (no related data)
+                            if (obj.length === 0) {
+                                proceed_delete(id); 
+                                return;
+                            }
 
-    // function delete_data(id) {
-    //     modal.confirm(confirm_delete_message, function(result) {
-    //         if (result) {
-    //             var url = "<?= base_url('cms/global_controller');?>"; 
-    //             var data = {
-    //                 event: "list",
-    //                 select: "s.id, s.code, s.description, COUNT(asg.store_id) AS storeid_count, COUNT(ba.store) as bra_count",
-    //                 query: "s.id = " + id, 
-    //                 offset: offset,  
-    //                 limit: limit,   
-    //                 table: "tbl_store s",
-    //                 join: [
-    //                     {
-    //                         table: "tbl_store_group asg",
-    //                         query: "asg.store_id = s.id",
-    //                         type: "left"
-    //                     },
-    //                     {
-    //                         table: "tbl_brand_ambassador ba",
-    //                         query: "ba.store = s.id",
-    //                         type: "left"
-    //                     }
-    //                 ],
-    //                 group: "s.id, s.code, s.description"  
-    //             };
+                            var Count = Number(obj[0].storeid_count) || 0;
+                            var count2 = Number(obj[0].bra_count) || 0;
 
-    //             aJax.post(url, data, function(response) {
-    //                 console.log("Raw Response:", response);
+                            console.log("storeid_count:", Count);
+                            console.log("bra_count:", count2);
 
-    //                 try {
-    //                     var obj = JSON.parse(response);
-    //                     console.log("Parsed Response Data:", obj);
+                            if (Count > 0 || count2 > 0) { 
+                                modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+                            } else {
+                                proceed_delete(id); 
+                            }
+                        } catch (e) {
+                            console.error("Error parsing response:", e, response);
+                            modal.alert("Error processing response data.", "error", ()=>{});
+                        }
+                    });
+                }
+            });
+        })
+    }
 
-    //                     if (!obj || obj.length === 0) { 
-    //                         console.error("Invalid or empty response:", response);
-    //                         return;
-    //                     }
-
-    //                     // Convert team_count to an integer
-    //                     var Count = Number(obj[0].storeid_count) || 0;
-    //                     console.log("Count:", Count);
-
-    //                     var count2 = Number(obj[0].bra_count) || 0;
-
-    //                     if (Count > 0 || count2 > 0) { 
-    //                         modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                     } else {
-    //                         proceed_delete(id); 
-    //                     }
-    //                 } catch (e) {
-    //                     console.error("Error parsing response:", e, response);
-    //                 }
-    //             });
-    //         }
-    //     });
-    // }
-
-    // function proceed_delete(id) {
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event : "update",
-    //         table : "tbl_store",
-    //         field : "id",
-    //         where : id, 
-    //         data : {
-    //                 updated_date : formatDate(new Date()),
-    //                 updated_by : user_id,
-    //                 status : -2
-    //         }  
-    //     }
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result);
-    //         modal.alert(success_delete_message, 'success', function() {
-    //             location.reload();
-    //         });
-    //     }); 
-    // }
+    function proceed_delete(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "update",
+            table : "tbl_store",
+            field : "id",
+            where : id, 
+            data : {
+                    updated_date : formatDate(new Date()),
+                    updated_by : user_id,
+                    status : -2
+            }  
+        }
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            modal.alert(success_delete_message, 'success', function() {
+                location.reload();
+            });
+        }); 
+    }
 
     function clear_import_table() {
         $(".import_table").empty()
