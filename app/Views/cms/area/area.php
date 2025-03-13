@@ -280,15 +280,22 @@
     });
     
     function edit_data(id) {
-        open_modal('Edit Area', 'edit', id);
+        modal.loading(true);
+
+        open_modal('Edit Area', 'edit', id, () => {
+            modal.loading(false);
+        });
     }
     
     function view_data(id) {
-        open_modal('View Area', 'view', id);
+        modal.loading(true);
+
+        open_modal('View Area', 'view', id, () => {
+            modal.loading(false);
+        });
     }
     
     function open_modal(msg, actions, id) {
-        console.log($('#store').val());
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#popup_modal');
@@ -359,6 +366,12 @@
         $footer.append(buttons.close);
 
         $modal.modal('show');
+
+        if (['edit', 'view'].includes(actions)) {
+            populate_modal(id, actions, () => {
+                modal.loading(false); 
+            });
+        }
     }
     
     function reset_modal_fields() {
@@ -411,84 +424,175 @@
         $(`#line_${lineId}`).remove();
     }
     
-    function populate_modal(inp_id, actions) {
+    // function populate_modal(inp_id, actions) {
+    //     var query = "status >= 0 and id = " + inp_id;
+    //     var url = "<?= base_url('cms/global_controller');?>";
+    //     var data = {
+    //         event : "list", 
+    //         select : "id, code, description, status",
+    //         query : query, 
+    //         table : "tbl_area"
+    //     }
+    //     aJax.post(url,data,function(result){
+    //         var obj = is_json(result);
+    //         if(obj){
+    //             $.each(obj, function(index,d) {
+    //                 $('#id').val(d.id);
+    //                 $('#code').val(d.code);
+    //                 $('#description').val(d.description);
+    //                 $('#store').val(d.store);
+    //                 // get_store(d.store, 'store_0');
+    //                 var line = 0;
+    //                 var readonly = '';
+    //                 var disabled = '';
+    //                 let $store_list = $('#store_list')
+    //                 $.each(get_area_stores(d.id), (x, y) => {
+    //                     if (actions === 'view') {
+    //                         disabled = 'disabled';
+    //                         readonly = 'readonly';
+    //                     } else {
+    //                         readonly = '';
+    //                         disabled = ''
+    //                     }
+    //                     get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
+    //                         console.log(res);
+    //                         for(let key in res) {
+    //                             console.log(`Key: ${key}, Value: ${res[key]}`);
+
+    //                             get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
+    //                                 for(let key1 in res1) {
+    //                                     console.log(`${res1[key1]} - ${res[key]}`);
+
+    //                                     if (actions === 'edit') {
+    //                                         readonly = (line == 0) ? 'readonly' : '';
+    //                                         disabled = (line == 0) ? 'disabled' : '';
+    //                                     }
+        
+    //                                     let html = `
+    //                                     <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+    //                                         <input id='store_${line}' class='form-control' placeholder='Select store' value='${res1[key1]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+    //                                         <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+    //                                             <i class="fa fa-minus" aria-hidden="true"></i>
+    //                                         </button>
+    //                                     </div>
+    //                                     `;
+        
+    //                                     $('#store_list').append(html);
+        
+    //                                     $(`#store_${line}`).autocomplete({
+    //                                         source: function(request, response) {
+    //                                             var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+    //                                             var uniqueResults = [...new Set(results)];
+    //                                             response(uniqueResults.slice(0, 10));
+    //                                         },
+    //                                     });
+    //                                     get_store(x, `store_${line}`);
+    //                                     line++
+    //                                 }
+    //                             });
+    //                         }
+    //                     });
+    //                 })
+    //                 if(d.status == 1) {
+    //                     $('#status').prop('checked', true)
+    //                 } else {
+    //                     $('#status').prop('checked', false)
+    //                 }
+    //             }); 
+    //         }
+    //     });
+    // }
+
+    function populate_modal(inp_id, actions, callback) {
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
-            event : "list", 
-            select : "id, code, description, status",
-            query : query, 
-            table : "tbl_area"
-        }
-        aJax.post(url,data,function(result){
+            event: "list", 
+            select: "id, code, description, status",
+            query: query, 
+            table: "tbl_area"
+        };
+
+        aJax.post(url, data, function(result) {
             var obj = is_json(result);
-            if(obj){
-                $.each(obj, function(index,d) {
+            if (obj) {
+                var totalRequests = 0; // Count the total number of AJAX requests
+                var completedRequests = 0; // Track completed requests
+
+                $.each(obj, function(index, d) {
                     $('#id').val(d.id);
                     $('#code').val(d.code);
                     $('#description').val(d.description);
                     $('#store').val(d.store);
-                    // get_store(d.store, 'store_0');
+
                     var line = 0;
                     var readonly = '';
                     var disabled = '';
-                    let $store_list = $('#store_list')
+                    let $store_list = $('#store_list');
+
                     $.each(get_area_stores(d.id), (x, y) => {
                         if (actions === 'view') {
                             disabled = 'disabled';
                             readonly = 'readonly';
                         } else {
                             readonly = '';
-                            disabled = ''
+                            disabled = '';
                         }
+
+                        totalRequests++;
+
+                        // Pass the callback to the get_field_values function
                         get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
-                            console.log(res);
-                            for(let key in res) {
-                                console.log(`Key: ${key}, Value: ${res[key]}`);
-
+                            for (let key in res) {
                                 get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
-                                    for(let key1 in res1) {
-                                        console.log(`${res1[key1]} - ${res[key]}`);
+                                    if (actions === 'edit') {
+                                        readonly = (line == 0) ? 'readonly' : '';
+                                        disabled = (line == 0) ? 'disabled' : '';
+                                    }
 
-                                        if (actions === 'edit') {
-                                            readonly = (line == 0) ? 'readonly' : '';
-                                            disabled = (line == 0) ? 'disabled' : '';
-                                        }
-        
-                                        let html = `
-                                        <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                            <input id='store_${line}' class='form-control' placeholder='Select store' value='${res1[key1]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
-                                            <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
-                                                <i class="fa fa-minus" aria-hidden="true"></i>
-                                            </button>
-                                        </div>
-                                        `;
-        
-                                        $('#store_list').append(html);
-        
-                                        $(`#store_${line}`).autocomplete({
-                                            source: function(request, response) {
-                                                var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
-                                                var uniqueResults = [...new Set(results)];
-                                                response(uniqueResults.slice(0, 10));
-                                            },
-                                        });
-                                        get_store(x, `store_${line}`);
-                                        line++
+                                    let html = `
+                                    <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                        <input id='store_${line}' class='form-control' placeholder='Select store' value='${res1[key]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+                                        <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+                                            <i class="fa fa-minus" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    `;
+
+                                    $('#store_list').append(html);
+
+                                    $(`#store_${line}`).autocomplete({
+                                        source: function(request, response) {
+                                            var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                                            var uniqueResults = [...new Set(results)];
+                                            response(uniqueResults.slice(0, 10));
+                                        },
+                                    });
+
+                                    get_store(x, `store_${line}`);
+                                    line++;
+
+                                    completedRequests++;
+
+                                    // Check if all requests are complete, then call the callback
+                                    if (completedRequests === totalRequests) {
+                                        if (callback) callback(); 
                                     }
                                 });
                             }
                         });
-                    })
-                    if(d.status == 1) {
-                        $('#status').prop('checked', true)
+                    });
+
+                    if (d.status == 1) {
+                        $('#status').prop('checked', true);
                     } else {
-                        $('#status').prop('checked', false)
+                        $('#status').prop('checked', false);
                     }
-                }); 
+                });
             }
         });
     }
+
     
     function create_button(btn_txt, btn_id, btn_class, onclick_event) {
         var new_btn = $('<button>', {
@@ -511,9 +615,10 @@
         clear_import_table()
     });
     
+    // try function
     function read_xl_file() {
         let btn = $(".btn.save");
-        btn.prop("disabled", false); 
+        btn.prop("disabled", false);
         clear_import_table();
         
         dataset = [];
@@ -525,30 +630,89 @@
             return;
         }
 
-        // File Size Validation (Limit: 30MB) temp
         const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
         if (file.size > maxFileSize) {
             modal.loading_progress(false);
             modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
             return;
         }
+
         modal.loading_progress(true, "Reviewing Data...");
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
+            const text = e.target.result;
+
+            // Read CSV manually to avoid auto-conversion
+            const workbook = XLSX.read(text, { type: "string", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
+            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-            // Process in chunks
+            // Ensure only numbers are treated as text, keeping dates unchanged
+            jsonData = jsonData.map(row => {
+                let fixedRow = {};
+                Object.keys(row).forEach(key => {
+                    let value = row[key];
+
+                    // Convert numbers to text while keeping dates unchanged
+                    if (typeof value === "number") {
+                        value = String(value); // Convert numbers to string
+                    }
+
+                    fixedRow[key] = value !== null && value !== undefined ? value : "";
+                });
+                return fixedRow;
+            });
+
+            console.log(jsonData);
+
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
         };
-        reader.readAsArrayBuffer(file);
+
+        reader.readAsText(file); 
     }
+
+    // function read_xl_file() {
+    //     let btn = $(".btn.save");
+    //     btn.prop("disabled", false); 
+    //     clear_import_table();
+        
+    //     dataset = [];
+
+    //     const file = $("#file")[0].files[0];
+    //     if (!file) {
+    //         modal.loading_progress(false);
+    //         modal.alert('Please select a file to upload', 'error', ()=>{});
+    //         return;
+    //     }
+
+    //     // File Size Validation (Limit: 30MB) temp
+    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+    //     if (file.size > maxFileSize) {
+    //         modal.loading_progress(false);
+    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+    //         return;
+    //     }
+    //     modal.loading_progress(true, "Reviewing Data...");
+
+    //     const reader = new FileReader();
+    //     reader.onload = function(e) {
+    //         const data = new Uint8Array(e.target.result);
+    //         const workbook = XLSX.read(data, { type: "array" });
+    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
+
+    //         // Process in chunks
+    //         processInChunks(jsonData, 5000, () => {
+    //             paginateData(rowsPerPage);
+    //         });
+    //     };
+    //     reader.readAsArrayBuffer(file);
+    // }
 
     function processInChunks(data, chunkSize, callback) {
         let index = 0;
@@ -817,6 +981,8 @@
                     if (matchFound) {
                         row.id = existingId;
                         row.updated_date = formatDate(new Date());
+                        //lagay sa lahat masterfile
+                        delete row.created_date;
                         updateRecords.push(row);
                     } else {
                         row.created_by = user_id;
@@ -1064,7 +1230,7 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        get_data(query, column_filter, order_by);
+        get_data(query, column_filter, order_filter);
     })
 
     function save_data(actions, id) {
@@ -1246,38 +1412,151 @@
         });
     }
 
-    function delete_data(id) {
-        
-        get_field_values("tbl_area", "code", "id", [id], function (res) {
-            let code = res[id];
-            let message = is_json(confirm_delete_message);
-            message.message = `Code <i><b>${code}</b></i> from Area Masterfile`;
-            modal.confirm(JSON.stringify(message),function(result){
-                if(result){ 
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var data = {
-                        event : "update",
-                        table : "tbl_area",
-                        field : "id",
-                        where : id, 
-                        data : {
-                                updated_date : formatDate(new Date()),
-                                updated_by : user_id,
-                                status : -2
-                        }  
-                    }
-                    aJax.post(url,data,function(result){
-                        var obj = is_json(result);
-                        total_delete(url, 'tbl_store_group', 'area_id', id)
-                        modal.alert(success_delete_message, "success", function() {
-                            location.reload();
-                        });
-                    });
-                }
+    // function delete_data(id) {
+    //     get_field_values("tbl_area", "code", "id", [id], function (res) {
+    //         let code = res[id];
+    //         let message = is_json(confirm_delete_message);
+    //         message.message = `Code <i><b>${code}</b></i> from Area Masterfile`;
+    //         modal.confirm(JSON.stringify(message),function(result){
+    //             if(result){ 
+    //                 var url = "<?= base_url('cms/global_controller');?>";
+    //                 var data = {
+    //                     event : "update",
+    //                     table : "tbl_area",
+    //                     field : "id",
+    //                     where : id, 
+    //                     data : {
+    //                             updated_date : formatDate(new Date()),
+    //                             updated_by : user_id,
+    //                             status : -2
+    //                     }  
+    //                 }
+    //                 aJax.post(url,data,function(result){
+    //                     var obj = is_json(result);
+    //                     total_delete(url, 'tbl_store_group', 'area_id', id)
+    //                     modal.alert(success_delete_message, "success", function() {
+    //                         location.reload();
+    //                     });
+    //                 });
+    //             }
     
-            });
-        })
-    }
+    //         });
+    //     })
+    // }
+
+    // trying CTE
+    // function delete_data(id) {
+    //     modal.confirm(confirm_delete_message, function(result) {
+    //         if (result) {
+    //             var checkUrl = "<?= base_url('cms/global_controller'); ?>";
+    //             var checkData = {
+    //                 event: "GetKailanganTeam", 
+    //                 table_fields: "s.id, sg.store_id",
+    //                 table_name: "tbl_store_group sg",
+    //                 table_joins: "JOIN tbl_store s ON s.id = sg.store_id",
+    //                 table_select: "store_id",
+    //                 value: id  
+    //             };
+
+    //             console.log("Checking usage:", checkData);
+
+    //             aJax.post(checkUrl, checkData, function(response) {
+    //                 var obj = is_json(response);
+    //                 console.log("Raw Response: ", response);
+    //                 console.log("Parsed Object: ", obj);
+
+    //                 // Check if the team exists in the response
+    //                 var found = obj.data && obj.data.some(item => item.store_id == id);
+
+    //                 console.log(found);
+
+    //                 if (found) { 
+    //                     modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+    //                 } else {
+    //                     proceed_delete(id);
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
+    // function delete_data(id) {
+    //     modal.confirm(confirm_delete_message, function(result) {
+    //         if (result) {
+    //             var url = "<?= base_url('cms/global_controller');?>"; 
+    //             var data = {
+    //                 event: "list",
+    //                 select: "a.id, a.code, COUNT(arsc.area_id) AS arsc_count, COUNT(bra.area) AS bra_count",
+    //                 query: "a.id = " + id, 
+    //                 offset: offset,  
+    //                 limit: limit,   
+    //                 table: "tbl_area a",
+    //                 join: [
+    //                     {
+    //                         table: "tbl_area_sales_coordinator arsc",
+    //                         query: "arsc.area_id = a.id",
+    //                         type: "left"
+    //                     },
+    //                     {
+    //                         table: "tbl_brand_ambassador bra",
+    //                         query: "bra.area = a.id",
+    //                         type: "left"
+    //                     }
+    //                 ],
+    //                 group: "a.id, a.code"  
+    //             };
+
+    //             aJax.post(url, data, function(response) {
+    //                 console.log("Raw Response:", response);
+
+    //                 try {
+    //                     var obj = JSON.parse(response);
+    //                     console.log("Parsed Response Data:", obj);
+
+    //                     if (!obj || obj.length === 0) { 
+    //                         console.error("Invalid or empty response:", response);
+    //                         return;
+    //                     }
+
+    //                     // Convert team_count to an integer
+    //                     var Count = Number(obj[0].arsc_count) || 0;
+    //                     console.log("Count:", Count);
+
+    //                     var bracount = Number(obj[0].bra_count) || 0;
+
+    //                     if (Count > 0 || bracount > 0) { 
+    //                         modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+    //                     } else {
+    //                         proceed_delete(id); 
+    //                     }
+    //                 } catch (e) {
+    //                     console.error("Error parsing response:", e, response);
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
+    // function proceed_delete(id) {
+    //     var url = "<?= base_url('cms/global_controller');?>";
+    //     var data = {
+    //         event : "update",
+    //         table : "tbl_area",
+    //         field : "id",
+    //         where : id, 
+    //         data : {
+    //                 updated_date : formatDate(new Date()),
+    //                 updated_by : user_id,
+    //                 status : -2
+    //         }  
+    //     }
+    //     aJax.post(url,data,function(result){
+    //         var obj = is_json(result);
+    //         modal.alert(success_delete_message, 'success', function() {
+    //             location.reload();
+    //         });
+    //     }); 
+    // }
 
     function formatDate(date) {
         const year = date.getFullYear();
