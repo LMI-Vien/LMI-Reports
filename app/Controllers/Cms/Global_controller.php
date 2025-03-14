@@ -702,10 +702,10 @@ class Global_controller extends BaseController
 	        $responseData['brandssopa'] = $this->Global_model->get_valid_records("tbl_brand", 'brand_code');
 	    }
 		if (!empty($request['agencies'])) {
-	        $responseData['agencies'] = $this->Global_model->get_valid_records("tbl_agency", 'agency');
+	        $responseData['agencies'] = $this->Global_model->get_valid_records("tbl_agency", 'code', 'agency');
 	    }
 		if (!empty($request['teams'])) {
-	        $responseData['teams'] = $this->Global_model->get_valid_records("tbl_team", 'team_description');
+	        $responseData['teams'] = $this->Global_model->get_valid_records("tbl_team", 'code', 'team_description');
 	    }
 	    if (!empty($request['stores'])) {
 	        $responseData['stores'] = $this->Global_model->get_valid_records("tbl_store", ['code', 'description']);
