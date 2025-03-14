@@ -227,7 +227,7 @@
         if(selectedBa !== 0){
             get_area_asc(selectedBa);
         }
-        // fetchData();
+        fetchData();
     });
 
     function fetchData() {
