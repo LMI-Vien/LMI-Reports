@@ -52,8 +52,9 @@
                                 <i class="fas fa-user"></i> Hi, <?= esc(session()->get('sess_site_name')) ?><br>
                                 <span id="currentDateTime" class="small text-muted"></span>
                             </a>
+
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a id="logout" class="dropdown-item">
+                                <a id="logout" href="<?= base_url('login/logout')?>" class="dropdown-item">
                                     <i class="fas fa-sign-out-alt mr-2"></i> Logout
                                 </a>
                             </div>
