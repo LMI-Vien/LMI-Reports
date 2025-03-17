@@ -413,61 +413,122 @@
         clear_import_table()
     });
     
+    // function read_xl_file() {
+    //     $(".import_table").empty()
+    //     var html = '';
+    //     const file = $("#file")[0].files[0];
+    //     if (file === undefined) {
+    //         load_swal(
+    //             '',
+    //             '500px',
+    //             'error',
+    //             'Error!',
+    //             'Please select a file to upload',
+    //             false,
+    //             true
+    //         )
+    //         return
+    //     }
+    //     const reader = new FileReader();
+    //     reader.onload = function(e) {
+    //         const data = e.target.result;
+    //         // convert the data to a workbook
+    //         const workbook = XLSX.read(data, {type: "binary"});
+    //         // get the first sheet
+    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    //         // convert the sheet to JSON
+    //         const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+    //         var tr_counter = 0;
+    //         jsonData.forEach(row => {
+    //             var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+    //             html += "<tr class=\""+rowClass+"\">";
+    //             html += "<td>";
+    //             html += tr_counter+1;
+    //             html += "</td>";
+
+    //             let record = row;
+
+    //             let lowerCaseRecord = Object.keys(record).reduce((acc, key) => {
+    //                 acc[key.toLowerCase()] = record[key];
+    //                 return acc;
+    //             }, {});
+    
+    //             // create a table cell for each item in the row
+    //             var td_validator = ['code', 'description', 'stores', 'status'];
+    //             td_validator.forEach(column => {
+    //                 html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
+    //                 html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
+    //                 html += "</td>";
+    //             });
+    //             html += "</tr>";
+    //             tr_counter += 1;
+    //         });
+
+    //         $(".import_table").append(html);
+    //         html = '';
+    //     };
+    //     reader.readAsBinaryString(file);
+    // }
+
+    // with special characters
     function read_xl_file() {
-        $(".import_table").empty()
-        var html = '';
+        let btn = $(".btn.save");
+        btn.prop("disabled", false);
+        clear_import_table();
+
+        dataset = [];
+
         const file = $("#file")[0].files[0];
-        if (file === undefined) {
-            load_swal(
-                '',
-                '500px',
-                'error',
-                'Error!',
-                'Please select a file to upload',
-                false,
-                true
-            )
-            return
+        if (!file) {
+            modal.loading_progress(false);
+            modal.alert('Please select a file to upload', 'error', () => {});
+            return;
         }
+
+        const maxFileSize = 30 * 1024 * 1024; // 30MB limit
+        if (file.size > maxFileSize) {
+            modal.loading_progress(false);
+            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+            return;
+        }
+
+        modal.loading_progress(true, "Reviewing Data...");
+
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = e.target.result;
-            // convert the data to a workbook
-            const workbook = XLSX.read(data, {type: "binary"});
-            // get the first sheet
+
+            // Read as binary instead of plain text
+            const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            // convert the sheet to JSON
-            const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-            var tr_counter = 0;
-            jsonData.forEach(row => {
-                var rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
-                html += "<tr class=\""+rowClass+"\">";
-                html += "<td>";
-                html += tr_counter+1;
-                html += "</td>";
+            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-                let record = row;
+            // Ensure special characters like "ñ" are correctly preserved
+            jsonData = jsonData.map(row => {
+                let fixedRow = {};
+                Object.keys(row).forEach(key => {
+                    let value = row[key];
 
-                let lowerCaseRecord = Object.keys(record).reduce((acc, key) => {
-                    acc[key.toLowerCase()] = record[key];
-                    return acc;
-                }, {});
-    
-                // create a table cell for each item in the row
-                var td_validator = ['code', 'description', 'stores', 'status'];
-                td_validator.forEach(column => {
-                    html += "<td class=\"sample-id-"+lowerCaseRecord[column]+"\" id=\"" + column + "\">";
-                    html += lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; // add value or leave empty
-                    html += "</td>";
+                    // Convert numbers to text while keeping dates unchanged
+                    if (typeof value === "number") {
+                        value = String(value);
+                    }
+
+                    fixedRow[key] = value !== null && value !== undefined ? value : "";
                 });
-                html += "</tr>";
-                tr_counter += 1;
+                return fixedRow;
             });
 
-            $(".import_table").append(html);
-            html = '';
+            console.log(jsonData);
+
+            processInChunks(jsonData, 5000, () => {
+                paginateData(rowsPerPage);
+            });
         };
+
+        // Use readAsBinaryString instead of readAsText
         reader.readAsBinaryString(file);
     }
     

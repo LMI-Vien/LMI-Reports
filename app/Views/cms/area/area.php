@@ -279,6 +279,7 @@
         open_modal('Add New Area', 'add', '');
     });
     
+    // cb
     function edit_data(id) {
         modal.loading(true);
 
@@ -286,7 +287,21 @@
             modal.loading(false);
         });
     }
+
+    // timeout
+    // function edit_data(id) {
+    //     modal.loading(true);
+
+    //     setTimeout(() => {
+    //         open_modal('Edit Area', 'edit', id);
+
+    //         setTimeout(() => {
+    //             modal.loading(false);
+    //         }, 1000);
+    //     }, 500);
+    // }
     
+    // cb
     function view_data(id) {
         modal.loading(true);
 
@@ -294,6 +309,19 @@
             modal.loading(false);
         });
     }
+
+    // timeout
+    // function view_data(id) {
+    //     modal.loading(true);
+
+    //     setTimeout(() => {
+    //         open_modal('View Area', 'view', id);
+
+    //         setTimeout(() => {
+    //             modal.loading(false);
+    //         }, 1000);
+    //     }, 500);
+    // }
     
     function open_modal(msg, actions, id) {
         $(".form-control").css('border-color','#ccc');
@@ -321,7 +349,13 @@
             })
         };
 
-        if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
+        // if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
+        if (['edit', 'view'].includes(actions)) {
+            populate_modal(id, actions, () => {
+                modal.loading(false); 
+            });
+        }
+
         let isReadOnly = actions === 'view';
         set_field_state('#code, #description, #status', isReadOnly);
         
@@ -366,12 +400,6 @@
         $footer.append(buttons.close);
 
         $modal.modal('show');
-
-        if (['edit', 'view'].includes(actions)) {
-            populate_modal(id, actions, () => {
-                modal.loading(false); 
-            });
-        }
     }
     
     function reset_modal_fields() {
@@ -616,21 +644,81 @@
     });
     
     // try function
+    // function read_xl_file() {
+    //     let btn = $(".btn.save");
+    //     btn.prop("disabled", false);
+    //     clear_import_table();
+        
+    //     dataset = [];
+
+    //     const file = $("#file")[0].files[0];
+    //     if (!file) {
+    //         modal.loading_progress(false);
+    //         modal.alert('Please select a file to upload', 'error', ()=>{});
+    //         return;
+    //     }
+
+    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+    //     if (file.size > maxFileSize) {
+    //         modal.loading_progress(false);
+    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+    //         return;
+    //     }
+
+    //     modal.loading_progress(true, "Reviewing Data...");
+
+    //     const reader = new FileReader();
+    //     reader.onload = function(e) {
+    //         const text = e.target.result;
+
+    //         // Read CSV manually to avoid auto-conversion
+    //         const workbook = XLSX.read(text, { type: "string", raw: true });
+    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    //         let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+    //         // Ensure only numbers are treated as text, keeping dates unchanged
+    //         jsonData = jsonData.map(row => {
+    //             let fixedRow = {};
+    //             Object.keys(row).forEach(key => {
+    //                 let value = row[key];
+
+    //                 // Convert numbers to text while keeping dates unchanged
+    //                 if (typeof value === "number") {
+    //                     value = String(value); // Convert numbers to string
+    //                 }
+
+    //                 fixedRow[key] = value !== null && value !== undefined ? value : "";
+    //             });
+    //             return fixedRow;
+    //         });
+
+    //         console.log(jsonData);
+
+    //         processInChunks(jsonData, 5000, () => {
+    //             paginateData(rowsPerPage);
+    //         });
+    //     };
+
+    //     reader.readAsText(file); 
+    // }
+
+    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
         clear_import_table();
-        
+
         dataset = [];
 
         const file = $("#file")[0].files[0];
         if (!file) {
             modal.loading_progress(false);
-            modal.alert('Please select a file to upload', 'error', ()=>{});
+            modal.alert('Please select a file to upload', 'error', () => {});
             return;
         }
 
-        const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+        const maxFileSize = 30 * 1024 * 1024; // 30MB limit
         if (file.size > maxFileSize) {
             modal.loading_progress(false);
             modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
@@ -641,15 +729,15 @@
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            const text = e.target.result;
+            const data = e.target.result;
 
-            // Read CSV manually to avoid auto-conversion
-            const workbook = XLSX.read(text, { type: "string", raw: true });
+            // Read as binary instead of plain text
+            const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-            // Ensure only numbers are treated as text, keeping dates unchanged
+            // Ensure special characters like "ñ" are correctly preserved
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
@@ -657,7 +745,7 @@
 
                     // Convert numbers to text while keeping dates unchanged
                     if (typeof value === "number") {
-                        value = String(value); // Convert numbers to string
+                        value = String(value);
                     }
 
                     fixedRow[key] = value !== null && value !== undefined ? value : "";
@@ -672,47 +760,9 @@
             });
         };
 
-        reader.readAsText(file); 
+        // Use readAsBinaryString instead of readAsText
+        reader.readAsBinaryString(file);
     }
-
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false); 
-    //     clear_import_table();
-        
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-
-    //     // File Size Validation (Limit: 30MB) temp
-    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
-    //     if (file.size > maxFileSize) {
-    //         modal.loading_progress(false);
-    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-    //         return;
-    //     }
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const data = new Uint8Array(e.target.result);
-    //         const workbook = XLSX.read(data, { type: "array" });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-    //         // Process in chunks
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-    //     reader.readAsArrayBuffer(file);
-    // }
 
     function processInChunks(data, chunkSize, callback) {
         let index = 0;
@@ -1367,6 +1417,144 @@
             });
         }
     }
+
+    // function save_data(actions, id) {
+    //     var code = $('#code').val();
+    //     var description = $('#description').val();
+    //     var chk_status = $('#status').prop('checked');
+    //     var linenum = 0;
+    //     var store = '';
+    //     var unique_store = [];
+    //     var store_list = $('#store_list');
+    //     // add_line
+    //     store_list.find('input').each(function() {
+    //         if (!unique_store.includes($(this).val())) {
+    //             store = $(this).val().split(' - ');
+
+    //             if(store.length == 2) {
+    //                 unique_store.push(store[1]);
+    //             } else {
+    //                 unique_store.push(store[1] + ' - ' + store[2]);
+    //             }
+    //         }
+    //         linenum++
+    //     });
+    //     if (chk_status) {
+    //         status_val = 1;
+    //     } else {
+    //         status_val = 0;
+    //     }
+    //     // return;
+    //     if (id !== undefined && id !== null && id !== '') {
+    //         check_current_db("tbl_store_group", ["store_id"], [store_id], "id", id, true, function(exists, duplicateFields) {
+    //             if (!exists) {
+    //                 check_current_db("tbl_area", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
+    //                     if (!exists) {
+    //                         modal.confirm(confirm_update_message,function(result){
+    //                             if(result){ 
+    //                                 let batch = [];
+    //                                 let valid = true;
+    //                                 $.each(unique_store, (x, y) => {
+    //                                     get_field_values('tbl_store', 'id', 'description', [y], (res) => {
+    //                                         if(res.length == 0) {
+    //                                             valid = false;
+    //                                         } else {
+    //                                             modal_alert = 'success';
+    //                                             $.each(res, (x, y) => {
+    //                                                 let data = {
+    //                                                     'area_id': id,
+    //                                                     'store_id': y,
+    //                                                     'created_by': user_id,
+    //                                                     'created_date': formatDate(new Date())
+    //                                                 };
+    //                                                 batch.push(data);
+    //                                             })
+    //                                         }
+    //                                     })
+    //                                 })
+    //                                 if(valid) {
+    //                                     save_to_db(code, description, store, status_val, id, (obj) => {
+    //                                         total_delete(url, 'tbl_store_group', 'area_id', id);
+
+    //                                         batch_insert(url, batch, 'tbl_store_group', false, () => {
+    //                                             modal.loading(false);
+    //                                             modal.alert(success_update_message, "success", function() {
+    //                                                 location.reload();
+    //                                             });
+    //                                         })
+    //                                     })         
+    //                                 } else {
+    //                                     // alert('mali');
+    //                                     modal.loading(false);
+    //                                     modal.alert('Store not found', 'error', function() {});
+    //                                 }
+    //                             }
+    //                         });
+    //                     }             
+    //                 });
+    //             }
+    //         });
+    //     }else{
+    //         check_current_db("tbl_store_group", ["store_id"], [store_id], "status", null, null, true, function(exists, duplicateFields) {
+    //             check_current_db("tbl_area", ["code", "description"], [code, description], "status" , null, null, true, function(exists, duplicateFields) {
+    //                 if (!exists) {
+    //                     modal.confirm(confirm_add_message,function(result){
+    //                         if(result){ 
+    //                             let batch = [];
+    //                             let valid = true;
+    //                             $.each(unique_store, (x, y) => {
+    //                                 get_field_values('tbl_store', 'id', 'description', [y], (res) => {
+    //                                     if(res.length == 0) {
+    //                                         valid = false;
+    //                                     } else {
+    //                                         modal_alert = 'success';
+    //                                         $.each(res, (x, y) => {
+    //                                             let data = {
+    //                                                 'area_id': id,
+    //                                                 'store_id': y,
+    //                                                 'created_by': user_id,
+    //                                                 'created_date': formatDate(new Date())
+    //                                             };
+    //                                             batch.push(data);
+    //                                         })
+    //                                     }
+    //                                 })
+    //                             })
+
+    //                             if(valid) {
+    //                                 // save_to_db(code, description, store, status_val, id, (obj) => {
+    //                                 //     total_delete(url, 'tbl_store_group', 'area_id', id);
+
+    //                                 //     batch_insert(url, batch, 'tbl_store_group', false, () => {
+    //                                 //         modal.loading(false);
+    //                                 //         modal.alert(success_update_message, "success", function() {
+    //                                 //             location.reload();
+    //                                 //         });
+    //                                 //     })
+    //                                 // })
+    //                                 save_to_db(code, description, store, status_val, id, (obj) => {
+    //                                     insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
+        
+    //                                     batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
+    //                                         modal.loading(false);
+    //                                         modal.alert(success_update_message, "success", function() {
+    //                                             location.reload();
+    //                                         });
+    //                                     })
+    //                                 })
+
+    //                             } else {
+    //                                 // alert('mali');
+    //                                 modal.loading(false);
+    //                                 modal.alert('Store not found', 'error', function() {});
+    //                             }
+    //                         }
+    //                     });
+    //                 }                  
+    //             });
+    //         });  
+    //     }
+    // }
 
     function save_to_db(inp_code, inp_description, inp_store, status_val, id, cb) {
         const url = "<?= base_url('cms/global_controller'); ?>";
