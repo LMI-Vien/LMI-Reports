@@ -207,6 +207,12 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
         autocomplete_field($("#area"), $("area_id"), area, "area_description");
 
         $(document).on('click', '#refreshButton', function () {
+            if($('#area').val() == ""){
+                $('#area_id').val('');
+            }
+            if($('#store').val() == ""){
+                $('#store_id').val('');
+            }
             fetchData();
         });
     });

@@ -221,29 +221,15 @@ class TradeDashboard extends BaseController
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data['content'] = "site/trade/store_performance.php";
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
 
 	public function trade_ba()
 	{
+
 	    $limit = $this->request->getVar('limit') ?? 10;
 	    $offset = $this->request->getVar('offset') ?? 0;
 	    $type = $this->request->getVar('type');
@@ -253,7 +239,6 @@ class TradeDashboard extends BaseController
 	    $store_name = $this->request->getVar('store_name');
 	    $sort = $this->request->getVar('sort') ?? 'ASC';
 	    $sort_field = $this->request->getVar('sort_field');
-	    //echo $sort_field;
 
 	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
 	    if($latest_vmi_data){
@@ -299,7 +284,15 @@ class TradeDashboard extends BaseController
 		        'recordsTotal' => $data['total_records'],
 		        'recordsFiltered' => $data['total_records'],
 		        'data' => $data['data'],
-		    ]);
+		    ]);	
+		    
+	    }else{
+			return $this->response->setJSON([
+		        'draw' => intval($this->request->getVar('draw')),
+		        'recordsTotal' => 0,
+		        'recordsFiltered' => 0,
+		        'data' => [],
+		    ]);	
 	    }
 	}
 
@@ -404,6 +397,63 @@ class TradeDashboard extends BaseController
 	    	$store = null;
 	    }
 	     $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $days, $date);
+	    return $this->response->setJSON([
+	        'draw' => intval($this->request->getVar('draw')),
+	        'recordsTotal' => $data['total_records'],
+	        'recordsFiltered' => $data['total_records'],
+	        'data' => $data['data'],
+	    ]);
+	}
+
+	public function trade_asc_dashboard_one()
+	{	
+		$days = $this->getDaysInMonth(2, $this->getCurrentYear());
+
+	    $limit = $this->request->getVar('limit') ?? 10;
+	    $offset = $this->request->getVar('offset') ?? 0;
+	    $month = $this->request->getVar('month');
+	    $year = $this->request->getVar('year');
+	    $area = $this->request->getVar('area');
+	    $store = $this->request->getVar('store');
+	    $sort = $this->request->getVar('sort') ?? 'ASC';
+	    $sort_field = $this->request->getVar('sort_field');
+	    $formatted_month = str_pad($month, 2, '0', STR_PAD_LEFT);
+	    $date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $lyMonth = null;
+	    $targetYear = null;
+	    $date = null;
+
+	    if($year){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$lyYear = $selected_year - 1;
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
+
+	    if($month){
+	    	$date = $formatted_month;
+	    	$lyMonth = $month;
+	    }
+
+		if($year && $month){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+	    }
+
+	    if(empty($area)){
+	    	$area = null;
+	    }
+	    if(empty($store)){
+	    	$store = null;
+	    }
+	     $data = $this->Dashboard_model->asctest();
+	     echo "<pre>";
+	     print_r($data);
+	     die();
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
 	        'recordsTotal' => $data['total_records'],

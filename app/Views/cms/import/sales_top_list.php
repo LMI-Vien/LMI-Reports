@@ -37,7 +37,7 @@
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center page-title md-center">
-                <b>B A - S A L E S - R E P O R T</b>
+                <b>I M P O R T - S A L E S - T O P - L I S T</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -53,10 +53,10 @@
                             <table class="table table-bordered listdata">
                                 <thead>
                                     <tr>
-                                        <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                        <th class='center-content'>Code</th>
+                                        <!-- <th class='center-content'><input class="selectall" type="checkbox"></th> -->
+                                        <!-- <th class='center-content'>Code</th>
                                         <th class='center-content'>Area Description</th>
-                                        <!-- <th class='center-content'>Store</th> -->
+                                         --><!-- <th class='center-content'>Store</th> -->
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
