@@ -127,7 +127,7 @@
 
                     <div class="form-group">
                         <label>Deployment Date</label>
-                        <input type="date" class="form-control" id="deployment_date">
+                        <input type="date" class="form-control required" id="deployment_date">
                     </div>
 
                     <div class="form-group">
@@ -1549,11 +1549,23 @@
                     modal.confirm(confirm_update_message, function(result){
                         if(result){ 
                             // modal.loading(true);
-                            let batch = [];
+                            let ids = [];
+                            let hasDuplicate = false;
                             let valid = true;
 
                             $.each(unique_brand, (x, y) => {
-                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                if (ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            });
+
+                            if(hasDuplicate) {
+                                modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
+                            } else {
+                                let batch = [];
+                                    get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
                                     if(res.length == 0) {
                                         valid = false;
                                     } else {
@@ -1568,23 +1580,23 @@
                                         })
                                     }
                                 });
-                            })
 
-                            if(valid) {
-                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                    total_delete(url, 'tbl_ba_brands', 'ba_id', id)
-                                    
-                                    batch_insert(url, batch, 'tbl_ba_brands', false, () => {
-                                        modal.loading(false);
-                                        modal.alert(success_update_message, "success", function() {
-                                            location.reload();
-                                        });
-                                    })
-                                });
-                            } else {
-                                modal.loading(false);
-                                modal.alert('Brand not found', 'error', function() {});
-                            }
+                                if(valid) {
+                                    save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                        total_delete(url, 'tbl_ba_brands', 'ba_id', id)
+                                        
+                                        batch_insert(url, batch, 'tbl_ba_brands', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
+                                    });
+                                } else {
+                                    modal.loading(false);
+                                    modal.alert('Brand not found', 'error', function() {});
+                                }
+                            } 
                         }
                     });
 
@@ -1593,14 +1605,27 @@
         }else{
             check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
-                    modal.confirm(confirm_update_message, function(result){
+                    modal.confirm(confirm_add_message, function(result){
                         if(result){ 
                             // modal.loading(true);
-                            let batch = [];
+                            let ids = [];
+                            let hasDuplicate = false;
+                            // let batch = [];
                             let valid = true;
 
                             $.each(unique_brand, (x, y) => {
-                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                if (ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            })
+
+                            if(hasDuplicate) {
+                                modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
+                            } else {
+                                let batch = [];
+                                get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
                                     if(res.length == 0) {
                                         console.log('waler');
                                         valid = false;
@@ -1616,25 +1641,25 @@
                                         })
                                     }
                                 });
-                            })
 
-                            if(valid) {
-                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                    console.log(obj.ID);
-                                    insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
-                                    console.log(insert_batch);
+                                if(valid) {
+                                    save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                        console.log(obj.ID);
+                                        insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
+                                        console.log(insert_batch);
 
-                                    batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
-                                        modal.loading(false);
-                                        modal.alert(success_update_message, "success", function() {
-                                            location.reload();
-                                        });
-                                    })
-                                });
-                            } else {
-                                modal.loading(false);
-                                modal.alert('Brand not found', 'error', function() {});
-                            }
+                                        batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
+                                    });
+                                } else {
+                                    modal.loading(false);
+                                    modal.alert('Brand not found', 'error', function() {});
+                                }
+                            }        
                         }
                     });
 
