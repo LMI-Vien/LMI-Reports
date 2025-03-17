@@ -484,6 +484,334 @@ class Dashboard_model extends Model
 
 	}
 
+
+	public function tradeOverallBaDataASC($limit, $offset, $month = null, $targetYear = null, $lyYear = null, $storeid = null, $areaid = null, $sortField = 'store_code', $sortOrder = 'ASC', $remainingDays = null, $salesDate = null) {
+
+	    // $allowedSortFields = ['rank', 'store_code', 'area', 'store_name', 'actual_sales', 'target_sales', 'balance_to_target', 'possible_incentives', 'target_per_remaining_days', 'ly_scanned_data', 'growth'];
+	    // if (!in_array($sortField, $allowedSortFields)) {
+	         $sortField = 'actual_sales';
+	    // }
+	    // print_r($sortField);
+	    // die();
+	    $sql = "
+	    WITH sales AS (
+	        SELECT 
+	            s.area_id,  
+	            s.store_id,
+	            COALESCE(SUM(s.amount), 0) AS actual_sales,
+	            GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands,
+	            GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS brand_ambassadors,
+	            GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS asc_names,
+	            MIN(ba.deployment_date) AS deployment_date
+	        FROM tbl_ba_sales_report s
+	        LEFT JOIN tbl_brand b ON s.brand = b.id
+	        LEFT JOIN tbl_brand_ambassador ba ON ba.area = s.area_id AND ba.store = s.store_id
+	        LEFT JOIN tbl_area_sales_coordinator a_asc ON a_asc.area_id = s.area_id
+	        WHERE (? IS NULL OR s.date LIKE CONCAT(?, '%'))
+	        GROUP BY s.area_id, s.store_id
+	    ),
+	    targets AS (
+	        SELECT 
+	             TRIM(t.location) AS store_code,
+	            -- SUM(COALESCE(
+	            --     CASE 
+	            --         WHEN ? = 1 THEN t.january
+	            --         WHEN ? = 2 THEN t.february
+	            --         WHEN ? = 3 THEN t.march
+	            --         WHEN ? = 4 THEN t.april
+	            --         WHEN ? = 5 THEN t.may
+	            --         WHEN ? = 6 THEN t.june
+	            --         WHEN ? = 7 THEN t.july
+	            --         WHEN ? = 8 THEN t.august
+	            --         WHEN ? = 9 THEN t.september
+	            --         WHEN ? = 10 THEN t.october
+	            --         WHEN ? = 11 THEN t.november
+	            --         WHEN ? = 12 THEN t.december
+	            --     END, 0)
+	            -- ) AS target_sales
+	            COALESCE(SUM(t.january), 0) AS january_target_sales,
+	            COALESCE(SUM(t.february), 0) AS february_target_sales,
+	            COALESCE(SUM(t.march), 0) AS march_target_sales,
+	            COALESCE(SUM(t.april), 0) AS april_target_sales,
+	            COALESCE(SUM(t.may), 0) AS may_target_sales,
+	            COALESCE(SUM(t.june), 0) AS june_target_sales,
+	            COALESCE(SUM(t.july), 0) AS july_target_sales,
+	            COALESCE(SUM(t.august), 0) AS august_target_sales,
+	            COALESCE(SUM(t.september), 0) AS september_target_sales,
+	            COALESCE(SUM(t.october), 0) AS october_target_sales,
+	            COALESCE(SUM(t.november), 0) AS november_target_sales,
+	            COALESCE(SUM(t.december), 0) AS december_target_sales
+	        FROM tbl_target_sales_per_store t
+	        WHERE (? IS NULL OR t.year = ?)
+	        GROUP BY t.location
+	    ),
+	    ly_scanned_january AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_january
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 1)
+	    ),
+	    ly_scanned_february AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_february
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 2)
+	    ),
+	    ly_scanned_march AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_march
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 3)
+	    ),
+	    ly_scanned_april AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_april
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 4)
+	    ),
+	    ly_scanned_may AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_may
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 5)
+	    ),
+	    ly_scanned_june AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_june
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 6)
+	    ),
+	    ly_scanned_july AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_july
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 7)
+	    ),
+	    ly_scanned_august AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_august
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 8)
+	    ),
+	    ly_scanned_september AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_september
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 9)
+	    ),
+	    ly_scanned_october AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_october
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 10)
+	    ),
+	    ly_scanned_november AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_november
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 11)
+	    ),
+	    ly_scanned_december AS (
+	        SELECT 
+	            SUM(COALESCE(so.net_sales, 0)) AS ly_sell_out_december
+	        FROM tbl_sell_out_data_details so
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (so.month = 12)
+	    ),
+
+
+	    store_mapping AS (
+	        SELECT 
+	            a.id AS area_id,
+	            a.description AS area,
+	            s.id AS store_id,
+	            s.description AS store_name,
+	            s.code AS store_code
+	        FROM tbl_store s
+	        JOIN tbl_store_group sg ON s.id = sg.store_id
+	        JOIN tbl_area a ON sg.area_id = a.id
+	        WHERE (? IS NULL OR s.id = ?) 
+	          AND (? IS NULL OR a.id = ?)
+	    )
+	    SELECT 
+	        sm.store_code,
+	        sm.area,
+	        sm.store_name,
+	        COALESCE(t.january_target_sales, 0) AS january_target_sales,
+	        COALESCE(t.february_target_sales, 0) AS february_target_sales,
+	        COALESCE(t.march_target_sales, 0) AS march_target_sales,
+	        COALESCE(t.april_target_sales, 0) AS april_target_sales,
+	        COALESCE(t.may_target_sales, 0) AS may_target_sales,
+	        COALESCE(t.june_target_sales, 0) AS june_target_sales,
+	        COALESCE(t.july_target_sales, 0) AS july_target_sales,
+	        COALESCE(t.august_target_sales, 0) AS august_target_sales,
+	        COALESCE(t.september_target_sales, 0) AS september_target_sales,
+	        COALESCE(t.october_target_sales, 0) AS october_target_sales,
+	        COALESCE(t.november_target_sales, 0) AS november_target_sales,
+	        COALESCE(t.december_target_sales, 0) AS december_target_sales,
+	       -- COALESCE(t.target_sales, 0) AS target_sales,
+	       -- ROUND((COALESCE(s.actual_sales, 0) / NULLIF(t.target_sales, 0)) * 100, 2) AS percent_ach,
+	       -- COALESCE(t.target_sales, 0) - COALESCE(s.actual_sales, 0) AS balance_to_target,
+	        (COALESCE(s.actual_sales, 0) * 0.01) AS possible_incentives,
+	        -- CASE 
+	        --     WHEN ? > 0 THEN CEIL((COALESCE(t.target_sales, 0) - COALESCE(s.actual_sales, 0)) / ?)
+	        --     ELSE NULL
+	        -- END AS target_per_remaining_days,
+	        s.store_id,
+	        s.brand_ambassadors,
+	        s.asc_names,
+	        s.brands,
+	        COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data
+	       -- ROUND((COALESCE(s.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)), 2) AS growth
+	    FROM store_mapping sm
+	    INNER JOIN sales s ON sm.area_id = s.area_id AND sm.store_id = s.store_id
+	    LEFT JOIN targets t ON TRIM(sm.store_code) = TRIM(t.store_code)
+	    LEFT JOIN ly_scanned ly ON sm.store_code = ly.store_code
+	    ORDER BY $sortField $sortOrder
+	    LIMIT ? OFFSET ?
+	    ";
+
+	    $params = [
+	        $salesDate, $salesDate,  
+	        $month, $month, $month, $month, $month, $month, 
+	        $month, $month, $month, $month, $month, $month, 
+	        $targetYear, $targetYear,  
+	        $lyYear, $lyYear, $month, $month,  
+	        $storeid, $storeid, $areaid, $areaid,  
+	        $remainingDays, $remainingDays,  
+	        (int) $limit, (int) $offset  
+	    ];
+
+
+	    $query = $this->db->query($sql, $params);
+		$data = $query->getResult();
+		$totalRecords = count($data);
+
+		return [
+		    'total_records' => $totalRecords,
+		    'data' => $data
+		];
+
+	}
+
+	public function asctest() {
+	    $sql = "
+	        WITH monthly_totals AS (
+	            SELECT 
+	                SUM(CASE WHEN s.date >= '2025-01-01' AND s.date < '2025-02-01' THEN s.amount ELSE 0 END) AS amount_january,
+	                SUM(CASE WHEN s.date >= '2025-02-01' AND s.date < '2025-03-01' THEN s.amount ELSE 0 END) AS amount_february,
+	                SUM(CASE WHEN s.date >= '2025-03-01' AND s.date < '2025-04-01' THEN s.amount ELSE 0 END) AS amount_march,
+	                SUM(CASE WHEN s.date >= '2025-04-01' AND s.date < '2025-05-01' THEN s.amount ELSE 0 END) AS amount_april,
+	                SUM(CASE WHEN s.date >= '2025-05-01' AND s.date < '2025-06-01' THEN s.amount ELSE 0 END) AS amount_may,
+	                SUM(CASE WHEN s.date >= '2025-06-01' AND s.date < '2025-07-01' THEN s.amount ELSE 0 END) AS amount_june,
+	                SUM(CASE WHEN s.date >= '2025-07-01' AND s.date < '2025-08-01' THEN s.amount ELSE 0 END) AS amount_july,
+	                SUM(CASE WHEN s.date >= '2025-08-01' AND s.date < '2025-09-01' THEN s.amount ELSE 0 END) AS amount_august,
+	                SUM(CASE WHEN s.date >= '2025-09-01' AND s.date < '2025-10-01' THEN s.amount ELSE 0 END) AS amount_september,
+	                SUM(CASE WHEN s.date >= '2025-10-01' AND s.date < '2025-11-01' THEN s.amount ELSE 0 END) AS amount_october,
+	                SUM(CASE WHEN s.date >= '2025-11-01' AND s.date < '2025-12-01' THEN s.amount ELSE 0 END) AS amount_november,
+	                SUM(CASE WHEN s.date >= '2025-12-01' AND s.date < '2026-01-01' THEN s.amount ELSE 0 END) AS amount_december,
+                	GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands,
+		            GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS brand_ambassadors,
+		            GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS asc_names,
+		            GROUP_CONCAT(DISTINCT st.description ORDER BY st.description SEPARATOR ', ') AS bsr_stores,
+		            GROUP_CONCAT(DISTINCT ar.description ORDER BY ar.description SEPARATOR ', ') AS bsr_areas
+	            FROM tbl_ba_sales_report s
+	            LEFT JOIN tbl_brand b ON s.brand = b.id
+		        LEFT JOIN tbl_brand_ambassador ba ON ba.area = s.area_id AND ba.store = s.store_id
+		        LEFT JOIN tbl_area_sales_coordinator a_asc ON a_asc.area_id = s.area_id
+		        LEFT JOIN tbl_store st ON s.store_id = st.id
+		        LEFT JOIN tbl_area ar ON s.area_id = ar.id
+		        
+	        ),
+	        net_sales_totals AS (
+            SELECT 
+                SUM(CASE WHEN sodd.month = 1 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_january,
+                SUM(CASE WHEN sodd.month = 2 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_february,
+                SUM(CASE WHEN sodd.month = 3 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_march,
+                SUM(CASE WHEN sodd.month = 4 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_april,
+                SUM(CASE WHEN sodd.month = 5 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_may,
+                SUM(CASE WHEN sodd.month = 6 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_june,
+                SUM(CASE WHEN sodd.month = 7 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_july,
+                SUM(CASE WHEN sodd.month = 8 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_august,
+                SUM(CASE WHEN sodd.month = 9 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_september,
+                SUM(CASE WHEN sodd.month = 10 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_october,
+                SUM(CASE WHEN sodd.month = 11 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_november,
+                SUM(CASE WHEN sodd.month = 12 AND sodd.year = 2024 THEN sodd.net_sales ELSE 0 END) AS net_sales_december,
+                GROUP_CONCAT(DISTINCT st.description ORDER BY st.description SEPARATOR ', ') AS sodd_stores,
+                GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS sodd_brands,
+        		GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS sodd_brand_ambassadors,
+        		GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS sodd_asc_names,
+        		GROUP_CONCAT(DISTINCT ar.description ORDER BY ar.description SEPARATOR ', ') AS sodd_areas
+	        FROM tbl_sell_out_data_details sodd
+	        LEFT JOIN tbl_store st ON st.code = sodd.store_code
+	        LEFT JOIN tbl_brand_ambassador ba ON ba.store = st.id
+	        LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+	        LEFT JOIN tbl_brand b ON bb.brand_id = b.id
+	        LEFT JOIN tbl_area_sales_coordinator a_asc ON ba.area = a_asc.area_id
+	        LEFT JOIN tbl_area ar ON ar.id = a_asc.area_id
+	        ),
+	        store_mapping AS (
+		        SELECT 
+		            a.id AS area_id,
+		            a.description AS area,
+		            s.id AS store_id,
+		            s.description AS store_name,
+		            s.code AS store_code
+		        FROM tbl_store s
+		        JOIN tbl_store_group sg ON s.id = sg.store_id
+		        JOIN tbl_area a ON sg.area_id = a.id
+		    ),
+	        target_sales_totals AS (
+            SELECT 
+                COALESCE(SUM(tsps.january), 0) AS target_sales_january,
+                COALESCE(SUM(tsps.february), 0) AS target_sales_february,
+                COALESCE(SUM(tsps.march), 0) AS target_sales_march,
+                COALESCE(SUM(tsps.april), 0) AS target_sales_april,
+                COALESCE(SUM(tsps.may), 0) AS target_sales_may,
+                COALESCE(SUM(tsps.june), 0) AS target_sales_june,
+                COALESCE(SUM(tsps.july), 0) AS target_sales_july,
+                COALESCE(SUM(tsps.august), 0) AS target_sales_august,
+                COALESCE(SUM(tsps.september), 0) AS target_sales_september,
+                COALESCE(SUM(tsps.october), 0) AS target_sales_october,
+                COALESCE(SUM(tsps.november), 0) AS target_sales_november,
+                COALESCE(SUM(tsps.december), 0) AS target_sales_december,
+                GROUP_CONCAT(DISTINCT st.description ORDER BY st.description SEPARATOR ', ') AS tsps_stores,
+                GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS tsps_brands,
+        		GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS tsps_brand_ambassadors,
+        		GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS tsps_asc_names,
+        		GROUP_CONCAT(DISTINCT ar.description ORDER BY ar.description SEPARATOR ', ') AS tsps_areas
+	        FROM tbl_target_sales_per_store tsps
+	        LEFT JOIN tbl_store st ON st.code = tsps.location
+	        LEFT JOIN tbl_brand_ambassador ba ON ba.store = st.id
+	        LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+	        LEFT JOIN tbl_brand b ON bb.brand_id = b.id
+	        LEFT JOIN tbl_area_sales_coordinator a_asc ON ba.area = a_asc.area_id
+	        LEFT JOIN tbl_area ar ON ar.id = a_asc.area_id
+	        )
+	        SELECT * FROM monthly_totals, net_sales_totals, target_sales_totals;
+	    ";
+
+	    // Execute query
+	    $query = $this->db->query($sql);
+	    $data = $query->getResult();
+
+	    return [
+	        'data' => $data
+	    ];
+	}
+
+
     public function updateConsolidatedData()
     {
         $this->db->query("TRUNCATE TABLE tbl_trade_db_overall_ba");

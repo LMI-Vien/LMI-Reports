@@ -29,7 +29,7 @@ class Import_sales_top_list extends BaseController
 		$data['PageName'] = 'Import Sales Top List';
 		$data['PageUrl'] = 'Import Sales Top List';
 		$data['content'] = "cms/import/sales_top_list.php";
-		$data['buttons'] = ['add', 'search', 'import'];
+		$data['buttons'] = [];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(

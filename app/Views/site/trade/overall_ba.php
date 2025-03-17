@@ -239,7 +239,13 @@ th:nth-child(10), td:nth-child(10) { width: 5%; }
         });
 
         $(document).on('click', '#refreshButton', function () {
-            fetchData();
+            if($('#area').val() == ""){
+                $('#area_id').val('');
+            }
+            if($('#store').val() == ""){
+                $('#store_id').val('');
+            }
+        fetchData();
         });
     });
 

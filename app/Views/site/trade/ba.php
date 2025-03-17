@@ -227,18 +227,25 @@
         if(selectedBa !== 0){
             get_area_asc(selectedBa);
         }
+        if($('#brand_ambassadors').val() == ""){
+            $('#ba_id').val('');
+        }
+        if($('#store_branch').val() == ""){
+            $('#store_id').val('');
+        }
+        if($('#brand').val() == ""){
+            $('#brand_id').val('');
+        }
         fetchData();
     });
 
     function fetchData() {
         let selectedType = $('input[name="filterType"]:checked').val();
-        let selectedBa = $('#brand_ambassador').val();
-        let selectedStore = $('#store_name').val();
-        let selectedBrand = $('#brand').val();
+        let selectedBa = $('#ba_id').val();
+        let selectedStore = $('#store_id').val();
+        let selectedBrand = $('#brand_id').val();
         let selectedSortField = $('#sortBy').val();
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-
-        console.log({ selectedType, selectedBa, selectedStore, selectedBrand, selectedSortField, selectedSortOrder });
 
         let tables = [
             { id: "#slowMovingTable", type: "slowMoving" },
@@ -258,9 +265,6 @@
             ajax: {
                 url: base_url + 'trade-dashboard/trade-ba',
                 type: 'GET',
-                // beforeSend: function() {
-                //     $(tableId).DataTable().processing(true); // Show loading
-                // },
                 data: function (d) {
                     d.sort_field = selectedSortField;
                     d.sort = selectedSortOrder;
@@ -273,7 +277,8 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                  //  $(tableId).DataTable().processing(false); // Hide loading
+                    console.log('asdas');
+                    console.log(json);
                     return json.data.length ? json.data : [];
                 }
             },
