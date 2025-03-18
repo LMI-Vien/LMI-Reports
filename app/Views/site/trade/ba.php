@@ -1,7 +1,4 @@
 <style>
-/*    .content{
-        margin-bottom: 35px;
-    }*/
     .content-wrapper, .content {
         margin-top: 0 !important;
         padding-top: 0 !important;
@@ -19,26 +16,103 @@
   }
 
     .md-center {
-        padding: 5px;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: large;
-        background-color: #fdb92a;
-        color: #333333;
-        border: 1px solid #ffffff;
-        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem; 
+        text-align: center;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
     }
 
     th {
         color: #fff;
         background-color: #301311 !important;
     }
-    .tbl-title-bg{
+    #previewButton{
         color: #fff;
-        border-radius: 5px;
         background-color: #143996 !important;
     }
-    #previewButton{
-      background-color: #143996 !important;
+
+    .paginate_button  {
+        font-size: 1em;
+    }
+
+    /* Card Styling */
+    .card {
+        border-radius: 12px !important;
+        background: #ffffff;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .card-dark {
+        border-radius: 12px !important;
+        border: #dee2e6, solid, 1px;
+    }
+
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+    }
+
+    /* Table Styling */
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate; /* Required for border-radius */
+        border-spacing: 0; /* Ensures borders don't separate */
+        border-radius: 12px 12px 0px 0px;
+        overflow: hidden; /* Ensures inner content respects border-radius */
+    }
+
+    .table th {
+        color: white !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
+    }
+
+    .table thead {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    .table tbody tr {
+        transition: background 0.3s ease-in-out;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(0, 123, 255, 0.1);
+    }
+
+    #refreshButton {
+        width: 10em;
+        height: 3em;
+        border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .paginate_button {
+        font-size: 15px !important;
+    }
+
+    label {
+        display: flex !important;
+        align-items: center;
+        margin-bottom: 0px !important;
     }
 
 </style>
@@ -47,121 +121,197 @@
     <div class="content-wrapper">
         <div class="content">
             <div class="container-fluid py-4">
-
                 <!-- Filters Section -->
-                <div class="card p-4 shadow-sm">
-                    <div class="md-center"><h5 class="mb-3"><i class="fas fa-filter"></i> Filter</h5></div>
-                    <div class="row">
-                        <!-- Left Side: Inputs -->
-                        <div class="col-md-8">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label for="brandAmbassador">Brand Ambassador</label>
+                <div class="card shadow-lg" 
+                    style="width: 100%;"
+                    id="step2" 
+                    data-title="Step 1: Applying Filters"
+                    data-intro="
+                    - The dashboard includes filters to refine data based on specific criteria. <br><br>
+                    To apply filters :<br><br>
+                    Click Next" 
+                    data-step="2"
+                >
+                    <div class="md-center p-2 col">
+                        <h5 class="mt-1 mb-1">
+                            <i 
+                                class="fas fa-filter"
+                                id="step1" 
+                                data-title="Welcome to the Info for BA Dashboard tutorial!"
+                                data-intro="
+                                This guide will walk you through using filters, sorting options, 
+                                and exporting reports to PDF or Excel." 
+                                data-step="1"
+                            ></i> 
+                            <span
+                                id="step12" 
+                                data-title="Final Notes"
+                                data-intro="
+                                - Use filters and sorting to analyze data effectively.<br>
+                                - Export reports for documentation and decision-making.<br><br>
+                                You're now ready to use the BA Dashboard efficiently! 🚀<br>
+                                Let us know if you need further assistance." 
+                                data-step="12"
+                            >
+                                F I L T E R
+                            </span>
+                        </h5>
+                    </div>
+                    <div class="row p-4">
+                        <!-- Left Side: Inputs and Selected BA -->
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column">
+                                <!-- Brand Ambassador -->
+                                <div 
+                                    class="p-2 d-flex flex-row"
+                                    id="step3" 
+                                    data-title="Brand Ambassador:"
+                                    data-intro="
+                                    - Type on the input box and select one of the suggested options.<br><br>
+                                    Click Next" 
+                                    data-step="3"
+                                >
+                                    <label for="brandAmbassador" class="col-3">Brand Ambassador</label>
                                     <input id="brand_ambassadors" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="ba_id">
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="storeName">Store Name</label>
+                                <!-- Store Name -->
+                                <div 
+                                    class="p-2 d-flex flex-row"
+                                    id="step4" 
+                                    data-title="Store Name:"
+                                    data-intro="
+                                    - Type on the input box and select one of the suggested options.<br><br>
+                                    Click Next" 
+                                    data-step="4"
+                                >
+                                    <label for="storeName" class="col-3">Store Name</label>
                                     <input id="store_branch" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="store_id">
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="brand">Brand</label>
+                                <!-- Brand -->
+                                <div 
+                                    class="p-2 d-flex flex-row"
+                                    id="step5" 
+                                    data-title="Brand:"
+                                    data-intro="
+                                    - Type on the input box and select one of the suggested options.<br><br>
+                                    Click Next" 
+                                    data-step="5"
+                                >
+                                    <label for="brand" class="col-3">Brand</label>
                                     <input id="brand" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="brand_id">
                                 </div>
+                                <!-- Selected BA -->
+                                <span class="p-2 d-flex flex-row">
+                                    <strong class="col-3 text-left">
+                                        Area / ASC Name:
+                                    </strong>
+                                    <p id="ar_asc_name" class="align-items-center col mb-0"> 
+                                        Please Select Brand Ambassador
+                                    </p>
+                                </span>
                             </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <label>Sort By</label>
-                                    <div class="d-flex">
-                                        <select class="form-control w-75" id="sortBy">
-                                            <option value="item_name">Item Name</option>
-                                            <option value="qty">Quantity</option>
-                                        </select>
-                                        <div class="ml-3">
-                                            <input type="radio" name="sortOrder" value="ASC" checked> Asc
-                                            <input type="radio" name="sortOrder" value="DESC"> Desc
-                                        </div>
-                                    </div>
+                        </div>
+
+                        <!-- Right Side: Radio Filters, Sorting Order & Refresh Button -->
+                        <div class="col-md-4">
+                            <!-- Sorting Order -->
+                            <div class="card-dark column"
+                                id="step7" 
+                                data-title="Step 2: Sorting Data"
+                                data-intro="
+                                - Click on any column header in the table to sort the data in ascending or descending order.<br>
+                                - Click again to switch between sorting orders.<br><br>
+                                Click Next" 
+                                data-step="7"
+                            >
+                                <label class="pt-2 pl-3">Sort By</label>
+                                <select class="form-control col mx-auto my-2" id="sortBy" style="width: 95%">
+                                    <option value="item_name">Item Name</option>
+                                    <option value="qty">Quantity</option>
+                                </select>
+                                <div class="text-left pl-3 pb-3">
+                                    <input type="radio" name="sortOrder" value="ASC" checked> Ascending
+                                    <input type="radio" name="sortOrder" value="DESC"> Descending
+                                </div>
+                            </div>
+                            <!-- Radio Filters -->
+                            <div
+                                class="p-2 d-flex flex-row"
+                                id="step6" 
+                                data-title="Type:"
+                                data-intro="
+                                - Choose All for a full view or Outright/Consignment for specific transaction types<br><br>
+                                Click Next" 
+                                data-step="6"
+                            >
+                                <label class="col-4">Filter by Type</label>
+                                <div class="btn-group btn-group-toggle d-flex flex-row col" data-toggle="buttons" style="background-color: white; border-radius: 8px">
+                                    <label class="btn btn-outline-primary active">
+                                        <input type="radio" name="filterType" value="3" checked> All
+                                    </label>
+                                    <label class="btn btn-outline-primary">
+                                        <input type="radio" name="filterType" value="1"> Outright
+                                    </label>
+                                    <label class="btn btn-outline-primary">
+                                        <input type="radio" name="filterType" value="0"> Consignment
+                                    </label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right Side: Radio Filters & Refresh -->
-                        <div class="col-md-4">
-                            <label>Filter by Type</label>
-                            <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
-                                <label class="btn btn-outline-primary active">
-                                    <input type="radio" name="filterType" value="3" checked> All
-                                </label>
-                                <label class="btn btn-outline-primary">
-                                    <input type="radio" name="filterType" value="1"> Outright
-                                </label>
-                                <label class="btn btn-outline-primary">
-                                    <input type="radio" name="filterType" value="0"> Consignment
-                                </label>
-                            </div>
-                            <div class="mt-3 d-flex justify-content-between align-items-center">
-                                <span><strong>Area / ASC Name:</strong><p id="ar_asc_name"> Please Select Brand Ambassador</p></span>
-                                <button class="btn btn-primary btn-sm" id="refreshButton"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        <div class="col-md-2">
+                            <!-- Refresh Button -->
+                            <div class="p-2 d-flex justify-content-end">
+                                <button class="btn btn-primary btn-sm" id="refreshButton"
+                                    id="step8" 
+                                    data-title="Step 3:"
+                                    data-intro="
+                                    - Click the Refresh button to update the data in all tables based on the set filters<br><br>
+                                    Click Next" 
+                                    data-step="8"
+                                >
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- DataTables Section -->
-                <div class="row mt-3">
+                <div class="row mt-3"
+                    id="step9" 
+                    data-title="Step 4: Understanding the Tables"
+                    data-intro="
+                    The dashboard includes four key tables displaying product data:<br><br>
+                    <b>Slow Moving SKU</b> – Products with low sales velocity.<br>
+                    <b>Overstock SKU</b> – Products with excess inventory.<br>
+                    <b>NPD (New Product Development) SKU</b> – Newly introduced products.<br>
+                    <b>Hero SKU</b> – Best-performing products with high sales.<br><br>
+                    Click Next" 
+                    data-step="9"
+                >
                     <div class="col-md-3">
-                        <div class="card p-3 shadow-sm">
-                            <div class="tbl-title-bg"><h5>SLOW MOVING SKU'S</h5></div>
-                            <div style="overflow-x: auto; max-height: 400px;">      
-                                <table id="slowMovingTable" class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>SKU Name</th>
-                                            <th>Quality</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="2">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="card p-3 shadow-sm">
-                            <div class="tbl-title-bg"><h5>OVERSTOCK SKU'S</h5></div>
-                            <div style="overflow-x: auto; max-height: 400px;">      
-                                <table id="overstockTable" class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>SKU Name</th>
-                                            <th>Quality</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="2">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="card p-3 shadow-sm">
-                            <div class="tbl-title-bg"><h5>NPD SKU'S</h5></div>
-                            <table id="npdTable" class="table table-bordered">
+                        <div class="card p-3 shadow-lg">
+                            <!-- <div class="tbl-title-field" style="font-weight: bold; font-family: 'Poppins', sans-serif;">
+                                <h5>SLOW MOVING SKU'S</h5>
+                            </div> -->
+                            <table id="slowMovingTable" class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>SKU Name</th>
-                                        <th>Quality</th>
+                                        <th 
+                                            colspan="2"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
+                                            class="tbl-title-header"
+                                        >
+                                            SLOW MOVING SKU'S
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field">Quality</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -174,12 +324,81 @@
                     </div>
 
                     <div class="col-md-3">
-                        <div class="card p-3 shadow-sm">
-                            <div class="tbl-title-bg"><h5>HERO SKU'S</h5></div>
-                            <table id="heroTable" class="table table-bordered">
+                        <div class="card p-3 shadow-lg">
+                            <!-- <div class="tbl-title-field" style="font-weight: bold; font-family: 'Poppins', sans-serif;">
+                                <h5>OVERSTOCK SKU'S</h5>
+                            </div> -->
+                            <table id="overstockTable" class="table table-bordered" >
                                 <thead>
                                     <tr>
-                                        <th>SKU Name</th>
+                                        <th 
+                                            colspan="2"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
+                                            class="tbl-title-header"
+                                        >OVERSTOCK SKU'S</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field">Quality</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="2">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card p-3 shadow-lg">
+                            <!-- <div class="tbl-title-field" style="font-weight: bold; font-family: 'Poppins', sans-serif;">
+                                <h5>NPD SKU'S</h5>
+                            </div> -->
+                            <table id="npdTable" class="table table-bordered" style="min-height: 100px !important;">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="2"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"\
+                                            class="tbl-title-header"
+                                        >NPD SKU'S</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field">Quality</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="2">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card p-3 shadow-lg">
+                            <!-- <div class="tbl-title-field" style="font-weight: bold; font-family: 'Poppins', sans-serif;">
+                                <h5>HERO SKU'S</h5>
+                            </div> -->
+                            <table 
+                                id="heroTable" 
+                                class="table table-bordered" 
+                                style="min-height: 100px !important; min-width: 200px !important;"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="2"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
+                                            class="tbl-title-header"
+                                        >HERO SKU'S</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU Name</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -195,20 +414,85 @@
 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
+                    <button 
+                        class="btn btn-info mr-2" 
+                        id="previewButton"
+                        id="step10" 
+                        data-title="Step 5: Previewing the Report"
+                        data-intro="
+                        Before exporting, you can preview the report:<br><br>
+                        Click the Preview button.<br>
+                        A modal or new page will display the formatted report.<br>
+                        Review the data and formatting before exporting.<br><br>
+                        Click Next" 
+                        data-step="10"
+                    >
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <button 
+                        class="btn btn-success" 
+                        id="exportButton"
+                        id="step11" 
+                        data-title="Step 6: Exporting the Report (PDF & Excel)"
+                        data-intro="
+                        Once satisfied with the report:<br><br>
+                        Click the Export button.<br>
+                        Choose between PDF or Excel format.<br>
+                        The file will be generated and downloaded to your device.<br><br>
+                        <small>Tip: Use PDF for sharing and Excel for further data analysis.</small><br><br>
+                        Click Next" 
+                        data-step="11"
+                    >
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- Tutorial Floating Modal -->
+        <div class="modal fade" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm"> 
+                <div class="modal-content">
+                    <!-- Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title"><b>Welcome to the BA Dashboard</b></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeTutorial()">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <!-- Body -->
+                    <div class="modal-body text-center">
+                        <p>Would you like to start the tutorial?</p>
+                    </div>
+                    <!-- Footer -->
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-primary" id="start_tutorial" onclick="startTutorial()" >Yes, Start</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeTutorial()" >No, Thanks</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- DataTables and Script -->
+<!-- Bootstrap 5 & DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js/minified/introjs.min.css">
+
+<!-- jQuery (Use 3.6.0 for Stability) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<!-- DataTables & Intro.js -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intro.js/minified/intro.min.js"></script>
+
+<!-- Bootstrap JS (AFTER jQuery) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     var base_url = "<?= base_url(); ?>";
     let brand_ambassadors = <?= json_encode($brand_ambassador) ?>;
@@ -220,7 +504,18 @@
         autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors);
         autocomplete_field($("#store_branch"), $("#store_id"), store_branch);
         autocomplete_field($("#brand"), $("#brand_id"), brands, "brand_description", "id");
+
+        $('#popup_modal').modal('show'); // Show modal on page load
     }); 
+
+    function startTutorial() {
+        $('#popup_modal').modal('hide');
+        introJs().start();
+    }
+
+    function closeTutorial() {
+        $('#popup_modal').modal('hide');
+    }
 
     $(document).on('click', '#refreshButton', function () {
         let selectedBa = $('#ba_id').val();
@@ -260,6 +555,7 @@
     }
 
     function initializeTable(tableId, type, selectedType, selectedBa, selectedStore, selectedBrand, selectedSortField, selectedSortOrder) {
+        console.log('initializeTable')
         $(tableId).DataTable({
             destroy: true, // Ensure the table is reinitialized
             ajax: {
