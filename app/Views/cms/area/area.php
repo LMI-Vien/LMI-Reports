@@ -67,7 +67,7 @@
                                     <tr>
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
                                         <th class='center-content'>Area Code</th>
-                                        <th class='center-content'>Area</th>
+                                        <th class='center-content'>Area Description</th>
                                         <!-- <th class='center-content'>Store</th> -->
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
@@ -222,7 +222,7 @@
                                     <tr>
                                         <th class='center-content' scope="col">Line #</th>
                                         <th class='center-content' scope="col">Area Code</th>
-                                        <th class='center-content' scope="col">Area</th>
+                                        <th class='center-content' scope="col">Area Description</th>
                                         <th class='center-content' scope="col">Stores/Branches</th>
                                         <th class='center-content' scope="col">Status</th>
                                     </tr>
@@ -770,7 +770,7 @@
             }, {});
 
             // 
-            let td_validator = ['area code', 'description', 'stores', 'status']; 
+            let td_validator = ['area code', 'area description', 'stores', 'status']; 
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -881,7 +881,7 @@
             }
             return {
                 "Area Code": row["Area Code"] || "",
-                "Description": row["Description"] || "", 
+                "Area Description": row["Area Description"] || "", 
                 "Status": row["Status"] || "", 
                 "Stores": row["Stores"] || "", 
                 "Created By": user_id || "",
@@ -1647,14 +1647,14 @@
         formattedData = [
             {
                 "Area Code": "",
-                "Description": "",
+                "Area Description": "",
                 "Status": "",
                 "Stores": "",
                 "NOTE:": "Please do not change the column headers."
             },
             {
                 "Area Code": "",
-                "Description": "",
+                "Area Description": "",
                 "Status": "",
                 "Stores": "",
                 "NOTE:": "Stores should be separated by commas. eg(Store1, Store2, Store3)"
