@@ -1048,6 +1048,7 @@
                 "In Transit":"", 
                 "Ave Sales Unit":"", 
                 // "Company":company,
+                "NOTE:": "Please do not change the column headers."
             }
         ]
         const headerData = [];

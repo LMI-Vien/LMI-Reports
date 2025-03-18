@@ -1059,6 +1059,7 @@
                 "Date":"",
                 "Amount":"",
                 "Status":"",
+                "NOTE:": "Please do not change the column headers."
             }
         ]
         const headerData = [];

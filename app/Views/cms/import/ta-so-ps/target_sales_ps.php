@@ -260,7 +260,7 @@
                                         <tr>
                                             <th class='center-content'>Line #</th>
                                             <th class='center-content'>Location</th>
-                                            <th class='center-content'>Location Description</th>
+                                            <!-- <th class='center-content'>Location Description</th> -->
                                             <th class='center-content'>January</th>
                                             <th class='center-content'>February</th>
                                             <th class='center-content'>March</th>
@@ -1100,10 +1100,10 @@
 
             let lowerCaseRecord = Object.keys(row).reduce((acc, key) => {
                 acc[key.toLowerCase()] = row[key];
-                return acc;
+                return acc;  
             }, {});
 
-            let td_validator = ['location', 'location description', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+            let td_validator = ['location', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; 
 
@@ -1369,14 +1369,16 @@
                 "October":"",
                 "November":"",
                 "December":"",
+                "NOTE:": "Please do not change the column headers."
             }
         ]
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["Target Sales per Store"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
+        // const headerData = [
+        //     ["Company Name: Lifestrong Marketing Inc."],
+        //     ["Target Sales per Store"],
+        //     ["Date Printed: " + formatDate(new Date())],
+        //     [""],
+        // ];
+        const headerData = [];
     
         exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
     }

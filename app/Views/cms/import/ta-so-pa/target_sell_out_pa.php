@@ -1783,14 +1783,16 @@
                 "OctoberTA":"",
                 "NovemberTA":"",
                 "DecemberTA":"",
+                "NOTE:": "Please do not change the column headers."
             }
         ]
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["Target Sell Out per Account"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
+        // const headerData = [
+        //     ["Company Name: Lifestrong Marketing Inc."],
+        //     ["Target Sell Out per Account"],
+        //     ["Date Printed: " + formatDate(new Date())],
+        //     [""],
+        // ];
+        const headerData = [];
     
         exportArrayToCSV(formattedData, `Target Sell Out per Account - ${formatDate(new Date())}`, headerData);
     }
