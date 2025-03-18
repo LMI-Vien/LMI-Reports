@@ -512,7 +512,7 @@
 
         for (const [key, value] of Object.entries(fields)) {
             if (!value) {
-                return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
+                return modal.alert(`Please select a ${key.charAt(4).toUpperCase() + key.slice(5)}.`, 'error', () => {});
             }
         }
 

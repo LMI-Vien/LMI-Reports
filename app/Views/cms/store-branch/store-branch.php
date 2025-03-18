@@ -657,7 +657,6 @@
         $(".import_table").empty()
     };
 
-    // og function
     // function read_xl_file() {
     //     let btn = $(".btn.save");
     //     btn.prop("disabled", false); 
@@ -695,8 +694,6 @@
     //     };
     //     reader.readAsArrayBuffer(file);
     // }
-
-    // try function
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -730,23 +727,23 @@
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-            // Ensure only numbers are treated as text, keeping dates unchanged
+            // Ensure all values are treated as strings
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
                     let value = row[key];
 
-                    // Convert numbers to text while keeping dates unchanged
-                    if (typeof value === "number") {
-                        value = String(value); // Convert numbers to string
+                    // Convert numbers and dates back to text
+                    if (typeof value === "number" || (typeof value === "string" && value.match(/^\d{1,2}\/\d{1,2}\/\d{2,4}$/))) {
+                        value = `'${value}`; // Add a single quote to force text
                     }
 
-                    fixedRow[key] = value !== null && value !== undefined ? value : "";
+                    fixedRow[key] = value !== null && value !== undefined ? String(value) : "";
                 });
                 return fixedRow;
             });
 
-            console.log(jsonData);
+            console.log(jsonData); 
 
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);

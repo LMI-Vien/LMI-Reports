@@ -219,7 +219,7 @@
       get_pagination(query);
     });
 
-    function get_data(query, field = "agency", order = "asc") {
+    function get_data(query, field = "code", order = "asc") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -229,8 +229,8 @@
             limit : limit,
             table : "tbl_agency",
             order : {
-                field : "code",
-                order : "asc" 
+                field : field,
+                order : order 
             }
 
         }

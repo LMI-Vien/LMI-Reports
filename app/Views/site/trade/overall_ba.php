@@ -269,7 +269,7 @@
 
         initializeTable();
         autocomplete_field($("#store"), $("#store_id"), store_branch);
-        autocomplete_field($("#area"), $("area_id"), area, "area_description");
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
 
         $(document).on('click', '#toggleColumnsButton', function() {
             $('#columnToggleContainer').toggle();
@@ -287,12 +287,16 @@
     });
 
     function fetchData() {
+      //  let selectedType = $('input[name="filterType"]:checked').val();
+       // let selectedBa = $('#brand_ambassador').val();
         let selectedStore = $('#store_id').val();
         let selectedArea = $('#area_id').val();
         let selectedMonth = $('#month').val();
         let selectedYear = $('#year').val();
         let selectedSortField = $('#sortBy').val();
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+
+        console.log(selectedStore);
 
         initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
     }

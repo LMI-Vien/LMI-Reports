@@ -67,7 +67,7 @@
                                     <tr>
                                         <th class='center-content'><input class="selectall" type="checkbox"></th>
                                         <th class='center-content'>Area Code</th>
-                                        <th class='center-content'>Area</th>
+                                        <th class='center-content'>Area Description</th>
                                         <!-- <th class='center-content'>Store</th> -->
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
@@ -222,7 +222,7 @@
                                     <tr>
                                         <th class='center-content' scope="col">Line #</th>
                                         <th class='center-content' scope="col">Area Code</th>
-                                        <th class='center-content' scope="col">Area</th>
+                                        <th class='center-content' scope="col">Area Description</th>
                                         <th class='center-content' scope="col">Stores/Branches</th>
                                         <th class='center-content' scope="col">Status</th>
                                     </tr>
@@ -321,7 +321,12 @@
             })
         };
 
-        if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
+        if (['edit', 'view'].includes(actions)) {
+            populate_modal(id, actions, () => {
+                modal.loading(false); 
+            });
+        }
+
         let isReadOnly = actions === 'view';
         set_field_state('#code, #description, #status', isReadOnly);
         
@@ -367,11 +372,11 @@
 
         $modal.modal('show');
 
-        if (['edit', 'view'].includes(actions)) {
-            populate_modal(id, actions, () => {
-                modal.loading(false); 
-            });
-        }
+        // if (['edit', 'view'].includes(actions)) {
+        //     populate_modal(id, actions, () => {
+        //         modal.loading(false); 
+        //     });
+        // }
     }
     
     function reset_modal_fields() {
@@ -574,6 +579,7 @@
 
                                     completedRequests++;
 
+                                    // model.loading(false);
                                     // Check if all requests are complete, then call the callback
                                     if (completedRequests === totalRequests) {
                                         if (callback) callback(); 
@@ -581,6 +587,7 @@
                                 });
                             }
                         });
+
                     });
 
                     if (d.status == 1) {
@@ -763,7 +770,7 @@
             }, {});
 
             // 
-            let td_validator = ['area code', 'description', 'stores', 'status']; 
+            let td_validator = ['area code', 'area description', 'stores', 'status']; 
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -874,7 +881,7 @@
             }
             return {
                 "Area Code": row["Area Code"] || "",
-                "Description": row["Description"] || "", 
+                "Area Description": row["Area Description"] || "", 
                 "Status": row["Status"] || "", 
                 "Stores": row["Stores"] || "", 
                 "Created By": user_id || "",
@@ -1265,10 +1272,25 @@
                 if (!exists) {
                     modal.confirm(confirm_update_message,function(result){
                         if(result){ 
-                            let batch = [];
+                            let ids = [];
+                            let hasDuplicate = false;
                             let valid = true;
+                            
                             $.each(unique_store, (x, y) => {
-                                get_field_values('tbl_store', 'id', 'description', [y], (res) => {
+                                if(ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            });
+
+                            if(hasDuplicate) {
+                                console.log('Has duplicate');
+                                modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
+                            } else {
+                                let batch = [];
+                                get_field_values('tbl_store', 'id', 'description', ids, (res) => {
+                                    // console.log(res);
                                     if(res.length == 0) {
                                         valid = false;
                                     } else {
@@ -1283,26 +1305,29 @@
                                             batch.push(data);
                                         })
                                     }
+
+                                    console.log(batch);
                                 })
-                            })
-
-                            if(valid) {
-                                save_to_db(code, description, store, status_val, id, (obj) => {
-                                    total_delete(url, 'tbl_store_group', 'area_id', id);
-
-                                    batch_insert(url, batch, 'tbl_store_group', false, () => {
-                                        modal.loading(false);
-                                        modal.alert(success_update_message, "success", function() {
-                                            location.reload();
-                                        });
+    
+                                if(valid) {
+                                    save_to_db(code, description, store, status_val, id, (obj) => {
+                                        total_delete(url, 'tbl_store_group', 'area_id', id);
+    
+                                        batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
                                     })
-                                })
-                                
-                            } else {
-                                // alert('mali');
-                                modal.loading(false);
-                                modal.alert('Store not found', 'error', function() {});
+                                    
+                                } else {
+                                    // alert('mali');
+                                    modal.loading(false);
+                                    modal.alert('Store not found', 'error', function() {});
+                                }
                             }
+
                         }
                     });
 
@@ -1313,10 +1338,24 @@
                 if (!exists) {
                     modal.confirm(confirm_add_message,function(result){
                         if(result){ 
-                            let batch = [];
+                            let ids = [];
+                            let hasDuplicate = false;
                             let valid = true;
                             $.each(unique_store, (x, y) => {
-                                get_field_values('tbl_store', 'id', 'description', [y], (res) => {
+                                if(ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            });
+
+                            if(hasDuplicate) {
+                                console.log('Has duplicate');
+                                modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
+                            } else {
+                                let batch = [];
+                                get_field_values('tbl_store', 'id', 'description', ids, (res) => {
+                                    console.log(res);
                                     if(res.length == 0) {
                                         valid = false;
                                     } else {
@@ -1331,35 +1370,27 @@
                                             batch.push(data);
                                         })
                                     }
+
+                                    console.log(batch);
                                 })
-                            })
-
-                            if(valid) {
-                                // save_to_db(code, description, store, status_val, id, (obj) => {
-                                //     total_delete(url, 'tbl_store_group', 'area_id', id);
-
-                                //     batch_insert(url, batch, 'tbl_store_group', false, () => {
-                                //         modal.loading(false);
-                                //         modal.alert(success_update_message, "success", function() {
-                                //             location.reload();
-                                //         });
-                                //     })
-                                // })
-                                save_to_db(code, description, store, status_val, id, (obj) => {
-                                    insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
     
-                                    batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
-                                        modal.loading(false);
-                                        modal.alert(success_update_message, "success", function() {
-                                            location.reload();
-                                        });
+                                if(valid) {
+                                    save_to_db(code, description, store, status_val, id, (obj) => {
+                                        insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
+        
+                                        batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
                                     })
-                                })
-
-                            } else {
-                                // alert('mali');
-                                modal.loading(false);
-                                modal.alert('Store not found', 'error', function() {});
+                                    
+                                } else {
+                                    // alert('mali');
+                                    modal.loading(false);
+                                    modal.alert('Store not found', 'error', function() {});
+                                }
                             }
                         }
                     });
@@ -1616,14 +1647,14 @@
         formattedData = [
             {
                 "Area Code": "",
-                "Description": "",
+                "Area Description": "",
                 "Status": "",
                 "Stores": "",
                 "NOTE:": "Please do not change the column headers."
             },
             {
                 "Area Code": "",
-                "Description": "",
+                "Area Description": "",
                 "Status": "",
                 "Stores": "",
                 "NOTE:": "Stores should be separated by commas. eg(Store1, Store2, Store3)"
