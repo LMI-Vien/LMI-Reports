@@ -52,7 +52,12 @@
     #exportButton{
         background-color: #339933 !important;
     }
-
+    label {
+        float: left;
+    }
+    #table-skus{
+        display: none;
+    }
 
 </style>
 
@@ -115,15 +120,17 @@
                                 <label class="position-absolute" style="top: 5px; left: 10px; font-size: 12px; font-weight: bold; background-color: #edf1f1; padding: 0 5px;">Covered by Selected ASC</label>
                                 <div style="margin-top: 15px;"></div>
                                 <div class="d-flex">
-                                    <input type="radio" name="sortOrder" value="asc" checked> W/ BA
-                                    <input type="radio" name="sortOrder" value="desc" class="ml-3"> W/O BA
+                                    <input type="radio" name="coveredASC" value="with_ba"> W/ BA
+                                    <input type="radio" name="coveredASC" value="without_ba" class="ml-3"> W/O BA
                                 </div>
                             </div>
-                             <div class="col-md-3 d-flex align-items-end">
-                                <button class="btn btn-primary btn-sm w-100" id="refreshButton">
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" id="clearButton" class="btn btn-secondary btn-sm" style="width: 90px; height: 32px;">Clear</button>
+                                <button class="btn btn-primary btn-sm ml-2" id="refreshButton" style="width: 90px; height: 32px;">
                                     <i class="fas fa-sync-alt"></i> Refresh
                                 </button>
                             </div>
+
                         </div>
                     </div>
              
@@ -132,7 +139,7 @@
 
 
                 <!-- DataTables Section -->
-            <div class="card p-4 shadow-sm">
+            <div class="card p-4 shadow-sm" id="data-graph">
                 <div class="text-center">
                     <h5 class="mb-3"><i class="fas fa-chart-bar"></i> ASC Performance</h5>
                 </div>
@@ -152,22 +159,17 @@
                                 <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr><td>LY Sell Out</td><td colspan="12"></td></tr>
-                            <tr><td>Sales Report</td><td colspan="12"></td></tr>
-                            <tr><td>Target Sales</td><td colspan="12"></td></tr>
-                            <tr><td>Growth</td><td colspan="12"></td></tr>
-                            <tr><td>% Achieved</td><td colspan="12"></td></tr>
+                        <tbody class="asc-dashboard-body">
                         </tbody>
                     </table>
                     </div>
                 </div>
             </div>
-
-                <div class="row mt-12" style="overflow-x: auto; max-height: 400px;">
-                    <div class="row">
+            <div id="table-skus">
+                <div class="row mt-12" style="overflow-x: auto; padding: 0px;">
+                    <div class="d-flex flex-row">
                         <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
+                            <div class="card p-6 shadow-sm">
                                 <div class="tbl-title-bg"><h5>SLOW MOVING SKU'S</h5></div>
                                 <table id="dataTable1" class="table table-bordered">
                                     <thead>
@@ -193,7 +195,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
+                            <div class="card p-6 shadow-sm">
                                 <div class="tbl-title-bg"><h5>OVERSTOCK SKU'S</h5></div>
                                 <table id="dataTable2" class="table table-bordered">
                                     <thead>
@@ -219,7 +221,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
+                            <div class="card p-6 shadow-sm">
                                 <div class="tbl-title-bg"><h5>NPD SKU'S</h5></div>
                                 <table id="dataTable3" class="table table-bordered">
                                     <thead>
@@ -246,7 +248,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
+                            <div class="card p-6 shadow-sm">
                                 <div class="tbl-title-bg"><h5>HERO SKU'S</h5></div>
                                 <table id="dataTable4" class="table table-bordered">
                                     <thead>
@@ -265,7 +267,7 @@
                     </div>
 
                 </div>
-
+            </div>
             <!-- Buttons -->
             <div class="d-flex justify-content-end mt-3">
                 <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
@@ -285,8 +287,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    var base_url = "<?= base_url(); ?>";
 $(document).ready(function () {
-    let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
+   // let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
 
     let asc = <?= json_encode($asc); ?>;
     let area = <?= json_encode($area); ?>;
@@ -300,30 +303,65 @@ $(document).ready(function () {
     autocomplete_field($("#storeName"), $("#store_id"), store_branch);
     autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
 
-    tables.forEach(id => {
-        $(id).DataTable({
-            paging: true,
-            searching: false,
-            ordering: true,
-            info: true,
-            lengthChange: false     // Hide "Show Entries" dropdown
-        });
-    });
+    // tables.forEach(id => {
+    //     $(id).DataTable({
+    //         paging: true,
+    //         searching: false,
+    //         ordering: true,
+    //         info: true,
+    //         lengthChange: false     // Hide "Show Entries" dropdown
+    //     });
+    // });
     renderCharts(); // Initial render
 
-    $('#refreshButton').click(function () {
-        alert('Refreshing data...');
-        renderCharts(); // Re-render charts on refresh
+    $(document).on('click', '#clearButton', function () {
+        $('input[type="text"], input[type="number"], input[type="date"]').val('');
+        $('input[type="radio"], input[type="checkbox"]').prop('checked', false);
+
+        $('select').prop('selectedIndex', 0);
+        $('#refreshButton').click();
     });
+
+    $(document).on('click', '#refreshButton', function () {
+        let selectedCoveredASC = $('input[name="coveredASC"]:checked').val();
+        if($('#ascName').val() == ""){
+            $('#asc_id').val('');
+        }
+        if($('#area').val() == ""){
+            $('#area_id').val('');
+        }
+        if($('#brand').val() == ""){
+            $('#brand_id').val('');
+        }
+        if($('#storeName').val() == ""){
+            $('#store_id').val('');
+        }
+        if($('#ba').val() == ""){
+            $('#ba_id').val('');
+        }
+        console.log(selectedCoveredASC);
+        if(selectedCoveredASC){
+            console.log('asdasd');
+            $('#data-graph').hide();
+            $('#table-skus').show();
+        }else{
+            $('#data-graph').show();
+            $('#table-skus').hide();
+            fetchData();
+            renderCharts();
+        }
+
+    });
+    fetchData();
 });
 
 // Define months
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const dataValues = {
-    salesReport: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65],
-    targetSales: [8, 14, 22, 26, 28, 38, 45, 50, 55, 60, 63, 70],
-    PerAchieved: [12, 18, 24, 28, 32, 40, 48, 52, 58, 64, 70, 75]
+    salesReport: [],
+    targetSales: [],
+    PerAchieved: []
 };
 
 let chartInstances = []; // Store chart instances
@@ -377,6 +415,65 @@ function renderCharts() {
 
         // Store chart instance
         chartInstances.push(newChart);
+    });
+}
+
+function fetchData(){
+    let selectedASC = $('#asc_id').val();
+    let selectedArea = $('#area_id').val();
+    let selectedBrand = $('#brand_id').val();
+    let selectedYear = $('#year').val();
+    let selectedStore = $('#store_id').val();
+    let selectedBa = $('#ba_id').val();
+    //console.log(selectedASC, 'selectedASC', selectedArea, 'selectedArea', selectedBrand, 'selectedBrand', selectedYear, 'selectedYear', selectedStore, 'selectedStore', selectedBa, 'selectedBa');
+
+    url = base_url + 'trade-dashboard/trade-asc-dashboard-one';
+    var data = {
+        asc : selectedASC,
+        brand : selectedBrand,
+        year : selectedYear,
+        store : selectedStore,
+        ba : selectedBa,
+        area : selectedArea
+    }
+    aJax.post(url, data, function (result) {
+        var html = '';
+        if (result) {
+            let salesData = result.data[0]; // Assuming response has an array
+
+            // Update dataValues dynamically
+            dataValues.salesReport = [
+                salesData.amount_january, salesData.amount_february, salesData.amount_march,
+                salesData.amount_april, salesData.amount_may, salesData.amount_june,
+                salesData.amount_july, salesData.amount_august, salesData.amount_september,
+                salesData.amount_october, salesData.amount_november, salesData.amount_december
+            ];
+            
+            dataValues.targetSales = [
+                salesData.target_sales_january, salesData.target_sales_february, salesData.target_sales_march,
+                salesData.target_sales_april, salesData.target_sales_may, salesData.target_sales_june,
+                salesData.target_sales_july, salesData.target_sales_august, salesData.target_sales_september,
+                salesData.target_sales_october, salesData.target_sales_november, salesData.target_sales_december
+            ];
+            
+            dataValues.PerAchieved = [
+                salesData.achieved_january, salesData.achieved_february, salesData.achieved_march,
+                salesData.achieved_april, salesData.achieved_may, salesData.achieved_june,
+                salesData.achieved_july, salesData.achieved_august, salesData.achieved_september,
+                salesData.achieved_october, salesData.achieved_november, salesData.achieved_december
+            ];
+
+            $.each(result.data, function(x,y) {
+                html += '<tr><td>LY Sell Out</td><td>'+(y.net_sales_january || "0.00")+'</td><td>'+(y.net_sales_february || "0.00")+'</td><td>'+(y.net_sales_march || "0.00")+'</td><td>'+(y.net_sales_april || "0.00")+'</td><td>'+(y.net_sales_may || "0.00")+'</td><td>'+(y.net_sales_june || "0.00")+'</td><td>'+(y.net_sales_july || "0.00")+'</td><td>'+(y.net_sales_august || "0.00")+'</td><td>'+(y.net_sales_september || "0.00")+'</td><td>'+(y.net_sales_october || "0.00")+'</td><td>'+(y.net_sales_november || "0.00")+'</td><td>'+(y.net_sales_december || "0.00")+'</td></tr>';
+                html += '<tr><td>Sales Report</td><td>'+(y.amount_january || "0.00")+'</td><td>'+(y.amount_february || "0.00")+'</td><td>'+(y.amount_march || "0.00")+'</td><td>'+(y.amount_april || "0.00")+'</td><td>'+(y.amount_may || "0.00")+'</td><td>'+(y.amount_june || "0.00")+'</td><td>'+(y.amount_july || "0.00")+'</td><td>'+(y.amount_august || "0.00")+'</td><td>'+(y.amount_september || "0.00")+'</td><td>'+(y.amount_october || "0.00")+'</td><td>'+(y.amount_november || "0.00")+'</td><td>'+(y.amount_december || "0.00")+'</td></tr>';
+                html += '<tr><td>Target Sales</td><td>'+(y.target_sales_january || "0.00")+'</td><td>'+(y.target_sales_february || "0.00")+'</td><td>'+(y.target_sales_march || "0.00")+'</td><td>'+(y.target_sales_april || "0.00")+'</td><td>'+(y.target_sales_may || "0.00")+'</td><td>'+(y.target_sales_june || "0.00")+'</td><td>'+(y.target_sales_july || "0.00")+'</td><td>'+(y.target_sales_august || "0.00")+'</td><td>'+(y.target_sales_september || "0.00")+'</td><td>'+(y.target_sales_october || "0.00")+'</td><td>'+(y.target_sales_november || "0.00")+'</td><td>'+(y.target_sales_december || "0.00")+'</td></tr>';
+                html += '<tr><td>Growth</td><td>'+(y.growth_january || "0.00")+'</td><td>'+(y.growth_february || "0.00")+'</td><td>'+(y.growth_march || "0.00")+'</td><td>'+(y.growth_april || "0.00")+'</td><td>'+(y.growth_may || "0.00")+'</td><td>'+(y.growth_june || "0.00")+'</td><td>'+(y.growth_july || "0.00")+'</td><td>'+(y.growth_august || "0.00")+'</td><td>'+(y.growth_september || "0.00")+'</td><td>'+(y.growth_october || "0.00")+'</td><td>'+(y.growth_november || "0.00")+'</td><td>'+(y.growth_december || "0.00")+'</td></tr>';
+                html += '<tr><td>% Achieved</td><td>'+(y.achieved_january || "0.00")+'</td><td>'+(y.achieved_february || "0.00")+'</td><td>'+(y.achieved_march || "0.00")+'</td><td>'+(y.achieved_april || "0.00")+'</td><td>'+(y.achieved_may || "0.00")+'</td><td>'+(y.achieved_june || "0.00")+'</td><td>'+(y.achieved_july || "0.00")+'</td><td>'+(y.achieved_august || "0.00")+'</td><td>'+(y.achieved_september || "0.00")+'</td><td>'+(y.achieved_october || "0.00")+'</td><td>'+(y.achieved_november || "0.00")+'</td><td>'+(y.achieved_december || "0.00")+'</td></tr>';
+
+            });
+        }
+        $('.asc-dashboard-body').html(html);
+        renderCharts();
     });
 }
 

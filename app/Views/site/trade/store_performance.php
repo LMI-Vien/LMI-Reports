@@ -40,6 +40,9 @@
     #previewButton{
       background-color: #143996 !important;
     }
+    label{
+        float: left;
+    }
     th:nth-child(1), td:nth-child(1) { width: 10%; } 
     th:nth-child(2), td:nth-child(2) { width: 20%; }
     th:nth-child(3), td:nth-child(3) { width: 20%; }
@@ -78,9 +81,9 @@
                                     <option value="2024">2024</option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label for=""></label>
-                                <button class="btn btn-primary btn-sm w-100" id="refreshButton" style="margin-top: 10px;">
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" id="clearButton" class="btn btn-secondary btn-sm" style="width: 90px; height: 32px;">Clear</button>
+                                <button class="btn btn-primary btn-sm ml-2" id="refreshButton" style="width: 90px; height: 32px;">
                                     <i class="fas fa-sync-alt"></i> Refresh
                                 </button>
                             </div>

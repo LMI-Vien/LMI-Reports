@@ -102,6 +102,7 @@
                             <div class="col-md-3">
                             </div>
                              <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" id="clearButton" class="btn btn-secondary btn-sm" style="width: 90px; height: 32px;">Clear</button>
                                 <button class="btn btn-primary btn-sm w-100" id="refreshButton">
                                     <i class="fas fa-sync-alt"></i> Refresh
                                 </button>
