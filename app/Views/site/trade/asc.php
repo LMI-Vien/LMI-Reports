@@ -65,6 +65,10 @@ th, td {
     white-space: nowrap;
 }
 
+label {
+    float: left;
+}
+
 /* Set specific column widths */
 th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
 th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
@@ -145,8 +149,11 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                                     <input type="radio" name="sortOrder" value="desc"> Desc
                                 </div>
                             </div>
-                            <div class="mt-3 d-flex justify-content-end">
-                                <button class="btn btn-primary btn-sm" id="refreshButton"><i class="fas fa-sync-alt"></i> Refresh</button>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" id="clearButton" class="btn btn-secondary btn-sm" style="width: 90px; height: 32px;">Clear</button>
+                                <button class="btn btn-primary btn-sm ml-2" id="refreshButton" style="width: 90px; height: 32px;">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
                             </div>
                         </div>
                     </div>

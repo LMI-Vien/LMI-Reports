@@ -23,6 +23,9 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('trade-overall-ba', 'TradeDashboard::trade_overall_ba');
     $routes->get('trade-info-asc', 'TradeDashboard::trade_info_asc');
     $routes->get('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');
+    $routes->post('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');
+    $routes->get('trade-asc-dashboard-one-tables', 'TradeDashboard::trade_asc_dashboard_one_tables');
+    
 });
 
 

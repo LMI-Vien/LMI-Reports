@@ -105,6 +105,14 @@
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
     }
 
+    #clearButton {
+        width: 10em;
+        height: 3em;
+        border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+
     .paginate_button {
         font-size: 15px !important;
     }
@@ -172,7 +180,7 @@
                                     data-step="3"
                                 >
                                     <label for="brandAmbassador" class="col-3">Brand Ambassador</label>
-                                    <input id="brand_ambassadors" class="form-control" placeholder="Please select...">
+                                    <input type="text" id="brand_ambassadors" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="ba_id">
                                 </div>
                                 <!-- Store Name -->
@@ -186,7 +194,7 @@
                                     data-step="4"
                                 >
                                     <label for="storeName" class="col-3">Store Name</label>
-                                    <input id="store_branch" class="form-control" placeholder="Please select...">
+                                    <input type="text" id="store_branch" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="store_id">
                                 </div>
                                 <!-- Brand -->
@@ -200,7 +208,7 @@
                                     data-step="5"
                                 >
                                     <label for="brand" class="col-3">Brand</label>
-                                    <input id="brand" class="form-control" placeholder="Please select...">
+                                    <input type="text" id="brand" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="brand_id">
                                 </div>
                                 <!-- Selected BA -->
@@ -249,7 +257,7 @@
                             >
                                 <label class="col-4">Filter by Type</label>
                                 <div class="btn-group btn-group-toggle d-flex flex-row col" data-toggle="buttons" style="background-color: white; border-radius: 8px">
-                                    <label class="btn btn-outline-primary active">
+                                    <label class="btn btn-outline-primary active main_all">
                                         <input type="radio" name="filterType" value="3" checked> All
                                     </label>
                                     <label class="btn btn-outline-primary">
@@ -264,17 +272,24 @@
 
                         <div class="col-md-2">
                             <!-- Refresh Button -->
-                            <div class="p-2 d-flex justify-content-end">
-                                <button class="btn btn-primary btn-sm" id="refreshButton"
-                                    id="step8" 
-                                    data-title="Step 3:"
-                                    data-intro="
-                                    - Click the Refresh button to update the data in all tables based on the set filters<br><br>
-                                    Click Next" 
-                                    data-step="8"
-                                >
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                </button>
+                            <div class="row">
+                                <div class="p-2 d-flex justify-content-end">
+                                    <button class="btn btn-primary btn-sm" id="refreshButton"
+                                        id="step8" 
+                                        data-title="Step 3:"
+                                        data-intro="
+                                        - Click the Refresh button to update the data in all tables based on the set filters<br><br>
+                                        Click Next" 
+                                        data-step="8"
+                                    >
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="p-2 d-flex justify-content-end">
+                                    <button id="clearButton" class="btn btn-secondary btn-sm"><i class="fas fa-sync-alt"></i> Clear</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -475,7 +490,6 @@
 
     </div>
 </div>
-
 <!-- Bootstrap 5 & DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -501,19 +515,37 @@
 
     $(document).ready(function () {
         fetchData();
+
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"], input[type="number"], input[type="date"]').val('');
+            $('input[type="checkbox"]').prop('checked', false);
+            $('input[name="sortOrder"]').first().prop('checked', true);
+            $('.btn-outline-primary').removeClass('active');
+            $('.main_all').addClass('active');
+            $('select').prop('selectedIndex', 0);
+        });
+
         autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors);
         autocomplete_field($("#store_branch"), $("#store_id"), store_branch);
         autocomplete_field($("#brand"), $("#brand_id"), brands, "brand_description", "id");
 
-        $('#popup_modal').modal('show'); // Show modal on page load
+
+        //store yung sagot ni user sa storage para hindi paulit ulit yung message
+        if (!localStorage.getItem("TutorialMessage")) {
+            $('#popup_modal').modal('show');
+        } else {
+            $('#popup_modal').modal('hide');
+        }
     }); 
 
     function startTutorial() {
+        localStorage.setItem("TutorialMessage", "true");
         $('#popup_modal').modal('hide');
         introJs().start();
     }
 
     function closeTutorial() {
+        localStorage.setItem("TutorialMessage", "true");
         $('#popup_modal').modal('hide');
     }
 
@@ -555,9 +587,8 @@
     }
 
     function initializeTable(tableId, type, selectedType, selectedBa, selectedStore, selectedBrand, selectedSortField, selectedSortOrder) {
-        console.log('initializeTable')
         $(tableId).DataTable({
-            destroy: true, // Ensure the table is reinitialized
+            destroy: true,
             ajax: {
                 url: base_url + 'trade-dashboard/trade-ba',
                 type: 'GET',
@@ -573,15 +604,13 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log('asdas');
-                    console.log(json);
                     return json.data.length ? json.data : [];
                 }
             },
             columns: [
                 { data: 'item_name' },
                 type !== 'hero' ? { data: 'sum_total_qty' } : null
-            ].filter(Boolean), // Remove `null` entries
+            ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,

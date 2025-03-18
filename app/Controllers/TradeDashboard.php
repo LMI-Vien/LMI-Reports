@@ -407,42 +407,27 @@ class TradeDashboard extends BaseController
 
 	public function trade_asc_dashboard_one()
 	{	
-		$days = $this->getDaysInMonth(2, $this->getCurrentYear());
+	    $area = $this->request->getPost('area');
+	    $asc = $this->request->getPost('asc');
+	    $brand = $this->request->getPost('brand');
+	    $ba = $this->request->getPost('ba');
+	    $store = $this->request->getPost('store');
+	    $year = $this->request->getPost('year');
 
-	    $limit = $this->request->getVar('limit') ?? 10;
-	    $offset = $this->request->getVar('offset') ?? 0;
-	    $month = $this->request->getVar('month');
-	    $year = $this->request->getVar('year');
-	    $area = $this->request->getVar('area');
-	    $store = $this->request->getVar('store');
-	    $sort = $this->request->getVar('sort') ?? 'ASC';
-	    $sort_field = $this->request->getVar('sort_field');
-	    $formatted_month = str_pad($month, 2, '0', STR_PAD_LEFT);
 	    $date = null; 
 	    $lookup_month = null;
 	    $lyYear = 0;
 	    $selected_year = null;
-	    $lyMonth = null;
 	    $targetYear = null;
 	    $date = null;
-
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$selected_year = $actual_year[0]['year'];
-	    	$lyYear = $selected_year - 1;
 	    	$date = $actual_year[0]['year'];
 	    	$targetYear = $actual_year[0]['id'];
 	    }
 
-	    if($month){
-	    	$date = $formatted_month;
-	    	$lyMonth = $month;
-	    }
 
-		if($year && $month){
-	    	$actual_year = $this->Dashboard_model->getYear($year);
-	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
-	    }
 
 	    if(empty($area)){
 	    	$area = null;
@@ -450,16 +435,69 @@ class TradeDashboard extends BaseController
 	    if(empty($store)){
 	    	$store = null;
 	    }
-	     $data = $this->Dashboard_model->asctest();
-	     echo "<pre>";
-	     print_r($data);
-	     die();
+	    $filters = [
+		    'year' => $selected_year, 
+		    'asc_id' => $asc,    
+		    'store_id' => $store,
+		    'area_id' => $area,
+		    'ba_id' => $ba,
+		    'brand_id' => $brand,
+		    'year_val' => $targetYear
+		];
+
+	    $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
 	    return $this->response->setJSON([
-	        'draw' => intval($this->request->getVar('draw')),
-	        'recordsTotal' => $data['total_records'],
-	        'recordsFiltered' => $data['total_records'],
 	        'data' => $data['data'],
 	    ]);
+	}
+
+	public function trade_asc_dashboard_one_tables()
+	{	
+	    $area = $this->request->getPost('area');
+	    $asc = $this->request->getPost('asc');
+	    $brand = $this->request->getPost('brand');
+	    $ba = $this->request->getPost('ba');
+	    $store = $this->request->getPost('store');
+	    $year = $this->request->getPost('year');
+
+	    $date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $targetYear = null;
+	    $date = null;
+	    if($year){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
+
+
+
+	    if(empty($area)){
+	    	$area = null;
+	    }
+	    if(empty($store)){
+	    	$store = null;
+	    }
+	    $filters = [
+		    'year' => $selected_year, 
+		    'asc_id' => $asc,    
+		    'store_id' => $store,
+		    'area_id' => $area,
+		    'ba_id' => $ba,
+		    'brand_id' => $brand,
+		    'year_val' => $targetYear
+		];
+
+	    $results = $this->Dashboard_model->asctest2(1, 1, 30, null, null, null, 3, 10, 0);
+	    echo "<pre>";
+	    print_r($results);
+	    die();
+	    // return $this->response->setJSON([
+	    //     'data' => $data['data'],
+	    // ]);
 	}
 
 	private function getDaysInMonth($month, $year) {
