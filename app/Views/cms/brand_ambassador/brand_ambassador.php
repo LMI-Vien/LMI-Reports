@@ -113,21 +113,21 @@
             <div class="modal-body">
                 <form id="form-modal">
                     <div class="mb-3">
-                        <label for="code" class="form-label">BA Code</label>
+                        <label for="code" class="form-label">Brand Ambassador Code</label>
                         <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                         <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label">BA Name</label>
+                        <label for="description" class="form-label">Brand Ambassador Name</label>
                         <input type="text" class="form-control required" id="name" maxlength="50" aria-describedby="description">
                         <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                     </div>
 
                     <div class="form-group">
                         <label>Deployment Date</label>
-                        <input type="date" class="form-control" id="deployment_date">
+                        <input type="date" class="form-control required" id="deployment_date">
                     </div>
 
                     <div class="form-group">
@@ -258,8 +258,8 @@
                                     <thead>
                                         <tr>
                                             <th class='center-content' scope="col">Line #</th>
-                                            <th class='center-content' scope="col">Code</th>
-                                            <th class='center-content' scope="col">Name</th>
+                                            <th class='center-content' scope="col">BA Code</th>
+                                            <th class='center-content' scope="col">BA Name</th>
                                             <th class='center-content' scope="col">Deployment Date</th>
                                             <th class='center-content' scope="col">Agency</th>
                                             <th class='center-content' scope="col">Brand</th>
@@ -756,9 +756,12 @@
         $(".import_buttons").append($downloadBtn);
     }
 
+    // try function
     // function read_xl_file() {
+    //     let btn = $(".btn.save");
+    //     btn.prop("disabled", false);
     //     clear_import_table();
-        
+
     //     dataset = [];
 
     //     const file = $("#file")[0].files[0];
@@ -767,11 +770,11 @@
     //         modal.alert('Please select a file to upload', 'error', ()=>{});
     //         return;
     //     }
-    //     // File Size Validation (Limit: 30MB) temp
+
     //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
     //     if (file.size > maxFileSize) {
     //         modal.loading_progress(false);
-    //         modal.alert('The file size exceeds the 50MB limit. Please upload a smaller file.', 'error', () => {});
+    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
     //         return;
     //     }
 
@@ -779,20 +782,41 @@
 
     //     const reader = new FileReader();
     //     reader.onload = function(e) {
-    //         const data = new Uint8Array(e.target.result);
-    //         const workbook = XLSX.read(data, { type: "array" });
+    //         const text = e.target.result;
+
+    //         // Read CSV manually to avoid auto-conversion
+    //         const workbook = XLSX.read(text, { type: "string", raw: true });
     //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-    //         // Process in chunks
+    //         let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+    //         // Ensure only numbers are treated as text, keeping dates unchanged
+    //         jsonData = jsonData.map(row => {
+    //             let fixedRow = {};
+    //             Object.keys(row).forEach(key => {
+    //                 let value = row[key];
+
+    //                 // Convert numbers to text while keeping dates unchanged
+    //                 if (typeof value === "number") {
+    //                     value = String(value); // Convert numbers to string
+    //                 }
+
+    //                 fixedRow[key] = value !== null && value !== undefined ? value : "";
+    //             });
+    //             return fixedRow;
+    //         });
+
+    //         console.log(jsonData);
+
     //         processInChunks(jsonData, 5000, () => {
     //             paginateData(rowsPerPage);
     //         });
     //     };
-    //     reader.readAsArrayBuffer(file);
+
+    //     reader.readAsText(file, 'UTF-8');
     // }
 
-    // try function
+    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -803,11 +827,11 @@
         const file = $("#file")[0].files[0];
         if (!file) {
             modal.loading_progress(false);
-            modal.alert('Please select a file to upload', 'error', ()=>{});
+            modal.alert('Please select a file to upload', 'error', () => {});
             return;
         }
 
-        const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
+        const maxFileSize = 30 * 1024 * 1024; // 30MB limit
         if (file.size > maxFileSize) {
             modal.loading_progress(false);
             modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
@@ -818,15 +842,15 @@
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            const text = e.target.result;
+            const data = e.target.result;
 
-            // Read CSV manually to avoid auto-conversion
-            const workbook = XLSX.read(text, { type: "string", raw: true });
+            // Read as binary instead of plain text
+            const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-            // Ensure only numbers are treated as text, keeping dates unchanged
+            // Ensure special characters like "ñ" are correctly preserved
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
@@ -834,7 +858,7 @@
 
                     // Convert numbers to text while keeping dates unchanged
                     if (typeof value === "number") {
-                        value = String(value); // Convert numbers to string
+                        value = String(value);
                     }
 
                     fixedRow[key] = value !== null && value !== undefined ? value : "";
@@ -849,7 +873,8 @@
             });
         };
 
-        reader.readAsText(file, 'UTF-8');
+        // Use readAsBinaryString instead of readAsText
+        reader.readAsBinaryString(file);
     }
 
 
@@ -1519,16 +1544,28 @@
             status_val = 0;
         }
         if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
+            check_current_db("tbl_brand_ambassador", ["code", "name", "area"], [code, name, area], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
                     modal.confirm(confirm_update_message, function(result){
                         if(result){ 
                             // modal.loading(true);
-                            let batch = [];
+                            let ids = [];
+                            let hasDuplicate = false;
                             let valid = true;
 
                             $.each(unique_brand, (x, y) => {
-                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                if (ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            });
+
+                            if(hasDuplicate) {
+                                modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
+                            } else {
+                                let batch = [];
+                                    get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
                                     if(res.length == 0) {
                                         valid = false;
                                     } else {
@@ -1543,39 +1580,52 @@
                                         })
                                     }
                                 });
-                            })
 
-                            if(valid) {
-                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                    total_delete(url, 'tbl_ba_brands', 'ba_id', id)
-                                    
-                                    batch_insert(url, batch, 'tbl_ba_brands', false, () => {
-                                        modal.loading(false);
-                                        modal.alert(success_update_message, "success", function() {
-                                            location.reload();
-                                        });
-                                    })
-                                });
-                            } else {
-                                modal.loading(false);
-                                modal.alert('Brand not found', 'error', function() {});
-                            }
+                                if(valid) {
+                                    save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                        total_delete(url, 'tbl_ba_brands', 'ba_id', id)
+                                        
+                                        batch_insert(url, batch, 'tbl_ba_brands', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
+                                    });
+                                } else {
+                                    modal.loading(false);
+                                    modal.alert('Brand not found', 'error', function() {});
+                                }
+                            } 
                         }
                     });
 
                 }             
             });
         }else{
-            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
+            check_current_db("tbl_brand_ambassador", ["code", "name", "area"], [code, name, area], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
-                    modal.confirm(confirm_update_message, function(result){
+                    modal.confirm(confirm_add_message, function(result){
                         if(result){ 
                             // modal.loading(true);
-                            let batch = [];
+                            let ids = [];
+                            let hasDuplicate = false;
+                            // let batch = [];
                             let valid = true;
 
                             $.each(unique_brand, (x, y) => {
-                                get_field_values('tbl_brand', 'brand_description', 'brand_code', [y], (res) => {
+                                if (ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            })
+
+                            if(hasDuplicate) {
+                                modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
+                            } else {
+                                let batch = [];
+                                get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
                                     if(res.length == 0) {
                                         console.log('waler');
                                         valid = false;
@@ -1591,25 +1641,25 @@
                                         })
                                     }
                                 });
-                            })
 
-                            if(valid) {
-                                save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                    console.log(obj.ID);
-                                    insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
-                                    console.log(insert_batch);
+                                if(valid) {
+                                    save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                                        console.log(obj.ID);
+                                        insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
+                                        console.log(insert_batch);
 
-                                    batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
-                                        modal.loading(false);
-                                        modal.alert(success_update_message, "success", function() {
-                                            location.reload();
-                                        });
-                                    })
-                                });
-                            } else {
-                                modal.loading(false);
-                                modal.alert('Brand not found', 'error', function() {});
-                            }
+                                        batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
+                                    });
+                                } else {
+                                    modal.loading(false);
+                                    modal.alert('Brand not found', 'error', function() {});
+                                }
+                            }        
                         }
                     });
 
