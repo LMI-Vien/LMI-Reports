@@ -77,7 +77,7 @@
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
                     <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
+                        <label for="description" class="form-label">Store/Branch Description</label>
                         <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
                         <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                     </div>
@@ -826,7 +826,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['store/branch code', 'description', 'status'];
+            let td_validator = ['store/branch code', 'store/branch description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -894,7 +894,7 @@
         let jsonData = dataset.map(row => {
             return {
                 "Store/Branch Code": row["Store/Branch Code"] || "",
-                "Description": row["Description"] || "",
+                "Store/Branch Description": row["Store/Branch Description"] || "",
                 "Status": row["Status"] || "",
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
@@ -1247,7 +1247,7 @@
         formattedData = [
             {
                 "Store/Branch Code": "",
-                "Description": "",
+                "Store/Branch Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }

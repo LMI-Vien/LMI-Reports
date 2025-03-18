@@ -107,7 +107,7 @@
                             <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label">Agency</label>
+                            <label for="description" class="form-label">Agency Description</label>
                             <input type="text" class="form-control required" id="agency" maxlength="50" aria-describedby="description">
                             <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
@@ -178,7 +178,7 @@
                                     <tr>
                                         <th class='center-content' style='width: 5%'>Line #</th>
                                         <th class='center-content' style='width: 10%'>Agency Code</th>
-                                        <th class='center-content' style='width: 20%'>Agency</th>
+                                        <th class='center-content' style='width: 20%'>Agency Description</th>
                                         <th class='center-content' style='width: 10%'>Status</th>
                                     </tr>
                                 </thead>
@@ -759,7 +759,7 @@
         let jsonData = dataset.map(row => {
             return {
                 "Agency Code": row["Agency Code"] || "",
-                "Agency": row["Agency"] || "",
+                "Agency Description": row["Agency Description"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
                 "Created Date": formatDate(new Date()) || ""
@@ -1116,7 +1116,7 @@
             }, {});
 
             // 
-            let td_validator = ['agency code', 'agency', 'status'];
+            let td_validator = ['agency code', 'agency description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -1288,7 +1288,7 @@
         formattedData = [
             {
                 "Agency Code": "",
-                "Agency": "",
+                "Agency Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
