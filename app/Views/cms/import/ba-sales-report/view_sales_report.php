@@ -66,13 +66,13 @@
             </div>
             <div class="card-body text-center">
                 <div class="box">
-                    <!-- <?php
+                    <?php
                         echo view("cms/layout/buttons",$buttons);
                         $optionSet = '';
                         foreach($pageOption as $pageOptionLoop) {
                             $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
                         }
-                    ?> -->
+                    ?>
                     <div class="box-body">
                         <div class="col-md-12 list-data tbl-content" id="list-data">
                             <table class="table table-bordered listdata">

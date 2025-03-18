@@ -701,13 +701,13 @@
             var db_fields = [];
             var input_fields = [];
             if (id != 0) {
-                db_fields = ["id", "code", "description"];
-                input_fields = [id, code, description];
+                db_fields = ["id", "code", "description", "area_id"];
+                input_fields = [id, code, description, area_id];
                 excludeField = "id";
                 excludeId = id;
             } else {
-                db_fields = ["code", "description"];
-                input_fields = [code, description];
+                db_fields = ["code", "description", "area_id"];
+                input_fields = [code, description, area_id];
                 excludeField = null;
                 excludeId = null;
             }
