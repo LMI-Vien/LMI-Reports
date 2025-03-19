@@ -15,7 +15,7 @@
         box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
     }
 
-    .md-center {
+    /* .md-center {
         padding: 5px;
         font-family: 'Courier New', Courier, monospace;
         font-size: large;
@@ -24,6 +24,19 @@
         border: 1px solid #ffffff;
         border-radius: 10px;
         text-align: center;
+    } */
+
+    .md-center {
+        padding: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-size: large;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        border: 1px solid #ffffff;
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
     }
 
     th {
@@ -65,10 +78,6 @@ th, td {
     white-space: nowrap;
 }
 
-label {
-    float: left;
-}
-
 /* Set specific column widths */
 th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
 th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
@@ -87,12 +96,94 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
         <div class="content">
             <div class="container-fluid py-4">
                 <!-- Filters Section -->
-                <div class="card p-4 shadow-sm">
-                    <div class="md-center mb-3">
+                <div class="card shadow-sm">
+                    <!-- <div class="md-center mb-3">
                         <h5><i class="fas fa-filter"></i> Filter</h5>
+                    </div> -->
+                    <div class="text-center md-center p-2">
+                        <h5 class="mt-1 mb-1">
+                            <i class="fas fa-filter"></i> 
+                            <span>
+                                F I L T E R
+                            </span>
+                        </h5>
                     </div>
+
+                    <div class="row p-4">
+                        <div class="col-md-6 column p-2 text-left">
+                            <div class="col-md p-1 row">
+                                <div class="col-md-3">
+                                    <label class="mt-2" for="store">Store Name</label>
+                                </div>
+                                <div class="col-md">
+                                    <input id="store" class="form-control" placeholder="Please select...">
+                                    <input type="hidden" id="store_id">
+                                </div>
+                            </div>
+                            <div class="col-md p-1 row">
+                                <div class="col-md-3">
+                                    <label class="mt-2" for="area">Area</label>
+                                </div>
+                                <div class="col-md">
+                                    <input id="area" class="form-control" placeholder="Please select...">
+                                    <input type="hidden" id="area_id">
+                                </div>
+                            </div>
+                            <div class="col-md p-1 row">
+                                <div class="col-md-3">
+                                    <label class="mt-2" for="month">Month/Year</label>
+                                </div>
+                                <div class="col-md row">
+                                    <div class="col-md-6">
+                                        <select class="form-control" id="month">
+                                            <option value="0">Please month..</option>
+                                            <?php
+                                                if($month){
+                                                    foreach ($month as $value) {
+                                                        echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                                    }                                                
+                                                }
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-control" id="year">
+                                            <option value="0">Please year..</option>
+                                            <?php
+                                                if($year){
+                                                    foreach ($year as $value) {
+                                                        echo "<option value=".$value['id'].">".$value['year']."</option>";
+                                                    }                                                
+                                                }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 p-2">
+                            <label>Sort By</label>
+                            <div class="d-flex gap-3">
+                                <select class="form-control" id="sortBy">
+                                    <option value="rank">Rank</option>
+                                    <option value="store">Store</option>
+                                </select>
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="radio" name="sortOrder" value="asc" checked> Asc
+                                    <input type="radio" name="sortOrder" value="desc"> Desc
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 p-2">
+                            <button type="button" id="clearButton" class="btn btn-secondary btn-sm" style="width: 90px; height: 32px;">Clear</button>
+                            <button class="btn btn-primary btn-sm ml-2" id="refreshButton" style="width: 90px; height: 32px;">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!--
                     <div class="row g-3">
-                        <!-- Left Side: Inputs -->
                         <div class="col-md-9">
                             <div class="row g-3">
                                 <div class="col-md-4">
@@ -136,7 +227,6 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                             </div>
                         </div>
                         
-                        <!-- Right Side: Sort Filters -->
                         <div class="col-md-3">
                             <label>Sort By</label>
                             <div class="d-flex gap-3">
@@ -157,6 +247,8 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                             </div>
                         </div>
                     </div>
+                    -->
+                
                 </div>
 
                 <!-- DataTables Section -->

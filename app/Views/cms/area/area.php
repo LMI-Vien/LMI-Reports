@@ -1605,9 +1605,9 @@
                             dynamic_search(
                                 "'tbl_area a'", 
                                 "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
-                                "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT b.description ORDER BY b.description ASC SEPARATOR \", \") AS store_description'", 
-                                0, 
-                                0, 
+                                "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT a.description ORDER BY a.description ASC SEPARATOR \", \") AS store_description'", 
+                                100000, 
+                                index, 
                                 `''`,  
                                 `''`, 
                                 `'a.id'`, 
