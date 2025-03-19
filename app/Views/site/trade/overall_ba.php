@@ -39,6 +39,23 @@
         text-align: center;
     }
 
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: white !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+        font-weight: bold; 
+        color: white;
+        background-color: #301311 !important;
+    }
+
     #previewButton, #exportButton {
         background-color: #143996 !important;
         color: white;
@@ -65,7 +82,7 @@
         white-space: nowrap;
     }
 
-    #refreshButton {
+    .filter_buttons {
         width: 10em;
         height: 3em;
         border-radius: 12px;
@@ -198,39 +215,41 @@
                         </div>
                         <div class="col-md-2 column">
                             <div class="p-2 d-flex justify-content-end">
-                                <button class="btn btn-primary btn-sm" id="refreshButton"><i class="fas fa-sync-alt"></i> Refresh</button>
+                                <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton"><i class="fas fa-sync-alt"></i> Refresh</button>
                             </div>
-                            <div class="d-flex justify-content-end mt-3">
-                                <button class="btn btn-secondary" id="toggleColumnsButton"><i class="fas fa-columns"></i> Toggle Columns</button>
+                            <div class="p-2 d-flex justify-content-end">
+                                <button class="btn btn-secondary filter_buttons" id="toggleColumnsButton"><i class="fas fa-columns"></i> Toggle Columns</button>
                             </div>
+
+                        </div>
+                        <div class="sortable row text-center p-2" id="columnToggleContainer" class="mb-3">
+                            <strong class="col">Select Columns:</strong>
                         </div>
                     </div>
                 </div>
-                <div id="columnToggleContainer" class="mb-3">
-                    <strong>Select Columns:</strong>
-                </div>
+
                 <!-- DataTables Section -->
                 <div class="card mt-4 p-4 shadow-sm">
-                    <div class="tbl-title-bg"><h5>OVERALL BA SALES TARGET</h5></div>
+                    <div class="tbl-title-header p-2"><h5>OVERALL BA SALES TARGET</h5></div>
                     <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
                         <table id="overall_ba_sales_tbl" class="table table-bordered table-responsive">
                             <thead>
                                 <tr>
-                                    <th>Rank</th>
-                                    <th>Store Code</th>
-                                    <th>Area</th>
-                                    <th>Store Name</th>
-                                    <th>Actual Sales</th>
-                                    <th>Target</th>
-                                    <th>% Ach</th>
-                                    <th>Balance To Target</th>
-                                    <th>Possible Incentives</th>
-                                    <th>Target per Remaining days</th>
-                                    <th class="sort">LY Scanned Data</th>
-                                    <th class="sort">Brand Ambassador</th>
-                                    <th class="sort">Deployed Date</th>
-                                    <th class="sort">Brand</th>
-                                    <th class="sort">Growth</th>
+                                    <th class="tbl-title-field">Rank</th>
+                                    <th class="tbl-title-field">Store Code</th>
+                                    <th class="tbl-title-field">Area</th>
+                                    <th class="tbl-title-field">Store Name</th>
+                                    <th class="tbl-title-field">Actual Sales</th>
+                                    <th class="tbl-title-field">Target</th>
+                                    <th class="tbl-title-field">% Ach</th>
+                                    <th class="tbl-title-field">Balance To Target</th>
+                                    <th class="tbl-title-field">Possible Incentives</th>
+                                    <th class="tbl-title-field">Target per Remaining days</th>
+                                    <th class="tbl-title-field sort">LY Scanned Data</th>
+                                    <th class="tbl-title-field sort">Brand Ambassador</th>
+                                    <th class="tbl-title-field sort">Deployed Date</th>
+                                    <th class="tbl-title-field sort">Brand</th>
+                                    <th class="tbl-title-field sort">Growth</th>
 
                                 </tr>
                             </thead>
@@ -255,6 +274,10 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
@@ -266,6 +289,9 @@
     let area = <?= json_encode($area) ?>;
 
     $(document).ready(function() {
+        $( ".sortable" ).sortable({
+            revert: true
+        });
 
         initializeTable();
         autocomplete_field($("#store"), $("#store_id"), store_branch);
@@ -376,7 +402,7 @@
                     }
                 });
                 $('#columnToggleContainer').append(
-                    $('<label class="mx-2">').append(checkbox, " " + columnTitle)
+                    $('<label class="mx-2 col">').append(checkbox, " " + columnTitle)
                 );
             }
         });
