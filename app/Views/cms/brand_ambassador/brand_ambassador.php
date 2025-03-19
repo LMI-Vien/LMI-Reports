@@ -1544,7 +1544,7 @@
             status_val = 0;
         }
         if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_brand_ambassador", ["code", "name", "area"], [code, name, area], "status" , "id", id, true, function(exists, duplicateFields) {
+            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
                     modal.confirm(confirm_update_message, function(result){
                         if(result){ 
@@ -1603,7 +1603,7 @@
                 }             
             });
         }else{
-            check_current_db("tbl_brand_ambassador", ["code", "name", "area"], [code, name, area], "status" , "id", id, true, function(exists, duplicateFields) {
+            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
                     modal.confirm(confirm_add_message, function(result){
                         if(result){ 
