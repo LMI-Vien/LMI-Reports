@@ -486,12 +486,12 @@
             return;
         }
 
-        const maxFileSize = 30 * 1024 * 1024; // 30MB limit
-        if (file.size > maxFileSize) {
-            modal.loading_progress(false);
-            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-            return;
-        }
+        // const maxFileSize = 30 * 1024 * 1024; // 30MB limit
+        // if (file.size > maxFileSize) {
+        //     modal.loading_progress(false);
+        //     modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+        //     return;
+        // }
 
         modal.loading_progress(true, "Reviewing Data...");
 

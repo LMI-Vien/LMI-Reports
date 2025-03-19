@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
         <!-- FontAwesome Icons -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <link rel="icon" href="<?= base_url('assets/img/lmi_logo.ico') ?>" type="image/x-icon">
 
         <title><?=$meta['title']?></title>
         <?php if(!empty($css)) : ?>
@@ -24,4 +25,4 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <!-- AdminLTE JS -->
         <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/js/adminlte.min.js"></script>
-        </head>
+    </head>
