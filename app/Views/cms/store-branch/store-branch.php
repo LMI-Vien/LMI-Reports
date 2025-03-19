@@ -30,7 +30,7 @@
                                 <tr>
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                     <th class='center-content'>Store/Branch Code</th>
-                                    <th class='center-content'>Store/Branch</th>
+                                    <th class='center-content'>Store/Branch Description</th>
                                     <th class='center-content'>Status</th>
                                     <th class='center-content'>Date Created</th>
                                     <th class='center-content'>Date Modified</th>
@@ -56,7 +56,6 @@
     </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -146,7 +145,7 @@
                                 <tr>
                                     <th class='center-content'>Line #</th>
                                     <th class='center-content'>Store/Branch Code</th>
-                                    <th class='center-content'>Store/Branch</th>
+                                    <th class='center-content'>Store/Branch Description</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
                             </thead>
@@ -241,7 +240,6 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        // console.log(query);
         get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
@@ -327,14 +325,14 @@
             limit : limit,
             table : "tbl_store",
             order : {
-                field : "updated_date", //field to order
-                order : "desc" //asc or desc
+                field : "updated_date", 
+                order : "desc" 
             }
 
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
+            var obj = is_json(result); 
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -417,7 +415,7 @@
             text: btn_txt,
             id: btn_id,
             class: btn_class,
-            click: onclick_event // Attach the onclick event
+            click: onclick_event 
         });
         return new_btn;
     };
@@ -528,38 +526,6 @@
         });
     };
 
-    // function delete_data(id) {
-    //     get_field_values("tbl_store", "code", "id", [id], (res) => {
-    //         let code = res[id];
-    //         let message = is_json(confirm_delete_message);
-    //         message.message = `Delete <b><i>${code}</i></b> from Store/Branch Masterfile?`;
-
-    //         modal.confirm(JSON.stringify(message),function(result){
-    //             if(result){ 
-    //                 var url = "<?= base_url('cms/global_controller');?>";
-    //                 var data = {
-    //                     event : "update",
-    //                     table : "tbl_store",
-    //                     field : "id",
-    //                     where : id, 
-    //                     data : {
-    //                             updated_date : formatDate(new Date()),
-    //                             updated_by : user_id,
-    //                             status : -2
-    //                     }  
-    //                 }
-    //                 aJax.post(url,data,function(result){
-    //                     var obj = is_json(result);
-    //                     modal.alert(success_delete_message, 'success', function() {
-    //                         location.reload();
-    //                     });
-    //                 });
-    //             }
-    
-    //         });
-    //     })
-    // };
-
     function delete_data(id) {
         get_field_values("tbl_store", "code", "id", [id], (res) => {
             let code = res[id];
@@ -657,67 +623,6 @@
         $(".import_table").empty()
     };
 
-    // try function
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false);
-    //     clear_import_table();
-        
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-
-    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
-    //     if (file.size > maxFileSize) {
-    //         modal.loading_progress(false);
-    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-    //         return;
-    //     }
-
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const text = e.target.result;
-
-    //         // Read CSV manually to avoid auto-conversion
-    //         const workbook = XLSX.read(text, { type: "string", raw: true });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-    //         // Ensure only numbers are treated as text, keeping dates unchanged
-    //         jsonData = jsonData.map(row => {
-    //             let fixedRow = {};
-    //             Object.keys(row).forEach(key => {
-    //                 let value = row[key];
-
-    //                 // Convert numbers to text while keeping dates unchanged
-    //                 if (typeof value === "number") {
-    //                     value = String(value); // Convert numbers to string
-    //                 }
-
-    //                 fixedRow[key] = value !== null && value !== undefined ? value : "";
-    //             });
-    //             return fixedRow;
-    //         });
-
-    //         console.log(jsonData);
-
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-
-    //     reader.readAsText(file); 
-    // }
-
-    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -880,13 +785,13 @@
 
     function process_xl_file() {
         let btn = $(".btn.save");
-        if (btn.prop("disabled")) return; // Prevent multiple clicks
+        if (btn.prop("disabled")) return;
 
         btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
         
         if (dataset.length === 0) {
-            modal.alert('No data to process. Please upload a file.', 'error', () => {});
+            modal.alert('No data to process. Please upload a file.', 'error', () => {});    
             return;
         }
         modal.loading(true);
@@ -900,9 +805,6 @@
                 "Created Date": formatDate(new Date()) || ""
             };
         });
-
-        console.log(jsonData);
-        // return;
 
         let worker = new Worker(base_url + "assets/cms/js/validator_store.js");
         worker.postMessage({ data: jsonData, base_url: base_url });
@@ -1112,15 +1014,13 @@
     };
 
     function formatDate(date) {
-        // Get components of the date
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
 
-        // Combine into the desired format
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
 
@@ -1152,7 +1052,7 @@
         var status = $(this).attr("data-status");
         var modal_obj = "";
         var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
+        var hasExecuted = false; 
 
         let id = $("input.select:checked");
         let code = [];
@@ -1173,25 +1073,19 @@
             message.message = `Delete ${code_string} from Store/Branch Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
+            offset = 1;
         } else if (parseInt(status) === 1) {
             message = is_json(confirm_publish_message);
             message.message = `Publish ${code_string} from Store/Branch Masterfile?`;
-            modal_obj = message;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
             message = is_json(confirm_unpublish_message);
             message.message = `Unpublish ${code_string} from Store/Branch Masterfile?`;
-            modal_obj = confirm_unpublish_message;
+            modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
-        // var counter = 0; 
-        // $('.select:checked').each(function () {
-        //     var id = $(this).attr('data-id');
-        //     if(id){
-        //         counter++;
-        //     }
-        //  });
-        // console.log(counter);
+
         modal.confirm(modal_obj, function (result) {
             if (result) {
                 var url = "<?= base_url('cms/global_controller');?>";
@@ -1216,7 +1110,7 @@
                 var processed = 0;
                 dataList.forEach(function (data, index) {
                     aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; // Prevents multiple executions
+                        if (hasExecuted) return;
 
                         modal.loading(false);
                         processed++;

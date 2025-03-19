@@ -93,7 +93,6 @@
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Deployment Date</label>
-                        <!-- <input type="text" class="form-control required" id="deployment_date" placeholder="Select Date"> -->
                         <input type="date" class="form-control required" id="deployment_date">
                         <small id="description" class="form-text text-muted">* required</small>
                     </div>
@@ -287,7 +286,7 @@
         var status = $(this).attr("data-status");
         var modal_obj = "";
         var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
+        var hasExecuted = false;
 
         let id = $("input.select:checked");
         let code = [];
@@ -345,7 +344,7 @@
                 var processed = 0;
                 dataList.forEach((data, index) => {
                     aJax.post(url, data, (result) => {
-                        if (hasExecuted) return; // Prevents multiple executions
+                        if (hasExecuted) return;
     
                         modal.loading(false);
                         processed++;
@@ -421,7 +420,7 @@
         }
     
         aJax.post(url,data,function(result){
-            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
+            var obj = is_json(result);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -489,7 +488,6 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        // console.log(query);
         get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
@@ -513,24 +511,20 @@
         $('#filter_modal').modal('hide');
     })
 
-    // add
     $('#btn_add').on('click', function() {
         open_modal('Add New ASC', 'add', '');
     });
 
-    // import
     $('#btn_import').on('click', function() {
         title = addNbsp('IMPORT ASC')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $('#import_modal').modal('show');
     });
 
-    // edit
     function edit_data(id) {
         open_modal('Edit ASC', 'edit', id);
     }
 
-    // delete
     function delete_data(id) {
         get_field_values("tbl_area_sales_coordinator", "code", "id", [id], (res) => {
             let code = res[id];
@@ -539,10 +533,10 @@
 
             modal.confirm(JSON.stringify(message),function(result){
                 if(result){
-                    var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+                    var url = "<?= base_url('cms/global_controller');?>";
                     var data = {
-                        event : "update", // list, insert, update, delete
-                        table : "tbl_area_sales_coordinator", //table
+                        event : "update",
+                        table : "tbl_area_sales_coordinator",
                         field : "id",
                         where : id, 
                         data : {
@@ -567,7 +561,6 @@
         })
     }
 
-    // view
     function view_data(id) {
         open_modal('View ASC', 'view', id);
     }
@@ -579,18 +572,17 @@
         $(".form-control").css('border-color','#ccc');
         // add modal title
         $('#popup_modal .modal-title b').html(addNbsp(msg));
-        // clear the form inputs, dropdowns, and checkboxes
+    
         reset_form();
-        // <button type="button" class="btn save" id="save_data" onclick="validate_data()">Save</button>
         var save_btn = create_button('Save', 'save_data', 'btn save', function () {
             id = 0;
             validate_data()
         });
-        // <button type="button" class="btn save" id="edit_data">Edit</button>
-        var edit_btn = create_button('Edit', 'edit_data', 'btn save', function () {
+
+        var edit_btn = create_button('Update', 'edit_data', 'btn save', function () {
             validate_data()
         });
-        // <button type="button" class="btn caution" data-dismiss="modal">Close</button>
+
         var close_btn = create_button('Close', 'close_data', 'btn caution', function () {
             reset_form();
             $('#popup_modal').modal('hide');
@@ -641,7 +633,6 @@
                 $('#popup_modal .modal-footer').append(close_btn);
                 break;
         }
-        // show modal
         $('#popup_modal').modal('show');
     }
 
@@ -676,7 +667,7 @@
             text: btn_txt,
             id: btn_id,
             class: btn_class,
-            click: onclick_event // Attach the onclick event
+            click: onclick_event
         });
         return new_btn;
     }
@@ -777,12 +768,11 @@
         })
     }
 
-    // saves the data to the database
     function save_to_db(user_input, callback) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+        var url = "<?= base_url('cms/global_controller');?>"; 
         var data = {
-            event : "insert", // list, insert, update, delete
-            table : "tbl_area_sales_coordinator", //table
+            event : "insert", 
+            table : "tbl_area_sales_coordinator", 
             data : {
                 code : user_input.code,
                 description : user_input.description,
@@ -794,16 +784,13 @@
             }  
         }
     
-        // calls aJax.post() to send the data to the controller
         aJax.post_async(url,data,function(result){
             var obj = is_json(result);
-            // calls the callback function and passes the result
             callback();
         });
     }
 
     function confirm_edit(id, code, description, status, date, area) {
-        // checks if the status is true or false and sets the value accordingly
         if (status) {
             val_status = 1
             chk_val = 'Active'
@@ -884,11 +871,8 @@
             html += "</tbody>"
             html += "</table>"
 
-            // calls modal.confirm() to confirm if the user wants to save the data
             modal.confirm(confirm_update_message,function(result){
                 if(result){
-                    // if the user confirms, call save_to_db() to save the data
-                    // passing the code, description, status, date, and area as parameters
                     data = {
                         'id': id,
                         'code': code, 
@@ -898,8 +882,6 @@
                         'area_id':area
                     }
                     update_db(data, function () {
-                        // show users what was saved
-                        // after users press ok refresh page
                         modal.content(success_update_message, 'success', html, '1000px', ()=>{location.reload();})
                     })
                 }
@@ -908,10 +890,10 @@
     }
 
     function update_db(user_input, callback) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+        var url = "<?= base_url('cms/global_controller');?>"; 
         var data = {
-            event : "update", // list, insert, update, delete
-            table : "tbl_area_sales_coordinator", //table
+            event : "update", 
+            table : "tbl_area_sales_coordinator",
             field : "id",
             where : user_input.id, 
             data : {
@@ -1025,67 +1007,6 @@
         $(".import_buttons").append($downloadBtn);
     }
 
-    // try function
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false);
-    //     clear_import_table();
-        
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-
-    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
-    //     if (file.size > maxFileSize) {
-    //         modal.loading_progress(false);
-    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-    //         return;
-    //     }
-
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const text = e.target.result;
-
-    //         // Read CSV manually to avoid auto-conversion
-    //         const workbook = XLSX.read(text, { type: "string", raw: true });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-    //         // Ensure only numbers are treated as text, keeping dates unchanged
-    //         jsonData = jsonData.map(row => {
-    //             let fixedRow = {};
-    //             Object.keys(row).forEach(key => {
-    //                 let value = row[key];
-
-    //                 // Convert numbers to text while keeping dates unchanged
-    //                 if (typeof value === "number") {
-    //                     value = String(value); // Convert numbers to string
-    //                 }
-
-    //                 fixedRow[key] = value !== null && value !== undefined ? value : "";
-    //             });
-    //             return fixedRow;
-    //         });
-
-    //         console.log(jsonData);
-
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-
-    //     reader.readAsText(file); 
-    // }
-
-    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -1172,7 +1093,7 @@
 
     function process_xl_file() {
         let btn = $(".btn.save");
-        if (btn.prop("disabled")) return; // Prevent multiple clicks
+        if (btn.prop("disabled")) return; 
 
         btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
@@ -1191,9 +1112,6 @@
             "Created By": user_id || "",
             "Created Date": formatDate(new Date()) || ""
         }));
-
-        // console.log(jsonData);
-        // return;
 
         let worker = new Worker(base_url + "assets/cms/js/validator_asc.js");
         worker.postMessage({ data: jsonData, base_url: base_url });
@@ -1453,68 +1371,14 @@
         });
     }
 
-    // function batch_insert(insert_batch_data, cb) {
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event: "batch_insert",
-    //         table: "tbl_area_sales_coordinator",
-    //         insert_batch_data: insert_batch_data
-    //     };
-
-    //     let retry_count = 0;
-    //     let max_retries = 5; // Maximum retry attempts
-
-    //     // Function to make the AJAX request and handle retries
-    //     function attemptInsert() {
-    //         $.ajax({
-    //             type: "POST",
-    //             url: url,
-    //             data: data,
-    //             success: function(result) {
-    //                 if (result.message === "success") {
-    //                     cb(true); // Success callback
-    //                 } else {
-    //                     handleSaveError(result); // Handle error if message is not success
-    //                 }
-    //             },
-    //             error: function(xhr, status, error) {
-    //                 console.error("Save failed:", status, error);
-    //                 handleSaveError({ message: 'fail' }); // Handle AJAX failure
-    //             }
-    //         });
-    //     }
-
-    //     // Handle the error and retry the request
-    //     function handleSaveError(result) {
-    //         if (retry_count < max_retries) {
-    //             retry_count++;
-    //             let wait_time = Math.pow(2, retry_count) * 1000; // Exponential backoff
-    //             console.log(`Error saving batch. Retrying in ${wait_time / 1000} seconds...`);
-
-    //             setTimeout(() => {
-    //                 console.log(`Retrying attempt ${retry_count}...`);
-    //                 attemptInsert(); // Retry the insertion
-    //             }, wait_time);
-    //         } else {
-    //             console.error("Failed to save data after multiple attempts.");
-    //             cb(false); // Call callback with failure if retries exceed max attempts
-    //         }
-    //     }
-
-    //     // Initiate the first attempt to insert
-    //     attemptInsert();
-    // }
-
     // This code is a fine example of reinventing the wheel—except the wheel is square, and occasionally forgets it's a wheel.
     let startTime, endTime;
 
-    // Function to start the timer
     function startTimer() {
-        startTime = new Date(); // Get the current time
+        startTime = new Date(); 
         console.log("Timer started at: " + startTime.toLocaleTimeString());
     }
 
-    // Function to stop the timer
     function stopTimer() {
         if (!startTime) {
             console.log("Timer was not started!");
@@ -1683,7 +1547,7 @@
         // Initiate data retrieval
         fetchAscs();
 
-        console.log(formattedData, 'formattedData') // debugging
+        console.log(formattedData, 'formattedData')
 
         // Header information for the exported Excel file
         const headerData = [

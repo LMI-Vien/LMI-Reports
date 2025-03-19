@@ -62,8 +62,8 @@
                                   <tr>
                                       <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                       <th class='center-content'>Agency Code</th>
-                                      <th class='center-content'>Agency</th>
-                                      <th class='center-content'>Agency Status</th>
+                                      <th class='center-content'>Agency Description</th>
+                                      <th class='center-content'>Status</th>
                                       <th class='center-content'>Date Created</th>
                                       <th class='center-content'>Date Modified</th>
                                       <th class='center-content'>Action</th>
@@ -436,9 +436,6 @@
         let isReadOnly = actions === 'view';
         set_field_state('#code, #agency, #status', isReadOnly);
 
-        // let isReadOnlyAdd = actions === 'add';
-        // set_field_state('#status', isReadOnlyAdd);
-
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
         if (actions === 'edit') $footer.append(buttons.edit);
@@ -462,7 +459,7 @@
             text: btn_txt,
             id: btn_id,
             class: btn_class,
-            click: onclick_event // Attach the onclick event
+            click: onclick_event
         });
         return new_btn;
     }
@@ -699,34 +696,7 @@
         }).join('');
     }
 
-    function save_to_db_import(dataObject) {
-        var url = "<?= base_url('cms/global_controller');?>"; // URL of Controller
-        // var data = {
-        //     event: "insert",
-        //     table: "tbl_agency", // Table name
-        //     data: dataObject  // Pass the entire object dynamically
-        // };
-
-        var data = {
-            event: "insert",
-            table: "tbl_agency",
-            data: {
-                code: dataObject.code,
-                agency: dataObject.agency,
-                status: dataObject.status,
-                created_date: formatDate(new Date()),
-                created_by: user_id
-            },
-        };
-
-        aJax.post(url, data, function (result) {
-            var obj = is_json(result);
-            location.reload();
-        });
-    }
-
     function formatDate(date) {
-      // Get components of the date
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
       const day = String(date.getDate()).padStart(2, '0');
@@ -945,67 +915,6 @@
         });
     }
 
-    // try function
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false);
-    //     clear_import_table();
-        
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-
-    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
-    //     if (file.size > maxFileSize) {
-    //         modal.loading_progress(false);
-    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-    //         return;
-    //     }
-
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const text = e.target.result;
-
-    //         // Read CSV manually to avoid auto-conversion
-    //         const workbook = XLSX.read(text, { type: "string", raw: true });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-    //         // Ensure only numbers are treated as text, keeping dates unchanged
-    //         jsonData = jsonData.map(row => {
-    //             let fixedRow = {};
-    //             Object.keys(row).forEach(key => {
-    //                 let value = row[key];
-
-    //                 // Convert numbers to text while keeping dates unchanged
-    //                 if (typeof value === "number") {
-    //                     value = String(value); // Convert numbers to string
-    //                 }
-
-    //                 fixedRow[key] = value !== null && value !== undefined ? value : "";
-    //             });
-    //             return fixedRow;
-    //         });
-
-    //         console.log(jsonData);
-
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-
-    //     reader.readAsText(file); 
-    // }
-
-    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -1211,28 +1120,20 @@
 
         if (parseInt(status) === -2) {
             message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Area Masterfile?`;  
+            message.message = `Delete ${code_string} from Agency Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
             message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Area Masterfile?`;
+            message.message = `Publish ${code_string} from Agency Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
             message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Area Masterfile?`;  
+            message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
-        // var counter = 0; 
-        // $('.select:checked').each(function () {
-        //     var id = $(this).attr('data-id');
-        //     if(id){
-        //         counter++;
-        //     }
-        //  });
-        // console.log(counter);
         modal.confirm(modal_obj, function (result) {
             if (result) {
                 var url = "<?= base_url('cms/global_controller');?>";
@@ -1257,7 +1158,7 @@
                 var processed = 0;
                 dataList.forEach(function (data, index) {
                     aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; // Prevents multiple executions
+                        if (hasExecuted) return; 
 
                         modal.loading(false);
                         processed++;
