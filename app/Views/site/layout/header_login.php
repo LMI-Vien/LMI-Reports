@@ -8,6 +8,7 @@
         <meta property="og:description" content="<?=$meta['description']?>" />
         <title><?=$meta['title']?></title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+        <link rel="icon" href="<?= base_url('assets/img/lmi_logo.ico') ?>" type="image/x-icon">
 
         <script type="text/javascript" src="<?= base_url();?>assets/js/jquery-3.7.1.min.js" ></script>
         <script type="text/javascript" src="<?= base_url();?>assets/js/cms_custom.js" ></script>
