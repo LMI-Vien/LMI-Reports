@@ -111,7 +111,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form-modal">
+                <form id="form-modal" class="form-group">
                     <div class="mb-3">
                         <label for="code" class="form-label">Brand Ambassador Code</label>
                         <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
@@ -125,24 +125,24 @@
                         <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                     </div>
 
-                    <div class="form-group">
+                    <div >
                         <label>Deployment Date</label>
                         <input type="date" class="form-control required" id="deployment_date">
                     </div>
 
-                    <div class="form-group">
+                    <div >
                         <label>Agency</label>
                         <select name="area" class="form-control required" id="agency">
                         </select>
                     </div>
 
-<!--                     <div class="form-group">
+<!--                     <div >
                         <label>Brand</label>
                         <select name="area" class="form-control required" id="brand">
                         </select>
                     </div>
  -->
-                        <div class="form-group">
+                        <div >
                             <div class="row" >
                                 <label class="col" >Brand</label>
                                 <input
@@ -163,19 +163,19 @@
                         </div>
 
 
-                    <div class="form-group">
+                    <div >
                         <label>Area</label>
                         <select name="area" class="form-control required" id="area">
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div >
                         <label>Store</label>
                         <select name="store" class="form-control required" id="store">
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div >
                         <label>Team</label>
                         <select name="team" class="form-control required" id="team">
                         </select>
