@@ -15,12 +15,12 @@
         height: 36px;
         font-size: 14px;
         border-radius: 5px;
-        min-width: 120px; /* Ensures uniform dropdown width */
-        flex-grow: 1; /* Makes sure dropdown takes available space */
+        min-width: 120px; 
+        flex-grow: 1; 
     }
     
     .d-flex {
-        gap: 10px; /* Adds space between label and dropdown */
+        gap: 10px; 
         margin: 5px;
     }
 
@@ -381,7 +381,7 @@
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
+            var obj = is_json(result); 
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -443,15 +443,13 @@
     });
 
     function formatDate(date) {
-        // Get components of the date
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const month = String(date.getMonth() + 1).padStart(2, '0'); 
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
 
-        // Combine into the desired format
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
@@ -557,7 +555,7 @@
 
     function process_xl_file() {
         let btn = $(".btn.save");
-        if (btn.prop("disabled")) return; // Prevent multiple clicks
+        if (btn.prop("disabled")) return;
 
         btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
@@ -775,7 +773,7 @@
                             for (let field of matchFields) {
                                 if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
                                     matchedId = id;
-                                    break; // Stop searching once a match is found
+                                    break; 
                                 }
                             }
                             if (matchedId) break;
@@ -786,6 +784,7 @@
                         row.id = matchedId;
                         row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
+                        delete row.created_by; // to prevent overwritting the created by
                         delete row.created_date; // Unset created_date
                         updateRecords.push(row);
                     } else {
@@ -879,8 +878,6 @@
                 border: "1px solid white",
                 borderRadius: "10px",
                 display: "inline-block",
-                // padding: "10px",
-                // lineHeight: 0.5,
                 background: "#990000",
                 color: "white",
                 textAlign: "center",
@@ -1033,8 +1030,6 @@
         let formattedData = [
             {
                 "Store":"", 
-                // "Store Name":store_map[`${store}`].description,  
-                // store name,
                 "Item":"", 
                 "Item Name":"", 
                 "VMI Status":"", 
@@ -1047,7 +1042,6 @@
                 "On Hand":"", 
                 "In Transit":"", 
                 "Ave Sales Unit":"", 
-                // "Company":company,
                 "NOTE:": "Please do not change the column headers."
             }
         ]

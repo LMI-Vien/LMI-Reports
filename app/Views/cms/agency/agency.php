@@ -830,14 +830,19 @@
                         for (let [key, id] of existingMap.entries()) {
                             let keyParts = key.split("|"); // ["AJK 530", "Marsden F. Hoffman"]
 
-                            for (let field of matchFields) {
-                                if (keyParts.includes(row[field])) {  // Check if any field value matches
-                                    matchedId = id;
-                                    break; // Stop as soon as we find a match
-                                }
+                            // for (let field of matchFields) {
+                            //     if (keyParts.includes(row[field])) {  // Check if any field value matches
+                            //         matchedId = id;
+                            //         break; // Stop as soon as we find a match
+                            //     }
+                            // }
+
+                            if (keyParts[0] === row["code"]) {
+                                matchedId = id;
+                                break; // Stop looping once a match is found
                             }
 
-                            if (matchedId) break; // Stop looping if we found a match
+                            // if (matchedId) break; // Stop looping if we found a match
                         }
                     }
 
