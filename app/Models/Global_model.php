@@ -995,4 +995,9 @@ class Global_model extends Model
         $query = $this->db->query("CALL get_companies()");
         return $query->getResultArray(); // Return data as an array
     }
+
+    function get_item_classification() {
+        $query = $this->db->query("CALL SearchDynamic('tbl_classification', null, 'id, item_class_code, item_class_description', 9999, 0, null, 'item_class_code', null)");
+        return $query->getResultArray(); 
+    }
 }

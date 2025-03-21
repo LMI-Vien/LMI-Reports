@@ -197,8 +197,13 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 </div>
                                 <div class="col-md">
                                     <select class="form-control" id="month">
-                                        <option>January</option>
-                                        <option>February</option>
+                                        <?php
+                                            if($month){
+                                                foreach ($month as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                                }                                                
+                                            }
+                                        ?>
                                     </select>
                                 </div>
                             </div>
@@ -208,8 +213,13 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 </div>
                                 <div class="col-md">
                                     <select class="form-control" id="week">
-                                        <option>Week 1</option>
-                                        <option>Week 2</option>
+                                        <?php
+                                            if($week){
+                                                foreach ($week as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['name']."</option>";
+                                                }                                                
+                                            }
+                                        ?>
                                     </select>
                                 </div>
                             </div>   
@@ -230,8 +240,8 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 <label for="item">Item Category</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="item" placeholder="Please select...">
-                                <input type="hidden" id="item_id">
+                                <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
+                                <input type="hidden" id="item_classi_id">
                             </div>
                         </div>
                     </div>
@@ -332,13 +342,41 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         let area = <?= json_encode($area); ?>;
         let brand = <?= json_encode($brand); ?>;
         let store = <?= json_encode($store_branch); ?>;
-        let asc = <?= json_encode($asc); ?>;
-        
+        let item_classification = <?= json_encode($item_classification); ?>;
+
         autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
         autocomplete_field($("#area"), $("#area_id"), area, "area_description");
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
         autocomplete_field($("#store"), $("#store_id"), store);
-        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
+        autocomplete_field($("#item_classi"), $("#item_classi_id"), item_classification, "item_class_description");
+
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"]').val('');
+            $('input[type="checkbox"]').prop('checked', false);
+            $('input[name="coveredASC"][value="with_ba"]').prop('checked', false);
+            $('input[name="coveredASC"][value="without_ba"]').prop('checked', false);
+            $('select').prop('selectedIndex', 0);
+            $('#refreshButton').click();
+        });
+
+        $(document).on('click', '#refreshButton', function () {
+            if($('#brandAmbassador').val() == ""){
+                $('#ba_id').val('');
+            }
+            if($('#area').val() == ""){
+                $('#area_id').val('');
+            }
+            if($('#brand').val() == ""){
+                $('#brand_id').val('');
+            }
+            if($('#store').val() == ""){
+                $('#store_id').val('');
+            }
+            if($('#item_classi').val() == ""){
+                $('#item_classi_id').val('');
+            }
+           // fetchData();
+        });
 
         tables.forEach(id => {
             $(id).DataTable({

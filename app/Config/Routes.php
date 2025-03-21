@@ -28,6 +28,8 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->post('trade-asc-dashboard-one-tables', 'TradeDashboard::trade_asc_dashboard_one_tables');
     $routes->get('trade-overall-asc-sales-report', 'TradeDashboard::trade_overall_asc_sales_report');
     $routes->post('trade-overall-asc-sales-report', 'TradeDashboard::trade_overall_asc_sales_report');
+    $routes->get('trade-kam-one', 'TradeDashboard::trade_kam_one');
+    
     //trade_overall_asc_sales_report
 });
 
