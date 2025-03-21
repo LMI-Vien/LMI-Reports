@@ -20,16 +20,34 @@
 
     .md-center {
         padding: 5px;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: 'Poppins', sans-serif;
         font-size: large;
-        background-color: #fdb92a;
-        color: #333333;
+        font-weight: bold;
+        color: white;
+        text-align: center;
         border: 1px solid #ffffff;
-        border-radius: 10px;
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
+    }
+
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
     }
 
     th {
-        color: #fff;
+        color: #fff !important;
         background-color: #301311 !important;
     }
     .tbl-title-bg{
@@ -40,13 +58,81 @@
     #previewButton{
       background-color: #143996 !important;
     }
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
+
+    .card-title {
+        text-align: center;
+        font-size: 1.25rem;
+        font-weight: bold;
     }
 
-    #dataTable4 {
-        width: 100% !important;
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+    }
+
+    /* Table Styling */
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate; /* Required for border-radius */
+        border-spacing: 0; /* Ensures borders don't separate */
+        border-radius: 12px 12px 0px 0px;
+        overflow: hidden; /* Ensures inner content respects border-radius */
+    }
+
+    .table th {
+        color: white !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
+    }
+
+    .table thead {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    .table tbody tr {
+        transition: background 0.3s ease-in-out;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(0, 123, 255, 0.1);
+    }
+
+    .filter_buttons {
+        width: 10em;
+        height: 3em;
+        border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #clearButton {
+        width: 10em;
+        height: 3em;
+        border-radius: 13px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #exportButton{
+        background-color: #339933 !important;
+    }
+    label {
+        float: left;
+    }
+    #table-skus{
+        display: none;
     }
 
 /* Set specific column widths */
@@ -65,94 +151,142 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             <div class="container-fluid py-4">
 
                 <!-- Filters Section -->
-            <div class="card p-4 shadow-sm">
-                <div class="text-center md-center">
-                    <h5 class="mb-3"><i class="fas fa-filter"></i> Filter</h5>
+            <div class="card shadow-lg">
+                <div class="text-center md-center p-2">
+                    <h5 class="mt-1 mb-1">
+                        <i class="fas fa-filter"></i> 
+                        <span>
+                            F I L T E R
+                        </span>
+                    </h5>
                 </div>
-                <div class="row">
-                    <!-- Left Side: Inputs -->
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-3">
+                <div class="row p-4">
+                    <div class="col-md-3 column p-2 text-left">
+                        <div class="col-md p-1 row">
+                            <div class="col-md-4">
                                 <label for="brandAmbassador">Brand Ambassador</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="brandAmbassador" placeholder="Please select">
                                 <input type="hidden" id="ba_id">
                             </div>
+                        </div>
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="area">Area</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="area" placeholder="Please select...">
                                 <input type="hidden" id="area_id">
                             </div>
+                        </div>
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="brand">Brand</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="brand" placeholder="Please select...">
                                 <input type="hidden" id="brand_id">
                             </div>
-                            <div class="col-md-3 d-flex gap-2">
-                                <div style="width: 100%;">
+                        </div>
+                    </div> 
+                    <div class="col-md-2 column p-2 text-left">
+                            <div class="col-md p-1 row">
+                                <div class="col-md-3">
                                     <label for="month">Month</label>
+                                </div>
+                                <div class="col-md">
                                     <select class="form-control" id="month">
                                         <option>January</option>
                                         <option>February</option>
                                     </select>
                                 </div>
-                                <div style="width: 70%;">
+                            </div>
+                            <div class="col-md p-1 row">
+                                <div class="col-md-3">
                                     <label for="week">Week</label>
+                                </div>
+                                <div class="col-md">
                                     <select class="form-control" id="week">
                                         <option>Week 1</option>
                                         <option>Week 2</option>
                                     </select>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
+                            </div>   
+                    </div>     
+                    <div class="col-md-3 column p-2 text-left">
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="store">Store</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="store" placeholder="Please select...">
                                 <input type="hidden" id="store_id">
                             </div>
+                        </div>
+
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="item">Item Category</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="item" placeholder="Please select...">
+                                <input type="hidden" id="item_id">
                             </div>
-                            <div class="col-md-3 position-relative p-3" style="border-radius: 7px; background-color: #edf1f1;">
-                                <label class="position-absolute" style="top: 5px; left: 10px; font-size: 12px; font-weight: bold; background-color: #edf1f1; padding: 0 5px;">Class A, B, NPD Only</label>
-                                <div style="margin-top: 15px;">
-                                    <label for="ascName">ASC Name</label>
-                                    <input type="text" class="form-control" id="ascName" placeholder="ASC Name">
-                                    <input type="hidden" id="asc_id">
-                                </div>
-                                <div class="d-flex">
-                                    <input type="radio" name="sortOrder" value="asc" checked> W/ BA
-                                    <input type="radio" name="sortOrder" value="desc" class="ml-3"> W/O BA
-                                </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
+                        <div class="col-md-12 mx-auto row my-2 py-2 text-left" >
+                            <label class="my-auto col-md-12" >Covered by Selected ASC</label>
+                        </div>
+                        <div class="col-md-12 mx-auto row py-2 text-center" >
+                            <div class="col-md-6 row" >
+                                <input type="radio" name="coveredASC" value="with_ba" class="col-md-2"><span class="col-md-10">W/ BA</span>
                             </div>
-                             <div class="col-md-3 d-flex align-items-end">
-                                <button class="btn btn-primary btn-sm w-100" id="refreshButton">
+                            <div class="col-md-6 row" >
+                                <input type="radio" name="coveredASC" value="without_ba" class="col-md-2"><span class="col-md-10">W/O BA</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <!-- Refresh Button -->
+                        <div class="row">
+                            <div class="p-3 d-flex justify-content-end">
+                                <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton">
                                     <i class="fas fa-sync-alt"></i> Refresh
                                 </button>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="p-3 d-flex justify-content-end">
+                                <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
+                            </div>
+                        </div>
                     </div>
-             
                 </div>
             </div>
 
                 <!-- DataTables Section -->
                 <div class="card mt-4 p-4 shadow-sm">
-                    <div class="tbl-title-bg"><h5>OVERALL BA SALES TARGET</h5></div>
-
                     <table id="dataTable4" class="table table-bordered table-responsive">
                         <thead>
                             <tr>
-                                <th>Store</th>
-                                <th>Area Sales Coordinator</th>
-                                <th>Brand Ambassador</th>
-                                <th>SKU</th>
-                                <th>SKU Code</th>
-                                <th>Item Class</th>
-                                <th>Stock Qty</th>
+                                <th 
+                                    colspan="8"
+                                    style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                    class="tbl-title-header"
+                                >
+                                    SKU's IN STORE
+                                </th>
+                            </tr>
+                            <tr>
+                                <th class="tbl-title-field">Store</th>
+                                <th class="tbl-title-field">Area Sales Coordinator</th>
+                                <th class="tbl-title-field">Brand Ambassador</th>
+                                <th class="tbl-title-field">SKU</th>
+                                <th class="tbl-title-field">SKU Code</th>
+                                <th class="tbl-title-field">Item Class</th>
+                                <th class="tbl-title-field">Stock Qty</th>
 
                             </tr>
                         </thead>

@@ -31,6 +31,7 @@
         color: #fff;
         background-color: #301311 !important;
     }
+
     #previewButton{
         color: #fff;
         background-color: #143996 !important;
@@ -376,7 +377,7 @@
                                     <tr>
                                         <th 
                                             colspan="2"
-                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"\
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
                                             class="tbl-title-header"
                                         >NPD SKU'S</th>
                                     </tr>
@@ -519,10 +520,12 @@
         $(document).on('click', '#clearButton', function () {
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
             $('input[type="checkbox"]').prop('checked', false);
-            $('input[name="sortOrder"]').first().prop('checked', true);
+            $('input[name="sortOrder"][value="ASC"]').prop('checked', true);
+            $('input[name="sortOrder"][value="DESC"]').prop('checked', false);
             $('.btn-outline-primary').removeClass('active');
             $('.main_all').addClass('active');
             $('select').prop('selectedIndex', 0);
+            $('#refreshButton').click();
         });
 
         autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors);
@@ -550,10 +553,6 @@
     }
 
     $(document).on('click', '#refreshButton', function () {
-        let selectedBa = $('#ba_id').val();
-        if(selectedBa !== 0){
-            get_area_asc(selectedBa);
-        }
         if($('#brand_ambassadors').val() == ""){
             $('#ba_id').val('');
         }
@@ -562,6 +561,12 @@
         }
         if($('#brand').val() == ""){
             $('#brand_id').val('');
+        }
+        let selectedBa = $('#ba_id').val();
+        if(selectedBa !== 0){
+            get_area_asc(selectedBa);
+        }else{
+            $('#ar_asc_name').text('Please Select Brand Ambassador'); 
         }
         fetchData();
     });

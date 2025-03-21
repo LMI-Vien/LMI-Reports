@@ -471,7 +471,7 @@ ul.child_menu {
                         } else {
                             status_val = 0;
                         }
-                        modal.confirm(confirm_add_message,function(result){
+                        modal.confirm(confirm_update_message,function(result){
                             if(result){ 
                                 modal.loading(true);
                                 var customURL = "<?= base_url('cms/roles/delete_role_tagging');?>"; 
@@ -495,8 +495,7 @@ ul.child_menu {
                                 }
 
                                 aJax.post(url,data,function(result){ 
-                                    var obj = is_json(result);
-                                    console.log(roles_menu_id);          
+                                    var obj = is_json(result);         
                                     save_role_module(roles_menu_id);
                                 });    
                             }

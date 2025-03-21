@@ -55,6 +55,7 @@ class Custom_model extends Model
         $builder = $this->db->table($table);
         $builder->select($select);
         $builder->where($query);
+        $builder->join('cms_site_menu_roles','cms_site_menu_roles.menu_id = site_menu.id','left');
         $builder->orderBy('sort_order','asc');
         $result = $builder->get();
         return $result->getResult();
