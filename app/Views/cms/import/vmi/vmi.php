@@ -784,7 +784,7 @@
                         row.id = matchedId;
                         row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
-                        // delete row.created_by; // to prevent overwritting the created by
+                        delete row.created_by; // to prevent overwritting the created by
                         delete row.created_date; // Unset created_date
                         updateRecords.push(row);
                     } else {
