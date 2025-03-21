@@ -288,13 +288,15 @@
                 field: "v.year",
                 order: "asc"
             },
-            group : "v.year, v.month, v.week, c.name"
+            // group : "v.year, v.month, v.week, c.name"
         };
         console.log(data, 'data')
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
+
+            console.log(result);
 
             if(result) {
                 if (result.length > 0) {
