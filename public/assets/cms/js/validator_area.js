@@ -15,7 +15,7 @@ self.onmessage = async function(e) {
 
         store_records = ba_data.stores;
         let store_lookup = {};
-        store_records.forEach(store => store_lookup[store.description] = store.id);
+        store_records.forEach(store => store_lookup[store.code] = store.id);
 
         function formatDateForDB(dateStr) {
             let [month, day, year] = dateStr.split('/');
