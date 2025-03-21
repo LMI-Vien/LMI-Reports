@@ -109,10 +109,9 @@ class Cms_preference extends BaseController
 
 	public function get_site_menu() {
 	    $session = session();
-	    $select = 'id, menu_url, menu_name, menu_type, menu_parent_id';
-	    $query = 'status = 1';
+	    $select = 'site_menu.id, menu_url, menu_name, menu_type, menu_parent_id';
+	    $query = 'status = 1 AND role_id = ' . $session->sess_role . ' AND menu_role_view = 1';
 	    $result = $this->Custom_model->get_site_menu_list('site_menu', $select, $query);
-
 	    $menuTree = [];
 	    $menuLookup = [];
 

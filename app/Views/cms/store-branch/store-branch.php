@@ -899,13 +899,18 @@
                         for (let [key, id] of existingMap.entries()) {
                             let keyParts = key.split("|");
 
-                            for (let field of matchFields) {
-                                if (keyParts.includes(row[field])) {
-                                    matchedId = id;
-                                }
+                            // for (let field of matchFields) {
+                            //     if (keyParts.includes(row[field])) {
+                            //         matchedId = id;
+                            //     }
+                            // }
+
+                            if (keyParts[0] === row["code"]) {
+                                matchedId = id;
+                                break; // Stop looping once a match is found
                             }
 
-                            if (matchedId) break; // Stop looping if we found a match
+                            // if (matchedId) break; // Stop looping if we found a match
                         }
                     }
 

@@ -56,9 +56,9 @@
         background-color: #301311 !important;
     }
 
-    #previewButton, #exportButton {
+    #previewButton{
+        color: #fff;
         background-color: #143996 !important;
-        color: white;
     }
 
     #overall_ba_sales_tbl {
@@ -86,6 +86,13 @@
         width: 10em;
         height: 3em;
         border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #clearButton {
+        width: 10em;
+        height: 3em;
+        border-radius: 13px;
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
     }
 
@@ -139,7 +146,7 @@
                                     <label for="store" class="pl-2">Store Name</label>
                                 </div>
                                 <div class="col-md-9">
-                                    <input id="store" class="form-control" placeholder="Please select...">
+                                    <input type="text" id="store" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="store_id">
                                 </div>
                             </div>
@@ -148,7 +155,7 @@
                                     <label for="area" class="pl-2">Area</label>
                                 </div>
                                 <div class="col-md-9">
-                                    <input id="area" class="form-control" placeholder="Please select...">
+                                    <input type="text" id="area" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="area_id">
                                 </div>
                             </div>
@@ -205,20 +212,23 @@
     
                                 <div class="col-md pt-2 row">
                                     <div class="col-md">
-                                        <input type="radio" name="sortOrder" value="asc" checked> Ascending
+                                        <input type="radio" name="sortOrder" value="ASC" checked> Ascending
                                     </div>
                                     <div class="col-md">
-                                        <input type="radio" name="sortOrder" value="desc"> Descending
+                                        <input type="radio" name="sortOrder" value="DESC"> Descending
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2 column">
                             <div class="p-2 d-flex justify-content-end">
-                                <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton"><i class="fas fa-sync-alt"></i> Refresh</button>
+                                <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton" style="border-radius: 13px;"><i class="fas fa-sync-alt"></i> Refresh</button>
                             </div>
                             <div class="p-2 d-flex justify-content-end">
-                                <button class="btn btn-secondary filter_buttons" id="toggleColumnsButton"><i class="fas fa-columns"></i> Toggle Columns</button>
+                                <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
+                            </div>
+                            <div class="d-flex justify-content-end mt-3">
+                                <button class="btn btn-secondary" id="toggleColumnsButton"><i class="fas fa-columns"></i> Toggle Columns</button>
                             </div>
 
                         </div>
@@ -296,7 +306,7 @@
         initializeTable();
         autocomplete_field($("#store"), $("#store_id"), store_branch);
         autocomplete_field($("#area"), $("#area_id"), area, "area_description");
-
+        $('#columnToggleContainer').toggle();
         $(document).on('click', '#toggleColumnsButton', function() {
             $('#columnToggleContainer').toggle();
         });
@@ -308,7 +318,16 @@
             if($('#store').val() == ""){
                 $('#store_id').val('');
             }
-        fetchData();
+            fetchData();
+        });
+
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"], input[type="number"], input[type="date"]').val('');
+            $('input[name="sortOrder"][value="ASC"]').prop('checked', true);
+            $('input[name="sortOrder"][value="DESC"]').prop('checked', false);
+            $('.main_all').addClass('active');
+            $('select').prop('selectedIndex', 0);
+            $('#refreshButton').click();
         });
     });
 

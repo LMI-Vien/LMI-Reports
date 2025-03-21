@@ -15,17 +15,6 @@
         box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
     }
 
-    /* .md-center {
-        padding: 5px;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: large;
-        background-color: #fdb92a;
-        color: #333333;
-        border: 1px solid #ffffff;
-        border-radius: 10px;
-        text-align: center;
-    } */
-
     .md-center {
         padding: 5px;
         font-family: 'Poppins', sans-serif;
@@ -52,43 +41,73 @@
         text-align: center;
     }
 
-    #previewButton, #exportButton {
+    #previewButton{
+        color: #fff;
         background-color: #143996 !important;
-        color: white;
     }
+
 
     #dataTable4 {
         table-layout: fixed;
         width: 100%;
     }
 
-table {
-    width: 100%;
-    table-layout: fixed; /* Ensures fixed column widths */
-    border-collapse: collapse;
-}
+    table {
+        width: 100%;
+        table-layout: fixed; /* Ensures fixed column widths */
+        border-collapse: collapse;
+    }
 
-th, td {
-    border: 1px solid black;
-    padding: 8px;
-    text-align: left;
-    min-width: 100px; /* Prevents shrinking */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+        min-width: 100px; /* Prevents shrinking */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-/* Set specific column widths */
-th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
-th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
-th:nth-child(3), td:nth-child(3) { width: 10%; } /* Area */
-th:nth-child(4), td:nth-child(4) { width: 15%; } /* Store Name */
-th:nth-child(5), td:nth-child(5) { width: 10%; } /* Actual Sales */
-th:nth-child(6), td:nth-child(6) { width: 10%; } /* Target */
-th:nth-child(7), td:nth-child(7) { width: 10%; } /* % Ach */
-th:nth-child(8), td:nth-child(8) { width: 10%; } /* Balance To Target */
-th:nth-child(9), td:nth-child(9) { width: 10%; } /* Possible Incentives */
-th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days */
+    .filter_buttons {
+        width: 10em;
+        height: 3em;
+        border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #clearButton {
+        width: 10em;
+        height: 3em;
+        border-radius: 13px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+    }
+
+    /* Set specific column widths */
+    th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
+    th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
+    th:nth-child(3), td:nth-child(3) { width: 10%; } /* Area */
+    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Store Name */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Actual Sales */
+    th:nth-child(6), td:nth-child(6) { width: 10%; } /* Target */
+    th:nth-child(7), td:nth-child(7) { width: 10%; } /* % Ach */
+    th:nth-child(8), td:nth-child(8) { width: 10%; } /* Balance To Target */
+    th:nth-child(9), td:nth-child(9) { width: 10%; } /* Possible Incentives */
+    th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days */
 </style>
 
 <div class="wrapper">
@@ -97,9 +116,6 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
             <div class="container-fluid py-4">
                 <!-- Filters Section -->
                 <div class="card shadow-sm">
-                    <!-- <div class="md-center mb-3">
-                        <h5><i class="fas fa-filter"></i> Filter</h5>
-                    </div> -->
                     <div class="text-center md-center p-2">
                         <h5 class="mt-1 mb-1">
                             <i class="fas fa-filter"></i> 
@@ -116,7 +132,7 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                                     <label class="mt-2" for="store">Store Name</label>
                                 </div>
                                 <div class="col-md">
-                                    <input id="store" class="form-control" placeholder="Please select...">
+                                    <input type="text" id="store" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="store_id">
                                 </div>
                             </div>
@@ -125,7 +141,7 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                                     <label class="mt-2" for="area">Area</label>
                                 </div>
                                 <div class="col-md">
-                                    <input id="area" class="form-control" placeholder="Please select...">
+                                    <input type="text" id="area" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="area_id">
                                 </div>
                             </div>
@@ -161,111 +177,66 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 p-2">
-                            <label>Sort By</label>
+                        <div class="col-md-4 p-3">
+                            <label style="float: left; margin-right: 20px;">Sort By</label>
                             <div class="d-flex gap-3">
                                 <select class="form-control" id="sortBy">
                                     <option value="rank">Rank</option>
-                                    <option value="store">Store</option>
+                                    <option value="area">Area</option>
+                                    <option value="asc_names">Area Sales Coordinator</option>
+                                    <option value="actual_sales">Actual Sales Report</option>
+                                    <option value="target_sales">Target</option>
+                                    <option value="percent_ach">% Arch</option>
+                                    <option value="balance_to_target">Balance to Target</option>
+                                    <option value="target_per_remaining_days">Target per Remaining Days</option>
                                 </select>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="radio" name="sortOrder" value="asc" checked> Asc
-                                    <input type="radio" name="sortOrder" value="desc"> Desc
+                            </div>
+                            <div style="float: right;">
+                                <input type="radio" name="sortOrder" value="ASC" checked> Asc
+                                <input type="radio" name="sortOrder" value="DESC"> Desc
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <!-- Refresh Button -->
+                            <div class="row">
+                                <div class="p-2 d-flex justify-content-end">
+                                    <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="p-2 d-flex justify-content-end">
+                                    <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-2 p-2">
-                            <button type="button" id="clearButton" class="btn btn-secondary btn-sm" style="width: 90px; height: 32px;">Clear</button>
-                            <button class="btn btn-primary btn-sm ml-2" id="refreshButton" style="width: 90px; height: 32px;">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                        </div>
-                    </div>
-
-                    <!--
-                    <div class="row g-3">
-                        <div class="col-md-9">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label for="store">Store Name</label>
-                                    <input id="store" class="form-control" placeholder="Please select...">
-                                    <input type="hidden" id="store_id">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="area">Area</label>
-                                    <input id="area" class="form-control" placeholder="Please select...">
-                                    <input type="hidden" id="area_id">
-                                </div>
-                                <div class="col-md-4 d-flex gap-2">
-                                    <div>
-                                        <label for="month">Month</label>
-                                        <select class="form-control" id="month">
-                                            <option value="0">Please select..</option>
-                                            <?php
-                                                if($month){
-                                                    foreach ($month as $value) {
-                                                        echo "<option value=".$value['id'].">".$value['month']."</option>";
-                                                    }                                                
-                                                }
-                                            ?>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="year">Year</label>
-                                        <select class="form-control" id="year">
-                                            <option value="0">Please select..</option>
-                                            <?php
-                                                if($year){
-                                                    foreach ($year as $value) {
-                                                        echo "<option value=".$value['id'].">".$value['year']."</option>";
-                                                    }                                                
-                                                }
-                                            ?>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-3">
-                            <label>Sort By</label>
-                            <div class="d-flex gap-3">
-                                <select class="form-control" id="sortBy">
-                                    <option value="rank">Rank</option>
-                                    <option value="store">Store</option>
-                                </select>
-                                <div class="d-flex align-items-center gap-3">
-                                    <input type="radio" name="sortOrder" value="asc" checked> Asc
-                                    <input type="radio" name="sortOrder" value="desc"> Desc
-                                </div>
-                            </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <button type="button" id="clearButton" class="btn btn-secondary btn-sm" style="width: 90px; height: 32px;">Clear</button>
-                                <button class="btn btn-primary btn-sm ml-2" id="refreshButton" style="width: 90px; height: 32px;">
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    -->
-                
+                    </div> 
                 </div>
 
                 <!-- DataTables Section -->
                 <div class="card mt-4 p-4 shadow-sm">
-                    <div class="tbl-title-bg"><h5>OVERALL BA SALES TARGET</h5></div>
                     <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
                         <table id="info_for_asc" class="table table-bordered table-responsive">
                             <thead>
                                 <tr>
-                                    <th>Rank</th>
-                                    <th>Area</th>
-                                    <th>Area Sales Coordinator</th>
-                                    <th>Actual Sales Report</th>
-                                    <th>Target</th>
-                                    <th>% Achieved</th>
-                                    <th>Balance To Target</th>
-                                    <th>Target per Remaining days</th>
+                                    <th 
+                                        colspan="8"
+                                        style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                        class="tbl-title-header"
+                                    >
+                                        OVERALL BA SALES TARGET
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th class="tbl-title-field">Rank</th>
+                                    <th class="tbl-title-field">Area</th>
+                                    <th class="tbl-title-field">Area Sales Coordinator</th>
+                                    <th class="tbl-title-field">Actual Sales Report</th>
+                                    <th class="tbl-title-field">Target</th>
+                                    <th class="tbl-title-field">% Achieved</th>
+                                    <th class="tbl-title-field">Balance To Target</th>
+                                    <th class="tbl-title-field">Target per Remaining days</th>
 
                                 </tr>
                             </thead>
@@ -277,7 +248,7 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
                 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-info" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
                     <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
                 </div>
             </div>
@@ -304,6 +275,16 @@ th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days 
         initializeTable();
         autocomplete_field($("#store"), $("#store_id"), store_branch);
         autocomplete_field($("#area"), $("area_id"), area, "area_description");
+
+
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"]').val('');
+            $('input[type="checkbox"]').prop('checked', false);
+            $('input[name="sortOrder"][value="ASC"]').prop('checked', true);
+            $('input[name="sortOrder"][value="DESC"]').prop('checked', false);
+            $('select').prop('selectedIndex', 0);
+            $('#refreshButton').click();
+        });
 
         $(document).on('click', '#refreshButton', function () {
             if($('#area').val() == ""){
