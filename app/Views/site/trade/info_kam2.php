@@ -20,25 +20,84 @@
 
     .md-center {
         padding: 5px;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: 'Poppins', sans-serif;
         font-size: large;
-        background-color: #fdb92a;
-        color: #333333;
+        font-weight: bold;
+        color: white;
+        text-align: center;
         border: 1px solid #ffffff;
-        border-radius: 10px;
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
     }
 
     th {
         color: #fff;
         background-color: #301311 !important;
     }
-    .tbl-title-bg{
+
+    .tbl-title-bg {
         color: #fff;
         border-radius: 5px;
         background-color: #143996 !important;
+        padding: 10px;
+        text-align: center;
     }
+
     #previewButton{
-      background-color: #143996 !important;
+        color: #fff;
+        background-color: #143996 !important;
+    }
+
+
+    #dataTable4 {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    table {
+        width: 100%;
+        table-layout: fixed; /* Ensures fixed column widths */
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+        min-width: 100px; /* Prevents shrinking */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .filter_buttons {
+        width: 10em;
+        height: 3em;
+        border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #clearButton {
+        width: 10em;
+        height: 3em;
+        border-radius: 13px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
     }
 
 </style>
@@ -50,72 +109,111 @@
 
                 <!-- Filters Section -->
             <div class="card p-4 shadow-sm">
-                <div class="text-center md-center">
-                    <h5 class="mb-3"><i class="fas fa-filter"></i> Filter</h5>
+                <div class="text-center md-center p-2">
+                    <h5 class="mt-1 mb-1">
+                        <i class="fas fa-filter"></i> 
+                        <span>
+                            F I L T E R
+                        </span>
+                    </h5>
                 </div>
-                <div class="row">
-                    <!-- Left Side: Inputs -->
-                    <div class="col-md-12">
-                        <div class="row">
+                <div class="row p-4">
+                    <div class="col-md-4 column p-2 text-left">
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="brandAmbassador">Brand Ambassador</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="brandAmbassador" placeholder="Please select...">
                                 <input type="hidden" id="ba_id">
                             </div>
+                        </div>
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="storeName">Store Name</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="storeName" placeholder="Please select...">
                                 <input type="hidden" id="store_id">
                             </div>
-                            <div class="col-md-3">
-                            </div>
-                            <div class="col-md-3 position-relative p-3" style="border-radius: 7px; background-color: #edf1f1;">
-                                <label class="position-absolute" style="top: 5px; left: 10px; font-size: 12px; font-weight: bold; background-color: #edf1f1; padding: 0 5px;">Sort By</label>
-                                <div style="margin-top: 15px;">
-                                    <label for="ascName">SKU</label>
-                                    <input type="text" class="form-control" id="ascName" placeholder="ASC Name">
-                                    <input type="hidden" id="asc_id">
-                                </div>
-                                <div class="d-flex">
-                                    <input type="radio" name="sortOrder" value="asc" checked> Acsending
-                                    <input type="radio" name="sortOrder" value="desc" class="ml-3"> Descending
-                                </div>
-                            </div>                            
-
                         </div>
-
-                        <div class="row mt-3">
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="storeName2">Category</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="storeName2" placeholder="Enter store">
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 column p-2 text-left">
+                        <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="baName">Qty Scope</label>
+                            </div>
+                            <div class="col-md">
                                 <input type="text" class="form-control" id="baName" placeholder="Enter BA name">
                             </div>
-                            <div class="col-md-3 d-flex gap-2">
-                                <div style="width: 100%;">
-                                    <label for="month">Month</label>
-                                    <select class="form-control" id="month">
-                                        <option>January</option>
-                                        <option>February</option>
-                                    </select>
-                                </div>
-                                <div style="width: 70%;">
-                                    <label for="week">Week</label>
-                                    <select class="form-control" id="week">
-                                        <option>Week 1</option>
-                                        <option>Week 2</option>
-                                    </select>
-                                </div>
+                        </div>
+                        <div class="col-md p-1 row">
+                            <div class="col-md-3">
+                                <label for="month">Month</label>
                             </div>
-                             <div class="col-md-3 d-flex align-items-end">
-                                <button class="btn btn-primary btn-sm w-100" id="refreshButton">
+                            <div class="col-md">
+                                <select class="form-control" id="month">
+                                    <option>January</option>
+                                    <option>February</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md p-1 row">
+                            <div class="col-md-3">    
+                                <label for="week">Week</label>
+                            </div>
+                            <div class="col-md">
+                                <select class="form-control" id="week">
+                                    <option>Week 1</option>
+                                    <option>Week 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
+                        <div class="col-md-12 mx-auto row py-2 text-left" >
+                            <label for="ascName">SKU</label>
+                            <div class="col-md" >
+                                <input type="text" class="form-control" id="ascName" placeholder="ASC Name">
+                                    <input type="hidden" id="asc_id">
+                            </div>
+                        </div>
+                        <div class="col-md-12 mx-auto row py-2 text-center" >
+                            <div class="col-md-6 row" >
+                                <input type="radio" name="coveredASC" value="with_ba" class="col-md-2"><span class="col-md-10">Acsending</span>
+                            </div>
+                            <div class="col-md-6 row" >
+                                <input type="radio" name="coveredASC" value="without_ba" class="col-md-2"><span class="col-md-10">Descending</span>
+                            </div>
+                        </div>
+                    </div>                         
+                    <div class="col-md-2">
+                        <!-- Refresh Button -->
+                        <div class="row">
+                            <div class="p-2 d-flex justify-content-end">
+                                <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton">
                                     <i class="fas fa-sync-alt"></i> Refresh
                                 </button>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="p-2 d-flex justify-content-end">
+                                <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
+                            </div>
+                        </div>
                     </div>
+
+                </div>
              
                 </div>
             </div>
@@ -125,15 +223,23 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card p-3 shadow-sm">
-                                <div class="tbl-title-bg"><h5>SLOW MOVING SKU'S</h5></div>
                                 <table id="dataTable1" class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>SKU</th>
-                                            <th>SOH Qty</th>
-                                            <th>Qty (W1)</th>
-                                            <th>Qty (W2)</th>
-                                            <th>Qty (W3)</th>
+                                        <th 
+                                            colspan="5"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            class="tbl-title-header"
+                                        >
+                                            SLOW MOVING SKU'S
+                                        </th>
+                                    </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
+                                            <th class="tbl-title-field">SOH Qty</th>
+                                            <th class="tbl-title-field">Qty (W1)</th>
+                                            <th class="tbl-title-field">Qty (W2)</th>
+                                            <th class="tbl-title-field">Qty (W3)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -151,15 +257,21 @@
 
                         <div class="col-md-6">
                             <div class="card p-3 shadow-sm">
-                                <div class="tbl-title-bg"><h5>OVERSTOCK SKU'S</h5></div>
                                 <table id="dataTable2" class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>SKU</th>
-                                            <th>SOH Qty</th>
-                                            <th>Qty (W1)</th>
-                                            <th>Qty (W2)</th>
-                                            <th>Qty (W3)</th>
+                                            <th 
+                                                colspan="5"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="tbl-title-header"
+                                            >OVERSTOCK SKU'S</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
+                                            <th class="tbl-title-field">SOH Qty</th>
+                                            <th class="tbl-title-field">Qty (W1)</th>
+                                            <th class="tbl-title-field">Qty (W2)</th>
+                                            <th class="tbl-title-field">Qty (W3)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -177,15 +289,21 @@
 
                         <div class="col-md-6">
                             <div class="card p-3 shadow-sm">
-                                <div class="tbl-title-bg"><h5>NPD SKU'S</h5></div>
                                 <table id="dataTable3" class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>SKU</th>
-                                            <th>SOH Qty</th>
-                                            <th>Qty (W1)</th>
-                                            <th>Qty (W2)</th>
-                                            <th>Qty (W3)</th>
+                                            <th 
+                                                colspan="5"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="tbl-title-header"
+                                            >NPD SKU'S</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
+                                            <th class="tbl-title-field">SOH Qty</th>
+                                            <th class="tbl-title-field">Qty (W1)</th>
+                                            <th class="tbl-title-field">Qty (W2)</th>
+                                            <th class="tbl-title-field">Qty (W3)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -204,11 +322,17 @@
 
                         <div class="col-md-6">
                             <div class="card p-3 shadow-sm">
-                                <div class="tbl-title-bg"><h5>HERO SKU'S</h5></div>
                                 <table id="dataTable4" class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>SKU</th>
+                                            <th 
+                                                colspan="1"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="tbl-title-header"
+                                            >HERO SKU'S</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
                                         </tr>
                                     </thead>
                                     <tbody>

@@ -19,15 +19,31 @@
   }
 
     .md-center {
-        color: white;
-        font-weight: bold;
+        padding: 5px;
         font-family: 'Poppins', sans-serif;
-        font-size: 1.5rem; 
+        font-size: large;
+        font-weight: bold;
+        color: white;
         text-align: center;
-        border: none;
+        border: 1px solid #ffffff;
         border-radius: 12px;
         transition: transform 0.2s ease-in-out;
         background: linear-gradient(90deg, #fdb92a, #ff9800);
+    }
+
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
     }
 
     th {
@@ -39,28 +55,8 @@
         border-radius: 5px;
         background-color: #143996 !important;
     }
-
-    .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
-        background: linear-gradient(to right, #143996, #007bff);
-        color: white !important;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    .tbl-title-header {
-        background-color: #301311 !important;
-        color: white;
-        border-radius: 8px 8px 0px 0px !important;
-    }
-
     #previewButton{
       background-color: #143996 !important;
-    }
-
-    .card-inverse {
-        box-shadow: inset 0 0 1px rgba(0, 0, 0, 1), inset 0 1px 3px rgba(0, 0, 0, 0.2);
-        border-radius: 12px;
     }
 
     .card-title {
@@ -68,11 +64,51 @@
         font-size: 1.25rem;
         font-weight: bold;
     }
-    #refreshButton{
-        background-color: #143996 !important;
+
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
     }
-    #exportButton{
-        background-color: #339933 !important;
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+    }
+
+    /* Table Styling */
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate; /* Required for border-radius */
+        border-spacing: 0; /* Ensures borders don't separate */
+        border-radius: 12px 12px 0px 0px;
+        overflow: hidden; /* Ensures inner content respects border-radius */
+    }
+
+    .table th {
+        color: white !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
+    }
+
+    .table thead {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    .table tbody tr {
+        transition: background 0.3s ease-in-out;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(0, 123, 255, 0.1);
     }
 
     .filter_buttons {
@@ -80,6 +116,17 @@
         height: 3em;
         border-radius: 12px;
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #clearButton {
+        width: 10em;
+        height: 3em;
+        border-radius: 13px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #exportButton{
+        background-color: #339933 !important;
     }
     label {
         float: left;
@@ -94,17 +141,18 @@
     <div class="content-wrapper">
         <div class="content">
             <div class="container-fluid py-4">
+
                 <!-- Filters Section -->
-                <div class="card shadow-lg">
-                    <div class="text-center md-center p-2">
-                        <h5 class="mt-1 mb-1">
-                            <i class="fas fa-filter"></i> 
-                            <span>
-                                F I L T E R
-                            </span>
-                        </h5>
-                    </div>
-                    <div class="row p-4" >
+            <div class="card shadow-lg">
+                <div class="text-center md-center p-2">
+                    <h5 class="mt-1 mb-1">
+                        <i class="fas fa-filter"></i> 
+                        <span>
+                            F I L T E R
+                        </span>
+                    </h5>
+                </div>
+                    <div class="row p-4">
                         <div class="col-md-6 column text-left" >
                             <div class="col-md-12 mx-auto row py-2" >
                                 <label for="ascName" class="col-md-4 my-auto" >ASC Name</label>
@@ -170,151 +218,172 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-2 column" >
-                            <button class="btn btn-primary btn-sm col-md-12 filter_buttons" id="refreshButton">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                            <button type="button" id="clearButton" class="btn btn-secondary btn-sm mt-3 col-md-12 filter_buttons">Clear</button>
+                        <div class="col-md-2">
+                            <!-- Refresh Button -->
+                            <div class="row">
+                                <div class="p-3 d-flex justify-content-end">
+                                    <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="p-3 d-flex justify-content-end">
+                                    <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+            </div>
+
 
                 <!-- DataTables Section -->
-                <div class="card p-4 shadow-lg" id="data-graph">
-                    <div class="text-center">
-                        <h5 class="mb-3"><i class="fas fa-chart-bar"></i> ASC Performance</h5>
-                    </div>
-
-                    <!-- Chart Container (Will be dynamically filled) -->
-                    <div class="mb-3" style="overflow-x: auto; padding: 10px; border-radius: 12px; border: 1px solid #dee2e6;">
-                        <div id="chartContainer" class="d-flex flex-row"></div>
-                    </div>
-                    <!-- Data Table -->
-                    <div class="table-responsive mt-4">
-                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
-                        <table class="table table-bordered text-center">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th></th>
-                                    <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
-                                    <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
-                                </tr>
-                            </thead>
-                            <tbody class="asc-dashboard-body">
-                            </tbody>
-                        </table>
-                        </div>
-                    </div>
+            <div class="card p-4 shadow-sm" id="data-graph">
+                <div class="text-center">
+                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> ASC Performance</h5>
                 </div>
 
-                <div id="table-skus">
-                    <div class="row mt-12" style="overflow-x: auto; padding: 0px;">
-                        <div class="d-flex flex-row">
-                            <div class="col-md-6">
-                                <div class="card p-6 shadow-lg">
-                                    <div class="tbl-title-bg tbl-title-header p-2"><h5>SLOW MOVING SKU'S</h5></div>
-                                    <table id="dataTable1" class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th class="tbl-title-field">SKU</th>
-                                                <th class="tbl-title-field">SOH Qty</th>
-                                                <th class="tbl-title-field">Qty (W1)</th>
-                                                <th class="tbl-title-field">Qty (W2)</th>
-                                                <th class="tbl-title-field">Qty (W3)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>John Doe</td>
-                                                <td>Store A</td>
-                                                <td>John Doe</td>
-                                                <td>Store A</td>
-                                                <td>Store A</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="card p-6 shadow-lg">
-                                    <div class="tbl-title-bg tbl-title-header p-2"><h5>OVERSTOCK SKU'S</h5></div>
-                                    <table id="dataTable2" class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th class="tbl-title-field">SKU</th>
-                                                <th class="tbl-title-field">SOH Qty</th>
-                                                <th class="tbl-title-field">Qty (W1)</th>
-                                                <th class="tbl-title-field">Qty (W2)</th>
-                                                <th class="tbl-title-field">Qty (W3)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Jane Smith</td>
-                                                <td>Store B</td>
-                                                <td>Jane Smith</td>
-                                                <td>Store B</td>
-                                                <td>Jane Smith</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="card p-6 shadow-lg">
-                                    <div class="tbl-title-bg tbl-title-header p-2"><h5>NPD SKU'S</h5></div>
-                                    <table id="dataTable3" class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th class="tbl-title-field">SKU</th>
-                                                <th class="tbl-title-field">SOH Qty</th>
-                                                <th class="tbl-title-field">Qty (W1)</th>
-                                                <th class="tbl-title-field">Qty (W2)</th>
-                                                <th class="tbl-title-field">Qty (W3)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Mike Johnson</td>
-                                                <td>Store C</td>
-                                                <td>Mike Johnson</td>
-                                                <td>Store C</td>
-                                                <td>Store C</td>
-
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="card p-6 shadow-lg">
-                                    <div class="tbl-title-bg tbl-title-header p-2"><h5>HERO SKU'S</h5></div>
-                                    <table id="dataTable4" class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th class="tbl-title-field">SKU</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Store D</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                <div class="mb-3" style="overflow-x: auto; padding: 0px;">
+                    <div id="chartContainer" class="d-flex flex-row"></div>
+                </div>
+                <!-- Data Table -->
+                <div class="table-responsive mt-4">
+                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                    <table class="table table-bordered text-center">
+                        <thead class="thead-light">
+                            <tr>
+                                <th class="tbl-title-field"></th>
+                                <th class="tbl-title-field">Jan</th><th class="tbl-title-field">Feb</th><th class="tbl-title-field">Mar</th><th class="tbl-title-field">Apr</th><th class="tbl-title-field">May</th><th class="tbl-title-field">Jun</th>
+                                <th class="tbl-title-field">Jul</th><th class="tbl-title-field">Aug</th><th class="tbl-title-field">Sep</th><th class="tbl-title-field">Oct</th><th class="tbl-title-field">Nov</th><th class="tbl-title-field">Dec</th>
+                            </tr>
+                        </thead>
+                        <tbody class="asc-dashboard-body">
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+            <div id="table-skus" style="overflow-x: auto; padding: 0px;">
+                <div class="row mt-12">
+                    <div class="d-flex flex-row">
+                        <div class="col-md-6">
+                            <div class="card p-6 shadow-sm">
+                                <table id="slowMovingTable" class="table table-bordered" style="width: 100%">
+                                    <thead>
+                                        <tr>
+                                            <th 
+                                                colspan="5"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="tbl-title-header"
+                                            >
+                                                SLOW MOVING SKU'S
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
+                                            <th class="tbl-title-field">SOH Qty</th>
+                                            <th class="tbl-title-field">Qty (W1)</th>
+                                            <th class="tbl-title-field">Qty (W2)</th>
+                                            <th class="tbl-title-field">Qty (W3)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5">No data available</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
+                        <div class="col-md-6">
+                            <div class="card p-6 shadow-sm">
+                                <table id="overstockTable" class="table table-bordered" style="width: 100%">
+                                    <thead>
+                                        <tr>
+                                            <th 
+                                                colspan="5"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="tbl-title-header"
+                                            >OVERSTOCK SKU'S</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
+                                            <th class="tbl-title-field">SOH Qty</th>
+                                            <th class="tbl-title-field">Qty (W1)</th>
+                                            <th class="tbl-title-field">Qty (W2)</th>
+                                            <th class="tbl-title-field">Qty (W3)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5">No data available</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card p-6 shadow-sm">
+                                <table id="npdTable" class="table table-bordered" style="width: 100%">
+                                    <thead>
+                                        <tr>
+                                            <th 
+                                                colspan="5"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="tbl-title-header"
+                                            >NPD SKU'S</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
+                                            <th class="tbl-title-field">SOH Qty</th>
+                                            <th class="tbl-title-field">Qty (W1)</th>
+                                            <th class="tbl-title-field">Qty (W2)</th>
+                                            <th class="tbl-title-field">Qty (W3)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5">No data available</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card p-6 shadow-sm">
+                                <table id="heroTable" class="table table-bordered" style="width: 100%">
+                                    <thead>
+                                        <tr>
+                                            <th 
+                                                colspan="1"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="tbl-title-header"
+                                            >HERO SKU'S</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field">SKU</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5">No data available</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
-                </div>
+            </div>
+            <!-- Buttons -->
+            <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
+                <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
+            </div>
             </div>
         </div>
     </div>
@@ -330,193 +399,235 @@
 
 <script>
     var base_url = "<?= base_url(); ?>";
-$(document).ready(function () {
-   // let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
+    $(document).ready(function () {
+       // let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
 
-    let asc = <?= json_encode($asc); ?>;
-    let area = <?= json_encode($area); ?>;
-    let brand = <?= json_encode($brand); ?>;
-    let store_branch = <?= json_encode($store_branch); ?>;
-    let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
+        let asc = <?= json_encode($asc); ?>;
+        let area = <?= json_encode($area); ?>;
+        let brand = <?= json_encode($brand); ?>;
+        let store_branch = <?= json_encode($store_branch); ?>;
+        let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
 
-    autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
-    autocomplete_field($("#area"), $("#area_id"), area, "area_description");
-    autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
-    autocomplete_field($("#storeName"), $("#store_id"), store_branch);
-    autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
+        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
+        autocomplete_field($("#storeName"), $("#store_id"), store_branch);
+        autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
 
-    // tables.forEach(id => {
-    //     $(id).DataTable({
-    //         paging: true,
-    //         searching: false,
-    //         ordering: true,
-    //         info: true,
-    //         lengthChange: false     // Hide "Show Entries" dropdown
-    //     });
-    // });
-    renderCharts(); // Initial render
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"], input[type="number"], input[type="date"]').val('');
+            $('input[type="radio"], input[type="checkbox"]').prop('checked', false);
 
-    $(document).on('click', '#clearButton', function () {
-        $('input[type="text"], input[type="number"], input[type="date"]').val('');
-        $('input[type="radio"], input[type="checkbox"]').prop('checked', false);
-
-        $('select').prop('selectedIndex', 0);
-        $('#refreshButton').click();
-    });
-
-    $(document).on('click', '#refreshButton', function () {
-        let selectedCoveredASC = $('input[name="coveredASC"]:checked').val();
-        if($('#ascName').val() == ""){
-            $('#asc_id').val('');
-        }
-        if($('#area').val() == ""){
-            $('#area_id').val('');
-        }
-        if($('#brand').val() == ""){
-            $('#brand_id').val('');
-        }
-        if($('#storeName').val() == ""){
-            $('#store_id').val('');
-        }
-        if($('#ba').val() == ""){
-            $('#ba_id').val('');
-        }
-        console.log(selectedCoveredASC);
-        if(selectedCoveredASC){
-            console.log('asdasd');
-            $('#data-graph').hide();
-            $('#table-skus').show();
-        }else{
-            $('#data-graph').show();
-            $('#table-skus').hide();
-            fetchData();
-            renderCharts();
-        }
-
-    });
-    fetchData();
-});
-
-// Define months
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-const dataValues = {
-    salesReport: [],
-    targetSales: [],
-    PerAchieved: []
-};
-
-let chartInstances = []; // Store chart instances
-
-function renderCharts() {
-    // Destroy previous charts
-    chartInstances.forEach(chart => chart.destroy());
-    chartInstances = [];
-
-    // Clear and recreate chart container
-    $('#chartContainer').html(''); // This ensures no duplication
-
-    // Generate new charts
-    months.forEach((month, index) => {
-        // Append new chart container
-        let chartHTML = `
-            <div class="col-md-3">
-                <div class="card-inverse p-2 mt-3">
-                    <h6 class="text-center card-title mb-2">${month}</h6>
-                    <canvas id="chart${index}"></canvas>
-                </div>
-            </div>
-        `;
-        $('#chartContainer').append(chartHTML); // Append new chart div
-
-        // Get canvas context
-        let ctx = document.getElementById(`chart${index}`).getContext('2d');
-
-        // Create new chart
-        let newChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ["Sales Report", "Target Sales", "% Achieved"],
-                datasets: [{
-                    label: month,
-                    backgroundColor: ["#1439a6", "#990000", "#339933"],
-                    data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
-                }]
-            },
-            options: {
-                responsive: true,
-                animation: true, // Disable animation
-                plugins: {
-                    legend: { display: false } // Hide legend if needed
-                },
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
+            $('select').prop('selectedIndex', 0);
+            $('#refreshButton').click();
         });
 
-        // Store chart instance
-        chartInstances.push(newChart);
+        $(document).on('click', '#refreshButton', function () {
+            let selectedCoveredASC = $('input[name="coveredASC"]:checked').val();
+            if($('#ascName').val() == ""){
+                $('#asc_id').val('');
+            }
+            if($('#area').val() == ""){
+                $('#area_id').val('');
+            }
+            if($('#brand').val() == ""){
+                $('#brand_id').val('');
+            }
+            if($('#storeName').val() == ""){
+                $('#store_id').val('');
+            }
+            if($('#ba').val() == ""){
+                $('#ba_id').val('');
+            }
+
+            if(selectedCoveredASC){
+                $('#data-graph').hide();
+                $('#table-skus').show();
+                    fetchDataTable();
+            }else{
+                $('#data-graph').show();
+                $('#table-skus').hide();
+                fetchData();
+            }
+
+
+        });
+        fetchData();
     });
-}
 
-function fetchData(){
-    let selectedASC = $('#asc_id').val();
-    let selectedArea = $('#area_id').val();
-    let selectedBrand = $('#brand_id').val();
-    let selectedYear = $('#year').val();
-    let selectedStore = $('#store_id').val();
-    let selectedBa = $('#ba_id').val();
-    //console.log(selectedASC, 'selectedASC', selectedArea, 'selectedArea', selectedBrand, 'selectedBrand', selectedYear, 'selectedYear', selectedStore, 'selectedStore', selectedBa, 'selectedBa');
+    // Define months
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-    url = base_url + 'trade-dashboard/trade-asc-dashboard-one';
-    var data = {
-        asc : selectedASC,
-        brand : selectedBrand,
-        year : selectedYear,
-        store : selectedStore,
-        ba : selectedBa,
-        area : selectedArea
-    }
-    aJax.post(url, data, function (result) {
-        var html = '';
-        if (result) {
-            let salesData = result.data[0]; // Assuming response has an array
+    const dataValues = {
+        salesReport: [],
+        targetSales: [],
+        PerAchieved: []
+    };
 
-            // Update dataValues dynamically
-            dataValues.salesReport = [
-                salesData.amount_january, salesData.amount_february, salesData.amount_march,
-                salesData.amount_april, salesData.amount_may, salesData.amount_june,
-                salesData.amount_july, salesData.amount_august, salesData.amount_september,
-                salesData.amount_october, salesData.amount_november, salesData.amount_december
-            ];
-            
-            dataValues.targetSales = [
-                salesData.target_sales_january, salesData.target_sales_february, salesData.target_sales_march,
-                salesData.target_sales_april, salesData.target_sales_may, salesData.target_sales_june,
-                salesData.target_sales_july, salesData.target_sales_august, salesData.target_sales_september,
-                salesData.target_sales_october, salesData.target_sales_november, salesData.target_sales_december
-            ];
-            
-            dataValues.PerAchieved = [
-                salesData.achieved_january, salesData.achieved_february, salesData.achieved_march,
-                salesData.achieved_april, salesData.achieved_may, salesData.achieved_june,
-                salesData.achieved_july, salesData.achieved_august, salesData.achieved_september,
-                salesData.achieved_october, salesData.achieved_november, salesData.achieved_december
-            ];
+    let chartInstances = [];
 
-            $.each(result.data, function(x,y) {
-                html += '<tr><td style="background-color: #808080;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>'+(y.net_sales_january || "0.00")+'</td><td>'+(y.net_sales_february || "0.00")+'</td><td>'+(y.net_sales_march || "0.00")+'</td><td>'+(y.net_sales_april || "0.00")+'</td><td>'+(y.net_sales_may || "0.00")+'</td><td>'+(y.net_sales_june || "0.00")+'</td><td>'+(y.net_sales_july || "0.00")+'</td><td>'+(y.net_sales_august || "0.00")+'</td><td>'+(y.net_sales_september || "0.00")+'</td><td>'+(y.net_sales_october || "0.00")+'</td><td>'+(y.net_sales_november || "0.00")+'</td><td>'+(y.net_sales_december || "0.00")+'</td></tr>';
-                html += '<tr><td style="background-color: #ADD8E6;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>'+(y.amount_january || "0.00")+'</td><td>'+(y.amount_february || "0.00")+'</td><td>'+(y.amount_march || "0.00")+'</td><td>'+(y.amount_april || "0.00")+'</td><td>'+(y.amount_may || "0.00")+'</td><td>'+(y.amount_june || "0.00")+'</td><td>'+(y.amount_july || "0.00")+'</td><td>'+(y.amount_august || "0.00")+'</td><td>'+(y.amount_september || "0.00")+'</td><td>'+(y.amount_october || "0.00")+'</td><td>'+(y.amount_november || "0.00")+'</td><td>'+(y.amount_december || "0.00")+'</td></tr>';
-                html += '<tr><td style="background-color: #FFC0CB;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Target Sales</td><td>'+(y.target_sales_january || "0.00")+'</td><td>'+(y.target_sales_february || "0.00")+'</td><td>'+(y.target_sales_march || "0.00")+'</td><td>'+(y.target_sales_april || "0.00")+'</td><td>'+(y.target_sales_may || "0.00")+'</td><td>'+(y.target_sales_june || "0.00")+'</td><td>'+(y.target_sales_july || "0.00")+'</td><td>'+(y.target_sales_august || "0.00")+'</td><td>'+(y.target_sales_september || "0.00")+'</td><td>'+(y.target_sales_october || "0.00")+'</td><td>'+(y.target_sales_november || "0.00")+'</td><td>'+(y.target_sales_december || "0.00")+'</td></tr>';
-                html += '<tr><td style="background-color: #808080;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Growth</td><td>'+(y.growth_january || "0.00")+'</td><td>'+(y.growth_february || "0.00")+'</td><td>'+(y.growth_march || "0.00")+'</td><td>'+(y.growth_april || "0.00")+'</td><td>'+(y.growth_may || "0.00")+'</td><td>'+(y.growth_june || "0.00")+'</td><td>'+(y.growth_july || "0.00")+'</td><td>'+(y.growth_august || "0.00")+'</td><td>'+(y.growth_september || "0.00")+'</td><td>'+(y.growth_october || "0.00")+'</td><td>'+(y.growth_november || "0.00")+'</td><td>'+(y.growth_december || "0.00")+'</td></tr>';
-                html += '<tr><td style="background-color: #90EE90;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Achieved</td><td>'+(y.achieved_january || "0.00")+'</td><td>'+(y.achieved_february || "0.00")+'</td><td>'+(y.achieved_march || "0.00")+'</td><td>'+(y.achieved_april || "0.00")+'</td><td>'+(y.achieved_may || "0.00")+'</td><td>'+(y.achieved_june || "0.00")+'</td><td>'+(y.achieved_july || "0.00")+'</td><td>'+(y.achieved_august || "0.00")+'</td><td>'+(y.achieved_september || "0.00")+'</td><td>'+(y.achieved_october || "0.00")+'</td><td>'+(y.achieved_november || "0.00")+'</td><td>'+(y.achieved_december || "0.00")+'</td></tr>';
+    function renderCharts() {
+        chartInstances.forEach(chart => chart.destroy());
+        chartInstances = [];
+        $('#chartContainer').html('');
 
+        months.forEach((month, index) => {
+            let chartHTML = `
+                <div class="col-md-3 mb-4">
+                    <div class="card p-2">
+                        <h6 class="text-center card-title">${month}</h6>
+                        <canvas id="chart${index}"></canvas>
+                    </div>
+                </div>
+            `;
+            $('#chartContainer').append(chartHTML);
+            let ctx = document.getElementById(`chart${index}`).getContext('2d');
+
+            let newChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ["Sales Report", "Target Sales", "% Achieved"],
+                    datasets: [{
+                        label: month,
+                        backgroundColor: ["#ffc107", "#990000", "#339933"],
+                        data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: true,
+                    plugins: {
+                        legend: { display: false } 
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
             });
+            chartInstances.push(newChart);
+        });
+    }
+
+    function fetchData(){
+
+        let selectedASC = $('#asc_id').val();
+        let selectedArea = $('#area_id').val();
+        let selectedBrand = $('#brand_id').val();
+        let selectedYear = $('#year').val();
+        let selectedStore = $('#store_id').val();
+        let selectedBa = $('#ba_id').val();
+        
+        url = base_url + 'trade-dashboard/trade-asc-dashboard-one';
+        var data = {
+            asc : selectedASC,
+            brand : selectedBrand,
+            year : selectedYear,
+            store : selectedStore,
+            ba : selectedBa,
+            area : selectedArea
         }
-        $('.asc-dashboard-body').html(html);
-        renderCharts();
-    });
-}
+        aJax.post(url, data, function (result) {
+            var html = '';
+            if (result) {
+                let salesData = result.data[0];
+
+                dataValues.salesReport = [
+                    salesData.amount_january, salesData.amount_february, salesData.amount_march,
+                    salesData.amount_april, salesData.amount_may, salesData.amount_june,
+                    salesData.amount_july, salesData.amount_august, salesData.amount_september,
+                    salesData.amount_october, salesData.amount_november, salesData.amount_december
+                ];
+                
+                dataValues.targetSales = [
+                    salesData.target_sales_january, salesData.target_sales_february, salesData.target_sales_march,
+                    salesData.target_sales_april, salesData.target_sales_may, salesData.target_sales_june,
+                    salesData.target_sales_july, salesData.target_sales_august, salesData.target_sales_september,
+                    salesData.target_sales_october, salesData.target_sales_november, salesData.target_sales_december
+                ];
+                
+                dataValues.PerAchieved = [
+                    salesData.achieved_january, salesData.achieved_february, salesData.achieved_march,
+                    salesData.achieved_april, salesData.achieved_may, salesData.achieved_june,
+                    salesData.achieved_july, salesData.achieved_august, salesData.achieved_september,
+                    salesData.achieved_october, salesData.achieved_november, salesData.achieved_december
+                ];
+
+                $.each(result.data, function(x,y) {
+                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>'+(y.net_sales_january || "0.00")+'</td><td>'+(y.net_sales_february || "0.00")+'</td><td>'+(y.net_sales_march || "0.00")+'</td><td>'+(y.net_sales_april || "0.00")+'</td><td>'+(y.net_sales_may || "0.00")+'</td><td>'+(y.net_sales_june || "0.00")+'</td><td>'+(y.net_sales_july || "0.00")+'</td><td>'+(y.net_sales_august || "0.00")+'</td><td>'+(y.net_sales_september || "0.00")+'</td><td>'+(y.net_sales_october || "0.00")+'</td><td>'+(y.net_sales_november || "0.00")+'</td><td>'+(y.net_sales_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #ffc107;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>'+(y.amount_january || "0.00")+'</td><td>'+(y.amount_february || "0.00")+'</td><td>'+(y.amount_march || "0.00")+'</td><td>'+(y.amount_april || "0.00")+'</td><td>'+(y.amount_may || "0.00")+'</td><td>'+(y.amount_june || "0.00")+'</td><td>'+(y.amount_july || "0.00")+'</td><td>'+(y.amount_august || "0.00")+'</td><td>'+(y.amount_september || "0.00")+'</td><td>'+(y.amount_october || "0.00")+'</td><td>'+(y.amount_november || "0.00")+'</td><td>'+(y.amount_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #990000;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Target Sales</td><td>'+(y.target_sales_january || "0.00")+'</td><td>'+(y.target_sales_february || "0.00")+'</td><td>'+(y.target_sales_march || "0.00")+'</td><td>'+(y.target_sales_april || "0.00")+'</td><td>'+(y.target_sales_may || "0.00")+'</td><td>'+(y.target_sales_june || "0.00")+'</td><td>'+(y.target_sales_july || "0.00")+'</td><td>'+(y.target_sales_august || "0.00")+'</td><td>'+(y.target_sales_september || "0.00")+'</td><td>'+(y.target_sales_october || "0.00")+'</td><td>'+(y.target_sales_november || "0.00")+'</td><td>'+(y.target_sales_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Growth</td><td>'+(y.growth_january || "0.00")+'</td><td>'+(y.growth_february || "0.00")+'</td><td>'+(y.growth_march || "0.00")+'</td><td>'+(y.growth_april || "0.00")+'</td><td>'+(y.growth_may || "0.00")+'</td><td>'+(y.growth_june || "0.00")+'</td><td>'+(y.growth_july || "0.00")+'</td><td>'+(y.growth_august || "0.00")+'</td><td>'+(y.growth_september || "0.00")+'</td><td>'+(y.growth_october || "0.00")+'</td><td>'+(y.growth_november || "0.00")+'</td><td>'+(y.growth_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #339933;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Achieved</td><td>'+(y.achieved_january || "0.00")+'</td><td>'+(y.achieved_february || "0.00")+'</td><td>'+(y.achieved_march || "0.00")+'</td><td>'+(y.achieved_april || "0.00")+'</td><td>'+(y.achieved_may || "0.00")+'</td><td>'+(y.achieved_june || "0.00")+'</td><td>'+(y.achieved_july || "0.00")+'</td><td>'+(y.achieved_august || "0.00")+'</td><td>'+(y.achieved_september || "0.00")+'</td><td>'+(y.achieved_october || "0.00")+'</td><td>'+(y.achieved_november || "0.00")+'</td><td>'+(y.achieved_december || "0.00")+'</td></tr>';
+
+                });
+            }
+            $('.asc-dashboard-body').html(html);
+            renderCharts();
+        });
+    }
+
+    function fetchDataTable() {
+        let selectedASC = $('#ascName').val();
+        let selectedArea = $('#area').val();
+        let selectedBrand = $('#brand').val();
+        let selectedYear = $('#year').val();
+        let selectedStore = $('#store_id').val();
+        let selectedBA = $('#ba').val();
+        let withBA = $('input[name="coveredASC"]:checked').val();
+
+        let tables = [
+            { id: "#slowMovingTable", type: "slowMoving" },
+            { id: "#overstockTable", type: "overStock" },
+            { id: "#npdTable", type: "npd" },
+            { id: "#heroTable", type: "hero" }
+        ];
+
+        tables.forEach(table => {
+            initializeTable(table.id, table.type, selectedASC, selectedArea, selectedStore, selectedBrand, selectedBA, selectedYear, withBA);
+        });
+    }
+
+    function initializeTable(tableId, type, selectedASC, selectedArea, selectedStore, selectedBrand, selectedBA, selectedYear, withBA) {
+
+        $(tableId).DataTable({
+            destroy: true,
+            ajax: {
+                url: base_url + 'trade-dashboard/trade-asc-dashboard-one-tables',
+                type: 'POST',
+                data: function (d) {
+
+                    d.asc = selectedASC === "0" ? null : selectedASC;
+                    d.area = selectedArea === "0" ? null : selectedArea;
+                    d.brand = selectedBrand === "0" ? null : selectedBrand;
+                    d.store = selectedStore === "0" ? null : selectedStore;
+                    d.ba = selectedBA === "0" ? null : selectedBA;
+                    d.year = selectedYear === "0" ? null : selectedYear;
+                    d.withba = withBA;
+                    d.type = type;
+                    d.limit = d.length;
+                    d.offset = d.start;
+                },
+                dataSrc: function(json) {
+                    console.log(json);
+                    return json.data.length ? json.data : [];
+                }
+            },
+            columns: [
+                { data: 'item_name' },
+                type !== 'hero' ? { data: 'sum_total_qty' } : null,
+                type !== 'hero' ? { data: 'total_on_hand' } : null,
+                type !== 'hero' ? { data: 'total_on_hand' } : null,
+                type !== 'hero' ? { data: 'total_on_hand' } : null
+            ].filter(Boolean),
+            pagingType: "full_numbers",
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            colReorder: true,
+            lengthChange: false
+        });
+    }
+
 
 </script>

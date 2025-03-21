@@ -150,23 +150,8 @@ class TradeDashboard extends BaseController
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -188,23 +173,8 @@ class TradeDashboard extends BaseController
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
-			// "assets/js/jquery-3.7.1.min.js",
-			// "assets/js/moment.min.js",
-			// "assets/js/jquery.tablesorter.min.js",
-			// "assets/js/daterangepicker.min.js",
-			// "assets/js/bootstrap.min.js",
-			// "assets/site/js/custom.js",
-			// "assets/site/js/charts.js"
                     );
         $data['css'] = array(
-        	// "assets/css/bootstrap.min.css",
-			// "assets/site/css/dashboard/style-common.css",
-			// "assets/site/css/dashboard/style-header.css",
-			// "assets/site/css/all.min.css",
-			// "assets/site/css/css.css",
-			//"assets/site/css/dashboard/style-footer.css",
-			//"assets/site/css/dashboard/dashboard.css"
-			//"assets//css/daterangepicker.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -427,8 +397,6 @@ class TradeDashboard extends BaseController
 	    	$targetYear = $actual_year[0]['id'];
 	    }
 
-
-
 	    if(empty($area)){
 	    	$area = null;
 	    }
@@ -444,20 +412,17 @@ class TradeDashboard extends BaseController
 		    'brand_id' => $brand,
 		    'year_val' => $targetYear
 		];
-
 	    $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
 	    return $this->response->setJSON([
 	        'data' => $data['data'],
 	    ]);
 	}
 
-	public function trade_asc_dashboard_one_tables()
+	public function trade_overall_asc_sales_report()
 	{	
 	    $area = $this->request->getPost('area');
 	    $asc = $this->request->getPost('asc');
 	    $brand = $this->request->getPost('brand');
-	    $ba = $this->request->getPost('ba');
-	    $store = $this->request->getPost('store');
 	    $year = $this->request->getPost('year');
 
 	    $date = null; 
@@ -473,8 +438,6 @@ class TradeDashboard extends BaseController
 	    	$targetYear = $actual_year[0]['id'];
 	    }
 
-
-
 	    if(empty($area)){
 	    	$area = null;
 	    }
@@ -484,20 +447,93 @@ class TradeDashboard extends BaseController
 	    $filters = [
 		    'year' => $selected_year, 
 		    'asc_id' => $asc,    
-		    'store_id' => $store,
 		    'area_id' => $area,
-		    'ba_id' => $ba,
 		    'brand_id' => $brand,
 		    'year_val' => $targetYear
 		];
+	    $data = $this->Dashboard_model->overallAscSalesReport($filters);
+	    return $this->response->setJSON([
+	        'data' => $data['data'],
+	    ]);
+	}
 
-	    $results = $this->Dashboard_model->asctest2(1, 1, 30, null, null, null, 3, 10, 0);
-	    echo "<pre>";
-	    print_r($results);
-	    die();
-	    // return $this->response->setJSON([
-	    //     'data' => $data['data'],
-	    // ]);
+	public function trade_asc_dashboard_one_tables()
+	{	
+	    $area = $this->request->getPost('area');
+	    $asc = $this->request->getPost('asc');
+	    $brand = $this->request->getPost('brand');
+	    $ba = $this->request->getPost('ba');
+	    $store = $this->request->getPost('store');
+	    $year = $this->request->getPost('year');
+	    $type = $this->request->getPost('type');
+	    $withba = $this->request->getPost('withba');
+
+
+	    $date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $targetYear = null;
+	    $date = null;
+	    if($year){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
+	    if(empty($area)){
+	    	$area = null;
+	    }
+	    if(empty($store)){
+	    	$store = null;
+	    }
+	    if(empty($ba)){
+	    	$ba = null;
+	    }
+	    if(empty($year)){
+	    	$year = null;
+	    }
+	    if(empty($area)){
+	    	$area = null;
+	    }
+	    if($withba == 'with_ba'){
+	    	$withba  = true;
+	    }else{
+	    	$withba = false;
+	    }
+
+		$latest_vmi_data = $this->Dashboard_model->getLatestVmi($year);
+		$month = null;
+		if($latest_vmi_data){
+			$month = $latest_vmi_data['month_id'];
+			$year = $latest_vmi_data['year_id'];
+		}
+		if(empty($month)){
+	    	$month = null;
+	    }
+
+	    switch ($type) {
+	        case 'slowMoving':
+	           $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 20, 30, $brand, $ba, $store, 10, 0, $withba);
+	            break;
+	        case 'overStock':
+	            $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 30, null, $brand, $ba, $store, 10, 0, $withba);
+	            break;
+	        case 'npd':
+	           $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $brand, $ba, $store, 10, 0, 'npd', $withba);
+	            break;
+	        case 'hero':
+	            $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $brand, $ba, $store, 10, 0, 'hero', $withba);
+	            break;
+	        default:
+	        	$data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 20, 30, $brand, $ba, $store, 10, 0);
+	    }
+	    return $this->response->setJSON([
+	        'draw' => intval($this->request->getVar('draw')),
+	        'recordsTotal' => $data['total_records'],
+	        'recordsFiltered' => $data['total_records'],
+	        'data' => $data['data'],
+	    ]);	
 	}
 
 	private function getDaysInMonth($month, $year) {

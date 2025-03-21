@@ -25,7 +25,10 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');
     $routes->post('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');
     $routes->get('trade-asc-dashboard-one-tables', 'TradeDashboard::trade_asc_dashboard_one_tables');
-    
+    $routes->post('trade-asc-dashboard-one-tables', 'TradeDashboard::trade_asc_dashboard_one_tables');
+    $routes->get('trade-overall-asc-sales-report', 'TradeDashboard::trade_overall_asc_sales_report');
+    $routes->post('trade-overall-asc-sales-report', 'TradeDashboard::trade_overall_asc_sales_report');
+    //trade_overall_asc_sales_report
 });
 
 
