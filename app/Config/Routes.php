@@ -126,6 +126,10 @@ $routes->group('cms/', static function ($routes) {
     });
     
     $routes->get('team', 'Cms\Team::index');
+    
+    $routes->group('newfile', static function ($routes) {
+        $routes->get('/', 'Cms\Newfile::index');
+    });
 
     $routes->get('store-branch', 'Cms\Store_Branch::index');
 

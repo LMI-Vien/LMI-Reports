@@ -46,6 +46,38 @@
         background-color: #143996 !important;
     }
 
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px ;
+        color: #fff;
+        border-radius: 5px;
+        background-color: #301311 ;
+        padding: 10px;
+        text-align: center;
+    }
+    .tbl-title-field {
+        background: linear-gradient(to right, #143996, #007bff);
+        color: #fff;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .filter-button {
+        width: 10em;
+        height: 3em;
+        border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #exportButton {
+        color: white;
+    }
+
+    #previewButton{
+        color: #fff;
+        background-color: #143996 !important;
+    }
 
     #dataTable4 {
         table-layout: fixed;
@@ -86,7 +118,7 @@
     .tbl-title-field {
         /* background: linear-gradient(to right, #007bff, #143996); */
         background: linear-gradient(to right, #143996, #007bff);
-        color: black !important;
+        color: white !important;
         text-align: center;
         padding: 10px;
         font-size: 18px;
@@ -177,10 +209,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 p-3">
-                            <label style="float: left; margin-right: 20px;">Sort By</label>
-                            <div class="d-flex gap-3">
-                                <select class="form-control" id="sortBy">
+                        <div class="col-md-4 p-2 text-left" style="border: #dee2e6, solid, 1px; border-radius: 12px;">
+                            <label class="p-2">Sort By</label>
+                            <div class="column">
+                                <select class="form-control col-md" id="sortBy">
                                     <option value="rank">Rank</option>
                                     <option value="area">Area</option>
                                     <option value="asc_names">Area Sales Coordinator</option>
@@ -190,28 +222,23 @@
                                     <option value="balance_to_target">Balance to Target</option>
                                     <option value="target_per_remaining_days">Target per Remaining Days</option>
                                 </select>
-                            </div>
-                            <div style="float: right;">
-                                <input type="radio" name="sortOrder" value="ASC" checked> Asc
-                                <input type="radio" name="sortOrder" value="DESC"> Desc
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <!-- Refresh Button -->
-                            <div class="row">
-                                <div class="p-2 d-flex justify-content-end">
-                                    <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton">
-                                        <i class="fas fa-sync-alt"></i> Refresh
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="p-2 d-flex justify-content-end">
-                                    <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
+                                <div class="col-md mt-3">
+                                    <input type="radio" name="sortOrder" value="asc" checked> Asc
+                                    <input type="radio" name="sortOrder" value="desc"> Desc
                                 </div>
                             </div>
                         </div>
-                    </div> 
+                        <div class="col-md-2 p-2 column">
+                            <div class="p-2 d-flex justify-content-end">
+                                <button class="btn btn-primary btn-sm p-2 filter-button" id="refreshButton">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            <div class="p-2 d-flex justify-content-end">
+                                <button type="button" id="clearButton" class="btn btn-secondary btn-sm p-2 filter-button">Clear</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- DataTables Section -->
