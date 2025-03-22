@@ -37,6 +37,7 @@
                     <tbody class="table_body word_break"></tbody>
                 </table>
             </div>
+            <div class="list_pagination"></div>
         </div>
     </div>
 </div>
@@ -115,7 +116,7 @@
 <script>
     var params = "<?=$uri->getSegment(4);?>";
     var query = `a.status >= 0 and b.year = ${params}`;
-    var limit = 0; 
+    var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
 
@@ -123,7 +124,8 @@
         $("#sell_out_title").html(addNbsp("VIEW TARGET SALES PER STORE"));
         $("#year").val(params)
 
-        get_data(query)
+        get_data(query);
+        get_pagination(query);
     })
 
     function get_data(new_query) {
@@ -399,4 +401,54 @@
             });
         });
     }
+
+    function get_pagination(new_query) {
+        var url = "<?= base_url("cms/global_controller");?>";
+        var data = {
+            event : "pagination",
+            select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
+            "a.july, a.august, a.september, a.october, a.november, a.december, "+
+            "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status",
+            query: new_query,
+            offset: offset,
+            limit: limit,
+            table: "tbl_target_sales_per_store a",
+            join: [
+                {
+                    table: "tbl_store s1",
+                    query: "s1.id = a.location",
+                    type: "left"
+                },
+                {
+                    table: "tbl_year b",
+                    query: "a.year = b.id",
+                    type: "left"
+                },
+                {
+                    table: "cms_users u",
+                    query: "u.id = a.created_by",
+                    type: "left"
+                }
+            ],
+            order : {
+                field : "a.id",
+                order : "asc" 
+            },
+            // group : ""
+        };
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result); 
+            modal.loading(false);
+            pagination.generate(obj.total_page, ".list_pagination", get_data);
+        });
+    }
+
+    pagination.onchange(function(){
+        offset = $(this).val();
+        get_data(query);
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
+        $("#search_query").val("");
+    });
 </script>
