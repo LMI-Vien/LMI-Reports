@@ -428,7 +428,7 @@
     function paginateData(rowsPerPage) {
         totalPages = Math.ceil(dataset.length / rowsPerPage);
         currentPage = 1;
-        display_imported_data();
+        fetchPaginatedData();
     }
 
 
@@ -493,159 +493,311 @@
     // }
 
     // with special characters
-    function read_xl_file() {
-        let btn = $(".btn.save");
-        btn.prop("disabled", false);
-        clear_import_table();
 
-        dataset = [];
 
-        const file = $("#file")[0].files[0];
-        if (!file) {
-            modal.loading_progress(false);
-            modal.alert('Please select a file to upload', 'error', () => {});
+
+    // function read_xl_file() {
+    //     let btn = $(".btn.save");
+    //     btn.prop("disabled", false);
+    //     clear_import_table();
+
+    //     dataset = [];
+
+    //     const file = $("#file")[0].files[0];
+    //     if (!file) {
+    //         modal.loading_progress(false);
+    //         modal.alert('Please select a file to upload', 'error', () => {});
+    //         return;
+    //     }
+
+    //     // const maxFileSize = 30 * 1024 * 1024; // 30MB limit
+    //     // if (file.size > maxFileSize) {
+    //     //     modal.loading_progress(false);
+    //     //     modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+    //     //     return;
+    //     // }
+
+    //     modal.loading_progress(true, "Reviewing Data...");
+
+    //     const reader = new FileReader();
+    //     reader.onload = function(e) {
+    //         const data = e.target.result;
+
+    //         // Read as binary instead of plain text
+    //         const workbook = XLSX.read(data, { type: "binary", raw: true });
+    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    //         let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+    //         // Ensure special characters like "ñ" are correctly preserved
+    //         jsonData = jsonData.map(row => {
+    //             let fixedRow = {};
+    //             Object.keys(row).forEach(key => {
+    //                 let value = row[key];
+
+    //                 // Convert numbers to text while keeping dates unchanged
+    //                 if (typeof value === "number") {
+    //                     value = String(value);
+    //                 }
+
+    //                 fixedRow[key] = value !== null && value !== undefined ? value : "";
+    //             });
+    //             return fixedRow;
+    //         });
+
+    //         console.log(jsonData);
+
+    //         processInChunks(jsonData, 5000, () => {
+    //             paginateData(rowsPerPage);
+    //         });
+    //     };
+
+    //     // Use readAsBinaryString instead of readAsText
+    //     reader.readAsBinaryString(file);
+    // }
+
+async function read_xl_file() {
+    let fileInput = document.getElementById("file");
+    let file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select a file to upload.");
+        return;
+    }
+
+    const chunkSize = 512 * 1024; // 512 KB
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        let start = chunkIndex * chunkSize;
+        let end = Math.min(start + chunkSize, file.size);
+        let chunk = file.slice(start, end);
+
+        let formData = new FormData();
+        formData.append("file", chunk);
+        formData.append("chunkIndex", chunkIndex);
+        formData.append("totalChunks", totalChunks);
+        formData.append("fileName", file.name);
+
+        try {
+            await fetch("<?= base_url('cms/import-vmi/import-testing'); ?>", {
+                method: "POST",
+                body: formData
+            });
+        } catch (error) {
+            console.error(`Chunk ${chunkIndex} upload failed:`, error);
+            alert("Upload error, please try again.");
             return;
         }
-
-        // const maxFileSize = 30 * 1024 * 1024; // 30MB limit
-        // if (file.size > maxFileSize) {
-        //     modal.loading_progress(false);
-        //     modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-        //     return;
-        // }
-
-        modal.loading_progress(true, "Reviewing Data...");
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const data = e.target.result;
-
-            // Read as binary instead of plain text
-            const workbook = XLSX.read(data, { type: "binary", raw: true });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-            // Ensure special characters like "ñ" are correctly preserved
-            jsonData = jsonData.map(row => {
-                let fixedRow = {};
-                Object.keys(row).forEach(key => {
-                    let value = row[key];
-
-                    // Convert numbers to text while keeping dates unchanged
-                    if (typeof value === "number") {
-                        value = String(value);
-                    }
-
-                    fixedRow[key] = value !== null && value !== undefined ? value : "";
-                });
-                return fixedRow;
-            });
-
-            console.log(jsonData);
-
-            processInChunks(jsonData, 5000, () => {
-                paginateData(rowsPerPage);
-            });
-        };
-
-        // Use readAsBinaryString instead of readAsText
-        reader.readAsBinaryString(file);
     }
 
-    function process_xl_file() {
-        let btn = $(".btn.save");
-        if (btn.prop("disabled")) return;
+    alert("Upload completed!");
+    fetchPaginatedData(); // Fetch data after upload
+}
 
-        btn.prop("disabled", true);
-        $(".import_buttons").find("a.download-error-log").remove();
-         setTimeout(() => {
-                btn.prop("disabled", false);
-            }, 4000);
-        const inp_year = $('#yearSelect').val()?.trim();
-        const inp_month = $('#monthSelect').val()?.trim();
-        const inp_week = $('#weekSelect').val()?.trim();
-        const inp_company = $('#companySelect').val()?.trim();
 
-        const fields = { inp_year, inp_month, inp_week, inp_company };
 
-        for (const [key, value] of Object.entries(fields)) {
-            if (!value) {
-                return modal.alert(`Please select a ${key.charAt(4).toUpperCase() + key.slice(5)}.`, 'error', () => {});
-            }
-        }
-
-        if (dataset.length === 0) {
-            return modal.alert('No data to process. Please upload a file.', 'error', () => {});
-        }
+    function fetchPaginatedData() {
         modal.loading(true);
 
-        let jsonData = dataset.map(row => {
-            return {
-                "Store": row["Store"] || "",
-                "Item": row["Item"] || "",
-                "Item Name": row["Item Name"] || "",
-                "VMI Status": row["VMI Status"] || "",
-                "Item Class": row["Item Class"] || "",
-                "Supplier": row["Supplier"] || "",
-                "Group": row["Group"] || "",
-                "Dept": row["Dept"] || "",
-                "Class": row["Class"] || "",
-                "Sub Class": row["Sub Class"] || "",
-                "On Hand": row["On Hand"] || "",
-                "In Transit": row["In Transit"] || "",
-                "Ave Sales Unit": row["Ave Sales Unit"] || "",
-                "Created by": user_id || "", 
-                "Created Date": formatDate(new Date()) || ""
-            };
-        });
-
-
-        let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
-        worker.postMessage({ data: jsonData, base_url, inp_company });
-
-        worker.onmessage = function(e) {
-            modal.loading_progress(false);
-            const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
-            if(progress == 100){
-                if (invalid) {
-                    let errorMsg = err_counter > 1000 
-                        ? '⚠️ Too many errors detected. Please download the error log for details.'
-                        : errorLogs.join("<br>");
-                    modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
-                        read_xl_file();
-                        btn.prop("disabled", false);
-                    });
-                    createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
-                } else if (valid_data && valid_data.length > 0) {
-                    btn.prop("disabled", false);
-                    updateSwalProgress("Validation Completed", 10);
-                    new_data = valid_data.map(record => ({
-                        ...record,
-                        year: inp_year,
-                        month: inp_month,
-                        week: inp_week,
-                        company: inp_company
-                    }));
-                    setTimeout(() => saveValidatedData(new_data), 500);
+        $.ajax({
+            url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",  // Update with your actual API endpoint
+            method: "GET",
+            data: {
+                page: currentPage,
+                limit: rowsPerPage
+            },
+            dataType: "json",
+            success: function(response) {
+                console.log(response);
+                if (response.success) {
+                    totalPages = Math.ceil(response.totalRecords / rowsPerPage);
+                    display_imported_data(response.data);
                 } else {
-                    btn.prop("disabled", false);
-                    modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                    alert("Failed to fetch data.");
                 }
-            }else{
-                //modal.loading(false);
-                //modal.loading_progress(true); 
-                //updateSwalProgress("Validating data...", progress);
-            
+                modal.loading(false);
+            },
+            error: function() {
+                alert("Error fetching data.");
+                modal.loading(false);
             }
-
-        };
-
-        worker.onerror = function() {
-            modal.loading_progress(false);
-            modal.alert("Error processing data. Please try again.", "error");
-        };
+        });
     }
+
+// function process_xl_file() {
+//     let btn = $(".btn.save");
+//     if (btn.prop("disabled")) return;
+
+//     btn.prop("disabled", true);
+//     $(".import_buttons").find("a.download-error-log").remove();
+
+//     setTimeout(() => {
+//         btn.prop("disabled", false);
+//     }, 4000);
+
+//     const inp_year = $('#yearSelect').val()?.trim();
+//     const inp_month = $('#monthSelect').val()?.trim();
+//     const inp_week = $('#weekSelect').val()?.trim();
+//     const inp_company = $('#companySelect').val()?.trim();
+
+//     const fields = { inp_year, inp_month, inp_week, inp_company };
+
+//     for (const [key, value] of Object.entries(fields)) {
+//         if (!value) {
+//             return modal.alert(`Please select a ${key.charAt(4).toUpperCase() + key.slice(5)}.`, 'error', () => {});
+//         }
+//     }
+
+//     modal.loading(true, "Fetching data from temporary table...");
+
+//     // Fetch data from tbl_temp_vmi
+//     $.ajax({
+//         url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
+//         method: "GET",
+//         data: {
+//             page: 1,
+//             limit: rowsPerPage
+//         },
+//         success: function(response) {
+//             if (response.success && response.data.length > 0) {
+//                 let jsonData = response.data.map(row => ({
+//                     "Store": row["store"] || "",
+//                     "Item": row["item"] || "",
+//                     "Item Name": row["item_name"] || "",
+//                     "VMI Status": row["vmi_status"] || "",
+//                     "Item Class": row["item_class"] || "",
+//                     "Supplier": row["supplier"] || "",
+//                     "Group": row["group"] || "",
+//                     "Dept": row["dept"] || "",
+//                     "Class": row["class"] || "",
+//                     "Sub Class": row["sub_class"] || "",
+//                     "On Hand": row["on_hand"] || "",
+//                     "In Transit": row["in_transit"] || "",
+//                     "Ave Sales Unit": row["ave_sales_unit"] || "",
+//                     "Created by": user_id || "",
+//                     "Created Date": formatDate(new Date()) || ""
+//                 }));
+
+//                 validate_temp_data(jsonData, inp_year, inp_month, inp_week, inp_company);
+//             } else {
+//                 modal.loading(false);
+//                 modal.alert("No data found in the temporary table.", "error");
+//             }
+//         },
+//         error: function(xhr) {
+//             modal.loading(false);
+//             modal.alert("Error fetching data: " + xhr.responseText, "error");
+//         }
+//     });
+// }
+
+function process_xl_file() {
+    let btn = $(".btn.save");
+    if (btn.prop("disabled")) return;
+
+    btn.prop("disabled", true);
+    $(".import_buttons").find("a.download-error-log").remove();
+
+    setTimeout(() => {
+        btn.prop("disabled", false);
+    }, 4000);
+
+    const inp_year = $('#yearSelect').val()?.trim();
+    const inp_month = $('#monthSelect').val()?.trim();
+    const inp_week = $('#weekSelect').val()?.trim();
+    const inp_company = $('#companySelect').val()?.trim();
+
+    const fields = { inp_year, inp_month, inp_week, inp_company };
+
+    for (const [key, value] of Object.entries(fields)) {
+        if (!value) {
+            return modal.alert(`Please select a ${key.charAt(4).toUpperCase() + key.slice(5)}.`, 'error', () => {});
+        }
+    }
+
+    modal.loading(true, "Fetching all data from temporary table...");
+
+    let allData = [];
+
+    function fetchAllPages(page = 1) {
+        $.ajax({
+            url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
+            method: "GET",
+            data: { page, limit: 5000 }, // Fetch larger chunks
+            success: function(response) {
+                if (response.success && response.data.length > 0) {
+                    allData = allData.concat(response.data);
+
+                    if (response.data.length === 5000) {
+                        // Fetch next page if more data is available
+                        fetchAllPages(page + 1);
+                    } else {
+                        // Once all data is fetched, process it
+                        validate_temp_data(allData, inp_year, inp_month, inp_week, inp_company);
+                    }
+                } else {
+                    modal.loading(false);
+                    modal.alert("No data found in the temporary table.", "error");
+                }
+            },
+            error: function(xhr) {
+                modal.loading(false);
+                modal.alert("Error fetching data: " + xhr.responseText, "error");
+            }
+        });
+    }
+
+    fetchAllPages(1); // Start fetching
+}
+
+function validate_temp_data(data, year, month, week, company) {
+    let btn = $(".btn.save");
+    modal.loading(true, "Validating data...");
+
+    let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
+    worker.postMessage({ data, base_url, company });
+
+    worker.onmessage = function(e) {
+        modal.loading_progress(false);
+        const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
+
+        if (progress === 100) {
+            if (invalid) {
+                let errorMsg = err_counter > 1000
+                    ? '⚠️ Too many errors detected. Please download the error log for details.'
+                    : errorLogs.join("<br>");
+
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                    btn.prop("disabled", false);
+                });
+
+                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
+            } else if (valid_data && valid_data.length > 0) {
+                btn.prop("disabled", false);
+                updateSwalProgress("Validation Completed", 10);
+
+                new_data = valid_data.map(record => ({
+                    ...record,
+                    year,
+                    month,
+                    week,
+                    company
+                }));
+
+                setTimeout(() => saveValidatedData(new_data), 500);
+            } else {
+                btn.prop("disabled", false);
+                modal.alert("No valid data returned. Please check the data and try again.", "error", () => {});
+            }
+        }
+    };
+
+    worker.onerror = function() {
+        modal.loading_progress(false);
+        modal.alert("Error processing data. Please try again.", "error");
+    };
+}
 
     function processInChunks(data, chunkSize, callback) {
         let index = 0;
@@ -671,13 +823,9 @@
         nextChunk();
     }
 
-    function display_imported_data() {
-        let start = (currentPage - 1) * rowsPerPage;
-        let end = start + rowsPerPage;
-        let paginatedData = dataset.slice(start, end);
-
-        let html = '';
-        let tr_counter = start;
+    function display_imported_data(paginatedData) {
+        let html = "";
+        let tr_counter = (currentPage - 1) * rowsPerPage;
 
         paginatedData.forEach(row => {
             let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
@@ -689,9 +837,9 @@
                 return acc;
             }, {});
 
-            let td_validator = ['store', 'item', 'item name', 'vmi status', 'item class', 'supplier', 'group', 'dept', 'class', 'sub class', 'on hand', 'in transit', 'ave sales unit'];
+            let td_validator = ['store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'average_sales_unit'];
             td_validator.forEach(column => {
-                let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; 
+                let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
 
                 if (column === 'status' && typeof value === 'string') {
                     value = value.replace(/\s*\(.*?\)/g, "");
@@ -704,12 +852,12 @@
             tr_counter += 1;
         });
 
-        modal.loading(false);
         $(".import_table").html(html);
         updatePaginationControls();
     }
 
-    function saveValidatedData(valid_data) {
+
+    async function saveValidatedData(valid_data) {
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
@@ -844,10 +992,126 @@
         });
     }
 
+    // function process_xl_file() {
+    //     let btn = $(".btn.save");
+    //     if (btn.prop("disabled")) return;
+
+    //     btn.prop("disabled", true);
+    //     $(".import_buttons").find("a.download-error-log").remove();
+    //      setTimeout(() => {
+    //             btn.prop("disabled", false);
+    //         }, 4000);
+    //     const inp_year = $('#yearSelect').val()?.trim();
+    //     const inp_month = $('#monthSelect').val()?.trim();
+    //     const inp_week = $('#weekSelect').val()?.trim();
+    //     const inp_company = $('#companySelect').val()?.trim();
+
+    //     const fields = { inp_year, inp_month, inp_week, inp_company };
+
+    //     for (const [key, value] of Object.entries(fields)) {
+    //         if (!value) {
+    //             return modal.alert(`Please select a ${key.charAt(4).toUpperCase() + key.slice(5)}.`, 'error', () => {});
+    //         }
+    //     }
+
+    //     if (dataset.length === 0) {
+    //         return modal.alert('No data to process. Please upload a file.', 'error', () => {});
+    //     }
+    //     modal.loading(true);
+
+    //     let jsonData = dataset.map(row => {
+    //         return {
+    //             "Store": row["Store"] || "",
+    //             "Item": row["Item"] || "",
+    //             "Item Name": row["Item Name"] || "",
+    //             "VMI Status": row["VMI Status"] || "",
+    //             "Item Class": row["Item Class"] || "",
+    //             "Supplier": row["Supplier"] || "",
+    //             "Group": row["Group"] || "",
+    //             "Dept": row["Dept"] || "",
+    //             "Class": row["Class"] || "",
+    //             "Sub Class": row["Sub Class"] || "",
+    //             "On Hand": row["On Hand"] || "",
+    //             "In Transit": row["In Transit"] || "",
+    //             "Ave Sales Unit": row["Ave Sales Unit"] || "",
+    //             "Created by": user_id || "", 
+    //             "Created Date": formatDate(new Date()) || ""
+    //         };
+    //     });
+
+
+    //     let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
+    //     worker.postMessage({ data: jsonData, base_url, inp_company });
+
+    //     worker.onmessage = function(e) {
+    //         modal.loading_progress(false);
+    //         const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
+    //         if(progress == 100){
+    //             if (invalid) {
+    //                 let errorMsg = err_counter > 1000 
+    //                     ? '⚠️ Too many errors detected. Please download the error log for details.'
+    //                     : errorLogs.join("<br>");
+    //                 modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+    //                     read_xl_file();
+    //                     btn.prop("disabled", false);
+    //                 });
+    //                 createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
+    //             } else if (valid_data && valid_data.length > 0) {
+    //                 btn.prop("disabled", false);
+    //                 updateSwalProgress("Validation Completed", 10);
+    //                 new_data = valid_data.map(record => ({
+    //                     ...record,
+    //                     year: inp_year,
+    //                     month: inp_month,
+    //                     week: inp_week,
+    //                     company: inp_company
+    //                 }));
+    //                 setTimeout(() => saveValidatedData(new_data), 500);
+    //             } else {
+    //                 btn.prop("disabled", false);
+    //                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+    //             }
+    //         }else{
+    //             //modal.loading(false);
+    //             //modal.loading_progress(true); 
+    //             //updateSwalProgress("Validating data...", progress);
+            
+    //         }
+
+    //     };
+
+    //     worker.onerror = function() {
+    //         modal.loading_progress(false);
+    //         modal.alert("Error processing data. Please try again.", "error");
+    //     };
+    // }
+
+    // function updatePaginationControls() {
+    //     let paginationHtml = `
+    //         <button onclick="changePage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
+    //         <button onclick="changePage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
+            
+    //         <select onchange="goToPage(this.value)">
+    //             ${Array.from({ length: totalPages }, (_, i) => 
+    //                 `<option value="${i + 1}" ${i + 1 === currentPage ? "selected" : ""}>Page ${i + 1}</option>`
+    //             ).join('')}
+    //         </select>
+            
+    //         <button onclick="changePage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
+    //         <button onclick="changePage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
+    //     `;
+
+    //     $(".import_pagination").html(paginationHtml);
+    // }
+
     function updatePaginationControls() {
         let paginationHtml = `
-            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
-            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
+            <button onclick="goToPage(1)" ${currentPage === 1 ? "disabled" : ""}>
+                <i class="fas fa-angle-double-left"></i>
+            </button>
+            <button onclick="changePage(-1)" ${currentPage === 1 ? "disabled" : ""}>
+                <i class="fas fa-angle-left"></i>
+            </button>
             
             <select onchange="goToPage(this.value)">
                 ${Array.from({ length: totalPages }, (_, i) => 
@@ -855,11 +1119,30 @@
                 ).join('')}
             </select>
             
-            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
-            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
+            <button onclick="changePage(1)" ${currentPage === totalPages ? "disabled" : ""}>
+                <i class="fas fa-angle-right"></i>
+            </button>
+            <button onclick="goToPage(totalPages)" ${currentPage === totalPages ? "disabled" : ""}>
+                <i class="fas fa-angle-double-right"></i>
+            </button>
         `;
 
         $(".import_pagination").html(paginationHtml);
+    }
+
+    function changePage(offset) {
+        if ((offset === -1 && currentPage > 1) || (offset === 1 && currentPage < totalPages)) {
+            currentPage += offset;
+            fetchPaginatedData();
+        }
+    }
+
+    function goToPage(page) {
+        page = parseInt(page);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            fetchPaginatedData();
+        }
     }
 
     function createErrorLogFile(errorLogs, filename) {

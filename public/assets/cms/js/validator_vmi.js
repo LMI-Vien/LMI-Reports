@@ -55,102 +55,102 @@ self.onmessage = async function(e) {
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
                 let status = 1;
 
-                if (!["active", "de-listed"].includes(vmi_status)) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid VMI Status at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (!["active", "de-listed"].includes(vmi_status)) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid VMI Status at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (store === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store Code at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (store === "") {
+                //    // invalid = true;
+                //    // errorLogs.push(`⚠️ Invalid Store Code at line #: ${tr_count}`);
+                //    // err_counter++;
+                // }
 
-                if (item === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (item === "") {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Item at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (item_name === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item Name at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (item_name === "") {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Item Name at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (item_class === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item Class at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (item_class === "") {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Item Class at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (supplier === "" || !Number.isInteger(Number(supplier))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Supplier at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (supplier === "" || !Number.isInteger(Number(supplier))) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Supplier at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (group === "" || !Number.isInteger(Number(group))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Group at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (group === "" || !Number.isInteger(Number(group))) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Group at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (dept === "" || !Number.isInteger(Number(dept))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Dept at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (dept === "" || !Number.isInteger(Number(dept))) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Dept at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (r_class === "" || !Number.isInteger(Number(r_class))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Class at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (r_class === "" || !Number.isInteger(Number(r_class))) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Class at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (sub_class === "" || !Number.isInteger(Number(sub_class))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Sub Class at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (sub_class === "" || !Number.isInteger(Number(sub_class))) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Sub Class at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (on_hand === "" || !Number.isInteger(Number(on_hand))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid On Hand at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (on_hand === "" || !Number.isInteger(Number(on_hand))) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid On Hand at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (in_transit === "" || !Number.isInteger(Number(in_transit))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid In Transit at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (in_transit === "" || !Number.isInteger(Number(in_transit))) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid In Transit at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                if (ave_sales_unit === "" || isNaN(ave_sales_unit) || isNaN(parseFloat(ave_sales_unit))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid In Ave Sales Unit at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // if (ave_sales_unit === "" || isNaN(ave_sales_unit) || isNaN(parseFloat(ave_sales_unit))) {
+                //    // invalid = true;
+                //     //errorLogs.push(`⚠️ Invalid In Ave Sales Unit at line #: ${tr_count}`);
+                //     //err_counter++;
+                // }
 
-                let normalized_store_lookup = {};
-                for (let key in store_lookup) {
-                    normalized_store_lookup[key.toLowerCase()] = store_lookup[key];
-                }
+                // let normalized_store_lookup = {};
+                // for (let key in store_lookup) {
+                //     normalized_store_lookup[key.toLowerCase()] = store_lookup[key];
+                // }
 
-                let store_lower = store.toLowerCase();
-                if (store_lower in normalized_store_lookup) {
-                    store = normalized_store_lookup[store_lower];
-                }else {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
-                    err_counter++;
-                }
+                // let store_lower = store.toLowerCase();
+                // if (store_lower in normalized_store_lookup) {
+                //     store = normalized_store_lookup[store_lower];
+                // }else {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
-                let normalized_item_lookup = {};
-                for (let key in item_lookup) {
-                    normalized_item_lookup[key.toLowerCase()] = item_lookup[key];
-                }
+                // let normalized_item_lookup = {};
+                // for (let key in item_lookup) {
+                //     normalized_item_lookup[key.toLowerCase()] = item_lookup[key];
+                // }
 
                 // let item_lower = item.toLowerCase();
                 // if (item_lower in normalized_item_lookup) {

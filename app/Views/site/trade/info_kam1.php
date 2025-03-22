@@ -278,7 +278,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
                 <!-- DataTables Section -->
                 <div class="card mt-4 p-4 shadow-sm">
-                    <table id="dataTable4" class="table table-bordered table-responsive">
+                    <table id="table-kam-one" class="table table-bordered table-responsive">
                         <thead>
                             <tr>
                                 <th 
@@ -337,7 +337,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
-        let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
+
         let ba = <?= json_encode($brand_ambassador); ?>;
         let area = <?= json_encode($area); ?>;
         let brand = <?= json_encode($brand); ?>;
@@ -375,17 +375,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             if($('#item_classi').val() == ""){
                 $('#item_classi_id').val('');
             }
-           // fetchData();
-        });
-
-        tables.forEach(id => {
-            $(id).DataTable({
-                paging: true,
-                searching: false,
-                ordering: true,
-                info: true,
-                lengthChange: false     // Hide "Show Entries" dropdown
-            });
+            fetchData();
         });
 
         $('#refreshButton').click(function() {
@@ -400,6 +390,70 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         $('#exportButton').click(function() {
             alert('Export feature coming soon!');
         });
+        fetchData();
     });
+
+    function fetchData() {
+        let selectedBa = $('#ba_id').val();
+        let selectedArea = $('#area_id').val();
+        let selectedBrand = $('#brand_id').val();
+        let selectedMonth = $('#month').val();
+        let selectedWeek = $('#week').val();
+        let selectedStore = $('#store_id').val();
+        let selectedItemCat = $('#item_classi_id').val();
+
+        initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat);
+    }
+
+    function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null) {
+        
+        if ($.fn.DataTable.isDataTable('#table-kam-one')) {
+            let existingTable = $('#table-kam-one').DataTable();
+            existingTable.clear().destroy();
+        }
+
+        let table = $('#table-kam-one').DataTable({
+            paging: true,
+            searching: false,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            colReorder: true, 
+            ajax: {
+                url: base_url + 'trade-dashboard/trade-kam-one',
+                type: 'GET',
+                data: function(d) {
+                    d.ba = selectedBa;
+                    d.area = selectedArea;
+                    d.brand = selectedBrand;
+                    d.week = selectedWeek === "0" ? null : selectedWeek;
+                    d.month = selectedMonth === "0" ? null : selectedMonth;
+                    d.store = selectedStore === "0" ? null : selectedStore;
+                    d.itemcat = selectedItemCat === "0" ? null : selectedItemCat;
+                    d.limit = d.length;
+                    d.offset = d.start;
+                },
+                dataSrc: function(json) {
+                    console.log(json.data);
+                    return json.data.length ? json.data : [];
+                }
+            },
+            columns: [
+                { data: 'store_name' },
+                { data: 'store_name' },
+                { data: 'brand' },
+                { data: 'item_name' },
+                { data: 'item' },
+                { data: 'item_class' },
+                { data: 'total_qty' }
+            ].filter(Boolean),
+            pagingType: "full_numbers",
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            lengthChange: false
+        });
+    }
     
 </script>

@@ -87,6 +87,10 @@ $routes->group('cms/', static function ($routes) {
     $routes->group('import-vmi', static function ($routes) {
         $routes->get('/', 'Cms\Import_vmi::index');
         $routes->get('view/(:any)', 'Cms\Import_vmi::view');
+        $routes->post('import-testing', 'Cms\Import_vmi::import_testing');
+        $routes->get('fetch-temp-vmi-data', 'Cms\Import_vmi::fetch_temp_vmi_data');
+        //fetch-temp-vmi-data
+        //import_testing
     });
 
     $routes->group('import-ba-sales-report', static function ($routes) {

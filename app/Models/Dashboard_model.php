@@ -847,6 +847,7 @@ public function getLatestVmi($year = null) {
 	            tv.item_name,
 	            tv.on_hand,
 	            tv.in_transit,
+	            tv.item_class,
 	            ba.name AS ambassador_name,
 	            b.brand_description AS brand,
 	            s.description AS store_name
@@ -859,6 +860,7 @@ public function getLatestVmi($year = null) {
 	    SELECT 
 	        ib.item,
 	        ib.item_name,
+	        ib.item_class,
 	        ib.on_hand + ib.in_transit AS total_qty,
 	        ib.ambassador_name,
 	        ib.brand,
@@ -871,7 +873,7 @@ public function getLatestVmi($year = null) {
 	      AND (? IS NULL OR ?)
 	      AND (? IS NULL OR ?)
 	      AND (? IS NULL OR ?)
-	      " . ($withba ? " AND ib.ambassador_name IS NOT NULL AND ib.ambassador_name <> ''" : " AND (ib.ambassador_name IS NULL OR ib.ambassador_name = '')") . "
+	      " . ($withba === true ? " AND ib.ambassador_name IS NOT NULL AND ib.ambassador_name <> ''" : ($withba === false ? " AND (ib.ambassador_name IS NULL OR ib.ambassador_name = '')" : "")) . "
 	      ORDER BY ib.id
 	    LIMIT ? OFFSET ?";
 

@@ -590,10 +590,13 @@ class TradeDashboard extends BaseController
 	    }
 	    if($withba == 'with_ba'){
 	    	$withba  = true;
+	    }else if($withba == 'without_ba'){
+	    	$withba = true;
 	    }else{
-	    	$withba = false;
+	    	$withba = null;
 	    }
 
+	    //$withba = false;
 		// $latest_vmi_data = $this->Dashboard_model->getLatestVmi($year);
 		// $month = null;
 		// if($latest_vmi_data){
@@ -604,7 +607,7 @@ class TradeDashboard extends BaseController
 	    // 	$month = null;
 	    // }
 
-	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $brand_ambassador, $store_name, 10, 0, $withba);
+	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $ba, $store, 10, 0, $withba);
 	    // echo "<pre>";
 	    // print_r($data);
 	    // die();

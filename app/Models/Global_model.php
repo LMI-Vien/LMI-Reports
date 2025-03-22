@@ -1000,4 +1000,20 @@ class Global_model extends Model
         $query = $this->db->query("CALL SearchDynamic('tbl_classification', null, 'id, item_class_code, item_class_description', 9999, 0, null, 'item_class_code', null)");
         return $query->getResultArray(); 
     }
+
+    public function fetch_temp_data($limit, $offset)
+    {
+        $builder = $this->db->table('tbl_temp_vmi')
+                      ->limit($limit, $offset)
+                      ->get();
+
+        $totalRecords = $this->db->table('tbl_temp_vmi')->countAllResults(); // Count total records
+
+        $data = $builder->getResultArray(); // Fetch results
+
+        return [
+            "data" => $builder->getResultArray(),
+            "totalRecords" => $totalRecords
+        ];
+    }
 }
