@@ -29,6 +29,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('trade-overall-asc-sales-report', 'TradeDashboard::trade_overall_asc_sales_report');
     $routes->post('trade-overall-asc-sales-report', 'TradeDashboard::trade_overall_asc_sales_report');
     $routes->get('trade-kam-one', 'TradeDashboard::trade_kam_one');
+    $routes->post('trade-kam-one', 'TradeDashboard::trade_kam_one');
     
     //trade_overall_asc_sales_report
 });
@@ -87,10 +88,10 @@ $routes->group('cms/', static function ($routes) {
     $routes->group('import-vmi', static function ($routes) {
         $routes->get('/', 'Cms\Import_vmi::index');
         $routes->get('view/(:any)', 'Cms\Import_vmi::view');
-        $routes->post('import-testing', 'Cms\Import_vmi::import_testing');
+        $routes->post('import-temp-vmi-data', 'Cms\Import_vmi::import_temp_vmi_data');
         $routes->get('fetch-temp-vmi-data', 'Cms\Import_vmi::fetch_temp_vmi_data');
-        //fetch-temp-vmi-data
-        //import_testing
+        $routes->post('delete-temp-vmi-data', 'Cms\Import_vmi::delete_temp_vmi_data');
+        
     });
 
     $routes->group('import-ba-sales-report', static function ($routes) {

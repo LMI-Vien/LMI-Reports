@@ -390,10 +390,8 @@
                 let salesData = result.data[0];
                 if(result.data.length > 0){
                     $.each(result.data, function(x,y) {
-                        console.log(y.asc_name);
                         if(y.asc_name){
                             months.push(y.asc_name); 
-                            console.log(y.total_amount);
                             dataValues.salesReport.push(y.total_amount);
                             dataValues.targetSales.push(y.total_target_sales); // Fix here
                             dataValues.PerAchieved.push(y.achieved);

@@ -549,24 +549,13 @@ class TradeDashboard extends BaseController
 	    $month = $this->request->getPost('month');
 	    $week = $this->request->getPost('week');
 	    $withba = $this->request->getPost('withba');
-		$itemclassi = $this->request->getPost('itemclassi'); //to follow
+		$itemclassi = $this->request->getPost('itemcat'); //to follow
 		$latest_vmi_data = $this->Dashboard_model->getLatestVmi();
 		$latest_year = null;
 		if($latest_vmi_data){
 	    	$latest_year = $latest_vmi_data['year_id'];
 	    }
-	    // $date = null; 
-	    // $lookup_month = null;
-	    // $lyYear = 0;
-	    // $selected_year = null;
-	    // $targetYear = null;
-	    // $date = null;
-	    // if($year){
-	    // 	$actual_year = $this->Dashboard_model->getYear($year);
-	    // 	$selected_year = $actual_year[0]['year'];
-	    // 	$date = $actual_year[0]['year'];
-	    // 	$targetYear = $actual_year[0]['id'];
-	    // }
+
 	    if(empty($area)){
 	    	$area = null;
 	    }
@@ -596,21 +585,7 @@ class TradeDashboard extends BaseController
 	    	$withba = null;
 	    }
 
-	    //$withba = false;
-		// $latest_vmi_data = $this->Dashboard_model->getLatestVmi($year);
-		// $month = null;
-		// if($latest_vmi_data){
-		// 	$month = $latest_vmi_data['month_id'];
-		// 	$year = $latest_vmi_data['year_id'];
-		// }
-		// if(empty($month)){
-	    // 	$month = null;
-	    // }
-
 	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $ba, $store, 10, 0, $withba);
-	    // echo "<pre>";
-	    // print_r($data);
-	    // die();
 	    
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),

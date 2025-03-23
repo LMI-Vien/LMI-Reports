@@ -301,19 +301,21 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Alice Brown</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No data available</td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -378,30 +380,22 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             fetchData();
         });
 
-        $('#refreshButton').click(function() {
-            alert('Refreshing data...');
-            tables.forEach(id => $(id).DataTable().ajax.reload(null, false));
-        });
-
         $('#previewButton').click(function() {
-            alert('Preview feature coming soon!');
         });
 
         $('#exportButton').click(function() {
-            alert('Export feature coming soon!');
         });
         fetchData();
     });
 
     function fetchData() {
-        let selectedBa = $('#ba_id').val();
-        let selectedArea = $('#area_id').val();
-        let selectedBrand = $('#brand_id').val();
+        let selectedBa = $('#brandAmbassador').val();
+        let selectedArea = $('#area').val();
+        let selectedBrand = $('#brand').val();
         let selectedMonth = $('#month').val();
         let selectedWeek = $('#week').val();
-        let selectedStore = $('#store_id').val();
-        let selectedItemCat = $('#item_classi_id').val();
-
+        let selectedStore = $('#store').val();
+        let selectedItemCat = $('#item_classi').val();
         initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat);
     }
 
@@ -421,7 +415,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             colReorder: true, 
             ajax: {
                 url: base_url + 'trade-dashboard/trade-kam-one',
-                type: 'GET',
+                type: 'POST',
                 data: function(d) {
                     d.ba = selectedBa;
                     d.area = selectedArea;
@@ -434,14 +428,13 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log(json.data);
                     return json.data.length ? json.data : [];
                 }
             },
             columns: [
                 { data: 'store_name' },
-                { data: 'store_name' },
-                { data: 'brand' },
+                { data: 'asc_name' },
+                { data: 'ambassador_name' },
                 { data: 'item_name' },
                 { data: 'item' },
                 { data: 'item_class' },
