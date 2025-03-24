@@ -37,7 +37,7 @@ self.onmessage = async function(e) {
                 let vmi_status = row["vmi_status"]?.toLowerCase() || "";
                 let item_class = row["item_class"]?.trim() || "";
                 let supplier = row["supplier"]?.trim() || "";
-                let group = row["group"]?.trim() || "";
+                let c_group = row["group"]?.trim() || "";
                 let dept = row["dept"]?.trim() || "";
                 let r_class = row["class"]?.trim() || "";
                 let sub_class = row["sub_class"]?.trim() || "";
@@ -56,7 +56,7 @@ self.onmessage = async function(e) {
                     }
                 }
 
-                if (!["active", "de-listed"].includes(vmi_status)) {
+                if (!["1 (active)", "3 (de-listed)"].includes(vmi_status)) {
                     addErrorLog("Invalid VMI Status");
                 }
 
@@ -76,7 +76,7 @@ self.onmessage = async function(e) {
                     addErrorLog("Invalid Supplier");
                 }
 
-                if (!group || isNaN(Number(group))) {
+                if (!c_group || isNaN(Number(c_group))) {
                     addErrorLog("Invalid Group");
                 }
 
@@ -106,7 +106,7 @@ self.onmessage = async function(e) {
 
                 if (!invalid) {
                     valid_data.push({
-                        store, item, item_name, item_class, supplier, group, dept, class: r_class, sub_class, 
+                        store, item, item_name, item_class, supplier, c_group, dept, c_class: r_class, sub_class, 
                         on_hand, in_transit, average_sales_unit: ave_sales_unit, vmi_status, status, 
                         created_by: user_id, created_date: date_of_creation
                     });

@@ -193,6 +193,7 @@ class Custom_model extends Model
         } catch (\Exception $e) {
             return [
                 "message"  => "Error: " . $e->getMessage(),
+                "sql_error" => $this->db->error(),
                 "inserted" => 0
             ];
         }

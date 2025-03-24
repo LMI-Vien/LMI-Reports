@@ -691,13 +691,13 @@
 
         let selected_fields = [
             'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
-            'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 
+            'supplier', 'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 
             'in_transit', 'year', 'month', 'week', 'company'
         ];
 
         const matchFields = [
             'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 
-            'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'
+            'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'
         ];  
 
 
@@ -1197,9 +1197,9 @@
                 "VMI Status":"", 
                 "Item Class":"", 
                 "Supplier":"", 
-                "Group":"", 
+                "C Group":"", 
                 "Dept":"", 
-                "Class":"", 
+                "C Class":"", 
                 "Sub Class":"", 
                 "On Hand":"", 
                 "In Transit":"", 
@@ -1259,7 +1259,7 @@
             dynamic_search(
                 "'tbl_vmi'", 
                 "''", 
-                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'", 
+                "'store, item, item_name, item_class, supplier, `c_group`, dept, `c_class` as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'", 
                 0, 
                 0, 
                 `'${filter}'`,  
@@ -1300,9 +1300,9 @@
                         "VMI Status":"", 
                         "Item Class":"", 
                         "Supplier":"", 
-                        "Group":"", 
+                        "C Group":"", 
                         "Dept":"", 
-                        "Class":"", 
+                        "C Class":"", 
                         "Sub Class":"", 
                         "On Hand":"", 
                         "In Transit":"", 
@@ -1326,9 +1326,9 @@
                             "VMI Status":det.vmi_status, 
                             "Item Class":det.item_class, 
                             "Supplier":det.supplier, 
-                            "Group":det.group, 
+                            "C Group":det.group, 
                             "Dept":det.dept, 
-                            "Class":det.classification, 
+                            "C Class":det.classification, 
                             "Sub Class":det.sub_class, 
                             "On Hand":det.on_hand, 
                             "In Transit":det.in_transit, 
@@ -1394,7 +1394,7 @@
                                 dynamic_search(
                                     "'tbl_vmi'", 
                                     "''", 
-                                    `'store, item, item_name, item_class, supplier, \`group\`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'`, 
+                                    `'store, item, item_name, item_class, supplier, \`c_group\`, dept, c_class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'`, 
                                     100000, 
                                     index, 
                                     `''`,  
@@ -1435,9 +1435,9 @@
                                             "VMI Status":"", 
                                             "Item Class":"", 
                                             "Supplier":"", 
-                                            "Group":"", 
+                                            "C Group":"", 
                                             "Dept":"", 
-                                            "Class":"", 
+                                            "C Class":"", 
                                             "Sub Class":"", 
                                             "On Hand":"", 
                                             "In Transit":"", 
@@ -1461,9 +1461,9 @@
                                                 "VMI Status":det.vmi_status, 
                                                 "Item Class":det.item_class, 
                                                 "Supplier":det.supplier, 
-                                                "Group":det.group, 
+                                                "C Group":det.c_group, 
                                                 "Dept":det.dept, 
-                                                "Class":det.classification, 
+                                                "C Class":det.classification, 
                                                 "Sub Class":det.sub_class, 
                                                 "On Hand":det.on_hand, 
                                                 "In Transit":det.in_transit, 
@@ -1542,8 +1542,8 @@
                                 "left join tbl_month m on v.month = m.id "+
                                 "left join tbl_week w on v.week = w.id'", 
 
-                                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, "+
-                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'", 
+                                "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
+                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'", 
 
                                 100000, 
                                 index, 
@@ -1586,7 +1586,7 @@
                                             "VMI Status":det.vmi_status, 
                                             "Item Class":det.item_class, 
                                             "Supplier":det.supplier, 
-                                            "Group":det.group, 
+                                            "Group":det.c_group, 
                                             "Dept":det.dept, 
                                             "Class":det.classification, 
                                             "Sub Class":det.sub_class, 

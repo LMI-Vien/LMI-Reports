@@ -412,7 +412,7 @@ class Global_controller extends BaseController
 
 			        $matchFields = [
 			            'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier',
-			            'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit',
+			            'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 'in_transit',
 			            'year', 'month', 'week', 'company'
 			        ];
 
@@ -654,6 +654,7 @@ class Global_controller extends BaseController
 					}
 			        return $this->response->setJSON([
 			            "message" => $message,
+
 			            "inserted" => $insertedCount
 			        ]);
 
