@@ -341,8 +341,6 @@
         let selectedSortField = $('#sortBy').val();
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
-        console.log(selectedStore);
-
         initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
     }
 
@@ -374,7 +372,6 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log(json.data);
                     return json.data.length ? json.data : [];
                 }
             },

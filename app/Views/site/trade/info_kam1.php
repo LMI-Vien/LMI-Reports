@@ -197,8 +197,13 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 </div>
                                 <div class="col-md">
                                     <select class="form-control" id="month">
-                                        <option>January</option>
-                                        <option>February</option>
+                                        <?php
+                                            if($month){
+                                                foreach ($month as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                                }                                                
+                                            }
+                                        ?>
                                     </select>
                                 </div>
                             </div>
@@ -208,8 +213,13 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 </div>
                                 <div class="col-md">
                                     <select class="form-control" id="week">
-                                        <option>Week 1</option>
-                                        <option>Week 2</option>
+                                        <?php
+                                            if($week){
+                                                foreach ($week as $value) {
+                                                    echo "<option value=".$value['id'].">".$value['name']."</option>";
+                                                }                                                
+                                            }
+                                        ?>
                                     </select>
                                 </div>
                             </div>   
@@ -230,8 +240,8 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 <label for="item">Item Category</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="item" placeholder="Please select...">
-                                <input type="hidden" id="item_id">
+                                <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
+                                <input type="hidden" id="item_classi_id">
                             </div>
                         </div>
                     </div>
@@ -268,7 +278,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
                 <!-- DataTables Section -->
                 <div class="card mt-4 p-4 shadow-sm">
-                    <table id="dataTable4" class="table table-bordered table-responsive">
+                    <table id="table-kam-one" class="table table-bordered table-responsive">
                         <thead>
                             <tr>
                                 <th 
@@ -291,19 +301,21 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Alice Brown</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No data available</td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -327,41 +339,114 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function() {
-        let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
+
         let ba = <?= json_encode($brand_ambassador); ?>;
         let area = <?= json_encode($area); ?>;
         let brand = <?= json_encode($brand); ?>;
         let store = <?= json_encode($store_branch); ?>;
-        let asc = <?= json_encode($asc); ?>;
-        
+        let item_classification = <?= json_encode($item_classification); ?>;
+
         autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
         autocomplete_field($("#area"), $("#area_id"), area, "area_description");
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
         autocomplete_field($("#store"), $("#store_id"), store);
-        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
+        autocomplete_field($("#item_classi"), $("#item_classi_id"), item_classification, "item_class_description");
 
-        tables.forEach(id => {
-            $(id).DataTable({
-                paging: true,
-                searching: false,
-                ordering: true,
-                info: true,
-                lengthChange: false     // Hide "Show Entries" dropdown
-            });
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"]').val('');
+            $('input[type="checkbox"]').prop('checked', false);
+            $('input[name="coveredASC"][value="with_ba"]').prop('checked', false);
+            $('input[name="coveredASC"][value="without_ba"]').prop('checked', false);
+            $('select').prop('selectedIndex', 0);
+            $('#refreshButton').click();
         });
 
-        $('#refreshButton').click(function() {
-            alert('Refreshing data...');
-            tables.forEach(id => $(id).DataTable().ajax.reload(null, false));
+        $(document).on('click', '#refreshButton', function () {
+            if($('#brandAmbassador').val() == ""){
+                $('#ba_id').val('');
+            }
+            if($('#area').val() == ""){
+                $('#area_id').val('');
+            }
+            if($('#brand').val() == ""){
+                $('#brand_id').val('');
+            }
+            if($('#store').val() == ""){
+                $('#store_id').val('');
+            }
+            if($('#item_classi').val() == ""){
+                $('#item_classi_id').val('');
+            }
+            fetchData();
         });
 
         $('#previewButton').click(function() {
-            alert('Preview feature coming soon!');
         });
 
         $('#exportButton').click(function() {
-            alert('Export feature coming soon!');
         });
+        fetchData();
     });
+
+    function fetchData() {
+        let selectedBa = $('#brandAmbassador').val();
+        let selectedArea = $('#area').val();
+        let selectedBrand = $('#brand').val();
+        let selectedMonth = $('#month').val();
+        let selectedWeek = $('#week').val();
+        let selectedStore = $('#store').val();
+        let selectedItemCat = $('#item_classi').val();
+        initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat);
+    }
+
+    function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null) {
+        
+        if ($.fn.DataTable.isDataTable('#table-kam-one')) {
+            let existingTable = $('#table-kam-one').DataTable();
+            existingTable.clear().destroy();
+        }
+
+        let table = $('#table-kam-one').DataTable({
+            paging: true,
+            searching: false,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            colReorder: true, 
+            ajax: {
+                url: base_url + 'trade-dashboard/trade-kam-one',
+                type: 'POST',
+                data: function(d) {
+                    d.ba = selectedBa;
+                    d.area = selectedArea;
+                    d.brand = selectedBrand;
+                    d.week = selectedWeek === "0" ? null : selectedWeek;
+                    d.month = selectedMonth === "0" ? null : selectedMonth;
+                    d.store = selectedStore === "0" ? null : selectedStore;
+                    d.itemcat = selectedItemCat === "0" ? null : selectedItemCat;
+                    d.limit = d.length;
+                    d.offset = d.start;
+                },
+                dataSrc: function(json) {
+                    return json.data.length ? json.data : [];
+                }
+            },
+            columns: [
+                { data: 'store_name' },
+                { data: 'asc_name' },
+                { data: 'ambassador_name' },
+                { data: 'item_name' },
+                { data: 'item' },
+                { data: 'item_class' },
+                { data: 'total_qty' }
+            ].filter(Boolean),
+            pagingType: "full_numbers",
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            lengthChange: false
+        });
+    }
     
 </script>

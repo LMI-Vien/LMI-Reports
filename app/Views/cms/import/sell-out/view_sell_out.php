@@ -57,6 +57,7 @@
                     <tbody class="table_body word_break"></tbody>
                 </table>
             </div>
+            <div class="list_pagination"></div>
         </div>
     </div>
 </div>
@@ -65,6 +66,7 @@
 <script>
     var url = "<?= base_url('cms/global_controller');?>";
     var import_sellout_id = "<?=$uri->getSegment(4);?>";
+    var limit = 10; 
 
     $(document).ready(function() {
         $("#sell_out_title").html(addNbsp("VIEW SELLOUT DATA"));
@@ -150,4 +152,34 @@
             return char + '&nbsp;';
         }).join('');
     }
+
+    function get_pagination(new_query) {
+        var url = "<?= base_url("cms/global_controller");?>";
+        var data = {
+            event : "pagination",
+            select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
+            query: new_query,
+            offset: offset,
+            limit: limit,
+            table : "tbl_sell_out_data_details",
+            order : {
+                field : "id",
+                order : "asc" 
+            }
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result); 
+            modal.loading(false);
+            pagination.generate(obj.total_page, ".list_pagination", renderDetails);
+        });
+    }
+
+    pagination.onchange(function(){
+        offset = $(this).val();
+        renderDetails(query);
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
+        $("#search_query").val("");
+    });
 </script>

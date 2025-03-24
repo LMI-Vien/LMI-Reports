@@ -139,7 +139,11 @@
                     <tbody>
                     <tr>
                       <td>
-                        <img src="" alt="Product 1" class="img-circle img-size-32 mr-2">
+                      <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
+                      alt="Product 1" 
+                      class="rounded-circle img-size-32 mr-2" 
+                      style="width: 50px; height: 50px; object-fit: cover;">
+                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
                         Some Product
                       </td>
                       <td>$13 USD</td>
@@ -158,7 +162,11 @@
                     </tr>
                     <tr>
                       <td>
-                        <img src="" alt="Product 1" class="img-circle img-size-32 mr-2">
+                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
+                        <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
+                        alt="Product 1" 
+                        class="rounded-circle img-size-32 mr-2" 
+                        style="width: 50px; height: 50px; object-fit: cover;">
                         Another Product
                       </td>
                       <td>$29 USD</td>
@@ -177,7 +185,11 @@
                     </tr>
                     <tr>
                       <td>
-                        <img src="" alt="Product 1" class="img-circle img-size-32 mr-2">
+                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
+                        <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
+                        alt="Product 1" 
+                        class="rounded-circle img-size-32 mr-2" 
+                        style="width: 50px; height: 50px; object-fit: cover;">
                         Amazing Product
                       </td>
                       <td>$1,230 USD</td>
@@ -196,7 +208,11 @@
                     </tr>
                     <tr>
                       <td>
-                        <img src="" alt="Product 1" class="img-circle img-size-32 mr-2">
+                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
+                        <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
+                        alt="Product 1" 
+                        class="rounded-circle img-size-32 mr-2" 
+                        style="width: 50px; height: 50px; object-fit: cover;">
                         Perfect Item
                         <span class="badge bg-danger">NEW</span>
                       </td>

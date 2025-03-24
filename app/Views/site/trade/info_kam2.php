@@ -89,7 +89,7 @@
     .tbl-title-field {
         /* background: linear-gradient(to right, #007bff, #143996); */
         background: linear-gradient(to right, #143996, #007bff);
-        color: black !important;
+        color: white !important;
         text-align: center;
         padding: 10px;
         font-size: 18px;

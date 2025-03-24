@@ -575,6 +575,9 @@ var modal = {
 }
 
 function updateSwalProgress(title, progress) {
+    if (progress > 100) {
+        progress = 90;
+    }
     $("#progress-bar").css("width", progress + "%");
     $("#currentTitle").text(`Processing: ${title} (${progress}%)`);
 }

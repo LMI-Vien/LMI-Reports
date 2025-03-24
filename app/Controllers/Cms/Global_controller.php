@@ -383,6 +383,60 @@ class Global_controller extends BaseController
 			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
 			    }
 			    break; 
+			case 'fetch_existing_new':
+			    try {
+			        $table = $this->request->getPost('table');
+			        $selected_fields = $this->request->getPost('selected_fields');
+			        $filters = $this->request->getPost('filters');
+			        $field = $this->request->getPost('field') ?: null;
+			        $value = $this->request->getPost('value') ?: null;
+			        $status = $this->request->getPost('status') ?: false;
+			        if (empty($table) || empty($selected_fields)) {
+			            echo json_encode(['status' => 'error', 'message' => 'Table or selected fields are missing.']);
+			            exit;
+			        }
+
+			        $result_data = $this->Global_model->fetch_existing_new($table, $selected_fields, $filters, $field, $value, $status);
+			        echo json_encode(['status' => 'success', 'existing' => $result_data]);
+			    } catch (Exception $e) {
+			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
+			    }
+			    break; 
+			    //for optimization do not remove
+			case 'fetch_existing2':
+			    try {
+			        $table = $this->request->getPost('table');
+			        $selected_fields = $this->request->getPost('selected_fields');
+			        $valid_data = $this->request->getPost('valid_data');
+			        $status = $this->request->getPost('status') ?? false;
+
+			        $matchFields = [
+			            'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier',
+			            'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 'in_transit',
+			            'year', 'month', 'week', 'company'
+			        ];
+
+			        if (empty($table) || empty($selected_fields) || empty($valid_data)) {
+			            return $this->response->setJSON([
+			                'status' => 'error',
+			                'message' => 'Missing parameters.'
+			            ]);
+			        }
+
+			        // Fetch only relevant existing records by passing the match fields & valid data
+			        $result_data = $this->Global_model->fetch_existing2($table, $selected_fields, $matchFields, $valid_data, $status);
+
+			        return $this->response->setJSON([
+			            'status' => 'success',
+			            'existing' => $result_data
+			        ]);
+			    } catch (Exception $e) {
+			        return $this->response->setJSON([
+			            'status' => 'error',
+			            'message' => 'Error fetching data: ' . $e->getMessage()
+			        ]);
+			    }
+			    break; 
 			case 'fetch_existing_custom':    
 		    try {
 		        // Get the ba_id from the post request
@@ -600,6 +654,7 @@ class Global_controller extends BaseController
 					}
 			        return $this->response->setJSON([
 			            "message" => $message,
+
 			            "inserted" => $insertedCount
 			        ]);
 

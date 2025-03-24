@@ -332,7 +332,19 @@
                                 </thead>
                                 <tbody>
                                     <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
                                         <td colspan="2">No data available</td>
+                                    </tr>
+                                    <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -360,7 +372,19 @@
                                 </thead>
                                 <tbody>
                                     <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
                                         <td colspan="2">No data available</td>
+                                    </tr>
+                                    <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -388,7 +412,19 @@
                                 </thead>
                                 <tbody>
                                     <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
                                         <td colspan="2">No data available</td>
+                                    </tr>
+                                    <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -419,7 +455,19 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>No data available</td>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">No data available</td>
+                                    </tr>
+                                    <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"></td>
                                     </tr>
                                 </tbody>
                             </table>

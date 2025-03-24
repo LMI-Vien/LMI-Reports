@@ -262,6 +262,7 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+
     $(document).ready(function () {
         let asc = <?= json_encode($asc); ?>;
         let area = <?= json_encode($area); ?>;
@@ -304,12 +305,12 @@
     // Define months
     var months = [];
 
-    const dataValues = {
+    var dataValues = {
         salesReport: [],
         targetSales: [],
         PerAchieved: []
     };
-
+    
     let chartInstances = []; // Store chart instances
 
     function renderCharts() {
@@ -356,6 +357,11 @@
 
     function fetchData(){
         months = [];
+        dataValues = {
+            salesReport: [],
+            targetSales: [],
+            PerAchieved: []
+        };
         let selectedASC = $('#asc_id').val();
         let selectedArea = $('#area_id').val();
         let selectedBrand = $('#brand_id').val();

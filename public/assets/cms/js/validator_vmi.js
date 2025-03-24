@@ -5,189 +5,123 @@ self.onmessage = async function(e) {
     let invalid = false;
     let errorLogs = [];
     let valid_data = [];
-    var err_counter = 0;
+    let err_counter = 0;
+    const ERROR_LOG_LIMIT = 1000; // Reduce error log limit
+    const BATCH_SIZE = 1000; // Reduce batch size
+    let index = 0;
 
     try {
         let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1`);   
         let ba_data = await get_ba_valid_response.json();
 
-        store_records = ba_data.stores;
         let store_lookup = {};
-        store_records.forEach(store => store_lookup[store.code] = store.id);
+        ba_data.stores.forEach(store => store_lookup[store.code.toLowerCase()] = store.id);
 
-        if(company == 1){
-            item_records = ba_data.customer_sku_code_rgdi;
-        }else{
-            item_records = ba_data.customer_sku_code_lmi;
-        }
         let item_lookup = {};
-        item_records.forEach(item => item_lookup[item.cusitmcde] = item.recid);     
-        
-        let batchSize = 2000;
-        let index = 0;
+        let item_records = company == 1 ? ba_data.customer_sku_code_rgdi : ba_data.customer_sku_code_lmi;
+        item_records.forEach(item => item_lookup[item.cusitmcde.toLowerCase()] = item.recid);
 
         function processBatch() {
             if (index >= data.length) {
-                self.postMessage({ invalid, errorLogs, valid_data, err_counter, progress: 100 });
+                // Final message with results
+                self.postMessage({ invalid, errorLogs, valid_data, err_counter });
                 return;
             }
 
-            let progress = Math.round((index / data.length) * 100);
-            self.postMessage({ progress });
-
-            for (let i = 0; i < batchSize && index < data.length; i++, index++) {
+            for (let i = 0; i < BATCH_SIZE && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let store = row["Store"] ? row["Store"].trim() : "";
-                let item = row["Item"] ? row["Item"].trim() : "";
-                let item_name = row["Item Name"] ? row["Item Name"].trim() : "";
-                let vmi_status = row["VMI Status"] ? row["VMI Status"].toLowerCase() : "";
-                let item_class = row["Item Class"] ? row["Item Class"].trim() : "";
-                let supplier = row["Supplier"] ? row["Supplier"].trim() : "";
-                let group = row["Group"] ? row["Group"].trim() : "";
-                let dept = row["Dept"] ? row["Dept"].trim() : "";
-                let r_class = row["Class"] ? row["Class"].trim() : "";
-                let sub_class = row["Sub Class"] ? row["Sub Class"].trim() : "";
-                let on_hand = row["On Hand"] ? row["On Hand"].replace(/,/g, "").trim() : "";
-                let in_transit = row["In Transit"] ? row["In Transit"].replace(/,/g, "").trim() : "";
-                let ave_sales_unit = row["Ave Sales Unit"] ? row["Ave Sales Unit"].trim() : "";
-                let user_id = row["Created By"] ? row["Created By"].trim() : "";
-                let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
+                let store = row["store"]?.trim() || "";
+                let item = row["item"]?.trim() || "";
+                let item_name = row["item_name"]?.trim() || "";
+                let vmi_status = row["vmi_status"]?.toLowerCase() || "";
+                let item_class = row["item_class"]?.trim() || "";
+                let supplier = row["supplier"]?.trim() || "";
+                let c_group = row["group"]?.trim() || "";
+                let dept = row["dept"]?.trim() || "";
+                let r_class = row["class"]?.trim() || "";
+                let sub_class = row["sub_class"]?.trim() || "";
+                let on_hand = row["on_hand"]?.replace(/,/g, "").trim() || "";
+                let in_transit = row["in_transit"]?.replace(/,/g, "").trim() || "";
+                let ave_sales_unit = row["average_sales_unit"]?.trim() || "";
+                let user_id = row["created_by"]?.trim() || "";
+                let date_of_creation = row["created_date"]?.trim() || "";
                 let status = 1;
 
-                if (!["active", "de-listed"].includes(vmi_status)) {
+                function addErrorLog(message) {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid VMI Status at line #: ${tr_count}`);
                     err_counter++;
+                    if (errorLogs.length < ERROR_LOG_LIMIT) {
+                        errorLogs.push(`⚠️ ${message} at line #: ${tr_count}`);
+                    }
                 }
 
-                if (store === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store Code at line #: ${tr_count}`);
-                    err_counter++;
+                if (!["1 (active)", "3 (de-listed)"].includes(vmi_status)) {
+                    addErrorLog("Invalid VMI Status");
                 }
 
-                if (item === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item at line #: ${tr_count}`);
-                    err_counter++;
+                if (!item) {
+                    addErrorLog("Invalid Item");
                 }
 
-                if (item_name === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item Name at line #: ${tr_count}`);
-                    err_counter++;
+                if (!item_name) {
+                    addErrorLog("Invalid Item Name");
                 }
 
-                if (item_class === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item Class at line #: ${tr_count}`);
-                    err_counter++;
+                if (!item_class) {
+                    addErrorLog("Invalid Item Class");
                 }
 
-                if (supplier === "" || !Number.isInteger(Number(supplier))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Supplier at line #: ${tr_count}`);
-                    err_counter++;
+                if (!supplier || isNaN(Number(supplier))) {
+                    addErrorLog("Invalid Supplier");
                 }
 
-                if (group === "" || !Number.isInteger(Number(group))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Group at line #: ${tr_count}`);
-                    err_counter++;
+                if (!c_group || isNaN(Number(c_group))) {
+                    addErrorLog("Invalid Group");
                 }
 
-                if (dept === "" || !Number.isInteger(Number(dept))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Dept at line #: ${tr_count}`);
-                    err_counter++;
+                if (!dept || isNaN(Number(dept))) {
+                    addErrorLog("Invalid Dept");
                 }
 
-                if (r_class === "" || !Number.isInteger(Number(r_class))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Class at line #: ${tr_count}`);
-                    err_counter++;
+                if (!r_class || isNaN(Number(r_class))) {
+                    addErrorLog("Invalid Class");
                 }
 
-                if (sub_class === "" || !Number.isInteger(Number(sub_class))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Sub Class at line #: ${tr_count}`);
-                    err_counter++;
+                if (!sub_class || isNaN(Number(sub_class))) {
+                    addErrorLog("Invalid Sub Class");
                 }
 
                 if (on_hand === "" || !Number.isInteger(Number(on_hand))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid On Hand at line #: ${tr_count}`);
-                    err_counter++;
+                    addErrorLog("Invalid On Hand");
                 }
 
-                if (in_transit === "" || !Number.isInteger(Number(in_transit))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid In Transit at line #: ${tr_count}`);
-                    err_counter++;
+                if (!in_transit || isNaN(Number(in_transit))) {
+                    addErrorLog("Invalid In Transit");
                 }
 
-                if (ave_sales_unit === "" || isNaN(ave_sales_unit) || isNaN(parseFloat(ave_sales_unit))) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid In Ave Sales Unit at line #: ${tr_count}`);
-                    err_counter++;
-                }
-
-                let normalized_store_lookup = {};
-                for (let key in store_lookup) {
-                    normalized_store_lookup[key.toLowerCase()] = store_lookup[key];
-                }
-
-                let store_lower = store.toLowerCase();
-                if (store_lower in normalized_store_lookup) {
-                    store = normalized_store_lookup[store_lower];
-                }else {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
-                    err_counter++;
-                }
-
-                let normalized_item_lookup = {};
-                for (let key in item_lookup) {
-                    normalized_item_lookup[key.toLowerCase()] = item_lookup[key];
-                }
-
-                // let item_lower = item.toLowerCase();
-                // if (item_lower in normalized_item_lookup) {
-                //     item = item;
-                // }else {
-                //     invalid = true;
-                //     errorLogs.push(`⚠️ Invalid Item at line #: ${tr_count}`);
-                //     err_counter++;
-                // }
+                store = store_lookup[store.toLowerCase()] || addErrorLog("Invalid Store");
+                //temporary disabled for demo
+               // item = item_lookup[item.toLowerCase()] || addErrorLog("Invalid Item");
 
                 if (!invalid) {
                     valid_data.push({
-                        store: store,
-                        item: item,
-                        item_name: item_name,
-                        item_class: item_class,
-                        supplier: supplier,
-                        group: group,
-                        dept: dept,
-                        class: r_class,
-                        sub_class: sub_class,
-                        on_hand: on_hand,
-                        in_transit: in_transit,
-                        average_sales_unit: ave_sales_unit,
-                        vmi_status : vmi_status,
-                        status : status,
-                        created_by: user_id,
-                        created_date: date_of_creation
+                        store, item, item_name, item_class, supplier, c_group, dept, c_class: r_class, sub_class, 
+                        on_hand, in_transit, average_sales_unit: ave_sales_unit, vmi_status, status, 
+                        created_by: user_id, created_date: date_of_creation
                     });
                 }
+            }
+
+            if (index % 100000 === 0) {
+                self.postMessage({ progress: Math.round((index / data.length) * 100), err_counter });
             }
 
             setTimeout(processBatch, 0);
         }
 
         processBatch();
-    }catch (error) {
+    } catch (error) {
         self.postMessage({ invalid: true, errorLogs: [`Validation failed: ${error.message}`], err_counter: 1 });
     }
 };

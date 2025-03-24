@@ -608,7 +608,6 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log(json);
                     return json.data.length ? json.data : [];
                 }
             },

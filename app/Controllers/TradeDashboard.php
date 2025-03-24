@@ -140,6 +140,9 @@ class TradeDashboard extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+		$data['month'] = $this->Global_model->get_months();
+		$data['week'] = $this->Global_model->get_weeks();
+		$data['item_classification'] = $this->Global_model->get_item_classification();
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
@@ -528,6 +531,62 @@ class TradeDashboard extends BaseController
 	        default:
 	        	$data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 20, 30, $brand, $ba, $store, 10, 0);
 	    }
+	    return $this->response->setJSON([
+	        'draw' => intval($this->request->getVar('draw')),
+	        'recordsTotal' => $data['total_records'],
+	        'recordsFiltered' => $data['total_records'],
+	        'data' => $data['data'],
+	    ]);	
+	}
+
+	public function trade_kam_one()
+	{	
+
+	    $ba = $this->request->getPost('ba');
+	    $area = $this->request->getPost('area');
+	    $brand = $this->request->getPost('brand');
+	    $store = $this->request->getPost('store');
+	    $month = $this->request->getPost('month');
+	    $week = $this->request->getPost('week');
+	    $withba = $this->request->getPost('withba');
+		$itemclassi = $this->request->getPost('itemcat'); //to follow
+		$latest_vmi_data = $this->Dashboard_model->getLatestVmi();
+		$latest_year = null;
+		if($latest_vmi_data){
+	    	$latest_year = $latest_vmi_data['year_id'];
+	    }
+
+	    if(empty($area)){
+	    	$area = null;
+	    }
+	    if(empty($store)){
+	    	$store = null;
+	    }
+	    if(empty($ba)){
+	    	$ba = null;
+	    }
+	    if(empty($brand)){
+	    	$brand = null;
+	    }
+	    if(empty($month)){
+	    	$month = null;
+	    }
+	    if(empty($week)){
+	    	$week = null;
+	    }
+	    if(empty($itemclassi)){
+	    	$itemclassi = null;
+	    }
+	    if($withba == 'with_ba'){
+	    	$withba  = true;
+	    }else if($withba == 'without_ba'){
+	    	$withba = true;
+	    }else{
+	    	$withba = null;
+	    }
+
+	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $ba, $store, 10, 0, $withba);
+	    
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
 	        'recordsTotal' => $data['total_records'],

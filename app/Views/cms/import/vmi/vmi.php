@@ -290,7 +290,6 @@
             },
             // group : "v.year, v.month, v.week, c.name"
         };
-        console.log(data, 'data')
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
@@ -430,7 +429,7 @@
     function paginateData(rowsPerPage) {
         totalPages = Math.ceil(dataset.length / rowsPerPage);
         currentPage = 1;
-        display_imported_data();
+        fetchPaginatedData();
     }
 
 
@@ -464,186 +463,164 @@
         }).join('');
     }
 
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false); 
-    //     clear_import_table();
-        
-    //     dataset = [];
+    async function read_xl_file() {
+        delete_temp_data();
+        let fileInput = document.getElementById("file");
+        let file = fileInput.files[0];
 
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const data = new Uint8Array(e.target.result);
-    //         const workbook = XLSX.read(data, { type: "array" });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-    //     reader.readAsArrayBuffer(file);
-    // }
-
-    // with special characters
-    function read_xl_file() {
-        let btn = $(".btn.save");
-        btn.prop("disabled", false);
-        clear_import_table();
-
-        dataset = [];
-
-        const file = $("#file")[0].files[0];
         if (!file) {
-            modal.loading_progress(false);
-            modal.alert('Please select a file to upload', 'error', () => {});
+            modal.alert("Please select a file to upload.", "error");
             return;
         }
 
-        // const maxFileSize = 30 * 1024 * 1024; // 30MB limit
-        // if (file.size > maxFileSize) {
-        //     modal.loading_progress(false);
-        //     modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-        //     return;
-        // }
+        modal.loading_progress(true, "Preparing Data");
+        const chunkSize = 512 * 1024; // 512 KB
+        const totalChunks = Math.ceil(file.size / chunkSize);
 
-        modal.loading_progress(true, "Reviewing Data...");
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+            let start = chunkIndex * chunkSize;
+            let end = Math.min(start + chunkSize, file.size);
+            let chunk = file.slice(start, end);
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const data = e.target.result;
+            let formData = new FormData();
+            formData.append("file", chunk);
+            formData.append("chunkIndex", chunkIndex);
+            formData.append("totalChunks", totalChunks);
+            formData.append("fileName", file.name);
 
-            // Read as binary instead of plain text
-            const workbook = XLSX.read(data, { type: "binary", raw: true });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-            // Ensure special characters like "ñ" are correctly preserved
-            jsonData = jsonData.map(row => {
-                let fixedRow = {};
-                Object.keys(row).forEach(key => {
-                    let value = row[key];
-
-                    // Convert numbers to text while keeping dates unchanged
-                    if (typeof value === "number") {
-                        value = String(value);
-                    }
-
-                    fixedRow[key] = value !== null && value !== undefined ? value : "";
+            try {
+                await fetch("<?= base_url('cms/import-vmi/import-temp-vmi-data'); ?>", {
+                    method: "POST",
+                    body: formData
                 });
-                return fixedRow;
-            });
+            } catch (error) {
+                modal.alert("Upload error, please try again.", "error");
+                return;
+            }
+            let progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+            updateSwalProgress("Preview Data", progress);
+        }
+        fetchPaginatedData();
+        modal.loading_progress(false);
+    }
 
-            console.log(jsonData);
-
-            processInChunks(jsonData, 5000, () => {
-                paginateData(rowsPerPage);
-            });
-        };
-
-        // Use readAsBinaryString instead of readAsText
-        reader.readAsBinaryString(file);
+    function fetchPaginatedData() {
+        modal.loading(true);
+        $.ajax({
+            url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
+            method: "GET",
+            data: {
+                page: currentPage,
+                limit: rowsPerPage
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    totalPages = Math.ceil(response.totalRecords / rowsPerPage);
+                    display_imported_data(response.data);
+                } else {
+                    modal.alert("Failed to fetch data.", "error");
+                }
+                modal.loading(false);
+            },
+            error: function() {
+                modal.alert("Error fetching data.", "error");
+                modal.loading(false);
+            }
+        });
     }
 
     function process_xl_file() {
         let btn = $(".btn.save");
         if (btn.prop("disabled")) return;
-
         btn.prop("disabled", true);
-        $(".import_buttons").find("a.download-error-log").remove();
-         setTimeout(() => {
-                btn.prop("disabled", false);
-            }, 4000);
+
         const inp_year = $('#yearSelect').val()?.trim();
         const inp_month = $('#monthSelect').val()?.trim();
         const inp_week = $('#weekSelect').val()?.trim();
         const inp_company = $('#companySelect').val()?.trim();
 
         const fields = { inp_year, inp_month, inp_week, inp_company };
-
         for (const [key, value] of Object.entries(fields)) {
             if (!value) {
-                return modal.alert(`Please select a ${key.charAt(4).toUpperCase() + key.slice(5)}.`, 'error', () => {});
+                btn.prop("disabled", false);
+                return modal.alert(`Please select a ${key.replace("inp_", "")}.`, 'error', () => {});
             }
         }
 
-        if (dataset.length === 0) {
-            return modal.alert('No data to process. Please upload a file.', 'error', () => {});
+        modal.loading(true, "Fetching all data from temporary table...");
+
+        let allData = [];
+
+        function fetchAllPages(page = 0) {
+            $.ajax({
+                url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
+                method: "GET",
+                data: { page, limit: 5000 }, // Fetch in larger chunks
+                success: function(response) {
+                    if (response.success && response.data.length > 0) {
+                        allData = allData.concat(response.data);
+                        if (response.data.length === 5000) {
+                            fetchAllPages(page + 5000);
+                        } else {
+                            validate_temp_data(allData, inp_year, inp_month, inp_week, inp_company);
+                        }
+                    } else {
+                        modal.loading_progress(false);
+                        modal.alert("No data found in the temporary table.", "error");
+                    }
+                },
+                error: function(xhr) {
+                    modal.loading(false);
+                    modal.alert("Error fetching data: " + xhr.responseText, "error");
+                }
+            });
         }
-        modal.loading(true);
 
-        let jsonData = dataset.map(row => {
-            return {
-                "Store": row["Store"] || "",
-                "Item": row["Item"] || "",
-                "Item Name": row["Item Name"] || "",
-                "VMI Status": row["VMI Status"] || "",
-                "Item Class": row["Item Class"] || "",
-                "Supplier": row["Supplier"] || "",
-                "Group": row["Group"] || "",
-                "Dept": row["Dept"] || "",
-                "Class": row["Class"] || "",
-                "Sub Class": row["Sub Class"] || "",
-                "On Hand": row["On Hand"] || "",
-                "In Transit": row["In Transit"] || "",
-                "Ave Sales Unit": row["Ave Sales Unit"] || "",
-                "Created by": user_id || "", 
-                "Created Date": formatDate(new Date()) || ""
-            };
-        });
+        fetchAllPages();
+    }
 
+    function validate_temp_data(data, inp_year, inp_month, inp_week, inp_company) {
+        modal.loading(true, "Validating data...");
 
         let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
-        worker.postMessage({ data: jsonData, base_url, inp_company });
+        worker.postMessage({ data, base_url, company: inp_company });
 
         worker.onmessage = function(e) {
-            modal.loading_progress(false);
             const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
-            if(progress == 100){
-                if (invalid) {
-                    let errorMsg = err_counter > 1000 
-                        ? '⚠️ Too many errors detected. Please download the error log for details.'
-                        : errorLogs.join("<br>");
-                    modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
-                        read_xl_file();
-                        btn.prop("disabled", false);
-                    });
-                    createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
-                } else if (valid_data && valid_data.length > 0) {
-                    btn.prop("disabled", false);
-                    updateSwalProgress("Validation Completed", 10);
-                    new_data = valid_data.map(record => ({
-                        ...record,
-                        year: inp_year,
-                        month: inp_month,
-                        week: inp_week,
-                        company: inp_company
-                    }));
-                    setTimeout(() => saveValidatedData(new_data), 500);
-                } else {
-                    btn.prop("disabled", false);
-                    modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
-                }
-            }else{
-                //modal.loading(false);
-                //modal.loading_progress(true); 
-                //updateSwalProgress("Validating data...", progress);
-            
+
+            if (progress !== undefined) {
+                modal.loading_progress(true, `Processing... ${progress}%`);
+                return;
             }
 
+            modal.loading_progress(false);
+
+            if (invalid) {
+                let errorMsg = err_counter > 1000
+                    ? '⚠️ Too many errors detected. Please download the error log for details.'
+                    : errorLogs.slice(0, 10).join("<br>") + (errorLogs.length > 10 ? "<br>...and more" : "");
+
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                    $(".btn.save").prop("disabled", false);
+                });
+
+                createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
+            } else if (Array.isArray(valid_data) && valid_data.length > 0) { 
+                let new_data = valid_data.map(record => ({
+                    ...record,
+                    year: inp_year,
+                    month: inp_month,
+                    week: inp_week,
+                    company: inp_company
+                }));
+                saveValidatedData(new_data);
+            } else {
+                modal.alert("No valid data found. Please check the file.", "error");
+            }
         };
 
-        worker.onerror = function() {
+        worker.onerror = function(event) {
             modal.loading_progress(false);
             modal.alert("Error processing data. Please try again.", "error");
         };
@@ -673,13 +650,9 @@
         nextChunk();
     }
 
-    function display_imported_data() {
-        let start = (currentPage - 1) * rowsPerPage;
-        let end = start + rowsPerPage;
-        let paginatedData = dataset.slice(start, end);
-
-        let html = '';
-        let tr_counter = start;
+    function display_imported_data(paginatedData) {
+        let html = "";
+        let tr_counter = (currentPage - 1) * rowsPerPage;
 
         paginatedData.forEach(row => {
             let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
@@ -691,9 +664,9 @@
                 return acc;
             }, {});
 
-            let td_validator = ['store', 'item', 'item name', 'vmi status', 'item class', 'supplier', 'group', 'dept', 'class', 'sub class', 'on hand', 'in transit', 'ave sales unit'];
+            let td_validator = ['store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'average_sales_unit'];
             td_validator.forEach(column => {
-                let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; 
+                let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
 
                 if (column === 'status' && typeof value === 'string') {
                     value = value.replace(/\s*\(.*?\)/g, "");
@@ -706,7 +679,6 @@
             tr_counter += 1;
         });
 
-        modal.loading(false);
         $(".import_table").html(html);
         updatePaginationControls();
     }
@@ -721,20 +693,33 @@
 
         let selected_fields = [
             'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
-            'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 
+            'supplier', 'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 
             'in_transit', 'year', 'month', 'week', 'company'
         ];
 
         const matchFields = [
             'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 
-            'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'
+            'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'
+        ];  
+
+
+        var inp_year = $('#yearSelect').val()?.trim();
+        var inp_month = $('#monthSelect').val()?.trim();
+        var inp_week = $('#weekSelect').val()?.trim();
+        var inp_company = $('#companySelect').val()?.trim();
+        const filters = [
+                inp_year,
+                inp_month,
+                inp_week,
+                inp_company
         ];  
 
         const matchType = "AND";  // Use "AND" or "OR" for matching logic
 
         modal.loading_progress(true, "Validating and Saving data...");
-
-        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+        let existingMap = new Map();
+        //aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields}, function(response) {
+        aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields,  filters:filters}, function(response) {
             let result = JSON.parse(response);
             let existingMap = new Map();
 
@@ -752,7 +737,9 @@
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
                         modal.alert("Some records encountered errors. Check the log.", 'info');
                     } else {
-                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                        modal.alert("All records saved/updated successfully!", 'success', () => 
+                            location.reload()
+                            );
                     }
                     return;
                 }
@@ -815,7 +802,6 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
-                            console.log(newRecords, 'newRecords')
                             batch_insert(url, newRecords, table, false, (response) => {
                                 if (response.message === 'success') {
                                     updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
@@ -845,11 +831,168 @@
             setTimeout(processNextBatch, 1000);
         });
     }
+    //for optimization
+    // function saveValidatedData(valid_data) {
+    //     let batch_size = 5000;
+    //     let batch_index = 0;
+    //     let errorLogs = [];
+    //     let url = "<?= base_url('cms/global_controller');?>";
+    //     let table = 'tbl_vmi';
+
+    //     let matchFields = ['store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'];
+    //     let matchType = "AND";
+
+    //     modal.loading_progress(true, "Validating and Saving data...");
+
+    //     let existingMap = new Map();
+
+    //     async function fetchExistingData() {
+    //         return new Promise((resolve, reject) => {
+    //             aJax.post(url, { table: table, event: "fetch_existing2", selected_fields: matchFields, valid_data: valid_data }, function(response) {
+    //                 let result = JSON.parse(response);
+    //                 if (result.existing) {
+    //                     result.existing.forEach(record => {
+    //                         let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+    //                         existingMap.set(key, record.id);
+    //                     });
+    //                 }
+    //                 resolve();
+    //             });
+    //         });
+    //     }
+
+    //     async function processNextBatch() {
+    //         if (batch_index * batch_size >= valid_data.length) {
+    //             modal.loading_progress(false);
+    //             if (errorLogs.length > 0) {
+    //                 createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+    //                 modal.alert("Some records encountered errors. Check the log.", 'info');
+    //             } else {
+    //                 modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+    //             }
+    //             return;
+    //         }
+
+    //         let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+    //         let newRecords = [];
+    //         let updateRecords = [];
+
+    //         batch.forEach(row => {
+    //             let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+    //             let matchedId = existingMap.get(key);
+
+    //             if (matchedId) {
+    //                 row.id = matchedId;
+    //                 row.updated_by = user_id;
+    //                 row.updated_date = formatDate(new Date());
+    //                 delete row.created_by;
+    //                 delete row.created_date;
+    //                 updateRecords.push(row);
+    //             } else {
+    //                 row.created_by = user_id;
+    //                 row.created_date = formatDate(new Date());
+    //                 newRecords.push(row);
+    //             }
+    //         });
+
+    //         try {
+    //             if (updateRecords.length > 0) {
+    //                 let updateResponse = await batch_update(url, updateRecords, table, "id", false);
+    //                 if (updateResponse.message !== 'success') errorLogs.push(`Failed to update: ${JSON.stringify(updateResponse.error)}`);
+    //             }
+
+    //             if (newRecords.length > 0) {
+    //                 let insertResponse = await batch_insert(url, newRecords, table, false);
+    //                 if (insertResponse.message !== 'success') errorLogs.push(`Batch insert failed: ${JSON.stringify(insertResponse.error)}`);
+    //             }
+    //         } catch (error) {
+    //             errorLogs.push(`Unexpected error: ${error}`);
+    //         }
+
+    //         batch_index++;
+    //         requestIdleCallback(processNextBatch);
+    //     }
+
+    //     fetchExistingData().then(processNextBatch);
+    // }
+
+    function delete_temp_data(){
+        $.ajax({
+        url: "<?= base_url('cms/import-vmi/delete-temp-vmi-data'); ?>",
+        type: "POST",
+        data: { action: "delete_temp_records" },
+        success: function (response) {
+        },
+        error: function (xhr, status, error) {
+        }
+    });
+    }
+
+    function processInChunks(data, chunkSize, callback) {
+        let index = 0;
+        let totalRecords = data.length;
+        let totalProcessed = 0;
+
+        function nextChunk() {
+            if (index >= data.length) {
+                modal.loading_progress(false);
+                callback(); 
+                return;
+            }
+
+            let chunk = data.slice(index, index + chunkSize);
+            dataset = dataset.concat(chunk);
+            totalProcessed += chunk.length; 
+            index += chunkSize;
+
+            let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
+            updateSwalProgress("Preview Data", progress);
+            requestAnimationFrame(nextChunk);
+        }
+        nextChunk();
+    }
+
+    function display_imported_data(paginatedData) {
+        let html = "";
+        let tr_counter = (currentPage - 1) * rowsPerPage;
+
+        paginatedData.forEach(row => {
+            let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
+            html += `<tr class="${rowClass}">`;
+            html += `<td>${tr_counter + 1}</td>`;
+
+            let lowerCaseRecord = Object.keys(row).reduce((acc, key) => {
+                acc[key.toLowerCase()] = row[key];
+                return acc;
+            }, {});
+
+            let td_validator = ['store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'average_sales_unit'];
+            td_validator.forEach(column => {
+                let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
+
+                if (column === 'status' && typeof value === 'string') {
+                    value = value.replace(/\s*\(.*?\)/g, "");
+                }
+
+                html += `<td>${value}</td>`;
+            });
+
+            html += "</tr>";
+            tr_counter += 1;
+        });
+
+        $(".import_table").html(html);
+        updatePaginationControls();
+    }
 
     function updatePaginationControls() {
         let paginationHtml = `
-            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
-            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
+            <button onclick="goToPage(1)" ${currentPage === 1 ? "disabled" : ""}>
+                <i class="fas fa-angle-double-left"></i>
+            </button>
+            <button onclick="changePage(-1)" ${currentPage === 1 ? "disabled" : ""}>
+                <i class="fas fa-angle-left"></i>
+            </button>
             
             <select onchange="goToPage(this.value)">
                 ${Array.from({ length: totalPages }, (_, i) => 
@@ -857,11 +1000,30 @@
                 ).join('')}
             </select>
             
-            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
-            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
+            <button onclick="changePage(1)" ${currentPage === totalPages ? "disabled" : ""}>
+                <i class="fas fa-angle-right"></i>
+            </button>
+            <button onclick="goToPage(totalPages)" ${currentPage === totalPages ? "disabled" : ""}>
+                <i class="fas fa-angle-double-right"></i>
+            </button>
         `;
 
         $(".import_pagination").html(paginationHtml);
+    }
+
+    function changePage(offset) {
+        if ((offset === -1 && currentPage > 1) || (offset === 1 && currentPage < totalPages)) {
+            currentPage += offset;
+            fetchPaginatedData();
+        }
+    }
+
+    function goToPage(page) {
+        page = parseInt(page);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            fetchPaginatedData();
+        }
     }
 
     function createErrorLogFile(errorLogs, filename) {
@@ -1037,9 +1199,9 @@
                 "VMI Status":"", 
                 "Item Class":"", 
                 "Supplier":"", 
-                "Group":"", 
+                "C Group":"", 
                 "Dept":"", 
-                "Class":"", 
+                "C Class":"", 
                 "Sub Class":"", 
                 "On Hand":"", 
                 "In Transit":"", 
@@ -1099,7 +1261,7 @@
             dynamic_search(
                 "'tbl_vmi'", 
                 "''", 
-                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'", 
+                "'store, item, item_name, item_class, supplier, `c_group`, dept, `c_class` as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'", 
                 0, 
                 0, 
                 `'${filter}'`,  
@@ -1140,9 +1302,9 @@
                         "VMI Status":"", 
                         "Item Class":"", 
                         "Supplier":"", 
-                        "Group":"", 
+                        "C Group":"", 
                         "Dept":"", 
-                        "Class":"", 
+                        "C Class":"", 
                         "Sub Class":"", 
                         "On Hand":"", 
                         "In Transit":"", 
@@ -1157,8 +1319,6 @@
                         let rec_month = det.month;
                         let rec_week = det.week;
                         let currentRecord = { rec_company, rec_year, rec_month, rec_week };
-
-                        console.log(currentRecord, count+1)
                         count+=1;
 
                         let newData = {
@@ -1168,9 +1328,9 @@
                             "VMI Status":det.vmi_status, 
                             "Item Class":det.item_class, 
                             "Supplier":det.supplier, 
-                            "Group":det.group, 
+                            "C Group":det.group, 
                             "Dept":det.dept, 
-                            "Class":det.classification, 
+                            "C Class":det.classification, 
                             "Sub Class":det.sub_class, 
                             "On Hand":det.on_hand, 
                             "In Transit":det.in_transit, 
@@ -1186,7 +1346,6 @@
                             )
                         ) {
                             formattedData.push(spacing)
-                            console.log('spaced')
                         }
                         formattedData.push(newData)
                         previousRecord = currentRecord;
@@ -1237,7 +1396,7 @@
                                 dynamic_search(
                                     "'tbl_vmi'", 
                                     "''", 
-                                    `'store, item, item_name, item_class, supplier, \`group\`, dept, class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'`, 
+                                    `'store, item, item_name, item_class, supplier, \`c_group\`, dept, c_class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'`, 
                                     100000, 
                                     index, 
                                     `''`,  
@@ -1278,9 +1437,9 @@
                                             "VMI Status":"", 
                                             "Item Class":"", 
                                             "Supplier":"", 
-                                            "Group":"", 
+                                            "C Group":"", 
                                             "Dept":"", 
-                                            "Class":"", 
+                                            "C Class":"", 
                                             "Sub Class":"", 
                                             "On Hand":"", 
                                             "In Transit":"", 
@@ -1295,8 +1454,6 @@
                                             let rec_month = det.month;
                                             let rec_week = det.week;
                                             let currentRecord = { rec_company, rec_year, rec_month, rec_week };
-
-                                            console.log(currentRecord, count+1)
                                             count+=1;
 
                                             let newData = {
@@ -1306,9 +1463,9 @@
                                                 "VMI Status":det.vmi_status, 
                                                 "Item Class":det.item_class, 
                                                 "Supplier":det.supplier, 
-                                                "Group":det.group, 
+                                                "C Group":det.c_group, 
                                                 "Dept":det.dept, 
-                                                "Class":det.classification, 
+                                                "C Class":det.classification, 
                                                 "Sub Class":det.sub_class, 
                                                 "On Hand":det.on_hand, 
                                                 "In Transit":det.in_transit, 
@@ -1324,7 +1481,6 @@
                                                 )
                                             ) {
                                                 formattedData.push(spacing)
-                                                console.log('spaced')
                                             }
                                             formattedData.push(newData)
                                             previousRecord = currentRecord;
@@ -1333,7 +1489,7 @@
                                 )
                             }
                         } else {
-                            console.log('No data received');
+
                         }
                     }
                 )
@@ -1388,8 +1544,8 @@
                                 "left join tbl_month m on v.month = m.id "+
                                 "left join tbl_week w on v.week = w.id'", 
 
-                                "'store, item, item_name, item_class, supplier, `group`, dept, class as classification, "+
-                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, year, month, week'", 
+                                "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
+                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'", 
 
                                 100000, 
                                 index, 
@@ -1432,7 +1588,7 @@
                                             "VMI Status":det.vmi_status, 
                                             "Item Class":det.item_class, 
                                             "Supplier":det.supplier, 
-                                            "Group":det.group, 
+                                            "Group":det.c_group, 
                                             "Dept":det.dept, 
                                             "Class":det.classification, 
                                             "Sub Class":det.sub_class, 
@@ -1495,9 +1651,8 @@
                             item.updated_by = user_id;
                             item.status = -2;
                             updateRecords.push(item);
-                            console.log(item.id)
                         })
-                        console.log(updateRecords, 'updateRecords')
+
                         batch_update(url, updateRecords, "tbl_vmi", "id", false, (response) => {
                             if (response.message !== 'success') {
                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
