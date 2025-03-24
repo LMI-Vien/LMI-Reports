@@ -59,8 +59,9 @@ $(document).ready(function () {
             .done(function (response) {
                 try {
                     const parsedResponse = is_json(response);
+                    // console.log(parsedResponse);
                     const resultCount = parsedResponse.count;
-                    const attempts = parsedResponse.attempts || "Incorrect Email Address or Password.";
+                    const attempts = parsedResponse.message || "Incorrect Email Address or Password.";
 
                     const messages = {
                         3: ["Login Successful.", `Welcome ${username} !`, "success", () => location.href = base_url + 'cms/home'],
