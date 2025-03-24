@@ -327,7 +327,7 @@
                                     </tr>
                                     <tr>
                                         <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Quality</th>
+                                        <th class="tbl-title-field">Quantity</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -367,7 +367,7 @@
                                     </tr>
                                     <tr>
                                         <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Quality</th>
+                                        <th class="tbl-title-field">Quantity</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -407,7 +407,7 @@
                                     </tr>
                                     <tr>
                                         <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Quality</th>
+                                        <th class="tbl-title-field">Quantity</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -481,7 +481,6 @@
                     <button 
                         class="btn btn-info mr-2" 
                         id="previewButton"
-                        id="step10" 
                         data-title="Step 5: Previewing the Report"
                         data-intro="
                         Before exporting, you can preview the report:<br><br>
@@ -490,6 +489,7 @@
                         Review the data and formatting before exporting.<br><br>
                         Click Next" 
                         data-step="10"
+                        onclick="handleAction('preview')"
                     >
                         <i class="fas fa-eye"></i> Preview
                     </button>
@@ -506,6 +506,7 @@
                         <small>Tip: Use PDF for sharing and Excel for further data analysis.</small><br><br>
                         Click Next" 
                         data-step="11"
+                        onclick="handleAction('export')"
                     >
                         <i class="fas fa-file-export"></i> Export
                     </button>
@@ -674,8 +675,6 @@
         });
     }
 
-
-
     function get_area_asc(id) {
         //id = 1;
         var url = "<?= base_url('cms/global_controller');?>";
@@ -715,5 +714,40 @@
                 });
             }
         });
+    }
+
+    function handleAction(action) {
+        let selectedType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#ba_id').val();
+        let selectedStore = $('#store_id').val();
+        let selectedBrand = $('#brand_id').val();
+        let selectedSortField = $('#sortBy').val();
+        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+        let ascName = $('#ar_asc_name').text().trim();
+        if (ascName === 'Please Select Brand Ambassador') {
+            ascName = '';
+        } else {
+            ascName = encodeURIComponent(ascName);
+        }
+        let date = new Date();
+        let formattedDate = encodeURIComponent(date.toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+        }));
+
+        if (action === 'preview') {
+            let link = `${selectedType}-${selectedBa}-${selectedStore}-${selectedBrand}-${selectedSortField}-${selectedSortOrder}-${ascName}`;
+            console.log(link, 'link');
+            window.open(`<?= base_url()?>trade-dashboard/trade-ba-view/${link}`, '_blank');
+        } else if (action === 'export') {
+            alert(action)
+        } else {
+            alert('wtf are u doing?')
+        }
     }
 </script>

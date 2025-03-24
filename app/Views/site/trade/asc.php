@@ -252,7 +252,7 @@
                                         style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                         class="tbl-title-header"
                                     >
-                                        OVERALL BA SALES TARGET
+                                        INFORMATION FOR AREA SALES COORDINATOR
                                     </th>
                                 </tr>
                                 <tr>
