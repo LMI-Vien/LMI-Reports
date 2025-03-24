@@ -105,6 +105,7 @@
                         </div> -->
                     </div>
                 </div>
+                <div class="list_pagination"></div>
             </div>
         </div>
     </div>
@@ -117,9 +118,10 @@
     var ba_sales_report_date = "<?=$uri->getSegment(4);?>";
     var query = "basr.status >= 0 and basr.date = '"+ba_sales_report_date+"'";
     console.log(query);
+
     $(document).ready(function() {
         get_data(query);
-        get_pagination();
+        get_pagination(query);
     });
 
     function get_data(new_query) {
@@ -127,8 +129,8 @@
             event : "list",
             select : "basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status",
             query : new_query,
-            offset : 0,
-            limit : 0,
+            offset : offset,
+            limit : limit,
             table : "tbl_ba_sales_report basr",
             join : [
                 {
@@ -207,19 +209,109 @@
         });
     }
 
-    function get_pagination() {
+    // function get_pagination() {
+    //     var url = "<?= base_url("cms/global_controller");?>";
+    //     var data = {
+    //       event : "pagination",
+    //         select : "basr.id, basr.status",
+    //         query : query,
+    //         offset : offset,
+    //         limit : limit,
+    //         table : "tbl_ba_sales_report as basr"
+    //     }
+
+    //     aJax.post(url,data,function(result){
+    //         var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
+    //         modal.loading(false);
+    //         pagination.generate(obj.total_page, ".list_pagination", get_data);
+    //     });
+    // }
+
+    // pagination.onchange(function(){
+    //     offset = $(this).val();
+    //     get_data(query);
+    //     $('.selectall').prop('checked', false);
+    //     $('.btn_status').hide();
+    //     $("#search_query").val("");
+    // });
+
+    // $(document).on('keypress', '#search_query', function(e) {               
+    //     if (e.keyCode === 13) {
+    //         var keyword = $(this).val().trim();
+    //         offset = 1;
+    //         var new_query = "(" + query + " AND ar.description LIKE '%" + keyword + "%') OR " +
+    //             "(" + query + " AND s.description LIKE '%" + keyword + "%') OR " +
+    //             "(" + query + " AND b.brand_description LIKE '%" + keyword + "%') OR " +
+    //             "(" + query + " AND ba.name LIKE '%" + keyword + "%') OR " +
+    //             "(" + query + " AND basr.date LIKE '%" + keyword + "%')"; 
+                
+    //         get_data(new_query);
+    //         get_pagination();
+    //     }
+    // });
+
+    // $(document).on("change", ".record-entries", function(e) {
+    //     $(".record-entries option").removeAttr("selected");
+    //     $(".record-entries").val($(this).val());
+    //     $(".record-entries option:selected").attr("selected","selected");
+    //     var record_entries = $(this).prop( "selected",true ).val();
+    //     limit = parseInt(record_entries);
+    //     offset = 1;
+    //     modal.loading(true); 
+    //     get_data(query);
+    //     get_pagination(query);
+    //     modal.loading(false);
+    // });
+
+    function ViewDateOnly(dateString) {
+        let date = new Date(dateString);
+        return date.toLocaleString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric'
+        });
+    }
+
+    function get_pagination(new_query) {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
-          event : "pagination",
-            select : "basr.id, basr.status",
-            query : query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_ba_sales_report as basr"
+            event : "pagination",
+            select: "basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status",
+            query: new_query,
+            offset: offset,
+            limit: limit,
+            table : "tbl_ba_sales_report basr",
+            join : [
+                {
+                    table: "tbl_brand b",
+                    query: "b.id = basr.brand",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = basr.store_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.id = basr.ba_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area ar",
+                    query: "ar.id = basr.area_id",
+                    type: "left"
+                }
+            ], 
+            order : {
+                field : "basr.id",
+                order : "asc" 
+            }
+            // group : ""
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
+            var obj = is_json(result); 
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -232,43 +324,6 @@
         $('.btn_status').hide();
         $("#search_query").val("");
     });
-
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
-            offset = 1;
-            var new_query = "(" + query + " AND ar.description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND s.description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND b.brand_description LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND ba.name LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND basr.date LIKE '%" + keyword + "%')"; 
-                
-            get_data(new_query);
-            get_pagination();
-        }
-    });
-
-    $(document).on("change", ".record-entries", function(e) {
-        $(".record-entries option").removeAttr("selected");
-        $(".record-entries").val($(this).val());
-        $(".record-entries option:selected").attr("selected","selected");
-        var record_entries = $(this).prop( "selected",true ).val();
-        limit = parseInt(record_entries);
-        offset = 1;
-        modal.loading(true); 
-        get_data(query);
-        get_pagination(query);
-        modal.loading(false);
-    });
-
-    function ViewDateOnly(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric'
-        });
-    }
 
 
 </script>

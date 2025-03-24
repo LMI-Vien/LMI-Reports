@@ -37,6 +37,7 @@
                     <tbody class="table_body word_break"></tbody>
                 </table>
             </div>
+            <div class="list_pagination"></div>
         </div>
     </div>
 </div>
@@ -208,7 +209,7 @@
 <script>
     var params = "<?=$uri->getSegment(4);?>";
     var query = `a.status >= 0 and y.year = ${params}`;
-    var limit = 0; 
+    var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
 
@@ -216,7 +217,8 @@
         $("#sell_out_title").html(addNbsp("VIEW TARGET SELL OUT PER ACCOUNT"));
         $("#year").val(params)
 
-        get_data(query)
+        get_data(query);
+        get_pagination(query);
     })
 
     function get_data(new_query) {
@@ -634,4 +636,53 @@
     function set_field_state(selector, isReadOnly) {
         $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
     }
+
+    function get_pagination(new_query) {
+        var url = "<?= base_url("cms/global_controller");?>";
+        var data = {
+            event : "pagination",
+            select: `a.id, a.payment_group, a.vendor, a.overall, a.kam_kas_kaa, a.sales_group, a.terms, a.channel, a.brand, 
+                a.exclusivity, a.category, a.lmi_code, a.rgdi_code, a.customer_sku_code, a.item_description, a.item_status, a.srp, 
+                a.trade_discount, a.customer_cost, a.customer_cost_net_of_vat,
+                a.january_tq, a.february_tq, a.march_tq, a.april_tq, a.may_tq, a.june_tq, 
+                a.july_tq, a.august_tq, a.september_tq, a.october_tq, a.november_tq, a.december_tq,
+                a.status, a.january_ta, a.february_ta, a.march_ta, a.april_ta, a.may_ta, a.june_ta, 
+                a.july_ta, a.august_ta, a.september_ta, a.october_ta, a.november_ta, a.december_ta, a.updated_date, 
+                (a.january_ta + a.february_ta + a.march_ta + a.april_ta + a.may_ta + a.june_ta + 
+                a.july_ta + a.august_ta + a.september_ta + a.october_ta + a.november_ta + a.december_ta) AS total_amount, 
+                (a.january_tq + a.february_tq + a.march_tq + a.april_tq + a.may_tq + a.june_tq + 
+                a.july_tq + a.august_tq + a.september_tq + a.october_tq + a.november_tq + a.december_tq) as total_qty,
+                a.created_date`.replace(/\s+/g, ' '),
+            query: new_query,
+            offset: offset,
+            limit: limit,
+            table : "tbl_accounts_target_sellout_pa a",
+            join : [
+                {
+                    table: "tbl_year y",
+                    query: "y.id = a.year",
+                    type: "left"
+                }
+            ],
+            order : {
+                field : "payment_group",
+                order : "asc" 
+            }
+            // group : ""
+        }
+
+        aJax.post(url,data,function(result){
+            var obj = is_json(result); 
+            modal.loading(false);
+            pagination.generate(obj.total_page, ".list_pagination", get_data);
+        });
+    }
+
+    pagination.onchange(function(){
+        offset = $(this).val();
+        get_data(query);
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
+        $("#search_query").val("");
+    });
 </script>
