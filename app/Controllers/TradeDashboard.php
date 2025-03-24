@@ -200,6 +200,26 @@ class TradeDashboard extends BaseController
 		return view("site/layout/template", $data);
 	}
 
+	public function trade_ba_view() {
+		$uri = current_url(true);
+		$data['uri'] =$uri;
+		$data['meta'] = array(
+			"title"         =>  "LMI Portal",
+			"description"   =>  "LMI Portal Wep application",
+			"keyword"       =>  ""
+		);
+		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['brands'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['title'] = "Trade Dashboard";
+		$data['PageName'] = 'Trade Dashboard';
+		$data['PageUrl'] = 'Trade Dashboard';
+		$data['content'] = "site/trade/ba_view.php";
+		$data['js'] = array();
+        $data['css'] = array();
+		return view("site/layout/template", $data);
+	}
+
 	public function trade_ba()
 	{
 

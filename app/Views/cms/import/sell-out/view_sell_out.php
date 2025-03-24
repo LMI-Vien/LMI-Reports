@@ -71,8 +71,10 @@
     $(document).ready(function() {
         $("#sell_out_title").html(addNbsp("VIEW SELLOUT DATA"));
 
-        renderHeader(import_sellout_id)
-        renderDetails(import_sellout_id)
+        renderHeader(import_sellout_id);
+        // renderDetails(import_sellout_id)
+        renderDetails ();
+        get_pagination("");
     });
 
     function renderHeader(header_id) {
@@ -103,47 +105,47 @@
         )
     }
 
-    function renderDetails(header_id) {
-        table = 'tbl_sell_out_data_details a';
-        join = '';
-        fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
-        limit = 0;
-        dynaoffset = 0;
-        filter = `data_header_id:EQ=${header_id}`;
-        order = '';
-        group = '';
-        dynamic_search(
-            `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${dynaoffset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
-            (result) => {
-                var html = '';
-                if(result) {
-                    if (result.length > 0) {
-                        $.each(result, function(x,y) {
-                            var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                            var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+    // function renderDetails(header_id) {
+    //     table = 'tbl_sell_out_data_details a';
+    //     join = '';
+    //     fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
+    //     limit = 0;
+    //     dynaoffset = 0;
+    //     filter = `data_header_id:EQ=${header_id}`;
+    //     order = '';
+    //     group = '';
+    //     dynamic_search(
+    //         `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${dynaoffset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
+    //         (result) => {
+    //             var html = '';
+    //             if(result) {
+    //                 if (result.length > 0) {
+    //                     $.each(result, function(x,y) {
+    //                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+    //                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
-                            html += "<tr class='" + rowClass + "'>";
-                            // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                            html += "<td scope=\"col\">" + y.file_name + "</td>";
-                            // html += "<td scope=\"col\">" + y.line_number + "</td>";
-                            html += "<td scope=\"col\">" + y.store_code + "</td>";
-                            html += "<td scope=\"col\">" + y.store_description + "</td>";
-                            html += "<td scope=\"col\">" + y.sku_code + "</td>";
-                            html += "<td scope=\"col\">" + y.sku_description + "</td>";
-                            html += "<td scope=\"col\">" + y.quantity + "</td>";
-                            html += "<td scope=\"col\">" + y.net_sales + "</td>";
+    //                         html += "<tr class='" + rowClass + "'>";
+    //                         // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+    //                         html += "<td scope=\"col\">" + y.file_name + "</td>";
+    //                         // html += "<td scope=\"col\">" + y.line_number + "</td>";
+    //                         html += "<td scope=\"col\">" + y.store_code + "</td>";
+    //                         html += "<td scope=\"col\">" + y.store_description + "</td>";
+    //                         html += "<td scope=\"col\">" + y.sku_code + "</td>";
+    //                         html += "<td scope=\"col\">" + y.sku_description + "</td>";
+    //                         html += "<td scope=\"col\">" + y.quantity + "</td>";
+    //                         html += "<td scope=\"col\">" + y.net_sales + "</td>";
                             
-                            html += "</tr>";   
-                        });
-                    } else {
-                        html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-                    }
-                };
-                $('.table_body').html(html);
-            }
-        )
-    }
-
+    //                         html += "</tr>";   
+    //                     });
+    //                 } else {
+    //                     html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+    //                 }
+    //             };
+    //             $('.table_body').html(html);
+    //         }
+    //     )
+    // }
+    
     function addNbsp(inputString) {
         return inputString.split('').map(char => {
             if (char === ' ') {
@@ -153,23 +155,65 @@
         }).join('');
     }
 
-    function get_pagination(new_query) {
+    function renderDetails () {
+        var data = {
+            event: "list",
+            select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
+            limit: 10,
+            table: "tbl_sell_out_data_details",
+            query: "",
+            offset: offset,
+            order: {},
+        }
+
+        aJax.post(url, data, function(result) {
+            var result = JSON.parse(result);
+            var html = "";
+
+            if(result) {
+                if (result.length > 0) {
+                    $.each(result, function(x,y) {
+                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+
+                        html += "<tr class='" + rowClass + "'>";
+                        // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                        html += "<td scope=\"col\">" + y.file_name + "</td>";
+                        // html += "<td scope=\"col\">" + y.line_number + "</td>";
+                        html += "<td scope=\"col\">" + y.store_code + "</td>";
+                        html += "<td scope=\"col\">" + y.store_description + "</td>";
+                        html += "<td scope=\"col\">" + y.sku_code + "</td>";
+                        html += "<td scope=\"col\">" + y.sku_description + "</td>";
+                        html += "<td scope=\"col\">" + y.quantity + "</td>";
+                        html += "<td scope=\"col\">" + y.net_sales + "</td>";
+                        
+                        html += "</tr>";   
+                    });
+                } else {
+                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+                }
+            };
+            $('.table_body').html(html);
+        });
+    }
+	
+	
+	function get_pagination() {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "pagination",
             select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
-            query: new_query,
+            query: "",
             offset: offset,
-            limit: limit,
+            limit: 10,
             table : "tbl_sell_out_data_details",
-            order : {
-                field : "id",
-                order : "asc" 
-            }
+            order : {},
+            group: "",
         }
 
         aJax.post(url,data,function(result){
             var obj = is_json(result); 
+            console.log(obj);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", renderDetails);
         });
