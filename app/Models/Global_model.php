@@ -769,6 +769,68 @@ class Global_model extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function fetch_existing_new($table, $selected_fields, $filters = [], $field = null, $value = null, $status = false)
+    {
+        if (empty($table) || empty($selected_fields)) {
+            return [];
+        }
+
+        $builder = $this->db->table($table);
+        $builder->select($selected_fields);
+
+        if ($status == 'true' || $status === true) {
+            $builder->where('status >=', 0);            
+        }
+
+        if ($field) {
+            $builder->where($field, $value);
+        }
+
+        if (!empty($filters)) {
+            $field_filter = ['year', 'month', 'week', 'company'];
+
+            if (count($filters) === count($field_filter)) {
+                $conditions = [];
+                foreach ($field_filter as $index => $columnName) {
+                    $conditions[$columnName] = $filters[$index]; 
+                }
+                $builder->groupStart()->Where($conditions)->groupEnd();
+            }
+        }
+
+        $query = $builder->get();
+
+        return $query->getResultArray();
+    }
+
+
+    public function fetch_existing2($table, $selected_fields, $match_fields, $valid_data, $status = false) 
+    {
+        if (empty($table) || empty($selected_fields) || empty($valid_data) || empty($match_fields)) {
+            return [];
+        }
+
+        $builder = $this->db->table($table);
+        $builder->select(array_merge(['id'], $match_fields));
+
+        if ($status == 'true' || $status === true) {
+            $builder->where('status >=', 0);            
+        }
+
+        // Use OR conditions to fetch only relevant records
+        $builder->groupStart();
+        foreach ($valid_data as $row) {
+            $conditions = [];
+            foreach ($match_fields as $field) {
+                $conditions[$field] = $row[$field] ?? '';
+            }
+            $builder->orWhere($conditions);
+        }
+        $builder->groupEnd();
+
+        return $builder->get()->getResultArray();
+    }
     
     public function fetch_existing_custom($table, $select, $field = null, $value = null, $lookup_field = null)
     {
@@ -1015,5 +1077,19 @@ class Global_model extends Model
             "data" => $builder->getResultArray(),
             "totalRecords" => $totalRecords
         ];
+    }
+
+    public function delete_temp_vmi($id)
+    {
+        $builder = $this->db->table('tbl_temp_vmi');
+
+        $builder->where('created_by', $id);
+        $deleted = $builder->delete();
+
+        if ($deleted) {
+            return 'success';
+        } else {
+            return 'failed';
+        }
     }
 }

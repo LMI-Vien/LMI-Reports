@@ -850,12 +850,16 @@ public function getLatestVmi($year = null) {
 	            tv.item_class,
 	            ba.name AS ambassador_name,
 	            b.brand_description AS brand,
-	            s.description AS store_name
+	            s.description AS store_name,
+	            a_asc.description AS asc_name
 	        FROM tbl_vmi tv
 	        LEFT JOIN tbl_brand_ambassador ba ON tv.store = ba.store
 	        LEFT JOIN tbl_store s ON ba.store = s.id
 	        LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
 	        LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+	        LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
+	        LEFT JOIN tbl_area a ON sg.area_id = a.id
+	        LEFT JOIN tbl_area_sales_coordinator a_asc ON a.id = a_asc.area_id
 	    )
 	    SELECT 
 	        ib.item,
@@ -865,6 +869,7 @@ public function getLatestVmi($year = null) {
 	        ib.ambassador_name,
 	        ib.brand,
 	        ib.store_name,
+	        ib.asc_name,
 	        COUNT(*) OVER() AS total_records
 	    FROM item_brands ib
 	    WHERE (? IS NULL OR ib.brand = ?)
@@ -874,7 +879,7 @@ public function getLatestVmi($year = null) {
 	      AND (? IS NULL OR ?)
 	      AND (? IS NULL OR ?)
 	      " . ($withba === true ? " AND ib.ambassador_name IS NOT NULL AND ib.ambassador_name <> ''" : ($withba === false ? " AND (ib.ambassador_name IS NULL OR ib.ambassador_name = '')" : "")) . "
-	      ORDER BY ib.id
+	      ORDER BY ib.item_name
 	    LIMIT ? OFFSET ?";
 
 		$params = [

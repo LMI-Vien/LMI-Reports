@@ -268,6 +268,21 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                    <tr>
+                                        <td colspan="8"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8" style="text-align: center;">No data available</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8"></td>
+                                    </tr>
                             </tbody>
                         </table>
                     </div>
@@ -363,7 +378,6 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log(json.data);
                     return json.data.length ? json.data : [];
                 }
             },
