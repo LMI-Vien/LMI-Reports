@@ -84,7 +84,7 @@
         var data = {
             event: "list",
             select: "v.id, s.code AS store, s.description AS store_name, v.item, v.item_name, "+
-            "v.status, v.item_class, v.supplier, v.group, v.dept, v.class, v.sub_class, v.on_hand, v.in_transit, "+
+            "v.status, v.item_class, v.supplier, v.c_group, v.dept, v.c_class, v.sub_class, v.on_hand, v.in_transit, "+
             "(v.on_hand + v.in_transit) AS total_qty, v.average_sales_unit, v.vmi_status, v.created_date, v.updated_date, "+
             "c.name AS company",
             query: new_query,
@@ -145,9 +145,9 @@
                         html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.item_class) + "</td>";
                         html += "<td scope=\"col\">" + (y.supplier) + "</td>";
-                        html += "<td scope=\"col\">" + (y.group) + "</td>";
+                        html += "<td scope=\"col\">" + (y.c_group) + "</td>";
                         html += "<td scope=\"col\">" + (y.dept) + "</td>";
-                        html += "<td scope=\"col\">" + (y.class) + "</td>";
+                        html += "<td scope=\"col\">" + (y.c_class) + "</td>";
                         html += "<td scope=\"col\">" + (y.sub_class) + "</td>";
                         html += "<td scope=\"col\">" + (y.on_hand) + "</td>";
                         html += "<td scope=\"col\">" + (y.in_transit) + "</td>";
@@ -171,7 +171,7 @@
         var data = {
           event : "pagination",
           select: "v.id, s.code AS store, s.description AS store_name, v.item, v.item_name, "+
-            "v.status, v.item_class, v.supplier, v.group, v.dept, v.class, v.sub_class, v.on_hand, v.in_transit, "+
+            "v.status, v.item_class, v.supplier, v.c_group, v.dept, v.c_class, v.sub_class, v.on_hand, v.in_transit, "+
             "(v.on_hand + v.in_transit) AS total_qty, v.average_sales_unit, v.vmi_status, v.created_date, v.updated_date, "+
             "c.name AS company",
           query: new_query,
