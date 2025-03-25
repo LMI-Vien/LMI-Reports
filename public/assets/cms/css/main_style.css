@@ -38,6 +38,12 @@
       margin-top: 10px;
     }
 
+    .box{
+        /* max-height: 530px; */
+        overflow-y: auto;
+        margin-top: 20px;
+    }
+
     div#list-data {
         padding: 0;
     }
