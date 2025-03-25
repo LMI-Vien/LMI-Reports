@@ -557,6 +557,10 @@
 <!-- Bootstrap JS (AFTER jQuery) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- FileSaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
     var base_url = "<?= base_url(); ?>";
     let brand_ambassadors = <?= json_encode($brand_ambassador) ?>;
@@ -745,9 +749,192 @@
             console.log(link, 'link');
             window.open(`<?= base_url()?>trade-dashboard/trade-ba-view/${link}`, '_blank');
         } else if (action === 'export') {
-            alert(action)
+            prepareExport();
         } else {
             alert('wtf are u doing?')
         }
     }
+
+    function prepareExport() {
+        let selectedType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#ba_id').val();
+        let selectedStore = $('#store_id').val();
+        let selectedBrand = $('#brand_id').val();
+        let selectedSortField = $('#sortBy').val();
+        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+        let selectedAsc = $('#ar_asc_name').text().trim();
+
+        let tables = [
+            { id: "Slow Moving SKU", type: "slowMoving" },
+            { id: "Overstock SKU", type: "overStock" },
+            { id: "NPD SKU", type: "npd" },
+            { id: "Hero SKU", type: "hero" }
+        ];
+
+        let bamap = mapData(brand_ambassadors, 'id', 'description')
+        let baval = (bamap[selectedBa] || "All");
+
+        let storemap = mapData(store_branch, 'id', 'description')
+        let storeval = (storemap[selectedStore] || "All");
+
+        let brandmap = mapData(brands, 'id', 'brand_description')
+        let brandval = (brandmap[selectedBrand] || "All");
+
+        let type = ''
+        if (selectedType == '1') {
+            type = 'Outright'
+        } else if (selectedType == '0') {
+            type = 'Consignment'
+        } else if (selectedType == '3') {
+            type = 'All'
+        } else {
+            type = 'Error! Invalid Type Value'
+        }
+
+        let fetchPromises = tables.map(table => {
+            return new Promise((resolve, reject) => {
+                fetchTradeDashboardData({
+                    baseUrl: "<?= base_url(); ?>",
+                    selectedSortField: selectedSortField,
+                    selectedSortOrder: selectedSortOrder,
+                    selectedBrand: selectedBrand,
+                    selectedBa: selectedBa,
+                    selectedStore: selectedStore,
+                    selectedType: selectedType,
+                    type: table.type,
+                    length: 10,
+                    start: 0,
+                    onSuccess: function(data) {
+                        let newData = data.map(({ item_name, sum_total_qty }) => ({
+                            "SKU Name": item_name,
+                            "Quantity": sum_total_qty,
+                            "LMI Code": "",
+                            "RGDI Code": "",
+                            "Type of SKU": table.id
+                        }));
+                        resolve(newData);
+                    },
+                    onError: function(error) {
+                        reject(error);
+                    }
+                });
+            });
+        });
+
+        Promise.all(fetchPromises)
+            .then(results => {
+                let formattedData = results.flat();
+                console.log(formattedData);
+
+                const headerData = [
+                    ["LIFESTRONG MARKETING INC."],
+                    ["Report: BA Dashboard"],
+                    ["Date Generated: " + formatDate(new Date())],
+                    ["Brand Ambassador: " + baval],
+                    ["Store Name: " + storeval],
+                    ["Brand: " + brandval],
+                    ["Area / ASC Name: " + selectedAsc],
+                    ["Outright/Consignment: " + type],
+                    [""]
+                ];
+
+                exportArrayToCSV(formattedData, `Report: BA Dashboard - ${formatDate(new Date())}`, headerData);
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+
+                return [
+                    {
+                        "Error": "An error occurred while fetching data."
+                    }
+                ];
+            });
+    }
+
+    function mapData(obj, index, value) {
+        let mapped_data = {};
+        
+        if (!Array.isArray(obj)) {
+            return {};
+        }
+
+        obj.forEach(item => {
+            if (item[index] !== undefined && item[value] !== undefined) {
+                mapped_data[item[index]] = item[value];
+            }
+        });
+
+        return mapped_data;
+    }
+
+    function fetchTradeDashboardData({ 
+        baseUrl, 
+        selectedSortField, 
+        selectedSortOrder, 
+        selectedBrand, 
+        selectedBa, 
+        selectedStore, 
+        selectedType, 
+        type, 
+        length, 
+        start, 
+        onSuccess, 
+        onError 
+    }) {
+        let allData = [];
+
+        function fetchData(offset) {
+            $.ajax({
+                url: baseUrl + 'trade-dashboard/trade-ba',
+                type: 'GET',
+                data: {
+                    sort_field: selectedSortField,
+                    sort: selectedSortOrder,
+                    brand: selectedBrand === "0" ? null : selectedBrand,
+                    brand_ambassador: selectedBa === "0" ? null : selectedBa,
+                    store_name: selectedStore === "0" ? null : selectedStore,
+                    ba_type: selectedType,
+                    type: type,
+                    limit: length,
+                    offset: offset
+                },
+                success: function(response) {
+                    if (response.data && response.data.length) {
+                        allData = allData.concat(response.data);
+
+                        if (response.data.length === length) {
+                            fetchData(offset + length);
+                        } else {
+                            if (onSuccess) onSuccess(allData);
+                        }
+                    } else {
+                        if (onSuccess) onSuccess(allData);
+                    }
+                },
+                error: function(error) {
+                    if (onError) onError(error);
+                }
+            });
+        }
+
+        fetchData(start);
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
+    }
+
 </script>
