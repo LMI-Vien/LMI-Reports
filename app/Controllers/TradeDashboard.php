@@ -289,6 +289,30 @@ class TradeDashboard extends BaseController
 	    }
 	}
 
+	public function trade_overall_ba_view() {
+		$uri = current_url(true);
+		$data['uri'] =$uri;
+		
+		$data['meta'] = array(
+			"title"         =>  "LMI Portal",
+			"description"   =>  "LMI Portal Wep application",
+			"keyword"       =>  ""
+		);
+
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['month'] = $this->Global_model->get_months();
+		$data['year'] = $this->Global_model->get_years();
+
+		$data['title'] = "Trade Dashboard";
+		$data['PageName'] = 'Trade Dashboard';
+		$data['PageUrl'] = 'Trade Dashboard';
+		$data['content'] = "site/trade/overall_ba_view.php";
+		$data['js'] = array();
+        $data['css'] = array();
+		return view("site/layout/template", $data);
+	}
+
 	public function trade_overall_ba()
 	{	
 		$days = $this->getDaysInMonth(2, $this->getCurrentYear());
@@ -335,6 +359,7 @@ class TradeDashboard extends BaseController
 	    	$store = null;
 	    }
 	     $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $days, $date);
+		//  echo ($limit . $offset . $month . $targetYear . $lyYear . $store . $area . $sort_field . $sort . $days . $date . "ECHO");
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
 	        'recordsTotal' => $data['total_records'],
