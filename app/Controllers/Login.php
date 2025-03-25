@@ -61,49 +61,184 @@ class Login extends BaseController
 		
 	}
 
+	// public function validate_log() {
+	//     $session = session();
+	//     $email = $this->request->getPost('emailadd');
+
+	//     $current_datetime = date("Y-m-d H:i:s");
+	//     $table = 'cms_users';
+
+	//     // Determine if login is via email or email
+	//     $account = $this->Global_model->check_email($email);
+	//     // print_r($email);
+	//     // die();
+	//     if (!$account) {
+	//         echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
+	//         return;
+	//     }
+
+	//     $user = $account[0];
+	//     $email = $user->email;
+	//     $login_attempts = 0;
+
+	//     // Authenticate user
+	//     $password = $this->request->getPost('password');
+	//     $data = $this->Global_model->validate_log_email($email, $password);
+
+
+	//     if(empty($data)){
+	// 	    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
+	// 	    return;
+	//     }        
+	//     if ($data->status > 0) {
+
+	//         $this->set_session($data);
+	//         echo json_encode(['count' => 3, 'result' => $data, 'message' => 'Login successful']);
+	//         return;
+	//     }else{
+	//     	$this->get_error_logs($email);
+	//     	echo json_encode(['count' => 2, 'result' => null, 'message' => 'Inactive Account']);
+	//     	return;
+	//     }
+	//     // Failed login attempt handling
+	//     $this->get_error_logs($email);
+	//     echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
+	//     return;
+	// }
+
+	
+	// public function get_error_logs($email) {
+	// 	$current_datetime = date("Y-m-d H:i:s");
+	// 	$table = 'cms_users';
+	
+	// 	$user_checker = $this->Global_model->check_email($email);
+	
+	// 	if (!$user_checker) return;
+	
+	// 	$user = $user_checker[0];
+	// 	$data = [];
+	
+	// 	if ($user->user_error_logs == 2) { 
+	// 		$expire_lock_time = date('Y-m-d H:i:s', strtotime("+5 minutes"));
+	// 		if (!$user->user_lock_time || $current_datetime > $user->user_lock_time) {
+	// 			$data['user_lock_time'] = $expire_lock_time;
+	// 		}
+	// 		$data['user_error_logs'] = 0;
+	// 		$data['user_block_logs'] = $user->user_block_logs + 1;
+	// 	} else {
+	// 		$data['user_error_logs'] = $user->user_error_logs + 1;
+	// 	}
+	
+	// 	$this->Global_model->update_data($table, $data, 'email', $email);
+	// }
+
 	public function validate_log() {
-	    $session = session();
-	    $email = $this->request->getPost('emailadd');
-
-	    $current_datetime = date("Y-m-d H:i:s");
-	    $table = 'cms_users';
-
-	    // Determine if login is via email or email
-	    $account = $this->Global_model->check_email($email);
-	    // print_r($email);
-	    // die();
-	    if (!$account) {
-	        echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
-	        return;
-	    }
-
-	    $user = $account[0];
-	    $email = $user->email;
-	    $login_attempts = 0;
-
-	    // Authenticate user
-	    $password = $this->request->getPost('password');
-	    $data = $this->Global_model->validate_log_email($email, $password);
-
-
-	    if(empty($data)){
-		    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
-		    return;
-	    }        
-	    if ($data->status > 0) {
-
-	        $this->set_session($data);
-	        echo json_encode(['count' => 3, 'result' => $data, 'message' => 'Login successful']);
-	        return;
-	    }else{
-	    	$this->get_error_logs($email);
-	    	echo json_encode(['count' => 2, 'result' => null, 'message' => 'Inactive Account']);
-	    	return;
-	    }
-	    // Failed login attempt handling
-	    $this->get_error_logs($email);
-	    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
-	    return;
+		$session = session();
+		$email = $this->request->getPost('emailadd');
+		$current_datetime = date("Y-m-d H:i:s");
+		$table = 'cms_users';
+	
+		// Check if the email exists
+		$account = $this->Global_model->check_email($email);
+		if (!$account) {
+			echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'attempts' => '']);
+			return;
+		}
+	
+		$user = $account[0];
+	
+		// **Check for blocked accounts**
+		if ($user->user_block_logs >= 3) {
+			echo json_encode(['count' => 4,
+				'result' => null,
+				'message' => 'Account is blocked',
+				// 'attempts' => 'Your account is permanently blocked. Contact admin.'
+			]);
+			return;
+		}
+	
+		// **Check for locked accounts**
+		if ($user->user_lock_time && $current_datetime < $user->user_lock_time) {
+			echo json_encode([
+				'count' => 4,
+				'result' => null,
+				'message' => 'Account is temporarily locked',
+				// 'attempts' => "Locked until {$user->user_lock_time}"
+			]);
+			return;
+		}
+	
+		// **Authenticate user**
+		$password = $this->request->getPost('password');
+		$data = $this->Global_model->validate_log_email($email, $password);
+	
+		if (empty($data)) {
+			// **Increment login attempts**
+			$this->get_error_logs($email);
+	
+			// **Fetch updated attempt count**
+			$updated_user = $this->Global_model->check_email($email)[0];
+			$attempts_left = 3 - $updated_user->user_error_logs;
+			$attempts_message = $attempts_left > 1 ? "$attempts_left attempts remaining"
+							  : ($attempts_left == 1 ? "1 attempt remaining" : "Last attempt remaining");
+	
+			// If the account is now blocked
+			if ($updated_user->user_block_logs >= 3) {
+				echo json_encode([
+					'count' => 4,
+					'result' => null,
+					'message' => 'Account is blocked',
+					'attempts' => 'Your account is permanently blocked. Contact admin.'
+				]);
+			} else {
+				echo json_encode([
+					'count' => 1,
+					'result' => null,
+					'message' => 'Invalid credentials',
+					'attempts' => $attempts_message
+				]);
+			}
+			return;
+		}
+	
+		// **Reset login attempts on successful login**
+		$this->Global_model->update_data($table, [
+			'user_error_logs' => 0,
+			'user_block_logs' => 0,
+			'user_lock_time' => null
+		], 'email', $email);
+	
+		$this->set_session($data);
+		echo json_encode([
+			'count' => 3,
+			'result' => $data,
+			'message' => 'Login successful',
+			'attempts' => 'No restrictions'
+		]);
+	}
+	
+	public function get_error_logs($email) {
+		$current_datetime = date("Y-m-d H:i:s");
+		$table = 'cms_users';
+	
+		$user_checker = $this->Global_model->check_email($email);
+		if (!$user_checker) return;
+	
+		$user = $user_checker[0];
+		$data = [];
+	
+		if ($user->user_error_logs == 2) { 
+			$expire_lock_time = date('Y-m-d H:i:s', strtotime("+5 minutes"));
+			if (!$user->user_lock_time || $current_datetime > $user->user_lock_time) {
+				$data['user_lock_time'] = $expire_lock_time;
+			}
+			$data['user_error_logs'] = 0;
+			$data['user_block_logs'] = $user->user_block_logs + 1;
+		} else {
+			$data['user_error_logs'] = $user->user_error_logs + 1;
+		}
+	
+		$this->Global_model->update_data($table, $data, 'email', $email);
 	}
 
 	public function set_session($data) {

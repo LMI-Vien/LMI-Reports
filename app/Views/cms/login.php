@@ -59,7 +59,7 @@ $(document).ready(function () {
             .done(function (response) {
                 try {
                     const parsedResponse = is_json(response);
-                    // console.log(parsedResponse);
+                    console.log(parsedResponse);
                     const resultCount = parsedResponse.count;
                     const attempts = parsedResponse.message || "Incorrect Email Address or Password.";
 
