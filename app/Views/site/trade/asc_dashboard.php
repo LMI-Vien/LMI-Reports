@@ -381,8 +381,8 @@
             </div>
             <!-- Buttons -->
             <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
-                <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
+                <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
+                <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
             </div>
             </div>
         </div>
@@ -396,6 +396,10 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- FileSaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var base_url = "<?= base_url(); ?>";
@@ -603,7 +607,7 @@
                     d.ba = selectedBA === "0" ? null : selectedBA;
                     d.year = selectedYear === "0" ? null : selectedYear;
                     d.withba = withBA;
-                    d.type = type;
+                    d.trade_type = type;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
@@ -628,5 +632,376 @@
         });
     }
 
+    function checkOutput(ifEmpty, ifNotEmpty) {
+        let selectedCoveredASC = $('input[name="coveredASC"]:checked').val();
+
+        if(selectedCoveredASC){
+            ifNotEmpty();
+        }else{
+            ifEmpty();
+        }
+    }
+
+    function handleAction(action) {
+        if (action === 'preview') {
+            checkOutput(
+                () => {
+                    let selectedASC = $('#asc_id').val();
+                    let selectedArea = $('#area_id').val();
+                    let selectedBrand = $('#brand_id').val();
+                    let selectedYear = $('#year').val();
+                    let selectedStore = $('#store_id').val();
+                    let selectedBa = $('#ba_id').val();
+                    let link = `FALSE-${selectedASC}-${selectedArea}-${selectedBrand}-${selectedYear}-${selectedStore}-${selectedBa}`;
+                    window.open(`<?= base_url()?>trade-dashboard/asc-dashboard-1-view/${link}`, '_blank');
+                },
+                () => {
+                    let selectedASC = $('#ascName').val();
+                    let selectedArea = $('#area').val();
+                    let selectedBrand = $('#brand').val();
+                    let selectedYear = $('#year').val();
+                    let selectedStore = $('#store_id').val();
+                    let selectedBA = $('#ba').val();
+                    let withBA = $('input[name="coveredASC"]:checked').val();
+                    let link = `TRUE-${selectedASC}-${selectedArea}-${selectedBrand}-${selectedYear}-${selectedStore}-${selectedBA}-${withBA}`;
+                    window.open(`<?= base_url()?>trade-dashboard/asc-dashboard-1-view/${link}`, '_blank');
+                }
+            );
+        } else if (action === 'export') {
+            checkOutput(
+                prepareExport, 
+                prepareExport1
+            );
+        } else {
+            alert('wtf are u doing?')
+        }
+    }
+
+    function prepareExport() {
+        let selectedASC = $('#ascName').val();
+        let selectedBrand = $('#brand').val();
+        let selectedYear = $('#year').val();
+        let selectedStore = $('#store_id').val();
+        let selectedBA = $('#ba').val();
+        let selectedArea = $('#area').val();
+
+        fetchTradeDashboardData({
+            selectedASC, 
+            selectedBrand, 
+            selectedYear, 
+            selectedStore, 
+            selectedBA, 
+            selectedArea, 
+            length: 10,
+            start: 0,
+            onSuccess: function(result) {
+                const valuesData = [];
+                if (result) {
+                    let salesData = result[0];
+
+                    valuesData.push({
+                        "Month" : "January", 
+                        "LY Sell Out" : salesData.net_sales_january, 
+                        "Sales Report" : salesData.amount_january, 
+                        "Target Sales" : salesData.target_sales_january, 
+                        "Growth" : salesData.growth_january, 
+                        "Achieved" : salesData.achieved_january
+                    });
+                    valuesData.push({
+                        "Month" : "February", 
+                        "LY Sell Out" : salesData.net_sales_february, 
+                        "Sales Report" : salesData.amount_february, 
+                        "Target Sales" : salesData.target_sales_february, 
+                        "Growth" : salesData.growth_february, 
+                        "Achieved" : salesData.achieved_february
+                    })
+                    valuesData.push({
+                        "Month" : "March", 
+                        "LY Sell Out" : salesData.net_sales_march, 
+                        "Sales Report" : salesData.amount_march, 
+                        "Target Sales" : salesData.target_sales_march, 
+                        "Growth" : salesData.growth_march, 
+                        "Achieved" : salesData.achieved_march
+                    })
+                    valuesData.push({
+                        "Month" : "April", 
+                        "LY Sell Out" : salesData.net_sales_april, 
+                        "Sales Report" : salesData.amount_april, 
+                        "Target Sales" : salesData.target_sales_april, 
+                        "Growth" : salesData.growth_april, 
+                        "Achieved" : salesData.achieved_april
+                    })
+                    valuesData.push({
+                        "Month" : "May", 
+                        "LY Sell Out" : salesData.net_sales_may, 
+                        "Sales Report" : salesData.amount_may, 
+                        "Target Sales" : salesData.target_sales_may, 
+                        "Growth" : salesData.growth_may, 
+                        "Achieved" : salesData.achieved_may
+                    })
+                    valuesData.push({
+                        "Month" : "June", 
+                        "LY Sell Out" : salesData.net_sales_june, 
+                        "Sales Report" : salesData.amount_june, 
+                        "Target Sales" : salesData.target_sales_june, 
+                        "Growth" : salesData.growth_june, 
+                        "Achieved" : salesData.achieved_june
+                    })
+                    valuesData.push({
+                        "Month" : "July", 
+                        "LY Sell Out" : salesData.net_sales_july, 
+                        "Sales Report" : salesData.amount_july, 
+                        "Target Sales" : salesData.target_sales_july, 
+                        "Growth" : salesData.growth_july, 
+                        "Achieved" : salesData.achieved_july
+                    })
+                    valuesData.push({
+                        "Month" : "August", 
+                        "LY Sell Out" : salesData.net_sales_august, 
+                        "Sales Report" : salesData.amount_august, 
+                        "Target Sales" : salesData.target_sales_august, 
+                        "Growth" : salesData.growth_august, 
+                        "Achieved" : salesData.achieved_august
+                    })
+                    valuesData.push({
+                        "Month" : "September", 
+                        "LY Sell Out" : salesData.net_sales_september, 
+                        "Sales Report" : salesData.amount_september, 
+                        "Target Sales" : salesData.target_sales_september, 
+                        "Growth" : salesData.growth_september, 
+                        "Achieved" : salesData.achieved_september
+                    })
+                    valuesData.push({
+                        "Month" : "October", 
+                        "LY Sell Out" : salesData.net_sales_october, 
+                        "Sales Report" : salesData.amount_october, 
+                        "Target Sales" : salesData.target_sales_october, 
+                        "Growth" : salesData.growth_october, 
+                        "Achieved" : salesData.achieved_october
+                    })
+                    valuesData.push({
+                        "Month" : "November", 
+                        "LY Sell Out" : salesData.net_sales_november, 
+                        "Sales Report" : salesData.amount_november, 
+                        "Target Sales" : salesData.target_sales_november, 
+                        "Growth" : salesData.growth_november, 
+                        "Achieved" : salesData.achieved_november
+                    })
+                    valuesData.push({
+                        "Month" : "December", 
+                        "LY Sell Out" : salesData.net_sales_december, 
+                        "Sales Report" : salesData.amount_december, 
+                        "Target Sales" : salesData.target_sales_december, 
+                        "Growth" : salesData.growth_december, 
+                        "Achieved" : salesData.achieved_december
+                    });
+                }
+
+                const headerData = [
+                    ["LIFESTRONG MARKETING INC."],
+                    ["Report: ASC Dashboard 2"],
+                    ["Date Generated: " + formatDate(new Date())],
+                    ["ASC Name: " + selectedASC],
+                    ["Area: " + selectedArea],
+                    ["Brand: " + selectedBrand],
+                    ["Year: " + ($('#year option:selected').text() === "Please select.." ? "All" : $('#year option:selected').text())],
+                    [""]
+                ];
+
+                exportArrayToCSV(valuesData, `Report: BA Dashboard - ${formatDate(new Date())}`, headerData);
+            },
+            onError: function(error) {
+                alert("Error:", error);
+            }
+        });
+    }
+
+    function fetchTradeDashboardData({ 
+        selectedASC, 
+        selectedBrand, 
+        selectedYear, 
+        selectedStore, 
+        selectedBA, 
+        selectedArea, 
+        length, 
+        start, 
+        onSuccess, 
+        onError 
+    }) {
+        let allData = [];
+
+        function fetchData(offset) {
+            $.ajax({
+                url: base_url + 'trade-dashboard/trade-asc-dashboard-one',
+                type: 'POST',
+                data : {
+                    asc : selectedASC,
+                    brand : selectedBrand,
+                    year : selectedYear,
+                    store : selectedStore,
+                    ba : selectedBA,
+                    area : selectedArea
+                },
+                success: function(response) {
+                    if (response.data && response.data.length) {
+                        allData = allData.concat(response.data);
+
+                        if (response.data.length > length) {
+                            fetchData(offset + length);
+                        } else {
+                            if (onSuccess) onSuccess(allData);
+                        }
+                    } else {
+                        if (onSuccess) onSuccess(allData);
+                    }
+                },
+                error: function(error) {
+                    if (onError) onError(error);
+                }
+            });
+        }
+
+        fetchData(start);
+    }
+
+    function prepareExport1() {
+        let selectedASC = $('#ascName').val();
+        let selectedArea = $('#area').val();
+        let selectedBrand = $('#brand').val();
+        let selectedYear = $('#year').val();
+        let selectedStore = $('#store_id').val();
+        let selectedBA = $('#ba').val();
+        let withBA = $('input[name="coveredASC"]:checked').val();
+
+        let tables = [
+            { id: "Slow Moving", type: "slowMoving" },
+            { id: "Overstock", type: "overStock" },
+            { id: "NPD", type: "npd" },
+            { id: "Hero", type: "hero" },
+        ];
+
+        let fetchPromises = tables.map(table => {
+            return new Promise((resolve, reject) => {
+                let stype = table.type;
+                fetchTradeDashboardData1({
+                    stype, 
+                    selectedASC, 
+                    selectedArea, 
+                    selectedStore, 
+                    selectedBrand, 
+                    selectedBA, 
+                    selectedYear, 
+                    withBA,
+                    length: 10,
+                    start: 0,
+                    onSuccess: function(result) {
+                        let newData = result.map(({ item_name, sum_total_qty }) => ({
+                            "SKU Name": item_name,
+                            "Quantity": sum_total_qty,
+                            "LMI Code": "",
+                            "RGDI Code": "",
+                            "Type of SKU": table.id
+                        }));
+                        resolve(newData);
+                    },
+                    onError: function(error) {
+                        reject(error);
+                    }
+                });
+            });
+        });
+
+        Promise.all(fetchPromises)
+            .then(results => {
+                let formattedData = results.flat();
+
+                const headerData = [
+                    ["LIFESTRONG MARKETING INC."],
+                    ["Report: ASC Dashboard 2"],
+                    ["Date Generated: " + formatDate(new Date())],
+                    ["ASC Name: " + selectedASC],
+                    ["Area: " + selectedArea],
+                    ["Brand: " + selectedBrand],
+                    ["Year: " + ($('#year option:selected').text() === "Please select.." ? "All" : $('#year option:selected').text())],
+                    [""]
+                ];
+
+                exportArrayToCSV(formattedData, `Report: BA Dashboard - ${formatDate(new Date())}`, headerData);
+            })
+            .catch(error => {
+                alert("Error:", error);
+            });
+    }
+
+    function fetchTradeDashboardData1({ 
+        stype, 
+        selectedASC, 
+        selectedArea, 
+        selectedStore, 
+        selectedBrand, 
+        selectedBA, 
+        selectedYear, 
+        withBA,
+        length, 
+        start, 
+        onSuccess, 
+        onError 
+    }) {
+        let allData = [];
+
+        function fetchData1(offset) {
+            $.ajax({
+                url: "<?= base_url(); ?>" + 'trade-dashboard/trade-asc-dashboard-one-tables',
+                type: 'POST',
+                data : {
+                    area : selectedArea === "0" ? null : selectedArea,
+                    asc : selectedASC === "0" ? null : selectedASC,
+                    brand : selectedBrand === "0" ? null : selectedBrand,
+                    ba : selectedBA === "0" ? null : selectedBA,
+                    store : selectedStore === "0" ? null : selectedStore,
+                    year : selectedYear === "0" ? null : selectedYear,
+                    trade_type : stype,
+                    withba : withBA,
+                    limit : length,
+                    offset : start,
+                },
+                success: function(response) {
+                    if (response.data && response.data.length) {
+                        allData = allData.concat(response.data);
+
+                        if (response.data.length > length) {
+                            fetchData1(offset + length);
+                        } else {
+                            if (onSuccess) onSuccess(allData);
+                        }
+                    } else {
+                        if (onSuccess) onSuccess(allData);
+                    }
+                },
+                error: function(error) {
+                    if (onError) onError(error);
+                }
+            });
+        }
+
+        fetchData1(start);
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
+    }
 
 </script>
