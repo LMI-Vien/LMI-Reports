@@ -50,7 +50,7 @@
     }
 
     .tbl-content {
-      max-height: 500px;
+      /* max-height: 500px; */
     }
 
     .box-header{
@@ -88,24 +88,21 @@
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
-
-                                        <!-- <th class='center-content'>Action</th> -->
                                     </tr>
                                 </thead>
                                 <tbody class="table_body word_break"></tbody>
                             </table>
                         </div>
-                        <!-- <div class="list_pagination"></div>
+                        <div class="list_pagination"></div>
                         <div class="form-group pull-right">
                             <label>Show</label>
                             <select class="record-entries">
                                 <?= $optionSet; ?>
                             </select>
                             <label>Entries</label>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
-                <div class="list_pagination"></div>
             </div>
         </div>
     </div>
@@ -323,6 +320,18 @@
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
+    });
+
+    $(document).on("change", ".record-entries", function(e) {
+        $(".record-entries option").removeAttr("selected");
+        $(".record-entries").val($(this).val());
+        $(".record-entries option:selected").attr("selected","selected");
+        var record_entries = $(this).prop("selected",true ).val();
+        limit = parseInt(record_entries);
+        offset = 1;
+        modal.loading(true); 
+        get_data(query);
+        modal.loading(false);
     });
 
 

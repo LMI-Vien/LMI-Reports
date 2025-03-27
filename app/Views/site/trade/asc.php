@@ -184,7 +184,7 @@
                                 <div class="col-md row">
                                     <div class="col-md-6">
                                         <select class="form-control" id="month">
-                                            <option value="0">Please month..</option>
+                                            <option value="0" disabled selected>Please month..</option>
                                             <?php
                                                 if($month){
                                                     foreach ($month as $value) {
@@ -196,7 +196,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <select class="form-control" id="year">
-                                            <option value="0">Please year..</option>
+                                            <option value="0" disabled selected>Please year..</option>
                                             <?php
                                                 if($year){
                                                     foreach ($year as $value) {
@@ -222,9 +222,16 @@
                                     <option value="balance_to_target">Balance to Target</option>
                                     <option value="target_per_remaining_days">Target per Remaining Days</option>
                                 </select>
-                                <div class="col-md mt-3">
+                                <!-- <div class="col-md mt-3">
                                     <input type="radio" name="sortOrder" value="asc" checked> Asc
                                     <input type="radio" name="sortOrder" value="desc"> Desc
+                                </div> -->
+                                <div class="col-md mt-3">
+                                    <input type="radio" id="sort_asc" name="sortOrder" value="asc" checked>
+                                    <label for="sort_asc">Asc</label>
+
+                                    <input type="radio" id="sort_desc" name="sortOrder" value="desc">
+                                    <label for="sort_desc">Desc</label>
                                 </div>
                             </div>
                         </div>
@@ -290,8 +297,8 @@
                 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
+                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
                 </div>
             </div>
         </div>
@@ -307,16 +314,21 @@
 <!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
 <script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js"></script> -->
 
+<!-- FileSaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
     var base_url = "<?= base_url(); ?>";
     let store_branch = <?= json_encode($store_branch) ?>;
     let area = <?= json_encode($area) ?>;
+    // console.log("Area", area);
 
     $(document).ready(function() {
 
         initializeTable();
         autocomplete_field($("#store"), $("#store_id"), store_branch);
-        autocomplete_field($("#area"), $("area_id"), area, "area_description");
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
 
 
         $(document).on('click', '#clearButton', function () {
@@ -398,6 +410,172 @@
             searching: false,
             lengthChange: false
         });
+    }
+
+    function handleAction(action) {
+        let selectedStore = $('#store_id').val() || "0";
+        let selectedArea = $('#area_id').val() || "0";
+        let selectedMonth = $('#month').val() || "0";
+        let selectedYear = $('#year').val() || "0";
+        let selectedSortField = $('#sortBy').val() || "0";
+        let selectedSortOrder = $('input[name="sortOrder"]:checked').val() || "0";
+
+        if (action === 'preview') {
+            let link = `${selectedStore}-${selectedArea}-${selectedMonth}-${selectedYear}-${selectedSortField}-${selectedSortOrder}`;
+            window.open(`<?= base_url()?>trade-dashboard/asc-view/${link}`, '_blank');
+        } else if (action === 'export') {
+            // alert(action)
+            prepareExport();
+        } else {
+            alert('wtf are u doing?')
+        }
+    }
+
+    function prepareExport() {
+        let selectedStore = $('#store_id').val();
+        let selectedArea = $('#area_id').val();
+        let selectedMonth = $('#month').val();
+        let selectedYear = $('#year').val();
+        let selectedSortField = $('#sortBy').val();
+        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+
+        let fetchPromise = new Promise((resolve, reject) => {
+        fetchTradeDashboardData({
+            selectedStore, 
+            selectedArea, 
+            selectedMonth, 
+            selectedYear, 
+            selectedSortField, 
+            selectedSortOrder,
+            length: 1000,
+            start: 0,
+            onSuccess: function(data) {
+                let newData = data.map(
+                    ({ rank, area, asc_names, actual_sales, target_sales, percent_ach, balance_to_target, 
+                        target_per_remaining_days
+                    }) => ({
+                        "Rank": rank,
+                        "Area": area,
+                        "Area Sales Coordinator": asc_names,
+                        "Actual Sales": actual_sales,
+                        "Target": target_sales,
+                        "% Ach": percent_ach,
+                        "Balance To Target": balance_to_target,
+                        "Target per Remaining days": target_per_remaining_days,
+
+
+                        // "Store Code": store_code,
+                        // "Store Name": store_name,
+                        // "Actual Sales": actual_sales,
+                        // "Possible Incentives": possible_incentives,
+                        // "LY Scanned Data": ly_scanned_data,
+                        // "Brand Ambassador": brand_ambassadors,
+                        // "Deployed Date": deployment_date,
+                        // "Brand": brands,
+                        // "Growth": growth
+                    })
+                )
+                resolve(newData);
+            },
+            onError: function(error) {
+                reject(error);
+            }
+        });
+    });
+
+    fetchPromise
+        .then(results => {
+            console.log(results, 'results');
+
+            const headerData = [
+                ["LIFESTRONG MARKETING INC."],
+                ["Report: Information for Area Sales Coordinator"],
+                ["Date Generated: " + formatDate(new Date())],
+                ["Store Name: " + $('#store').val()],
+                ["Area: " + $('#area').val()],
+                ["Month: " + ($('#month option:selected').text() === "Select Month..." ? "All" : $('#month option:selected').text())],
+                ["Year: " + ($('#year option:selected').text() === "Select Year..." ? "All" : $('#year option:selected').text())],
+                [""]
+            ];
+    
+            exportArrayToCSV(results, `Report: ASC Dashboard - ${formatDate(new Date())}`, headerData);
+        })
+        .catch(error => {
+            console.log(error, 'error');
+        });
+
+    }
+
+    function fetchTradeDashboardData({ 
+        baseUrl, 
+        selectedStore = null, 
+        selectedArea = null, 
+        selectedMonth = null, 
+        selectedYear = null, 
+        selectedSortField = null, 
+        selectedSortOrder = null,
+        length, 
+        start, 
+        onSuccess, 
+        onError 
+    }) {
+        let allData = [];
+
+        function fetchData(offset) {
+            $.ajax({
+                url: base_url + 'trade-dashboard/trade-info-asc',
+                type: 'GET',
+                data: {
+                    store : selectedStore === "0" ? null : selectedStore,
+                    area : selectedArea === "0" ? null : selectedArea,
+                    month : selectedMonth === "0" ? null : selectedMonth,
+                    year : selectedYear === "0" ? null : selectedYear,
+                    sort_field : selectedSortField,
+                    sort : selectedSortOrder,
+                    limit: length,
+                    offset: offset
+                },
+                success: function(response) {
+                    console.log("Response received:", response);
+
+                    if (response.data && response.data.length) {
+                        allData = allData.concat(response.data);
+                        console.log("Current allData:", allData);
+
+                        if (response.data.length === length) {
+                            fetchData(offset + length);
+                        } else {
+                            if (onSuccess) onSuccess(allData);
+                        }
+                    } else {
+                        if (onSuccess) onSuccess(allData);
+                    }
+                },
+                error: function(error) {
+                    if (onError) onError(error);
+                }
+            });
+        }
+
+        fetchData(start);
+    }
+
+
+    function exportArrayToCSV(data, filename, headerData) {
+        // Create a new worksheet
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        // Add header rows manually
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert CSV string to Blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        // Trigger file download
+        saveAs(blob, filename + ".csv");
     }
 
 </script>
