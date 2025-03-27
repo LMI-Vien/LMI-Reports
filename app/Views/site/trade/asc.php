@@ -417,17 +417,47 @@
         let selectedArea = $('#area_id').val() || "0";
         let selectedMonth = $('#month').val() || "0";
         let selectedYear = $('#year').val() || "0";
+        let selectedStoreName = $('#store').val() || "0";
+        let selectedAreaName = $('#area').val() || "0";
+        let selectedMonthName = $("#month option:selected").text() || "0";
+        let selectedYearName = $("#year option:selected").text() || "0";
         let selectedSortField = $('#sortBy').val() || "0";
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val() || "0";
 
+
+        if(selectedMonthName == "Please month.."){
+            selectedMonthName = "0";
+        }
+
+        if(selectedYearName == "Please year.."){
+            selectedYearName = "0";    
+        }
+
         if (action === 'preview') {
-            let link = `${selectedStore}-${selectedArea}-${selectedMonth}-${selectedYear}-${selectedSortField}-${selectedSortOrder}`;
-            window.open(`<?= base_url()?>trade-dashboard/asc-view/${link}`, '_blank');
+            var url = "<?= base_url("trade-dashboard/set-asc-preview-session");?>";
+            var data = {
+                store : selectedStore,
+                area : selectedArea,
+                month : selectedMonth,
+                year : selectedYear,
+                storename : selectedStoreName,
+                areaname : selectedAreaName,
+                monthname : selectedMonthName,
+                yearname : selectedYearName,
+                sortfield : selectedSortField,
+                sortorder : selectedSortOrder
+
+            }
+            aJax.post(url,data,function(result){
+                if(result.status == "success"){
+                    window.location.href = "<?= base_url('trade-dashboard/asc-view') ?>";
+                }
+                
+            });
         } else if (action === 'export') {
-            // alert(action)
             prepareExport();
         } else {
-            alert('wtf are u doing?')
+            
         }
     }
 

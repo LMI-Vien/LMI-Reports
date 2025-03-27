@@ -89,6 +89,21 @@
         box-shadow: 0px 0px 5px rgba(255, 152, 0, 0.5);
         background: #fff;
     }
+
+    /* Title Styling */
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: white !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+    }
     
     @media (max-width: 768px) {
         th, td {
@@ -147,19 +162,19 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <label for="store">Store</label>
-                                    <input type="text" class="form-control" id="store_name" readonly>
+                                    <input type="text" class="form-control" id="store_name" value="<?= ($store_branch_name == 0) ? 'ANY' : $store_branch_name; ?>" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label for="area">Area</label>
-                                    <input type="text" class="form-control" id="area" readonly>
+                                    <input type="text" class="form-control" id="area" value="<?= ($area_name == 0) ? 'ANY' : $area_name; ?>" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label for="month">Month</label>
-                                    <input type="text" class="form-control" id="month" readonly>
+                                    <input type="text" class="form-control" id="month" value="<?= ($month_name == 0) ? 'ANY' : $month_name; ?>" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label for="year">Year</label>
-                                    <input type="text" class="form-control" id="year" readonly>
+                                    <input type="text" class="form-control" id="year" value="<?= ($year_name == 0) ? 'ANY' : $year_name; ?>" readonly>
                                 </div>
                             </div>
 
@@ -175,23 +190,45 @@
 
                     <div class="card">
                         <div class="table-responsive">
-                            <table id="asc_preview_tbl" class="table">
+                            <table id="info_for_asc" class="table">
                                 <thead>
                                     <tr>
-                                        <th colspan="8">Summary</th>
+                                        <th 
+                                            colspan="8"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            class="tbl-title-header"
+                                        >
+                                            SUMMARY
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">Rank</th>
+                                        <th class="tbl-title-field">Area</th>
+                                        <th class="tbl-title-field">Area Sales Coordinator</th>
+                                        <th class="tbl-title-field">Actual Sales Report</th>
+                                        <th class="tbl-title-field">Target</th>
+                                        <th class="tbl-title-field">% Achieved</th>
+                                        <th class="tbl-title-field">Balance To Target</th>
+                                        <th class="tbl-title-field">Target per Remaining days</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <th>Rank</th>
-                                        <th>Area</th>
-                                        <th>Area Sales Coordinator</th>
-                                        <th>Actual Sales Report</th>
-                                        <th>Target</th>
-                                        <th>% Achieved</th>
-                                        <th>Balance to Target</th>
-                                        <th>Target per Remaining days</th> 
-                                    </tr>
+                                        <tr>
+                                            <td colspan="8"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="8" style="text-align: center;">No data available</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="8"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="8"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="8"></td>
+                                        </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -202,14 +239,12 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <script>
     var segment = "<?=$uri->getSegment(3);?>";
     var params = segment.split("-");
-
-    let store_branch = <?= json_encode($store_branch) ?>;
-    let area = <?= json_encode($area) ?>;
-    let month = <?= json_encode($month) ?>;
-    let year = <?= json_encode($year) ?>;
 
     $(document).ready(function() {
         // populate header
@@ -220,17 +255,20 @@
        
     });
 
+    //clear the session on page close
+    $(window).on("beforeunload", function() {
+        $.ajax({
+            url: "<?= base_url('trade-dashboard/clear-filter-session/asc_preview_filters'); ?>",
+            type: "POST",
+            async: false 
+        });
+    });
+    //clear the session on click other pages
+    $(document).on("click", "a", function() {
+        $.post("<?= base_url('trade-dashboard/clear-filter-session/asc_preview_filters'); ?>");
+    });
+
     function populateHeaderData() {
-        let storeMap = mapData(store_branch, 'id', 'description');
-        let areaMap = mapData(area, 'id', 'area_description');
-        let monthMap = mapData(month, 'id', 'month');
-        let yearMap = mapData(year, 'id', 'year');
-
-        $("#store_name").val(storeMap[params[0]] || "ALL");
-        $("#area").val(areaMap[params[1]] || "ALL");
-        $("#month").val(monthMap[params[2]] || "ALL");
-        $("#year").val(yearMap[params[3]] || "ALL");
-
         let date = new Date();
         let formattedDate = date.toLocaleDateString("en-US", { 
             year: "numeric", 
@@ -244,118 +282,157 @@
         $('#date-generated').text(`Date Generated: ${formattedDate}`);
     }
 
-    function mapData(obj, index, value) {
-        let mapped_data = {};
-        
-        if (!Array.isArray(obj)) {
-            return {};
-        }
+    // function populateTable() {
+    //     console.log("Fetching data...", params);
+    //     let selectedStore = '<?= ($store_branch_val == 0) ? NULL : $store_branch_val; ?>';
+    //     let selectedArea = '<?= ($area_val == 0) ? NULL : $area_val; ?>';
+    //     let selectedMonth = '<?= ($month_val == 0) ? NULL : $month_val; ?>';
+    //     let selectedYear = '<?= ($year_val == 0) ? NULL : $year_val; ?>';
+    //     let selectedSortField = '<?= ($sort_field == 0) ? NULL : $sort_field; ?>';
+    //     let selectedSortOrder = '<?= ($sort_order == 0) ? NULL : $sort_order; ?>';
 
-        obj.forEach(item => {
-            if (item[index] !== undefined && item[value] !== undefined) {
-                mapped_data[item[index]] = item[value];
-            }
-        });
+    //     fetchTradeDashboardData({
+    //         selectedStore, 
+    //         selectedArea, 
+    //         selectedMonth, 
+    //         selectedYear, 
+    //         selectedSortField, 
+    //         selectedSortOrder,
+    //         length: 10,
+    //         start: 0,
+    //         onSuccess: function(data) {
+    //             let html = '';
 
-        return mapped_data;
-    }
+    //             data.forEach((value) => {
+    //                 html += `<tr>
+    //                     <td>${value.rank}</td>
+    //                     <td>${value.area}</td>
+    //                     <td>${value.asc_names}</td>
+    //                     <td>${value.actual_sales}</td>
+    //                     <td>${value.target_sales}</td>
+    //                     <td>${value.percent_ach ?? ""}</td>
+    //                     <td>${value.balance_to_target}</td>
+    //                     <td>${value.target_per_remaining_days}</td>
+    //                 </tr>`;
+    //             });
+
+    //             $(`#info_for_asc tbody`).html(html);
+    //         },
+    //         onError: function(error) {
+    //             alert("Error:", error);
+    //         }
+    //     });
+    // }
 
     function populateTable() {
-        console.log("Fetching data...", params);
-        let selectedStore = params[0];
-        let selectedArea = params[1];
-        let selectedMonth = params[2];
-        let selectedYear = params[3];
-        let selectedSortField = params[4];
-        let selectedSortOrder = params[5];
 
-        fetchTradeDashboardData({
-            selectedStore, 
-            selectedArea, 
-            selectedMonth, 
-            selectedYear, 
-            selectedSortField, 
-            selectedSortOrder,
-            length: 10,
-            start: 0,
-            onSuccess: function(data) {
-                console.log(data, 'data');
-                let html = '';
+        let selectedStore = '<?= ($store_branch_val == 0) ? NULL : $store_branch_val; ?>';
+        let selectedArea = '<?= ($area_val == 0) ? NULL : $area_val; ?>';
+        let selectedMonth = '<?= ($month_val == 0) ? NULL : $month_val; ?>';
+        let selectedYear = '<?= ($year_val == 0) ? NULL : $year_val; ?>';
+        let selectedSortField = '<?= ($sort_field == 0) ? NULL : $sort_field; ?>';
+        let selectedSortOrder = '<?= ($sort_order == 0) ? NULL : $sort_order; ?>';
 
-                data.forEach((value) => {
-                    html += `<tr>
-                        <td>${value.rank}</td>
-                        <td>${value.area}</td>
-                        <td>${value.asc_names}</td>
-                        <td>${value.actual_sales}</td>
-                        <td>${value.target_sales}</td>
-                        <td>${value.percent_ach ?? ""}</td>
-                        <td>${value.balance_to_target}</td>
-                        <td>${value.target_per_remaining_days}</td>
-                    </tr>`;
-                });
+        if ($.fn.DataTable.isDataTable('#info_for_asc')) {
+            let existingTable = $('#info_for_asc').DataTable();
+            existingTable.clear().destroy();
+        }
 
-                $(`#asc_preview_tbl tbody`).append(html);
+        let table = $('#info_for_asc').DataTable({
+            paging: true,
+            searching: false,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            colReorder: true, 
+            ajax: {
+                url: base_url + 'trade-dashboard/trade-info-asc',
+                type: 'GET',
+                data: function(d) {
+                    d.sort_field = selectedSortField;
+                    d.sort = selectedSortOrder;
+                    d.year = selectedYear === "0" ? null : selectedYear;
+                    d.month = selectedMonth === "0" ? null : selectedMonth;
+                    d.area = selectedArea === "0" ? null : selectedArea;
+                    d.store = selectedStore === "0" ? null : selectedStore;
+                    d.limit = d.length;
+                    d.offset = d.start;
+                },
+                dataSrc: function(json) {
+                    json
+                    return json.data.length ? json.data : [];
+                }
             },
-            onError: function(error) {
-                alert("Error:", error);
-            }
+            columns: [
+                { data: 'rank' },
+                { data: 'area' },
+                { data: 'asc_names' },
+                { data: 'actual_sales' },
+                { data: 'target_sales' },
+                { data: 'percent_ach' },
+                { data: 'balance_to_target' },
+                { data: 'target_per_remaining_days' }
+            ].filter(Boolean),
+            pagingType: "full_numbers",
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            lengthChange: false
         });
     }
 
-    function fetchTradeDashboardData({ 
-        baseUrl, 
-        selectedStore = null, 
-        selectedArea = null, 
-        selectedMonth = null, 
-        selectedYear = null, 
-        selectedSortField = null, 
-        selectedSortOrder = null,
-        length, 
-        start, 
-        onSuccess, 
-        onError 
-    }) {
-        let allData = [];
+    // function fetchTradeDashboardData({ 
+    //     baseUrl, 
+    //     selectedStore = null, 
+    //     selectedArea = null, 
+    //     selectedMonth = null, 
+    //     selectedYear = null, 
+    //     selectedSortField = null, 
+    //     selectedSortOrder = null,
+    //     length, 
+    //     start, 
+    //     onSuccess, 
+    //     onError 
+    // }) {
+    //     let allData = [];
 
-        function fetchData(offset) {
-            $.ajax({
-                url: base_url + 'trade-dashboard/trade-info-asc',
-                type: 'GET',
-                data: {
-                    store : selectedStore === "0" ? null : selectedStore,
-                    area : selectedArea === "0" ? null : selectedArea,
-                    month : selectedMonth === "0" ? null : selectedMonth,
-                    year : selectedYear === "0" ? null : selectedYear,
-                    sort_field : selectedSortField,
-                    sort : selectedSortOrder,
-                    limit: length,
-                    offset: offset
-                },
-                success: function(response) {
-                    console.log("Response received:", response);
+    //     function fetchData(offset) {
+    //         $.ajax({
+    //             url: base_url + 'trade-dashboard/trade-info-asc',
+    //             type: 'GET',
+    //             data: {
+    //                 store : selectedStore === "0" ? null : selectedStore,
+    //                 area : selectedArea === "0" ? null : selectedArea,
+    //                 month : selectedMonth === "0" ? null : selectedMonth,
+    //                 year : selectedYear === "0" ? null : selectedYear,
+    //                 sort_field : selectedSortField,
+    //                 sort : selectedSortOrder,
+    //                 limit: length,
+    //                 offset: offset
+    //             },
+    //             success: function(response) {
 
-                    if (response.data && response.data.length) {
-                        allData = allData.concat(response.data);
-                        console.log("Current allData:", allData);
+    //                 if (response.data && response.data.length) {
+    //                     allData = allData.concat(response.data);
 
-                        if (response.data.length === length) {
-                            fetchData(offset + length);
-                        } else {
-                            if (onSuccess) onSuccess(allData);
-                        }
-                    } else {
-                        if (onSuccess) onSuccess(allData);
-                    }
-                },
-                error: function(error) {
-                    if (onError) onError(error);
-                }
-            });
-        }
+    //                     if (response.data.length === length) {
+    //                         fetchData(offset + length);
+    //                     } else {
+    //                         if (onSuccess) onSuccess(allData);
+    //                     }
+    //                 } else {
+    //                     if (onSuccess) onSuccess(allData);
+    //                 }
+    //             },
+    //             error: function(error) {
+    //                 if (onError) onError(error);
+    //             }
+    //         });
+    //     }
 
-        fetchData(start);
-    }
+    //     fetchData(start);
+    // }
 
     
 
