@@ -252,19 +252,44 @@
         open_modal('Add New Area', 'add', '');
     });
     
-    function edit_data(id) {
-        modal.loading(true);
+    // function edit_data(id) {
+    //     modal.loading(true);
 
-        open_modal('Edit Area', 'edit', id, () => {
-            modal.loading(false);
+    //     open_modal('Edit Area', 'edit', id, () => {
+    //         modal.loading(false);
+    //     });
+    // }
+    
+    // function view_data(id) {
+    //     modal.loading(true);
+
+    //     open_modal('View Area', 'view', id, () => {
+    //         modal.loading(false);
+    //     });
+    // }
+
+    function close_modal(callback) {
+        if (typeof modal.close === "function") {
+            modal.close();
+        }
+        setTimeout(callback, 300); 
+    }
+
+    function edit_data(id) {
+        close_modal(() => {
+            modal.loading(true);
+            open_modal('Edit Area', 'edit', id, () => {
+                modal.loading(false);
+            });
         });
     }
-    
-    function view_data(id) {
-        modal.loading(true);
 
-        open_modal('View Area', 'view', id, () => {
-            modal.loading(false);
+    function view_data(id) {
+        close_modal(() => {
+            modal.loading(true);
+            open_modal('View Area', 'view', id, () => {
+                modal.loading(false);
+            });
         });
     }
     
