@@ -91,6 +91,10 @@ class Import_vmi extends BaseController
 	        $chunkIndex = $this->request->getPost('chunkIndex');
 	        $totalChunks = $this->request->getPost('totalChunks');
 	        $fileName = $this->request->getPost('fileName');
+	        $year = $this->request->getPost('inp_year');
+	        $month = $this->request->getPost('inp_month');
+	        $week = $this->request->getPost('inp_week');
+	        $company = $this->request->getPost('inp_company');
 
 	        if (!$file->isValid()) {
 	            return $this->response->setJSON(['message' => 'Invalid file'])->setStatusCode(400);
@@ -147,6 +151,10 @@ class Import_vmi extends BaseController
 	                            'on_hand' => trim($row[10]) ? $row[10] : 0,
 	                            'in_transit' => trim($row[11]) ? $row[11] : 0,
 	                            'average_sales_unit' => trim($row[12]) ? $row[12] : 0.00,
+	                            'year' => $year,
+	                            'month' => $month,
+	                            'week' => $week,
+	                            'company' => $company,
 	                            'created_date' => date('Y-m-d H:i:s'),
 	                            'created_by' => $this->session->get('sess_uid')
 	                        ];
@@ -184,6 +192,10 @@ class Import_vmi extends BaseController
 	                            'on_hand' => trim($row[10]) ? $row[10] : 0,
 	                            'in_transit' => trim($row[11]) ? $row[11] : 0,
 	                            'average_sales_unit' => trim($row[12]) ? $row[12] : 0.00,
+	                            'year' => $year,
+	                            'month' => $month,
+	                            'week' => $week,
+	                            'company' => $company,
 	                            'created_date' => date('Y-m-d H:i:s'),
 	                            'created_by' => $this->session->get('sess_uid')
 	                    ];
@@ -224,7 +236,12 @@ class Import_vmi extends BaseController
 	public function fetch_temp_vmi_data(){
 		    $page = $this->request->getGet('page') ?? 1;
     		$limit = $this->request->getGet('limit') ?? 1000;
-    		$result = $this->Global_model->fetch_temp_data($limit, $page);
+    		$year = $this->request->getGet('inp_year') ?? '';
+    		$month = $this->request->getGet('inp_month') ?? '';
+    		$week = $this->request->getGet('inp_week') ?? '';
+    		$company = $this->request->getGet('inp_company') ?? '';
+
+    		$result = $this->Global_model->fetch_temp_data($limit, $page, $year, $month, $week, $company, $this->session->get('sess_uid'));
 		    return $this->response->setJSON([
 		        "success" => true,
 		        "data" => $result['data'],

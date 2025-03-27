@@ -471,6 +471,18 @@
             return;
         }
 
+        var inp_year = $('#yearSelect').val()?.trim();
+        var inp_month = $('#monthSelect').val()?.trim();
+        var inp_week = $('#weekSelect').val()?.trim();
+        var inp_company = $('#companySelect').val()?.trim();
+
+        const fields = { inp_year, inp_month, inp_week, inp_company };
+        for (const [key, value] of Object.entries(fields)) {
+            if (!value) {
+                return modal.alert(`Please select a ${key.replace("inp_", "")}.`, 'error', () => {});
+            }
+        }
+
         modal.loading_progress(true, "Preparing Data");
         const chunkSize = 512 * 1024; // 512 KB
         const totalChunks = Math.ceil(file.size / chunkSize);
@@ -485,6 +497,10 @@
             formData.append("chunkIndex", chunkIndex);
             formData.append("totalChunks", totalChunks);
             formData.append("fileName", file.name);
+            formData.append("inp_year", inp_year);
+            formData.append("inp_month", inp_month);
+            formData.append("inp_week", inp_week);
+            formData.append("inp_company", inp_company);
 
             try {
                 await fetch("<?= base_url('cms/import-vmi/import-temp-vmi-data'); ?>", {
@@ -503,18 +519,28 @@
     }
 
     function fetchPaginatedData() {
+        inp_year = $('#yearSelect').val()?.trim();
+        inp_month = $('#monthSelect').val()?.trim();
+        inp_week = $('#weekSelect').val()?.trim();
+        inp_company = $('#companySelect').val()?.trim();
+
         modal.loading(true);
         $.ajax({
             url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
             method: "GET",
             data: {
                 page: currentPage,
-                limit: rowsPerPage
+                limit: rowsPerPage,
+                inp_year: inp_year,
+                inp_month: inp_month,
+                inp_week: inp_week,
+                inp_company: inp_company
             },
             dataType: "json",
             success: function(response) {
                 if (response.success) {
                     totalPages = Math.ceil(response.totalRecords / rowsPerPage);
+                    console.log(response.data);
                     display_imported_data(response.data);
                 } else {
                     modal.alert("Failed to fetch data.", "error");
@@ -533,10 +559,10 @@
         if (btn.prop("disabled")) return;
         btn.prop("disabled", true);
 
-        const inp_year = $('#yearSelect').val()?.trim();
-        const inp_month = $('#monthSelect').val()?.trim();
-        const inp_week = $('#weekSelect').val()?.trim();
-        const inp_company = $('#companySelect').val()?.trim();
+        var inp_year = $('#yearSelect').val()?.trim();
+        var inp_month = $('#monthSelect').val()?.trim();
+        var inp_week = $('#weekSelect').val()?.trim();
+        var inp_company = $('#companySelect').val()?.trim();
 
         const fields = { inp_year, inp_month, inp_week, inp_company };
         for (const [key, value] of Object.entries(fields)) {
@@ -551,10 +577,16 @@
         let allData = [];
 
         function fetchAllPages(page = 0) {
+            inp_year = $('#yearSelect').val()?.trim();
+            inp_month = $('#monthSelect').val()?.trim();
+            inp_week = $('#weekSelect').val()?.trim();
+            inp_company = $('#companySelect').val()?.trim();
+
             $.ajax({
                 url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
                 method: "GET",
-                data: { page, limit: 5000 }, // Fetch in larger chunks
+
+                data: { page, limit: 5000, inp_year, inp_month, inp_week, inp_company}, // Fetch in larger chunks
                 success: function(response) {
                     if (response.success && response.data.length > 0) {
                         allData = allData.concat(response.data);

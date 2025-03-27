@@ -1063,9 +1063,14 @@ class Global_model extends Model
         return $query->getResultArray(); 
     }
 
-    public function fetch_temp_data($limit, $offset)
+    public function fetch_temp_data($limit, $offset, $year, $month, $week, $company, $id)
     {
         $builder = $this->db->table('tbl_temp_vmi')
+                      ->where('year', $year)
+                      ->where('month', $month)
+                      ->where('week', $week)
+                      ->where('company', $company)
+                      ->where('created_by', $id)
                       ->limit($limit, $offset)
                       ->get();
 
