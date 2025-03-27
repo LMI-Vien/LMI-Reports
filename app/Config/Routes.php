@@ -15,6 +15,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('overall-ba', 'TradeDashboard::overall_ba');
     $routes->get('asc', 'TradeDashboard::asc');
     $routes->get('overall-asc', 'TradeDashboard::overall_asc');
+    $routes->get('asc-view/(:any)', 'TradeDashboard::asc_preview');
     $routes->get('asc-dashboard-1', 'TradeDashboard::asc_dashboard');
     $routes->get('info-kam-1', 'TradeDashboard::info_kam1');
     $routes->get('info-kam-2', 'TradeDashboard::info_kam2');
@@ -22,6 +23,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('trade-ba', 'TradeDashboard::trade_ba');
     $routes->get('trade-ba-view/(:any)', 'TradeDashboard::trade_ba_view');
     $routes->get('trade-overall-ba', 'TradeDashboard::trade_overall_ba');
+    $routes->get('trade-overall-ba-view(:any)', 'TradeDashboard::trade_overall_ba_view');
     $routes->get('trade-info-asc', 'TradeDashboard::trade_info_asc');
     $routes->get('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');
     $routes->post('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');

@@ -8,6 +8,13 @@
 
 <div class="content-wrapper p-4">
     <div class="card">
+        <?php
+            echo view("cms/layout/buttons",$buttons);
+            $optionSet = '';
+            foreach($pageOption as $pageOptionLoop) {
+                $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
+            }
+        ?>
         <div class="text-center page-title md-center">
             <b id="sell_out_title"></b>
         </div>
@@ -21,7 +28,7 @@
                     <input hidden type="text" class="form-control p-2 col-3" id="s2" readonly disabled>
                 </div>
             </div>
-            <div class="box" style="max-height: 500px; overflow-y: auto; margin-top: 20px;">
+            <div class="box">
                 <table class="table table-bordered listdata">
                     <thead>
                         <tr>
@@ -38,6 +45,13 @@
                 </table>
             </div>
             <div class="list_pagination"></div>
+            <div class="form-group pull-right">
+                <label>Show</label>
+                <select class="record-entries">
+                    <?= $optionSet; ?>
+                </select>
+                <label>Entries</label>
+            </div>
         </div>
     </div>
 </div>
@@ -450,5 +464,17 @@
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
+    });
+
+    $(document).on("change", ".record-entries", function(e) {
+        $(".record-entries option").removeAttr("selected");
+        $(".record-entries").val($(this).val());
+        $(".record-entries option:selected").attr("selected","selected");
+        var record_entries = $(this).prop("selected",true ).val();
+        limit = parseInt(record_entries);
+        offset = 1;
+        modal.loading(true); 
+        get_data(query);
+        modal.loading(false);
     });
 </script>

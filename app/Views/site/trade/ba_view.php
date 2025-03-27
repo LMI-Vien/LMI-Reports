@@ -89,6 +89,19 @@
         box-shadow: 0px 0px 5px rgba(255, 152, 0, 0.5);
         background: #fff;
     }
+
+    #generatePDF {
+        background-color: #007bff; /* Blue color */
+        color: white; /* Text color */
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    }
     
     @media (max-width: 768px) {
         th, td {
@@ -134,7 +147,10 @@
                                     <input type="text" class="form-control" id="ar_asc_name" readonly>
                                 </div>
                                 <div class="col-md-3"></div>
-                                <div class="col-md-6 text-right pr-2">
+                                <div class="col-md-3">
+                                    <button id="generatePDF" class="my-3" onclick="generatePDF()">Generate PDF</button>
+                                </div>
+                                <div class="col-md-3 text-right pr-2">
                                     <small id="date-generated"></small>
                                 </div>
                             </div>
@@ -167,6 +183,8 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
+
 <script>
     let brand_ambassadors = <?= json_encode($brand_ambassador) ?>;
     let store_branch = <?= json_encode($store_branch) ?>;
@@ -181,6 +199,9 @@
         { id: "Hero SKU", type: "hero" }
     ];
 
+    // Ensure jsPDF is available
+    const { jsPDF } = window.jspdf;
+
     $(document).ready(function() {
         // populate header
         populateHeaderData();
@@ -188,6 +209,134 @@
         // populate table
         populateTableData();
     });
+
+    // Function to generate PDF WIP
+    function generatePDF() {
+        const doc = new jsPDF({
+            orientation: "landscape",
+        });
+        
+        // Add title
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.text("LIFESTRONG MARKETING INC.", 20, 20);
+
+        // Add a subtitle
+        doc.setFontSize(14);
+        doc.text("Report: BA Dashboard", 20, 30);
+
+        // Add a line separator
+        doc.line(20, 35, 300, 35);
+
+        doc.setFontSize(12);
+        doc.text("Item Name", 20, 40);
+        doc.text("Quantity", 145, 40);
+        doc.text("LMI Code", 170, 40);
+        doc.text("RGDI Code", 205, 40);
+        doc.text("Type of SKU", 245, 40);
+
+        // Load an image and add it to PDF
+        // Example image
+        // const imgURL = "https://dummyimage.com/150x150/000/fff.png";
+        const imgURL = "<?php echo base_url('assets/img/sampleimg.png'); ?>"; // if this does not work use the other link
+        const img = new Image();
+        img.src = imgURL;
+        
+        img.onload = function () {
+            doc.addImage(img, "PNG", 245, 5, 30, 30); // Add image at x=20, y=60, width=50, height=50
+        };
+
+        let yPos = 50;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+
+        let newTableData = [];
+
+        async function fetchDataForTables() {
+            let fetchPromises = tables.map(table => {
+                return new Promise((resolve, reject) => {
+                    fetchTradeDashboardData({
+                        baseUrl: "<?= base_url(); ?>",
+                        selectedSortField: params[4],
+                        selectedSortOrder: params[5],
+                        selectedBrand: params[3],
+                        selectedBa: params[1],
+                        selectedStore: params[2],
+                        selectedType: params[0],
+                        type: table.type,
+                        length: 10,
+                        start: 0,
+                        onSuccess: function(data) {
+                            data.forEach((value) => {
+                                newTableData.push([
+                                    value.item_name,
+                                    value.sum_total_qty,
+                                    "",
+                                    "",
+                                    table.id
+                                ]);
+                            });
+                            resolve(); // Mark this request as complete
+                        },
+                        onError: function(error) {
+                            console.error("Error:", error);
+                            reject(error); // Mark this request as failed
+                        }
+                    });
+                });
+            });
+
+            // Wait for all requests to complete before proceeding
+            await Promise.all(fetchPromises);
+
+            $.each(newTableData, function (rowIndex, row) {
+                if (yPos >= 200) {
+                    doc.addPage();
+
+                    const imgURL = "<?php echo base_url('assets/img/sampleimg.png'); ?>"; // if this does not work use the other link
+                    const img = new Image();
+                    img.src = imgURL;
+
+                    img.onload = function () {
+                        doc.addImage(img, "PNG", 245, 5, 30, 30); // Add image at x=20, y=60, width=50, height=50
+                    };
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(22);
+                    doc.text("LIFESTRONG MARKETING INC.", 20, 20);
+
+                    doc.setFontSize(14);
+                    doc.text("Report: BA Dashboard", 20, 30);
+
+                    doc.line(20, 35, 300, 35);
+
+                    doc.setFontSize(12);
+                    doc.text("Item Name", 20, 40);
+                    doc.text("Quantity", 145, 40);
+                    doc.text("LMI Code", 170, 40);
+                    doc.text("RGDI Code", 195, 40);
+                    doc.text("Type of SKU", 245, 40);
+
+                    yPos = 50;
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(12);
+                }
+                let xPos = 20;
+                doc.text(row[0], xPos, yPos);
+                doc.text(row[1], xPos+125, yPos);
+                doc.text(row[2], xPos+150, yPos);
+                doc.text(row[3], xPos+185, yPos);
+                doc.text(row[4], xPos+225, yPos);
+                yPos += 10;
+            });
+
+            // Save the PDF
+            doc.save("custom_report.pdf");
+        }
+
+        // Call the function
+        fetchDataForTables();
+    }
 
     /**
      * @example

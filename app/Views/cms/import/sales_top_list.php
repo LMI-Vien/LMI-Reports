@@ -205,8 +205,8 @@
     var url = "<?= base_url("cms/global_controller");?>";
     
     $(document).ready(function() {
-        get_data(query);
-        get_pagination(query);
+        // get_data(query);
+        // get_pagination(query);
 
     });
     
