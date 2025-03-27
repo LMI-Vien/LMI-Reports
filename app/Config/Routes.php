@@ -41,6 +41,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
 //sample API 
 $routes->get('/api/send_system_info', 'Dashboard::send_system_info');
 $routes->get('/api/get_users', 'Dashboard::get_users');
+$routes->get('/api/get-tracc-data-sync', 'Api\Fetch_Data_LMI::SyncData');
 
 $routes->group('login/', static function ($routes) {
     $routes->get('/', 'Login::login');
