@@ -64,6 +64,11 @@ class TradeDashboard extends BaseController
 
 	public function asc()
 	{
+
+	// echo '<pre>';
+	// print_r(session()->get());
+	// echo '</pre>';
+	// die();
 		$data['meta'] = array(
 			"title"         =>  "LMI Portal",
 			"description"   =>  "LMI Portal Wep application",
@@ -86,29 +91,61 @@ class TradeDashboard extends BaseController
 		return view("site/layout/template", $data);
 	}
 
+	public function set_asc_preview_session() {
+	    $session = session();
+	   
+		$session->set('asc_preview_filters', [
+		    'store'      => $this->request->getPost('store'),
+		    'area'       => $this->request->getPost('area'),
+		    'month'      => $this->request->getPost('month'),
+		    'year'       => $this->request->getPost('year'),
+		    'storename'      => $this->request->getPost('storename'),
+		    'areaname'       => $this->request->getPost('areaname'),
+		    'monthname'      => $this->request->getPost('monthname'),
+		    'yearname'       => $this->request->getPost('yearname'),
+		    'sort'       => $this->request->getPost('sortfield'),
+		    'sort_order' => $this->request->getPost('sortorder')
+		]);
+
+	    return $this->response->setJSON(['status' => 'success']);
+	}
+
 	public function asc_preview() {
-		$uri = current_url(true);
-		$data['uri'] =$uri;
-		$data['meta'] = array(
-			"title"         =>  "LMI Portal",
-			"description"   =>  "LMI Portal Wep application",
-			"keyword"       =>  ""
-		);
 
-		$data['area'] = $this->Global_model->get_area(0);
-		$data['store_branch'] = $this->Global_model->get_store_branch(0);
-		$data['month'] = $this->Global_model->get_months();
-		$data['year'] = $this->Global_model->get_years();
+		$sessionFilters = session()->get('asc_preview_filters');
+		if (!empty($sessionFilters)) {
+			$uri = current_url(true);
+			$data['uri'] =$uri;
+			$data['meta'] = array(
+				"title"         =>  "LMI Portal",
+				"description"   =>  "LMI Portal Wep application",
+				"keyword"       =>  ""
+			);
 
-		$data['title'] = "Trade Dashboard";
-		$data['PageName'] = 'Trade Dashboard';
-		$data['PageUrl'] = 'Trade Dashboard';
-		$data['content'] = "site/trade/asc_preview.php";
-		$data['js'] = array(
-                    );
-        $data['css'] = array(
-                    );
-		return view("site/layout/template", $data);
+			$data['area_name'] = session()->get('asc_preview_filters')['areaname'];
+			$data['store_branch_name'] = session()->get('asc_preview_filters')['storename'];
+			$data['month_name'] = session()->get('asc_preview_filters')['monthname'];
+			$data['year_name'] = session()->get('asc_preview_filters')['yearname'];
+			$data['area_val'] = session()->get('asc_preview_filters')['area'];
+			$data['store_branch_val'] = session()->get('asc_preview_filters')['store'];
+			$data['month_val'] = session()->get('asc_preview_filters')['month'];
+			$data['year_val'] = session()->get('asc_preview_filters')['year'];
+			$data['sort_field'] = session()->get('asc_preview_filters')['sort'];
+			$data['sort_order'] = session()->get('asc_preview_filters')['sort_order'];
+
+			$data['title'] = "Trade Dashboard";
+			$data['PageName'] = 'Trade Dashboard';
+			$data['PageUrl'] = 'Trade Dashboard';
+			$data['content'] = "site/trade/asc_preview.php";
+			$data['js'] = array(
+	                    );
+	        $data['css'] = array(
+	                    );
+			return view("site/layout/template", $data);			
+		}else{
+			redirect()->to(base_url('dashboard'))->send();
+			exit;
+		}
 	}
 
 	public function overall_asc()
@@ -704,5 +741,14 @@ class TradeDashboard extends BaseController
 	private function getCurrentYear() {
 	    return date("Y");
 	}
+
+	public function clear_preview_session($sessionGroup)
+	{
+	    $session = session();
+	    $session->remove($sessionGroup);
+
+	    return $this->response->setJSON(['status' => 'cleared']);
+	}
+
 
 }
