@@ -448,6 +448,32 @@ class TradeDashboard extends BaseController
 	    ]);
 	}
 
+	public function asc_dashboard_view()
+	{
+		$uri = current_url(true);
+		$data['uri'] =$uri;
+		$data['meta'] = array(
+			"title"         =>  "LMI Portal",
+			"description"   =>  "LMI Portal Wep application",
+			"keyword"       =>  ""
+		);
+		$data['title'] = "Trade Dashboard";
+		$data['PageName'] = 'Trade Dashboard';
+		$data['PageUrl'] = 'Trade Dashboard';
+		$data['content'] = "site/trade/asc_dashboard_view.php";
+		$data['year'] = $this->Global_model->get_years();
+		$data['asc'] = $this->Global_model->get_asc(0);
+		$data['area'] = $this->Global_model->get_area(0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['store_branch'] = $this->Global_model->get_store_branch(0);
+		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
+		$data['js'] = array(
+                    );
+        $data['css'] = array(
+                    );
+		return view("site/layout/template", $data);
+	}
+
 	public function trade_asc_dashboard_one()
 	{	
 	    $area = $this->request->getPost('area');
@@ -488,6 +514,12 @@ class TradeDashboard extends BaseController
 	    $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
 	    return $this->response->setJSON([
 	        'data' => $data['data'],
+			'area' => $area,
+			'asc' => $asc,
+			'brand' => $brand,
+			'ba' => $ba,
+			'store' => $store,
+			'year' => $year,
 	    ]);
 	}
 
@@ -538,7 +570,7 @@ class TradeDashboard extends BaseController
 	    $ba = $this->request->getPost('ba');
 	    $store = $this->request->getPost('store');
 	    $year = $this->request->getPost('year');
-	    $type = $this->request->getPost('type');
+	    $type = $this->request->getPost('trade_type');
 	    $withba = $this->request->getPost('withba');
 
 

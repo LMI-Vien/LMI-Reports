@@ -17,6 +17,7 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('overall-asc', 'TradeDashboard::overall_asc');
     $routes->get('asc-view/(:any)', 'TradeDashboard::asc_preview');
     $routes->get('asc-dashboard-1', 'TradeDashboard::asc_dashboard');
+    $routes->get('asc-dashboard-1-view/(:any)', 'TradeDashboard::asc_dashboard_view');
     $routes->get('info-kam-1', 'TradeDashboard::info_kam1');
     $routes->get('info-kam-2', 'TradeDashboard::info_kam2');
     $routes->get('store-performance', 'TradeDashboard::store_performance');
