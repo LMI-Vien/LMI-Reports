@@ -96,6 +96,19 @@
         box-shadow: 0px 0px 5px rgba(255, 152, 0, 0.5);
         background: #fff;
     }
+
+    #generatePDF {
+        background-color: #007bff; /* Blue color */
+        color: white; /* Text color */
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    }
     
     @media (max-width: 768px) {
         th, td {
@@ -137,7 +150,10 @@
 
                             <div class="row mt-3">
                                 <div class="col-md-6"></div>
-                                <div class="col-md-6 text-right pr-2">
+                                <div class="col-md-3">
+                                    <button id="generatePDF" class="my-3 mx-auto" onclick="generatePDF()">Generate PDF</button>
+                                </div>
+                                <div class="col-md-3 text-right pr-2">
                                     <small id="date-generated"></small>
                                 </div>
                             </div>
@@ -175,6 +191,8 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
+
 <script>
     var segment = "<?=$uri->getSegment(3);?>";
     var params = segment.split("-"); // store, area, month, year
@@ -187,7 +205,7 @@
     $(document).ready(function() {
         populateHeader();
 
-        populateTable();
+        populateTable(true);
     });
 
     function populateHeader() {
@@ -230,8 +248,7 @@
         return mapped_data;
     }
 
-    function populateTable() {
-        console.log("Fetching data...", params);
+    function populateTable(plotTbl) {
         let selectedStore = params[0];
         let selectedArea = params[1];
         let selectedMonth = params[2];
@@ -249,25 +266,28 @@
             length: 10,
             start: 0,
             onSuccess: function(data) {
-                console.log(data, 'data');
                 let html = '';
 
-                data.forEach((value) => {
-                    html += `<tr>
-                        <td>${value.rank}</td>
-                        <td>${value.store_code}</td>
-                        <td>${value.area}</td>
-                        <td>${value.store_name}</td>
-                        <td>${value.actual_sales}</td>
-                        <td>${value.target_sales}</td>
-                        <td>${value.percent_ach ?? ""}</td>
-                        <td>${value.balance_to_target}</td>
-                        <td>${value.possible_incentives}</td>
-                        <td>${value.target_per_remaining_days}</td>
-                    </tr>`;
-                });
-
-                $(`#overall_ba_sales_tbl tbody`).append(html);
+                if (plotTbl) {
+                    data.forEach((value) => {
+                        html += `<tr>
+                            <td>${value.rank}</td>
+                            <td>${value.store_code}</td>
+                            <td>${value.area}</td>
+                            <td>${value.store_name}</td>
+                            <td>${value.actual_sales}</td>
+                            <td>${value.target_sales}</td>
+                            <td>${value.percent_ach ?? ""}</td>
+                            <td>${value.balance_to_target}</td>
+                            <td>${value.possible_incentives}</td>
+                            <td>${value.target_per_remaining_days}</td>
+                        </tr>`;
+                    });
+    
+                    $(`#overall_ba_sales_tbl tbody`).append(html);
+                } else {
+                    outputPDF(data)
+                }
             },
             onError: function(error) {
                 alert("Error:", error);
@@ -324,6 +344,94 @@
         }
 
         fetchData(start);
+    }
+    
+    function generatePDF() {
+        populateTable(false)
+    }
+
+    function outputPDF(data) {
+        const { jsPDF } = window.jspdf;
+
+        const doc = new jsPDF({
+            orientation: "landscape",
+        });
+
+        let date = new Date();
+        let formattedDate = date.toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric",
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
+        });
+
+        // Add title
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.text("LIFESTRONG MARKETING INC.", 20, 20);
+
+        // Add a subtitle
+        doc.setFontSize(14);
+        doc.text("Report: Overall BA Sales Target", 20, 30);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.text("Store Name: " + $('#store').val(), 20, 35);
+        doc.text("Area: " + $('#area').val(), 20, 40);
+        doc.text("Month: " + $('#month').val(), 120, 35);
+        doc.text("Year: " + $('#year').val(), 120, 40);
+        doc.text("Date Generated: " + formattedDate, 190, 35);
+
+        // Add a line separator
+        doc.line(20, 45, 290, 45);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("Rank", 20, 50);
+        doc.text("Store", 35, 50);
+        doc.text("Code", 35, 55);
+        doc.text("Area", 55, 50);
+        doc.text("Store Name", 90, 50);
+        doc.text("Actual Sales", 125, 50);
+        doc.text("Target", 155, 50);
+        doc.text("%Ach", 175, 50);
+        doc.text("Balance to", 195, 50);
+        doc.text("target", 195, 55);
+        doc.text("Possible", 230, 50);
+        doc.text("Incentives", 230, 55);
+        doc.text("Target per", 260, 50);
+        doc.text("remaining days", 260, 55);
+
+        let yPos = 60;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+
+        data.forEach((value) => {
+            doc.text(value.rank, 20, yPos);
+            doc.text(value.store_code, 35, yPos);
+            doc.text(value.area, 55, yPos);
+            doc.text(trimText(value.store_name, 10), 90, yPos);
+            doc.text(value.actual_sales, 125, yPos);
+            doc.text(value.target_sales, 155, yPos);
+            doc.text((value.percent_ach ?? ""), 175, yPos);
+            doc.text(value.balance_to_target, 195, yPos);
+            doc.text(value.possible_incentives, 230, yPos);
+            doc.text(value.target_per_remaining_days, 260, yPos);
+            yPos += 5;
+        })
+
+        doc.save(`Overall BA Sales Target ${formattedDate}.pdf`);
+    }
+
+    function trimText(str, length) {
+        if (str.length > length) {
+            return str.substring(0, length) + "...";
+        } else {
+            return str;
+        }
     }
 
 </script>

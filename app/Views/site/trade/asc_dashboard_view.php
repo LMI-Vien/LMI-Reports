@@ -507,7 +507,7 @@
                 doc.text(data["Target Sales"], 170, yPos);
                 doc.text((data["Growth"] !== null && data["Growth"] !== undefined ? data["Growth"] : "0.00"), 220, yPos);
                 doc.text(data["Achieved"], 270, yPos);
-                yPos += 10;
+                yPos += 5;
             })
         } else {
             valuesData.forEach(data => {
@@ -539,7 +539,7 @@
                 doc.text(data["LMI Code"], 170, yPos);
                 doc.text(data["RGDI Code"], 195, yPos);
                 doc.text(data["Type of SKU"], 245, yPos);
-                yPos += 10;
+                yPos += 5;
             });
         }
 
