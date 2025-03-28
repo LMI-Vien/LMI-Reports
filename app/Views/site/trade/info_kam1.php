@@ -237,7 +237,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
                         <div class="col-md p-1 row">
                             <div class="col-md-3">
-                                <label for="item">Item Category</label>
+                                <label for="item_classi">Item Category</label>
                             </div>
                             <div class="col-md">
                                 <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
@@ -247,7 +247,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                     </div>
                     <div class="col-md-2 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
                         <div class="col-md-12 mx-auto row my-2 py-2 text-left" >
-                            <label class="my-auto col-md-12" >Covered by Selected ASC</label>
+                            <label class="my-auto col-md-12">Covered by Selected ASC</label>
                         </div>
                         <div class="col-md-12 mx-auto row py-2 text-center" >
                             <div class="col-md-6 row" >
@@ -337,8 +337,12 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
     $(document).ready(function() {
+        fetchData();
 
         let ba = <?= json_encode($brand_ambassador); ?>;
         let area = <?= json_encode($area); ?>;
@@ -385,7 +389,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
         $('#exportButton').click(function() {
         });
-        fetchData();
     });
 
     function fetchData() {
@@ -400,7 +403,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
     }
 
     function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null) {
-        
         if ($.fn.DataTable.isDataTable('#table-kam-one')) {
             let existingTable = $('#table-kam-one').DataTable();
             existingTable.clear().destroy();
@@ -447,6 +449,177 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             searching: false,
             lengthChange: false
         });
+    }
+
+    $("#previewButton").on('click', function() {
+        prepareExport();
+    })
+
+    function get_data(id, table, parameter) {
+        return new Promise((resolve, reject) => {
+            let query = id ? " id = " + id : ""
+            let url = "<?= base_url('cms/global_controller'); ?>";
+            let data = {
+                event: "list",
+                select: parameter,
+                query: query,
+                limit: 0,
+                offset: 0,
+                table: table,
+                order: {}
+            };
+    
+            aJax.post(url, data, function(result) {
+                try {
+                    if(id) {
+                        resolve(JSON.parse(result)[0][parameter]);
+                    } else {
+                        resolve(null);
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            })
+        })
+    }
+
+    async function prepareExport() {
+        let ba = $("#ba_id").val();
+        let area = $("#area_id").val();
+        let brand = $("#brand_id").val();
+        let month = $("#month").val();
+        let week = $("#week").val();
+        let store = $("#store_id").val();
+        let itemClass = $("#item_classi_id").val();
+        let covered_asc = $("[name='coveredASC']:checked").val();
+        
+        let baval = await get_data(ba, 'tbl_brand_ambassador', 'name');
+        let areaval = await get_data(area, 'tbl_area', 'description');
+        let brandval = await get_data(brand, 'tbl_brand', 'brand_description');
+        let monthval = await get_data(month, 'tbl_month', 'month');
+        let weekval = await get_data(week, 'tbl_week', 'name');
+        let itemclassval = await get_data(itemClass, 'tbl_classification', 'item_class_description');
+        let storeval = await get_data(store, 'tbl_store', 'description');
+        
+        let fetchPromises = new Promise((resolve, reject) => {
+            fetchTradeDashboardData({
+                baseUrl: "<?= base_url(); ?>",
+                selectedBa: baval,
+                selectedArea: areaval,
+                selectedBrand: brandval,
+                selectedMonth: monthval,
+                selectedWeek: weekval,
+                selectedStore: storeval,
+                selectedClass: itemclassval,
+                length: 10,
+                start: 0,
+                onSuccess: function(data) {
+                    let newData = data.map(({ ambassador_name, asc_name, brand, item, item_class, item_name, store_name, total_qty }) => ({
+                        "ambassador_name": ambassador_name,
+                        "asc_name": asc_name,
+                        "brand": brand,
+                        "item": item,
+                        "item_class": item_class,
+                        "item_name": item_name,
+                        "store_name": store_name,
+                        "total_qty": total_qty,
+                    }));
+                    // console.log(newData);
+                    resolve(newData);
+                },
+                onError: function(error) {
+                    reject(error);
+                }
+            });
+        });
+
+        fetchPromises.then((result) => {
+            let formattedData = result.flat();
+            console.log(formattedData);
+
+            const headerData = [
+                ["LIFESTRONG MARKETING INC."],
+                ["Report: Kam1 Dashboard"],
+                ["Date Generated: " + formatDate(new Date())],
+                ["Brand Ambassador: " + (baval ? baval : "ALL")],
+                ["Area: " + (areaval ? areaval : "ALL")],
+                ["Brand: " + (brandval ? brandval : "ALL")],
+                ["Month: " + (monthval ? monthval : "ALL")],
+                ["Week: " + (weekval ? weekval : "ALL")],
+                ["Item Category: " + (itemclassval ? itemclassval : "ALL")],
+                ["Store Name: " + (storeval ? storeval : "ALL")]
+            ];
+
+            exportArrayToCSV(formattedData, `Report: Kam1 Dashboard - ${formatDate(new Date())}`, headerData);
+        }).catch((error) => {
+            console.error(error);
+        })
+    }
+
+    function fetchTradeDashboardData({ 
+        baseUrl, 
+        selectedBa,
+        selectedArea,
+        selectedBrand,
+        selectedMonth,
+        selectedWeek,
+        selectedStore,
+        selectedClass,
+        length,
+        start, 
+        onSuccess, 
+        onError 
+    }) {
+        let allData = [];
+
+        function fetchData(offset) {
+            $.ajax({
+                url: baseUrl + 'trade-dashboard/trade-kam-one',
+                type: 'GET',
+                data: {
+                    ba: selectedBa === 0 ? null : selectedBa,
+                    area: selectedArea === 0 ? null : selectedArea,
+                    brand: selectedBrand === 0 ? null : selectedBrand,
+                    month: selectedMonth === 0 ? null : selectedMonth,
+                    week: selectedWeek === 0 ? null : selectedWeek,
+                    store: selectedStore === 0 ? null : selectedStore,
+                    itemcat: selectedClass === 0 ? null : selectedClass,
+                    limit: length,
+                    offset: offset
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.data && response.data.length) {
+                        allData = allData.concat(response.data);
+
+                        if (response.data.length === length) {
+                            fetchData(offset + length);
+                        } else {
+                            if (onSuccess) onSuccess(allData);
+                        }
+                    } else {
+                        if (onSuccess) onSuccess(allData);
+                    }
+                },
+                error: function(error) {
+                    if (onError) onError(error);
+                }
+            });
+        }
+
+        fetchData(start); 
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+        saveAs(blob, filename + ".csv");
     }
     
 </script>

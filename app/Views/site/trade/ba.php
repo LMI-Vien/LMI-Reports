@@ -826,6 +826,10 @@
                 let formattedData = results.flat();
                 console.log(formattedData);
 
+                if (selectedAsc = 'Please Select Brand Ambassador') {
+                    selectedAsc = ''
+                }
+
                 const headerData = [
                     ["LIFESTRONG MARKETING INC."],
                     ["Report: BA Dashboard"],
