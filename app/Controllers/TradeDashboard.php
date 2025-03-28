@@ -681,14 +681,15 @@ class TradeDashboard extends BaseController
 	public function trade_kam_one()
 	{	
 
-	    $ba = $this->request->getPost('ba');
-	    $area = $this->request->getPost('area');
-	    $brand = $this->request->getPost('brand');
-	    $store = $this->request->getPost('store');
-	    $month = $this->request->getPost('month');
-	    $week = $this->request->getPost('week');
-	    $withba = $this->request->getPost('withba');
-		$itemclassi = $this->request->getPost('itemcat'); //to follow
+	    $ba = $this->request->getVar('ba');
+	    $area = $this->request->getVar('area');
+	    $brand = $this->request->getVar('brand');
+	    $store = $this->request->getVar('store');
+	    $month = $this->request->getVar('month');
+	    $week = $this->request->getVar('week');
+	    $withba = $this->request->getVar('withba');
+		$itemclassi = $this->request->getVar('itemcat'); //to follow
+		// $limit = (int) $this->request->getPost('limit');
 		$latest_vmi_data = $this->Dashboard_model->getLatestVmi();
 		$latest_year = null;
 		if($latest_vmi_data){
@@ -716,6 +717,9 @@ class TradeDashboard extends BaseController
 	    if(empty($itemclassi)){
 	    	$itemclassi = null;
 	    }
+		if(empty($limit)) {
+			$limit = 0;
+		}
 	    if($withba == 'with_ba'){
 	    	$withba  = true;
 	    }else if($withba == 'without_ba'){
@@ -724,13 +728,14 @@ class TradeDashboard extends BaseController
 	    	$withba = null;
 	    }
 
-	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $ba, $store, 10, 0, $withba);
+	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $ba, $store, 100, 0, $withba);
 	    
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
 	        'recordsTotal' => $data['total_records'],
 	        'recordsFiltered' => $data['total_records'],
 	        'data' => $data['data'],
+			'limit' => $limit
 	    ]);	
 	}
 
