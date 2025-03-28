@@ -8,6 +8,12 @@
 
 <div class="content-wrapper p-4">
     <div class="card">
+        <?php
+            $optionSet = '';
+            foreach($pageOption as $pageOptionLoop) {
+                $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
+            }
+        ?>
         <div class="text-center page-title md-center">
             <b id="sell_out_title"></b>
         </div>
@@ -39,7 +45,7 @@
                     <input type="text" class="form-control p-2 col" id="remarks" readonly disabled>
                 </div>
             </div>
-            <div class="box" style="max-height: 500px; overflow-y: auto; margin-top: 20px;">
+            <div class="box">
                 <table class= "table table-bordered listdata" style="width: 100%">
                     <thead>
                         <tr>
@@ -58,6 +64,13 @@
                 </table>
             </div>
             <div class="list_pagination"></div>
+            <div class="form-group pull-right">
+                <label>Show</label>
+                <select class="record-entries">
+                    <?= $optionSet; ?>
+                </select>
+                <label>Entries</label>
+            </div>
         </div>
     </div>
 </div>
@@ -66,22 +79,23 @@
 <script>
     var url = "<?= base_url('cms/global_controller');?>";
     var import_sellout_id = "<?=$uri->getSegment(4);?>";
-    var limit = 10; 
+    var limit = 10;
+    var query = "";
 
     $(document).ready(function() {
         $("#sell_out_title").html(addNbsp("VIEW SELLOUT DATA"));
 
         renderHeader(import_sellout_id);
         // renderDetails(import_sellout_id)
-        renderDetails ();
-        get_pagination("");
+        renderDetails(query);
+        get_pagination(query);
     });
 
     function renderHeader(header_id) {
         table = 'tbl_sell_out_data_header a';
         join = 'left join tbl_month b on a.month = b.id';
         fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
-        limit = 0;
+        limit = limit;
         dynaoffset = 0;
         filter = `a.id:EQ=${header_id}`;
         order = '';
@@ -155,13 +169,13 @@
         }).join('');
     }
 
-    function renderDetails () {
+    function renderDetails(new_query) {
         var data = {
             event: "list",
             select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
-            limit: 10,
+            limit: limit,
             table: "tbl_sell_out_data_details",
-            query: "",
+            query: new_query,
             offset: offset,
             order: {},
         }
@@ -198,14 +212,14 @@
     }
 	
 	
-	function get_pagination() {
+	function get_pagination(new_query) {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "pagination",
             select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
-            query: "",
+            query: new_query,
             offset: offset,
-            limit: 10,
+            limit: limit,
             table : "tbl_sell_out_data_details",
             order : {},
             group: "",
@@ -225,5 +239,17 @@
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
+    });
+
+    $(document).on("change", ".record-entries", function(e) {
+        $(".record-entries option").removeAttr("selected");
+        $(".record-entries").val($(this).val());
+        $(".record-entries option:selected").attr("selected","selected");
+        var record_entries = $(this).prop("selected",true ).val();
+        limit = parseInt(record_entries);
+        offset = 1;
+        modal.loading(true); 
+        renderDetails(query);
+        modal.loading(false);
     });
 </script>
