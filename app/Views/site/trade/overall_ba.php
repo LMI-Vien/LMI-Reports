@@ -385,15 +385,15 @@
                 { data: 'store_code' },
                 { data: 'area' },
                 { data: 'store_name' },
-                { data: 'actual_sales' },
+                { data: 'actual_sales', render: formatTwoDecimals },
                 { data: 'target_sales' },
                 { data: 'percent_ach' },
-                { data: 'balance_to_target' },
-                { data: 'possible_incentives' },
-                { data: 'target_per_remaining_days' },
+                { data: 'balance_to_target', render: formatTwoDecimals },
+                { data: 'possible_incentives', render: formatFourDecimals  },
+                { data: 'target_per_remaining_days', render: formatNoDecimals },
                 { data: 'ly_scanned_data' },
                 { data: 'brand_ambassadors' },
-                { data: 'deployment_date' },
+                { data: 'deployment_date', render: formattedDate },
                 { data: 'brands' },
                 { data: 'growth' }
             ].filter(Boolean),
@@ -405,6 +405,26 @@
             lengthChange: false
         });
         addColumnToggle(table);
+    }
+
+    function formatNoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0';
+    }
+
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+    }
+
+    function formatFourDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) : '0.0000';
+    }
+
+    function formattedDate(data) {
+        if (!data) return ''; 
+
+        let date = new Date(data);
+        let options = { month: 'short', day: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('en-US', options).replace(',', '');
     }
 
     function addColumnToggle(table) {

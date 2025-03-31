@@ -397,11 +397,11 @@
                 { data: 'rank' },
                 { data: 'area' },
                 { data: 'asc_names' },
-                { data: 'actual_sales' },
+                { data: 'actual_sales', render: formatTwoDecimals },
                 { data: 'target_sales' },
                 { data: 'percent_ach' },
-                { data: 'balance_to_target' },
-                { data: 'target_per_remaining_days' }
+                { data: 'balance_to_target', render: formatTwoDecimals },
+                { data: 'target_per_remaining_days', render: formatNoDecimals }
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
@@ -410,6 +410,14 @@
             searching: false,
             lengthChange: false
         });
+    }
+
+    function formatNoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0';
+    }
+
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
     }
 
     function handleAction(action) {

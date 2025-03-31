@@ -403,11 +403,11 @@
                             dataValues.targetSales.push(y.total_target_sales); // Fix here
                             dataValues.PerAchieved.push(y.achieved);
                             thead += "<th class='tbl-title-field'>"+y.asc_name+"</th>";
-                            selloutdata += '<td>'+(y.total_net_sales || "0.00")+'</td>';
-                            salesreportdata += '<td>'+(y.total_amount || "0.00")+'</td>';
-                            targetsalesreport += '<td>'+(y.total_target_sales || "0.00")+'</td>';
-                            growthreport += '<td>'+(y.growth || "0.00")+'</td>';
-                            achievedreport += '<td>'+(y.achieved || "0.00")+'</td>';
+                            selloutdata += '<td>'+formatUnliDecimals(y.total_net_sales || "0.00")+'</td>';
+                            salesreportdata += '<td>'+formatTwoDecimals(y.total_amount || "0.00")+'</td>';
+                            targetsalesreport += '<td>'+formatTwoDecimals(y.total_target_sales || "0.00")+'</td>';
+                            growthreport += '<td>'+formatTwoDecimals(y.growth || "0.00")+'</td>';
+                            achievedreport += '<td>'+formatUnliDecimals(y.achieved || "0.00")+'</td>';
                         }
 
                     });                    
@@ -551,6 +551,18 @@
             renderChartsASC();
         });
     }
+
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+    }
+
+    function formatUnliDecimals(data) {
+        if (!data) return '0'; // Handle null or undefined
+        let [integerPart, decimalPart] = data.toString().split('.'); // Split integer and decimal parts
+        integerPart = Number(integerPart).toLocaleString('en-US'); // Format integer part with commas
+        return decimalPart ? `${integerPart}.${decimalPart}` : integerPart; // Reattach decimal part if exists
+    }
+
 
     // function handleAction(action) {
     //     let selectedAsc = $('#asc_id').val();
