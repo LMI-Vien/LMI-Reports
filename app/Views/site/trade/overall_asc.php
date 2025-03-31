@@ -749,7 +749,7 @@
                         return alert("No valid data available for export.");
                     }
 
-                    exportArrayToCSV(formattedData, `Trade_Overall_Sales_Report_${formatDate(new Date())}`, headerData);
+                    exportArrayToCSV(formattedData, `Trade Overall ASC Report - ${formatDate(new Date())}`, headerData);
                 })
                 .catch(error => {
                     console.error("Export Error:", error);

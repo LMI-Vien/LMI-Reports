@@ -29,6 +29,10 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('info-kam-1', 'TradeDashboard::info_kam1');
     $routes->get('info-kam-2', 'TradeDashboard::info_kam2');
     $routes->get('store-performance', 'TradeDashboard::store_performance');
+    
+    $routes->post('set-store-performance-preview-session', 'TradeDashboard::set_store_performance_preview_session');
+    $routes->get('store-performance-preview', 'TradeDashboard::store_performance_preview');
+
     $routes->get('trade-ba', 'TradeDashboard::trade_ba');
     $routes->get('trade-ba-view/(:any)', 'TradeDashboard::trade_ba_view');
     $routes->get('trade-overall-ba', 'TradeDashboard::trade_overall_ba');

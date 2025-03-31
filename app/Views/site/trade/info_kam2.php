@@ -162,22 +162,32 @@
                             </div>
                             <div class="col-md">
                                 <select class="form-control" id="month">
-                                    <option>January</option>
-                                    <option>February</option>
+                                    <?php
+                                        if($month){
+                                            foreach ($month as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md p-1 row">
-                            <div class="col-md-3">    
+                            <div class="col-md-3">
                                 <label for="week">Week</label>
                             </div>
                             <div class="col-md">
                                 <select class="form-control" id="week">
-                                    <option>Week 1</option>
-                                    <option>Week 2</option>
+                                    <?php
+                                        if($week){
+                                            foreach ($week as $value) {
+                                                echo "<option value=".$value['id'].">".$value['name']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
                                 </select>
                             </div>
-                        </div>
+                        </div>   
                     </div>
 
                     <div class="col-md-3 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
@@ -350,8 +360,8 @@
 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
+                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
                 </div>
             </div>
         </div>
@@ -364,6 +374,11 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<!-- FileSaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
     $(document).ready(function() {
         let ba = <?= json_encode($brand_ambassador); ?>;
@@ -390,12 +405,79 @@
             tables.forEach(id => $(id).DataTable().ajax.reload(null, false));
         });
 
-        $('#previewButton').click(function() {
-            alert('Preview feature coming soon!');
-        });
+        // $('#previewButton').click(function() {
+        //     alert('Preview feature coming soon!');
+        // });
 
-        $('#exportButton').click(function() {
-            alert('Export feature coming soon!');
-        });
+        // $('#exportButton').click(function() {
+        //     alert('Export feature coming soon!');
+        // });
     });
+
+    function handleAction(action) {
+        if (action === 'preview') {
+            alert('coming soon!');
+        } else if (action === 'export') {
+            prepareExport();
+        } else {
+            alert('wala rito boy');
+        }
+    }
+
+    function prepareExport() {
+        const headerData = [
+            ["LIFESTRONG MARKETING INC."],
+            ["Report: Information for KAM 2"],
+            ["Date Generated: " + formatDate(new Date())],
+            // ["ASC Name: " + (selectedAscName || "All")],
+            // ["Area: " + (selectedAreaName || "All")],
+            // ["Brand: " + (selectedBrandName || "All")],
+            // ["Year: " + (selectedYearName === "All" ? "All" : selectedYearName)],
+            ["Brand Ambassador: "],
+            ["Store Name: "],
+            ["Category: "],
+            ["Quantity Scope: "],
+            ["Month: "],
+            ["Week: "],
+            ["SKU: "],
+            ["Order by: "],
+            [""], // Empty row for separation
+        ];
+
+        let rawData = [
+            { sku: "Joan Donato", sohQty: "SC001", qtyw1: 100, qtyw2: 100, qtyw3: 150, typeSku: "Slow Moving SKU"},
+            { sku: "Jecerie Narito", sohQty: "SC002", qtyw1: 100, qtyw2: 200, qtyw3: 250, typeSku: "Overstock SKU"},
+            { sku: "Janshiene Bandojo", sohQty: "SC003", qtyw1: 50, qtyw2: 80, qtyw3: 90, typeSku: "Hero" }
+        ];
+
+        let formattedData = rawData.map(row => 
+            row.typeSku === "Hero" 
+                ? { "SKU": row.sku,
+                    "Type of SKU": "Hero",
+                 } 
+                : {
+                    "SKU": row.sku,
+                    "SOH Qty": row.sohQty,
+                    "Qty (W1)": row.qtyw1,
+                    "Qty (W2)": row.qtyw2,
+                    "Qty (W3)": row.qtyw3,
+                    "Type of SKU": row.typeSku,
+                }
+        );
+
+        console.log(formattedData);
+        // return;
+
+        exportArrayToCSV(formattedData, `Trade Information for Kam2 - ${formatDate(new Date())}`, headerData);
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        saveAs(blob, filename + ".csv");
+    }
+
+
 </script>

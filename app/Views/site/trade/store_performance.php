@@ -165,16 +165,34 @@
                             <div class="col-md-3">
                                 <label for="storeName">Month/Start</label>
                             </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="month_start" placeholder="">
+                            <div class="col-md-9">
+                                <select class="form-control" id="month">
+                                    <option value="0" disabled selected>Please month..</option>
+                                    <?php
+                                        if($month){
+                                            foreach ($month as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                         </div> 
                         <div class="col-md-12 mx-auto row py-2">
                             <div class="col-md-3">
                                 <label for="storeName">Month/End</label>
                             </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="month_end" placeholder="">
+                            <div class="col-md-9">
+                                <select class="form-control" id="month_end">
+                                    <option value="0" disabled selected>Please month..</option>
+                                    <?php
+                                        if($month){
+                                            foreach ($month as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                         </div> 
                     </div>
@@ -183,10 +201,16 @@
                             <div class="col-md-3">
                                 <label for="year">Year</label>
                             </div>
-                            <div class="col-md">
+                            <div class="col-md-9">
                                 <select class="form-control" id="year">
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
+                                    <option value="0" disabled selected>Please year..</option>
+                                    <?php
+                                        if($year){
+                                            foreach ($year as $value) {
+                                                echo "<option value=".$value['id'].">".$value['year']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
                                 </select>
                             </div>
                         </div> 
@@ -254,8 +278,8 @@
 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
+                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
                 </div>
             </div>
         </div>
@@ -265,6 +289,11 @@
 <!-- DataTables and Script -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<!-- FileSaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <script>
     $(document).ready(function() {
         let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
@@ -284,12 +313,67 @@
             tables.forEach(id => $(id).DataTable().ajax.reload(null, false));
         });
 
-        $('#previewButton').click(function() {
-            alert('Preview feature coming soon!');
-        });
+        // $('#previewButton').click(function() {
+        //     alert('Preview feature coming soon!');
+        // });
 
-        $('#exportButton').click(function() {
-            alert('Export feature coming soon!');
-        });
+        // $('#exportButton').click(function() {
+        //     alert('Export feature coming soon!');
+        // });
     });
+
+
+    function handleAction(action) {
+        if (action === 'preview') {
+            alert('coming soon!');
+        } else if (action === 'export') {
+            prepareExport();
+        } else {
+            alert('wala rito boy');
+        }
+    }
+
+    function prepareExport() {
+        const headerData = [
+            ["LIFESTRONG MARKETING INC."],
+            ["Report: Store Performance"],
+            ["Date Generated: " + formatDate(new Date())],
+            // ["ASC Name: " + (selectedAscName || "All")],
+            // ["Area: " + (selectedAreaName || "All")],
+            // ["Brand: " + (selectedBrandName || "All")],
+            // ["Year: " + (selectedYearName === "All" ? "All" : selectedYearName)],
+            ["Month Start: "],
+            ["Month End: "],
+            ["Year: "],
+            [""], // Empty row for separation
+        ];
+
+        let formattedData = [];
+
+        let rawData = [
+            { rank: 1, storeCode: "SC001", location: "Location A", lySellOut: 100, tySellOut: 150, sellThrough: "50%", contribution: "20%" },
+            { rank: 2, storeCode: "SC002", location: "Location B", lySellOut: 200, tySellOut: 250, sellThrough: "25%", contribution: "15%" }
+        ];
+
+        formattedData = rawData.map(row => ({
+            "Rank": row.rank,
+            "Store Code": row.storeCode,
+            "Location Description": row.location,
+            "LY Sell Out": row.lySellOut,
+            "TY Sell Out": row.tySellOut,
+            "% Sell Through": row.sellThrough,
+            "Contribution": row.contribution,
+        }));
+
+        exportArrayToCSV(formattedData, `Store Performance - ${formatDate(new Date())}`, headerData);
+    }
+
+    function exportArrayToCSV(data, filename, headerData) {
+        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        saveAs(blob, filename + ".csv");
+    }
+    
 </script>
