@@ -166,7 +166,16 @@
                                 <label for="storeName">Month/Start</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="month_start" placeholder="">
+                                <select class="form-control" id="month_start">
+                                    <option value="0">Please select..</option>
+                                    <?php
+                                        if($year){
+                                            foreach ($month as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                         </div> 
                         <div class="col-md-12 mx-auto row py-2">
@@ -174,7 +183,16 @@
                                 <label for="storeName">Month/End</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="month_end" placeholder="">
+                                <select class="form-control" id="month_end">
+                                    <option value="0">Please select..</option>
+                                    <?php
+                                        if($year){
+                                            foreach ($month as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                         </div> 
                     </div>
@@ -184,7 +202,7 @@
                                 <label for="year">Year</label>
                             </div>
                             <div class="col-md">
-                            <select class="form-control" id="year">
+                                <select class="form-control" id="year">
                                     <option value="0">Please select..</option>
                                     <?php
                                         if($year){
@@ -272,6 +290,8 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
+    let months = <?= json_encode($month); ?>;
+
     $(document).ready(function() {
         let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
 
@@ -298,4 +318,28 @@
             alert('Export feature coming soon!');
         });
     });
+
+    $("#month_start").on("change", function() {
+        let start = $("#month_start").val();
+        let html = "";
+        
+        months.forEach(month => {
+            if(parseInt(month.id) > start)
+                html += `<option value=${month.id}>${month.month}</option>`;
+        })
+
+        $("#month_end").html(html);
+    })
+
+    $("#month_end").on("change", function() {
+        let end = $("#month_end").val();
+        let html = "";
+
+        months.forEach(month => {
+            if(parseInt(month.id) < end)
+                html += `<option value=${month.id}>${month.month}</option>`;
+        })
+
+        $("#month_start").html(html);
+    })
 </script>

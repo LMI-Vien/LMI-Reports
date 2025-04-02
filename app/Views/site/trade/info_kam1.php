@@ -441,6 +441,12 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
         // autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
         autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(res) {
+            $("#store").val("");
+            $("#store_id").val("");
+
+            $("#brandAmbassador").val("");
+            $("#ba_id").val("");
+
             let data = {
                 event: "list",
                 query: "area_id = " + res.id,
@@ -455,7 +461,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                     {
                         table: "tbl_brand_ambassador",
                         query: "tbl_store.id = tbl_brand_ambassador.store",
-                        type: "left"
+                        type: "right"
                     }
                 ]
             }
