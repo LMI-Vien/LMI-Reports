@@ -350,10 +350,141 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         let store = <?= json_encode($store_branch); ?>;
         let item_classification = <?= json_encode($item_classification); ?>;
 
-        autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba, "description", "id", function(result) {
+            // console.log(result);
+
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_store.id, tbl_store.description, tbl_area.id AS area_id, tbl_area.description AS area",
+                query: "tbl_brand_ambassador.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_brand_ambassador",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store.id = tbl_brand_ambassador.store",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_store_group",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_area",
+                        query: "tbl_store_group.area_id = tbl_area.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let store_name = JSON.parse(result);
+                console.log(store_name);
+
+                $("#store").val(store_name[0].description);
+                $("#store_id").val(store_name[0].id);
+
+                $("#area").val(store_name[0].area);
+                $("#area_id").val(store_name[0].area_id);
+            })
+        });
+
+        autocomplete_field($("#store"), $("#store_id"), store, "description", "id", function(result) {
+            console.log(result.id);
+
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_brand_ambassador.id, tbl_brand_ambassador.name, tbl_area.description AS area, tbl_area.id AS area_id",
+                query: "tbl_store.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_store",
+                join: [
+                    {
+                        table: "tbl_brand_ambassador",
+                        query: "tbl_brand_ambassador.store = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_store_group",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_area",
+                        query: "tbl_store_group.area_id = tbl_area.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let baname = JSON.parse(result);
+                console.log(baname);
+
+                if(baname[0].name !== null) {
+                    $("#brandAmbassador").val(baname[0].name);
+                    $("#ba_id").val(baname[0].id);
+
+                    $("#area").val(baname[0].area);
+                    $("#area_id").val(baname[0].area_id);
+                } else {
+                    $("#brandAmbassador").val("No Brand Ambassador");
+                }
+
+            })
+        });
+
+        // autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(res) {
+            $("#store").val("");
+            $("#store_id").val("");
+
+            $("#brandAmbassador").val("");
+            $("#ba_id").val("");
+
+            let data = {
+                event: "list",
+                query: "area_id = " + res.id,
+                select: "tbl_store.id AS store_id, tbl_brand_ambassador.id AS ba_id, tbl_store.description AS store_description, tbl_brand_ambassador.name AS ba_name",
+                table: "tbl_store_group",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_brand_ambassador",
+                        query: "tbl_store.id = tbl_brand_ambassador.store",
+                        type: "right"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let info = JSON.parse(res);
+                
+                autocomplete_field($("#brandAmbassador"), $("#ba_id"), info, "ba_name", "ba_id", function(res) {
+                    $("#store").val(res.store_description);
+                    $("#store_id").val(res.store_id);
+                })
+
+                autocomplete_field($("#store"), $("#store_id"), info, "store_description", "store_id", function(res) {
+                    $("#brandAmbassador").val(res.ba_name);
+                    $("#ba_id").val(res.ba_id);
+                })
+            })
+        });
+
+
+
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
-        autocomplete_field($("#store"), $("#store_id"), store);
+        // autocomplete_field($("#store"), $("#store_id"), store);
         autocomplete_field($("#item_classi"), $("#item_classi_id"), item_classification, "item_class_description");
 
         $(document).on('click', '#clearButton', function () {
@@ -386,8 +517,9 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
         $('#previewButton').click(function() {
         });
-
+        
         $('#exportButton').click(function() {
+            prepareExport();
         });
     });
 
@@ -451,9 +583,9 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         });
     }
 
-    $("#previewButton").on('click', function() {
-        prepareExport();
-    })
+    // $("#previewButton").on('click', function() {
+    //     prepareExport();
+    // })
 
     function get_data(id, table, parameter) {
         return new Promise((resolve, reject) => {

@@ -251,6 +251,9 @@ class TradeDashboard extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+
+		$data['month'] = $this->Global_model->get_months();
+		$data['year'] = $this->Global_model->get_years();
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
@@ -689,7 +692,6 @@ class TradeDashboard extends BaseController
 	    $week = $this->request->getVar('week');
 	    $withba = $this->request->getVar('withba');
 		$itemclassi = $this->request->getVar('itemcat'); //to follow
-		// $limit = (int) $this->request->getPost('limit');
 		$latest_vmi_data = $this->Dashboard_model->getLatestVmi();
 		$latest_year = null;
 		if($latest_vmi_data){
@@ -717,9 +719,6 @@ class TradeDashboard extends BaseController
 	    if(empty($itemclassi)){
 	    	$itemclassi = null;
 	    }
-		if(empty($limit)) {
-			$limit = 0;
-		}
 	    if($withba == 'with_ba'){
 	    	$withba  = true;
 	    }else if($withba == 'without_ba'){
@@ -728,14 +727,13 @@ class TradeDashboard extends BaseController
 	    	$withba = null;
 	    }
 
-	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $ba, $store, 100, 0, $withba);
+	    $data = $this->Dashboard_model->getKamOneData($latest_year, $month, $week, $brand, $ba, $store, 10, 0, $withba);
 	    
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
 	        'recordsTotal' => $data['total_records'],
 	        'recordsFiltered' => $data['total_records'],
-	        'data' => $data['data'],
-			'limit' => $limit
+	        'data' => $data['data']
 	    ]);	
 	}
 

@@ -180,7 +180,7 @@
                                     Click Next" 
                                     data-step="3"
                                 >
-                                    <label for="brandAmbassador" class="col-3">Brand Ambassador</label>
+                                    <label for="brand_ambassadors" class="col-3">Brand Ambassador</label>
                                     <input type="text" id="brand_ambassadors" class="form-control" placeholder="Please select...">
                                     <input type="hidden" id="ba_id">
                                 </div>
@@ -570,6 +570,8 @@
     $(document).ready(function () {
         fetchData();
 
+        console.log("<?= base_url(); ?>");
+
         $(document).on('click', '#clearButton', function () {
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
             $('input[type="checkbox"]').prop('checked', false);
@@ -581,10 +583,67 @@
             $('#refreshButton').click();
         });
 
-        autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors);
-        autocomplete_field($("#store_branch"), $("#store_id"), store_branch);
-        autocomplete_field($("#brand"), $("#brand_id"), brands, "brand_description", "id");
+        autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors, "description", "id", function(result) {
+            // console.log(result);
 
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_store.id, tbl_store.description",
+                query: "tbl_brand_ambassador.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_brand_ambassador",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store.id = tbl_brand_ambassador.store",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let store_name = JSON.parse(result);
+                $("#store_branch").val(store_name[0].description);
+                $("#store_id").val(store_name[0].id);
+            })
+        });
+
+        autocomplete_field($("#store_branch"), $("#store_id"), store_branch, "description", "id", function(result) {
+            console.log(result.id);
+
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_brand_ambassador.id, tbl_brand_ambassador.name",
+                query: "tbl_store.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_store",
+                join: [
+                    {
+                        table: "tbl_brand_ambassador",
+                        query: "tbl_brand_ambassador.store = tbl_store.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let baname = JSON.parse(result);
+
+                if(baname[0].name !== null) {
+                    $("#brand_ambassadors").val(baname[0].name);
+                    $("#ba_id").val(baname[0].id);
+                } else {
+                    $("#brand_ambassadors").val("No Brand Ambassador");
+                }
+
+            })
+        });
+
+        autocomplete_field($("#brand"), $("#brand_id"), brands, "brand_description", "id");
 
         //store yung sagot ni user sa storage para hindi paulit ulit yung message
         if (!localStorage.getItem("TutorialMessage")) {
@@ -618,10 +677,12 @@
         let selectedBa = $('#ba_id').val();
         if(selectedBa !== 0){
             get_area_asc(selectedBa);
+            
         }else{
             $('#ar_asc_name').text('Please Select Brand Ambassador'); 
         }
         fetchData();
+        console.log(selectedBa);
     });
 
     function fetchData() {
@@ -711,6 +772,7 @@
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
+            console.log
             if(result){
                 $.each(result, function(index,d) {
                     $('#ar_asc_name').text((d.area || "N/A") + " / " + (d.asc_name || "N/A"));
@@ -939,6 +1001,22 @@
 
         // Trigger file download
         saveAs(blob, filename + ".csv");
+    }
+
+    function automate_data(ba_id) {
+        let data = {
+            event: "list",
+            select: "*",
+            query: "id = " + ba_id,
+            offset: offset,
+            limit: limit,
+            table: "tbl_brand_ambassador",
+            order: {}
+        }
+
+        aJax.post(url, data, function(result) {
+            console.log(result);
+        })
     }
 
 </script>

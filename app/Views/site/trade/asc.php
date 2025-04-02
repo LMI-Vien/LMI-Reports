@@ -324,11 +324,76 @@
     let area = <?= json_encode($area) ?>;
     // console.log("Area", area);
 
+    console.log(store_branch);
+
     $(document).ready(function() {
 
         initializeTable();
-        autocomplete_field($("#store"), $("#store_id"), store_branch);
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(result) {
+            let data = {
+                event: "list",
+                select: "",
+                query: "tbl_store_group.store_id = " + result.id,
+                table: "tbl_store_group",
+                join: [
+                    {
+                        table: "tbl_area",
+                        query: "tbl_store_group.area_id = tbl_area.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let area_description = JSON.parse(res);
+                console.log(area_description);
+
+                $("#area").val(area_description[0].description);
+                $("#area_id").val(area_description[0].id)
+            })
+        });
+
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+            console.log(result);
+            let data = {
+                event: "list",
+                select: "",
+                query: "area_id = " + result.id,
+                table: "tbl_store_group",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let store_description = JSON.parse(res);
+                console.log(store_description);
+
+                $("#store").val("");
+                $("#store_id").val("");
+
+                store_branch = store_description;
+                console.log(store_branch);
+
+                autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(res) {
+                    let data = {
+                        event: "list",
+                        select: "",
+                        query: "id = " + res.store_id,
+                        table: "tbl_store"
+                    }
+
+                    aJax.post(base_url + "cms/global_controller", data, function(res) {
+                        let store_description = JSON.parse(res);
+                        $("#store_id").val(store_description[0].id);
+                    })
+                })
+            })
+        });
 
 
         $(document).on('click', '#clearButton', function () {
