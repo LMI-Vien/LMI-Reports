@@ -115,7 +115,7 @@
                     <div class="mb-3">
                         <label for="code" class="form-label">Brand Ambassador Code</label>
                         <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
-                        <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
+                        <input type="text" class="form-control" id="code" maxlength="25" aria-describedby="code" disabled>
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
 
@@ -258,7 +258,6 @@
                                     <thead>
                                         <tr>
                                             <th class='center-content' scope="col">Line #</th>
-                                            <th class='center-content' scope="col">BA Code</th>
                                             <th class='center-content' scope="col">BA Name</th>
                                             <th class='center-content' scope="col">Deployment Date</th>
                                             <th class='center-content' scope="col">Agency</th>
@@ -309,7 +308,7 @@
 
     });
 
-    function get_data(query, field = "ba.code", order = "asc") {
+    function get_data(query, field = "ba.name", order = "asc") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -496,7 +495,6 @@
         query += m_date_from ? ` AND ba.updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND ba.updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        console.log(query);
         get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
@@ -579,7 +577,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id, actions);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#code, #name, #deployment_date, #agency, #brand, #store, #team, #area, #status', isReadOnly);
+        set_field_state('#name, #deployment_date, #agency, #brand, #store, #team, #area, #status', isReadOnly);
         
         setTimeout(() => {
             if (actions === 'view') {
@@ -691,7 +689,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['ba code', 'ba name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
+            let td_validator = ['ba name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -866,8 +864,6 @@
                 return fixedRow;
             });
 
-            console.log(jsonData);
-
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -930,7 +926,6 @@
             }
 
             return {
-                "BA Code": row["BA Code"] || "",
                 "BA Name": row["BA Name"] || "",
                 "Deployment Date": row["Deployment Date"] ? row["Deployment Date"] : "",
                 "Agency": row["Agency"] || "",
@@ -1180,125 +1175,282 @@
     //     }
     // }
 
-    function saveValidatedData(valid_data, brand_per_ba) {
-        let batch_size = 5000;
-        let total_batches = Math.ceil(valid_data.length / batch_size);
-        let batch_index = 0;
-        let errorLogs = [];
-        let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_brand_ambassador';
-        let selected_fields = ['id', 'code', 'name'];
+    // function saveValidatedData(valid_data, brand_per_ba) {
+    //     let batch_size = 5000;
+    //     let total_batches = Math.ceil(valid_data.length / batch_size);
+    //     let batch_index = 0;
+    //     let errorLogs = [];
+    //     let url = "<?= base_url('cms/global_controller');?>";
+    //     let table = 'tbl_brand_ambassador';
+    //     let selected_fields = ['id', 'name', 'store'];
 
-        let existingMapByCode = new Map();
-        let existingMapByName = new Map();
-        matchType = "OR";
+    //     let existingMapByStore = new Map();
+    //     let existingMapByName = new Map();
+    //     matchType = "OR";
 
-        modal.loading_progress(true, "Validating and Saving data...");
+    //     modal.loading_progress(true, "Validating and Saving data...");
 
-        aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
-            let result = JSON.parse(response);
-            if (result.existing) {
-                result.existing.forEach(record => {
-                    existingMapByCode.set(record.code, record.id);
-                    existingMapByName.set(record.name, record.id);
-                });
-            }
+    //     aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
+    //         let result = JSON.parse(response);
+    //         if (result.existing) {
+    //             result.existing.forEach(record => {
+    //                 existingMapByStore.set(record.store, record.id);
+    //                 existingMapByName.set(record.name, record.id);
+    //             });
+    //         }
 
-            function updateOverallProgress(stepName, completed, total) {
-                let progress = Math.round((completed / total) * 100);
-                updateSwalProgress(stepName, progress);
-            }
+    //         function updateOverallProgress(stepName, completed, total) {
+    //             let progress = Math.round((completed / total) * 100);
+    //             updateSwalProgress(stepName, progress);
+    //         }
 
-            function processNextBatch() {
-                if (batch_index >= total_batches) {
-                    modal.loading_progress(false);
+    //         function processNextBatch() {
+    //             if (batch_index >= total_batches) {
+    //                 modal.loading_progress(false);
 
-                    if (errorLogs.length > 0) {
-                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-                    } else {
-                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-                    }
-                    return;
+    //                 if (errorLogs.length > 0) {
+    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+    //                     modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+    //                 } else {
+    //                     modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+    //                 }
+    //                 return;
+    //             }
+
+    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+    //             let newRecords = [];
+    //             let updateRecords = [];
+
+    //             batch.forEach(row => {
+    //                 let matchByStore = existingMapByStore.get(row.store);
+    //                 let matchByName = existingMapByName.get(row.name);
+
+    //                 let matchFound = false;
+    //                 let existingId = null;
+
+    //                 if (matchType === "AND") {
+    //                     if (matchByStore && matchByName && matchByStore === matchByName) {
+    //                         matchFound = true;
+    //                         existingId = matchByStore;
+    //                     }
+    //                 } else if (matchType === "OR") {
+    //                     if (matchByStore || matchByName) {
+    //                         matchFound = true;
+    //                         existingId = matchByStore || matchByName;
+    //                     }
+    //                 }
+
+    //                 if (matchFound) {
+    //                     row.id = existingId;
+    //                     row.updated_date = formatDate(new Date());
+    //                     delete row.created_date;
+    //                     updateRecords.push(row);
+    //                 } else {
+    //                     row.created_by = user_id;
+    //                     row.created_date = formatDate(new Date());
+    //                     newRecords.push(row);
+    //                 }
+    //             });
+
+    //             function processUpdates(callback) {
+    //                 if (updateRecords.length > 0) {
+    //                     batch_update(url, updateRecords, "tbl_brand_ambassador", "id", true, (response) => {
+    //                         if (response.message !== 'success') {
+    //                             errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+    //                         }
+    //                         updateOverallProgress("Updating Brands...", batch_index + 1, total_batches);
+    //                         processBrandPerBA(updateRecords.map(r => ({ id: r.id, store: r.store })), brand_per_ba, callback);
+    //                     });
+    //                 } else {
+    //                     callback(); // Proceed even if no updates
+    //                 }
+    //             }
+
+    //             function processInserts() {
+    //                 if (newRecords.length > 0) {
+    //                     batch_insert(url, newRecords, "tbl_brand_ambassador", true, (response) => {
+    //                         if (response.message === 'success') {
+    //                             let inserted_ids = response.inserted;
+    //                             updateOverallProgress("Saving Brands...", batch_index + 1, total_batches);
+    //                             processBrandPerBA(inserted_ids, brand_per_ba, function() {
+    //                                 batch_index++;
+    //                                 setTimeout(processNextBatch, 300);
+    //                             });
+    //                         } else {
+    //                             errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+    //                             batch_index++;
+    //                             setTimeout(processNextBatch, 300);
+    //                         }
+    //                     });
+    //                 } else {
+    //                     batch_index++;
+    //                     setTimeout(processNextBatch, 300);
+    //                 }
+    //             }
+
+    //             processUpdates(processInserts);
+    //         }
+
+    //         setTimeout(processNextBatch, 1000);
+    //     });
+    // }
+
+function saveValidatedData(valid_data, brand_per_ba) {
+    let batch_size = 5000;
+    let total_batches = Math.ceil(valid_data.length / batch_size);
+    let batch_index = 0;
+    let errorLogs = [];
+    let url = "<?= base_url('cms/global_controller');?>";
+    let table = 'tbl_brand_ambassador';
+    let selected_fields = ['id', 'name', 'store', 'code'];
+    let existingMapByStore = new Map();
+    let existingMapByName = new Map();
+    let existingMapByCode = new Map();
+
+    matchType = "OR";
+
+    modal.loading_progress(true, "Validating and Saving data...");
+
+    aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
+        let result = JSON.parse(response);
+        let lastCode = null;
+
+        if (result.existing) {
+            result.existing.forEach(record => {
+                existingMapByStore.set(record.store, record.id);
+                existingMapByName.set(record.name, record.id);
+                existingMapByCode.set(record.code, record.id);
+            });
+
+            // Fetch last generated code
+            aJax.post(url, { table: table, event: "get_last_code", field: "code" }, function(codeResponse) {
+                let codeResult = codeResponse;
+                if (codeResult.message === 'success' && codeResult.last_code) {
+                    lastCode = codeResult.last_code;
                 }
 
-                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-                let newRecords = [];
-                let updateRecords = [];
+                function generateNewCode() {
+                    let today = new Date();
+                    let year = today.getFullYear();
+                    let month = String(today.getMonth() + 1).padStart(2, '0'); // Ensure 2-digit month
+                    let newSequence = 1;
 
-                batch.forEach(row => {
-                    let matchByCode = existingMapByCode.get(row.code);
-                    let matchByName = existingMapByName.get(row.name);
+                    if (lastCode) {
+                        let parts = lastCode.split('-');
+                        let lastYear = parseInt(parts[0], 10);
+                        let lastMonth = parseInt(parts[1], 10);
+                        let lastSequence = parseInt(parts[2], 10);
 
-                    let matchFound = false;
-                    let existingId = null;
-
-                    if (matchType === "AND") {
-                        if (matchByCode && matchByName && matchByCode === matchByName) {
-                            matchFound = true;
-                            existingId = matchByCode;
-                        }
-                    } else if (matchType === "OR") {
-                        if (matchByCode || matchByName) {
-                            matchFound = true;
-                            existingId = matchByCode || matchByName;
+                        if (lastYear === year && lastMonth === parseInt(month, 10)) {
+                            newSequence = lastSequence + 1;
                         }
                     }
 
-                    if (matchFound) {
-                        row.id = existingId;
-                        row.updated_date = formatDate(new Date());
-                        delete row.created_date;
-                        updateRecords.push(row);
-                    } else {
-                        row.created_by = user_id;
-                        row.created_date = formatDate(new Date());
-                        newRecords.push(row);
-                    }
-                });
+                    return `${year}-${month}-${String(newSequence).padStart(3, '0')}`;
+                }
 
-                function processUpdates(callback) {
-                    if (updateRecords.length > 0) {
-                        batch_update(url, updateRecords, "tbl_brand_ambassador", "id", true, (response) => {
-                            if (response.message !== 'success') {
-                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                function updateOverallProgress(stepName, completed, total) {
+                    let progress = Math.round((completed / total) * 100);
+                    updateSwalProgress(stepName, progress);
+                }
+
+                function processNextBatch() {
+                    if (batch_index >= total_batches) {
+                        modal.loading_progress(false);
+
+                        if (errorLogs.length > 0) {
+                            createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                            modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+                        } else {
+                            modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                        }
+                        return;
+                    }
+
+                    let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                    let newRecords = [];
+                    let updateRecords = [];
+
+                    batch.forEach(row => {
+                        let matchByStore = existingMapByStore.get(row.store);
+                        let matchByName = existingMapByName.get(row.name);
+                        let matchByCode = existingMapByName.get(row.code);
+                        let matchFound = false;
+                        let existingId = null;
+
+                        if (matchType === "AND") {
+                            if (matchByStore && matchByName && matchByCode && matchByStore === matchByName === matchByCode) {
+                                matchFound = true;
+                                existingId = matchByStore;
                             }
-                            updateOverallProgress("Updating Brands...", batch_index + 1, total_batches);
-                            processBrandPerBA(updateRecords.map(r => ({ id: r.id, code: r.code })), brand_per_ba, callback);
-                        });
-                    } else {
-                        callback(); // Proceed even if no updates
-                    }
-                }
+                        } else if (matchType === "OR") {
+                            if (matchByStore || matchByName || matchByCode) {
+                                matchFound = true;
+                                existingId = matchByStore || matchByName || matchByCode;
+                            }
+                        }
 
-                function processInserts() {
-                    if (newRecords.length > 0) {
-                        batch_insert(url, newRecords, "tbl_brand_ambassador", true, (response) => {
-                            if (response.message === 'success') {
-                                let inserted_ids = response.inserted;
-                                updateOverallProgress("Saving Brands...", batch_index + 1, total_batches);
-                                processBrandPerBA(inserted_ids, brand_per_ba, function() {
+                        if (matchFound) {
+                            row.id = existingId;
+                            row.updated_date = formatDate(new Date());
+                            delete row.created_date;
+                            row.updated_by = user_id;
+                            updateRecords.push(row);
+                        } else {
+                            row.code = generateNewCode(); // Assign auto-generated code
+                            row.created_by = user_id;
+                            row.created_date = formatDate(new Date());
+                            newRecords.push(row);
+
+                            lastCode = row.code; // Update lastCode for the next entry
+                        }
+                    });
+
+                    function processUpdates(callback) {
+                        if (updateRecords.length > 0) {
+                            batch_update(url, updateRecords, "tbl_brand_ambassador", "id", true, (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                updateOverallProgress("Updating Brands...", batch_index + 1, total_batches);
+                                processBrandPerBA(updateRecords.map(r => ({ id: r.id, name: r.name })), brand_per_ba, callback);
+                            });
+                        } else {
+                            callback(); // Proceed even if no updates
+                        }
+                    }
+
+                    function processInserts() {
+                        if (newRecords.length > 0) {
+                            batch_insert(url, newRecords, "tbl_brand_ambassador", true, (response) => {
+                                if (response.message === 'success') {
+                                    let inserted_ids = response.inserted;
+                                    updateOverallProgress("Saving Brands...", batch_index + 1, total_batches);
+                                    processBrandPerBA(inserted_ids, brand_per_ba, function() {
+                                        batch_index++;
+                                        setTimeout(processNextBatch, 300);
+                                    });
+                                } else {
+                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
                                     batch_index++;
                                     setTimeout(processNextBatch, 300);
-                                });
-                            } else {
-                                errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                                batch_index++;
-                                setTimeout(processNextBatch, 300);
-                            }
-                        });
-                    } else {
-                        batch_index++;
-                        setTimeout(processNextBatch, 300);
+                                }
+                            });
+                        } else {
+                            batch_index++;
+                            setTimeout(processNextBatch, 300);
+                        }
                     }
+
+                    processUpdates(processInserts);
                 }
 
-                processUpdates(processInserts);
-            }
+                setTimeout(processNextBatch, 1000);
+            });
+        }
+    });
+}
 
-            setTimeout(processNextBatch, 1000);
-        });
-    }
 
     function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
         let batch_size = 5000;
@@ -1307,8 +1459,8 @@
         let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
         let insertedMap = {};
 
-        inserted_ids.forEach(({ id, code }) => {
-            insertedMap[code] = id;
+        inserted_ids.forEach(({ id, name }) => {
+            insertedMap[name] = id;
         });
 
         function processNextBrandBatch() {
@@ -1321,10 +1473,10 @@
             let chunkData = [];
             let baIdsToDelete = [];
 
-            chunkKeys.forEach(code => {
-                if (insertedMap[code]) {
-                    let ba_id = insertedMap[code];
-                    let brand_ids = brand_per_ba[code];
+            chunkKeys.forEach(name => {
+                if (insertedMap[name]) {
+                    let ba_id = insertedMap[name];
+                    let brand_ids = brand_per_ba[name];
                     baIdsToDelete.push(ba_id);
                     brand_ids.forEach(brand_id => {
                         chunkData.push({
@@ -1421,7 +1573,6 @@
                     $('#team').val(ba.team);
                     get_team(ba.team);
                     $('#area').val(ba.area);
-                    //console.log(area);
                     get_area(ba.store, ba.area);
 
                     var line = 0;
@@ -1514,159 +1665,307 @@
         $('input[name="type"]').prop('checked', false);
     }
 
-    function save_data(action, id) {
-        var code = $('#code').val().trim();
-        var name = $('#name').val().trim();
-        var deployment_date = $('#deployment_date').val();
-        var agency = $('#agency').val();
-        var brand = '';
-        var store = $('#store').val();
-        var team = $('#team').val();
-        var area = $('#area').val();
-        var type = $('input[name="type"]:checked').val() || ''; 
-        var chk_status = $('#status').prop('checked');
-        var linenum = 0;
-        var unique_brand = [];
-        var brand_list = $('#brand_list');
-        // add_line
-        brand_list.find('input').each(function() {
-            if (!unique_brand.includes($(this).val())) {
-                brand = $(this).val().split(' - ');
+    // function save_data(action, id) {
+    //     var code = 'make it auto generated and auto increment based on the last generated id';
+    //     var name = $('#name').val().trim();
+    //     var deployment_date = $('#deployment_date').val();
+    //     var agency = $('#agency').val();
+    //     var brand = '';
+    //     var store = $('#store').val();
+    //     var team = $('#team').val();
+    //     var area = $('#area').val();
+    //     var type = $('input[name="type"]:checked').val() || ''; 
+    //     var chk_status = $('#status').prop('checked');
+    //     var linenum = 0;
+    //     var unique_brand = [];
+    //     var brand_list = $('#brand_list');
+    //     // add_line
+    //     brand_list.find('input').each(function() {
+    //         if (!unique_brand.includes($(this).val())) {
+    //             brand = $(this).val().split(' - ');
 
+    //             unique_brand.push(brand[1]);
+    //         }
+    //         linenum++
+    //     });
+
+    //     if (chk_status) {
+    //         status_val = 1;
+    //     } else {
+    //         status_val = 0;
+    //     }
+    //     if (id !== undefined && id !== null && id !== '') {
+    //         check_current_db("tbl_brand_ambassador", ["store", "name"], [store, name], "status" , "id", id, true, function(exists, duplicateFields) {
+    //             if (!exists) {
+    //                 modal.confirm(confirm_update_message, function(result){
+    //                     if(result){ 
+    //                         // modal.loading(true);
+    //                         let ids = [];
+    //                         let hasDuplicate = false;
+    //                         let valid = true;
+
+    //                         $.each(unique_brand, (x, y) => {
+    //                             if (ids.includes(y)) {
+    //                                 hasDuplicate = true;
+    //                             } else {
+    //                                 ids.push(y);
+    //                             }
+    //                         });
+
+    //                         if(hasDuplicate) {
+    //                             modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
+    //                         } else {
+    //                             let batch = [];
+    //                                 get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
+    //                                 if(res.length == 0) {
+    //                                     valid = false;
+    //                                 } else {
+    //                                     $.each(res, (x, y) => {
+    //                                         let data = {
+    //                                             'ba_id': id,
+    //                                             'brand_id': x,
+    //                                             'created_by': user_id,
+    //                                             'created_date': formatDate(new Date())
+    //                                         };
+    //                                         batch.push(data);
+    //                                     })
+    //                                 }
+    //                             });
+
+    //                             if(valid) {
+    //                                 save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+    //                                     total_delete(url, 'tbl_ba_brands', 'ba_id', id)
+                                        
+    //                                     batch_insert(url, batch, 'tbl_ba_brands', false, () => {
+    //                                         modal.loading(false);
+    //                                         modal.alert(success_update_message, "success", function() {
+    //                                             location.reload();
+    //                                         });
+    //                                     })
+    //                                 });
+    //                             } else {
+    //                                 modal.loading(false);
+    //                                 modal.alert('Brand not found', 'error', function() {});
+    //                             }
+    //                         } 
+    //                     }
+    //                 });
+
+    //             }             
+    //         });
+    //     }else{
+    //         check_current_db("tbl_brand_ambassador", ["store", "name"], [store, name], "status" , "id", id, true, function(exists, duplicateFields) {
+    //             if (!exists) {
+    //                 modal.confirm(confirm_add_message, function(result){
+    //                     if(result){ 
+    //                         // modal.loading(true);
+    //                         let ids = [];
+    //                         let hasDuplicate = false;
+    //                         // let batch = [];
+    //                         let valid = true;
+
+    //                         $.each(unique_brand, (x, y) => {
+    //                             if (ids.includes(y)) {
+    //                                 hasDuplicate = true;
+    //                             } else {
+    //                                 ids.push(y);
+    //                             }
+    //                         })
+
+    //                         if(hasDuplicate) {
+    //                             modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
+    //                         } else {
+    //                             let batch = [];
+    //                             get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
+    //                                 if(res.length == 0) {
+    //                                     console.log('waler');
+    //                                     valid = false;
+    //                                 } else {
+    //                                     $.each(res, (x, y) => {
+    //                                         let data = {
+    //                                             'ba_id': null,
+    //                                             'brand_id': x,
+    //                                             'created_by': user_id,
+    //                                             'created_date': formatDate(new Date())
+    //                                         };
+    //                                         batch.push(data);
+    //                                     })
+    //                                 }
+    //                             });
+
+    //                             if(valid) {
+    //                                 save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+    //                                     console.log(obj.ID);
+    //                                     insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
+    //                                     console.log(insert_batch);
+
+    //                                     batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
+    //                                         modal.loading(false);
+    //                                         modal.alert(success_update_message, "success", function() {
+    //                                             location.reload();
+    //                                         });
+    //                                     })
+    //                                 });
+    //                             } else {
+    //                                 modal.loading(false);
+    //                                 modal.alert('Brand not found', 'error', function() {});
+    //                             }
+    //                         }        
+    //                     }
+    //                 });
+
+    //             }             
+    //         });
+    //     }
+    // }
+
+    function save_data(action, id) {
+
+        generateCode(function (generatedCode) {
+            var name = $('#name').val().trim();
+            var deployment_date = $('#deployment_date').val();
+            var agency = $('#agency').val();
+            var brand = '';
+            var store = $('#store').val();
+            var team = $('#team').val();
+            var area = $('#area').val();
+            var type = $('input[name="type"]:checked').val() || ''; 
+            var chk_status = $('#status').prop('checked');
+            var linenum = 0;
+            var unique_brand = [];
+            var brand_list = $('#brand_list');
+
+            brand_list.find('input').each(function() {
+                if (!unique_brand.includes($(this).val())) {
+                    brand = $(this).val().split(' - ');
+                    unique_brand.push(brand[1]);
+                }
+                linenum++;
+            });
+
+            var status_val = chk_status ? 1 : 0;
+
+            if (id !== undefined && id !== null && id !== '') {
+                code = $('#code').val();
+                check_current_db("tbl_brand_ambassador", ["store", "code"], [store, code], "status", "id", id, true, function(exists) {
+                    if (!exists) {
+                        modal.confirm(confirm_update_message, function(result) {
+                            if (result) {
+                                processSaveData(id, code, name, deployment_date, agency, store, team, area, type, status_val);
+                            }
+                        });
+                    }
+                });
+            } else {
+                var code = generatedCode;
+                check_current_db("tbl_brand_ambassador", ["store", "code"], [store, code], "status", "id", id, true, function(exists) {
+                    if (!exists) {
+                        modal.confirm(confirm_add_message, function(result) {
+                            if (result) {
+                                processSaveData(null, code, name, deployment_date, agency, store, team, area, type, status_val);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function generateCode(callback) {
+        const url = "<?= base_url('cms/global_controller'); ?>";
+        let data = {
+            event: "get_last_code",
+            table: "tbl_brand_ambassador",
+            field: "code"
+        };
+
+        aJax.post(url, data, function(result) {
+            var lastCode = result.last_code || '';
+            var currentYear = new Date().getFullYear();
+            var currentMonth = ('0' + (new Date().getMonth() + 1)).slice(-2);
+
+            if (!lastCode || !lastCode.startsWith(currentYear + "-" + currentMonth)) {
+                callback(`${currentYear}-${currentMonth}-001`);
+            } else {
+                var lastSeq = parseInt(lastCode.split('-')[2]) || 0;
+                var newSeq = ('000' + (lastSeq + 1)).slice(-3);
+                callback(`${currentYear}-${currentMonth}-${newSeq}`);
+            }
+        });
+    }
+
+    function processSaveData(id, code, name, deployment_date, agency, store, team, area, type, status_val) {
+        let ids = [];
+        let hasDuplicate = false;
+        let valid = true;
+
+        let unique_brand = [];
+        $('#brand_list input').each(function() {
+            let brand = $(this).val().split(' - ');
+            if (!unique_brand.includes(brand[1])) {
                 unique_brand.push(brand[1]);
             }
-            linenum++
         });
-        console.log(unique_brand);
-        if (chk_status) {
-            status_val = 1;
+
+        $.each(unique_brand, (x, y) => {
+            if (ids.includes(y)) {
+                hasDuplicate = true;
+            } else {
+                ids.push(y);
+            }
+        });
+
+        if (hasDuplicate) {
+            modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', () => {});
         } else {
-            status_val = 0;
-        }
-        if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_update_message, function(result){
-                        if(result){ 
-                            // modal.loading(true);
-                            let ids = [];
-                            let hasDuplicate = false;
-                            let valid = true;
+            let batch = [];
+            let baIdsToDelete = [];
+            get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
+                if (res.length == 0) {
+                    valid = false;
+                } else {
+                    var counter = 0;
+                    $.each(res, (x, y) => {
+                        let data = {
+                            'ba_id': id,
+                            'brand_id': x,
+                            'created_by': user_id,
+                            'created_date': formatDate(new Date())
+                        };
+                        counter++;
+                        if (counter === 1 && id) {
+                            baIdsToDelete.push(id);
+                        }
+                        batch.push(data);
+                    });
+                }
 
-                            $.each(unique_brand, (x, y) => {
-                                if (ids.includes(y)) {
-                                    hasDuplicate = true;
-                                } else {
-                                    ids.push(y);
-                                }
+                if (valid) {
+                    save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
+                        insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
+                        if(id){
+                            insert_batch = batch.map(batch => ({...batch, ba_id: id}));
+                        }
+                        if (Array.isArray(baIdsToDelete) && baIdsToDelete.length > 0) {
+                            batch_delete(url, "tbl_ba_brands", "ba_id", baIdsToDelete, 'brand_id', function(resp) {
                             });
-
-                            if(hasDuplicate) {
-                                modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
-                            } else {
-                                let batch = [];
-                                    get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
-                                    if(res.length == 0) {
-                                        valid = false;
-                                    } else {
-                                        $.each(res, (x, y) => {
-                                            let data = {
-                                                'ba_id': id,
-                                                'brand_id': x,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date())
-                                            };
-                                            batch.push(data);
-                                        })
-                                    }
-                                });
-
-                                if(valid) {
-                                    save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                        total_delete(url, 'tbl_ba_brands', 'ba_id', id)
-                                        
-                                        batch_insert(url, batch, 'tbl_ba_brands', false, () => {
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
-                                            });
-                                        })
-                                    });
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('Brand not found', 'error', function() {});
-                                }
-                            } 
                         }
+                        batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
+                            modal.loading(false);
+                            modal.alert(success_update_message, "success", function() {
+                                location.reload();
+                            });
+                        });
+
                     });
-
-                }             
-            });
-        }else{
-            check_current_db("tbl_brand_ambassador", ["code", "name"], [code, name], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_add_message, function(result){
-                        if(result){ 
-                            // modal.loading(true);
-                            let ids = [];
-                            let hasDuplicate = false;
-                            // let batch = [];
-                            let valid = true;
-
-                            $.each(unique_brand, (x, y) => {
-                                if (ids.includes(y)) {
-                                    hasDuplicate = true;
-                                } else {
-                                    ids.push(y);
-                                }
-                            })
-
-                            if(hasDuplicate) {
-                                modal.alert('Brands cannot be duplicated. Please check brands carefully', 'error', ()=> {});
-                            } else {
-                                let batch = [];
-                                get_field_values('tbl_brand', 'brand_description', 'brand_code', ids, (res) => {
-                                    if(res.length == 0) {
-                                        console.log('waler');
-                                        valid = false;
-                                    } else {
-                                        $.each(res, (x, y) => {
-                                            let data = {
-                                                'ba_id': null,
-                                                'brand_id': x,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date())
-                                            };
-                                            batch.push(data);
-                                        })
-                                    }
-                                });
-
-                                if(valid) {
-                                    save_to_db(code, name, deployment_date, agency, store, team, area, type, status_val, id, (obj) => {
-                                        console.log(obj.ID);
-                                        insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
-                                        console.log(insert_batch);
-
-                                        batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
-                                            });
-                                        })
-                                    });
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('Brand not found', 'error', function() {});
-                                }
-                            }        
-                        }
-                    });
-
-                }             
+                } else {
+                    modal.loading(false);
+                    modal.alert('Brand not found', 'error', function() {});
+                }
             });
         }
     }
+
 
     function save_to_db(inp_code, inp_name, inp_deployment_date, inp_agency, inp_store, inp_team, inp_area, int_type, status_val, id, cb) {
         const url = "<?= base_url('cms/global_controller'); ?>";
@@ -2234,12 +2533,6 @@
                         );
                     }
                 );
-
-                console.log(agency_map, 'agency_map');
-                console.log(store_map, 'store_map');
-                console.log(team_map, 'team_map');
-                console.log(area_map, 'area_map');
-                console.log(brand_map, 'brand_map');
                 
                 formattedData = res.map(({ 
                     id, 
@@ -2287,20 +2580,15 @@
                 (res) => {
                     if (res && res.length > 0) {
                         let total_records = res[0].total_records;
-                        console.log(total_records, 'total records');
 
                         for (let index = 0; index < total_records; index += 100000) {
-                            console.log(index, 'index here')
                             var ano_ire = [];
 
                             get_brand_ambassador_brands(index, (result) => {
-                                console.log(result, 'result here');
 
                                 result.forEach(({ id, brands }) => {
                                     ano_ire[id] = brands;  // Assign value to ano_ire array using id as index
                                 });
-
-                                console.log(ano_ire); // To check the final array
                             });
 
                             dynamic_search(
@@ -2428,7 +2716,6 @@
                             )
                         }
                     } else {
-                        console.log('No data received');
                     }
                 }
             )

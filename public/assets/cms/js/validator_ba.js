@@ -63,7 +63,6 @@ self.onmessage = async function(e) {
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let code = row["BA Code"] ? row["BA Code"].trim() : "";
                 let name = row["BA Name"] ? row["BA Name"].trim() : "";
                 let agency = row["Agency"] ? row["Agency"].trim() : "";
                 let brand = row["Brand"] ? row["Brand"] : "";
@@ -77,18 +76,31 @@ self.onmessage = async function(e) {
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
                 let invalid_brand = false; 
 
-                if (unique_code.has(code)) {
+
+                // if (unique_name.has(name)) {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Duplicated Name at line #: ${tr_count}`);
+                //     err_counter++;
+                // } else if (name.length > 50 || name === "") {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Name at line #: ${tr_count}`);
+                //     err_counter++;
+                // } else {
+                //     unique_name.add(name);
+                // }
+
+                if (unique_code.has(name)) {
                     invalid = true;
-                    errorLogs.push(`⚠️ Duplicated Code at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Duplicated Name at line #: ${tr_count}`);
                     err_counter++;
-                } else if (code.length > 25 || code === "") {
+                } else if (name.length > 50 || name === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Code at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Name at line #: ${tr_count}`);
                     err_counter++;
                 } else {
 
-                    if (!brand_per_ba[code]) {
-                        brand_per_ba[code] = []; 
+                    if (!brand_per_ba[name]) {
+                        brand_per_ba[name] = []; 
                     }
 
                     let normalized_brand_lookup = {};
@@ -101,8 +113,8 @@ self.onmessage = async function(e) {
                         let brand_lower = brand[i].toLowerCase();
                         if (brand_lower in normalized_brand_lookup) {
                             let brand_id = normalized_brand_lookup[brand_lower];
-                            if (!brand_per_ba[code].includes(brand_id)) {
-                                brand_per_ba[code].push(brand_id);
+                            if (!brand_per_ba[name].includes(brand_id)) {
+                                brand_per_ba[name].push(brand_id);
                             }
                         } else {
                             if (!invalid_brand) {
@@ -114,19 +126,7 @@ self.onmessage = async function(e) {
                         }
                     }
 
-                    unique_code.add(code);
-                }
-
-                if (unique_name.has(name)) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Duplicated Name at line #: ${tr_count}`);
-                    err_counter++;
-                } else if (name.length > 50 || name === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Name at line #: ${tr_count}`);
-                    err_counter++;
-                } else {
-                    unique_name.add(name);
+                    unique_code.add(name);
                 }
 
                 if (!["outright", "consign"].includes(type)) {
@@ -204,18 +204,10 @@ self.onmessage = async function(e) {
                     errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
                     err_counter++;
                 }
-                //  console.log(store, "store");
-                // console.log(store_area_lookup, "store_area_lookup");
-                // if (store in store_area_lookup) {
-                //     if (!store_area_lookup[store].has(area)) {
-                //         invalid = true;
-                //         errorLogs.push(`⚠️ Store is not allowed in Area at line #: ${tr_count}`);
-                //         err_counter++;
-                //     }
-                // }
+
 
                 if (store in store_area_lookup) {
-                    if (!store_area_lookup[store].has(area)) {  // Check if area_id exists in store's allowed areas
+                    if (!store_area_lookup[store].has(area)) {
                         invalid = true;
                         errorLogs.push(`⚠️ Store is NOT allowed in Area at line #: ${tr_count}`);
                         err_counter++;
@@ -232,7 +224,6 @@ self.onmessage = async function(e) {
                 
                 if (!invalid) {
                     valid_data.push({
-                        code: code,
                         name: name,
                         deployment_date: deployment_date,
                         store: store,
