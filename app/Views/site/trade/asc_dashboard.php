@@ -412,8 +412,41 @@
         let store_branch = <?= json_encode($store_branch); ?>;
         let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
 
-        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id", function(result) {            
+            let data = {
+                event: "list",
+                query: "id = " + result.area_id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let area_description = JSON.parse(res);
+                $("#area").val(area_description[0].description);
+                $("#area_id").val(area_description[0].id);
+            })
+        });
+
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+            console.log(result);
+
+            let data = {
+                event: "list",
+                query: "area_id = " + result.id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area_sales_coordinator",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let asc_description = JSON.parse(res);
+                $("#ascName").val(asc_description[0].description);
+                $("#asc_id").val(asc_description[0].id);
+            })
+        });
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
         autocomplete_field($("#storeName"), $("#store_id"), store_branch);
         autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);

@@ -268,8 +268,50 @@
         let area = <?= json_encode($area); ?>;
         let brand = <?= json_encode($brand); ?>;
 
-        autocomplete_field($("#asc"), $("#asc_id"), asc, "asc_description", "asc_id");
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#asc"), $("#asc_id"), asc, "asc_description", "asc_id", function(result) {
+            let data = {
+                event: "list",
+                query: "id = " + result.area_id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let area_description = JSON.parse(res);
+                
+                if(area_description.length > 0) {
+                    $("#area").val(area_description[0].description);
+                    $("#area_id").val(area_description[0].id);
+                } else {
+                    $("#area").val(null);
+                }
+            })
+        });
+
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+            let data = {
+                event: "list",
+                query: "area_id = " + result.id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area_sales_coordinator",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let asc_description = JSON.parse(res);
+
+                if(asc_description.length > 0) {
+                    $("#asc").val(asc_description[0].description);
+                    $("#asc_id").val(asc_description[0].id);
+                } else {
+                    $("#asc").val("No ASC");
+                }
+            })
+        });
+        
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
 
         renderCharts(); // Initial render

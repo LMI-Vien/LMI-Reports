@@ -162,6 +162,8 @@
             var result = JSON.parse(result);
             var html = '';
 
+            console.log(result);
+
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
@@ -177,7 +179,7 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(brandAmbassadorName) + "</td>"
+                        html += `<td scope=\"col\" onClick='get_total_amount("${brandAmbassadorName}")'>` + trimText(brandAmbassadorName) + "</td>"
                         html += "<td scope=\"col\">" + trimText(areaDescription) + "</td>"
                         html += "<td scope=\"col\">" + trimText(storeDescription) + "</td>"
                         html += "<td scope=\"col\">" + trimText(brandDescription) + "</td>"
@@ -204,6 +206,29 @@
             }
             $('.table_body').html(html);
         });
+    }
+
+    function get_total_amount(ba_name) {
+        let data = {
+            event: "list",
+            select: "tbl_brand_ambassador.name, SUM(tbl_ba_sales_report.amount), tbl_ba_sales_report.date",
+            query: "tbl_brand_ambassador.name = '" + ba_name + "'",
+            offset: offset,
+            limit: 0,
+            table: "tbl_ba_sales_report",
+            join: [
+                {
+                    table: "tbl_brand_ambassador",
+                    query: "tbl_ba_sales_report.ba_id = tbl_brand_ambassador.id",
+                    type: "left"
+                }
+            ],
+            group: "tbl_brand_ambassador.name, tbl_ba_sales_report.date"
+        }
+
+        aJax.post(url, data, function(result) {
+            console.log(JSON.parse(result));
+        })
     }
 
     // function get_pagination() {

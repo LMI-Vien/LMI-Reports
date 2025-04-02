@@ -184,9 +184,15 @@
                                 <label for="year">Year</label>
                             </div>
                             <div class="col-md">
-                                <select class="form-control" id="year">
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
+                            <select class="form-control" id="year">
+                                    <option value="0">Please select..</option>
+                                    <?php
+                                        if($year){
+                                            foreach ($year as $value) {
+                                                echo "<option value=".$value['id'].">".$value['year']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
                                 </select>
                             </div>
                         </div> 
