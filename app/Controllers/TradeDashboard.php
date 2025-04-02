@@ -91,6 +91,65 @@ class TradeDashboard extends BaseController
 		return view("site/layout/template", $data);
 	}
 
+	public function set_overall_asc_preview_session() {
+		$session = session();
+		
+		$session->set('overall_asc_preview_filters', [
+			'asc'			=> $this->request->getPost('asc'),
+			'area'			=> $this->request->getPost('area'),
+			'brand'			=> $this->request->getPost('brand'),
+			'year'			=> $this->request->getPost('year'),
+			'ascname'		=> $this->request->getPost('ascname'),
+			'areaname'		=> $this->request->getPost('areaname'),
+			'brandname'		=> $this->request->getPost('brandname'),
+			'yearname' 		=> $this->request->getPost('yearname')
+		]);
+		return $this->response->setJSON(['status' => 'success']);
+	}
+
+	public function overall_asc_preview() {
+
+		$sessionFilters = session()->get('overall_asc_preview_filters');
+		if (!empty($sessionFilters)) {
+			$uri = current_url(true);
+			$data['uri'] = $uri;
+			$data['meta'] = array(
+				"title"         =>  "LMI Portal",
+				"description"   =>  "LMI Portal Wep application",
+				"keyword"       =>  ""
+			);
+
+			// echo '<pre>';
+			// print_r(session()->get());
+			// echo '</pre>';
+			// die();
+
+			$data['asc_name'] = session()->get('overall_asc_preview_filters')['ascname'];
+			$data['area_name'] = session()->get('overall_asc_preview_filters')['areaname'];
+			$data['brand_name'] = session()->get('overall_asc_preview_filters')['brandname'];
+			$data['year_name'] = session()->get('overall_asc_preview_filters')['yearname'];
+
+			$data['asc_val'] = session()->get('overall_asc_preview_filters')['asc'];
+			$data['area_val'] = session()->get('overall_asc_preview_filters')['area'];
+			$data['brand_val'] = session()->get('overall_asc_preview_filters')['brand'];
+			$data['year_val'] = session()->get('overall_asc_preview_filters')['year'];
+
+			$data['title'] = "Trade Dashboard";
+			$data['PageName'] = 'Trade Dashboard';
+			$data['PageUrl'] = 'Trade Dashboard';
+			$data['content'] = "site/trade/overall_asc_preview.php";
+			$data['js'] = array(
+	                    );
+	        $data['css'] = array(
+	                    );
+			return view("site/layout/template", $data);	
+
+		} else {
+			redirect()->to(base_url('dashboard'))->send();
+			exit;
+		}
+	}
+
 	public function set_asc_preview_session() {
 	    $session = session();
 	   
@@ -237,6 +296,9 @@ class TradeDashboard extends BaseController
 		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
+		$data['month'] = $this->Global_model->get_months();
+		$data['week'] = $this->Global_model->get_weeks();
+
 		$data['js'] = array(
                     );
         $data['css'] = array(
@@ -263,6 +325,47 @@ class TradeDashboard extends BaseController
         $data['css'] = array(
                     );
 		return view("site/layout/template", $data);
+	}
+
+	public function set_store_performance_preview_session() {
+		$session = session();
+
+		$session->set('store_performance_preview_filters', [
+			'month'			=> $this->request->getPost('month'),
+			'year'			=> $this->request->getPost('year'),
+			'monthname'		=> $this->request->getPost('monthname'),
+			'yearname'		=> $this->request->getPost('yearname')
+		]);
+		return $this->response->setJSON(['status' => 'success']);
+	}
+
+	public function store_performance_preview() {
+		$sessionFilters = session()->get('store_performance_preview_filters');
+		if (!empty($sessionFilters)) {
+			$uri = current_url(true);
+			$data['uri'] = $uri;
+			$data['meta'] = array(
+				"title"         =>  "LMI Portal",
+				"description"   =>  "LMI Portal Wep application",
+				"keyword"       =>  ""
+			);
+
+			$data['month_name'] = session()->get('store_performance_preview_filters')['monthname'];
+			$data['year_name'] = session()->get('store_performance_preview_filters')['yearname'];
+			$data['month_val'] = session()->get('store_performance_preview_filters')['monthname'];
+			$data['year_val'] = session()->get('store_performance_preview_filters')['monthname'];
+
+			$data['title'] = "Trade Dashboard";
+			$data['PageName'] = 'Trade Dashboard';
+			$data['PageUrl'] = 'Trade Dashboard';
+			$data['content'] = "site/trade/overall_asc_preview.php";
+			$data['js'] = array(
+	                    );
+	        $data['css'] = array(
+	                    );
+			return view("site/layout/template", $data);	
+
+		}
 	}
 
 	public function trade_ba_view() {

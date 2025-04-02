@@ -31,9 +31,9 @@
         background: linear-gradient(90deg, #fdb92a, #ff9800);
     }
 
-    /* Title Styling */
+    /* Title Styling /
     .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
+        / background: linear-gradient(to right, #007bff, #143996); */
         background: linear-gradient(to right, #143996, #007bff);
         color: black !important;
         text-align: center;
@@ -65,9 +65,9 @@
         font-weight: bold;
     }
 
-    /* Title Styling */
+    /* Title Styling /
     .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
+        / background: linear-gradient(to right, #007bff, #143996); */
         background: linear-gradient(to right, #143996, #007bff);
         color: black !important;
         text-align: center;
@@ -80,13 +80,13 @@
         border-radius: 8px 8px 0px 0px !important;
     }
 
-    /* Table Styling */
+    /* Table Styling /
     .table {
         margin-bottom: 0;
-        border-collapse: separate; /* Required for border-radius */
-        border-spacing: 0; /* Ensures borders don't separate */
+        border-collapse: separate; / Required for border-radius /
+        border-spacing: 0; / Ensures borders don't separate /
         border-radius: 12px 12px 0px 0px;
-        overflow: hidden; /* Ensures inner content respects border-radius */
+        overflow: hidden; / Ensures inner content respects border-radius */
     }
 
     .table th {
@@ -207,8 +207,7 @@
                                     <?php
                                         if($year){
                                             foreach ($year as $value) {
-                                                echo "<option value=".$value['id'].">".$value['year']."</option>";
-                                            }                                                
+                                                echo "<option value=".$value['id'].">".$value['year']."</option>";}                                                
                                         }
                                     ?>
                                 </select>

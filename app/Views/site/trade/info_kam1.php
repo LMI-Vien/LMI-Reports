@@ -323,8 +323,8 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-info mr-2" id="previewButton"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton"><i class="fas fa-file-export"></i> Export</button>
+                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
                 </div>
             </div>
         </div>
@@ -583,9 +583,15 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         });
     }
 
-    // $("#previewButton").on('click', function() {
-    //     prepareExport();
-    // })
+    function handleAction(action) {
+        if (action === 'preview') {
+            alert('coming soon!');
+        } else if (action === 'export') {
+            prepareExport();
+        } else {
+            alert('wala rito boy');
+        }
+    }
 
     function get_data(id, table, parameter) {
         return new Promise((resolve, reject) => {

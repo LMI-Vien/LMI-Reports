@@ -67,14 +67,7 @@
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                         <th class='center-content'>BA Code</th>
                                         <th class='center-content'>BA Name</th>
-                                        <!-- <th class='center-content'>Deployment Date</th>
-                                        <th class='center-content'>Agency</th>
-                                        <th class='center-content'>Brand</th>
-                                        <th class='center-content'>Store</th>
-                                        <th class='center-content'>Team</th>
-                                        <th class='center-content'>Area</th> -->
                                         <th class='center-content'>Status</th>
-                                        <!-- <th class='center-content'>Type</th> -->
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
                                         <th class='center-content'>Action</th>
@@ -97,6 +90,25 @@
         </div>
     </div>
 
+    <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-modal">
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Brand Ambassador Code</label>
+                            <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
+                            <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
+                            <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
+                        </div>
 
 <!-- Modal -->
 <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -119,30 +131,18 @@
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Brand Ambassador Name</label>
-                        <input type="text" class="form-control required" id="name" maxlength="50" aria-describedby="description">
-                        <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
-                    </div>
+                        <div class="form-group">
+                            <label>Deployment Date</label>
+                            <input type="date" class="form-control required" id="deployment_date">
+                        </div>
 
-                    <div >
-                        <label>Deployment Date</label>
-                        <input type="date" class="form-control required" id="deployment_date">
-                    </div>
+                        <div class="form-group">
+                            <label>Agency</label>
+                            <select name="area" class="form-control required" id="agency">
+                            </select>
+                        </div>
 
-                    <div >
-                        <label>Agency</label>
-                        <select name="area" class="form-control required" id="agency">
-                        </select>
-                    </div>
-
-<!--                     <div >
-                        <label>Brand</label>
-                        <select name="area" class="form-control required" id="brand">
-                        </select>
-                    </div>
- -->
-                        <div >
+                        <div class="form-group">
                             <div class="row" >
                                 <label class="col" >Brand</label>
                                 <input
@@ -153,57 +153,51 @@
                                 >
                             </div>
                             <div id="brand_list">
-                                <!-- <div id="line_0" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                    <select name="store" class="form-control store_drop required" id="store_0"></select>
-                                    <button type="button" class="rmv-btn" onclick="remove_line(0)" disabled readonly>
-                                        <i class="fa fa-minus" aria-hidden="true"></i>
-                                    </button>
-                                </div> -->
+                            
                             </div>
                         </div>
 
-
-                    <div >
-                        <label>Area</label>
-                        <select name="area" class="form-control required" id="area">
-                        </select>
-                    </div>
-
-                    <div >
-                        <label>Store</label>
-                        <select name="store" class="form-control required" id="store">
-                        </select>
-                    </div>
-
-                    <div >
-                        <label>Team</label>
-                        <select name="team" class="form-control required" id="team">
-                        </select>
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="status" checked>
-                        <label class="form-check-label" for="status">Active</label>
-                    </div>
-
-                    <div class="form-group mt-3">
-                        <label>Type</label>
-                        <div class="d-flex gap-2"> 
-                            <label class="mr-3">
-                                <input type="radio" name="type" value="1"> Outright
-                            </label>
-                            <label>
-                                <input type="radio" name="type" value="0"> Consign
-                            </label>
+                        <div class="form-group">
+                            <label>Area</label>
+                            <select name="area" class="form-control required" id="area">
+                            </select>
                         </div>
-                    </div>
 
-                </form>
+                        <div class="form-group">
+                            <label>Store</label>
+                            <select name="store" class="form-control required" id="store">
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Team</label>
+                            <select name="team" class="form-control required" id="team">
+                            </select>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="status" checked>
+                            <label class="form-check-label" for="status">Active</label>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label>Type</label>
+                            <div class="d-flex gap-2"> 
+                                <label class="mr-3">
+                                    <input type="radio" name="type" value="1"> Outright
+                                </label>
+                                <label>
+                                    <input type="radio" name="type" value="0"> Consign
+                                </label>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer"></div>
             </div>
-            <div class="modal-footer"></div>
         </div>
     </div>
-</div>
 
     <div class="modal" tabindex="-1" id="import_modal">
         <div class="modal-dialog modal-xl">
@@ -368,7 +362,6 @@
                         html += "<td>" + y.code + "</td>";
                         html += "<td>" + y.name + "</td>";
                         html += "<td>" +status+ "</td>";
-                        // html += "<td>" + (y.type == 1 ? "Outright" : "Consign") + "</td>";
                         html += "<td class='center-content'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td class='center-content'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
                         
@@ -403,8 +396,8 @@
             limit : limit,
             table : "tbl_brand_ambassador ba",
             order : {
-                field : "ba.updated_date", //field to order
-                order : "desc" //asc or desc
+                field : "ba.updated_date", 
+                order : "desc" 
             },
             join : [
                 {
@@ -432,8 +425,7 @@
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
-            // console.log(obj);
+            var obj = is_json(result);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -452,8 +444,7 @@
         search_input = $('#search_query').val();
         offset = 1;
         new_query = query;
-        new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%')";
-        //to follow OR b.brand_description LIKE '%" + search_input + "%'
+        new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%' OR b.brand_description LIKE '%" + search_input + "%')";
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -465,8 +456,7 @@
             search_input = $('#search_query').val();
             offset = 1;
             new_query = query;
-            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%')";
-            //to follow OR b.brand_description LIKE '%" + search_input + "%'
+            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%' OR b.brand_description LIKE '%" + search_input + "%')";
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -590,7 +580,6 @@
         $('input[name="type"]').prop('disabled', isReadOnly);
 
         $footer.empty();
-        //if (actions === 'add') $footer.append(buttons.save);
         if (actions === 'add') {
             let line = get_max_number();
 
@@ -649,7 +638,7 @@
             text: btn_txt,
             id: btn_id,
             class: btn_class,
-            click: onclick_event // Attach the onclick event
+            click: onclick_event 
         });
         return new_btn;
     }
@@ -754,67 +743,6 @@
         $(".import_buttons").append($downloadBtn);
     }
 
-    // try function
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false);
-    //     clear_import_table();
-
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-
-    //     const maxFileSize = 30 * 1024 * 1024; // 30MB in bytes
-    //     if (file.size > maxFileSize) {
-    //         modal.loading_progress(false);
-    //         modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-    //         return;
-    //     }
-
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const text = e.target.result;
-
-    //         // Read CSV manually to avoid auto-conversion
-    //         const workbook = XLSX.read(text, { type: "string", raw: true });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-    //         // Ensure only numbers are treated as text, keeping dates unchanged
-    //         jsonData = jsonData.map(row => {
-    //             let fixedRow = {};
-    //             Object.keys(row).forEach(key => {
-    //                 let value = row[key];
-
-    //                 // Convert numbers to text while keeping dates unchanged
-    //                 if (typeof value === "number") {
-    //                     value = String(value); // Convert numbers to string
-    //                 }
-
-    //                 fixedRow[key] = value !== null && value !== undefined ? value : "";
-    //             });
-    //             return fixedRow;
-    //         });
-
-    //         console.log(jsonData);
-
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-
-    //     reader.readAsText(file, 'UTF-8');
-    // }
-
-    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -873,7 +801,6 @@
         reader.readAsBinaryString(file);
     }
 
-
     function processInChunks(data, chunkSize, callback) {
         let index = 0;
         let totalRecords = data.length;
@@ -900,7 +827,7 @@
 
     function process_xl_file() {
         let btn = $(".btn.save");
-        if (btn.prop("disabled")) return; // Prevent multiple clicks
+        if (btn.prop("disabled")) return; 
 
         btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
@@ -918,7 +845,7 @@
                 row["Brand"] = brandList.filter(brand => {
                     let lowerCaseBrand = brand.toLowerCase();
                     if (!seen.has(lowerCaseBrand)) {
-                        seen.set(lowerCaseBrand, brand); // Store original case of first occurrence
+                        seen.set(lowerCaseBrand, brand); 
                         return true;
                     }
                     return false;
@@ -1569,7 +1496,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     get_agency(ba.agency);
                     $('#brand').val(ba.brand);
                     $('#store').val(ba.store);
-                    //get_store(ba.store, ba.area);
                     $('#team').val(ba.team);
                     get_team(ba.team);
                     $('#area').val(ba.area);
@@ -1984,7 +1910,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     name: inp_name,
                     deployment_date: inp_deployment_date,
                     agency: inp_agency,
-                    //brand: inp_brand,
                     store: inp_store,
                     team: inp_team,
                     area: inp_area,
@@ -2004,7 +1929,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     name: inp_name,
                     deployment_date: inp_deployment_date,
                     agency: inp_agency,
-                    //brand: inp_brand,
                     store: inp_store,
                     team: inp_team,
                     area: inp_area,
@@ -2057,7 +1981,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
     let areaDescriptions = {}; 
     function get_area(id, area_id) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+        var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
             select : "id, code, description, status",
@@ -2098,7 +2022,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
     let agencyDescriptions = {};
     function get_agency(id) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+        var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
             select : "id, code, agency, status",
@@ -2138,7 +2062,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
     let storeDescriptions = {};
     function get_store(id, area_id) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+        var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
             select : "sg.id as sgid, s.id as id, s.code as code, s.description as description, s.status",
@@ -2185,7 +2109,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
     let teamDescriptions = {};
     function get_team(id) {
-        var url = "<?= base_url('cms/global_controller');?>"; //URL OF CONTROLLER
+        var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list",
             select : "id, code, team_description, status",
@@ -2241,7 +2165,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
         aJax.post(url,data,function(res){
             var result = JSON.parse(res);
-            // var html = '<option id="default_val" value=" ">Select Brand</option>';
             var html = '';
 
             if(result) {
@@ -2253,7 +2176,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     });
                 }
             }
-            // $('#brand').append(html);
         });
     }
 
@@ -2275,7 +2197,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
         var status = $(this).attr("data-status");
         var modal_obj = "";
         var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
+        var hasExecuted = false;
 
         let id = $("input.select:checked");
         let code = [];
@@ -2332,7 +2254,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
                 var processed = 0;
                 dataList.forEach(function (data, index) {
                     aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; // Prevents multiple executions
+                        if (hasExecuted) return; 
 
                         modal.loading(false);
                         processed++;

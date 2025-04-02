@@ -122,6 +122,12 @@
                             <label for="dec" class="form-label p-2 col-2">December</label>
                             <input type="text" class="form-control required p-2 col-2" id="dec" aria-describedby="dec">
                         </div>
+
+                        <div class="d-flex flex-row" style="margin-left:20px; margin-right: 20px; margin-top:50px;" >
+                            <label for="total" class="form-label p-2 col-2">Total for all months</label>
+                            <input type="text" class="form-control required p-2 col-2" id="total" aria-describedby="total">
+                        </div>
+                        
                     </div>
                 </form>
             </div>
@@ -326,6 +332,19 @@
                     $('#oct').val(Math.round(d.october).toLocaleString());
                     $('#nov').val(Math.round(d.november).toLocaleString());
                     $('#dec').val(Math.round(d.december).toLocaleString());
+
+                    let months = ['january', 'february', 'march', 'april', 'may', 'june', 
+                                'july', 'august', 'september', 'october', 'november', 'december'];
+
+                    let total = 0;
+
+                    months.forEach(month => {
+                        let value = Math.round(d[month]) || 0; 
+                        total += value; 
+                        $('#' + month.substring(0, 3)).val(value.toLocaleString()); 
+                    });
+
+                    $('#total').val(total.toLocaleString());
                 }); 
             }
         });

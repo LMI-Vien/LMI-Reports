@@ -15,7 +15,10 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('overall-ba', 'TradeDashboard::overall_ba');
     $routes->get('asc', 'TradeDashboard::asc');
     $routes->get('overall-asc', 'TradeDashboard::overall_asc');
+    $routes->post('set-overall-asc-preview-session', 'TradeDashboard::set_overall_asc_preview_session');
+    $routes->get('overall-asc-preview', 'TradeDashboard::overall_asc_preview');
     $routes->post('set-asc-preview-session', 'TradeDashboard::set_asc_preview_session');
+    // for session
     $routes->post('clear-filter-session/(:any)', 'TradeDashboard::clear_preview_session/$1');
 
     
@@ -24,9 +27,12 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('asc-dashboard-1', 'TradeDashboard::asc_dashboard');
     $routes->get('asc-dashboard-1-view/(:any)', 'TradeDashboard::asc_dashboard_view');
     $routes->get('info-kam-1', 'TradeDashboard::info_kam1');
-    $routes->get('info-kam-1/(:any)', 'TradeDashboard::info_kam1_preview');
     $routes->get('info-kam-2', 'TradeDashboard::info_kam2');
     $routes->get('store-performance', 'TradeDashboard::store_performance');
+    
+    $routes->post('set-store-performance-preview-session', 'TradeDashboard::set_store_performance_preview_session');
+    $routes->get('store-performance-preview', 'TradeDashboard::store_performance_preview');
+
     $routes->get('trade-ba', 'TradeDashboard::trade_ba');
     $routes->get('trade-ba-view/(:any)', 'TradeDashboard::trade_ba_view');
     $routes->get('trade-overall-ba', 'TradeDashboard::trade_overall_ba');

@@ -57,6 +57,40 @@
         margin-bottom: 20px !important;
     }
 
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    .form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .form-label {
+        width: 40%;
+        font-weight: bold;
+    }
+
+    .small-input {
+        width: 50%;
+        font-size: 13px;
+        padding: 5px;
+    }
+
+    .clickable-link {
+        color: #007bff; /* Link color */
+        cursor: pointer; /* Change the cursor to a pointer */
+    }
+
+    .clickable-link:hover {
+        color: #0056b3; /* Darker shade when hovering */
+        text-decoration: none; /* Optional: remove underline on hover */
+    }
+
 </style>
 
     <div class="content-wrapper p-4">
@@ -106,6 +140,44 @@
             </div>
         </div>
     </div>
+
+    <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-m">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-modal">
+                        <div class="form-container">
+                            <div hidden>
+                                <input type="text" class="form-control small-input" id="id" aria-describedby="id">
+                            </div>
+
+                            <div class="form-group d-flex">
+                                <label for="ba_name" class="form-label">Brand Ambassador Name</label>
+                                <input type="text" class="form-control required small-input" id="ba_name" aria-describedby="ba_name">
+                            </div>
+
+                            <div class="form-group d-flex">
+                                <label for="ba_total_amount" class="form-label">Total Amount for the day</label>
+                                <input type="text" class="form-control required small-input" id="ba_total_amount" aria-describedby="ba_total_amount">
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
+
 <script>
     
     var limit = 10; 
@@ -179,7 +251,8 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += `<td scope=\"col\" onClick='get_total_amount("${brandAmbassadorName}")'>` + trimText(brandAmbassadorName) + "</td>"
+                        // html += "<td scope=\"col\">" + trimText(brandAmbassadorName) + "</td>"
+                        html += "<td scope=\"col\"><a href='#' class='clickable-link' onclick='handleBrandAmbassadorClick(\"" + y.id + "\", \"" + y.date + "\", \"" + brandAmbassadorName + "\")'>" + trimText(brandAmbassadorName) + "</a></td>";
                         html += "<td scope=\"col\">" + trimText(areaDescription) + "</td>"
                         html += "<td scope=\"col\">" + trimText(storeDescription) + "</td>"
                         html += "<td scope=\"col\">" + trimText(brandDescription) + "</td>"
@@ -208,27 +281,113 @@
         });
     }
 
-    function get_total_amount(ba_name) {
+    function updateModalTitle(message) {
+        $('.modal-title').html('<b>' + message + '</b>'); 
+    }
+
+    function handleBrandAmbassadorClick(id, date) {
+        $('#popup_modal').modal('show');
+        open_modal(id, date);
+
+        updateModalTitle("Total Amount");
+        
+        console.log(id, date);
+    }
+
+    // function open_modal(id) {
+    //     let data = {
+    //         event: "list",
+    //         select: "basr.id, basr.date, ba.name AS ba_name, ar.description AS area, s.description AS store_name, b.brand_description AS brand, SUM(basr.amount) AS total_amount, basr.status",
+    //         query: "basr.id = '" + id + "'",
+    //         offset: offset,
+    //         limit: 0,
+    //         table: "tbl_ba_sales_report AS basr",
+    //         join : [
+    //             {
+    //                 table: "tbl_brand b",
+    //                 query: "b.id = basr.brand",
+    //                 type: "left"
+    //             },
+    //             {
+    //                 table: "tbl_store s",
+    //                 query: "s.id = basr.store_id",
+    //                 type: "left"
+    //             },
+    //             {
+    //                 table: "tbl_brand_ambassador ba",
+    //                 query: "ba.id = basr.ba_id",
+    //                 type: "left"
+    //             },
+    //             {
+    //                 table: "tbl_area ar",
+    //                 query: "ar.id = basr.area_id",
+    //                 type: "left"
+    //             }
+    //         ],
+    //         order : {
+    //             field : "basr.id",
+    //             order : "asc" 
+    //         },
+    //         // group: "basr.date"
+    //     }
+
+    //     aJax.post(url,data,function(result){
+    //         // console.log("result mo to: ",result)
+    //         var obj = is_json(result);
+    //         if(obj){
+    //             $.each(obj, function(index,y) {
+    //                 $('#id').val(y.id);
+    //                 // console.log(y.id);
+    //                 $('#ba_name').val(y.ba_name);
+    //                 $('#ba_total_amount').val(y.total_amount);
+    //             }); 
+    //         }
+    //     });
+    // }
+
+    function open_modal(id, date) {
         let data = {
             event: "list",
-            select: "tbl_brand_ambassador.name, SUM(tbl_ba_sales_report.amount), tbl_ba_sales_report.date",
-            query: "tbl_brand_ambassador.name = '" + ba_name + "'",
-            offset: offset,
+            select: "ba.name AS ba_name, basr.date, SUM(basr.amount) AS total_amount",
+            query: "basr.ba_id = (SELECT ba_id FROM tbl_ba_sales_report WHERE id = '" + id + "') AND basr.date = '" + date + "'",
+            offset: 0,
             limit: 0,
-            table: "tbl_ba_sales_report",
+            table: "tbl_ba_sales_report AS basr",
             join: [
                 {
-                    table: "tbl_brand_ambassador",
-                    query: "tbl_ba_sales_report.ba_id = tbl_brand_ambassador.id",
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.id = basr.ba_id",
                     type: "left"
                 }
             ],
-            group: "tbl_brand_ambassador.name, tbl_ba_sales_report.date"
-        }
+            group: "ba.name, basr.date",  
+            order: { 
+                field: "basr.date", 
+                order: "asc" 
+            }
+        };
 
         aJax.post(url, data, function(result) {
-            console.log(JSON.parse(result));
-        })
+            console.log("AJAX Response:", result);
+            var obj = is_json(result);
+            if (obj && obj.length > 0) {
+                let totalAmount = 0; 
+                let baName = obj[0].ba_name; 
+
+                $.each(obj, function(index, y) {
+                    totalAmount += parseFloat(y.total_amount); 
+                });
+
+                $('#ba_name').val(baName);
+                $('#ba_total_amount').val(totalAmount.toFixed(2));
+            }
+        });
+
+        set_field_state('#ba_name, #ba_total_amount', true);
+    }
+
+    function set_field_state(selector, isReadOnly) {
+        $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
     }
 
     // function get_pagination() {
