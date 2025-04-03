@@ -46,8 +46,17 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->post('trade-overall-asc-sales-report', 'TradeDashboard::trade_overall_asc_sales_report');
     $routes->get('trade-kam-one', 'TradeDashboard::trade_kam_one');
     $routes->post('trade-kam-one', 'TradeDashboard::trade_kam_one');
-    
+    $routes->get('trade-kam-two', 'TradeDashboard::trade_kam_two');
+    $routes->post('trade-kam-two', 'TradeDashboard::trade_kam_two');
+
+    $routes->get('trade-store-performance', 'TradeDashboard::trade_store_performance');
+    $routes->post('trade-store-performance', 'TradeDashboard::trade_store_performance');
     //trade_overall_asc_sales_report
+     $routes->get('generate-pdf-ba', 'TradeDashboard::generatePdfBA');
+     $routes->get('generate-excel-ba', 'TradeDashboard::generateExcelBA');
+     
+     $routes->get('testinglang', 'TradeDashboard::refreshPreAggregatedData');
+     //refreshPreAggregatedData
 });
 
 

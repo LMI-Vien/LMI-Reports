@@ -322,9 +322,6 @@
     var base_url = "<?= base_url(); ?>";
     let store_branch = <?= json_encode($store_branch) ?>;
     let area = <?= json_encode($area) ?>;
-    // console.log("Area", area);
-
-    console.log(store_branch);
 
     $(document).ready(function() {
 
@@ -346,15 +343,13 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let area_description = JSON.parse(res);
-                console.log(area_description);
-
+  
                 $("#area").val(area_description[0].description);
                 $("#area_id").val(area_description[0].id)
             })
         });
 
         autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
-            console.log(result);
             let data = {
                 event: "list",
                 select: "",
@@ -371,13 +366,11 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let store_description = JSON.parse(res);
-                console.log(store_description);
 
                 $("#store").val("");
                 $("#store_id").val("");
 
                 store_branch = store_description;
-                console.log(store_branch);
 
                 autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(res) {
                     let data = {
@@ -588,8 +581,6 @@
 
     fetchPromise
         .then(results => {
-            console.log(results, 'results');
-
             const headerData = [
                 ["LIFESTRONG MARKETING INC."],
                 ["Report: Information for Area Sales Coordinator"],
@@ -639,11 +630,9 @@
                     offset: offset
                 },
                 success: function(response) {
-                    console.log("Response received:", response);
 
                     if (response.data && response.data.length) {
                         allData = allData.concat(response.data);
-                        console.log("Current allData:", allData);
 
                         if (response.data.length === length) {
                             fetchData(offset + length);

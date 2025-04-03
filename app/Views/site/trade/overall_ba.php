@@ -352,7 +352,6 @@
 
                     aJax.post(base_url + "cms/global_controller", data, function(result) {
                         let store_description = JSON.parse(result);
-                        console.log(store_description);
 
                         $("#store_id").val(store_description[0].store_id);
                     })
@@ -413,8 +412,6 @@
     });
 
     function fetchData() {
-      //  let selectedType = $('input[name="filterType"]:checked').val();
-       // let selectedBa = $('#brand_ambassador').val();
         let selectedStore = $('#store_id').val();
         let selectedArea = $('#area_id').val();
         let selectedMonth = $('#month').val();
@@ -469,7 +466,7 @@
                 { data: 'target_per_remaining_days', render: formatNoDecimals },
                 { data: 'ly_scanned_data' },
                 { data: 'brand_ambassadors' },
-                { data: 'deployment_date', render: formattedDate },
+                { data: 'ba_deployment_dates' },
                 { data: 'brands' },
                 { data: 'growth' }
             ].filter(Boolean),
@@ -535,7 +532,6 @@
 
         if (action === 'preview') {
             let link = `${selectedStore}-${selectedArea}-${selectedMonth}-${selectedYear}-${selectedSortField}-${selectedSortOrder}`;
-            console.log(link, 'link');
             window.open(`<?= base_url()?>trade-dashboard/trade-overall-ba-view/${link}`, '_blank');
         } else if (action === 'export') {
             prepareExport();
@@ -594,7 +590,6 @@
 
     fetchPromise
         .then(results => {
-            console.log(results, 'results');
 
             const headerData = [
                 ["LIFESTRONG MARKETING INC."],

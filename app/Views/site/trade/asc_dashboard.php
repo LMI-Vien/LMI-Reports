@@ -134,6 +134,9 @@
     #table-skus{
         display: none;
     }
+    #consolidatedChart{
+        height: 200px;
+    }
 
 </style>
 
@@ -182,9 +185,11 @@
                                         <option value="0">Please select..</option>
                                         <?php
                                             if($year){
+                                                $maxYear = max(array_column($year, 'year')); 
                                                 foreach ($year as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['year']."</option>";
-                                                }                                                
+                                                    $selected = ($value['year'] == $maxYear) ? 'selected' : '';
+                                                    echo "<option value='{$value['id']}' {$selected}>{$value['year']}</option>";
+                                                }
                                             }
                                         ?>
                                     </select>
@@ -404,7 +409,6 @@
 <script>
     var base_url = "<?= base_url(); ?>";
     $(document).ready(function () {
-       // let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
 
         let asc = <?= json_encode($asc); ?>;
         let area = <?= json_encode($area); ?>;
@@ -430,7 +434,6 @@
         });
 
         autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
-            console.log(result);
 
             let data = {
                 event: "list",
@@ -455,7 +458,15 @@
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
             $('input[type="radio"], input[type="checkbox"]').prop('checked', false);
 
-            $('select').prop('selectedIndex', 0);
+            $('select').not('#year').prop('selectedIndex', 0);
+            //reset the year dd
+            let highestYear = $("#year option:not(:first)").map(function () {
+                return parseInt($(this).val());
+            }).get().sort((a, b) => b - a)[0];
+
+            if (highestYear) {
+                $("#year").val(highestYear);
+            }
             $('#refreshButton').click();
         });
 
@@ -503,46 +514,129 @@
 
     let chartInstances = [];
 
+
+    //old backup
+    // function renderCharts() {
+    //     chartInstances.forEach(chart => chart.destroy());
+    //     chartInstances = [];
+    //     $('#chartContainer').html('');
+
+    //     months.forEach((month, index) => {
+    //         let chartHTML = `
+    //             <div class="col-md-3 mb-4">
+    //                 <div class="card p-2">
+    //                     <h6 class="text-center card-title">${month}</h6>
+    //                     <canvas id="chart${index}"></canvas>
+    //                 </div>
+    //             </div>
+    //         `;
+    //         $('#chartContainer').append(chartHTML);
+    //         let ctx = document.getElementById(`chart${index}`).getContext('2d');
+
+    //         let newChart = new Chart(ctx, {
+    //             type: 'bar',
+    //             data: {
+    //                 labels: ["Sales Report", "Target Sales", "% Achieved"],
+    //                 datasets: [{
+    //                     label: month,
+    //                     backgroundColor: ["#ffc107", "#990000", "#339933"],
+    //                     data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
+    //                 }]
+    //             },
+    //             options: {
+    //                 responsive: true,
+    //                 animation: true,
+    //                 plugins: {
+    //                     legend: { display: false } 
+    //                 },
+    //                 scales: {
+    //                     y: { beginAtZero: true }
+    //                 }
+    //             }
+    //         });
+    //         chartInstances.push(newChart);
+    //     });
+    // }
+
     function renderCharts() {
         chartInstances.forEach(chart => chart.destroy());
         chartInstances = [];
-        $('#chartContainer').html('');
+        $('#chartContainer').html('<canvas id="consolidatedChart"></canvas>');
 
-        months.forEach((month, index) => {
-            let chartHTML = `
-                <div class="col-md-3 mb-4">
-                    <div class="card p-2">
-                        <h6 class="text-center card-title">${month}</h6>
-                        <canvas id="chart${index}"></canvas>
-                    </div>
-                </div>
-            `;
-            $('#chartContainer').append(chartHTML);
-            let ctx = document.getElementById(`chart${index}`).getContext('2d');
+        let ctx = document.getElementById("consolidatedChart").getContext("2d");
 
-            let newChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ["Sales Report", "Target Sales", "% Achieved"],
-                    datasets: [{
-                        label: month,
-                        backgroundColor: ["#ffc107", "#990000", "#339933"],
-                        data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: true,
-                    plugins: {
-                        legend: { display: false } 
+        let datasets = [
+            {
+                label: "Sales Report",
+                backgroundColor: "#ffc107",
+                borderColor: "#d39e00",
+                borderWidth: 1,
+                data: dataValues.salesReport
+            },
+            {
+                label: "Target Sales",
+                backgroundColor: "#990000",
+                borderColor: "#770000",
+                borderWidth: 1,
+                data: dataValues.targetSales
+            },
+            {
+                label: "% Achieved",
+                backgroundColor: "#339933",
+                borderColor: "#267326",
+                borderWidth: 1,
+                data: dataValues.PerAchieved
+            }
+        ];
+
+        let consolidatedChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: months,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
                     },
-                    scales: {
-                        y: { beginAtZero: true }
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                return tooltipItem.dataset.label + ": " + tooltipItem.raw;
+                            }
+                        }
                     }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Months",
+                            font: { weight: "bold" }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Values",
+                            font: { weight: "bold" }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: "easeOutBounce"
                 }
-            });
-            chartInstances.push(newChart);
+            }
         });
+
+        chartInstances.push(consolidatedChart);
     }
 
     function fetchData(){
@@ -651,9 +745,9 @@
             columns: [
                 { data: 'item_name' },
                 type !== 'hero' ? { data: 'sum_total_qty' } : null,
-                type !== 'hero' ? { data: 'total_on_hand' } : null,
-                type !== 'hero' ? { data: 'total_on_hand' } : null,
-                type !== 'hero' ? { data: 'total_on_hand' } : null
+                type !== 'hero' ? { data: 'week_1' } : null,
+                type !== 'hero' ? { data: 'week_2' } : null,
+                type !== 'hero' ? { data: 'week_3' } : null
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,

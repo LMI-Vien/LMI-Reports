@@ -32,7 +32,7 @@
         background-color: #301311 !important;
     }
 
-    #previewButton{
+    #ExportPDF{
         color: #fff;
         background-color: #143996 !important;
     }
@@ -122,6 +122,10 @@
         display: flex !important;
         align-items: center;
         margin-bottom: 0px !important;
+    }
+
+    .swal2-checkbox{
+        display: none !important;
     }
 
 </style>
@@ -239,7 +243,7 @@
                                 <label class="pt-2 pl-3">Sort By</label>
                                 <select class="form-control col mx-auto my-2" id="sortBy" style="width: 95%">
                                     <option value="item_name">Item Name</option>
-                                    <option value="qty">Quantity</option>
+                                    <option value="sum_total_qty">Quantity</option>
                                 </select>
                                 <div class="text-left pl-3 pb-3">
                                     <input type="radio" name="sortOrder" value="ASC" checked> Ascending
@@ -248,7 +252,7 @@
                             </div>
                             <!-- Radio Filters -->
                             <div
-                                class="p-2 d-flex flex-row"
+                                class="p-2 d-flex flex-column flex-md-row align-items-center"
                                 id="step6" 
                                 data-title="Type:"
                                 data-intro="
@@ -256,8 +260,8 @@
                                 Click Next" 
                                 data-step="6"
                             >
-                                <label class="col-4">Filter by Type</label>
-                                <div class="btn-group btn-group-toggle d-flex flex-row col" data-toggle="buttons" style="background-color: white; border-radius: 8px">
+                                <label class="col-12 col-md-4 text-center text-md-start mb-2 mb-md-0">Filter by Type</label>
+                                <div class="btn-group btn-group-toggle d-flex flex-wrap col-12 col-md" data-toggle="buttons" style="background-color: white; border-radius: 8px;">
                                     <label class="btn btn-outline-primary active main_all">
                                         <input type="radio" name="filterType" value="3" checked> All
                                     </label>
@@ -480,24 +484,19 @@
                 <div class="d-flex justify-content-end mt-3">
                     <button 
                         class="btn btn-info mr-2" 
-                        id="previewButton"
-                        data-title="Step 5: Previewing the Report"
-                        data-intro="
-                        Before exporting, you can preview the report:<br><br>
-                        Click the Preview button.<br>
-                        A modal or new page will display the formatted report.<br>
-                        Review the data and formatting before exporting.<br><br>
-                        Click Next" 
+                        id="ExportPDF"
+                        data-title="Step 5: Exporting the Report (PDF)"
+                        data-intro="Paki palitan to haha" 
                         data-step="10"
-                        onclick="handleAction('preview')"
+                        onclick="handleAction('export_pdf')"
                     >
-                        <i class="fas fa-eye"></i> Preview
+                        <i class="fas fa-file-export"></i> PDF
                     </button>
                     <button 
                         class="btn btn-success" 
                         id="exportButton"
                         id="step11" 
-                        data-title="Step 6: Exporting the Report (PDF & Excel)"
+                        data-title="Step 6: Exporting the Report (Excel)"
                         data-intro="
                         Once satisfied with the report:<br><br>
                         Click the Export button.<br>
@@ -506,9 +505,9 @@
                         <small>Tip: Use PDF for sharing and Excel for further data analysis.</small><br><br>
                         Click Next" 
                         data-step="11"
-                        onclick="handleAction('export')"
+                        onclick="handleAction('export_excel')"
                     >
-                        <i class="fas fa-file-export"></i> Export
+                        <i class="fas fa-file-export"></i> Excel
                     </button>
                 </div>
             </div>
@@ -569,9 +568,6 @@
 
     $(document).ready(function () {
         fetchData();
-
-        console.log("<?= base_url(); ?>");
-
         $(document).on('click', '#clearButton', function () {
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
             $('input[type="checkbox"]').prop('checked', false);
@@ -584,8 +580,6 @@
         });
 
         autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors, "description", "id", function(result) {
-            // console.log(result);
-
             let url ="<?= base_url("cms/global_controller"); ?>";
             let data = {
                 event: "list",
@@ -611,8 +605,6 @@
         });
 
         autocomplete_field($("#store_branch"), $("#store_id"), store_branch, "description", "id", function(result) {
-            console.log(result.id);
-
             let url ="<?= base_url("cms/global_controller"); ?>";
             let data = {
                 event: "list",
@@ -642,10 +634,7 @@
 
             })
         });
-
         autocomplete_field($("#brand"), $("#brand_id"), brands, "brand_description", "id");
-
-        //store yung sagot ni user sa storage para hindi paulit ulit yung message
         if (!localStorage.getItem("TutorialMessage")) {
             $('#popup_modal').modal('show');
         } else {
@@ -682,14 +671,13 @@
             $('#ar_asc_name').text('Please Select Brand Ambassador'); 
         }
         fetchData();
-        console.log(selectedBa);
     });
 
     function fetchData() {
         let selectedType = $('input[name="filterType"]:checked').val();
-        let selectedBa = $('#ba_id').val();
-        let selectedStore = $('#store_id').val();
-        let selectedBrand = $('#brand_id').val();
+        let selectedBa = $('#brand_ambassadors').val();
+        let selectedStore = $('#store_branch').val();
+        let selectedBrand = $('#brand').val();
         let selectedSortField = $('#sortBy').val();
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
@@ -699,7 +687,6 @@
             { id: "#npdTable", type: "npd" },
             { id: "#heroTable", type: "hero" }
         ];
-
         tables.forEach(table => {
             initializeTable(table.id, table.type, selectedType, selectedBa, selectedStore, selectedBrand, selectedSortField, selectedSortOrder);
         });
@@ -714,9 +701,9 @@
                 data: function (d) {
                     d.sort_field = selectedSortField;
                     d.sort = selectedSortOrder;
-                    d.brand = selectedBrand === "0" ? null : selectedBrand;
-                    d.brand_ambassador = selectedBa === "0" ? null : selectedBa;
-                    d.store_name = selectedStore === "0" ? null : selectedStore;
+                    d.brand = selectedBrand === "" ? null : selectedBrand;
+                    d.brand_ambassador = selectedBa === "" ? null : selectedBa;
+                    d.store_name = selectedStore === "" ? null : selectedStore;
                     d.ba_type = selectedType;
                     d.type = type;
                     d.limit = d.length;
@@ -741,7 +728,6 @@
     }
 
     function get_area_asc(id) {
-        //id = 1;
         var url = "<?= base_url('cms/global_controller');?>";
         query = 'ba.status = 1 AND ba.id = '+id;
         var data = {
@@ -772,7 +758,6 @@
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
-            console.log
             if(result){
                 $.each(result, function(index,d) {
                     $('#ar_asc_name').text((d.area || "N/A") + " / " + (d.asc_name || "N/A"));
@@ -783,240 +768,38 @@
     }
 
     function handleAction(action) {
+        modal.loading(true);
+
         let selectedType = $('input[name="filterType"]:checked').val();
-        let selectedBa = $('#ba_id').val();
-        let selectedStore = $('#store_id').val();
-        let selectedBrand = $('#brand_id').val();
+        let selectedBa = $('#brand_ambassadors').val();
+        let selectedStore = $('#store_branch').val();
+        let selectedBrand = $('#brand').val();
         let selectedSortField = $('#sortBy').val();
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
         let ascName = $('#ar_asc_name').text().trim();
-        if (ascName === 'Please Select Brand Ambassador') {
-            ascName = '';
-        } else {
-            ascName = encodeURIComponent(ascName);
-        }
-        let date = new Date();
-        let formattedDate = encodeURIComponent(date.toLocaleDateString("en-US", { 
-            year: "numeric", 
-            month: "short", 
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true
-        }));
-
-        if (action === 'preview') {
-            let link = `${selectedType}-${selectedBa}-${selectedStore}-${selectedBrand}-${selectedSortField}-${selectedSortOrder}-${ascName}`;
-            console.log(link, 'link');
-            window.open(`<?= base_url()?>trade-dashboard/trade-ba-view/${link}`, '_blank');
-        } else if (action === 'export') {
-            prepareExport();
-        } else {
-            alert('wtf are u doing?')
-        }
-    }
-
-    function prepareExport() {
-        let selectedType = $('input[name="filterType"]:checked').val();
-        let selectedBa = $('#ba_id').val();
-        let selectedStore = $('#store_id').val();
-        let selectedBrand = $('#brand_id').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-        let selectedAsc = $('#ar_asc_name').text().trim();
-
-        let tables = [
-            { id: "Slow Moving SKU", type: "slowMoving" },
-            { id: "Overstock SKU", type: "overStock" },
-            { id: "NPD SKU", type: "npd" },
-            { id: "Hero SKU", type: "hero" }
-        ];
-
-        let bamap = mapData(brand_ambassadors, 'id', 'description')
-        let baval = (bamap[selectedBa] || "All");
-
-        let storemap = mapData(store_branch, 'id', 'description')
-        let storeval = (storemap[selectedStore] || "All");
-
-        let brandmap = mapData(brands, 'id', 'brand_description')
-        let brandval = (brandmap[selectedBrand] || "All");
-
-        let type = ''
-        if (selectedType == '1') {
-            type = 'Outright'
-        } else if (selectedType == '0') {
-            type = 'Consignment'
-        } else if (selectedType == '3') {
-            type = 'All'
-        } else {
-            type = 'Error! Invalid Type Value'
-        }
-
-        let fetchPromises = tables.map(table => {
-            return new Promise((resolve, reject) => {
-                fetchTradeDashboardData({
-                    baseUrl: "<?= base_url(); ?>",
-                    selectedSortField: selectedSortField,
-                    selectedSortOrder: selectedSortOrder,
-                    selectedBrand: selectedBrand,
-                    selectedBa: selectedBa,
-                    selectedStore: selectedStore,
-                    selectedType: selectedType,
-                    type: table.type,
-                    length: 10,
-                    start: 0,
-                    onSuccess: function(data) {
-                        let newData = data.map(({ item_name, sum_total_qty }) => ({
-                            "SKU Name": item_name,
-                            "Quantity": sum_total_qty,
-                            "LMI Code": "",
-                            "RGDI Code": "",
-                            "Type of SKU": table.id
-                        }));
-                        resolve(newData);
-                    },
-                    onError: function(error) {
-                        reject(error);
-                    }
-                });
-            });
-        });
-
-        Promise.all(fetchPromises)
-            .then(results => {
-                let formattedData = results.flat();
-                console.log(formattedData);
-
-                if (selectedAsc = 'Please Select Brand Ambassador') {
-                    selectedAsc = ''
-                }
-
-                const headerData = [
-                    ["LIFESTRONG MARKETING INC."],
-                    ["Report: BA Dashboard"],
-                    ["Date Generated: " + formatDate(new Date())],
-                    ["Brand Ambassador: " + baval],
-                    ["Store Name: " + storeval],
-                    ["Brand: " + brandval],
-                    ["Area / ASC Name: " + selectedAsc],
-                    ["Outright/Consignment: " + type],
-                    [""]
-                ];
-
-                exportArrayToCSV(formattedData, `Report: BA Dashboard - ${formatDate(new Date())}`, headerData);
-            })
-            .catch(error => {
-                console.error("Error fetching data:", error);
-
-                return [
-                    {
-                        "Error": "An error occurred while fetching data."
-                    }
-                ];
-            });
-    }
-
-    function mapData(obj, index, value) {
-        let mapped_data = {};
         
-        if (!Array.isArray(obj)) {
-            return {};
-        }
+        let type = 'slowMoving';
 
-        obj.forEach(item => {
-            if (item[index] !== undefined && item[value] !== undefined) {
-                mapped_data[item[index]] = item[value];
-            }
-        });
+        let url = base_url + 'trade-dashboard/generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-ba?'
+            + 'sort_field=' + encodeURIComponent(selectedSortField)
+            + '&sort=' + encodeURIComponent(selectedSortOrder)
+            + '&brand=' + encodeURIComponent(selectedBrand || '')
+            + '&brand_ambassador=' + encodeURIComponent(selectedBa || '')
+            + '&store_name=' + encodeURIComponent(selectedStore || '')
+            + '&ba_type=' + encodeURIComponent(selectedType)
+            + '&asc_name=' + encodeURIComponent(ascName)
+            + '&type=' + encodeURIComponent(type)
+            + '&limit=' + encodeURIComponent(length)
+            + '&offset=' + encodeURIComponent(offset);
 
-        return mapped_data;
-    }
+        let iframe = document.createElement('iframe');
+        iframe.style.display = "none";
+        iframe.src = url;
+        document.body.appendChild(iframe);
 
-    function fetchTradeDashboardData({ 
-        baseUrl, 
-        selectedSortField, 
-        selectedSortOrder, 
-        selectedBrand, 
-        selectedBa, 
-        selectedStore, 
-        selectedType, 
-        type, 
-        length, 
-        start, 
-        onSuccess, 
-        onError 
-    }) {
-        let allData = [];
-
-        function fetchData(offset) {
-            $.ajax({
-                url: baseUrl + 'trade-dashboard/trade-ba',
-                type: 'GET',
-                data: {
-                    sort_field: selectedSortField,
-                    sort: selectedSortOrder,
-                    brand: selectedBrand === "0" ? null : selectedBrand,
-                    brand_ambassador: selectedBa === "0" ? null : selectedBa,
-                    store_name: selectedStore === "0" ? null : selectedStore,
-                    ba_type: selectedType,
-                    type: type,
-                    limit: length,
-                    offset: offset
-                },
-                success: function(response) {
-                    if (response.data && response.data.length) {
-                        allData = allData.concat(response.data);
-
-                        if (response.data.length === length) {
-                            fetchData(offset + length);
-                        } else {
-                            if (onSuccess) onSuccess(allData);
-                        }
-                    } else {
-                        if (onSuccess) onSuccess(allData);
-                    }
-                },
-                error: function(error) {
-                    if (onError) onError(error);
-                }
-            });
-        }
-
-        fetchData(start);
-    }
-
-    function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
-        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
-        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
-        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        // Trigger file download
-        saveAs(blob, filename + ".csv");
-    }
-
-    function automate_data(ba_id) {
-        let data = {
-            event: "list",
-            select: "*",
-            query: "id = " + ba_id,
-            offset: offset,
-            limit: limit,
-            table: "tbl_brand_ambassador",
-            order: {}
-        }
-
-        aJax.post(url, data, function(result) {
-            console.log(result);
-        })
+        setTimeout(() => {
+            modal.loading(false);
+        }, 5000);
     }
 
 </script>

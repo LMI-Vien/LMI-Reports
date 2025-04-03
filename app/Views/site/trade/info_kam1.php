@@ -244,6 +244,14 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 <input type="hidden" id="item_classi_id">
                             </div>
                         </div>
+                        <div class="col-md p-1 row">
+                            <div class="col-md-3">
+                                <label for="qtyscp">Qty Scope</label>
+                            </div>
+                            <div class="col-md">
+                                <input type="number" class="form-control" id="qtyscp" placeholder="Enter Qty">
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-2 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
                         <div class="col-md-12 mx-auto row my-2 py-2 text-left" >
@@ -351,7 +359,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         let item_classification = <?= json_encode($item_classification); ?>;
 
         autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba, "description", "id", function(result) {
-            // console.log(result);
 
             let url ="<?= base_url("cms/global_controller"); ?>";
             let data = {
@@ -382,7 +389,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
             aJax.post(url, data, function(result) {
                 let store_name = JSON.parse(result);
-                console.log(store_name);
 
                 $("#store").val(store_name[0].description);
                 $("#store_id").val(store_name[0].id);
@@ -393,7 +399,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         });
 
         autocomplete_field($("#store"), $("#store_id"), store, "description", "id", function(result) {
-            console.log(result.id);
 
             let url ="<?= base_url("cms/global_controller"); ?>";
             let data = {
@@ -424,7 +429,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
             aJax.post(url, data, function(result) {
                 let baname = JSON.parse(result);
-                console.log(baname);
 
                 if(baname[0].name !== null) {
                     $("#brandAmbassador").val(baname[0].name);
@@ -488,7 +492,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         autocomplete_field($("#item_classi"), $("#item_classi_id"), item_classification, "item_class_description");
 
         $(document).on('click', '#clearButton', function () {
-            $('input[type="text"]').val('');
+            $('input[type="text"], input[type="number"]').val('');
             $('input[type="checkbox"]').prop('checked', false);
             $('input[name="coveredASC"][value="with_ba"]').prop('checked', false);
             $('input[name="coveredASC"][value="without_ba"]').prop('checked', false);
@@ -512,6 +516,9 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             if($('#item_classi').val() == ""){
                 $('#item_classi_id').val('');
             }
+            if($('#qtyscp').val() == ""){
+                $('#qtyscp').val('');
+            }
             fetchData();
         });
 
@@ -531,10 +538,12 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         let selectedWeek = $('#week').val();
         let selectedStore = $('#store').val();
         let selectedItemCat = $('#item_classi').val();
-        initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat);
+        let selectedQty = $('#qtyscp').val();
+        
+        initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat, selectedQty);
     }
 
-    function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null) {
+    function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null, selectedQty = 0) {
         if ($.fn.DataTable.isDataTable('#table-kam-one')) {
             let existingTable = $('#table-kam-one').DataTable();
             existingTable.clear().destroy();
@@ -558,6 +567,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                     d.month = selectedMonth === "0" ? null : selectedMonth;
                     d.store = selectedStore === "0" ? null : selectedStore;
                     d.itemcat = selectedItemCat === "0" ? null : selectedItemCat;
+                    d.qty = selectedQty === "0" ? null : selectedQty;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
@@ -566,13 +576,13 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                 }
             },
             columns: [
-                { data: 'store_name' },
-                { data: 'asc_name' },
-                { data: 'ambassador_name' },
-                { data: 'item_name' },
-                { data: 'item' },
-                { data: 'item_class' },
-                { data: 'total_qty' }
+                { data: 'store_name'},
+                { data: 'asc_name'},
+                { data: 'ambassador_names'},
+                { data: 'item_name'},
+                { data: 'item'},
+                { data: 'item_class'},
+                { data: 'total_qty'}
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
@@ -662,7 +672,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                         "store_name": store_name,
                         "total_qty": total_qty,
                     }));
-                    // console.log(newData);
                     resolve(newData);
                 },
                 onError: function(error) {
@@ -673,7 +682,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
         fetchPromises.then((result) => {
             let formattedData = result.flat();
-            console.log(formattedData);
 
             const headerData = [
                 ["LIFESTRONG MARKETING INC."],
@@ -690,7 +698,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
             exportArrayToCSV(formattedData, `Report: Kam1 Dashboard - ${formatDate(new Date())}`, headerData);
         }).catch((error) => {
-            console.error(error);
         })
     }
 
@@ -726,7 +733,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                     offset: offset
                 },
                 success: function(response) {
-                    console.log(response);
                     if (response.data && response.data.length) {
                         allData = allData.concat(response.data);
 
