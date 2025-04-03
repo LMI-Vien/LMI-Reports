@@ -1588,12 +1588,13 @@ function createErrorLogFile(errorLogs, filename) {
     $(".import_buttons").append($downloadBtn);
 }
 
-function autocomplete_field(field, field_id, options, description = "description", id = "id") {
+function autocomplete_field(field, field_id, options, description = "description", id = "id", callback) {
 	field.autocomplete({
 		source: function(request, response) {
 			let result = $.ui.autocomplete.filter(options.map(option => ({
 				label: option[description],
 				value: option[id],
+				info: option,
 			})), request.term);
 			let uniqueResults = [...new Set(result)];
 			response(uniqueResults.slice(0, 10));
@@ -1601,9 +1602,14 @@ function autocomplete_field(field, field_id, options, description = "description
 		select: function(event, ui) {
 			field.val(ui.item.label);
 			field_id.val(ui.item.value);
+
+			if (typeof callback === "function") {
+				callback(ui.item.info);
+			}
+
 			return false;
 		},
-		minLength: 0,
+		minLength: 0
 	}).focus(function () {
 		$(this).autocomplete("search", "");
 	})

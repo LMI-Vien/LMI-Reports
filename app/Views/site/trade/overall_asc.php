@@ -267,14 +267,55 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
-
     $(document).ready(function () {
         let asc = <?= json_encode($asc); ?>;
         let area = <?= json_encode($area); ?>;
         let brand = <?= json_encode($brand); ?>;
 
-        autocomplete_field($("#asc"), $("#asc_id"), asc, "asc_description", "asc_id");
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#asc"), $("#asc_id"), asc, "asc_description", "asc_id", function(result) {
+            let data = {
+                event: "list",
+                query: "id = " + result.area_id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let area_description = JSON.parse(res);
+                
+                if(area_description.length > 0) {
+                    $("#area").val(area_description[0].description);
+                    $("#area_id").val(area_description[0].id);
+                } else {
+                    $("#area").val(null);
+                }
+            })
+        });
+
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+            let data = {
+                event: "list",
+                query: "area_id = " + result.id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area_sales_coordinator",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let asc_description = JSON.parse(res);
+
+                if(asc_description.length > 0) {
+                    $("#asc").val(asc_description[0].description);
+                    $("#asc_id").val(asc_description[0].id);
+                } else {
+                    $("#asc").val("No ASC");
+                }
+            })
+        });
+        
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
 
         renderCharts(); // Initial render
@@ -318,46 +359,118 @@
     
     let chartInstances = []; // Store chart instances
 
+    //old backup
+    // function renderCharts() {
+    //     chartInstances.forEach(chart => chart.destroy());
+    //     chartInstances = [];
+    //     $('#chartContainer').html('');
+
+    //     months.forEach((month, index) => {
+    //         let chartHTML = `
+    //             <div class="col-md-3 mb-4">
+    //                 <div class="card p-2">
+    //                     <h6 class="text-center card-title">${month}</h6>
+    //                     <canvas id="chart${index}"></canvas>
+    //                 </div>
+    //             </div>
+    //         `;
+    //         $('#chartContainer').append(chartHTML);
+    //         let ctx = document.getElementById(`chart${index}`).getContext('2d');
+
+    //         let newChart = new Chart(ctx, {
+    //             type: 'bar',
+    //             data: {
+    //                 labels: ["Sales Report", "Target Sales", "% Achieved"],
+    //                 datasets: [{
+    //                     label: month,
+    //                     backgroundColor: ["#ffc107", "#990000", "#339933"],
+    //                     data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
+    //                 }]
+    //             },
+    //             options: {
+    //                 responsive: true,
+    //                 animation: true,
+    //                 plugins: {
+    //                     legend: { display: false } 
+    //                 },
+    //                 scales: {
+    //                     y: { beginAtZero: true }
+    //                 }
+    //             }
+    //         });
+    //         chartInstances.push(newChart);
+    //     });
+    // }
+
     function renderCharts() {
         chartInstances.forEach(chart => chart.destroy());
         chartInstances = [];
-        $('#chartContainer').html('');
-
-        months.forEach((month, index) => {
-            let chartHTML = `
-                <div class="col-md-3 mb-4">
-                    <div class="card p-2">
-                        <h6 class="text-center card-title">${month}</h6>
-                        <canvas id="chart${index}"></canvas>
-                    </div>
-                </div>
-            `;
-            $('#chartContainer').append(chartHTML);
-            let ctx = document.getElementById(`chart${index}`).getContext('2d');
-
-            let newChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ["Sales Report", "Target Sales", "% Achieved"],
-                    datasets: [{
-                        label: month,
-                        backgroundColor: ["#ffc107", "#990000", "#339933"],
-                        data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
-                    }]
+        $('#chartContainer').html('<canvas id="consolidatedChart"></canvas>');
+        
+        let ctx = document.getElementById('consolidatedChart').getContext('2d');
+     //   let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        let datasets = [
+            {
+                label: "Sales Report",
+                backgroundColor: "#ffc107",
+                data: dataValues.salesReport
+            },
+            {
+                label: "Target Sales",
+                backgroundColor: "#990000",
+                data: dataValues.targetSales
+            },
+            {
+                label: "% Achieved",
+                backgroundColor: "#339933",
+                data: dataValues.PerAchieved
+            }
+        ];
+        
+        let consolidatedChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutBounce'
                 },
-                options: {
-                    responsive: true,
-                    animation: true,
-                    plugins: {
-                        legend: { display: false } 
+                plugins: {
+                    legend: { display: true },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.dataset.label}: ${tooltipItem.raw}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: "Months"
+                        }
                     },
-                    scales: {
-                        y: { beginAtZero: true }
+                    y: {
+                        stacked: false,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Values"
+                        }
                     }
                 }
-            });
-            chartInstances.push(newChart);
+            }
         });
+        
+        chartInstances.push(consolidatedChart);
     }
 
     function fetchData(){
@@ -383,7 +496,6 @@
             area : selectedArea
         }
         aJax.post(url, data, function (result) {
-            // console.log('RESULt:', result);
             var html = '';
             var thead = "<th class='tbl-title-field'></th>";
             var selloutdata = '';
@@ -396,7 +508,6 @@
                 let salesData = result.data[0];
                 if(result.data.length > 0){
                     $.each(result.data, function(x,y) {
-                        // console.log("Value: ",y);
                         if(y.asc_name){
                             months.push(y.asc_name); 
                             dataValues.salesReport.push(y.total_amount);
@@ -434,46 +545,118 @@
         });
     }
 
+    //old backup
+    // function renderChartsASC() {
+    //     chartInstances.forEach(chart => chart.destroy());
+    //     chartInstances = [];
+    //     $('#chartContainer').html('');
+    //     months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    //     months.forEach((month, index) => {
+    //         let chartHTML = `
+    //             <div class="col-md-3 mb-4">
+    //                 <div class="card p-2">
+    //                     <h6 class="text-center card-title">${month}</h6>
+    //                     <canvas id="chart${index}"></canvas>
+    //                 </div>
+    //             </div>
+    //         `;
+    //         $('#chartContainer').append(chartHTML);
+    //         let ctx = document.getElementById(`chart${index}`).getContext('2d');
+
+    //         let newChart = new Chart(ctx, {
+    //             type: 'bar',
+    //             data: {
+    //                 labels: ["Sales Report", "Target Sales", "% Achieved"],
+    //                 datasets: [{
+    //                     label: month,
+    //                     backgroundColor: ["#ffc107", "#990000", "#339933"],
+    //                     data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
+    //                 }]
+    //             },
+    //             options: {
+    //                 responsive: true,
+    //                 animation: true,
+    //                 plugins: {
+    //                     legend: { display: false } 
+    //                 },
+    //                 scales: {
+    //                     y: { beginAtZero: true }
+    //                 }
+    //             }
+    //         });
+    //         chartInstances.push(newChart);
+    //     });
+    // }
+
     function renderChartsASC() {
         chartInstances.forEach(chart => chart.destroy());
         chartInstances = [];
-        $('#chartContainer').html('');
-        months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        months.forEach((month, index) => {
-            let chartHTML = `
-                <div class="col-md-3 mb-4">
-                    <div class="card p-2">
-                        <h6 class="text-center card-title">${month}</h6>
-                        <canvas id="chart${index}"></canvas>
-                    </div>
-                </div>
-            `;
-            $('#chartContainer').append(chartHTML);
-            let ctx = document.getElementById(`chart${index}`).getContext('2d');
-
-            let newChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ["Sales Report", "Target Sales", "% Achieved"],
-                    datasets: [{
-                        label: month,
-                        backgroundColor: ["#ffc107", "#990000", "#339933"],
-                        data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
-                    }]
+        $('#chartContainer').html('<canvas id="consolidatedChart"></canvas>');
+        
+        let ctx = document.getElementById('consolidatedChart').getContext('2d');
+        let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        let datasets = [
+            {
+                label: "Sales Report",
+                backgroundColor: "#ffc107",
+                data: dataValues.salesReport
+            },
+            {
+                label: "Target Sales",
+                backgroundColor: "#990000",
+                data: dataValues.targetSales
+            },
+            {
+                label: "% Achieved",
+                backgroundColor: "#339933",
+                data: dataValues.PerAchieved
+            }
+        ];
+        
+        let consolidatedChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutBounce'
                 },
-                options: {
-                    responsive: true,
-                    animation: true,
-                    plugins: {
-                        legend: { display: false } 
+                plugins: {
+                    legend: { display: true },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.dataset.label}: ${tooltipItem.raw}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: "Months"
+                        }
                     },
-                    scales: {
-                        y: { beginAtZero: true }
+                    y: {
+                        stacked: false,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Values"
+                        }
                     }
                 }
-            });
-            chartInstances.push(newChart);
+            }
         });
+        
+        chartInstances.push(consolidatedChart);
     }
 
     function fetchDataASCMonthy(){
@@ -495,7 +678,6 @@
             area : selectedArea
         }
         aJax.post(url, data, function (result) {
-            // console.log("RESULT: ", result);
             var html = '';
             var thead = `
                 <th class="tbl-title-field"></th>
@@ -513,7 +695,6 @@
                 <th class="tbl-title-field">Dec</th>
             `;
             if (result) {
-                // console.log("First Data Object:", result.data[0]);
                 let salesData = result.data[0];
 
                 dataValues.salesReport = [
@@ -660,12 +841,8 @@
                 area: selectedArea
             };
 
-            console.log("Fetching data from URL:", url);
-            console.log("Request Payload:", data);
-
             let fetchPromise = new Promise((resolve, reject) => {
                 aJax.post(url, data, function (result) {
-                    console.log("Raw API Response:", result);
                     if (result && result.data && result.data.length > 0) {
                         resolve(result.data);
                     } else {
@@ -676,19 +853,14 @@
 
             fetchPromise
                 .then(results => {
-                    console.log("API Results:", results);
 
                     let filteredResults = results; 
 
                     if (!hasFilters) {
-                        console.log("Applying ASC Name filter (only when no filters are used)");
                         filteredResults = results.filter(row => row.asc_name && row.asc_name.trim() !== "");
                     }
 
-                    console.log("Filtered Results:", filteredResults);
-
                     if (filteredResults.length === 0) {
-                        console.error("No valid data available for export.");
                         return Promise.reject("No valid data available for export.");
                     }
 
@@ -734,10 +906,8 @@
                                     let dataKey = dataKeys[metric][index]; // Select the correct key based on metric and month index
 
                                     if (row.hasOwnProperty(dataKey)) {
-                                        console.log(`Checking row[${dataKey}] for ${metric} - Month: ${key}`, row[dataKey]);
                                         formattedData[metricIndex][key] = row[dataKey] || "0";  // Default to "0" if undefined
                                     } else {
-                                        console.warn(`Missing key: ${dataKey} in row`, row);
                                     }
                                 });
                             });
@@ -754,17 +924,13 @@
                         }));
                     }
 
-                    console.log("Formatted Data (Before Export):", formattedData);
-
                     if (formattedData.length === 0) {
-                        console.error("Formatted data is empty, cannot export!");
                         return alert("No valid data available for export.");
                     }
 
                     exportArrayToCSV(formattedData, `Trade Overall ASC Report - ${formatDate(new Date())}`, headerData);
                 })
                 .catch(error => {
-                    console.error("Export Error:", error);
                     alert(error);
                 });
         }

@@ -463,6 +463,7 @@
 
     async function read_xl_file() {
         delete_temp_data();
+        $(".btn.save").prop("disabled", false);
         let fileInput = document.getElementById("file");
         let file = fileInput.files[0];
 
@@ -597,12 +598,12 @@
                         }
                     } else {
                         modal.loading_progress(false);
-                        modal.alert("No data found in the temporary table.", "error");
+                        modal.alert("No data found in the temporary table.", "error", () => {});
                     }
                 },
                 error: function(xhr) {
                     modal.loading(false);
-                    modal.alert("Error fetching data: " + xhr.responseText, "error");
+                    modal.alert("Error fetching data: " + xhr.responseText, "error", () => {});
                 }
             });
         }
@@ -767,9 +768,12 @@
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
                         modal.alert("Some records encountered errors. Check the log.", 'info');
                     } else {
+                        modal.loading_progress(true, "Finishing data...");
+                        setTimeout(function(){
                         modal.alert("All records saved/updated successfully!", 'success', () => 
                             location.reload()
-                            );
+                        );
+                        }, 1000);
                     }
                     return;
                 }

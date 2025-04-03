@@ -121,41 +121,25 @@
                     <div class="col-md-4 column p-2 text-left">
                         <div class="col-md p-1 row">
                             <div class="col-md-3">
-                                <label for="brandAmbassador">Brand Ambassador</label>
+                                <label for="brand_ambassadors">Brand Ambassador</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="brandAmbassador" placeholder="Please select...">
+                                <input type="text" class="form-control" id="brand_ambassadors" placeholder="Please select...">
                                 <input type="hidden" id="ba_id">
                             </div>
                         </div>
                         <div class="col-md p-1 row">
                             <div class="col-md-3">
-                                <label for="storeName">Store Name</label>
+                                <label for="store_branch">Store Name</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="storeName" placeholder="Please select...">
+                                <input type="text" class="form-control" id="store_branch" placeholder="Please select...">
                                 <input type="hidden" id="store_id">
-                            </div>
-                        </div>
-                        <div class="col-md p-1 row">
-                            <div class="col-md-3">
-                                <label for="storeName2">Category</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="storeName2" placeholder="Enter store">
                             </div>
                         </div>
                     </div>
 
                     <div class="col-md-3 column p-2 text-left">
-                        <div class="col-md p-1 row">
-                            <div class="col-md-3">
-                                <label for="baName">Qty Scope</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="baName" placeholder="Enter BA name">
-                            </div>
-                        </div>
                         <div class="col-md p-1 row">
                             <div class="col-md-3">
                                 <label for="month">Month</label>
@@ -174,15 +158,18 @@
                         </div>
                         <div class="col-md p-1 row">
                             <div class="col-md-3">
-                                <label for="week">Week</label>
+                                <label for="week">Year</label>
                             </div>
                             <div class="col-md">
-                                <select class="form-control" id="week">
+                                <select class="form-control" id="year">
+                                    <option value="0">Please select..</option>
                                     <?php
-                                        if($week){
-                                            foreach ($week as $value) {
-                                                echo "<option value=".$value['id'].">".$value['name']."</option>";
-                                            }                                                
+                                        if($year){
+                                            $maxYear = max(array_column($year, 'year')); 
+                                            foreach ($year as $value) {
+                                                $selected = ($value['year'] == $maxYear) ? 'selected' : '';
+                                                echo "<option value='{$value['id']}' {$selected}>{$value['year']}</option>";
+                                            }
                                         }
                                     ?>
                                 </select>
@@ -192,18 +179,23 @@
 
                     <div class="col-md-3 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
                         <div class="col-md-12 mx-auto row py-2 text-left" >
-                            <label for="ascName">SKU</label>
+                            <label for="ascName">Sort By</label>
                             <div class="col-md" >
-                                <input type="text" class="form-control" id="ascName" placeholder="ASC Name">
-                                    <input type="hidden" id="asc_id">
+                                <select class="form-control col mx-auto my-2" id="sortBy" style="width: 95%">
+                                    <option value="item_name">SKU</option>
+                                    <option value="sum_total_qty">SOH Qty</option>
+                                    <option value="week_1">Qty (W1)</option>
+                                    <option value="week_2">Qty (W2)</option>
+                                    <option value="week_3">Qty (W3)</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-12 mx-auto row py-2 text-center" >
                             <div class="col-md-6 row" >
-                                <input type="radio" name="coveredASC" value="with_ba" class="col-md-2"><span class="col-md-10">Acsending</span>
+                                <input type="radio" name="coveredASC" value="ASC" class="col-md-2" checked><span class="col-md-10">Acsending</span>
                             </div>
                             <div class="col-md-6 row" >
-                                <input type="radio" name="coveredASC" value="without_ba" class="col-md-2"><span class="col-md-10">Descending</span>
+                                <input type="radio" name="coveredASC" value="DESC" class="col-md-2"><span class="col-md-10">Descending</span>
                             </div>
                         </div>
                     </div>                         
@@ -229,132 +221,133 @@
             </div>
 
                 <!-- DataTables Section -->
-                <div class="row mt-12" style="overflow-x: auto; max-height: 400px;">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
-                                <table id="dataTable1" class="table table-bordered">
-                                    <thead>
-                                        <tr>
+                <div class="d-flex mt-3" style="overflow-x: auto; white-space: nowrap; gap: 10px;">
+                    <div class="col-md-6">
+                        <div class="card p-6 shadow-lg" >
+                            <table id="slowMovingTable" class="table table-bordered" style="min-height: 100px !important; width: 100% !important;">
+                                <thead>
+                                    <tr>
                                         <th 
                                             colspan="5"
-                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
                                             class="tbl-title-header"
                                         >
                                             SLOW MOVING SKU'S
                                         </th>
                                     </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                            <th class="tbl-title-field">SOH Qty</th>
-                                            <th class="tbl-title-field">Qty (W1)</th>
-                                            <th class="tbl-title-field">Qty (W2)</th>
-                                            <th class="tbl-title-field">Qty (W3)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>John Doe</td>
-                                            <td>Store A</td>
-                                            <td>John Doe</td>
-                                            <td>Store A</td>
-                                            <td>Store A</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
-                                <table id="dataTable2" class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th 
-                                                colspan="5"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                                class="tbl-title-header"
-                                            >OVERSTOCK SKU'S</th>
-                                        </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                            <th class="tbl-title-field">SOH Qty</th>
-                                            <th class="tbl-title-field">Qty (W1)</th>
-                                            <th class="tbl-title-field">Qty (W2)</th>
-                                            <th class="tbl-title-field">Qty (W3)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Jane Smith</td>
-                                            <td>Store B</td>
-                                            <td>Jane Smith</td>
-                                            <td>Store B</td>
-                                            <td>Jane Smith</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
-                                <table id="dataTable3" class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th 
-                                                colspan="5"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                                class="tbl-title-header"
-                                            >NPD SKU'S</th>
-                                        </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                            <th class="tbl-title-field">SOH Qty</th>
-                                            <th class="tbl-title-field">Qty (W1)</th>
-                                            <th class="tbl-title-field">Qty (W2)</th>
-                                            <th class="tbl-title-field">Qty (W3)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Mike Johnson</td>
-                                            <td>Store C</td>
-                                            <td>Mike Johnson</td>
-                                            <td>Store C</td>
-                                            <td>Store C</td>
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="card p-3 shadow-sm">
-                                <table id="dataTable4" class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th 
-                                                colspan="1"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                                class="tbl-title-header"
-                                            >HERO SKU'S</th>
-                                        </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Store D</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU</th>
+                                        <th class="tbl-title-field">SOH Qty</th>
+                                        <th class="tbl-title-field">Qty (W1)</th>
+                                        <th class="tbl-title-field">Qty (W2)</th>
+                                        <th class="tbl-title-field">Qty (W3)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                         <td colspan="5"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
+                    <div class="col-md-6">
+                        <div class="card p-6 shadow-lg">
+                            <table id="overstockTable" class="table table-bordered" style="min-height: 100px !important; width: 100% !important;">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="5"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
+                                            class="tbl-title-header"
+                                        >OVERSTOCK SKU'S</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU</th>
+                                        <th class="tbl-title-field">SOH Qty</th>
+                                        <th class="tbl-title-field">Qty (W1)</th>
+                                        <th class="tbl-title-field">Qty (W2)</th>
+                                        <th class="tbl-title-field">Qty (W3)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                         <td colspan="5"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card p-6 shadow-lg">
+                            <table id="npdTable" class="table table-bordered" style="min-height: 100px !important; width: 100% !important;">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="5"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
+                                            class="tbl-title-header"
+                                        >NPD SKU'S</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU</th>
+                                        <th class="tbl-title-field">SOH Qty</th>
+                                        <th class="tbl-title-field">Qty (W1)</th>
+                                        <th class="tbl-title-field">Qty (W2)</th>
+                                        <th class="tbl-title-field">Qty (W3)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                         <td colspan="5"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card p-6 shadow-lg">
+                            <table 
+                                id="heroTable" 
+                                class="table table-bordered" 
+                                style="min-height: 100px !important; width: 100% !important;"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="2"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif;"
+                                            class="tbl-title-header"
+                                        >HERO SKU'S</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU</th>
+                                        <th class="tbl-title-field">Transition Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                         <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">No data available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -380,104 +373,224 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
+    var base_url = "<?= base_url(); ?>";
+    let brand_ambassadors = <?= json_encode($brand_ambassador) ?>;
+    let store_branch = <?= json_encode($store_branch) ?>;
+
     $(document).ready(function() {
-        let ba = <?= json_encode($brand_ambassador); ?>;
-        let store = <?= json_encode($store_branch); ?>;
-        let asc = <?= json_encode($asc); ?>;
-        let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
+        fetchDataTable();
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"], input[type="number"], input[type="date"]').val('');
+            $('input[type="checkbox"]').prop('checked', false);
+            $('input[name="coveredASC"][value="ASC"]').prop('checked', true);
+            $('input[name="coveredASC"][value="DESC"]').prop('checked', false);
+            $('.btn-outline-primary').removeClass('active');
+            $('.main_all').addClass('active');
+            $('select').not('#year').prop('selectedIndex', 0);
+            //reset the year dd
+            let highestYear = $("#year option:not(:first)").map(function () {
+                return parseInt($(this).val());
+            }).get().sort((a, b) => b - a)[0];
 
-        autocomplete_field($("#brandAmbassador"), $("ba_id"), ba);
-        autocomplete_field($("#storeName"), $("store_id"), store);
-        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
-
-        tables.forEach(id => {
-            $(id).DataTable({
-                paging: true,
-                searching: false,
-                ordering: true,
-                info: true,
-                lengthChange: false     // Hide "Show Entries" dropdown
-            });
+            if (highestYear) {
+                $("#year").val(highestYear);
+            }
+            $('#refreshButton').click();
         });
 
-        $('#refreshButton').click(function() {
-            alert('Refreshing data...');
-            tables.forEach(id => $(id).DataTable().ajax.reload(null, false));
+        autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors, "description", "id", function(result) {
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_store.id, tbl_store.description",
+                query: "tbl_brand_ambassador.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_brand_ambassador",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store.id = tbl_brand_ambassador.store",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let store_name = JSON.parse(result);
+                $("#store_branch").val(store_name[0].description);
+                $("#store_id").val(store_name[0].id);
+            })
         });
 
-        // $('#previewButton').click(function() {
-        //     alert('Preview feature coming soon!');
-        // });
+        autocomplete_field($("#store_branch"), $("#store_id"), store_branch, "description", "id", function(result) {
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_brand_ambassador.id, tbl_brand_ambassador.name",
+                query: "tbl_store.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_store",
+                join: [
+                    {
+                        table: "tbl_brand_ambassador",
+                        query: "tbl_brand_ambassador.store = tbl_store.id",
+                        type: "left"
+                    }
+                ]
+            }
 
-        // $('#exportButton').click(function() {
-        //     alert('Export feature coming soon!');
-        // });
+            aJax.post(url, data, function(result) {
+                let baname = JSON.parse(result);
+
+                if(baname[0].name !== null) {
+                    $("#brand_ambassadors").val(baname[0].name);
+                    $("#ba_id").val(baname[0].id);
+                } else {
+                    $("#brand_ambassadors").val("No Brand Ambassador");
+                }
+
+            })
+        });
     });
 
-    function handleAction(action) {
-        if (action === 'preview') {
-            alert('coming soon!');
-        } else if (action === 'export') {
-            prepareExport();
-        } else {
-            alert('wala rito boy');
+
+    $(document).on('click', '#refreshButton', function () {
+        if($('#brand_ambassadors').val() == ""){
+            $('#ba_id').val('');
         }
+        if($('#store_branch').val() == ""){
+            $('#store_id').val('');
+        }
+        fetchDataTable();
+    });
+
+    function fetchDataTable() {
+        let selectedBa = $('#brand_ambassadors').val();
+        let selectedStore = $('#store_branch').val();
+        let selectedMonth = $('#month').val();
+        let selectedYear = $('#year').val();
+        let selectedSortField = $('#sortBy').val();
+        let selectedSortOrder = $('input[name="coveredASC"]:checked').val();
+
+        let tables = [
+            { id: "#slowMovingTable", type: "slowMoving" },
+            { id: "#overstockTable", type: "overStock" },
+            { id: "#npdTable", type: "npd" },
+            { id: "#heroTable", type: "hero" }
+        ];
+
+        tables.forEach(table => {
+            initializeTable(table.id, table.type, selectedBa, selectedStore, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
+        });
     }
 
-    function prepareExport() {
-        const headerData = [
-            ["LIFESTRONG MARKETING INC."],
-            ["Report: Information for KAM 2"],
-            ["Date Generated: " + formatDate(new Date())],
-            // ["ASC Name: " + (selectedAscName || "All")],
-            // ["Area: " + (selectedAreaName || "All")],
-            // ["Brand: " + (selectedBrandName || "All")],
-            // ["Year: " + (selectedYearName === "All" ? "All" : selectedYearName)],
-            ["Brand Ambassador: "],
-            ["Store Name: "],
-            ["Category: "],
-            ["Quantity Scope: "],
-            ["Month: "],
-            ["Week: "],
-            ["SKU: "],
-            ["Order by: "],
-            [""], // Empty row for separation
-        ];
+    function initializeTable(tableId, type, selectedBa, selectedStore, selectedMonth, selectedYear, selectedSortField, selectedSortOrder) {
 
-        let rawData = [
-            { sku: "Joan Donato", sohQty: "SC001", qtyw1: 100, qtyw2: 100, qtyw3: 150, typeSku: "Slow Moving SKU"},
-            { sku: "Jecerie Narito", sohQty: "SC002", qtyw1: 100, qtyw2: 200, qtyw3: 250, typeSku: "Overstock SKU"},
-            { sku: "Janshiene Bandojo", sohQty: "SC003", qtyw1: 50, qtyw2: 80, qtyw3: 90, typeSku: "Hero" }
-        ];
-
-        let formattedData = rawData.map(row => 
-            row.typeSku === "Hero" 
-                ? { "SKU": row.sku,
-                    "Type of SKU": "Hero",
-                 } 
-                : {
-                    "SKU": row.sku,
-                    "SOH Qty": row.sohQty,
-                    "Qty (W1)": row.qtyw1,
-                    "Qty (W2)": row.qtyw2,
-                    "Qty (W3)": row.qtyw3,
-                    "Type of SKU": row.typeSku,
+        $(tableId).DataTable({
+            destroy: true,
+            ajax: {
+                url: base_url + 'trade-dashboard/trade-kam-two',
+                type: 'POST',
+                data: function (d) {
+                    d.trade_type = type;
+                    d.brand_ambassador = selectedBa === "" ? null : selectedBa;
+                    d.store = selectedStore === "" ? null : selectedStore;
+                    d.month = selectedMonth === "0" ? null : selectedMonth;
+                    d.year = selectedYear === "0" ? null : selectedYear;
+                    d.sort_field = selectedSortField === "" ? null : selectedSortField;
+                    d.sort = selectedSortOrder === "ASC" ? null : selectedSortOrder;
+                    d.limit = d.length;
+                    d.offset = d.start;
+                },
+                dataSrc: function(json) {
+                    return json.data.length ? json.data : [];
                 }
-        );
-
-        console.log(formattedData);
-        // return;
-
-        exportArrayToCSV(formattedData, `Trade Information for Kam2 - ${formatDate(new Date())}`, headerData);
+            },
+            columns: [
+                { 
+                    data: 'item_name',
+                    render: function(data, type, row) {
+                        return `<span title="${data}">${data}</span>`; // Tooltip enabled
+                    }
+                },
+                type !== 'hero' ? { data: 'sum_total_qty' } : null,
+                type !== 'hero' ? { data: 'week_1' } : null,
+                type !== 'hero' ? { data: 'week_2' } : null,
+                type !== 'hero' ? { data: 'week_3' } : null,
+                type == 'hero' ? { 
+                    data: 'trans_date',
+                    render: function(data, type, row) {
+                        return data ? 'week ' + data : ''; 
+                    }
+                } : null
+            ].filter(Boolean), 
+            pagingType: "full_numbers",
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            colReorder: true,
+            lengthChange: false
+        });
     }
 
-    function exportArrayToCSV(data, filename, headerData) {
-        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        saveAs(blob, filename + ".csv");
-    }
+    // function fetchData() {
+    //     let selectedBa = $('#brand_ambassadors').val();
+    //     let selectedStore = $('#store_branch').val();
+    //     let selectedMonth = $('#month').val();
+    //     let selectedYear = $('#year').val();
+    //     let selectedSortField = $('#sortBy').val();
+    //     let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+
+    //     let tables = [
+    //         { id: "#slowMovingTable", type: "slowMoving" },
+    //         { id: "#overstockTable", type: "overStock" },
+    //         { id: "#npdTable", type: "npd" },
+    //         { id: "#heroTable", type: "hero" }
+    //     ];
+    //     tables.forEach(table => {
+    //         initializeTable(table.id, table.type, selectedType, selectedBa, selectedStore, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
+    //     });
+    // }
+
+    // function initializeTable(tableId, type, selectedType, selectedBa, selectedStore, selectedMonth, selectedYear, selectedSortField, selectedSortOrder) {
+    //     $(tableId).DataTable({
+    //         destroy: true,
+    //         ajax: {
+    //             url: base_url + 'trade-dashboard/trade-ba',
+    //             type: 'GET',
+    //             data: function (d) {
+    //                 d.sort_field = selectedSortField;
+    //                 d.sort = selectedSortOrder;
+    //                 d.month = selectedMonth === "" ? null : selectedMonth;
+    //                 d.year = selectedYear === "" ? null : selectedYear;
+    //                 d.brand_ambassador = selectedBa === "" ? null : selectedBa;
+    //                 d.store_name = selectedStore === "" ? null : selectedStore;
+    //                 d.ba_type = selectedType;
+    //                 d.type = type;
+    //                 d.limit = d.length;
+    //                 d.offset = d.start;
+    //             },
+    //             dataSrc: function(json) {
+    //                 return json.data.length ? json.data : [];
+    //             }
+    //         },
+    //         columns: [
+    //             { data: 'item_name' },
+    //             type !== 'hero' ? { data: 'sum_total_qty' } : null
+    //         ].filter(Boolean),
+    //         pagingType: "full_numbers",
+    //         pageLength: 10,
+    //         processing: true,
+    //         serverSide: true,
+    //         searching: false,
+    //         colReorder: true,
+    //         lengthChange: false
+    //     });
+    // }
+
 
 
 </script>

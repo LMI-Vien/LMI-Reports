@@ -301,6 +301,7 @@
 <script>
     var base_url = "<?= base_url(); ?>";
     let store_branch = <?= json_encode($store_branch) ?>;
+    // let store_branch = [];
     let area = <?= json_encode($area) ?>;
 
     $(document).ready(function() {
@@ -309,8 +310,82 @@
         });
 
         initializeTable();
-        autocomplete_field($("#store"), $("#store_id"), store_branch);
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+            let data = {
+                event: "list",
+                select: "",
+                query: "tbl_store_group.area_id = " + result.id,
+                table: "tbl_store_group",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let store = JSON.parse(res);
+                store_branch = store;
+
+                $("#store").val("");
+                $("#store_id").val("");
+
+                autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(result) {
+                    let data = {
+                        event: "list",
+                        select: "tbl_store_group.store_id, tbl_area.description",
+                        query: "tbl_store_group.store_id = " + result.id,
+                        table: "tbl_store_group",
+                        offset: offset,
+                        limit: 0,
+                        join: [
+                            {
+                                table: "tbl_area",
+                                query: "tbl_area.id = tbl_store_group.area_id",
+                                type: "left"
+                            }
+                        ]
+                    }
+
+                    aJax.post(base_url + "cms/global_controller", data, function(result) {
+                        let store_description = JSON.parse(result);
+
+                        $("#store_id").val(store_description[0].store_id);
+                    })
+                })
+            })
+        });
+
+        autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(result) {
+
+            let data = {
+                event: "list",
+                select: "tbl_area.id, tbl_area.description",
+                query: "tbl_store_group.store_id = " + result.id,
+                table: "tbl_store_group",
+                offset: offset,
+                limit: 0,
+                join: [
+                    {
+                        table: "tbl_area",
+                        query: "tbl_area.id = tbl_store_group.area_id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(result) {
+                let area_description = JSON.parse(result);
+
+                $("#area").val(area_description[0].description);
+                $("#area_id").val(area_description[0].id);
+
+            })
+        });
+
         $('#columnToggleContainer').toggle();
         $(document).on('click', '#toggleColumnsButton', function() {
             $('#columnToggleContainer').toggle();
@@ -337,8 +412,6 @@
     });
 
     function fetchData() {
-      //  let selectedType = $('input[name="filterType"]:checked').val();
-       // let selectedBa = $('#brand_ambassador').val();
         let selectedStore = $('#store_id').val();
         let selectedArea = $('#area_id').val();
         let selectedMonth = $('#month').val();
@@ -393,7 +466,7 @@
                 { data: 'target_per_remaining_days', render: formatNoDecimals },
                 { data: 'ly_scanned_data' },
                 { data: 'brand_ambassadors' },
-                { data: 'deployment_date', render: formattedDate },
+                { data: 'ba_deployment_dates' },
                 { data: 'brands' },
                 { data: 'growth' }
             ].filter(Boolean),
@@ -459,7 +532,6 @@
 
         if (action === 'preview') {
             let link = `${selectedStore}-${selectedArea}-${selectedMonth}-${selectedYear}-${selectedSortField}-${selectedSortOrder}`;
-            console.log(link, 'link');
             window.open(`<?= base_url()?>trade-dashboard/trade-overall-ba-view/${link}`, '_blank');
         } else if (action === 'export') {
             prepareExport();
@@ -518,7 +590,6 @@
 
     fetchPromise
         .then(results => {
-            console.log(results, 'results');
 
             const headerData = [
                 ["LIFESTRONG MARKETING INC."],

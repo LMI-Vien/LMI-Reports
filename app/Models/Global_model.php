@@ -1097,4 +1097,14 @@ class Global_model extends Model
             return 'failed';
         }
     }
+
+    public function fetch_last_ba_code($table, $field) {
+        try {
+            $query = $this->db->query("SELECT $field FROM $table ORDER BY id DESC LIMIT 1");
+            $result = $query->getRow();
+            return $result ? $result->$field : null;
+        } catch (Exception $e) {
+            return "failed";
+        }
+    }
 }

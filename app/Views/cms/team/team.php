@@ -184,7 +184,7 @@
       get_pagination(query);
     });
 
-    function get_data(query, field = "updated_date", order = "order") {
+    function get_data(query, field = "code", order = "order") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -315,6 +315,7 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
+        console.log(order_filter, column_filter);
         get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');

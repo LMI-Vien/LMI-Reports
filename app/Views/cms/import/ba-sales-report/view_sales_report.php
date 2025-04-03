@@ -234,6 +234,8 @@
             var result = JSON.parse(result);
             var html = '';
 
+            console.log(result);
+
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {

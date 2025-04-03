@@ -244,6 +244,14 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                                 <input type="hidden" id="item_classi_id">
                             </div>
                         </div>
+                        <div class="col-md p-1 row">
+                            <div class="col-md-3">
+                                <label for="qtyscp">Qty Scope</label>
+                            </div>
+                            <div class="col-md">
+                                <input type="number" class="form-control" id="qtyscp" placeholder="Enter Qty">
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-2 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
                         <div class="col-md-12 mx-auto row my-2 py-2 text-left" >
@@ -350,14 +358,141 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         let store = <?= json_encode($store_branch); ?>;
         let item_classification = <?= json_encode($item_classification); ?>;
 
-        autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba, "description", "id", function(result) {
+
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_store.id, tbl_store.description, tbl_area.id AS area_id, tbl_area.description AS area",
+                query: "tbl_brand_ambassador.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_brand_ambassador",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store.id = tbl_brand_ambassador.store",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_store_group",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_area",
+                        query: "tbl_store_group.area_id = tbl_area.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let store_name = JSON.parse(result);
+
+                $("#store").val(store_name[0].description);
+                $("#store_id").val(store_name[0].id);
+
+                $("#area").val(store_name[0].area);
+                $("#area_id").val(store_name[0].area_id);
+            })
+        });
+
+        autocomplete_field($("#store"), $("#store_id"), store, "description", "id", function(result) {
+
+            let url ="<?= base_url("cms/global_controller"); ?>";
+            let data = {
+                event: "list",
+                select: "tbl_brand_ambassador.id, tbl_brand_ambassador.name, tbl_area.description AS area, tbl_area.id AS area_id",
+                query: "tbl_store.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_store",
+                join: [
+                    {
+                        table: "tbl_brand_ambassador",
+                        query: "tbl_brand_ambassador.store = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_store_group",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_area",
+                        query: "tbl_store_group.area_id = tbl_area.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let baname = JSON.parse(result);
+
+                if(baname[0].name !== null) {
+                    $("#brandAmbassador").val(baname[0].name);
+                    $("#ba_id").val(baname[0].id);
+
+                    $("#area").val(baname[0].area);
+                    $("#area_id").val(baname[0].area_id);
+                } else {
+                    $("#brandAmbassador").val("No Brand Ambassador");
+                }
+
+            })
+        });
+
+        // autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba);
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(res) {
+            $("#store").val("");
+            $("#store_id").val("");
+
+            $("#brandAmbassador").val("");
+            $("#ba_id").val("");
+
+            let data = {
+                event: "list",
+                query: "area_id = " + res.id,
+                select: "tbl_store.id AS store_id, tbl_brand_ambassador.id AS ba_id, tbl_store.description AS store_description, tbl_brand_ambassador.name AS ba_name",
+                table: "tbl_store_group",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    },
+                    {
+                        table: "tbl_brand_ambassador",
+                        query: "tbl_store.id = tbl_brand_ambassador.store",
+                        type: "right"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let info = JSON.parse(res);
+                
+                autocomplete_field($("#brandAmbassador"), $("#ba_id"), info, "ba_name", "ba_id", function(res) {
+                    $("#store").val(res.store_description);
+                    $("#store_id").val(res.store_id);
+                })
+
+                autocomplete_field($("#store"), $("#store_id"), info, "store_description", "store_id", function(res) {
+                    $("#brandAmbassador").val(res.ba_name);
+                    $("#ba_id").val(res.ba_id);
+                })
+            })
+        });
+
+
+
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
-        autocomplete_field($("#store"), $("#store_id"), store);
+        // autocomplete_field($("#store"), $("#store_id"), store);
         autocomplete_field($("#item_classi"), $("#item_classi_id"), item_classification, "item_class_description");
 
         $(document).on('click', '#clearButton', function () {
-            $('input[type="text"]').val('');
+            $('input[type="text"], input[type="number"]').val('');
             $('input[type="checkbox"]').prop('checked', false);
             $('input[name="coveredASC"][value="with_ba"]').prop('checked', false);
             $('input[name="coveredASC"][value="without_ba"]').prop('checked', false);
@@ -381,13 +516,17 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             if($('#item_classi').val() == ""){
                 $('#item_classi_id').val('');
             }
+            if($('#qtyscp').val() == ""){
+                $('#qtyscp').val('');
+            }
             fetchData();
         });
 
         $('#previewButton').click(function() {
         });
-
+        
         $('#exportButton').click(function() {
+            prepareExport();
         });
     });
 
@@ -399,10 +538,12 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         let selectedWeek = $('#week').val();
         let selectedStore = $('#store').val();
         let selectedItemCat = $('#item_classi').val();
-        initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat);
+        let selectedQty = $('#qtyscp').val();
+        
+        initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat, selectedQty);
     }
 
-    function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null) {
+    function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null, selectedQty = 0) {
         if ($.fn.DataTable.isDataTable('#table-kam-one')) {
             let existingTable = $('#table-kam-one').DataTable();
             existingTable.clear().destroy();
@@ -426,6 +567,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                     d.month = selectedMonth === "0" ? null : selectedMonth;
                     d.store = selectedStore === "0" ? null : selectedStore;
                     d.itemcat = selectedItemCat === "0" ? null : selectedItemCat;
+                    d.qty = selectedQty === "0" ? null : selectedQty;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
@@ -434,13 +576,13 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                 }
             },
             columns: [
-                { data: 'store_name' },
-                { data: 'asc_name' },
-                { data: 'ambassador_name' },
-                { data: 'item_name' },
-                { data: 'item' },
-                { data: 'item_class' },
-                { data: 'total_qty' }
+                { data: 'store_name'},
+                { data: 'asc_name'},
+                { data: 'ambassador_names'},
+                { data: 'item_name'},
+                { data: 'item'},
+                { data: 'item_class'},
+                { data: 'total_qty'}
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
@@ -530,7 +672,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                         "store_name": store_name,
                         "total_qty": total_qty,
                     }));
-                    // console.log(newData);
                     resolve(newData);
                 },
                 onError: function(error) {
@@ -541,7 +682,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
         fetchPromises.then((result) => {
             let formattedData = result.flat();
-            console.log(formattedData);
 
             const headerData = [
                 ["LIFESTRONG MARKETING INC."],
@@ -558,7 +698,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
             exportArrayToCSV(formattedData, `Report: Kam1 Dashboard - ${formatDate(new Date())}`, headerData);
         }).catch((error) => {
-            console.error(error);
         })
     }
 
@@ -594,7 +733,6 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
                     offset: offset
                 },
                 success: function(response) {
-                    console.log(response);
                     if (response.data && response.data.length) {
                         allData = allData.concat(response.data);
 

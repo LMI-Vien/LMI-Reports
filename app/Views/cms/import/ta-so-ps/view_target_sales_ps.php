@@ -33,6 +33,7 @@
                     <thead>
                         <tr>
                             <!-- <th class='center-content'><input class="selectall" type="checkbox"></th> -->
+                            <th class='center-content'>BA Name</th>
                             <th class='center-content'>Location</th>
                             <th class='center-content'>Location Description</th>
                             <th class='center-content'>Status</th>
@@ -74,6 +75,8 @@
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
+                            <label for="ba_name" class="form-label p-2 col-2">BA Name</label>
+                            <input type="text" class="form-control required p-2 col" id="ba_name" aria-describedby="ba_name">
                             <label for="location" class="form-label p-2 col-2">Location</label>
                             <input type="text" class="form-control required p-2 col" id="location" aria-describedby="location">
                             <label for="location_desc" class="form-label p-2 col-2">Location Description</label>
@@ -153,7 +156,7 @@
             event: "list",
             select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
             "a.july, a.august, a.september, a.october, a.november, a.december, "+
-            "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status",
+            "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status, ba.name as ba_name",
             // select: "a.created_date, u.name imported_by, b.year, a.updated_date",
             query: new_query,
             offset: offset,
@@ -178,7 +181,12 @@
                     table: "cms_users u",
                     query: "u.id = a.created_by",
                     type: "left"
-                }
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.code = a.ba_code",
+                    type: "left"
+                },
             ]
         };
 
@@ -197,9 +205,10 @@
                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
                     var storeCode = y.location || 'N/A';
                     var storeDesc = y.location_desc || 'N/A';
-
+                    var BAName = y.ba_name || 'N/A';
                     html += "<tr class='" + rowClass + "'>";
                     // html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
+                    html += "<td scope=\"col\">" + trimText(BAName) + "</td>";
                     html += "<td scope=\"col\">" + trimText(storeCode) + "</td>";
                     html += "<td scope=\"col\">" + trimText(storeDesc) + "</td>";
                     html += "<td scope=\"col\">" + status + "</td>";
@@ -263,7 +272,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#location, #location_desc, #jan, #feb, #mar, #apr, #may, #jun, #jul, #aug, #sep, #oct, #nov, #dec, #total', isReadOnly);
+        set_field_state('#ba_name, #location, #location_desc, #jan, #feb, #mar, #apr, #may, #jun, #jul, #aug, #sep, #oct, #nov, #dec', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -274,7 +283,7 @@
     }
 
     function reset_modal_fields() {
-        $('#popup_modal #location, #popup_modal #location_desc, #popup_modal #jan, #popup_modal #feb, #popup_modal #mar, #popup_modal #apr, #popup_modal #may, #popup_modal #jun, #popup_modal #jul, #popup_modal #aug, #popup_modal #sep, #popup_modal #oct, #popup_modal #nov, #popup_modal #dec').val('');
+        $('#popup_modal #ba_name, #popup_modal #location, #popup_modal #location_desc, #popup_modal #jan, #popup_modal #feb, #popup_modal #mar, #popup_modal #apr, #popup_modal #may, #popup_modal #jun, #popup_modal #jul, #popup_modal #aug, #popup_modal #sep, #popup_modal #oct, #popup_modal #nov, #popup_modal #dec').val('');
         $('#popup_modal #status').prop('checked', true);
     }
 
@@ -293,7 +302,7 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description",
+            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description, pr.ba_code",
             query : query, 
             table : "tbl_target_sales_per_store pr",
             join: [
@@ -308,6 +317,7 @@
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
+                    $('#ba_code').val(d.ba_code);
                     $('#location').val(d.location);
                     $('#location_desc').val(d.location_description);
                     $('#jan').val(Math.round(d.january).toLocaleString());
