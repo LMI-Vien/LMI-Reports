@@ -134,6 +134,9 @@
     #table-skus{
         display: none;
     }
+    #consolidatedChart{
+        height: 200px;
+    }
 
 </style>
 
@@ -182,9 +185,11 @@
                                         <option value="0">Please select..</option>
                                         <?php
                                             if($year){
+                                                $maxYear = max(array_column($year, 'year')); 
                                                 foreach ($year as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['year']."</option>";
-                                                }                                                
+                                                    $selected = ($value['year'] == $maxYear) ? 'selected' : '';
+                                                    echo "<option value='{$value['id']}' {$selected}>{$value['year']}</option>";
+                                                }
                                             }
                                         ?>
                                     </select>
@@ -404,7 +409,6 @@
 <script>
     var base_url = "<?= base_url(); ?>";
     $(document).ready(function () {
-       // let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
 
         let asc = <?= json_encode($asc); ?>;
         let area = <?= json_encode($area); ?>;
@@ -412,8 +416,40 @@
         let store_branch = <?= json_encode($store_branch); ?>;
         let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
 
-        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id");
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id", function(result) {            
+            let data = {
+                event: "list",
+                query: "id = " + result.area_id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let area_description = JSON.parse(res);
+                $("#area").val(area_description[0].description);
+                $("#area_id").val(area_description[0].id);
+            })
+        });
+
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+
+            let data = {
+                event: "list",
+                query: "area_id = " + result.id,
+                select: "id, description",
+                offset: offset,
+                limit: 0,
+                table: "tbl_area_sales_coordinator",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let asc_description = JSON.parse(res);
+                $("#ascName").val(asc_description[0].description);
+                $("#asc_id").val(asc_description[0].id);
+            })
+        });
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
         autocomplete_field($("#storeName"), $("#store_id"), store_branch);
         autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
@@ -422,7 +458,15 @@
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
             $('input[type="radio"], input[type="checkbox"]').prop('checked', false);
 
-            $('select').prop('selectedIndex', 0);
+            $('select').not('#year').prop('selectedIndex', 0);
+            //reset the year dd
+            let highestYear = $("#year option:not(:first)").map(function () {
+                return parseInt($(this).val());
+            }).get().sort((a, b) => b - a)[0];
+
+            if (highestYear) {
+                $("#year").val(highestYear);
+            }
             $('#refreshButton').click();
         });
 
@@ -470,46 +514,129 @@
 
     let chartInstances = [];
 
+
+    //old backup
+    // function renderCharts() {
+    //     chartInstances.forEach(chart => chart.destroy());
+    //     chartInstances = [];
+    //     $('#chartContainer').html('');
+
+    //     months.forEach((month, index) => {
+    //         let chartHTML = `
+    //             <div class="col-md-3 mb-4">
+    //                 <div class="card p-2">
+    //                     <h6 class="text-center card-title">${month}</h6>
+    //                     <canvas id="chart${index}"></canvas>
+    //                 </div>
+    //             </div>
+    //         `;
+    //         $('#chartContainer').append(chartHTML);
+    //         let ctx = document.getElementById(`chart${index}`).getContext('2d');
+
+    //         let newChart = new Chart(ctx, {
+    //             type: 'bar',
+    //             data: {
+    //                 labels: ["Sales Report", "Target Sales", "% Achieved"],
+    //                 datasets: [{
+    //                     label: month,
+    //                     backgroundColor: ["#ffc107", "#990000", "#339933"],
+    //                     data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
+    //                 }]
+    //             },
+    //             options: {
+    //                 responsive: true,
+    //                 animation: true,
+    //                 plugins: {
+    //                     legend: { display: false } 
+    //                 },
+    //                 scales: {
+    //                     y: { beginAtZero: true }
+    //                 }
+    //             }
+    //         });
+    //         chartInstances.push(newChart);
+    //     });
+    // }
+
     function renderCharts() {
         chartInstances.forEach(chart => chart.destroy());
         chartInstances = [];
-        $('#chartContainer').html('');
+        $('#chartContainer').html('<canvas id="consolidatedChart"></canvas>');
 
-        months.forEach((month, index) => {
-            let chartHTML = `
-                <div class="col-md-3 mb-4">
-                    <div class="card p-2">
-                        <h6 class="text-center card-title">${month}</h6>
-                        <canvas id="chart${index}"></canvas>
-                    </div>
-                </div>
-            `;
-            $('#chartContainer').append(chartHTML);
-            let ctx = document.getElementById(`chart${index}`).getContext('2d');
+        let ctx = document.getElementById("consolidatedChart").getContext("2d");
 
-            let newChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ["Sales Report", "Target Sales", "% Achieved"],
-                    datasets: [{
-                        label: month,
-                        backgroundColor: ["#ffc107", "#990000", "#339933"],
-                        data: [dataValues.salesReport[index], dataValues.targetSales[index], dataValues.PerAchieved[index]]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: true,
-                    plugins: {
-                        legend: { display: false } 
+        let datasets = [
+            {
+                label: "Sales Report",
+                backgroundColor: "#ffc107",
+                borderColor: "#d39e00",
+                borderWidth: 1,
+                data: dataValues.salesReport
+            },
+            {
+                label: "Target Sales",
+                backgroundColor: "#990000",
+                borderColor: "#770000",
+                borderWidth: 1,
+                data: dataValues.targetSales
+            },
+            {
+                label: "% Achieved",
+                backgroundColor: "#339933",
+                borderColor: "#267326",
+                borderWidth: 1,
+                data: dataValues.PerAchieved
+            }
+        ];
+
+        let consolidatedChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: months,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
                     },
-                    scales: {
-                        y: { beginAtZero: true }
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                return tooltipItem.dataset.label + ": " + tooltipItem.raw;
+                            }
+                        }
                     }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Months",
+                            font: { weight: "bold" }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Values",
+                            font: { weight: "bold" }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: "easeOutBounce"
                 }
-            });
-            chartInstances.push(newChart);
+            }
         });
+
+        chartInstances.push(consolidatedChart);
     }
 
     function fetchData(){
@@ -557,13 +684,13 @@
                 ];
 
                 $.each(result.data, function(x,y) {
-                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>'+(y.net_sales_january || "0.00")+'</td><td>'+(y.net_sales_february || "0.00")+'</td><td>'+(y.net_sales_march || "0.00")+'</td><td>'+(y.net_sales_april || "0.00")+'</td><td>'+(y.net_sales_may || "0.00")+'</td><td>'+(y.net_sales_june || "0.00")+'</td><td>'+(y.net_sales_july || "0.00")+'</td><td>'+(y.net_sales_august || "0.00")+'</td><td>'+(y.net_sales_september || "0.00")+'</td><td>'+(y.net_sales_october || "0.00")+'</td><td>'+(y.net_sales_november || "0.00")+'</td><td>'+(y.net_sales_december || "0.00")+'</td></tr>';
-                    html += '<tr><td style="background-color: #ffc107;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>'+(y.amount_january || "0.00")+'</td><td>'+(y.amount_february || "0.00")+'</td><td>'+(y.amount_march || "0.00")+'</td><td>'+(y.amount_april || "0.00")+'</td><td>'+(y.amount_may || "0.00")+'</td><td>'+(y.amount_june || "0.00")+'</td><td>'+(y.amount_july || "0.00")+'</td><td>'+(y.amount_august || "0.00")+'</td><td>'+(y.amount_september || "0.00")+'</td><td>'+(y.amount_october || "0.00")+'</td><td>'+(y.amount_november || "0.00")+'</td><td>'+(y.amount_december || "0.00")+'</td></tr>';
-                    html += '<tr><td style="background-color: #990000;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Target Sales</td><td>'+(y.target_sales_january || "0.00")+'</td><td>'+(y.target_sales_february || "0.00")+'</td><td>'+(y.target_sales_march || "0.00")+'</td><td>'+(y.target_sales_april || "0.00")+'</td><td>'+(y.target_sales_may || "0.00")+'</td><td>'+(y.target_sales_june || "0.00")+'</td><td>'+(y.target_sales_july || "0.00")+'</td><td>'+(y.target_sales_august || "0.00")+'</td><td>'+(y.target_sales_september || "0.00")+'</td><td>'+(y.target_sales_october || "0.00")+'</td><td>'+(y.target_sales_november || "0.00")+'</td><td>'+(y.target_sales_december || "0.00")+'</td></tr>';
-                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Growth</td><td>'+(y.growth_january || "0.00")+'</td><td>'+(y.growth_february || "0.00")+'</td><td>'+(y.growth_march || "0.00")+'</td><td>'+(y.growth_april || "0.00")+'</td><td>'+(y.growth_may || "0.00")+'</td><td>'+(y.growth_june || "0.00")+'</td><td>'+(y.growth_july || "0.00")+'</td><td>'+(y.growth_august || "0.00")+'</td><td>'+(y.growth_september || "0.00")+'</td><td>'+(y.growth_october || "0.00")+'</td><td>'+(y.growth_november || "0.00")+'</td><td>'+(y.growth_december || "0.00")+'</td></tr>';
-                    html += '<tr><td style="background-color: #339933;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Achieved</td><td>'+(y.achieved_january || "0.00")+'</td><td>'+(y.achieved_february || "0.00")+'</td><td>'+(y.achieved_march || "0.00")+'</td><td>'+(y.achieved_april || "0.00")+'</td><td>'+(y.achieved_may || "0.00")+'</td><td>'+(y.achieved_june || "0.00")+'</td><td>'+(y.achieved_july || "0.00")+'</td><td>'+(y.achieved_august || "0.00")+'</td><td>'+(y.achieved_september || "0.00")+'</td><td>'+(y.achieved_october || "0.00")+'</td><td>'+(y.achieved_november || "0.00")+'</td><td>'+(y.achieved_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>'+formatTwoDecimals(y.net_sales_january || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_february || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_march || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_april || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_may || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_june || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_july || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_august || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_september || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_october || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_november || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #ffc107;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>'+formatTwoDecimals(y.amount_january || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_february || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_march || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_april || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_may || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_june || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_july || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_august || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_september || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_october || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_november || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #990000;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Target Sales</td><td>'+formatTwoDecimals(y.target_sales_january || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_february || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_march || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_april || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_may || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_june || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_july || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_august || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_september || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_october || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_november || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Growth</td><td>'+formatTwoDecimals(y.growth_january || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_february || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_march || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_april || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_may || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_june || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_july || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_august || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_september || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_october || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_november || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #339933;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Achieved</td><td>'+formatTwoDecimals(y.achieved_january || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_february || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_march || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_april || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_may || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_june || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_july || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_august || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_september || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_october || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_november || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_december || "0.00")+'</td></tr>';
 
-                });
+                });formatTwoDecimals
             }
             $('.asc-dashboard-body').html(html);
             renderCharts();
@@ -618,9 +745,9 @@
             columns: [
                 { data: 'item_name' },
                 type !== 'hero' ? { data: 'sum_total_qty' } : null,
-                type !== 'hero' ? { data: 'total_on_hand' } : null,
-                type !== 'hero' ? { data: 'total_on_hand' } : null,
-                type !== 'hero' ? { data: 'total_on_hand' } : null
+                type !== 'hero' ? { data: 'week_1' } : null,
+                type !== 'hero' ? { data: 'week_2' } : null,
+                type !== 'hero' ? { data: 'week_3' } : null
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
@@ -640,6 +767,10 @@
         }else{
             ifEmpty();
         }
+    }
+
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
     }
 
     function handleAction(action) {

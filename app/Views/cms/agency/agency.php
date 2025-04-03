@@ -552,39 +552,6 @@
             message = is_json(confirm_delete_message);
             message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
             modal.confirm(JSON.stringify(message), function(result){
-                if(result){ 
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var data = {
-                        event : "update",
-                        table : "tbl_agency",
-                        field : "id",
-                        where : id, 
-                        data : {
-                                updated_date : formatDate(new Date()),
-                                updated_by : user_id,
-                                status : -2
-                        }  
-                    }
-                    aJax.post(url,data,function(result){
-                        var obj = is_json(result);
-                        modal.alert(success_delete_message, 'success', function() {
-                            location.reload();
-                        });
-                    });
-                }
-    
-            });
-        });
-    }
-
-    function delete_data(id) {
-        var code = '';
-
-        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-            code = res;
-            message = is_json(confirm_delete_message);
-            message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
-            modal.confirm(JSON.stringify(message), function(result){
                 if (result) {
                     var url = "<?= base_url('cms/global_controller');?>"; 
                     var data = {

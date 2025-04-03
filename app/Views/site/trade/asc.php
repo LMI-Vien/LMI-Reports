@@ -322,13 +322,71 @@
     var base_url = "<?= base_url(); ?>";
     let store_branch = <?= json_encode($store_branch) ?>;
     let area = <?= json_encode($area) ?>;
-    // console.log("Area", area);
 
     $(document).ready(function() {
 
         initializeTable();
-        autocomplete_field($("#store"), $("#store_id"), store_branch);
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description");
+        autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(result) {
+            let data = {
+                event: "list",
+                select: "",
+                query: "tbl_store_group.store_id = " + result.id,
+                table: "tbl_store_group",
+                join: [
+                    {
+                        table: "tbl_area",
+                        query: "tbl_store_group.area_id = tbl_area.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let area_description = JSON.parse(res);
+  
+                $("#area").val(area_description[0].description);
+                $("#area_id").val(area_description[0].id)
+            })
+        });
+
+        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+            let data = {
+                event: "list",
+                select: "",
+                query: "area_id = " + result.id,
+                table: "tbl_store_group",
+                join: [
+                    {
+                        table: "tbl_store",
+                        query: "tbl_store_group.store_id = tbl_store.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let store_description = JSON.parse(res);
+
+                $("#store").val("");
+                $("#store_id").val("");
+
+                store_branch = store_description;
+
+                autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(res) {
+                    let data = {
+                        event: "list",
+                        select: "",
+                        query: "id = " + res.store_id,
+                        table: "tbl_store"
+                    }
+
+                    aJax.post(base_url + "cms/global_controller", data, function(res) {
+                        let store_description = JSON.parse(res);
+                        $("#store_id").val(store_description[0].id);
+                    })
+                })
+            })
+        });
 
 
         $(document).on('click', '#clearButton', function () {
@@ -397,11 +455,11 @@
                 { data: 'rank' },
                 { data: 'area' },
                 { data: 'asc_names' },
-                { data: 'actual_sales' },
+                { data: 'actual_sales', render: formatTwoDecimals },
                 { data: 'target_sales' },
                 { data: 'percent_ach' },
-                { data: 'balance_to_target' },
-                { data: 'target_per_remaining_days' }
+                { data: 'balance_to_target', render: formatTwoDecimals },
+                { data: 'target_per_remaining_days', render: formatNoDecimals }
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
@@ -412,22 +470,60 @@
         });
     }
 
+    function formatNoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0';
+    }
+
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+    }
+
     function handleAction(action) {
         let selectedStore = $('#store_id').val() || "0";
         let selectedArea = $('#area_id').val() || "0";
         let selectedMonth = $('#month').val() || "0";
         let selectedYear = $('#year').val() || "0";
+        let selectedStoreName = $('#store').val() || "0";
+        let selectedAreaName = $('#area').val() || "0";
+        let selectedMonthName = $("#month option:selected").text() || "0";
+        let selectedYearName = $("#year option:selected").text() || "0";
         let selectedSortField = $('#sortBy').val() || "0";
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val() || "0";
 
+
+        if(selectedMonthName == "Please month.."){
+            selectedMonthName = "0";
+        }
+
+        if(selectedYearName == "Please year.."){
+            selectedYearName = "0";    
+        }
+
         if (action === 'preview') {
-            let link = `${selectedStore}-${selectedArea}-${selectedMonth}-${selectedYear}-${selectedSortField}-${selectedSortOrder}`;
-            window.open(`<?= base_url()?>trade-dashboard/asc-view/${link}`, '_blank');
+            var url = "<?= base_url("trade-dashboard/set-asc-preview-session");?>";
+            var data = {
+                store : selectedStore,
+                area : selectedArea,
+                month : selectedMonth,
+                year : selectedYear,
+                storename : selectedStoreName,
+                areaname : selectedAreaName,
+                monthname : selectedMonthName,
+                yearname : selectedYearName,
+                sortfield : selectedSortField,
+                sortorder : selectedSortOrder
+
+            }
+            aJax.post(url,data,function(result){
+                if(result.status == "success"){
+                    window.location.href = "<?= base_url('trade-dashboard/asc-view') ?>";
+                }
+                
+            });
         } else if (action === 'export') {
-            // alert(action)
             prepareExport();
         } else {
-            alert('wtf are u doing?')
+            
         }
     }
 
@@ -485,8 +581,6 @@
 
     fetchPromise
         .then(results => {
-            console.log(results, 'results');
-
             const headerData = [
                 ["LIFESTRONG MARKETING INC."],
                 ["Report: Information for Area Sales Coordinator"],
@@ -536,11 +630,9 @@
                     offset: offset
                 },
                 success: function(response) {
-                    console.log("Response received:", response);
 
                     if (response.data && response.data.length) {
                         allData = allData.concat(response.data);
-                        console.log("Current allData:", allData);
 
                         if (response.data.length === length) {
                             fetchData(offset + length);

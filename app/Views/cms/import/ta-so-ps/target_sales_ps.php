@@ -127,6 +127,10 @@
                             <div hidden>
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
+                            <label for="ba_code" class="form-label">BA Code</label>
+                            <input type="text" class="form-control required" id="ba_code" aria-describedby="ba_code">
+                        </div>
+                        <div class="mb-3">
                             <label for="location" class="form-label">Location</label>
                             <input type="text" class="form-control required" id="location" aria-describedby="location">
                         </div>
@@ -259,6 +263,7 @@
                                     <thead>
                                         <tr>
                                             <th class='center-content'>Line #</th>
+                                            <th class='center-content'>BA Code</th>
                                             <th class='center-content'>Location</th>
                                             <!-- <th class='center-content'>Location Description</th> -->
                                             <th class='center-content'>January</th>
@@ -1004,8 +1009,8 @@
 
         let jsonData = dataset.map(row => {
             return {
+                "BA Code": row["BA Code"] || "",
                 "Location": row["Location"] || "",
-                "Location Description": row["Location Description"] || "",
                 "January": row["January"] || "",
                 "February": row["February"] || "",
                 "March": row["March"] || "",
@@ -1023,39 +1028,42 @@
             };
         });
 
-        modal.loading_progress(true, "Validating and Saving data...");
+      //  modal.loading_progress(true, "Validating and Saving data...");
         let worker = new Worker(base_url + "assets/cms/js/validator_target_sales_ps.js");
         worker.postMessage({ data: jsonData, base_url });
 
         worker.onmessage = function(e) {
+            const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
+
+            if (progress !== undefined) {
+                modal.loading_progress(true, `Processing... ${progress}%`);
+                return;
+            }
+
             modal.loading_progress(false);
-            const { invalid, errorLogs, valid_data, err_counter } = e.data;
 
             if (invalid) {
-                let errorMsg = err_counter > 1000 
+                let errorMsg = err_counter > 1000
                     ? '⚠️ Too many errors detected. Please download the error log for details.'
-                    : errorLogs.join("<br>");
+                    : errorLogs.slice(0, 10).join("<br>") + (errorLogs.length > 10 ? "<br>...and more" : "");
+
                 modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
-                    read_xl_file();
-                    btn.prop("disabled", false);
+                    $(".btn.save").prop("disabled", false);
                 });
-                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
-            } else if (valid_data && valid_data.length > 0) {
-                btn.prop("disabled", false);
-                updateSwalProgress("Validation Completed", 10);
-                new_data = valid_data.map(record => ({
+
+                createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
+            } else if (Array.isArray(valid_data) && valid_data.length > 0) { 
+                let new_data = valid_data.map(record => ({
                     ...record,
-                    year: year
+                    year: year,
                 }));
-                setTimeout(() => saveValidatedData(new_data), 500);
-                //console.log(new_data);
+                saveValidatedData(new_data);
             } else {
-                btn.prop("disabled", false);
-                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                modal.alert("No valid data found. Please check the file.", "error");
             }
         };
 
-        worker.onerror = function() {
+        worker.onerror = function(event) {
             modal.loading_progress(false);
             modal.alert("Error processing data. Please try again.", "error");
         };
@@ -1103,7 +1111,7 @@
                 return acc;  
             }, {});
 
-            let td_validator = ['location', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+            let td_validator = ['ba code', 'location', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; 
 
@@ -1133,14 +1141,14 @@
         let table = 'tbl_target_sales_per_store';
 
         let selected_fields = [
-            'id', 'location', 'january', 'february', 'march', 'april',
+            'id', 'ba_code', 'location', 'january', 'february', 'march', 'april',
             'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
             'year'
 
         ];
 
         const matchFields = [
-            'location', 'january', 'february', 'march', 'april',
+            'ba_code', 'location', 'january', 'february', 'march', 'april',
             'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
             'year'
         ]; 
@@ -1356,6 +1364,7 @@
     function download_template() {
         let formattedData = [
             {
+                "BA Code":"",
                 "Location":"",
                 "January":"",
                 "February":"",
@@ -1372,12 +1381,7 @@
                 "NOTE:": "Please do not change the column headers."
             }
         ]
-        // const headerData = [
-        //     ["Company Name: Lifestrong Marketing Inc."],
-        //     ["Target Sales per Store"],
-        //     ["Date Printed: " + formatDate(new Date())],
-        //     [""],
-        // ];
+
         const headerData = [];
     
         exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
@@ -1409,7 +1413,7 @@
             dynamic_search(
                 "'tbl_target_sales_per_store a'", 
                 "'left join tbl_store s1 on s1.id = a.location'", 
-                "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
+                "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
                 0, 
                 0, 
                 `"year:EQ=${year}"`,  
@@ -1420,8 +1424,9 @@
                     let store_map = {}
             
                     let newData = res.map(({ 
-                        location, january, february, march, april, may, june, july, august, september, october, november, december
+                        location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
                     }) => ({
+                        "BA Code":ba_code,
                         "Location":location,
                         "January":january,
                         "February":february,
@@ -1475,8 +1480,9 @@
             const fetchStores = (callback) => {
                 function processResponse (res) {
                     formattedData = res.map(({ 
-                        location, january, february, march, april, may, june, july, august, september, october, november, december
+                        location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
                     }) => ({
+                        "BA Code":ba_code,
                         "Location":location,
                         "January":january,
                         "February":february,
@@ -1497,7 +1503,7 @@
                     ? dynamic_search(
                         "'tbl_target_sales_per_store a'", 
                         "'left join tbl_store s1 on s1.id = a.location'", 
-                        "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
+                        "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
                         100000, 
                         0, 
                         `'id:IN=${ids.join('|')}'`,  
@@ -1526,7 +1532,7 @@
                                 dynamic_search(
                                     "'tbl_target_sales_per_store a'", 
                                     "'left join tbl_store s1 on s1.id = a.location'", 
-                                    "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
+                                    "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
                                     100000, 
                                     index, 
                                     `''`,  
@@ -1534,8 +1540,9 @@
                                     `''`,
                                     (res) => {
                                         let newData = res.map(({ 
-                                            location, january, february, march, april, may, june, july, august, september, october, november, december
+                                            location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
                                         }) => ({
+                                            "BA Code":ba_code,
                                             "Location":location,
                                             "January":january,
                                             "February":february,
@@ -1580,8 +1587,10 @@
 
         const startExport = (res) => {
             let newData = res.map(({ 
-                location, january, february, march, april, may, june, july, august, september, october, november, december
+                location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
+
             }) => ({
+                "BA Code":ba_code,
                 "Location":location,
                 "January":january,
                 "February":february,
@@ -1607,7 +1616,7 @@
                     dynamic_search(
                         "'tbl_target_sales_per_store a'", 
                         "'left join tbl_store s1 on s1.id = a.location'", 
-                        "'s1.description location, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
+                        "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
                         100000, 
                         index, 
                         `'a.year:EQ=${year}'`, 

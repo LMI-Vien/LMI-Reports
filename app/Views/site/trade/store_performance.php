@@ -31,11 +31,10 @@
         background: linear-gradient(90deg, #fdb92a, #ff9800);
     }
 
-    /* Title Styling */
     .tbl-title-field {
         /* background: linear-gradient(to right, #007bff, #143996); */
         background: linear-gradient(to right, #143996, #007bff);
-        color: black !important;
+        color: white !important;
         text-align: center;
         padding: 10px;
         font-size: 18px;
@@ -65,28 +64,17 @@
         font-weight: bold;
     }
 
-    /* Title Styling */
-    .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
-        background: linear-gradient(to right, #143996, #007bff);
-        color: black !important;
-        text-align: center;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
     .tbl-title-header {
         border-radius: 8px 8px 0px 0px !important;
     }
 
-    /* Table Styling */
+    /* Table Styling /
     .table {
         margin-bottom: 0;
-        border-collapse: separate; /* Required for border-radius */
-        border-spacing: 0; /* Ensures borders don't separate */
+        border-collapse: separate; / Required for border-radius /
+        border-spacing: 0; / Ensures borders don't separate /
         border-radius: 12px 12px 0px 0px;
-        overflow: hidden; /* Ensures inner content respects border-radius */
+        overflow: hidden; / Ensures inner content respects border-radius */
     }
 
     .table th {
@@ -166,7 +154,16 @@
                                 <label for="storeName">Month/Start</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="month_start" placeholder="">
+                                <select class="form-control" id="month_start">
+                                    <option value="0">Please select..</option>
+                                    <?php
+                                        if($year){
+                                            foreach ($month as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                         </div> 
                         <div class="col-md-12 mx-auto row py-2">
@@ -174,7 +171,16 @@
                                 <label for="storeName">Month/End</label>
                             </div>
                             <div class="col-md">
-                                <input type="text" class="form-control" id="month_end" placeholder="">
+                                <select class="form-control" id="month_end">
+                                    <option value="0">Please select..</option>
+                                    <?php
+                                        if($year){
+                                            foreach ($month as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                         </div> 
                     </div>
@@ -185,8 +191,16 @@
                             </div>
                             <div class="col-md">
                                 <select class="form-control" id="year">
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
+                                    <option value="0">Please select..</option>
+                                    <?php
+                                        if($year){
+                                            $maxYear = max(array_column($year, 'year')); 
+                                            foreach ($year as $value) {
+                                                $selected = ($value['year'] == $maxYear) ? 'selected' : '';
+                                                echo "<option value='{$value['id']}' {$selected}>{$value['year']}</option>";
+                                            }
+                                        }
+                                    ?>
                                 </select>
                             </div>
                         </div> 
@@ -211,7 +225,7 @@
 
                 <!-- DataTables Section -->
                 <div class="card mt-4 p-4 shadow-sm">
-                    <table id="dataTable4" class="table table-bordered table-responsive">
+                    <table id="top_performing_stores" class="table table-bordered table-responsive">
                         <thead>
                             <tr>
                                 <th 
@@ -230,23 +244,21 @@
                                 <th class="tbl-title-field">TY Sell Out</th>
                                 <th class="tbl-title-field">% Sell Through</th>
                                 <th class="tbl-title-field">Contribution</th>
-
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Alice Brown</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td><td>Store D1</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td><td>Store D2</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td><td>Store D3</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td><td>Store D4</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td><td>Store D5</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td><td>Store D6</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td><td>Store D7</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td><td>Store D8</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td><td>Store D9</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
-                            <tr><td>Alice Brown</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td><td>Store D10</td></tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7" style="text-align: center;">No data available</td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="7"></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -263,33 +275,122 @@
 </div>
 
 <!-- DataTables and Script -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script>
+    let months = <?= json_encode($month); ?>;
+
     $(document).ready(function() {
-        let tables = ['#dataTable1', '#dataTable2', '#dataTable3', '#dataTable4'];
-
-        tables.forEach(id => {
-            $(id).DataTable({
-                paging: true,
-                searching: false,
-                ordering: true,
-                info: true,
-                lengthChange: false     // Hide "Show Entries" dropdown
-            });
+        fetchData();
+        $(document).on('click', '#refreshButton', function () {
+            if($('#month_start').val() == ""){
+                $('#month_start').val('');
+            }
+            if($('#month_end').val() == ""){
+                $('#month_end').val('');
+            }
+            if($('#year').val() == ""){
+                $('#year').val('');
+            }
+            fetchData();
         });
 
-        $('#refreshButton').click(function() {
-            alert('Refreshing data...');
-            tables.forEach(id => $(id).DataTable().ajax.reload(null, false));
-        });
+        $(document).on('click', '#clearButton', function () {
+            $('input[type="text"], input[type="number"]').val('');
+            $('select').not('#year').prop('selectedIndex', 0);
+            //reset the year dd
+            let highestYear = $("#year option:not(:first)").map(function () {
+                return parseInt($(this).val());
+            }).get().sort((a, b) => b - a)[0];
 
-        $('#previewButton').click(function() {
-            alert('Preview feature coming soon!');
-        });
-
-        $('#exportButton').click(function() {
-            alert('Export feature coming soon!');
+            if (highestYear) {
+                $("#year").val(highestYear);
+            }
+            $("#refreshButton").click();
         });
     });
+
+    function fetchData() {
+        let selectedMonthStart = $('#month_start').val();
+        let selectedMonthEnd = $('#month_end').val();
+        let selectedYear = $('#year').val();
+        initializeTable(selectedMonthStart, selectedMonthEnd, selectedYear);
+    }
+
+    function initializeTable(selectedMonthStart = null, selectedMonthEnd = null, selectedYear = null) {
+        if ($.fn.DataTable.isDataTable('#top_performing_stores')) {
+            let existingTable = $('#top_performing_stores').DataTable();
+            existingTable.clear().destroy();
+        }
+
+        let table = $('#top_performing_stores').DataTable({
+            paging: true,
+            searching: false,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            colReorder: true, 
+            ajax: {
+                url: base_url + 'trade-dashboard/trade-store-performance',
+                type: 'POST',
+                data: function(d) {
+                    d.year = selectedYear === "0" ? null : selectedYear;
+                    d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
+                    d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
+                    d.limit = d.length;
+                    d.offset = d.start;
+                },
+                dataSrc: function(json) {
+                    return json.data.length ? json.data : [];
+                }
+            },
+            columns: [
+                { data: 'rank' },
+                { data: 'store_code' },
+                { data: 'store_name' },
+                { data: 'ly_scanned_data' },
+                { data: 'ty_scanned_data' },
+                { data: 'sell_through' },
+                { data: 'contribution' }
+            ].filter(Boolean),
+            pagingType: "full_numbers",
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            searching: false,
+            lengthChange: false
+        });
+    }
+
+    $("#month_start").on("change", function() {
+        let start = $("#month_start").val();
+        let html = "<option value=''>Please select..</option>";
+
+        months.forEach(month => {
+            if (parseInt(month.id) >= start) {
+                html += `<option value="${month.id}">${month.month}</option>`;
+            }
+        });
+
+        $("#month_end").html(html);
+    });
+
+    $("#month_end").on("change", function() {
+        let end = $("#month_end").val();
+        let html = "<option value=''>Please select..</option>";
+
+        months.forEach(month => {
+            if (parseInt(month.id) < end) {
+                html += `<option value="${month.id}">${month.month}</option>`;
+            }
+        });
+
+       // $("#month_start").html(html);
+    });
+
 </script>

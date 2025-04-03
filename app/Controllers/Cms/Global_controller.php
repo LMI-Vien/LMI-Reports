@@ -709,7 +709,26 @@ class Global_controller extends BaseController
 			        echo json_encode(['message' => 'error', 'error' => $e->getMessage()]);
 			    }
 			    break;
-		
+			case 'get_last_code':
+			    try { 
+			        $table = $this->request->getPost('table');
+			        $field = $this->request->getPost('field');
+
+			        if (empty($table) || empty($field)) {
+			            return $this->response->setJSON(['message' => 'error', 'error' => 'Invalid request data']);
+			        }
+
+			        $last_code = $this->Global_model->fetch_last_ba_code($table, $field); 
+
+			        if ($last_code !== "failed" && !empty($last_code)) {
+			            return $this->response->setJSON(['message' => 'success', 'last_code' => $last_code]);
+			        } else {
+			            return $this->response->setJSON(['message' => 'error', 'error' => 'Fetch last code failed']);
+			        }
+			    } catch (Exception $e) {
+			        return $this->response->setJSON(['message' => 'error', 'error' => $e->getMessage()]);
+			    }
+			    break;
 		}
 		
 	}
@@ -775,10 +794,10 @@ class Global_controller extends BaseController
 	        $responseData['payment_group'] = $this->Global_model->get_valid_records("tbl_payment_group", 'customer_group_code');
 	    }
 	    if (!empty($request['customer_sku_code_lmi'])) {
-	        $responseData['customer_sku_code_lmi'] = $this->Global_model->get_valid_records_tracc_data("pricecodefile2", 'cusitmcde');
+	        $responseData['customer_sku_code_lmi'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_lmi", 'cusitmcde');
 	    }
 	    if (!empty($request['customer_sku_code_rgdi'])) {
-	        $responseData['customer_sku_code_rgdi'] = $this->Global_model->get_valid_records_tracc_data("pricecodefile2rgdi", 'cusitmcde');
+	        $responseData['customer_sku_code_rgdi'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_rgdi", 'cusitmcde');
 	    }
 	    if (!empty($request['store_area'])) {
 	        $responseData['store_area'] = $this->Global_model->get_valid_records_store_group();

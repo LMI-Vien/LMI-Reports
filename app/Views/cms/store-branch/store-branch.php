@@ -272,8 +272,8 @@
             limit : limit,
             table : "tbl_store",
             order : {
-                field : "code",
-                order : "asc" 
+                field : field,
+                order : order 
             }
 
         }

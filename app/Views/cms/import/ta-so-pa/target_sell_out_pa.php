@@ -49,12 +49,12 @@
         height: 36px;
         font-size: 14px;
         border-radius: 5px;
-        min-width: 120px; /* Ensures uniform dropdown width */
-        flex-grow: 1; /* Makes sure dropdown takes available space */
+        min-width: 120px;
+        flex-grow: 1;
     }
     
     .d-flex {
-        gap: 10px; /* Adds space between label and dropdown */
+        gap: 10px;
         margin: 5px;
     }
 
@@ -109,7 +109,6 @@
     </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -127,230 +126,221 @@
                         <div hidden>
                             <input type="text" class="form-control" id="id" aria-describedby="id">
                         </div>
-                        <label for="store" class="form-label">Payment Group</label>
+                        <label for="payment_group" class="form-label">Payment Group</label>
                         <input type="text" class="form-control required" id="payment_group" aria-describedby="payment_group">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Vendor</label>
+                        <label for="vendor" class="form-label">Vendor</label>
                         <input type="text" class="form-control required" id="vendor" aria-describedby="vendor">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Overall</label>
+                        <label for="overall" class="form-label">Overall</label>
                         <input type="text" class="form-control required" id="overall" aria-describedby="overall">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">KAM/KAS/KAA</label>
+                        <label for="kam_kas_kaa" class="form-label">KAM/KAS/KAA</label>
                         <input type="text" class="form-control required" id="kam_kas_kaa" aria-describedby="kam_kas_kaa">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Sales Group</label>
+                        <label for="sales_group" class="form-label">Sales Group</label>
                         <input type="text" class="form-control required" id="sales_group" aria-describedby="sales_group">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Terms</label>
+                        <label for="terms" class="form-label">Terms</label>
                         <input type="text" class="form-control required" id="terms" aria-describedby="terms">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Channel</label>
+                        <label for="channel" class="form-label">Channel</label>
                         <input type="text" class="form-control required" id="channel" aria-describedby="channel">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Brand</label>
+                        <label for="brand" class="form-label">Brand</label>
                         <input type="text" class="form-control required" id="brand" aria-describedby="brand">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Exclusivity</label>
+                        <label for="exclusivity" class="form-label">Exclusivity</label>
                         <input type="text" class="form-control required" id="exclusivity" aria-describedby="exclusivity">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Category</label>
+                        <label for="category" class="form-label">Category</label>
                         <input type="text" class="form-control required" id="category" aria-describedby="category">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">LMI Code</label>
+                        <label for="lmi_code" class="form-label">LMI Code</label>
                         <input type="text" class="form-control required" id="lmi_code" aria-describedby="lmi_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">RGDI Code</label>
+                        <label for="rgdi_code" class="form-label">RGDI Code</label>
                         <input type="text" class="form-control required" id="rgdi_code" aria-describedby="rgdi_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Customer SKU Code</label>
+                        <label for="customer_sku_code" class="form-label">Customer SKU Code</label>
                         <input type="text" class="form-control required" id="customer_sku_code" aria-describedby="customer_sku_code">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Item Description</label>
+                        <label for="item_description" class="form-label">Item Description</label>
                         <input type="text" class="form-control required" id="item_description" aria-describedby="item_description">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Item Status</label>
+                        <label for="item_status" class="form-label">Item Status</label>
                         <input type="text" class="form-control required" id="item_status" aria-describedby="item_status">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">SRP</label>
+                        <label for="srp" class="form-label">SRP</label>
                         <input type="text" class="form-control required" id="srp" aria-describedby="srp">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Trade Discount</label>
+                        <label for="trade_discount" class="form-label">Trade Discount</label>
                         <input type="text" class="form-control required" id="trade_discount" aria-describedby="trade_discount">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Customer Cost</label>
+                        <label for="customer_cost" class="form-label">Customer Cost</label>
                         <input type="text" class="form-control required" id="customer_cost" aria-describedby="customer_cost">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">Customer Cost Net of Vat</label>
+                        <label for="customer_cost_net_of_vat" class="form-label">Customer Cost Net of Vat</label>
                         <input type="text" class="form-control required" id="customer_cost_net_of_vat" aria-describedby="customer_cost_net_of_vat">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">January</label>
+                        <label for="jan_tq" class="form-label">January</label>
                         <input type="text" class="form-control required" id="jan_tq" aria-describedby="jan_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">February</label>
+                        <label for="feb_tq" class="form-label">February</label>
                         <input type="text" class="form-control required" id="feb_tq" aria-describedby="feb_tq">
                     </div>
                     
                     <div class="mb-3">
-                        <label for="code" class="form-label">March</label>
+                        <label for="mar_tq" class="form-label">March</label>
                         <input type="text" class="form-control required" id="mar_tq" aria-describedby="mar_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">April</label>
+                        <label for="apr_tq" class="form-label">April</label>
                         <input type="text" class="form-control required" id="apr_tq" aria-describedby="apr_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">May</label>
+                        <label for="may_tq" class="form-label">May</label>
                         <input type="text" class="form-control required" id="may_tq" aria-describedby="may_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">June</label>
+                        <label for="jun_tq" class="form-label">June</label>
                         <input type="text" class="form-control required" id="jun_tq" aria-describedby="jun_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">July</label>
+                        <label for="jul_tq" class="form-label">July</label>
                         <input type="text" class="form-control required" id="jul_tq" aria-describedby="jul_tq">
                     </div>
 
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">August</label>
+                        <label for="aug_tq" class="form-label">August</label>
                         <input type="text" class="form-control required" id="aug_tq" aria-describedby="aug_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">September</label>
+                        <label for="sep_tq" class="form-label">September</label>
                         <input type="text" class="form-control required" id="sep_tq" aria-describedby="sep_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">October</label>
+                        <label for="oct_tq" class="form-label">October</label>
                         <input type="text" class="form-control required" id="oct_tq" aria-describedby="oct_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">November</label>
+                        <label for="nov_tq" class="form-label">November</label>
                         <input type="text" class="form-control required" id="nov_tq" aria-describedby="nov_tq">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">December</label>
+                        <label for="dec_tq" class="form-label">December</label>
                         <input type="text" class="form-control required" id="dec_tq" aria-describedby="dec_tq">
                     </div>
 
-                    <!-- <div class="mb-3">
-                        <label for="code" class="form-label">Total Quantity</label>
-                        <input type="text" class="form-control required" id="total_qty" aria-describedby="total_qty">
-                    </div> -->
-
                     <div class="mb-3">
-                        <label for="code" class="form-label">January</label>
+                        <label for="jan_ta" class="form-label">January</label>
                         <input type="text" class="form-control required" id="jan_ta" aria-describedby="jan_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">February</label>
+                        <label for="feb_ta" class="form-label">February</label>
                         <input type="text" class="form-control required" id="feb_ta" aria-describedby="feb_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">March</label>
+                        <label for="mar_ta" class="form-label">March</label>
                         <input type="text" class="form-control required" id="mar_ta" aria-describedby="mar_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">April</label>
+                        <label for="apr_ta" class="form-label">April</label>
                         <input type="text" class="form-control required" id="apr_ta" aria-describedby="apr_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">May</label>
+                        <label for="may_ta" class="form-label">May</label>
                         <input type="text" class="form-control required" id="may_ta" aria-describedby="may_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">June</label>
+                        <label for="jun_ta" class="form-label">June</label>
                         <input type="text" class="form-control required" id="jun_ta" aria-describedby="jun_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">July</label>
+                        <label for="jul_ta" class="form-label">July</label>
                         <input type="text" class="form-control required" id="jul_ta" aria-describedby="jul_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">August</label>
+                        <label for="aug_ta" class="form-label">August</label>
                         <input type="text" class="form-control required" id="aug_ta" aria-describedby="aug_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">September</label>
+                        <label for="sep_ta" class="form-label">September</label>
                         <input type="text" class="form-control required" id="sep_ta" aria-describedby="sep_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">October</label>
+                        <label for="oct_ta" class="form-label">October</label>
                         <input type="text" class="form-control required" id="oct_ta" aria-describedby="oct_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">November</label>
+                        <label for="nov_ta" class="form-label">November</label>
                         <input type="text" class="form-control required" id="nov_ta" aria-describedby="nov_ta">
                     </div>
 
                     <div class="mb-3">
-                        <label for="code" class="form-label">December</label>
+                        <label for="dec_ta" class="form-label">December</label>
                         <input type="text" class="form-control required" id="dec_ta" aria-describedby="dec_ta">
                     </div>
 
-                    <!-- <div class="mb-3">
-                        <label for="code" class="form-label">Total Amount</label>
-                        <input type="text" class="form-control required" id="total_amount" aria-describedby="total_amount">
-                    </div> -->
                 </form>
             </div>
             <div class="modal-footer"></div>
@@ -358,7 +348,6 @@
     </div>
 </div>
     
-<!-- IMPORT MODAL -->
 <div class="modal" tabindex="-1" id="import_modal">
     <div class="modal-dialog modal-xxl">
         <div class="modal-content">
@@ -579,7 +568,6 @@
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
-                        // console.log(y);
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
                         var totalAmount = parseFloat(y.total_amount);
@@ -652,7 +640,7 @@
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
+            var obj = is_json(result);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -787,10 +775,6 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            // select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
-            // lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
-            // january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
-            // total_quantity, created_date, updated_date`.replace(/\s+/g, ' '),
             select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
             lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
             january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
@@ -868,17 +852,10 @@
         inp_aprtq, inp_maytq, inp_juntq, inp_jultq, inp_augtq, inp_septq, inp_octtq,
         inp_novtq, inp_dectq, inp_janta, inp_febta, inp_marta, inp_aprta,
         inp_julta, inp_augta, inp_septa, inp_octta, inp_novta, inp_decta, id) {
-        // let {inp_payment_group, inp_vendor, inp_overall, inp_kam_kas_kaa, inp_sales_group, inp_terms, inp_channel, 
-        //     inp_brand, inp_exclusivity, inp_category, inp_lmi_code, inp_rgdi_code, inp_sku_code, inp_item_description,
-        //     inp_item_status, inp_srp, inp_trade_discount, inp_customer_cost, inp_customer_cost_nov, inp_jantq, inp_febtq,
-        //     inp_martq, inp_aprtq, inp_maytq, inp_juntq, inp_jul, inp_augtq, inp_septq, inp_octtq, inp_novtq, inp_dectq,
-        //     total_quantity
-        // } = data;
 
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
-        // return;
 
         if (id !== undefined && id !== null && id !== '') {
             modal_alert_success = success_update_message;
@@ -1047,40 +1024,6 @@
         var nov_ta = $('#nov_ta').val();
         var dec_ta = $('#dec_ta').val();
 
-
-        // let months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-        // let monthlyTq = {};
-
-        // months.forEach(month => {
-        //     monthlyTq[`${month}_tq`] = $(`#${month}_tq`).val();
-        // });
-
-        // let formData = {
-        //     payment_group,
-        //     vendor,
-        //     overall,
-        //     kam_kas_kaa,
-        //     sales_group,
-        //     terms,
-        //     channel,
-        //     brand,
-        //     exclusivity,
-        //     category,
-        //     lmi_code,
-        //     rgdi_code,
-        //     customer_sku_code,
-        //     item_description,
-        //     item_status,
-        //     srp,
-        //     trade_discount,
-        //     customer_cost,
-        //     customer_cost_nov,
-        //     totalQty,
-        //     ...monthlyTq 
-        // };
-
-        // console.log(formData);
-
         if (validate.standard("form-modal")) {
             if (id !== undefined && id !== null && id !== '') {
                 modal.confirm(confirm_update_message, function (result) {
@@ -1139,62 +1082,7 @@
             }
         })
     }
-    // function delete_data(id) {
-    //     modal.confirm(confirm_delete_message,function(result){
-    //         if(result){ 
-    //             var url = "<?= base_url('cms/global_controller');?>";
-    //             var data = {
-    //                 event : "update",
-    //                 table : "tbl_accounts_target_sellout_pa",
-    //                 field : "id",
-    //                 where : id, 
-    //                 data : {
-    //                         updated_date : formatDate(new Date()),
-    //                         updated_by : user_id,
-    //                         status : -2
-    //                 }  
-    //             }
-    //             aJax.post(url,data,function(result){
-    //                 var obj = is_json(result);
-    //                 modal.alert(success_delete_message, "success", function() {
-    //                     location.reload();
-    //                 });
-    //             });
-    //         }
 
-    //     });
-    // }
-
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false); 
-    //     clear_import_table();
-        
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const data = new Uint8Array(e.target.result);
-    //         const workbook = XLSX.read(data, { type: "array" });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-    //     reader.readAsArrayBuffer(file);
-    // }
-
-    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -1298,7 +1186,6 @@
             }, {});
 
             let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'januaryta', 'februaryta', 'marchta', 'aprilta', 'mayta', 'juneta', 'julyta', 'augustta', 'septemberta', 'octoberta', 'novemberta', 'decemberta'];
-            // let td_validator = ['payment group', 'vendor', 'overall', 'kam/kas/kaa', 'sales group', 'terms', 'channel', 'brand', 'exclusivity', 'category', 'lmi code', 'rgdi code', 'customer sku code', 'item description', 'item status', 'srp', 'trade discount', 'customer cost', 'customer cost (net of vat)', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december', 'total quantity'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
 
@@ -1430,7 +1317,6 @@
                     year: year
                 }));
                 setTimeout(() => saveValidatedData(new_data), 500);
-                //console.log(new_data);
             } else {
                 btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
@@ -1553,7 +1439,7 @@
                         row.id = matchedId;
                         row.updated_by = user_id;
                         row.updated_date = formatDate(new Date());
-                        delete row.created_date; // Unset created_date
+                        delete row.created_date;
                         updateRecords.push(row);
 
                     } else {
@@ -1626,7 +1512,7 @@
         var status = $(this).attr("data-status");
         var modal_obj = "";
         var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
+        var hasExecuted = false;
 
         if (parseInt(status) === -2) {
             modal_obj = confirm_delete_message;
@@ -1663,7 +1549,7 @@
                 var processed = 0;
                 dataList.forEach(function (data, index) {
                     aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; // Prevents multiple executions
+                        if (hasExecuted) return;
 
                         modal.loading(false);
                         processed++;
@@ -1786,12 +1672,6 @@
                 "NOTE:": "Please do not change the column headers."
             }
         ]
-        // const headerData = [
-        //     ["Company Name: Lifestrong Marketing Inc."],
-        //     ["Target Sell Out per Account"],
-        //     ["Date Printed: " + formatDate(new Date())],
-        //     [""],
-        // ];
         const headerData = [];
     
         exportArrayToCSV(formattedData, `Target Sell Out per Account - ${formatDate(new Date())}`, headerData);
@@ -1920,8 +1800,7 @@
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Collect IDs in an array
-            // ids.push(`'${id}'`); // Collect IDs in an array
+            ids.push(`${id}`);
         });
 
         modal.confirm(confirm_export_message,function(result){

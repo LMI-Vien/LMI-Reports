@@ -7,10 +7,14 @@ self.onmessage = async function(e) {
     let err_counter = 0;
 
     try {
-        let get_tsp_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1`);
-        let store_data = await get_tsp_valid_response.json();
+        let get_tsp_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&ba=1`);
+        let fetch_data = await get_tsp_valid_response.json();
 
-        let store_lookup = createLookup(store_data.stores, "code", "code");
+        let store_lookup = createLookup(fetch_data.stores, "code", "code");
+
+        ba_records = fetch_data.ba;
+        let ba_lookup = {};
+        ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
 
         function createLookup(records, key1, key2) {
             let lookup = {};
@@ -61,16 +65,18 @@ self.onmessage = async function(e) {
 
         function processBatch() {
             if (index >= data.length) {
-                self.postMessage({ invalid, errorLogs, valid_data, err_counter, progress: 100 });
+                // Final message with results
+                self.postMessage({ invalid, errorLogs, valid_data, err_counter });
                 return;
             }
 
-            let progress = Math.round((index / data.length) * 100);
-            self.postMessage({ progress });
+            // let progress = Math.round((index / data.length) * 100);
+            // self.postMessage({ progress });
     
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
+                let ba_code = row["BA Code"] ? row["BA Code"].trim() : "";
                 let location = row["Location"] ? row["Location"].trim() : "";
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
@@ -78,6 +84,12 @@ self.onmessage = async function(e) {
                 if (location.length > 25 || location === "") {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Location at line #: ${tr_count}`);
+                    err_counter++;
+                }
+
+                if (ba_code.length > 25 || ba_code === "") {
+                    invalid = true;
+                    errorLogs.push(`⚠️ Invalid BA Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -99,9 +111,24 @@ self.onmessage = async function(e) {
                     errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
                     err_counter++;
                 }
+
+                let normalized_ba_lookup = {};
+                for (let key in ba_lookup) {
+                    normalized_ba_lookup[key.toLowerCase()] = ba_lookup[key];
+                }
+
+                let ba_lower = ba_code.toLowerCase();
+                if (ba_lower in normalized_ba_lookup) {
+                    //ba_code = normalized_ba_lookup[ba_lower];
+                }else {
+                    invalid = true;
+                    errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
+                    err_counter++;
+                }
     
                 if (!invalid) {
                     valid_data.push({
+                        ba_code,
                         location,
                         ...monthlyValues,
                         status: 1,
@@ -110,7 +137,11 @@ self.onmessage = async function(e) {
                     });
                 }
             }
-    
+
+            if (index % 100000 === 0) {
+                self.postMessage({ progress: Math.round((index / data.length) * 100), err_counter });
+            }
+
             setTimeout(processBatch, 0);
         }
 

@@ -85,11 +85,9 @@ class Dashboard extends BaseController
         return $this->respond($data);
     }
 
-	// public function get_users()
-	// {
-	//     $builder = $this->db->table('cms_users');
-	//     $users = $builder->get()->getResult();
-
-	//     return $this->respond($users);
-	// }
+    public function getCounts()
+    {
+        $counts = $this->Dashboard_model->getCounts();
+        return $this->response->setJSON($counts);
+    }
 }

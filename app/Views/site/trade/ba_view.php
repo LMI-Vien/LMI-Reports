@@ -210,12 +210,23 @@
         populateTableData();
     });
 
-    // Function to generate PDF WIP
+    // Function to generate PDF
     function generatePDF() {
         const doc = new jsPDF({
             orientation: "landscape",
         });
-        
+
+        let date = new Date();
+        let formattedDate = date.toLocaleDateString("en-US", { 
+            year: "numeric", 
+            month: "short", 
+            day: "numeric",
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
+        });
+
         // Add title
         doc.setFont("helvetica", "bold");
         doc.setFontSize(22);
@@ -225,28 +236,27 @@
         doc.setFontSize(14);
         doc.text("Report: BA Dashboard", 20, 30);
 
-        // Add a line separator
-        doc.line(20, 35, 300, 35);
-
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
-        doc.text("Item Name", 20, 40);
-        doc.text("Quantity", 145, 40);
-        doc.text("LMI Code", 170, 40);
-        doc.text("RGDI Code", 205, 40);
-        doc.text("Type of SKU", 245, 40);
+        doc.text("Brand Ambassador: " + $('#ba').val(), 20, 40);
+        doc.text("Store Name: " + $('#store').val(), 20, 45);
+        doc.text("Brand: " + $('#brand').val(), 120, 40);
+        doc.text("Area / ASC Name: " + $('#ar_asc_name').val(), 120, 45);
+        doc.text("Outright/Consignment: " + $('#type').val(), 190, 40);
+        doc.text("Date Generated: " + formattedDate, 190, 45);
 
-        // Load an image and add it to PDF
-        // Example image
-        // const imgURL = "https://dummyimage.com/150x150/000/fff.png";
-        const imgURL = "<?php echo base_url('assets/img/sampleimg.png'); ?>"; // if this does not work use the other link
-        const img = new Image();
-        img.src = imgURL;
-        
-        img.onload = function () {
-            doc.addImage(img, "PNG", 245, 5, 30, 30); // Add image at x=20, y=60, width=50, height=50
-        };
+        // Add a line separator
+        doc.line(20, 50, 300, 50);
 
-        let yPos = 50;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text("Item Name", 20, 55);
+        doc.text("Quantity", 145, 55);
+        doc.text("LMI Code", 170, 55);
+        doc.text("RGDI Code", 205, 55);
+        doc.text("Type of SKU", 245, 55);
+
+        let yPos = 65;
         doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
 
@@ -293,31 +303,31 @@
                 if (yPos >= 200) {
                     doc.addPage();
 
-                    const imgURL = "<?php echo base_url('assets/img/sampleimg.png'); ?>"; // if this does not work use the other link
-                    const img = new Image();
-                    img.src = imgURL;
-
-                    img.onload = function () {
-                        doc.addImage(img, "PNG", 245, 5, 30, 30); // Add image at x=20, y=60, width=50, height=50
-                    };
-
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(22);
                     doc.text("LIFESTRONG MARKETING INC.", 20, 20);
-
                     doc.setFontSize(14);
                     doc.text("Report: BA Dashboard", 20, 30);
 
-                    doc.line(20, 35, 300, 35);
-
+                    doc.setFont("helvetica", "normal");
                     doc.setFontSize(12);
-                    doc.text("Item Name", 20, 40);
-                    doc.text("Quantity", 145, 40);
-                    doc.text("LMI Code", 170, 40);
-                    doc.text("RGDI Code", 195, 40);
-                    doc.text("Type of SKU", 245, 40);
+                    doc.text("Brand Ambassador: " + $('#ba').val(), 20, 40);
+                    doc.text("Store Name: " + $('#store').val(), 20, 45);
+                    doc.text("Brand: " + $('#brand').val(), 120, 40);
+                    doc.text("Area / ASC Name: " + $('#ar_asc_name').val(), 120, 45);
+                    doc.text("Outright/Consignment: " + $('#type').val(), 220, 40);
 
-                    yPos = 50;
+                    doc.line(20, 50, 300, 50);
+
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(12);
+                    doc.text("Item Name", 20, 55);
+                    doc.text("Quantity", 145, 55);
+                    doc.text("LMI Code", 170, 55);
+                    doc.text("RGDI Code", 205, 55);
+                    doc.text("Type of SKU", 245, 55);
+
+                    yPos = 65;
                     doc.setFont("helvetica", "normal");
                     doc.setFontSize(12);
                 }
@@ -327,11 +337,11 @@
                 doc.text(row[2], xPos+150, yPos);
                 doc.text(row[3], xPos+185, yPos);
                 doc.text(row[4], xPos+225, yPos);
-                yPos += 10;
+                yPos += 5;
             });
 
             // Save the PDF
-            doc.save("custom_report.pdf");
+            doc.save(`BA Dashboard ${formattedDate}.pdf`);
         }
 
         // Call the function

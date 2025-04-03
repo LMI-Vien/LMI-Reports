@@ -67,263 +67,118 @@
     table {
       color:white;
     }
+    .content {
+      padding: 20px;
+      margin-top: 20px;
+    }
 </style>
 
-<body class="hold-transition sidebar-mini">
-  <div></div>
-  <br>
-  <div class="wrapper">
-      <div class="content">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col">
-              <div class="card">
-                <div class="card-header border-0">
-                  <div class="d-flex justify-content-between">
-                    <h3 class="card-title">Online Store Visitors</h3>
-                    <a href="javascript:void(0);">View Report</a>
-                  </div>
+  <div class="row content">
+    <div class="col-md-4 col-sm-6 mb-3">
+      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
+              <h3 class="box-title">
+                <div class="box-icon">
+                  <i class="fas fa-users"></i>
                 </div>
-                <div class="card-body">
-                  <div class="d-flex">
-                    <p class="d-flex flex-column">
-                      <span class="text-bold text-lg">820</span>
-                      <span>Visitors Over Time</span>
-                    </p>
-                    <p class="ml-auto d-flex flex-column text-right">
-                      <span class="text-success">
-                        <i class="fas fa-arrow-up"></i> 12.5%
-                      </span>
-                      <span class="text-muted">Since last week</span>
-                    </p>
-                  </div>
+                Total Brand Ambassador
+              </h3>
+              <p class="box-value" id="ba-count">0</p>
 
-                  <div class="position-relative mb-4">
-                    <canvas id="visitors-chart" height="200"></canvas>
-                  </div>
-
-                  <div class="d-flex flex-row justify-content-end">
-                    <span class="mr-2">
-                      <i class="fas fa-square text-primary"></i> This Week
-                    </span>
-
-                    <span>
-                      <i class="fas fa-square text-gray"></i> Last Week
-                    </span>
-                  </div>
+            </h1></div>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-3">
+      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
+              <h3 class="box-title">
+                <div class="box-icon">
+                  <i class="fas fa-store"></i>
                 </div>
-              </div>
+                Total Store
+              </h3>
+              <p class="box-value" id="store-count">0</p>
 
-              <div class="card">
-                <div class="card-header border-0">
-                  <h3 class="card-title">Products</h3>
-                  <div class="card-tools">
-                    <a href="#" class="btn btn-tool btn-sm">
-                      <i class="fas fa-download"></i>
-                    </a>
-                    <a href="#" class="btn btn-tool btn-sm">
-                      <i class="fas fa-bars"></i>
-                    </a>
-                  </div>
+            </h1></div>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-3">
+      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
+              <h3 class="box-title">
+                <div class="box-icon">
+                  <i class="fas fa-building"></i>
                 </div>
-                <div class="card-body table-responsive p-0">
-                  <table class="table table-striped table-valign-middle" style="color:white !important">
-                    <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Price</th>
-                      <th>Sales</th>
-                      <th>More</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                      <td>
-                      <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
-                      alt="Product 1" 
-                      class="rounded-circle img-size-32 mr-2" 
-                      style="width: 50px; height: 50px; object-fit: cover;">
-                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
-                        Some Product
-                      </td>
-                      <td>$13 USD</td>
-                      <td>
-                        <small class="text-success mr-1">
-                          <i class="fas fa-arrow-up"></i>
-                          12%
-                        </small>
-                        12,000 Sold
-                      </td>
-                      <td>
-                        <a href="#" class="text-muted">
-                          <i class="fas fa-search"></i>
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
-                        <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
-                        alt="Product 1" 
-                        class="rounded-circle img-size-32 mr-2" 
-                        style="width: 50px; height: 50px; object-fit: cover;">
-                        Another Product
-                      </td>
-                      <td>$29 USD</td>
-                      <td>
-                        <small class="text-warning mr-1">
-                          <i class="fas fa-arrow-down"></i>
-                          0.5%
-                        </small>
-                        123,234 Sold
-                      </td>
-                      <td>
-                        <a href="#" class="text-muted">
-                          <i class="fas fa-search"></i>
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
-                        <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
-                        alt="Product 1" 
-                        class="rounded-circle img-size-32 mr-2" 
-                        style="width: 50px; height: 50px; object-fit: cover;">
-                        Amazing Product
-                      </td>
-                      <td>$1,230 USD</td>
-                      <td>
-                        <small class="text-danger mr-1">
-                          <i class="fas fa-arrow-down"></i>
-                          3%
-                        </small>
-                        198 Sold
-                      </td>
-                      <td>
-                        <a href="#" class="text-muted">
-                          <i class="fas fa-search"></i>
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <!-- <img src="dist/img/default-150x150.png" alt="Product 1" class="img-circle img-size-32 mr-2"> -->
-                        <img src="<?php echo base_url('assets/img/ump_twins.gif'); ?>" 
-                        alt="Product 1" 
-                        class="rounded-circle img-size-32 mr-2" 
-                        style="width: 50px; height: 50px; object-fit: cover;">
-                        Perfect Item
-                        <span class="badge bg-danger">NEW</span>
-                      </td>
-                      <td>$199 USD</td>
-                      <td>
-                        <small class="text-success mr-1">
-                          <i class="fas fa-arrow-up"></i>
-                          63%
-                        </small>
-                        87 Sold
-                      </td>
-                      <td>
-                        <a href="#" class="text-muted">
-                          <i class="fas fa-search"></i>
-                        </a>
-                      </td>
-                    </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            <div class="col">
-              <div class="card">
-                <div class="card-header border-0">
-                  <div class="d-flex justify-content-between">
-                    <h3 class="card-title">Sales</h3>
-                    <a href="javascript:void(0);">View Report</a>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="d-flex">
-                    <p class="d-flex flex-column">
-                      <span class="text-bold text-lg">$18,230.00</span>
-                      <span>Sales Over Time</span>
-                    </p>
-                    <p class="ml-auto d-flex flex-column text-right">
-                      <span class="text-success">
-                        <i class="fas fa-arrow-up"></i> 33.1%
-                      </span>
-                      <span class="text-muted">Since last month</span>
-                    </p>
-                  </div>
+                Total Company
+              </h3>
+              <p class="box-value" id="company-count">0</p>
 
-                  <div class="position-relative mb-4">
-                    <canvas id="sales-chart" height="200"></canvas>
-                  </div>
-
-                  <div class="d-flex flex-row justify-content-end">
-                    <span class="mr-2">
-                      <i class="fas fa-square text-primary"></i> This year
-                    </span>
-
-                    <span>
-                      <i class="fas fa-square text-gray"></i> Last year
-                    </span>
-                  </div>
+            </h1></div>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-3">
+      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
+              <h3 class="box-title">
+                <div class="box-icon">
+                  <i class="fas fa-users"></i>
                 </div>
-              </div>
+                Total Team
+              </h3>
+              <p class="box-value" id="team-count">0</p>
 
-              <div class="card">
-                <div class="card-header border-0">
-                  <h3 class="card-title">Online Store Overview</h3>
-                  <div class="card-tools">
-                    <a href="#" class="btn btn-sm btn-tool">
-                      <i class="fas fa-download"></i>
-                    </a>
-                    <a href="#" class="btn btn-sm btn-tool">
-                      <i class="fas fa-bars"></i>
-                    </a>
-                  </div>
+            </h1></div>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-3">
+      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
+              <h3 class="box-title">
+                <div class="box-icon">
+                  <i class="fas fa-users"></i>
                 </div>
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
-                    <p class="text-success text-xl">
-                      <i class="ion ion-ios-refresh-empty"></i>
-                    </p>
-                    <p class="d-flex flex-column text-right">
-                      <span class="font-weight-bold" style="color: white !important">
-                        <i class="ion ion-android-arrow-up text-success"></i> 12%
-                      </span>
-                      <span class="text-muted">CONVERSION RATE</span>
-                    </p>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
-                    <p class="text-warning text-xl">
-                      <i class="ion ion-ios-cart-outline"></i>
-                    </p>
-                    <p class="d-flex flex-column text-right">
-                      <span class="font-weight-bold" style="color: white !important">
-                        <i class="ion ion-android-arrow-up text-warning"></i> 0.8%
-                      </span>
-                      <span class="text-muted">SALES RATE</span>
-                    </p>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center mb-0">
-                    <p class="text-danger text-xl">
-                      <i class="ion ion-ios-people-outline"></i>
-                    </p>
-                    <p class="d-flex flex-column text-right">
-                      <span class="font-weight-bold" style="color: white !important">
-                        <i class="ion ion-android-arrow-down text-danger"></i> 1%
-                      </span>
-                      <span class="text-muted">REGISTRATION RATE</span>
-                    </p>
-                  </div>
+                Total Area
+              </h3>
+              <p class="box-value" id="area-count">0</p>
+
+            </h1></div>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-3">
+      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
+              <h3 class="box-title">
+                <div class="box-icon">
+                  <i class="fas fa-briefcase"></i>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  </div> 
-</body>
+                Total Agency
+              </h3>
+              <p class="box-value" id="agency-count">0</p>
+
+            </h1></div>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-3">
+      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
+              <h3 class="box-title">
+                <div class="box-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                Total ASC
+              </h3>
+              <p class="box-value" id="asc-count">0</p>
+
+            </h1></div>
+    </div>
+  </div>
+
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url: '<?php echo base_url('dashboard/get-counts'); ?>',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                $('#company-count').text(response.company);
+                $('#area-count').text(response.area);
+                $('#store-count').text(response.store);
+                $('#agency-count').text(response.agency);
+                $('#team-count').text(response.team);
+                $('#ba-count').text(response.ba);
+                $('#asc-count').text(response.asc);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching counts:', error);
+            }
+        });
+    });
+</script>
+
