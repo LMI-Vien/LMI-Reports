@@ -7,7 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Login::login');
 $routes->get('/dashboard', 'Dashboard::index');
-
+$routes->get('/dashboard/get-counts', 'Dashboard::getCounts');
 
 //dashboard routes
 $routes->group('trade-dashboard/', static function ($routes) {
@@ -55,11 +55,10 @@ $routes->group('trade-dashboard/', static function ($routes) {
      $routes->get('generate-pdf-ba', 'TradeDashboard::generatePdfBA');
      $routes->get('generate-excel-ba', 'TradeDashboard::generateExcelBA');
      
-     $routes->get('testinglang', 'TradeDashboard::refreshPreAggregatedData');
+     $routes->get('refresh-data', 'TradeDashboard::refreshPreAggregatedData');
      //refreshPreAggregatedData
+     $routes->get('get-counts', 'Dashboard::getCounts');
 });
-
-
 
 
 //sample API 

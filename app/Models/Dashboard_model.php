@@ -1726,4 +1726,25 @@ class Dashboard_model extends Model
     	return $message;
     }
 
+    public function getCounts()
+    {
+        $companyCount = $this->db->table('tbl_company')->countAllResults(); 
+        $areaCount = $this->db->table('tbl_area')->countAllResults(); 
+        $storeCount = $this->db->table('tbl_store')->countAllResults(); 
+        $agencyCount = $this->db->table('tbl_agency')->countAllResults(); 
+        $BaCount = $this->db->table('tbl_brand_ambassador')->countAllResults(); 
+        $AscCount = $this->db->table('tbl_area_sales_coordinator')->countAllResults(); 
+		$TeamCount = $this->db->table('tbl_team')->countAllResults(); 
+
+        return [
+            'company' => $companyCount,
+            'area' => $areaCount,
+            'store' => $storeCount,
+            'agency' => $agencyCount,
+            'ba' => $BaCount,
+            'asc' => $AscCount,
+            'team' => $TeamCount
+        ];
+    }
+
 }

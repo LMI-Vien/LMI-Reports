@@ -28,7 +28,7 @@ class TradeDashboard extends BaseController
 		);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
-		$data['brands'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['brands'] = $this->Global_model->get_brand_data("ASC", 99999, 0);
 		
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
@@ -215,7 +215,7 @@ class TradeDashboard extends BaseController
 		$data['content'] = "site/trade/overall_asc.php";
 		$data['asc'] = $this->Global_model->get_asc(0);
 		$data['area'] = $this->Global_model->get_area(0);
-		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 99999, 0);
 		$data['js'] = array(
                     );
         $data['css'] = array(
@@ -237,7 +237,7 @@ class TradeDashboard extends BaseController
 		$data['content'] = "site/trade/asc_dashboard.php";
 		$data['asc'] = $this->Global_model->get_asc(0);
 		$data['area'] = $this->Global_model->get_area(0);
-		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 99999, 0);
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
@@ -263,7 +263,7 @@ class TradeDashboard extends BaseController
 		$data['content'] = "site/trade/info_kam1.php";
 		$data['asc'] = $this->Global_model->get_asc(0);
 		$data['area'] = $this->Global_model->get_area(0);
-		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 99999, 0);
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
@@ -369,7 +369,7 @@ class TradeDashboard extends BaseController
 		);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
-		$data['brands'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['brands'] = $this->Global_model->get_brand_data("ASC", 99999, 0);
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
@@ -613,7 +613,7 @@ class TradeDashboard extends BaseController
 		$data['year'] = $this->Global_model->get_years();
 		$data['asc'] = $this->Global_model->get_asc(0);
 		$data['area'] = $this->Global_model->get_area(0);
-		$data['brand'] = $this->Global_model->get_brand_data("ASC", 10, 0);
+		$data['brand'] = $this->Global_model->get_brand_data("ASC", 99999, 0);
 		$data['store_branch'] = $this->Global_model->get_store_branch(0);
 		$data['brand_ambassador'] = $this->Global_model->get_brand_ambassador(0);
 		$data['js'] = array(
@@ -986,38 +986,8 @@ class TradeDashboard extends BaseController
 	}
 
 	public function refreshPreAggregatedData(){
-		//$data = 234;
-		
-		//working na
-		//$data = $this->Dashboard_model->refreshPreAggregatedData();
-	
-	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
-	    $brand = null;
-	    $brand_ambassador = null;
-	    $store_name = null;
-	    $ba_type = 3;
-		$sort = 'ASC';
-	    $sort_field = 'item_name';
-
-	    $limit = 10;
-	    $offset = 0;
-	    if($latest_vmi_data){
-	    	$latest_year = $latest_vmi_data['year_id'];
-	    	$latest_month = $latest_vmi_data['month_id'];
-	    	$latest_week = $latest_vmi_data['week_id'];
-
-	    	$data = $this->Dashboard_model->tradeInfoBa(null, null, null, 1, 'item_name', 'ASC', 10, 0, 20, 30, $latest_week, $latest_month, $latest_year);
-
-			//bagong ba fetch data
-				
-			
-			echo "<pre>";
-			print_r($data);
-			echo "<pre>";
-			die();
-
-	    }	
-
+		//manual trigger
+		$data = $this->Dashboard_model->refreshPreAggregatedData();
 	}
 
 	public function generatePdfBA()
