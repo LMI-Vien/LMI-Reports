@@ -159,6 +159,9 @@ $routes->group('cms/', static function ($routes) {
     
     $routes->group('newfile', static function ($routes) {
         $routes->get('/', 'Cms\Newfile::index');
+        $routes->match(['get', 'post'], 'import-temp-scan-data', 'Cms\Newfile::import_temp_scan_data');
+        $routes->match(['get', 'post'], 'fetch-temp-scan-data', 'Cms\Newfile::fetch_temp_scan_data');
+        $routes->match(['get', 'post'], 'delete-temp-scan-data', 'Cms\Newfile::delete_temp_scan_data');
     });
 
     $routes->get('store-branch', 'Cms\Store_Branch::index');

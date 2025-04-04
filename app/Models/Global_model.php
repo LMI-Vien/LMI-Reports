@@ -1098,6 +1098,38 @@ class Global_model extends Model
         }
     }
 
+    public function fetch_scan_data($limit, $offset, $filename, $id) {
+        $builder = $this->db->table('tbl_sell_out_temp_space')
+                      ->where('file_name', $filename)
+                      ->where('created_by', $id)
+                      ->limit($limit, $offset)
+                      ->get();
+
+        $totalRecords = $this->db->table('tbl_sell_out_temp_space')->countAllResults(); // Count total records
+
+        $data = $builder->getResultArray(); // Fetch results
+
+        return [
+            "data" => $builder->getResultArray(),
+            "totalRecords" => $totalRecords
+        ];
+    }
+
+    public function delete_temp_scan($id, $filename)
+    {
+        $builder = $this->db->table('tbl_sell_out_temp_space');
+        $builder->where('created_by', $id);
+        $builder->where('file_name', $filename);
+        
+        $deleted = $builder->delete();
+
+        if ($deleted) {
+            return 'success';
+        } else {
+            return 'failed';
+        }
+    }
+
     public function fetch_last_ba_code($table, $field) {
         try {
             $query = $this->db->query("SELECT $field FROM $table ORDER BY id DESC LIMIT 1");
