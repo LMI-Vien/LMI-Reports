@@ -573,6 +573,7 @@
         $(".form-control").css('border-color','#ccc');
         // add modal title
         $('#popup_modal .modal-title b').html(addNbsp(msg));
+        let $modal = $('#popup_modal');
         let $contentWrapper = $('.content-wrapper');
     
         reset_form();
