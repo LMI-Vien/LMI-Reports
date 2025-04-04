@@ -299,7 +299,7 @@ class Dashboard_model extends Model
 	    ),
 	    targets AS (
 	        SELECT 
-	             TRIM(t.location) AS store_code,
+	             TRIM(t.location) AS store_id,
 	            SUM(COALESCE(
 	                CASE 
 	                    WHEN ? = 1 THEN t.january
@@ -344,6 +344,7 @@ class Dashboard_model extends Model
 	    )
 	    SELECT 
 	        ROW_NUMBER() OVER (ORDER BY percent_ach DESC) AS rank,
+	        sm.store_id,
 	        sm.store_code,
 	        sm.area,
 	        sm.store_name,
@@ -366,7 +367,7 @@ class Dashboard_model extends Model
 	        ROUND((COALESCE(s.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)), 2) AS growth
 	    FROM store_mapping sm
 	    INNER JOIN sales s ON sm.area_id = s.area_id AND sm.store_id = s.store_id
-	    LEFT JOIN targets t ON TRIM(sm.store_code) = TRIM(t.store_code)
+	    LEFT JOIN targets t ON TRIM(sm.store_id) = TRIM(t.store_id)
 	    LEFT JOIN ly_scanned ly ON sm.store_code = ly.store_code
 	    ORDER BY $sortField $sortOrder
 	    LIMIT ? OFFSET ?
@@ -577,7 +578,7 @@ class Dashboard_model extends Model
         		GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS tsps_asc_names,
         		GROUP_CONCAT(DISTINCT ar.description ORDER BY ar.description SEPARATOR ', ') AS tsps_areas
 	        FROM tbl_target_sales_per_store tsps
-	        LEFT JOIN tbl_store st ON st.code = tsps.location
+	        LEFT JOIN tbl_store st ON st.id = tsps.location
 	        LEFT JOIN tbl_brand_ambassador ba ON ba.code = tsps.ba_code
 	        LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
 	        LEFT JOIN tbl_brand b ON b.id = bb.brand_id
@@ -713,7 +714,7 @@ class Dashboard_model extends Model
 	                    COALESCE(tsps.october, 0) + COALESCE(tsps.november, 0) + COALESCE(tsps.december, 0)) 
 	                AS total_target_sales
 	            FROM tbl_target_sales_per_store tsps
-	            LEFT JOIN tbl_store st ON st.code = tsps.location
+	            LEFT JOIN tbl_store st ON st.id = tsps.location
 	            LEFT JOIN tbl_brand_ambassador ba ON ba.store = st.id
 	            LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
 	            LEFT JOIN tbl_brand b ON bb.brand_id = b.id
@@ -956,7 +957,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $type, $withba = false, $item_class_filter) {
+	public function asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $type, $item_class_filter, $withba = false) {
 
 	    // $year = intval($year);
 	    // $month = intval($month);
@@ -1156,7 +1157,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getKamOneData($year, $month, $week, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $withba)
+	public function getKamOneData($year, $month, $week, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $withba = false)
 	{
 	    $year = intval($year);
 	    $month = intval($month);
@@ -1191,7 +1192,7 @@ class Dashboard_model extends Model
 		            bd.asc_name,
 		            bd.area_name
 		        FROM tbl_vmi tv
-		        LEFT JOIN tbl_store s ON tv.store = s.code
+		        LEFT JOIN tbl_store s ON tv.store = s.id
 		        LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
 		        LEFT JOIN brand_data bd ON s.id = bd.store_id
 		        GROUP BY tv.id
@@ -1241,7 +1242,7 @@ class Dashboard_model extends Model
 		];
 	}
 
-	public function getFilteredKamOneData($year, $month, $week, $brand, $area, $ba, $store_name, $itemclassi, $page_limit, $page_offset, $withba, $qty = null)
+	public function getFilteredKamOneData($year, $month, $week, $brand, $area, $ba, $store_name, $itemclassi, $page_limit, $page_offset, $withba = false, $qty = null)
 	{
 
 	    $year = intval($year);
@@ -1254,7 +1255,7 @@ class Dashboard_model extends Model
 	            item,
 	            item_name,
 	            item_class,
-	            store,
+	            store_id,
 	            total_qty,
 	            ambassador_names,
 	            brands,
@@ -1504,12 +1505,13 @@ class Dashboard_model extends Model
 	        ),
 	        vmi_total_qty AS (
 	            SELECT 
-	                vmi.store,
+	                vmi.store_id,
+	                vmi.store_code,
 	                SUM(vmi.total_qty) AS vmi_total_qty_data
 	            FROM tbl_vmi_pre_aggregated_data vmi
 	            WHERE (? IS NULL OR vmi.year = ?)
 	              AND (? IS NULL OR vmi.month BETWEEN ? AND ?)
-	            GROUP BY vmi.store
+	            GROUP BY vmi.store_id
 	        ),
 	        total_ty AS (
 	            SELECT SUM(COALESCE(ty.ty_scanned_data, 0)) AS total_ty_sales
@@ -1532,7 +1534,7 @@ class Dashboard_model extends Model
 	        FROM tbl_sell_out_data_details so
 	        LEFT JOIN ly_scanned ly ON so.store_code = ly.store_code
 	        LEFT JOIN ty_scanned ty ON so.store_code = ty.store_code
-	        LEFT JOIN vmi_total_qty tq ON so.store_code = tq.store
+	        LEFT JOIN vmi_total_qty tq ON so.store_code = tq.store_code
 	        LEFT JOIN tbl_store s ON so.store_code = s.code
 	        CROSS JOIN total_ty tt
 	        CROSS JOIN distinct_store_count dsc
@@ -1595,7 +1597,7 @@ class Dashboard_model extends Model
 	                tv.on_hand,
 	                tv.in_transit,
 	                tv.item_class,
-	                tv.store,
+	                tv.store as store_id,
 	                tv.year,
 	                tv.month,
 	                tv.week,
@@ -1613,7 +1615,7 @@ class Dashboard_model extends Model
 	                iflmi.itmclacde AS lmi_itmclass,
 	                ifrgdi.itmclacde AS rgdi_itmclass
 	            FROM tbl_vmi tv
-	            LEFT JOIN tbl_store s ON tv.store = s.code
+	            LEFT JOIN tbl_store s ON tv.store = s.id
 	            LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
 	            LEFT JOIN brand_data bd ON s.id = bd.store_id
 				LEFT JOIN tbl_price_code_file_2_lmi pclmi ON tv.item = pclmi.cusitmcde AND tv.company = 2
@@ -1630,7 +1632,7 @@ class Dashboard_model extends Model
 	            ib.supplier,
 	            ib.average_sales_unit,
 	            ib.item_class,
-	            ib.store,
+	            ib.store_id,
 	            ib.on_hand + ib.in_transit AS total_qty,
 	            ib.ambassador_names,
 	            ib.ba_types,
