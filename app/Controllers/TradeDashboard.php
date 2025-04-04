@@ -778,7 +778,7 @@ class TradeDashboard extends BaseController
 	            break;
 	        case 'npd':
 	        	$item_class_filter = ['N-New Item'];
-	           $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'npd', $withba, $item_class_filter);
+	           $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'npd', $item_class_filter, $withba);
 	            break;
 	        case 'hero':
 	                $item_class_filter = [
@@ -788,7 +788,7 @@ class TradeDashboard extends BaseController
 						'B-Remaining Class B net of BU Pharma/Beauty'
 
 					];
-	            $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'hero', $withba, $item_class_filter);
+	            $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'hero', $item_class_filter, $withba);
 	            break;
 	        default:
 	        	$data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 20, 30, $brand, $ba, $store, $limit, $offset);

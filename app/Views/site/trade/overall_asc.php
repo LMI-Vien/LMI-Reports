@@ -223,7 +223,7 @@
                 </div>
 
                 <div class="mb-3" style="overflow-x: auto; padding: 0px;">
-                    <div id="chartContainer" class="d-flex flex-row"></div>
+                    <div id="chartContainer" class="d-flex flex-row" ></div>
                 </div>
 
                 <!-- Data Table -->
@@ -405,29 +405,28 @@
     function renderCharts() {
         chartInstances.forEach(chart => chart.destroy());
         chartInstances = [];
-        $('#chartContainer').html('<canvas id="consolidatedChart"></canvas>');
-        
+        $('#chartContainer').html('<canvas id="consolidatedChart"></canvas>'); 
+
         let ctx = document.getElementById('consolidatedChart').getContext('2d');
-     //   let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        
+
         let datasets = [
             {
                 label: "Sales Report",
                 backgroundColor: "#ffc107",
-                data: dataValues.salesReport
+                data: dataValues.salesReport.map(val => parseFloat(val) || 0),
             },
             {
                 label: "Target Sales",
                 backgroundColor: "#990000",
-                data: dataValues.targetSales
+                data: dataValues.targetSales.map(val => (val !== null ? parseFloat(val) : 0)),
             },
             {
                 label: "% Achieved",
                 backgroundColor: "#339933",
-                data: dataValues.PerAchieved
+                data: dataValues.PerAchieved.map(val => parseFloat(val) || 0),
             }
         ];
-        
+
         let consolidatedChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -436,50 +435,51 @@
             },
             options: {
                 responsive: true,
-                animation: {
-                    duration: 1000,
-                    easing: 'easeOutBounce'
-                },
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: true },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
                     tooltip: {
+                        enabled: true,
                         callbacks: {
-                            label: function(tooltipItem) {
-                                return `${tooltipItem.dataset.label}: ${tooltipItem.raw}`;
+                            label: function (tooltipItem) {
+                                return tooltipItem.dataset.label + ": " + tooltipItem.raw.toLocaleString();
                             }
                         }
                     }
                 },
                 scales: {
                     x: {
-                        stacked: true,
                         title: {
                             display: true,
-                            text: "Months"
+                            text: "Months",
+                            font: { weight: "bold" }
                         }
                     },
                     y: {
-                        stacked: false,
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: "Values"
+                            text: "Values",
+                            font: { weight: "bold" }
                         }
                     }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: "easeOutBounce"
                 }
             }
         });
-        
+
         chartInstances.push(consolidatedChart);
     }
 
     function fetchData(){
         months = [];
-        dataValues = {
-            salesReport: [],
-            targetSales: [],
-            PerAchieved: []
-        };
+
         let selectedASC = $('#asc_id').val();
         let selectedArea = $('#area_id').val();
         let selectedBrand = $('#brand_id').val();
@@ -744,24 +744,6 @@
         return decimalPart ? `${integerPart}.${decimalPart}` : integerPart; // Reattach decimal part if exists
     }
 
-
-    // function handleAction(action) {
-    //     let selectedAsc = $('#asc_id').val();
-    //     let selectedArea = $('#area_id').val();
-    //     let selectedBrand = $('#brand_id').val();
-    //     let selectedYear = $('#year').val();
-
-    //     if (action === 'preview') {
-    //         let link = `${selectedAsc}-${selectedArea}-${selectedBrand}-${selectedYear}`;
-    //         window.open(`<?= base_url()?>trade-dashboard/overall-asc-view/${link}`, '_blank');
-    //     } else if (action === 'export') {
-    //         alert(action)
-    //         // prepareExport();
-    //     } else {
-    //         alert('wtf are u doing?')
-    //     }
-    // }
-
     function handleAction(action) {
         let selectedAsc = $('#asc_id').val() || "0";
         let selectedArea = $('#area_id').val() || "0";
@@ -879,14 +861,13 @@
                     let formattedData = [];
 
                     if (hasFilters) {
-                        // Data structure when filters are applied (horizontal format)
                         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                         let metrics = ["LY Sell Out", "Sales Report", "Target Sales", "Growth", "% Achieved"];
 
                         formattedData = metrics.map(metric => {
-                            let row = { "Metric": metric }; // First column is the metric name
+                            let row = { "Metric": metric }; 
                             months.forEach(month => {
-                                row[month] = ""; // Placeholder for future data
+                                row[month] = "";
                             });
                             return row;
                         });
@@ -903,10 +884,10 @@
                                         "% Achieved": ["achieved_january", "achieved_february", "achieved_march", "achieved_april", "achieved_may", "achieved_june", "achieved_july", "achieved_august", "achieved_september", "achieved_october", "achieved_november", "achieved_december"]
                                     };
 
-                                    let dataKey = dataKeys[metric][index]; // Select the correct key based on metric and month index
+                                    let dataKey = dataKeys[metric][index];
 
                                     if (row.hasOwnProperty(dataKey)) {
-                                        formattedData[metricIndex][key] = row[dataKey] || "0";  // Default to "0" if undefined
+                                        formattedData[metricIndex][key] = row[dataKey] || "0";
                                     } else {
                                     }
                                 });
