@@ -566,12 +566,14 @@
     }
 
     function open_modal(msg, actions, id) {
+        window.lastFocusedElement = document.activeElement;
         // remove error message
         $(".validate_error_message").remove();
         // remove error style
         $(".form-control").css('border-color','#ccc');
         // add modal title
         $('#popup_modal .modal-title b').html(addNbsp(msg));
+        let $contentWrapper = $('.content-wrapper');
     
         reset_form();
         var save_btn = create_button('Save', 'save_data', 'btn save', function () {
@@ -633,7 +635,23 @@
                 $('#popup_modal .modal-footer').append(close_btn);
                 break;
         }
-        $('#popup_modal').modal('show');
+        // Disable background content interaction
+        $contentWrapper.attr('inert', '');
+
+        // Move focus inside modal when opened
+        $modal.on('shown.bs.modal', function () {
+            $(this).find('input, textarea, button, select').filter(':visible:first').focus();
+        });
+
+        $modal.modal('show');
+
+        // Fix focus issue when modal is hidden
+        $modal.on('hidden.bs.modal', function () {
+            $contentWrapper.removeAttr('inert');  // Re-enable background interaction
+            if (window.lastFocusedElement) {
+                window.lastFocusedElement.focus();
+            }
+        });
     }
 
     // clears all  user input/changes in the modal
