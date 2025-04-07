@@ -90,26 +90,6 @@
         </div>
     </div>
 
-    <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">
-                        <b></b>
-                    </h1>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="form-modal">
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Brand Ambassador Code</label>
-                            <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
-                            <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
-                            <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
-                        </div>
-
 <!-- Modal -->
 <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -456,7 +436,7 @@
             search_input = $('#search_query').val();
             offset = 1;
             new_query = query;
-            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%' OR b.brand_description LIKE '%" + search_input + "%')";
+            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%')";
             get_data(new_query);
             get_pagination(new_query);
         }
