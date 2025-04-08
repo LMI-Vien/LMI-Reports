@@ -66,7 +66,9 @@ class Newfile extends BaseController
 			log_message('debug', 'Chunk file received: ' . $file->getName());
 
 			$tempDir = WRITEPATH . 'uploads/temp_chunks/';
-			
+	        if (!is_dir($tempDir)) {
+	            mkdir($tempDir, 0777, true);
+	        }			
 			$tempFilePath = $tempDir . $fileName . "_part_" . $chunkIndex;
 			$file->move($tempDir, $fileName . "_part_" . $chunkIndex);
 
@@ -92,47 +94,94 @@ class Newfile extends BaseController
 	            $batchData = [];
 	            $totalInserted = 0;
 
-				if (true) {
-					$reader = IOFactory::createReaderForFile($finalFilePath);
+	            if (str_ends_with($fileName, '.csv')) {
+	                $handle = fopen($finalFilePath, 'r');
+	                if ($handle !== false) {
+	                    $headerSkipped = false;
+	                    $counter = 0;
+	                    $line_number = 0;
+	                    while (($row = fgetcsv($handle, 1000, ",")) !== false) {
+	                        if (!$headerSkipped) {
+	                            $headerSkipped = true;
+	                            continue; 
+	                        }
+	                        $row = array_pad($row, 8, null);
+	                        $counter++;
+	                        $line_number++;
+							if ($counter >= 5) {
+		                        $batchData[] = [
+									'created_date' => date('Y-m-d H:i:s'),
+									'created_by' => $this->session->get('sess_uid'),
+									'stuff' => $line_number.'_stuff',
+									'data_header_id' => $header_id,
+									'month' => $month,
+									'year' => $year,
+									'customer_payment_group' => $customer_payment_group,
+									'template_id' => $template_id,
+									'file_name' => $fileName,
+									'line_number' => $line_number,
+									'store_code' => trim($row[1] ?? ''),
+									'store_description' => trim($row[2] ?? ''),
+									'sku_code' => trim($row[3] ?? ''),
+									'sku_description' => trim($row[4] ?? ''),
+									'gross_sales' => trim($row[5] ?? ''),
+									'quantity' => trim($row[6] ?? ''),
+									'net_sales' => trim($row[7] ?? '')
+		                        ];
+		                    }
+	                        if (count($batchData) === $batchSize) {
+	                            $this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
+	                            $totalInserted += count($batchData);
+	                            $batchData = [];
+	                        }
+	                    }
+	                    fclose($handle);
+	                }
+	            } elseif (str_ends_with($fileName, '.xls') || str_ends_with($fileName, '.xlsx')) {
+	                $reader = IOFactory::createReaderForFile($finalFilePath);
 	                $reader->setReadDataOnly(true);
 	                $spreadsheet = $reader->load($finalFilePath);
 	                $worksheet = $spreadsheet->getActiveSheet();
 	                $rows = $worksheet->toArray();
 
 	                array_shift($rows); 
-
-	                foreach ($rows as $index => $row) {
-						$row = array_pad($row, 8, null);
-
-						if ($index >= 5) {
-							$linenum = $index-4;
+	                $counter = 0;
+	                $line_number = 0;
+	                foreach ($rows as $row) {
+	                    $row = array_pad($row, 8, null);
+	                    $counter++;
+	                    $line_number++;
+						if ($counter >= 5) {
+						
 							$batchData[] = [
 								'created_date' => date('Y-m-d H:i:s'),
 								'created_by' => $this->session->get('sess_uid'),
-								'stuff' => $linenum."_stuff",
+								'stuff' => $line_number.'_stuff',
 								'data_header_id' => $header_id,
 								'month' => $month,
 								'year' => $year,
 								'customer_payment_group' => $customer_payment_group,
 								'template_id' => $template_id,
 								'file_name' => $fileName,
-								'line_number' => $linenum,
-								'store_code' => trim($row[1] ?? null),
-								'store_description' => trim($row[2] ?? null),
-								'sku_code' => trim($row[3] ?? null),
-								'sku_description' => trim($row[4] ?? null),
-								'gross_sales' => trim($row[5] ?? null),
-								'quantity' => trim($row[6] ?? null),
-								'net_sales' => trim($row[7] ?? null),
+								'line_number' => $line_number,
+								'store_code' => trim($row[1] ?? ''),
+								'store_description' => trim($row[2] ?? ''),
+								'sku_code' => trim($row[3] ?? ''),
+								'sku_description' => trim($row[4] ?? ''),
+								'gross_sales' => trim($row[5] ?? ''),
+								'quantity' => trim($row[6] ?? ''),
+								'net_sales' => trim($row[7] ?? ''),
 							];
-							
-							if (count($batchData) === $batchSize) {
-								$this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
-								$totalInserted += count($batchData);
-								$batchData = [];
-							}
 						}
-					}
+
+	                    if (count($batchData) === $batchSize) {
+	                        $this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
+	                        $totalInserted += count($batchData);
+	                        $batchData = [];
+	                    }
+	                }
+	            } else {
+	                return $this->response->setJSON(['message' => 'Unsupported file format'])->setStatusCode(400);
 	            }
 
 				if (!empty($batchData)) {
@@ -176,7 +225,7 @@ class Newfile extends BaseController
 	public function delete_temp_scan_data(){
 		$file_name = $this->request->getPost('file_name');
 		$result = $this->Global_model->delete_temp_scan($this->session->get('sess_uid'), $file_name);
-		echo $file_name;
+		echo $result;
 	}
 
 }

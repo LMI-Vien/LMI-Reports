@@ -770,7 +770,41 @@ class Global_model extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function fetch_existing_new($table, $selected_fields, $filters = [], $field = null, $value = null, $status = false)
+    // public function fetch_existing_new($table, $selected_fields, $filters = [], $field = null, $value = null, $status = false)
+    // {
+    //     if (empty($table) || empty($selected_fields)) {
+    //         return [];
+    //     }
+
+    //     $builder = $this->db->table($table);
+    //     $builder->select($selected_fields);
+
+    //     if ($status == 'true' || $status === true) {
+    //         $builder->where('status >=', 0);            
+    //     }
+
+    //     if ($field) {
+    //         $builder->where($field, $value);
+    //     }
+
+    //     if (!empty($filters)) {
+    //         $field_filter = ['year', 'month', 'week', 'company'];
+
+    //         if (count($filters) === count($field_filter)) {
+    //             $conditions = [];
+    //             foreach ($field_filter as $index => $columnName) {
+    //                 $conditions[$columnName] = $filters[$index]; 
+    //             }
+    //             $builder->groupStart()->Where($conditions)->groupEnd();
+    //         }
+    //     }
+
+    //     $query = $builder->get();
+
+    //     return $query->getResultArray();
+    // }
+
+    public function fetch_existing_new($table, $selected_fields, $filters = [], $field_filter, $field = null, $value = null, $status = false)
     {
         if (empty($table) || empty($selected_fields)) {
             return [];
@@ -788,7 +822,6 @@ class Global_model extends Model
         }
 
         if (!empty($filters)) {
-            $field_filter = ['year', 'month', 'week', 'company'];
 
             if (count($filters) === count($field_filter)) {
                 $conditions = [];
@@ -1098,19 +1131,43 @@ class Global_model extends Model
         }
     }
 
-    public function fetch_scan_data($limit, $offset, $filename, $id) {
+    // public function fetch_scan_data($limit, $offset, $filename, $id) {
+    //     $builder = $this->db->table('tbl_sell_out_temp_space')
+    //                   ->where('file_name', $filename)
+    //                   ->where('created_by', $id)
+    //                   ->limit($limit, $offset)
+    //                   ->get();
+
+    //     $totalRecords = $this->db->table('tbl_sell_out_temp_space')->countAllResults(); // Count total records
+
+    //     $data = $builder->getResultArray(); // Fetch results
+
+    //     return [
+    //         "data" => $builder->getResultArray(),
+    //         "totalRecords" => $totalRecords
+    //     ];
+    // }
+
+    public function fetch_scan_data($limit, $page, $filename, $id)
+    {
+        $offset = ($page - 1) * $limit;
+
         $builder = $this->db->table('tbl_sell_out_temp_space')
                       ->where('file_name', $filename)
                       ->where('created_by', $id)
+                      ->orderBy('id', 'ASC')
                       ->limit($limit, $offset)
                       ->get();
 
-        $totalRecords = $this->db->table('tbl_sell_out_temp_space')->countAllResults(); // Count total records
+        $data = $builder->getResultArray();
 
-        $data = $builder->getResultArray(); // Fetch results
+        $totalRecords = $this->db->table('tbl_sell_out_temp_space')
+                          ->where('file_name', $filename)
+                          ->where('created_by', $id)
+                          ->countAllResults();
 
         return [
-            "data" => $builder->getResultArray(),
+            "data" => $data,
             "totalRecords" => $totalRecords
         ];
     }

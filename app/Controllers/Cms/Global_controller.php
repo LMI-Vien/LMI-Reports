@@ -365,24 +365,33 @@ class Global_controller extends BaseController
 			// ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
 			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
 			
-			case 'fetch_existing':
+			case 'fetch_existing_new':
 			    try {
 			        $table = $this->request->getPost('table');
 			        $selected_fields = $this->request->getPost('selected_fields');
+			        $filters = $this->request->getPost('filters');
 			        $field = $this->request->getPost('field') ?: null;
 			        $value = $this->request->getPost('value') ?: null;
 			        $status = $this->request->getPost('status') ?: false;
+
+			        $field_filter = [];
+			        if($table == "tbl_vmi"){
+			        	$field_filter = ['year', 'month', 'week', 'company'];
+			        }else{
+			        	$field_filter = ['year', 'month'];
+			        }
+            		
 			        if (empty($table) || empty($selected_fields)) {
 			            echo json_encode(['status' => 'error', 'message' => 'Table or selected fields are missing.']);
 			            exit;
 			        }
 
-			        $result_data = $this->Global_model->fetch_existing($table, $selected_fields, $field, $value, $status);
+			        $result_data = $this->Global_model->fetch_existing_new($table, $selected_fields, $filters, $field_filter, $field, $value, $status);
 			        echo json_encode(['status' => 'success', 'existing' => $result_data]);
 			    } catch (Exception $e) {
 			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
 			    }
-			    break; 
+			    break;
 			case 'fetch_existing_new':
 			    try {
 			        $table = $this->request->getPost('table');
@@ -700,7 +709,8 @@ class Global_controller extends BaseController
 			        $status = $this->Global_model->batch_update($table, $data, $primaryKey, $get_code, $where_in);
 			        
 			        // Send response
-					if ($status !== "failed" && !empty($status)) {
+					// if ($status !== "failed" && !empty($status)) {
+					if ($status !== "failed" && $status !== null) {
 					    echo json_encode(['message' => 'success', 'inserted_ids' => $status]);
 					} else {
 					    echo json_encode(['message' => 'error', 'error' => 'Update failed']);

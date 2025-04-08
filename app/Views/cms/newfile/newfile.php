@@ -194,6 +194,8 @@
     let totalPages = 1;
     let dataset = [];
 
+    var user_id = '<?=$session->sess_uid;?>';
+
     function clear_import_table() {
         $(".import_table").empty()
     }
@@ -208,6 +210,11 @@
 
         const file = $("#file")[0].files[0];
 
+        if (!file) {
+            modal.loading_progress(false);
+            modal.alert('Please select a file to upload', 'error', () => {});
+            return;
+        }
         modal.loading_progress(true, "Preparing Data");
         const chunkSize = 512 * 1024; // 512 KB
         const totalChunks = Math.ceil(file.size / chunkSize);
@@ -238,72 +245,51 @@
                 console.error("Upload error:", error);
                 modal.alert("Upload error, please try again.", "error");
             }
-        }
-        
-        if (!file) {
-            modal.loading_progress(false);
-            modal.alert('Please select a file to upload', 'error', () => {});
-            return;
+            let progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+            updateSwalProgress("Preview Data", progress);
         }
 
-        const maxFileSize = 30 * 1024 * 1024; // 30MB limit
-        if (file.size > maxFileSize) {
-            modal.loading_progress(false);
-            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-            return;
-        }
+        // const maxFileSize = 30 * 1024 * 1024; // 30MB limit
+        // if (file.size > maxFileSize) {
+        //     modal.loading_progress(false);
+        //     modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+        //     return;
+        // }
 
-        modal.loading_progress(true, "Reviewing Data...");
+        //modal.loading_progress(true, "Reviewing Data...");
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const data = e.target.result;
+        fetchPaginatedData();
+        modal.loading_progress(false);
+    }
 
-            // Read as binary instead of plain text
-            const workbook = XLSX.read(data, { type: "binary", raw: true });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            // User-defined number of rows to skip at the top
-            const skipRows = 5; // Adjust this value
-            
-            // User-defined number of rows to ignore from the bottom
-            const ignoreRows = 1; // Adjust this value
-
-            let jsonData = XLSX.utils.sheet_to_json(sheet, { 
-                raw: true, 
-                range: skipRows // This skips the first `skipRows` rows
-            });
-
-            // Remove the last `ignoreRows` rows
-            if (ignoreRows > 0) {
-                jsonData = jsonData.slice(0, jsonData.length - ignoreRows);
+    function fetchPaginatedData() {
+        const file = $("#file")[0].files[0];
+        let file_name = file.name;
+        modal.loading(true);
+        $.ajax({
+            url: "<?= base_url('cms/newfile/fetch-temp-scan-data'); ?>",
+            method: "GET",
+            data: {
+                page: currentPage,
+                limit: rowsPerPage,
+                file_name: file_name
+            },
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    totalPages = Math.ceil(response.totalRecords / rowsPerPage);
+                    console.log(totalPages);
+                    display_imported_data(response.data);
+                } else {
+                    modal.alert("Failed to fetch data.", "error");
+                }
+                modal.loading(false);
+            },
+            error: function() {
+                modal.alert("Error fetching data.", "error");
+                modal.loading(false);
             }
-
-            // Ensure special characters like "ñ" are correctly preserved
-            jsonData = jsonData.map(row => {
-                let fixedRow = {};
-                let count = 0;
-                Object.keys(row).forEach(key => {
-                    let value = row[key];
-
-                    if (typeof value === "number") {
-                        value = String(value);
-                    }
-
-                    fixedRow[count] = value !== null && value !== undefined ? value : "";
-
-                    count += 1;
-                });
-                return fixedRow;
-            });
-
-            processInChunks(jsonData, 5000, () => {
-                paginateData(rowsPerPage);
-            });
-        };
-
-        // Use readAsBinaryString instead of readAsText
-        reader.readAsBinaryString(file);
+        });
     }
 
     function processInChunks(data, chunkSize, callback) {
@@ -336,13 +322,9 @@
         display_imported_data();
     }
 
-    function display_imported_data() {
-        let start = (currentPage - 1) * rowsPerPage;
-        let end = start + rowsPerPage;
-        let paginatedData = dataset.slice(start, end);
-
-        let html = '';
-        let tr_counter = start;
+    function display_imported_data(paginatedData) {
+        let html = "";
+        let tr_counter = (currentPage - 1) * rowsPerPage;
 
         paginatedData.forEach(row => {
             let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
@@ -353,49 +335,65 @@
                 acc[key.toLowerCase()] = row[key];
                 return acc;
             }, {});
-            
-            let selected_td = [0, 1, 2, 3, 4, 5, 6]
-            $.each(selected_td, (x, y) => {
-                if (selected_td.includes(y)) {
-                    html += `<td>${lowerCaseRecord[y] !== undefined ? lowerCaseRecord[y] : ""}</td>`;
+
+            let td_validator = ['store_code', 'store_description', 'sku_code', 'sku_description', 'gross_sales', 'quantity', 'net_sales'];
+            td_validator.forEach(column => {
+                let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
+
+                if (column === 'status' && typeof value === 'string') {
+                    value = value.replace(/\s*\(.*?\)/g, "");
                 }
-            })
+
+                html += `<td>${value}</td>`;
+            });
 
             html += "</tr>";
-            
             tr_counter += 1;
         });
 
-        modal.loading(false);
         $(".import_table").html(html);
         updatePaginationControls();
     }
 
     function updatePaginationControls() {
         let paginationHtml = `
-        <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}>
-            <i class="fas fa-angle-double-left"></i>
-        </button>
-        <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}>
-            <i class="fas fa-angle-left"></i>
-        </button>
-        
-        <select onchange="goToPage(this.value)">
-            ${Array.from({ length: totalPages }, (_, i) => 
-                `<option value="${i + 1}" ${i + 1 === currentPage ? "selected" : ""}>Page ${i + 1}</option>`
-            ).join('')}
-        </select>
-        
-        <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}>
-            <i class="fas fa-angle-right"></i>
-        </button>
-        <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}>
-            <i class="fas fa-angle-double-right"></i>
-        </button>
+            <button onclick="goToPage(1)" ${currentPage === 1 ? "disabled" : ""}>
+                <i class="fas fa-angle-double-left"></i>
+            </button>
+            <button onclick="changePage(-1)" ${currentPage === 1 ? "disabled" : ""}>
+                <i class="fas fa-angle-left"></i>
+            </button>
+            
+            <select onchange="goToPage(this.value)">
+                ${Array.from({ length: totalPages }, (_, i) => 
+                    `<option value="${i + 1}" ${i + 1 === currentPage ? "selected" : ""}>Page ${i + 1}</option>`
+                ).join('')}
+            </select>
+            
+            <button onclick="changePage(1)" ${currentPage === totalPages ? "disabled" : ""}>
+                <i class="fas fa-angle-right"></i>
+            </button>
+            <button onclick="goToPage(totalPages)" ${currentPage === totalPages ? "disabled" : ""}>
+                <i class="fas fa-angle-double-right"></i>
+            </button>
         `;
 
         $(".import_pagination").html(paginationHtml);
-        modal.loading_progress(false);
+    }
+
+    function changePage(offset) {
+        if ((offset === -1 && currentPage > 1) || (offset === 1 && currentPage < totalPages)) {
+            currentPage += offset;
+            fetchPaginatedData();
+        }
+    }
+
+    function goToPage(page) {
+        page = parseInt(page);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            fetchPaginatedData();
+        }
     }
 
     function process_xl_file() {
@@ -406,18 +404,18 @@
 
         let allData = [];
 
-        function fetchAllPages(page = 0) {
-            console.log(page, 'page')
+        function fetchAllPages(page = 1) {
+            //console.log(page, 'page')
             $.ajax({
                 url: "<?= base_url('cms/newfile/fetch-temp-scan-data'); ?>",
                 method: "GET",
 
-                data: { page, limit: 1000, file_name}, // Fetch in larger chunks
+                data: { page, limit: 5000, file_name}, // Fetch in larger chunks
                 success: function(response) {
                     console.log(response.data, 'response.data')
                     allData = allData.concat(response.data);
-                    if (response.data.length === 1000) {
-                        fetchAllPages(page + 1000);
+                    if (response.data.length === 5000) {
+                        fetchAllPages(page + 1);
                     } 
                     else {
                         console.log(allData.length, 'allData.length')
@@ -450,14 +448,12 @@
                     $(".btn.save").prop("disabled", false);
                 });
 
-                // createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
+                createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
             } else if (Array.isArray(valid_data) && valid_data.length > 0) { 
                 let new_data = valid_data.map(record => ({
                     ...record
                 }));
 
-                console.log(valid_data.length, 'valid_data.length')
-                console.log(new_data.length, 'new_data.length')
                 saveValidatedData(new_data);
             } else {
                 modal.alert("No valid data found. Please check the file.", "error");
@@ -470,60 +466,153 @@
     }
 
     function saveValidatedData(valid_data) {
-        let batch_size = 1000;
+        let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_sell_out_data_details_copy';
 
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                console.log("All batches processed.", batch_index, total_batches);
-                modal.loading_progress(false);
-                delete_temp_data()
-                modal.alert("All records saved/updated successfully!", 'success', () => {
-                    location.reload()
+        let selected_fields = [
+            'id', 'data_header_id', 'month', 'year', 'customer_payment_group', 'template_id',
+            'file_name', 'line_number', 'store_code', 'store_description', 'sku_code', 'sku_description', 
+            'quantity', 'net_sales', 'gross_sales'
+        ];
+
+        const matchFields = [
+            'month', 'year', 'customer_payment_group', 'template_id',
+            'file_name', 'line_number', 'store_code', 'store_description', 'sku_code', 'sku_description', 
+            'quantity', 'net_sales', 'gross_sales'
+        ];  
+
+        const filters = [
+            '2025',
+            '3'
+        ];  
+
+        const matchType = "AND";  // Use "AND" or "OR" for matching logic
+
+        modal.loading_progress(true, "Validating and Saving data...");
+        let existingMap = new Map();
+        //aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields}, function(response) {
+        aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters:filters}, function(response) {
+            let result = JSON.parse(response);
+            let existingMap = new Map();
+
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+                    existingMap.set(key, record.id);
                 });
-                return;
             }
 
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let newRecords = [...batch]; // Avoid modifying the original array
-
-            function processInserts() {
-                return new Promise((resolve) => {
-                    if (newRecords.length > 0) {
-                        batch_insert(url, newRecords, table, false, (response) => {
-                            console.log(`Batch ${batch_index + 1} processed.`, total_batches);
-
-                            if (response.message === 'success') {
-                                updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
-                            } else {
-                                errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                            }
-                            
-                            resolve();  // Ensure promise is resolved
-                        });
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
+                    if (errorLogs.length > 0) {
+                        console.log(errorLogs);
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info');
                     } else {
-                        resolve(); // Resolve even for empty batches
+                        modal.loading_progress(true, "Finishing data...");
+                        setTimeout(function(){
+                        modal.alert("All records saved/updated successfully!", 'success', () => 
+                            location.reload()
+                        );
+                        }, 1000);
+                    }
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let matchedId = null;
+
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else if (matchType === "OR") {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+                            for (let field of matchFields) {
+                                if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
+                                    matchedId = id;
+                                    break; 
+                                }
+                            }
+                            if (matchedId) break;
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
+                      //  row.updated_by = user_id;
+                      //  row.updated_date = formatDate(new Date());
+                      //  delete row.created_by; // to prevent overwritting the created by
+                      //  delete row.created_date; // Unset created_date
+                     //   delete row.created_by;
+                        updateRecords.push(row);
+                    } else {
+                        //row.created_by = user_id;
+                      //  row.created_date = formatDate(new Date());
+                        newRecords.push(row);
                     }
                 });
+
+                function processUpdates() {
+                    return new Promise((resolve) => {
+                        if (updateRecords.length > 0) {
+                            console.log(updateRecords);
+                            batch_update(url, updateRecords, table, "id", false, (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                function processInserts() {
+                    return new Promise((resolve) => {
+                        if (newRecords.length > 0) {
+                            console.log(newRecords);
+                            batch_insert(url, newRecords, table, false, (response) => {
+                                if (response.message === 'success') {
+                                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+                                } else {
+                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                }
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                processUpdates()
+                    .then(processInserts)
+                    .then(() => {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    })
+                    .catch(error => {
+                        errorLogs.push(`Unexpected error: ${error}`);
+                        processNextBatch();
+                    });
             }
 
-            processInserts()
-                .then(() => {
-                    batch_index++; // Move to next batch
-                    setTimeout(processNextBatch, 300);
-                })
-                .catch(error => {
-                    errorLogs.push(`Unexpected error: ${error}`);
-                    batch_index++; // Ensure it moves forward even on error
-                    processNextBatch();
-                });
-        }
-
-        setTimeout(processNextBatch, 1000);
+            setTimeout(processNextBatch, 1000);
+        });
     }
 
     function delete_temp_data() {
