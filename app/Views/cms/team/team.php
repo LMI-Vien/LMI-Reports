@@ -66,7 +66,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form-modal form-save-modal">
+                <form id="form-modal">
                     <div class="mb-3">
                         <label for="code" class="form-label">Team Code</label>
                         <input type="text" class="form-control required" id="code" aria-describedby="code" maxlength="25">
