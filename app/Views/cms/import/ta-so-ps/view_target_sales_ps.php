@@ -272,7 +272,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#ba_name, #location, #location_desc, #jan, #feb, #mar, #apr, #may, #jun, #jul, #aug, #sep, #oct, #nov, #dec', isReadOnly);
+        set_field_state('#ba_name, #location, #location_desc, #jan, #feb, #mar, #apr, #may, #jun, #jul, #aug, #sep, #oct, #nov, #dec, #total', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -302,7 +302,7 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description, pr.ba_code",
+            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description, ba.name AS ba_code",
             query : query, 
             table : "tbl_target_sales_per_store pr",
             join: [
@@ -310,14 +310,19 @@
                     table: "tbl_store s1",
                     query: "s1.id = pr.location AND s1.id = pr.location",
                     type: "left"
-                }
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.code = pr.ba_code",
+                    type: "left"
+                },
             ]
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
-                    $('#ba_code').val(d.ba_code);
+                    $('#ba_name').val(d.ba_code);
                     $('#location').val(d.location);
                     $('#location_desc').val(d.location_description);
                     $('#jan').val(Math.round(d.january).toLocaleString());
