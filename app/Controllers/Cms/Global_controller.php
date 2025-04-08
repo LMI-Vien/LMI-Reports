@@ -86,6 +86,12 @@ class Global_controller extends BaseController
 					$join = isset($_POST['join']) ? $_POST['join']: null;
 					$group= isset($_POST['group']) ? $_POST['group']: null;
 
+					if ($table === 'tbl_vmi_grouped') {
+					    $result_data = $this->Global_model->get_vmi_grouped_with_latest_updated($query, $limit, ($offset - 1) * $limit);
+					    echo json_encode($result_data);
+					    break;
+					}
+
 					$result_data = $this->Global_model->get_data_list($table, $query, $limit, ($offset - 1) * $limit, $select,$order_field,$order_type, $join, $group);
 
 			        echo json_encode($result_data);

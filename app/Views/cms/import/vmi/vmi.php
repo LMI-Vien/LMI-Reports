@@ -252,55 +252,28 @@
     function get_data(new_query) {
         var data = {
             event: "list",
-            select: "c.name AS company, y.year as year, m.month, w.name week, v.created_date, v.updated_date, u.name as imported_by",
+            select: "name",
             query: new_query,
             offset: offset,
             limit: limit,
-            table: "tbl_vmi v",
-            join: [
-                {
-                    table: "cms_users u",
-                    query: "u.id = v.created_by",
-                    type: "left"
-                },
-                {
-                    table: "tbl_company c",
-                    query: "c.id = v.company",
-                    type: "left"
-                },
-                {
-                    table: "tbl_year y",
-                    query: "y.id = v.year",
-                    type: "left"
-                },
-                {
-                    table: "tbl_month m",
-                    query: "m.id = v.month",
-                    type: "left"
-                },
-                {
-                    table: "tbl_week w",
-                    query: "w.id = v.week",
-                    type: "left"
-                }
-            ],
-            order: {
-                field: "v.year",
-                order: "asc"
-            },
-            group : "v.year, v.month, v.week, c.name"
+            table: "tbl_vmi_grouped"
         };
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
-
+            var latestDate = null;
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
+                        if (y.updated_date && y.updated_date !== "0000-00-00 00:00:00") {
+                            const currentDate = y.updated_date;
+                            if (!latestDate || currentDate > latestDate) {
+                                latestDate = currentDate;
+                            }
+                        }
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
@@ -308,8 +281,7 @@
                         html += "<td scope=\"col\">" + (y.year) + "</td>";
                         html += "<td scope=\"col\">" + (y.month) + "</td>";
                         html += "<td scope=\"col\">" + (y.week) + "</td>";
-                        html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
+                        html += "<td scope=\"col\">" + (latestDate ? ViewDateformat(latestDate) : "N/A") + "</td>";
                         let href = "<?= base_url()?>"+"cms/import-vmi/view/"+`${y.company}-${y.year}-${y.month}-${y.week}`;
 
                         if (y.id == 0) {
@@ -398,10 +370,18 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            var new_query = "(" + query + " AND c.name LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND y.year LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND m.month LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND w.name LIKE '%" + keyword + "%')";
+
+            var search_conditions = [
+                "c.name LIKE '%" + keyword + "%'",
+                "y.year LIKE '%" + keyword + "%'",
+                "m.month LIKE '%" + keyword + "%'",
+                "w.name LIKE '%" + keyword + "%'"
+            ];
+
+            var combined_query = "(" + search_conditions.join(" OR ") + ")";
+
+            var new_query = query ? "(" + query + " AND " + combined_query + ")" : combined_query;
+
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -541,7 +521,6 @@
             success: function(response) {
                 if (response.success) {
                     totalPages = Math.ceil(response.totalRecords / rowsPerPage);
-                    console.log(response.data);
                     display_imported_data(response.data);
                 } else {
                     modal.alert("Failed to fetch data.", "error");

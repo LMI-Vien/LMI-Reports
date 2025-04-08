@@ -246,6 +246,40 @@ class Global_model extends Model
         return $q->getResult();
     }
 
+public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
+{
+    $sql = "
+        SELECT *
+        FROM (
+            SELECT 
+                v.id,
+                c.name AS company,
+                y.year,
+                m.month,
+                w.name AS week,
+                v.created_date,
+                v.updated_date,
+                u.name AS imported_by,
+                ROW_NUMBER() OVER (
+                    PARTITION BY v.year, v.month, v.week, c.name
+                    ORDER BY v.updated_date DESC
+                ) AS row_num
+            FROM tbl_vmi v
+            LEFT JOIN cms_users u ON u.id = v.created_by
+            LEFT JOIN tbl_company c ON c.id = v.company
+            LEFT JOIN tbl_year y ON y.id = v.year
+            LEFT JOIN tbl_month m ON m.id = v.month
+            LEFT JOIN tbl_week w ON w.id = v.week
+            " . ($query ? "WHERE $query" : "") . "
+        ) t
+        WHERE row_num = 1
+        LIMIT $offset, $limit
+    ";
+
+    return $this->db->query($sql)->getResult();
+}
+
+
     function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false, $action = null)
     {
         $builder = $this->db->table($table);
