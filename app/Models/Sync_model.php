@@ -17,7 +17,7 @@ class Sync_model extends Model
         $this->sfaDB = \Config\Database::connect('default');
     }
 
-    // public function syncData($batchSize = 100)
+    // public function syncData($batchSize = 5000)
     // {
     //     $offset = 0;
     //     while (true) {
@@ -85,7 +85,7 @@ class Sync_model extends Model
 
 
     //optimized version
-    public function syncDataPriceCodeLMI($batchSize = 100)
+    public function syncDataPriceCodeLMI($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -171,7 +171,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Price Code LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataPriceCodeRGDI($batchSize = 100)
+    public function syncDataPriceCodeRGDI($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -257,7 +257,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Price Code RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataitemfileLMI($batchSize = 100)
+    public function syncDataitemfileLMI($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -278,16 +278,10 @@ class Sync_model extends Model
                 foreach ($sourceData as $row) {
                     $values[] = "(
                         '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['ptycde']) . "',
-                        '" . addslashes($row['olditmcde']) . "',
-                        '" . addslashes($row['saldisact']) . "',
-                        '" . addslashes($row['purdisact']) . "',
-                        '" . addslashes($row['scpwddis']) . "',
                         '" . addslashes($row['supdsc']) . "',
                         '" . addslashes($row['itmcde']) . "',
                         '" . addslashes($row['itmdsc']) . "',
                         '" . addslashes($row['untmea']) . "',
-                        '" . addslashes($row['untmea2']) . "',
                         '" . addslashes($row['conver']) . "',
                         '" . addslashes($row['untcst1']) . "',
                         '" . addslashes($row['untcst2']) . "',
@@ -295,105 +289,35 @@ class Sync_model extends Model
                         '" . addslashes($row['remarks']) . "',
                         '" . addslashes($row['wardsc']) . "',
                         '" . addslashes($row['avecst']) . "',
-                        '" . addslashes($row['maxlvl']) . "',
                         '" . addslashes($row['status']) . "',
-                        '" . addslashes($row['lstcst']) . "',
                         '" . addslashes($row['untcst']) . "',
                         '" . addslashes($row['untprc']) . "',
                         '" . addslashes($row['brndsc']) . "',
                         '" . addslashes($row['itmcladsc']) . "',
-                        '" . addslashes($row['itmmdl']) . "',
                         '" . addslashes($row['supcde']) . "',
                         '" . addslashes($row['warcde']) . "',
                         '" . addslashes($row['brncde']) . "',
                         '" . addslashes($row['itmclacde']) . "',
-                        '" . addslashes($row['salum']) . "',
-                        '" . addslashes($row['srtum']) . "',
-                        '" . addslashes($row['recum']) . "',
-                        '" . addslashes($row['prtum']) . "',
-                        '" . addslashes($row['invum']) . "',
                         '" . addslashes($row['barcde']) . "',
-                        '" . addslashes($row['cstdebcde']) . "',
-                        '" . addslashes($row['cstcrecde']) . "',
                         '" . addslashes($row['inactive']) . "',
                         '" . addslashes($row['itmtyp']) . "',
-                        '" . addslashes($row['cgsactcde']) . "',
-                        '" . addslashes($row['salactcde']) . "',
-                        '" . addslashes($row['invactcde']) . "',
-                        '" . addslashes($row['srtactcde']) . "',
                         '" . addslashes($row['multium']) . "',
                         '" . addslashes($row['reqsernum']) . "',
                         '" . addslashes($row['taxcde']) . "',
-                        '" . addslashes($row['prtactcde']) . "',
-                        '" . addslashes($row['puractcde']) . "',
-                        '" . addslashes($row['purtaxcde']) . "',
-                        '" . addslashes($row['salewtcde']) . "',
-                        '" . addslashes($row['purewtcde']) . "',
-                        '" . addslashes($row['salevatcde']) . "',
-                        '" . addslashes($row['purevatcde']) . "',
-                        '" . addslashes($row['salcur']) . "',
-                        '" . addslashes($row['purcur']) . "',
-                        '" . addslashes($row['itmrem1']) . "',
-                        '" . addslashes($row['itmrem2']) . "',
-                        '" . addslashes($row['itmrem3']) . "',
                         '" . addslashes($row['itmbal']) . "',
-                        '" . addslashes($row['strqty']) . "',
-                        '" . addslashes($row['chknontrd']) . "',
-                        '" . addslashes($row['package']) . "',
-                        '" . addslashes($row['rebdte']) . "',
-                        '" . addslashes($row['itmprt']) . "',
-                        '" . addslashes($row['gldepcde']) . "',
-                        '" . addslashes($row['reqbatchnum']) . "',
-                        '" . addslashes($row['logdte']) . "',
-                        '" . addslashes($row['itmsubclacde']) . "',
-                        '" . addslashes($row['linenum']) . "',
-                        '" . addslashes($row['saltarget01']) . "',
-                        '" . addslashes($row['saltarget02']) . "',
-                        '" . addslashes($row['saltarget03']) . "',
-                        '" . addslashes($row['saltarget04']) . "',
-                        '" . addslashes($row['saltarget05']) . "',
-                        '" . addslashes($row['saltarget06']) . "',
-                        '" . addslashes($row['saltarget07']) . "',
-                        '" . addslashes($row['saltarget08']) . "',
-                        '" . addslashes($row['saltarget09']) . "',
-                        '" . addslashes($row['saltarget10']) . "',
-                        '" . addslashes($row['saltarget11']) . "',
-                        '" . addslashes($row['saltarget12']) . "',
-                        '" . addslashes($row['recumcon']) . "',
-                        '" . addslashes($row['itmdeptcde']) . "',
-                        '" . addslashes($row['itmmerchcatcde']) . "',
-                        '" . addslashes($row['itmhierarchy']) . "',
                         '" . addslashes($row['itmclass']) . "',
-                        '" . addslashes($row['itmtag']) . "',
-                        '" . addslashes($row['itmsrc']) . "',
-                        '" . addslashes($row['itminvmvmnttyp']) . "',
-                        '" . addslashes($row['tariffcde']) . "',
-                        '" . addslashes($row['bomactcde']) . "',
-                        '" . addslashes($row['itmpalletcap']) . "',
-                        '" . addslashes($row['splblum']) . "',
-                        '" . addslashes($row['chkmultibarcde']) . "',
-                        '" . addslashes($row['multibarcde']) . "',
-                        '" . addslashes($row['purseractcde']) . "',
-                        '" . addslashes($row['minOQ']) . "',
-                        '" . addslashes($row['chkreorder']) . "',
-                        '" . addslashes($row['maxOQ']) . "'
+                        '" . addslashes($row['itmsrc']) . "'
                     )";
                 }
 
                 if (!empty($values)) {
-                    $sql = "INSERT INTO tbl_itemfile_lmi (recid, ptycde, olditmcde, saldisact, purdisact, scpwddis, supdsc, itmcde, itmdsc, untmea, untmea2, conver, untcst1, untcst2, crilvl, remarks, wardsc, avecst, maxlvl, status, lstcst, untcst, untprc, brndsc, itmcladsc, itmmdl, supcde, warcde, brncde, itmclacde, salum, srtum, recum, prtum, invum, barcde, cstdebcde, cstcrecde, inactive, itmtyp, cgsactcde, salactcde, invactcde, srtactcde, multium, reqsernum, taxcde, prtactcde, puractcde, purtaxcde, salewtcde, purewtcde, salevatcde, purevatcde, salcur, purcur, itmrem1, itmrem2, itmrem3, itmbal, strqty, chknontrd, package, rebdte, itmprt, gldepcde, reqbatchnum, logdte, itmsubclacde, linenum, saltarget01, saltarget02, saltarget03, saltarget04, saltarget05, saltarget06, saltarget07, saltarget08, saltarget09, saltarget10, saltarget11, saltarget12, recumcon, itmdeptcde, itmmerchcatcde, itmhierarchy, itmclass, itmtag, itmsrc, itminvmvmnttyp, tariffcde, bomactcde, itmpalletcap, splblum, chkmultibarcde, multibarcde, purseractcde, minOQ, chkreorder, maxOQ) 
+                    $sql = "INSERT INTO tbl_itemfile_lmi (recid, supdsc, itmcde, itmdsc, untmea, conver, untcst1, untcst2, crilvl, remarks, wardsc, avecst, status, untcst, untprc, brndsc, itmcladsc, supcde, warcde, brncde, itmclacde, barcde, inactive, itmtyp, multium, reqsernum, taxcde, itmbal, itmclass, itmsrc) 
                             VALUES " . implode(',', $values) . "
                             ON DUPLICATE KEY UPDATE 
-                              ptycde = VALUES(ptycde), 
-                              olditmcde = VALUES(olditmcde), 
-                              saldisact = VALUES(saldisact),
-                              purdisact = VALUES(purdisact),
-                              scpwddis = VALUES(scpwddis),
                               supdsc = VALUES(supdsc),
                               itmcde = VALUES(itmcde),
                               itmdsc = VALUES(itmdsc),
                               untmea = VALUES(untmea),
-                              untmea2 = VALUES(untmea2),
                               conver = VALUES(conver),
                               untcst1 = VALUES(untcst1),
                               untcst2 = VALUES(untcst2),
@@ -401,85 +325,24 @@ class Sync_model extends Model
                               remarks = VALUES(remarks),
                               wardsc = VALUES(wardsc),
                               avecst = VALUES(avecst),
-                              maxlvl = VALUES(maxlvl),
-                              lstcst = VALUES(lstcst),
+                              status = VALUES(status),
                               untcst = VALUES(untcst),
+                              untprc = VALUES(untprc),
                               brndsc = VALUES(brndsc),
                               itmcladsc = VALUES(itmcladsc),
-                              itmmdl = VALUES(itmmdl),
                               supcde = VALUES(supcde),
                               warcde = VALUES(warcde),
                               brncde = VALUES(brncde),
                               itmclacde = VALUES(itmclacde),
-                              salum = VALUES(salum),
-                              srtum = VALUES(srtum),
-                              recum = VALUES(recum),
-                              prtum = VALUES(prtum),
-                              invum = VALUES(invum),
                               barcde = VALUES(barcde),
-                              cstdebcde = VALUES(cstdebcde),
-                              cstcrecde = VALUES(cstcrecde),
                               inactive = VALUES(inactive),
-                              cgsactcde = VALUES(cgsactcde),
-                              salactcde = VALUES(salactcde),
-                              invactcde = VALUES(invactcde),
-                              srtactcde = VALUES(srtactcde),
+                              itmtyp = VALUES(itmtyp),
                               multium = VALUES(multium),
                               reqsernum = VALUES(reqsernum),
                               taxcde = VALUES(taxcde),
-                              prtactcde = VALUES(prtactcde),
-                              puractcde = VALUES(puractcde),
-                              purtaxcde = VALUES(purtaxcde),
-                              salewtcde = VALUES(salewtcde),
-                              purewtcde = VALUES(purewtcde),
-                              salevatcde = VALUES(salevatcde),
-                              purevatcde = VALUES(purevatcde),
-                              salcur = VALUES(salcur),
-                              purcur = VALUES(purcur),
-                              itmrem1 = VALUES(itmrem1),
-                              itmrem2 = VALUES(itmrem2),
-                              itmrem3 = VALUES(itmrem3),
                               itmbal = VALUES(itmbal),
-                              strqty = VALUES(strqty),
-                              chknontrd = VALUES(chknontrd),
-                              package = VALUES(package),
-                              rebdte = VALUES(rebdte),
-                              itmprt = VALUES(itmprt),
-                              gldepcde = VALUES(gldepcde),
-                              reqbatchnum = VALUES(reqbatchnum),
-                              logdte = VALUES(logdte),
-                              itmsubclacde = VALUES(itmsubclacde),
-                              linenum = VALUES(linenum),
-                              saltarget01 = VALUES(saltarget01),
-                              saltarget02 = VALUES(saltarget02),
-                              saltarget03 = VALUES(saltarget03),
-                              saltarget04 = VALUES(saltarget04),
-                              saltarget05 = VALUES(saltarget05),
-                              saltarget06 = VALUES(saltarget06),
-                              saltarget07 = VALUES(saltarget07),
-                              saltarget08 = VALUES(saltarget08),
-                              saltarget09 = VALUES(saltarget09),
-                              saltarget10 = VALUES(saltarget10),
-                              saltarget11 = VALUES(saltarget11),
-                              saltarget12 = VALUES(saltarget12),
-                              recumcon = VALUES(recumcon),
-                              itmdeptcde = VALUES(itmdeptcde),
-                              itmmerchcatcde = VALUES(itmmerchcatcde),
-                              itmhierarchy = VALUES(itmhierarchy),
                               itmclass = VALUES(itmclass),
-                              itmtag = VALUES(itmtag),
-                              itmsrc = VALUES(itmsrc),
-                              itminvmvmnttyp = VALUES(itminvmvmnttyp),
-                              tariffcde = VALUES(tariffcde),
-                              bomactcde = VALUES(bomactcde),
-                              itmpalletcap = VALUES(itmpalletcap),
-                              splblum = VALUES(splblum),
-                              chkmultibarcde = VALUES(chkmultibarcde),
-                              multibarcde = VALUES(multibarcde),
-                              purseractcde = VALUES(purseractcde),
-                              minOQ = VALUES(minOQ),
-                              chkreorder = VALUES(chkreorder),
-                              maxOQ = VALUES(maxOQ)";
+                              itmsrc = VALUES(itmsrc)";
 
                     $this->sfaDB->query($sql);
                     $totalRecordsSynced += count($sourceData);
@@ -494,7 +357,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Item File LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataitemfileRGDI($batchSize = 100)
+    public function syncDataitemfileRGDI($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -515,16 +378,10 @@ class Sync_model extends Model
                 foreach ($sourceData as $row) {
                     $values[] = "(
                         '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['ptycde']) . "',
-                        '" . addslashes($row['olditmcde']) . "',
-                        '" . addslashes($row['saldisact']) . "',
-                        '" . addslashes($row['purdisact']) . "',
-                        '" . addslashes($row['scpwddis']) . "',
                         '" . addslashes($row['supdsc']) . "',
                         '" . addslashes($row['itmcde']) . "',
                         '" . addslashes($row['itmdsc']) . "',
                         '" . addslashes($row['untmea']) . "',
-                        '" . addslashes($row['untmea2']) . "',
                         '" . addslashes($row['conver']) . "',
                         '" . addslashes($row['untcst1']) . "',
                         '" . addslashes($row['untcst2']) . "',
@@ -532,105 +389,35 @@ class Sync_model extends Model
                         '" . addslashes($row['remarks']) . "',
                         '" . addslashes($row['wardsc']) . "',
                         '" . addslashes($row['avecst']) . "',
-                        '" . addslashes($row['maxlvl']) . "',
                         '" . addslashes($row['status']) . "',
-                        '" . addslashes($row['lstcst']) . "',
                         '" . addslashes($row['untcst']) . "',
                         '" . addslashes($row['untprc']) . "',
                         '" . addslashes($row['brndsc']) . "',
                         '" . addslashes($row['itmcladsc']) . "',
-                        '" . addslashes($row['itmmdl']) . "',
                         '" . addslashes($row['supcde']) . "',
                         '" . addslashes($row['warcde']) . "',
                         '" . addslashes($row['brncde']) . "',
                         '" . addslashes($row['itmclacde']) . "',
-                        '" . addslashes($row['salum']) . "',
-                        '" . addslashes($row['srtum']) . "',
-                        '" . addslashes($row['recum']) . "',
-                        '" . addslashes($row['prtum']) . "',
-                        '" . addslashes($row['invum']) . "',
                         '" . addslashes($row['barcde']) . "',
-                        '" . addslashes($row['cstdebcde']) . "',
-                        '" . addslashes($row['cstcrecde']) . "',
                         '" . addslashes($row['inactive']) . "',
                         '" . addslashes($row['itmtyp']) . "',
-                        '" . addslashes($row['cgsactcde']) . "',
-                        '" . addslashes($row['salactcde']) . "',
-                        '" . addslashes($row['invactcde']) . "',
-                        '" . addslashes($row['srtactcde']) . "',
                         '" . addslashes($row['multium']) . "',
                         '" . addslashes($row['reqsernum']) . "',
                         '" . addslashes($row['taxcde']) . "',
-                        '" . addslashes($row['prtactcde']) . "',
-                        '" . addslashes($row['puractcde']) . "',
-                        '" . addslashes($row['purtaxcde']) . "',
-                        '" . addslashes($row['salewtcde']) . "',
-                        '" . addslashes($row['purewtcde']) . "',
-                        '" . addslashes($row['salevatcde']) . "',
-                        '" . addslashes($row['purevatcde']) . "',
-                        '" . addslashes($row['salcur']) . "',
-                        '" . addslashes($row['purcur']) . "',
-                        '" . addslashes($row['itmrem1']) . "',
-                        '" . addslashes($row['itmrem2']) . "',
-                        '" . addslashes($row['itmrem3']) . "',
                         '" . addslashes($row['itmbal']) . "',
-                        '" . addslashes($row['strqty']) . "',
-                        '" . addslashes($row['chknontrd']) . "',
-                        '" . addslashes($row['package']) . "',
-                        '" . addslashes($row['rebdte']) . "',
-                        '" . addslashes($row['itmprt']) . "',
-                        '" . addslashes($row['gldepcde']) . "',
-                        '" . addslashes($row['reqbatchnum']) . "',
-                        '" . addslashes($row['logdte']) . "',
-                        '" . addslashes($row['itmsubclacde']) . "',
-                        '" . addslashes($row['linenum']) . "',
-                        '" . addslashes($row['saltarget01']) . "',
-                        '" . addslashes($row['saltarget02']) . "',
-                        '" . addslashes($row['saltarget03']) . "',
-                        '" . addslashes($row['saltarget04']) . "',
-                        '" . addslashes($row['saltarget05']) . "',
-                        '" . addslashes($row['saltarget06']) . "',
-                        '" . addslashes($row['saltarget07']) . "',
-                        '" . addslashes($row['saltarget08']) . "',
-                        '" . addslashes($row['saltarget09']) . "',
-                        '" . addslashes($row['saltarget10']) . "',
-                        '" . addslashes($row['saltarget11']) . "',
-                        '" . addslashes($row['saltarget12']) . "',
-                        '" . addslashes($row['recumcon']) . "',
-                        '" . addslashes($row['itmdeptcde']) . "',
-                        '" . addslashes($row['itmmerchcatcde']) . "',
-                        '" . addslashes($row['itmhierarchy']) . "',
                         '" . addslashes($row['itmclass']) . "',
-                        '" . addslashes($row['itmtag']) . "',
-                        '" . addslashes($row['itmsrc']) . "',
-                        '" . addslashes($row['itminvmvmnttyp']) . "',
-                        '" . addslashes($row['tariffcde']) . "',
-                        '" . addslashes($row['bomactcde']) . "',
-                        '" . addslashes($row['itmpalletcap']) . "',
-                        '" . addslashes($row['splblum']) . "',
-                        '" . addslashes($row['chkmultibarcde']) . "',
-                        '" . addslashes($row['multibarcde']) . "',
-                        '" . addslashes($row['purseractcde']) . "',
-                        '" . addslashes($row['minOQ']) . "',
-                        '" . addslashes($row['chkreorder']) . "',
-                        '" . addslashes($row['maxOQ']) . "'
+                        '" . addslashes($row['itmsrc']) . "'
                     )";
                 }
 
                 if (!empty($values)) {
-                    $sql = "INSERT INTO tbl_itemfile_rgdi (recid, ptycde, olditmcde, saldisact, purdisact, scpwddis, supdsc, itmcde, itmdsc, untmea, untmea2, conver, untcst1, untcst2, crilvl, remarks, wardsc, avecst, maxlvl, status, lstcst, untcst, untprc, brndsc, itmcladsc, itmmdl, supcde, warcde, brncde, itmclacde, salum, srtum, recum, prtum, invum, barcde, cstdebcde, cstcrecde, inactive, itmtyp, cgsactcde, salactcde, invactcde, srtactcde, multium, reqsernum, taxcde, prtactcde, puractcde, purtaxcde, salewtcde, purewtcde, salevatcde, purevatcde, salcur, purcur, itmrem1, itmrem2, itmrem3, itmbal, strqty, chknontrd, package, rebdte, itmprt, gldepcde, reqbatchnum, logdte, itmsubclacde, linenum, saltarget01, saltarget02, saltarget03, saltarget04, saltarget05, saltarget06, saltarget07, saltarget08, saltarget09, saltarget10, saltarget11, saltarget12, recumcon, itmdeptcde, itmmerchcatcde, itmhierarchy, itmclass, itmtag, itmsrc, itminvmvmnttyp, tariffcde, bomactcde, itmpalletcap, splblum, chkmultibarcde, multibarcde, purseractcde, minOQ, chkreorder, maxOQ) 
+                    $sql = "INSERT INTO tbl_itemfile_rgdi (recid, supdsc, itmcde, itmdsc, untmea, conver, untcst1, untcst2, crilvl, remarks, wardsc, avecst, status, untcst, untprc, brndsc, itmcladsc, supcde, warcde, brncde, itmclacde, barcde, inactive, itmtyp, multium, reqsernum, taxcde, itmbal, itmclass, itmsrc) 
                             VALUES " . implode(',', $values) . "
                             ON DUPLICATE KEY UPDATE 
-                              ptycde = VALUES(ptycde), 
-                              olditmcde = VALUES(olditmcde), 
-                              saldisact = VALUES(saldisact),
-                              purdisact = VALUES(purdisact),
-                              scpwddis = VALUES(scpwddis),
                               supdsc = VALUES(supdsc),
                               itmcde = VALUES(itmcde),
                               itmdsc = VALUES(itmdsc),
                               untmea = VALUES(untmea),
-                              untmea2 = VALUES(untmea2),
                               conver = VALUES(conver),
                               untcst1 = VALUES(untcst1),
                               untcst2 = VALUES(untcst2),
@@ -638,85 +425,24 @@ class Sync_model extends Model
                               remarks = VALUES(remarks),
                               wardsc = VALUES(wardsc),
                               avecst = VALUES(avecst),
-                              maxlvl = VALUES(maxlvl),
-                              lstcst = VALUES(lstcst),
+                              status = VALUES(status),
                               untcst = VALUES(untcst),
+                              untprc = VALUES(untprc),
                               brndsc = VALUES(brndsc),
                               itmcladsc = VALUES(itmcladsc),
-                              itmmdl = VALUES(itmmdl),
                               supcde = VALUES(supcde),
                               warcde = VALUES(warcde),
                               brncde = VALUES(brncde),
                               itmclacde = VALUES(itmclacde),
-                              salum = VALUES(salum),
-                              srtum = VALUES(srtum),
-                              recum = VALUES(recum),
-                              prtum = VALUES(prtum),
-                              invum = VALUES(invum),
                               barcde = VALUES(barcde),
-                              cstdebcde = VALUES(cstdebcde),
-                              cstcrecde = VALUES(cstcrecde),
                               inactive = VALUES(inactive),
-                              cgsactcde = VALUES(cgsactcde),
-                              salactcde = VALUES(salactcde),
-                              invactcde = VALUES(invactcde),
-                              srtactcde = VALUES(srtactcde),
+                              itmtyp = VALUES(itmtyp),
                               multium = VALUES(multium),
                               reqsernum = VALUES(reqsernum),
                               taxcde = VALUES(taxcde),
-                              prtactcde = VALUES(prtactcde),
-                              puractcde = VALUES(puractcde),
-                              purtaxcde = VALUES(purtaxcde),
-                              salewtcde = VALUES(salewtcde),
-                              purewtcde = VALUES(purewtcde),
-                              salevatcde = VALUES(salevatcde),
-                              purevatcde = VALUES(purevatcde),
-                              salcur = VALUES(salcur),
-                              purcur = VALUES(purcur),
-                              itmrem1 = VALUES(itmrem1),
-                              itmrem2 = VALUES(itmrem2),
-                              itmrem3 = VALUES(itmrem3),
                               itmbal = VALUES(itmbal),
-                              strqty = VALUES(strqty),
-                              chknontrd = VALUES(chknontrd),
-                              package = VALUES(package),
-                              rebdte = VALUES(rebdte),
-                              itmprt = VALUES(itmprt),
-                              gldepcde = VALUES(gldepcde),
-                              reqbatchnum = VALUES(reqbatchnum),
-                              logdte = VALUES(logdte),
-                              itmsubclacde = VALUES(itmsubclacde),
-                              linenum = VALUES(linenum),
-                              saltarget01 = VALUES(saltarget01),
-                              saltarget02 = VALUES(saltarget02),
-                              saltarget03 = VALUES(saltarget03),
-                              saltarget04 = VALUES(saltarget04),
-                              saltarget05 = VALUES(saltarget05),
-                              saltarget06 = VALUES(saltarget06),
-                              saltarget07 = VALUES(saltarget07),
-                              saltarget08 = VALUES(saltarget08),
-                              saltarget09 = VALUES(saltarget09),
-                              saltarget10 = VALUES(saltarget10),
-                              saltarget11 = VALUES(saltarget11),
-                              saltarget12 = VALUES(saltarget12),
-                              recumcon = VALUES(recumcon),
-                              itmdeptcde = VALUES(itmdeptcde),
-                              itmmerchcatcde = VALUES(itmmerchcatcde),
-                              itmhierarchy = VALUES(itmhierarchy),
                               itmclass = VALUES(itmclass),
-                              itmtag = VALUES(itmtag),
-                              itmsrc = VALUES(itmsrc),
-                              itminvmvmnttyp = VALUES(itminvmvmnttyp),
-                              tariffcde = VALUES(tariffcde),
-                              bomactcde = VALUES(bomactcde),
-                              itmpalletcap = VALUES(itmpalletcap),
-                              splblum = VALUES(splblum),
-                              chkmultibarcde = VALUES(chkmultibarcde),
-                              multibarcde = VALUES(multibarcde),
-                              purseractcde = VALUES(purseractcde),
-                              minOQ = VALUES(minOQ),
-                              chkreorder = VALUES(chkreorder),
-                              maxOQ = VALUES(maxOQ)";
+                              itmsrc = VALUES(itmsrc)";
 
                     $this->sfaDB->query($sql);
                     $totalRecordsSynced += count($sourceData);
@@ -730,8 +456,245 @@ class Sync_model extends Model
         }    
         return $status === 'success' ? "Data sync completed for Item File RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
+    
+    // public function syncDataitemfileRGDIBK($batchSize = 5000)
+    // {
+    //     $offset = 0;
+    //     $totalRecordsSynced = 0;
+    //     $errorMessage = null;
+    //     $status = 'success';
+    //     try {
+    //         while (true) {
+    //             $sourceData = $this->traccRgdiDB->table('itemfile')
+    //                                          ->limit($batchSize, $offset)
+    //                                          ->get()
+    //                                          ->getResultArray();
 
-    public function syncBrandData($batchSize = 100)
+    //             if (empty($sourceData)) {
+    //                 break;
+    //             }
+
+    //             $values = [];
+    //             foreach ($sourceData as $row) {
+    //                 $values[] = "(
+    //                     '" . addslashes($row['recid']) . "',
+    //                     '" . addslashes($row['ptycde']) . "',
+    //                     '" . addslashes($row['olditmcde']) . "',
+    //                     '" . addslashes($row['saldisact']) . "',
+    //                     '" . addslashes($row['purdisact']) . "',
+    //                     '" . addslashes($row['scpwddis']) . "',
+    //                     '" . addslashes($row['supdsc']) . "',
+    //                     '" . addslashes($row['itmcde']) . "',
+    //                     '" . addslashes($row['itmdsc']) . "',
+    //                     '" . addslashes($row['untmea']) . "',
+    //                     '" . addslashes($row['untmea2']) . "',
+    //                     '" . addslashes($row['conver']) . "',
+    //                     '" . addslashes($row['untcst1']) . "',
+    //                     '" . addslashes($row['untcst2']) . "',
+    //                     '" . addslashes($row['crilvl']) . "',
+    //                     '" . addslashes($row['remarks']) . "',
+    //                     '" . addslashes($row['wardsc']) . "',
+    //                     '" . addslashes($row['avecst']) . "',
+    //                     '" . addslashes($row['maxlvl']) . "',
+    //                     '" . addslashes($row['status']) . "',
+    //                     '" . addslashes($row['lstcst']) . "',
+    //                     '" . addslashes($row['untcst']) . "',
+    //                     '" . addslashes($row['untprc']) . "',
+    //                     '" . addslashes($row['brndsc']) . "',
+    //                     '" . addslashes($row['itmcladsc']) . "',
+    //                     '" . addslashes($row['itmmdl']) . "',
+    //                     '" . addslashes($row['supcde']) . "',
+    //                     '" . addslashes($row['warcde']) . "',
+    //                     '" . addslashes($row['brncde']) . "',
+    //                     '" . addslashes($row['itmclacde']) . "',
+    //                     '" . addslashes($row['salum']) . "',
+    //                     '" . addslashes($row['srtum']) . "',
+    //                     '" . addslashes($row['recum']) . "',
+    //                     '" . addslashes($row['prtum']) . "',
+    //                     '" . addslashes($row['invum']) . "',
+    //                     '" . addslashes($row['barcde']) . "',
+    //                     '" . addslashes($row['cstdebcde']) . "',
+    //                     '" . addslashes($row['cstcrecde']) . "',
+    //                     '" . addslashes($row['inactive']) . "',
+    //                     '" . addslashes($row['itmtyp']) . "',
+    //                     '" . addslashes($row['cgsactcde']) . "',
+    //                     '" . addslashes($row['salactcde']) . "',
+    //                     '" . addslashes($row['invactcde']) . "',
+    //                     '" . addslashes($row['srtactcde']) . "',
+    //                     '" . addslashes($row['multium']) . "',
+    //                     '" . addslashes($row['reqsernum']) . "',
+    //                     '" . addslashes($row['taxcde']) . "',
+    //                     '" . addslashes($row['prtactcde']) . "',
+    //                     '" . addslashes($row['puractcde']) . "',
+    //                     '" . addslashes($row['purtaxcde']) . "',
+    //                     '" . addslashes($row['salewtcde']) . "',
+    //                     '" . addslashes($row['purewtcde']) . "',
+    //                     '" . addslashes($row['salevatcde']) . "',
+    //                     '" . addslashes($row['purevatcde']) . "',
+    //                     '" . addslashes($row['salcur']) . "',
+    //                     '" . addslashes($row['purcur']) . "',
+    //                     '" . addslashes($row['itmrem1']) . "',
+    //                     '" . addslashes($row['itmrem2']) . "',
+    //                     '" . addslashes($row['itmrem3']) . "',
+    //                     '" . addslashes($row['itmbal']) . "',
+    //                     '" . addslashes($row['strqty']) . "',
+    //                     '" . addslashes($row['chknontrd']) . "',
+    //                     '" . addslashes($row['package']) . "',
+    //                     '" . addslashes($row['rebdte']) . "',
+    //                     '" . addslashes($row['itmprt']) . "',
+    //                     '" . addslashes($row['gldepcde']) . "',
+    //                     '" . addslashes($row['reqbatchnum']) . "',
+    //                     '" . addslashes($row['logdte']) . "',
+    //                     '" . addslashes($row['itmsubclacde']) . "',
+    //                     '" . addslashes($row['linenum']) . "',
+    //                     '" . addslashes($row['saltarget01']) . "',
+    //                     '" . addslashes($row['saltarget02']) . "',
+    //                     '" . addslashes($row['saltarget03']) . "',
+    //                     '" . addslashes($row['saltarget04']) . "',
+    //                     '" . addslashes($row['saltarget05']) . "',
+    //                     '" . addslashes($row['saltarget06']) . "',
+    //                     '" . addslashes($row['saltarget07']) . "',
+    //                     '" . addslashes($row['saltarget08']) . "',
+    //                     '" . addslashes($row['saltarget09']) . "',
+    //                     '" . addslashes($row['saltarget10']) . "',
+    //                     '" . addslashes($row['saltarget11']) . "',
+    //                     '" . addslashes($row['saltarget12']) . "',
+    //                     '" . addslashes($row['recumcon']) . "',
+    //                     '" . addslashes($row['itmdeptcde']) . "',
+    //                     '" . addslashes($row['itmmerchcatcde']) . "',
+    //                     '" . addslashes($row['itmhierarchy']) . "',
+    //                     '" . addslashes($row['itmclass']) . "',
+    //                     '" . addslashes($row['itmtag']) . "',
+    //                     '" . addslashes($row['itmsrc']) . "',
+    //                     '" . addslashes($row['itminvmvmnttyp']) . "',
+    //                     '" . addslashes($row['tariffcde']) . "',
+    //                     '" . addslashes($row['bomactcde']) . "',
+    //                     '" . addslashes($row['itmpalletcap']) . "',
+    //                     '" . addslashes($row['splblum']) . "',
+    //                     '" . addslashes($row['chkmultibarcde']) . "',
+    //                     '" . addslashes($row['multibarcde']) . "',
+    //                     '" . addslashes($row['purseractcde']) . "',
+    //                     '" . addslashes($row['minOQ']) . "',
+    //                     '" . addslashes($row['chkreorder']) . "',
+    //                     '" . addslashes($row['maxOQ']) . "'
+    //                 )";
+    //             }
+
+    //             if (!empty($values)) {
+    //                 $sql = "INSERT INTO tbl_itemfile_rgdi (recid, ptycde, olditmcde, saldisact, purdisact, scpwddis, supdsc, itmcde, itmdsc, untmea, untmea2, conver, untcst1, untcst2, crilvl, remarks, wardsc, avecst, maxlvl, status, lstcst, untcst, untprc, brndsc, itmcladsc, itmmdl, supcde, warcde, brncde, itmclacde, salum, srtum, recum, prtum, invum, barcde, cstdebcde, cstcrecde, inactive, itmtyp, cgsactcde, salactcde, invactcde, srtactcde, multium, reqsernum, taxcde, prtactcde, puractcde, purtaxcde, salewtcde, purewtcde, salevatcde, purevatcde, salcur, purcur, itmrem1, itmrem2, itmrem3, itmbal, strqty, chknontrd, package, rebdte, itmprt, gldepcde, reqbatchnum, logdte, itmsubclacde, linenum, saltarget01, saltarget02, saltarget03, saltarget04, saltarget05, saltarget06, saltarget07, saltarget08, saltarget09, saltarget10, saltarget11, saltarget12, recumcon, itmdeptcde, itmmerchcatcde, itmhierarchy, itmclass, itmtag, itmsrc, itminvmvmnttyp, tariffcde, bomactcde, itmpalletcap, splblum, chkmultibarcde, multibarcde, purseractcde, minOQ, chkreorder, maxOQ) 
+    //                         VALUES " . implode(',', $values) . "
+    //                         ON DUPLICATE KEY UPDATE 
+    //                           ptycde = VALUES(ptycde), 
+    //                           olditmcde = VALUES(olditmcde), 
+    //                           saldisact = VALUES(saldisact),
+    //                           purdisact = VALUES(purdisact),
+    //                           scpwddis = VALUES(scpwddis),
+    //                           supdsc = VALUES(supdsc),
+    //                           itmcde = VALUES(itmcde),
+    //                           itmdsc = VALUES(itmdsc),
+    //                           untmea = VALUES(untmea),
+    //                           untmea2 = VALUES(untmea2),
+    //                           conver = VALUES(conver),
+    //                           untcst1 = VALUES(untcst1),
+    //                           untcst2 = VALUES(untcst2),
+    //                           crilvl = VALUES(crilvl),
+    //                           remarks = VALUES(remarks),
+    //                           wardsc = VALUES(wardsc),
+    //                           avecst = VALUES(avecst),
+    //                           maxlvl = VALUES(maxlvl),
+    //                           lstcst = VALUES(lstcst),
+    //                           untcst = VALUES(untcst),
+    //                           brndsc = VALUES(brndsc),
+    //                           itmcladsc = VALUES(itmcladsc),
+    //                           itmmdl = VALUES(itmmdl),
+    //                           supcde = VALUES(supcde),
+    //                           warcde = VALUES(warcde),
+    //                           brncde = VALUES(brncde),
+    //                           itmclacde = VALUES(itmclacde),
+    //                           salum = VALUES(salum),
+    //                           srtum = VALUES(srtum),
+    //                           recum = VALUES(recum),
+    //                           prtum = VALUES(prtum),
+    //                           invum = VALUES(invum),
+    //                           barcde = VALUES(barcde),
+    //                           cstdebcde = VALUES(cstdebcde),
+    //                           cstcrecde = VALUES(cstcrecde),
+    //                           inactive = VALUES(inactive),
+    //                           cgsactcde = VALUES(cgsactcde),
+    //                           salactcde = VALUES(salactcde),
+    //                           invactcde = VALUES(invactcde),
+    //                           srtactcde = VALUES(srtactcde),
+    //                           multium = VALUES(multium),
+    //                           reqsernum = VALUES(reqsernum),
+    //                           taxcde = VALUES(taxcde),
+    //                           prtactcde = VALUES(prtactcde),
+    //                           puractcde = VALUES(puractcde),
+    //                           purtaxcde = VALUES(purtaxcde),
+    //                           salewtcde = VALUES(salewtcde),
+    //                           purewtcde = VALUES(purewtcde),
+    //                           salevatcde = VALUES(salevatcde),
+    //                           purevatcde = VALUES(purevatcde),
+    //                           salcur = VALUES(salcur),
+    //                           purcur = VALUES(purcur),
+    //                           itmrem1 = VALUES(itmrem1),
+    //                           itmrem2 = VALUES(itmrem2),
+    //                           itmrem3 = VALUES(itmrem3),
+    //                           itmbal = VALUES(itmbal),
+    //                           strqty = VALUES(strqty),
+    //                           chknontrd = VALUES(chknontrd),
+    //                           package = VALUES(package),
+    //                           rebdte = VALUES(rebdte),
+    //                           itmprt = VALUES(itmprt),
+    //                           gldepcde = VALUES(gldepcde),
+    //                           reqbatchnum = VALUES(reqbatchnum),
+    //                           logdte = VALUES(logdte),
+    //                           itmsubclacde = VALUES(itmsubclacde),
+    //                           linenum = VALUES(linenum),
+    //                           saltarget01 = VALUES(saltarget01),
+    //                           saltarget02 = VALUES(saltarget02),
+    //                           saltarget03 = VALUES(saltarget03),
+    //                           saltarget04 = VALUES(saltarget04),
+    //                           saltarget05 = VALUES(saltarget05),
+    //                           saltarget06 = VALUES(saltarget06),
+    //                           saltarget07 = VALUES(saltarget07),
+    //                           saltarget08 = VALUES(saltarget08),
+    //                           saltarget09 = VALUES(saltarget09),
+    //                           saltarget10 = VALUES(saltarget10),
+    //                           saltarget11 = VALUES(saltarget11),
+    //                           saltarget12 = VALUES(saltarget12),
+    //                           recumcon = VALUES(recumcon),
+    //                           itmdeptcde = VALUES(itmdeptcde),
+    //                           itmmerchcatcde = VALUES(itmmerchcatcde),
+    //                           itmhierarchy = VALUES(itmhierarchy),
+    //                           itmclass = VALUES(itmclass),
+    //                           itmtag = VALUES(itmtag),
+    //                           itmsrc = VALUES(itmsrc),
+    //                           itminvmvmnttyp = VALUES(itminvmvmnttyp),
+    //                           tariffcde = VALUES(tariffcde),
+    //                           bomactcde = VALUES(bomactcde),
+    //                           itmpalletcap = VALUES(itmpalletcap),
+    //                           splblum = VALUES(splblum),
+    //                           chkmultibarcde = VALUES(chkmultibarcde),
+    //                           multibarcde = VALUES(multibarcde),
+    //                           purseractcde = VALUES(purseractcde),
+    //                           minOQ = VALUES(minOQ),
+    //                           chkreorder = VALUES(chkreorder),
+    //                           maxOQ = VALUES(maxOQ)";
+
+    //                 $this->sfaDB->query($sql);
+    //                 $totalRecordsSynced += count($sourceData);
+    //             }
+
+    //             $offset += $batchSize;
+    //         }
+    //     } catch (\Exception $e) {
+    //         $status = 'error';
+    //         $errorMessage = $e->getMessage();
+    //     }    
+    //     return $status === 'success' ? "Data sync completed for Item File RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    // }
+
+    public function syncBrandData($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -787,7 +750,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Brand with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncClassificationData($batchSize = 100)
+    public function syncClassificationData($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -843,7 +806,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Classification with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCusPaymentGroupLmiData($batchSize = 100)
+    public function syncCusPaymentGroupLmiData($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -897,7 +860,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer Payment Group LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCusPaymentGroupRgdiData($batchSize = 100)
+    public function syncCusPaymentGroupRgdiData($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -951,7 +914,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer Payment Group RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCustomerLmiData($batchSize = 100)
+    public function syncCustomerLmiData($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -1034,7 +997,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCustomerRgdiData($batchSize = 100)
+    public function syncCustomerRgdiData($batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
