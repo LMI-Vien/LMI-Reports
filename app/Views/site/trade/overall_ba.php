@@ -272,8 +272,8 @@
                 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-info" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
+                    <button class="btn btn-info" id="previewButton" onclick="handleAction('export_pdf')"><i class="fas fa-file-export"></i> PDF</button>
+                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export_excel')"><i class="fas fa-file-export"></i> Excel</button>
                 </div>
             </div>
         </div>
@@ -522,159 +522,189 @@
         });
     }
 
-    function handleAction(action) {
-        let selectedStore = $('#store_id').val();
-        let selectedArea = $('#area_id').val();
-        let selectedMonth = $('#month').val();
-        let selectedYear = $('#year').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+    // function handleAction(action) {
+    //     let selectedStore = $('#store_id').val();
+    //     let selectedArea = $('#area_id').val();
+    //     let selectedMonth = $('#month').val();
+    //     let selectedYear = $('#year').val();
+    //     let selectedSortField = $('#sortBy').val();
+    //     let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
-        if (action === 'preview') {
-            let link = `${selectedStore}-${selectedArea}-${selectedMonth}-${selectedYear}-${selectedSortField}-${selectedSortOrder}`;
-            window.open(`<?= base_url()?>trade-dashboard/trade-overall-ba-view/${link}`, '_blank');
-        } else if (action === 'export') {
-            prepareExport();
-        } else {
-            alert('wtf are u doing?')
-        }
-    }
+    //     if (action === 'preview') {
+    //         let link = `${selectedStore}-${selectedArea}-${selectedMonth}-${selectedYear}-${selectedSortField}-${selectedSortOrder}`;
+    //         window.open(`<?= base_url()?>trade-dashboard/trade-overall-ba-view/${link}`, '_blank');
+    //     } else if (action === 'export') {
+    //         prepareExport();
+    //     } else {
+    //         alert('wtf are u doing?')
+    //     }
+    // }
 
-    function prepareExport() {
-        let selectedStore = $('#store_id').val();
-        let selectedArea = $('#area_id').val();
-        let selectedMonth = $('#month').val();
-        let selectedYear = $('#year').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+    // function prepareExport() {
+    //     let selectedStore = $('#store_id').val();
+    //     let selectedArea = $('#area_id').val();
+    //     let selectedMonth = $('#month').val();
+    //     let selectedYear = $('#year').val();
+    //     let selectedSortField = $('#sortBy').val();
+    //     let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
-        let fetchPromise = new Promise((resolve, reject) => {
-        fetchTradeDashboardData({
-            selectedStore, 
-            selectedArea, 
-            selectedMonth, 
-            selectedYear, 
-            selectedSortField, 
-            selectedSortOrder,
-            length: 1000,
-            start: 0,
-            onSuccess: function(data) {
-                let newData = data.map(
-                    ({ rank, store_code, area, store_name, actual_sales, target_sales, percent_ach, balance_to_target, possible_incentives, 
-                        target_per_remaining_days, ly_scanned_data, brand_ambassadors, deployment_date, brands, growth 
-                    }) => ({
-                        "Rank": rank,
-                        "Store Code": store_code,
-                        "Area": area,
-                        "Store Name": store_name,
-                        "Actual Sales": actual_sales,
-                        "Target": target_sales,
-                        "% Ach": percent_ach,
-                        "Balance To Target": balance_to_target,
-                        "Possible Incentives": possible_incentives,
-                        "Target per Remaining days": target_per_remaining_days,
-                        "LY Scanned Data": ly_scanned_data,
-                        "Brand Ambassador": brand_ambassadors,
-                        "Deployed Date": deployment_date,
-                        "Brand": brands,
-                        "Growth": growth
-                    })
-                )
-                resolve(newData);
-            },
-            onError: function(error) {
-                reject(error);
-            }
-        });
-    });
+    //     let fetchPromise = new Promise((resolve, reject) => {
+    //     fetchTradeDashboardData({
+    //         selectedStore, 
+    //         selectedArea, 
+    //         selectedMonth, 
+    //         selectedYear, 
+    //         selectedSortField, 
+    //         selectedSortOrder,
+    //         length: 1000,
+    //         start: 0,
+    //         onSuccess: function(data) {
+    //             let newData = data.map(
+    //                 ({ rank, store_code, area, store_name, actual_sales, target_sales, percent_ach, balance_to_target, possible_incentives, 
+    //                     target_per_remaining_days, ly_scanned_data, brand_ambassadors, deployment_date, brands, growth 
+    //                 }) => ({
+    //                     "Rank": rank,
+    //                     "Store Code": store_code,
+    //                     "Area": area,
+    //                     "Store Name": store_name,
+    //                     "Actual Sales": actual_sales,
+    //                     "Target": target_sales,
+    //                     "% Ach": percent_ach,
+    //                     "Balance To Target": balance_to_target,
+    //                     "Possible Incentives": possible_incentives,
+    //                     "Target per Remaining days": target_per_remaining_days,
+    //                     "LY Scanned Data": ly_scanned_data,
+    //                     "Brand Ambassador": brand_ambassadors,
+    //                     "Deployed Date": deployment_date,
+    //                     "Brand": brands,
+    //                     "Growth": growth
+    //                 })
+    //             )
+    //             resolve(newData);
+    //         },
+    //         onError: function(error) {
+    //             reject(error);
+    //         }
+    //     });
+    // });
 
-    fetchPromise
-        .then(results => {
+    // fetchPromise
+    //     .then(results => {
 
-            const headerData = [
-                ["LIFESTRONG MARKETING INC."],
-                ["Report: Overall BA Sales Target"],
-                ["Date Generated: " + formatDate(new Date())],
-                ["Store Name: " + $('#store').val()],
-                ["Area: " + $('#area').val()],
-                ["Month: " + ($('#month option:selected').text() === "Select Month..." ? "All" : $('#month option:selected').text())],
-                ["Year: " + ($('#year option:selected').text() === "Select Year..." ? "All" : $('#year option:selected').text())],
-                [""]
-            ];
+    //         const headerData = [
+    //             ["LIFESTRONG MARKETING INC."],
+    //             ["Report: Overall BA Sales Target"],
+    //             ["Date Generated: " + formatDate(new Date())],
+    //             ["Store Name: " + $('#store').val()],
+    //             ["Area: " + $('#area').val()],
+    //             ["Month: " + ($('#month option:selected').text() === "Select Month..." ? "All" : $('#month option:selected').text())],
+    //             ["Year: " + ($('#year option:selected').text() === "Select Year..." ? "All" : $('#year option:selected').text())],
+    //             [""]
+    //         ];
     
-            exportArrayToCSV(results, `Report: BA Dashboard - ${formatDate(new Date())}`, headerData);
-        })
-        .catch(error => {
-            console.log(error, 'error');
-        });
+    //         exportArrayToCSV(results, `Report: BA Dashboard - ${formatDate(new Date())}`, headerData);
+    //     })
+    //     .catch(error => {
+    //         console.log(error, 'error');
+    //     });
 
-    }
+    // }
 
-    function fetchTradeDashboardData({ 
-        baseUrl, 
-        selectedStore = null, 
-        selectedArea = null, 
-        selectedMonth = null, 
-        selectedYear = null, 
-        selectedSortField = null, 
-        selectedSortOrder = null,
-        length, 
-        start, 
-        onSuccess, 
-        onError 
-    }) {
-        let allData = [];
+    // function fetchTradeDashboardData({ 
+    //     baseUrl, 
+    //     selectedStore = null, 
+    //     selectedArea = null, 
+    //     selectedMonth = null, 
+    //     selectedYear = null, 
+    //     selectedSortField = null, 
+    //     selectedSortOrder = null,
+    //     length, 
+    //     start, 
+    //     onSuccess, 
+    //     onError 
+    // }) {
+    //     let allData = [];
 
-        function fetchData(offset) {
-            $.ajax({
-                url: base_url + 'trade-dashboard/trade-overall-ba',
-                type: 'GET',
-                data: {
-                    store : selectedStore === "0" ? null : selectedStore,
-                    area : selectedArea === "0" ? null : selectedArea,
-                    month : selectedMonth === "0" ? null : selectedMonth,
-                    year : selectedYear === "0" ? null : selectedYear,
-                    sort_field : selectedSortField,
-                    sort : selectedSortOrder,
-                    limit: length,
-                    offset: offset
-                },
-                success: function(response) {
-                    if (response.data && response.data.length) {
-                        allData = allData.concat(response.data);
+    //     function fetchData(offset) {
+    //         $.ajax({
+    //             url: base_url + 'trade-dashboard/trade-overall-ba',
+    //             type: 'GET',
+    //             data: {
+    //                 store : selectedStore === "0" ? null : selectedStore,
+    //                 area : selectedArea === "0" ? null : selectedArea,
+    //                 month : selectedMonth === "0" ? null : selectedMonth,
+    //                 year : selectedYear === "0" ? null : selectedYear,
+    //                 sort_field : selectedSortField,
+    //                 sort : selectedSortOrder,
+    //                 limit: length,
+    //                 offset: offset
+    //             },
+    //             success: function(response) {
+    //                 if (response.data && response.data.length) {
+    //                     allData = allData.concat(response.data);
 
-                        if (response.data.length === length) {
-                            fetchData(offset + length);
-                        } else {
-                            if (onSuccess) onSuccess(allData);
-                        }
-                    } else {
-                        if (onSuccess) onSuccess(allData);
-                    }
-                },
-                error: function(error) {
-                    if (onError) onError(error);
-                }
-            });
-        }
+    //                     if (response.data.length === length) {
+    //                         fetchData(offset + length);
+    //                     } else {
+    //                         if (onSuccess) onSuccess(allData);
+    //                     }
+    //                 } else {
+    //                     if (onSuccess) onSuccess(allData);
+    //                 }
+    //             },
+    //             error: function(error) {
+    //                 if (onError) onError(error);
+    //             }
+    //         });
+    //     }
 
-        fetchData(start);
-    }
+    //     fetchData(start);
+    // }
 
-    function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
-        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+    // function exportArrayToCSV(data, filename, headerData) {
+    //     // Create a new worksheet
+    //     const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
 
-        // Add header rows manually
-        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+    //     // Add header rows manually
+    //     XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
 
-        // Convert worksheet to CSV format
-        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+    //     // Convert worksheet to CSV format
+    //     const csvContent = XLSX.utils.sheet_to_csv(worksheet);
 
-        // Convert CSV string to Blob
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    //     // Convert CSV string to Blob
+    //     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-        // Trigger file download
-        saveAs(blob, filename + ".csv");
+    //     // Trigger file download
+    //     saveAs(blob, filename + ".csv");
+    // }
+
+    function handleAction(action) {
+        modal.loading(true);
+    
+        let selectedStore = $('#store').val();
+        let selectedArea = $('#area').val();
+        let selectedMonth = $('#month').val();
+        let selectedYear = $('#year').val();
+        let selectedSortField = $('#sortBy').val();
+        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+
+        let url = base_url + 'trade-dashboard/generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-overall-ba?'
+            + 'sort_field=' + encodeURIComponent(selectedSortField)
+            + '&sort=' + encodeURIComponent(selectedSortOrder)
+            + '&store=' + encodeURIComponent(selectedStore)
+            + '&area=' + encodeURIComponent(selectedArea)
+            + '&month=' + encodeURIComponent(selectedMonth)
+            + '&year=' + encodeURIComponent(selectedYear)
+            + '&limit=' + encodeURIComponent(length)
+            + '&offset=' + encodeURIComponent(offset);
+
+        let iframe = document.createElement('iframe');
+        iframe.style.display = "none";
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        setTimeout(() => {
+            modal.loading(false);
+        }, 5000);
     }
 </script>

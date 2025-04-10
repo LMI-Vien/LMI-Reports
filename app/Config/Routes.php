@@ -52,16 +52,20 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('trade-store-performance', 'TradeDashboard::trade_store_performance');
     $routes->post('trade-store-performance', 'TradeDashboard::trade_store_performance');
     //trade_overall_asc_sales_report
-     $routes->get('generate-pdf-ba', 'TradeDashboard::generatePdfBA');
-     $routes->get('generate-excel-ba', 'TradeDashboard::generateExcelBA');
-     
-     $routes->get('generate-pdf-asc', 'TradeDashboard::generatePdfASC');
-     $routes->get('generate-excel-asc', 'TradeDashboard::generateExcelASC');
+    // trade - info for BA (preview export)
+    $routes->get('generate-pdf-ba', 'TradeDashboard::generatePdfBA');
+    $routes->get('generate-excel-ba', 'TradeDashboard::generateExcelBA');
+    // trade - overall ba sales target (preview export)
+    $routes->get('generate-pdf-overall-ba', 'TradeDashboard::generatePdfOverallBA');
+    $routes->get('generate-excel-overall-ba', 'TradeDashboard::generateExcelOverallBA');
+    // trade - info for ASC (preview export)
+    $routes->get('generate-pdf-asc', 'TradeDashboard::generatePdfASC');
+    $routes->get('generate-excel-asc', 'TradeDashboard::generateExcelASC');
 
 
-     $routes->get('refresh-data', 'TradeDashboard::refreshPreAggregatedData');
-     //refreshPreAggregatedData
-     $routes->get('get-counts', 'Dashboard::getCounts');
+    $routes->get('refresh-data', 'TradeDashboard::refreshPreAggregatedData');
+    //refreshPreAggregatedData
+    $routes->get('get-counts', 'Dashboard::getCounts');
 });
 
 
@@ -103,6 +107,8 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('menu_add/(:num)/(:any)', 'Cms\Cms_menu::menu_add');
         $routes->get('menu_update/(:num)', 'Cms\Cms_menu::menu_update');
     });
+
+    $routes->get('system-parameter', 'Cms\System_parameter::index');
 
     $routes->group('import-sell-out', static function ($routes) {
         $routes->get('/', 'Cms\Import_sell_out::index');
