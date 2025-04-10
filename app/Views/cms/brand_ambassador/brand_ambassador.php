@@ -1728,7 +1728,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
     function save_data(action, id) {
 
         generateCode(function (generatedCode) {
-            var name = $('#name').val().trim();
+            var name = $('#name').val();
             var deployment_date = $('#deployment_date').val();
             var agency = $('#agency').val();
             var brand = '';

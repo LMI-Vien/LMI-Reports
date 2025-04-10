@@ -1072,6 +1072,30 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
             return $results;
     }
 
+    function get_valid_records_ba_area_store_brand() {
+        $builder = $this->db->table('tbl_brand_ambassador ba');
+        $builder->select("
+            ba.id,
+            ba.code,
+            ba.store AS store_id,
+            ba.area AS area_id,
+            ba.name AS ba_name,
+            s.code AS store_code,
+            a.code AS area_code,
+            GROUP_CONCAT(b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
+        ");
+        $builder->where('ba.status', 1);
+        $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
+        $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
+        $builder->join('tbl_store s', 'ba.store = s.id', 'left');
+        $builder->join('tbl_area a', 'ba.area = a.id', 'left');
+        $builder->groupBy('ba.id');
+
+        $results = $builder->get()->getResultArray();
+
+        return $results;
+    }
+
     function get_weeks() {
         $query = $this->db->query("CALL get_weeks()");
         return $query->getResultArray(); // Return data as an array

@@ -502,23 +502,9 @@
                     `''`, 
                     `''`, 
                     (res) => {
-                        res.forEach(item => {
-                            let updateRecords = [];
-                            res.forEach(item => {
-                                item.updated_date = formatDate(new Date());
-                                item.updated_by = user_id;
-                                item.status = -2;
-                                updateRecords.push(item);
-                            })
-                            console.log(updateRecords, 'updateRecords')
-                            batch_update(url, updateRecords, "tbl_ba_sales_report", "id", false, (response) => {
-                                if (response.message !== 'success') {
-                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                                }
-                                modal.alert(success_delete_message, "success", function() {
-                                    location.reload();
-                                });
-                            });
+                        date = [date];
+                        batch_delete(url, "tbl_ba_sales_report", "date", date, 'date', function(resp) {
+                            modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                         });
                     }
                 );
@@ -702,35 +688,33 @@
         worker.postMessage({ data: jsonData, base_url });
 
         worker.onmessage = function(e) {
-            modal.loading_progress(false);
             const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
-            if(progress == 100){
-                if (invalid) {
-                    let errorMsg = err_counter > 1000 
-                        ? '⚠️ Too many errors detected. Please download the error log for details.'
-                        : errorLogs.join("<br>");
-                    modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
-                        //read_xl_file();
-                        btn.prop("disabled", false);
-                    });
-                    createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
-                } else if (valid_data && valid_data.length > 0) {
-                    btn.prop("disabled", false);
-                    updateSwalProgress("Validation Completed", 10);
-                    setTimeout(() => saveValidatedData(valid_data), 500);
-                } else {
-                    btn.prop("disabled", false);
-                    modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
-                }
-            }else{
-                //modal.loading(false);
-               // modal.loading_progress(true); 
-                //updateSwalProgress("Validating data...", progress);
+
+            if (progress !== undefined) {
+                modal.loading_progress(true, `Processing... ${progress}%`);
+                return;
             }
 
+            modal.loading_progress(false);
+
+            if (invalid) {
+                let errorMsg = err_counter > 1000
+                    ? '⚠️ Too many errors detected. Please download the error log for details.'
+                    : errorLogs.slice(0, 10).join("<br>") + (errorLogs.length > 10 ? "<br>...and more" : "");
+
+                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
+                    $(".btn.save").prop("disabled", false);
+                });
+
+                createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
+            } else if (Array.isArray(valid_data) && valid_data.length > 0) { 
+                saveValidatedData(valid_data);
+            } else {
+                modal.alert("No valid data found. Please check the file.", "error");
+            }
         };
 
-        worker.onerror = function() {
+        worker.onerror = function(event) {
             modal.loading_progress(false);
             modal.alert("Error processing data. Please try again.", "error");
         };
