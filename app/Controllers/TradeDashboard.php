@@ -1199,5 +1199,277 @@ class TradeDashboard extends BaseController
 	    exit;
 	}
 
+	public function generatePdfASC()
+	{
+		$month = date('m');
+		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
+		$day = date('d');
+		$tpr = $days - $day;
+
+		$sort_field = $this->request->getGet('sort_field');
+		$sort = $this->request->getGet('sort');
+		$store = $this->request->getGet('store') ?? null;
+		$area = $this->request->getGet('area') ?? null;
+		$month = $this->request->getGet('month') ?? null;
+		$year = $this->request->getGet('year') ?? null;
+		$offset = 0;
+		$limit = 10;
+		$formatted_month = str_pad($month, 2, '0', STR_PAD_LEFT);
+		$date = null;
+		$lookup_month = null;
+		$lyYear = 0;
+		$selected_year = null;
+		$lyMonth = null;
+		$targetYear = null;
+
+		if($year) {
+			$actual_year = $this->Dashboard_model->getYear($year);
+			$selected_year = $actual_year[0]['year'];
+			$lyYear = $selected_year - 1;
+			$date = $actual_year[0]['year'];
+			$targetYear = $actual_year[0]['id'];
+		}
+
+		if($month) {
+			$date = $formatted_month;
+			$lyMonth = $month;
+		}
+
+		if($year && $month) {
+			$actual_year = $this->Dashboard_model->getYear($year);
+			$date = $actual_year[0]['year'] . '-' . $formatted_month;
+		}
+
+		if(empty($area)) {
+			$area = null;
+		}
+
+		if(empty($store)) {
+			$store = null;
+		}
+
+		$store = $store ?: null;
+		$area = $area ?: null;
+		
+		$title = 'ASC_Dashboard_Report';
+		
+		$data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $tpr, $date);
+		// echo var_dump($data);
+		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf->SetCreator('LMI SFA');
+		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
+		$pdf->SetTitle('ASC Dashboard Report');
+		$pdf->setPrintHeader(false);
+		$pdf->setPrintFooter(false);
+		$pdf->AddPage();
+
+		$filterData = [
+			"Store" => $store ?: "ALL",
+			"Area" => $area ?: "ALL",
+			"Month" => $month ?: "ALL",
+			"Year" => $year ?: "ALL",
+			"Sort By" => $sort_field ?: "ALL",
+			"Sort" => $sort ?: "ALL",
+		];
+
+		$headers = [
+			"rank" => "Rank",
+			"area" => "Area",
+			"asc_names" => "Area Sales Coordinator",
+			"actual_sales" => "Actual Sales Report",
+			"target_sales" => "Target",
+			"percent_ach" => "% Achieved",
+			"balance_to_target" => "Balance to Target",
+			"target_per_remaining_days" => "Target per Remaining Days"
+		];
+
+		$this->printHeader($pdf, "ASC Dashboard");
+		$this->printFilter($pdf, $filterData);
+		$this->printTableHeader($pdf, $headers);
+		$this->printTableData($pdf, $headers, $data, $filterData);
+
+		$pdf->Output($title . '.pdf', 'D');
+		exit;
+	}
+
+	// ================================= Header for pdf export =================================
+	private function printHeader($pdf, $title) {
+		$pdf->SetFont('helvetica', '', 12);
+		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
+		$pdf->SetFont('helvetica', '', 10);
+		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
+		$pdf->Ln(5);
+	}
+
+
+	// ================================= Display filters for pdf export =================================
+	private function printFilter($pdf, $filters) {
+		$pdf->SetFont('helvetica', '', 9);
+		
+		$pageWidth = $pdf->getPageWidth();
+		$pageMargin = $pdf->getMargins();
+		$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / count($filters);
+
+		foreach($filters as $key => $value) {
+			$pdf->Cell($width, 10, $key . ": " . $value, 0, 0, 'L');
+		}
+		$pdf->Ln(8);
+
+		$pdf->Cell(0, 6, 'Generated Date: ' . date('Y-m-d'), 0, 1, 'L');
+
+		$pdf->Ln(2);
+		$pdf->Cell(0, 0, '', 'T');
+		$pdf->Ln(4);
+	}
+
+	// ================================= Display table headers for pdf export =================================
+	private function printTableHeader($pdf, $headers, $columnWidth = [], $height = 10) {
+		$pageWidth = $pdf->getPageWidth();
+		$pageMargin = $pdf->getMargins();
+		$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / count($headers);
+
+		$pdf->SetFont('helvetica', 'B', 10);
+		
+		if($columnWidth) {
+			foreach ($headers as $key => $header) {
+				$width = $columnWidth[$key];
+				$pdf->MultiCell($width, $height, $header, 1, 'C', false, 0);
+			}
+			$pdf->Ln();
+		} else {
+			foreach($headers as $header) {
+				$pdf->MultiCell($width, $height, $header, 1, 'C', false, 0);
+			}
+			$pdf->Ln();
+		}
+
+	}
+
+	// ================================= Display table data for pdf export =================================
+	private function printTableData($pdf, $header, $data, $filterData) {
+		$pageWidth = $pdf->getPageWidth();
+		$pageMargin = $pdf->getMargins();
+		$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / count($header);
+		$headers = array_keys($header);
+
+		
+		foreach($data['data'] as $row) {
+			if($pdf->GetY() > 180) {
+				$pdf->AddPage();
+				$this->printHeader($pdf, "ASC Dashboard");
+				$this->printFilter($pdf, $filterData);
+				$this->printTableHeader($pdf, $header);
+			}
+			
+			$pdf->SetFont('helvetica', '', 10);
+			foreach($headers as $head) {
+				$pdf->MultiCell($width, 10, $row->$head, 1, 'L', false, 0);
+			}
+			$pdf->MultiCell($width, 10, '', 0, 'C', false, 1);
+		}
+
+		$pdf->Ln();
+	}
+
+	public function generateExcelASC() {
+		$month = date('m');
+		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
+		$day = date('d');
+		$tpr = $days - $day;
+
+		$sort_field = $this->request->getGet('sort_field');
+		$sort = $this->request->getGet('sort');
+		$store = $this->request->getGet('store') ?? null;
+		$area = $this->request->getGet('area') ?? null;
+		$month = $this->request->getGet('month') ?? null;
+		$year = $this->request->getGet('year') ?? null;
+		$formatted_month = str_pad($month, 2, '0', STR_PAD_LEFT);
+		$date = null;
+		$lookup_month = null;
+		$lyYear = 0;
+		$selected_year = null;
+		$lyMonth = null;
+		$targetYear = null;
+		$limit = 10;
+		$offset = 0;
+
+		if($year) {
+			$actual_year = $this->Dashboard_model->getYear($year);
+			$selected_year = $actual_year[0]['year'];
+			$lyYear = $selected_year - 1;
+			$date = $actual_year[0]['year'];
+			$targetYear = $actual_year[0]['id'];
+		}
+
+		if($month) {
+			$date = $formatted_month;
+			$lyMonth = $month;
+		}
+
+		if($year && $month) {
+			$actual_year = $this->Dashboard_model->getYear($year);
+			$date = $actual_year[0]['year'] . '-' . $formatted_month;
+		}
+
+		if(empty($area)) {
+			$area = null;
+		}
+
+		if(empty($store)) {
+			$store = null;
+		}
+
+		$store = $store ?: null;
+		$area = $area ?: null;
+		
+		$title = 'ASC_Dashboard_Report';
+		
+		$data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $tpr, $date);
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
+		$sheet->setCellValue('A2', 'Report: Info for ASC');
+		$sheet->mergeCells('A1:E1');
+		$sheet->mergeCells('A2:E2');
+
+		$sheet->setCellValue('A4', 'Store: ' . ($store ?: 'ALL'));
+		$sheet->setCellValue('B4', 'Area: ' . ($area ?: 'ALL'));
+		$sheet->setCellValue('C4', 'Sort By: ' . ($area ?: 'ALL'));
+
+		$sheet->setCellValue('A5', 'Month: ' . ($area ?: 'ALL'));
+		$sheet->setCellValue('B5', 'Year: ' . ($area ?: 'ALL'));
+		$sheet->setCellValue('C5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+
+		$headers = ["Rank", "Area", "Area Sales Coordinator", "Actual Sales Report", "Target", "% Achieved", "Balance to Target", "Target per Remaining Days"];
+		$sheet->fromArray($headers, null, 'A7');
+		$sheet->getStyle('A7:H7')->getFont()->setBold(true);
+
+		$rowNum = 8;
+		foreach($data['data'] as $row) {
+			$sheet->setCellValueExplicit('A' . $rowNum, $row->rank, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('B' . $rowNum, $row->area, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('C' . $rowNum, $row->asc_names, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('D' . $rowNum, $row->actual_sales, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+			$sheet->setCellValueExplicit('E' . $rowNum, $row->target_sales, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+			$sheet->setCellValueExplicit('F' . $rowNum, $row->percent_ach, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+			$sheet->setCellValueExplicit('G' . $rowNum, $row->balance_to_target, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+			$sheet->setCellValueExplicit('H' . $rowNum, $row->target_per_remaining_days, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+			$rowNum++;
+		}
+
+		foreach(range('A', 'G') as $columnID) {
+			$sheet->getColumnDimension($columnID)->setAutoSize(true);
+		}
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+	    header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+	    header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
 
 }

@@ -297,8 +297,8 @@
                 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
+                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('export_pdf')"><i class="fas fa-eye"></i> PDF</button>
+                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export_excel')"><i class="fas fa-file-export"></i> Excel</button>
                 </div>
             </div>
         </div>
@@ -448,6 +448,7 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
+                    console.log(json);
                     return json.data.length ? json.data : [];
                 }
             },
@@ -483,8 +484,8 @@
         let selectedArea = $('#area_id').val() || "0";
         let selectedMonth = $('#month').val() || "0";
         let selectedYear = $('#year').val() || "0";
-        let selectedStoreName = $('#store').val() || "0";
-        let selectedAreaName = $('#area').val() || "0";
+        let selectedStoreName = $('#store_id').val() || "0";
+        let selectedAreaName = $('#area_id').val() || "0";
         let selectedMonthName = $("#month option:selected").text() || "0";
         let selectedYearName = $("#year option:selected").text() || "0";
         let selectedSortField = $('#sortBy').val() || "0";
@@ -499,32 +500,51 @@
             selectedYearName = "0";    
         }
 
-        if (action === 'preview') {
-            var url = "<?= base_url("trade-dashboard/set-asc-preview-session");?>";
-            var data = {
-                store : selectedStore,
-                area : selectedArea,
-                month : selectedMonth,
-                year : selectedYear,
-                storename : selectedStoreName,
-                areaname : selectedAreaName,
-                monthname : selectedMonthName,
-                yearname : selectedYearName,
-                sortfield : selectedSortField,
-                sortorder : selectedSortOrder
+        let url = base_url + 'trade-dashboard/generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-asc?'
+            + 'sort_field=' + encodeURIComponent(selectedSortField)
+            + '&sort=' + encodeURIComponent(selectedSortOrder)
+            + '&store=' + encodeURIComponent(selectedStoreName || '')
+            + '&area=' + encodeURIComponent(selectedAreaName || '')
+            + '&month=' + encodeURIComponent(selectedMonthName || '')
+            + '&year=' + encodeURIComponent(selectedYearName || '');
 
-            }
-            aJax.post(url,data,function(result){
-                if(result.status == "success"){
-                    window.location.href = "<?= base_url('trade-dashboard/asc-view') ?>";
-                }
+        console.log(url);
+
+        let iframe = document.createElement('iframe');
+        iframe.style.display = "none";
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        
+        // if (action === 'export_pdf') {
+        //     var url = "<?= base_url("trade-dashboard/set-asc-preview-session");?>";
+        //     var data = {
+        //         store : selectedStore,
+        //         area : selectedArea,
+        //         month : selectedMonth,
+        //         year : selectedYear,
+        //         storename : selectedStoreName,
+        //         areaname : selectedAreaName,
+        //         monthname : selectedMonthName,
+        //         yearname : selectedYearName,
+        //         sortfield : selectedSortField,
+        //         sortorder : selectedSortOrder
+
+        //     }
+
+        //     console.log(url);
+
+        //     aJax.post(url,data,function(result){
+        //         if(result.status == "success"){
+        //             // window.location.href = "<?= base_url('trade-dashboard/asc-view') ?>";
+        //             console.log(url);
+        //         }
                 
-            });
-        } else if (action === 'export') {
-            prepareExport();
-        } else {
+        //     });
+        // } else if (action === 'export') {
+        //     prepareExport();
+        // } else {
             
-        }
+        // }
     }
 
     function prepareExport() {
