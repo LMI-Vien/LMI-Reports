@@ -262,7 +262,7 @@
                 }
             ],
             order : {
-                field : "payment_group",
+                field : "id",
                 order : "asc" 
             }
         }

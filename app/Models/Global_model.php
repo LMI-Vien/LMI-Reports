@@ -915,11 +915,12 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
     }
 
     function get_valid_records_tracc_data($table, $column_name) {
-        return $this->db->table($table)
+        $builder = $this->db->table($table)
             ->select(['recid', $column_name, 'itmcde'])
             ->where('cusitmcde !=', '')
-            ->get()
-            ->getResultArray();
+            ->groupBy('itmcde');
+        $query = $builder->get();
+        return $query->getResultArray();
     }
 
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
