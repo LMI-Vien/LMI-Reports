@@ -129,10 +129,6 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('view/(:any)', 'Cms\Import_target_sales_ps::view');
     });
 
-    $routes->group('import-sales-top-list', static function ($routes) {
-        $routes->get('/', 'Cms\Import_sales_top_list::index');
-    });
-
     $routes->group('cms_preference/', static function ($routes) {
         $routes->get('get_logo', 'Cms\Cms_preference::get_logo');
         $routes->get('get_menu', 'Cms\Cms_preference::get_menu');
