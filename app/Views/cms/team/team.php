@@ -66,7 +66,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form-modal form-save-modal">
+                <form id="form-modal">
                     <div class="mb-3">
                         <label for="code" class="form-label">Team Code</label>
                         <input type="text" class="form-control required" id="code" aria-describedby="code" maxlength="25">
@@ -365,10 +365,12 @@
     }
 
     function open_modal(msg, actions, id) {
+        window.lastFocusedElement = document.activeElement;
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#popup_modal');
         let $footer = $modal.find('.modal-footer');
+        let $contentWrapper = $('.content-wrapper');
 
         $modal.find('.modal-title b').html(addNbsp(msg));
         reset_modal_fields();
@@ -399,7 +401,23 @@
         if (actions === 'edit') $footer.append(buttons.edit);
         $footer.append(buttons.close);
 
+        // Disable background content interaction
+        $contentWrapper.attr('inert', '');
+
+        // Move focus inside modal when opened
+        $modal.on('shown.bs.modal', function () {
+            $(this).find('input, textarea, button, select').filter(':visible:first').focus();
+        });
+
         $modal.modal('show');
+
+        // Fix focus issue when modal is hidden
+        $modal.on('hidden.bs.modal', function () {
+            $contentWrapper.removeAttr('inert');  // Re-enable background interaction
+            if (window.lastFocusedElement) {
+                window.lastFocusedElement.focus();
+            }
+        });
     }
 
     function reset_modal_fields() {

@@ -86,6 +86,12 @@ class Global_controller extends BaseController
 					$join = isset($_POST['join']) ? $_POST['join']: null;
 					$group= isset($_POST['group']) ? $_POST['group']: null;
 
+					if ($table === 'tbl_vmi_grouped') {
+					    $result_data = $this->Global_model->get_vmi_grouped_with_latest_updated($query, $limit, ($offset - 1) * $limit);
+					    echo json_encode($result_data);
+					    break;
+					}
+
 					$result_data = $this->Global_model->get_data_list($table, $query, $limit, ($offset - 1) * $limit, $select,$order_field,$order_type, $join, $group);
 
 			        echo json_encode($result_data);
@@ -365,24 +371,33 @@ class Global_controller extends BaseController
 			// ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
 			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
 			
-			case 'fetch_existing':
+			case 'fetch_existing_new':
 			    try {
 			        $table = $this->request->getPost('table');
 			        $selected_fields = $this->request->getPost('selected_fields');
+			        $filters = $this->request->getPost('filters');
 			        $field = $this->request->getPost('field') ?: null;
 			        $value = $this->request->getPost('value') ?: null;
 			        $status = $this->request->getPost('status') ?: false;
+
+			        $field_filter = [];
+			        if($table == "tbl_vmi"){
+			        	$field_filter = ['year', 'month', 'week', 'company'];
+			        }else{
+			        	$field_filter = ['year', 'month'];
+			        }
+            		
 			        if (empty($table) || empty($selected_fields)) {
 			            echo json_encode(['status' => 'error', 'message' => 'Table or selected fields are missing.']);
 			            exit;
 			        }
 
-			        $result_data = $this->Global_model->fetch_existing($table, $selected_fields, $field, $value, $status);
+			        $result_data = $this->Global_model->fetch_existing_new($table, $selected_fields, $filters, $field_filter, $field, $value, $status);
 			        echo json_encode(['status' => 'success', 'existing' => $result_data]);
 			    } catch (Exception $e) {
 			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
 			    }
-			    break; 
+			    break;
 			case 'fetch_existing_new':
 			    try {
 			        $table = $this->request->getPost('table');
@@ -700,7 +715,8 @@ class Global_controller extends BaseController
 			        $status = $this->Global_model->batch_update($table, $data, $primaryKey, $get_code, $where_in);
 			        
 			        // Send response
-					if ($status !== "failed" && !empty($status)) {
+					// if ($status !== "failed" && !empty($status)) {
+					if ($status !== "failed" && $status !== null) {
 					    echo json_encode(['message' => 'success', 'inserted_ids' => $status]);
 					} else {
 					    echo json_encode(['message' => 'error', 'error' => 'Update failed']);
@@ -790,6 +806,11 @@ class Global_controller extends BaseController
 	    if (!empty($request['ba_store_area'])) {
 	        $responseData['ba_store_area'] = $this->Global_model->get_valid_records_ba_area_store_group();
 	    }
+
+	    if (!empty($request['ba_area_store_brand'])) {
+	        $responseData['ba_area_store_brand'] = $this->Global_model->get_valid_records_ba_area_store_brand();
+	    }
+
 	    if (!empty($request['payment_group'])) {
 	        $responseData['payment_group'] = $this->Global_model->get_valid_records("tbl_payment_group", 'customer_group_code');
 	    }

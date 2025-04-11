@@ -52,12 +52,20 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('trade-store-performance', 'TradeDashboard::trade_store_performance');
     $routes->post('trade-store-performance', 'TradeDashboard::trade_store_performance');
     //trade_overall_asc_sales_report
-     $routes->get('generate-pdf-ba', 'TradeDashboard::generatePdfBA');
-     $routes->get('generate-excel-ba', 'TradeDashboard::generateExcelBA');
-     
-     $routes->get('refresh-data', 'TradeDashboard::refreshPreAggregatedData');
-     //refreshPreAggregatedData
-     $routes->get('get-counts', 'Dashboard::getCounts');
+    // trade - info for BA (preview export)
+    $routes->get('generate-pdf-ba', 'TradeDashboard::generatePdfBA');
+    $routes->get('generate-excel-ba', 'TradeDashboard::generateExcelBA');
+    // trade - overall ba sales target (preview export)
+    $routes->get('generate-pdf-overall-ba', 'TradeDashboard::generatePdfOverallBA');
+    $routes->get('generate-excel-overall-ba', 'TradeDashboard::generateExcelOverallBA');
+    // trade - info for ASC (preview export)
+    $routes->get('generate-pdf-asc', 'TradeDashboard::generatePdfASC');
+    $routes->get('generate-excel-asc', 'TradeDashboard::generateExcelASC');
+
+
+    $routes->get('refresh-data', 'TradeDashboard::refreshPreAggregatedData');
+    //refreshPreAggregatedData
+    $routes->get('get-counts', 'Dashboard::getCounts');
 });
 
 
@@ -100,9 +108,15 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('menu_update/(:num)', 'Cms\Cms_menu::menu_update');
     });
 
+    $routes->get('system-parameter', 'Cms\System_parameter::index');
+
     $routes->group('import-sell-out', static function ($routes) {
         $routes->get('/', 'Cms\Import_sell_out::index');
         $routes->get('view/(:any)', 'Cms\Import_sell_out::view');
+        $routes->get('add/(:any)', 'Cms\Import_sell_out::add');
+        $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\Import_sell_out::import_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\Import_sell_out::fetch_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\Import_sell_out::delete_temp_scan_data');
     });
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {
@@ -127,10 +141,6 @@ $routes->group('cms/', static function ($routes) {
     $routes->group('import-target-sales-ps', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sales_ps::index');
         $routes->get('view/(:any)', 'Cms\Import_target_sales_ps::view');
-    });
-
-    $routes->group('import-sales-top-list', static function ($routes) {
-        $routes->get('/', 'Cms\Import_sales_top_list::index');
     });
 
     $routes->group('cms_preference/', static function ($routes) {
@@ -159,6 +169,9 @@ $routes->group('cms/', static function ($routes) {
     
     $routes->group('newfile', static function ($routes) {
         $routes->get('/', 'Cms\Newfile::index');
+        $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\Newfile::import_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\Newfile::fetch_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\Newfile::delete_temp_scan_data');
     });
 
     $routes->get('store-branch', 'Cms\Store_Branch::index');

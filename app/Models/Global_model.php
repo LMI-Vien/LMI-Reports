@@ -246,6 +246,40 @@ class Global_model extends Model
         return $q->getResult();
     }
 
+public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
+{
+    $sql = "
+        SELECT *
+        FROM (
+            SELECT 
+                v.id,
+                c.name AS company,
+                y.year,
+                m.month,
+                w.name AS week,
+                v.created_date,
+                v.updated_date,
+                u.name AS imported_by,
+                ROW_NUMBER() OVER (
+                    PARTITION BY v.year, v.month, v.week, c.name
+                    ORDER BY v.updated_date DESC
+                ) AS row_num
+            FROM tbl_vmi v
+            LEFT JOIN cms_users u ON u.id = v.created_by
+            LEFT JOIN tbl_company c ON c.id = v.company
+            LEFT JOIN tbl_year y ON y.id = v.year
+            LEFT JOIN tbl_month m ON m.id = v.month
+            LEFT JOIN tbl_week w ON w.id = v.week
+            " . ($query ? "WHERE $query" : "") . "
+        ) t
+        WHERE row_num = 1
+        LIMIT $offset, $limit
+    ";
+
+    return $this->db->query($sql)->getResult();
+}
+
+
     function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false, $action = null)
     {
         $builder = $this->db->table($table);
@@ -770,7 +804,41 @@ class Global_model extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function fetch_existing_new($table, $selected_fields, $filters = [], $field = null, $value = null, $status = false)
+    // public function fetch_existing_new($table, $selected_fields, $filters = [], $field = null, $value = null, $status = false)
+    // {
+    //     if (empty($table) || empty($selected_fields)) {
+    //         return [];
+    //     }
+
+    //     $builder = $this->db->table($table);
+    //     $builder->select($selected_fields);
+
+    //     if ($status == 'true' || $status === true) {
+    //         $builder->where('status >=', 0);            
+    //     }
+
+    //     if ($field) {
+    //         $builder->where($field, $value);
+    //     }
+
+    //     if (!empty($filters)) {
+    //         $field_filter = ['year', 'month', 'week', 'company'];
+
+    //         if (count($filters) === count($field_filter)) {
+    //             $conditions = [];
+    //             foreach ($field_filter as $index => $columnName) {
+    //                 $conditions[$columnName] = $filters[$index]; 
+    //             }
+    //             $builder->groupStart()->Where($conditions)->groupEnd();
+    //         }
+    //     }
+
+    //     $query = $builder->get();
+
+    //     return $query->getResultArray();
+    // }
+
+    public function fetch_existing_new($table, $selected_fields, $filters = [], $field_filter, $field = null, $value = null, $status = false)
     {
         if (empty($table) || empty($selected_fields)) {
             return [];
@@ -788,7 +856,6 @@ class Global_model extends Model
         }
 
         if (!empty($filters)) {
-            $field_filter = ['year', 'month', 'week', 'company'];
 
             if (count($filters) === count($field_filter)) {
                 $conditions = [];
@@ -881,11 +948,12 @@ class Global_model extends Model
     }
 
     function get_valid_records_tracc_data($table, $column_name) {
-        return $this->db->table($table)
+        $builder = $this->db->table($table)
             ->select(['recid', $column_name, 'itmcde'])
             ->where('cusitmcde !=', '')
-            ->get()
-            ->getResultArray();
+            ->groupBy('itmcde');
+        $query = $builder->get();
+        return $query->getResultArray();
     }
 
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
@@ -1038,6 +1106,30 @@ class Global_model extends Model
             return $results;
     }
 
+    function get_valid_records_ba_area_store_brand() {
+        $builder = $this->db->table('tbl_brand_ambassador ba');
+        $builder->select("
+            ba.id,
+            ba.code,
+            ba.store AS store_id,
+            ba.area AS area_id,
+            ba.name AS ba_name,
+            s.code AS store_code,
+            a.code AS area_code,
+            GROUP_CONCAT(b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
+        ");
+        $builder->where('ba.status', 1);
+        $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
+        $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
+        $builder->join('tbl_store s', 'ba.store = s.id', 'left');
+        $builder->join('tbl_area a', 'ba.area = a.id', 'left');
+        $builder->groupBy('ba.id');
+
+        $results = $builder->get()->getResultArray();
+
+        return $results;
+    }
+
     function get_weeks() {
         $query = $this->db->query("CALL get_weeks()");
         return $query->getResultArray(); // Return data as an array
@@ -1089,6 +1181,62 @@ class Global_model extends Model
         $builder = $this->db->table('tbl_temp_vmi');
 
         $builder->where('created_by', $id);
+        $deleted = $builder->delete();
+
+        if ($deleted) {
+            return 'success';
+        } else {
+            return 'failed';
+        }
+    }
+
+    // public function fetch_scan_data($limit, $offset, $filename, $id) {
+    //     $builder = $this->db->table('tbl_sell_out_temp_space')
+    //                   ->where('file_name', $filename)
+    //                   ->where('created_by', $id)
+    //                   ->limit($limit, $offset)
+    //                   ->get();
+
+    //     $totalRecords = $this->db->table('tbl_sell_out_temp_space')->countAllResults(); // Count total records
+
+    //     $data = $builder->getResultArray(); // Fetch results
+
+    //     return [
+    //         "data" => $builder->getResultArray(),
+    //         "totalRecords" => $totalRecords
+    //     ];
+    // }
+
+    public function fetch_scan_data($limit, $page, $filename, $id)
+    {
+        $offset = ($page - 1) * $limit;
+
+        $builder = $this->db->table('tbl_sell_out_temp_space')
+                      ->where('file_name', $filename)
+                      ->where('created_by', $id)
+                      ->orderBy('id', 'ASC')
+                      ->limit($limit, $offset)
+                      ->get();
+
+        $data = $builder->getResultArray();
+
+        $totalRecords = $this->db->table('tbl_sell_out_temp_space')
+                          ->where('file_name', $filename)
+                          ->where('created_by', $id)
+                          ->countAllResults();
+
+        return [
+            "data" => $data,
+            "totalRecords" => $totalRecords
+        ];
+    }
+
+    public function delete_temp_scan($id, $filename)
+    {
+        $builder = $this->db->table('tbl_sell_out_temp_space');
+        $builder->where('created_by', $id);
+        $builder->where('file_name', $filename);
+        
         $deleted = $builder->delete();
 
         if ($deleted) {

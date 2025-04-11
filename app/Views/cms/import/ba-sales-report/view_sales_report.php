@@ -112,7 +112,7 @@
                             <table class="table table-bordered listdata">
                                 <thead>
                                     <tr>
-                                        <th class='center-content'><input class="selectall" type="checkbox"></th>
+                                        <!-- <th class='center-content'><input class="selectall" type="checkbox"></th> -->
                                         <th class='center-content'>BA Name</th>
                                         <th class='center-content'>Area</th>
                                         <th class='center-content'>Store</th>
@@ -250,7 +250,7 @@
                         var brandAmbassadorName = y.ba_name || 'NA';
 
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                        // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         // html += "<td scope=\"col\">" + trimText(brandAmbassadorName) + "</td>"
                         html += "<td scope=\"col\"><a href='#' class='clickable-link' onclick='handleBrandAmbassadorClick(\"" + y.id + "\", \"" + y.date + "\", \"" + brandAmbassadorName + "\")'>" + trimText(brandAmbassadorName) + "</a></td>";
                         html += "<td scope=\"col\">" + trimText(areaDescription) + "</td>"

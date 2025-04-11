@@ -375,7 +375,7 @@
             // select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
             // "a.july, a.august, a.september, a.october, a.november, a.december, "+
             // "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status",
-            select: "a.created_date, u.name imported_by, b.year, a.updated_date, a.year yearval",
+            select: "a.created_date, u.name imported_by, b.year, a.updated_date, a.year yearval, b.id as year_id",
             query: new_query,
             offset: offset,
             limit: limit,
@@ -428,7 +428,7 @@
                     } else {
                         html+="<td class='center-content'>";
                         
-                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.yearval+
+                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year_id+
                         "')\" data-status='"+y.status+"' id='"+y.id+
                         "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
 
@@ -755,21 +755,10 @@
                     `''`, 
                     `''`,
                     (res) => {
-                        let updateRecords = [];
-                        res.forEach(item => {
-                            item.updated_date = formatDate(new Date());
-                            item.updated_by = user_id;
-                            item.status = -2;
-                            updateRecords.push(item);
-                        })
-                        console.log(updateRecords, 'updateRecords')
-                        batch_update(url, updateRecords, "tbl_target_sales_per_store", "id", false, (response) => {
-                            if (response.message !== 'success') {
-                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                            }
-                            modal.alert(success_delete_message, "success", function() {
-                                location.reload();
-                            });
+                        year = [year];
+                        console.log(year);
+                        batch_delete(url, "tbl_target_sales_per_store", "year", year, 'year', function(resp) {
+                            modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                         });
                     }
                 )

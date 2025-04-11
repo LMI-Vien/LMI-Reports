@@ -541,7 +541,7 @@
     function get_data(new_query) {
         var data = {
             event : "list",
-            select : "a.created_date, u.name imported_by, b.year, a.updated_date",
+            select : "a.created_date, u.name imported_by, b.year, a.updated_date, b.id as year_id",
             query : new_query,
             offset : offset,
             limit : limit,
@@ -589,7 +589,7 @@
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
                             
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year+
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year_id+
                             "')\" data-status='"+y.status+"' id='"+y.id+
                             "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
 
@@ -1061,21 +1061,10 @@
                     `''`, 
                     `''`,
                     (res) => {
-                        let updateRecords = [];
-                        res.forEach(item => {
-                            item.updated_date = formatDate(new Date());
-                            item.updated_by = user_id;
-                            item.status = -2;
-                            updateRecords.push(item);
-                        })
-                        console.log(updateRecords, 'updateRecords')
-                        batch_update(url, updateRecords, "tbl_accounts_target_sellout_pa", "id", false, (response) => {
-                            if (response.message !== 'success') {
-                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                            }
-                            modal.alert(success_delete_message, "success", function() {
-                                location.reload();
-                            });
+                        year = [year];
+                        console.log(year);
+                        batch_delete(url, "tbl_accounts_target_sellout_pa", "year", year, 'year', function(resp) {
+                            modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                         });
                     }
                 )
@@ -1097,12 +1086,12 @@
             return;
         }
 
-        // const maxFileSize = 30 * 1024 * 1024; // 30MB limit
-        // if (file.size > maxFileSize) {
-        //     modal.loading_progress(false);
-        //     modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-        //     return;
-        // }
+        const maxFileSize = 30 * 1024 * 1024; // 30MB limit
+        if (file.size > maxFileSize) {
+            modal.loading_progress(false);
+            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
+            return;
+        }
 
         modal.loading_progress(true, "Reviewing Data...");
 
@@ -1299,7 +1288,8 @@
         worker.onmessage = function(e) {
             modal.loading_progress(false);
             const { invalid, errorLogs, valid_data, err_counter } = e.data;
-
+            console.log(invalid);
+            console.log(valid_data, 'valid_data');
             if (invalid) {
                 let errorMsg = err_counter > 1000 
                     ? '⚠️ Too many errors detected. Please download the error log for details.'
@@ -1309,7 +1299,7 @@
                     btn.prop("disabled", false);
                 });
                 createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
-            } else if (valid_data && valid_data.length > 0) {
+            } else if (Array.isArray(valid_data) && valid_data.length > 0) { 
                 btn.prop("disabled", false);
                 updateSwalProgress("Validation Completed", 10);
                 new_data = valid_data.map(record => ({
@@ -1319,7 +1309,10 @@
                 setTimeout(() => saveValidatedData(new_data), 500);
             } else {
                 btn.prop("disabled", false);
-                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                setTimeout(() => {
+                    modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
+                }, 500);
+                
             }
         };
 
