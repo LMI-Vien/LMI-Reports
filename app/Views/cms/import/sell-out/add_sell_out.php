@@ -209,7 +209,6 @@
                 });
                 let data = await response.json();
             } catch (error) {
-                console.error("Upload error:", error);
                 modal.alert("Upload error, please try again.", "error");
             }
 
@@ -385,7 +384,12 @@
         worker.postMessage({ data, base_url });
 
         worker.onmessage = function(e) {
-            const { invalid, errorLogs, valid_data, err_counter } = e.data;
+            const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
+            
+            if (progress !== undefined) {
+                modal.loading_progress(true, `Processing... ${progress}%`);
+                return;
+            }
 
             if (invalid) {
                 let errorMsg = err_counter > 1000
@@ -398,12 +402,8 @@
 
                 // createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
             } else if (Array.isArray(valid_data) && valid_data.length > 0) { 
-                let new_data = valid_data.map(record => ({
-                    ...record
-                }));
-
                 saveHeaderData(parts, function(header_id, headers) {
-                    saveValidatedData(new_data, header_id, headers);
+                    saveValidatedData(valid_data, header_id, headers);
                 });
             } else {
                 modal.alert("No valid data found. Please check the file.", "error");
