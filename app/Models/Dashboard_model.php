@@ -234,7 +234,8 @@ class Dashboard_model extends Model
 
 	public function getLatestVmi($year = null) {
 	    $builder = $this->db->table('tbl_vmi v')
-	        ->select('y.id as year_id, m.id as month_id, w.id as week_id')
+	        // ->select('y.id as year_id, m.id as month_id, w.id as week_id')
+			->select('y.id as year_id, y.year, m.id as month_id, m.month, w.id as week_id, w.name as week_name')
 	        ->where('v.status', 1)
 	        ->join('tbl_week w', 'v.week = w.id')
 	        ->join('tbl_month m', 'v.month = m.id')
