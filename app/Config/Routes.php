@@ -55,6 +55,10 @@ $routes->group('trade-dashboard/', static function ($routes) {
      $routes->get('generate-pdf-ba', 'TradeDashboard::generatePdfBA');
      $routes->get('generate-excel-ba', 'TradeDashboard::generateExcelBA');
      
+     $routes->get('generate-pdf-asc', 'TradeDashboard::generatePdfASC');
+     $routes->get('generate-excel-asc', 'TradeDashboard::generateExcelASC');
+
+
      $routes->get('refresh-data', 'TradeDashboard::refreshPreAggregatedData');
      //refreshPreAggregatedData
      $routes->get('get-counts', 'Dashboard::getCounts');

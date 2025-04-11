@@ -451,8 +451,51 @@
             })
         });
         autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
-        autocomplete_field($("#storeName"), $("#store_id"), store_branch);
-        autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador);
+        autocomplete_field($("#storeName"), $("#store_id"), store_branch, "description", "id", function(result) {
+
+            let data = {
+                event: "list",
+                query: "store = " + result.id,
+                select: "",
+                offset: offset,
+                limit: 0,
+                table: "tbl_brand_ambassador",
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let data = JSON.parse(res)[0];
+                
+                if(data) {
+                    $("#ba").val(data.name);
+                    $("#ba_id").val(data.id);
+                } else {
+                    $("#ba").val("No Brand Ambassador");
+                }
+            })
+        });
+        autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador, "description", "id", function(result) {
+            let data = {
+                event: "list",
+                select: "s.id AS store, s.description, ba.id AS ba, ba.name",
+                query: "ba.id = " + result.id,
+                table: "tbl_brand_ambassador ba",
+                join: [
+                    {
+                        table: "tbl_store s",
+                        query: "ba.store = s.id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let data = JSON.parse(res)[0];
+                console.log(data.description);
+
+                $("#storeName").val(data.description);
+                $("#store_id").val(data.store);
+            })
+        });
 
         $(document).on('click', '#clearButton', function () {
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
