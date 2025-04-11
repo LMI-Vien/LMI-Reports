@@ -398,25 +398,6 @@ class Global_controller extends BaseController
 			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
 			    }
 			    break;
-			case 'fetch_existing_new':
-			    try {
-			        $table = $this->request->getPost('table');
-			        $selected_fields = $this->request->getPost('selected_fields');
-			        $filters = $this->request->getPost('filters');
-			        $field = $this->request->getPost('field') ?: null;
-			        $value = $this->request->getPost('value') ?: null;
-			        $status = $this->request->getPost('status') ?: false;
-			        if (empty($table) || empty($selected_fields)) {
-			            echo json_encode(['status' => 'error', 'message' => 'Table or selected fields are missing.']);
-			            exit;
-			        }
-
-			        $result_data = $this->Global_model->fetch_existing_new($table, $selected_fields, $filters, $field, $value, $status);
-			        echo json_encode(['status' => 'success', 'existing' => $result_data]);
-			    } catch (Exception $e) {
-			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
-			    }
-			    break; 
 			    //for optimization do not remove
 			case 'fetch_existing2':
 			    try {

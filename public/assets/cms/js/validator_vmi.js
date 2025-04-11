@@ -7,7 +7,7 @@ self.onmessage = async function(e) {
     let valid_data = [];
     let err_counter = 0;
     const ERROR_LOG_LIMIT = 1000; // Reduce error log limit
-    const BATCH_SIZE = 1000; // Reduce batch size
+    const BATCH_SIZE = 2000; // Reduce batch size
     let index = 0;
 
     try {
