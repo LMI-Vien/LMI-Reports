@@ -206,6 +206,10 @@
 				case 'back':
 					echo '<a href="#" id="btn_back" class="btn_back btn-sm btn-default cms-btn" ><span class="fa fa fa-arrow-left"></span> Back </a>';
 					break;
+
+				case 'templates':
+					echo '<a href="#" id="btn_templates" class="btn_add btn-sm btn-success cms-btn" ><span class="fa fa fa-plus "></span> Templates </a>';
+					break;
 					
 				default:
 					# code...

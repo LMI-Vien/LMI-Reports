@@ -5,7 +5,7 @@ namespace App\Controllers\Cms;
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Import_sell_out extends BaseController
+class Newfile extends BaseController
 {
     protected $session;
 
@@ -20,90 +20,18 @@ class Import_sell_out extends BaseController
 
 	public function index()
 	{
-
 		$data['meta'] = array(
-			"title"         =>  "Import Sell Out",
-			"description"   =>  "Import Sell Out",
+			"title"         =>  "Newfile",
+			"description"   =>  "Newfile",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Import Sell Out";
-		$data['PageName'] = 'Import Sell Out';
-		$data['PageUrl'] = 'Import Sell Out';
-		$data['content'] = "cms/import/sell-out/sell_out.php";
-		$data['buttons'] = ['export', 'add', 'templates', 'search'];
+		$data['title'] = "Newfile";
+		$data['PageName'] = 'Newfile';
+		$data['PageUrl'] = 'Newfile';
+		$data['buttons'] = [];
+		$data['content'] = "cms/newfile/newfile.php";
 		$data['session'] = session(); //for frontend accessing the session data
-		$data['standard'] = config('Standard');
 		$data['js'] = array(
-				"assets/js/xlsx.full.min.js",
-				"assets/js/bootstrap.min.js",
-				"assets/js/adminlte.min.js",
-				"assets/js/moment.js",
-				"assets/js/xlsx.full.min.js"
-                    );
-        $data['css'] = array(
-        		"assets/css/bootstrap.min.css",
-        		"assets/css/adminlte.min.css",
-        		"assets/css/all.min.css",
-        		"assets/cms/css/main_style.css",//css sa style ni master Vien
-        		"assets/css/style.css"
-                    );
-		return view("cms/layout/template", $data);		
-	}
-
-	public function view()
-	{
-
-		$uri = current_url(true);
-		$data['uri'] =$uri;
-
-		$data['meta'] = array(
-			"title"         =>  "Import Sell Out",
-			"description"   =>  "Import Sell Out",
-			"keyword"       =>  ""
-		);
-		$data['title'] = "Import Sell Out";
-		$data['PageName'] = 'Import Sell Out';
-		$data['PageUrl'] = 'Import Sell Out';
-		$data['content'] = "cms/import/sell-out/view_sell_out.php";
-		$data['buttons'] = ['search'];
-		$data['session'] = session(); //for frontend accessing the session data
-		$data['standard'] = config('Standard');
-		$data['js'] = array(
-				"assets/js/xlsx.full.min.js",
-				"assets/js/bootstrap.min.js",
-				"assets/js/adminlte.min.js",
-				"assets/js/moment.js",
-				"assets/js/xlsx.full.min.js"
-                    );
-        $data['css'] = array(
-        		"assets/css/bootstrap.min.css",
-        		"assets/css/adminlte.min.css",
-        		"assets/css/all.min.css",
-        		"assets/cms/css/main_style.css",//css sa style ni master Vien
-        		"assets/css/style.css"
-                    );
-		return view("cms/layout/template", $data);		
-	}
-
-	public function add() {
-		$uri = current_url(true);
-		$data['uri'] =$uri;
-
-		$data['meta'] = array(
-			"title"         =>  "Import Sell Out",
-			"description"   =>  "Import Sell Out",
-			"keyword"       =>  ""
-		);
-		$data['title'] = "Import Sell Out";
-		$data['PageName'] = 'Import Sell Out';
-		$data['PageUrl'] = 'Import Sell Out';
-		$data['content'] = "cms/import/sell-out/add_sell_out.php";
-		$data['buttons'] = ['search'];
-		$data['session'] = session(); //for frontend accessing the session data
-		$data['standard'] = config('Standard');
-		$data['month'] = $this->Global_model->get_months();
-		$data['js'] = array(
-				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
 				"assets/js/moment.js",
@@ -130,7 +58,6 @@ class Import_sell_out extends BaseController
 			$year = $this->request->getPost('year');
 			$customer_payment_group = $this->request->getPost('customer_payment_group');
 			$template_id = $this->request->getPost('template_id');
-			$placeholder = json_decode($this->request->getPost('placeholder'), true);
 
 			if (!$file) {
 				return $this->response->setJSON(['message' => 'No file received.']);
@@ -181,7 +108,7 @@ class Import_sell_out extends BaseController
 	                        $row = array_pad($row, 8, null);
 	                        $counter++;
 	                        $line_number++;
-							if ($counter >= 5) { // look here
+							if ($counter >= 5) {
 		                        $batchData[] = [
 									'created_date' => date('Y-m-d H:i:s'),
 									'created_by' => $this->session->get('sess_uid'),
@@ -193,13 +120,13 @@ class Import_sell_out extends BaseController
 									'template_id' => $template_id,
 									'file_name' => $fileName,
 									'line_number' => $line_number,
-									'store_code' => trim($row[1] ?? ''), // look here
-									'store_description' => trim($row[2] ?? ''), // look here
-									'sku_code' => trim($row[3] ?? ''), // look here
-									'sku_description' => trim($row[4] ?? ''), // look here
-									'gross_sales' => trim($row[5] ?? ''), // look here
-									'quantity' => trim($row[6] ?? ''), // look here
-									'net_sales' => trim($row[7] ?? '') // look here
+									'store_code' => trim($row[1] ?? ''),
+									'store_description' => trim($row[2] ?? ''),
+									'sku_code' => trim($row[3] ?? ''),
+									'sku_description' => trim($row[4] ?? ''),
+									'gross_sales' => trim($row[5] ?? ''),
+									'quantity' => trim($row[6] ?? ''),
+									'net_sales' => trim($row[7] ?? '')
 		                        ];
 		                    }
 	                        if (count($batchData) === $batchSize) {
@@ -224,7 +151,7 @@ class Import_sell_out extends BaseController
 	                    $row = array_pad($row, 8, null);
 	                    $counter++;
 	                    $line_number++;
-						if ($counter >= $placeholder['start_line_read'] -1) { // look here
+						if ($counter >= 5) {
 						
 							$batchData[] = [
 								'created_date' => date('Y-m-d H:i:s'),
@@ -237,13 +164,13 @@ class Import_sell_out extends BaseController
 								'template_id' => $template_id,
 								'file_name' => $fileName,
 								'line_number' => $line_number,
-								'store_code' => trim($row[$placeholder['store_code'] - 1] ?? ''), // look here
-								'store_description' => trim($row[$placeholder['store_description'] - 1] ?? ''), // look here
-								'sku_code' => trim($row[$placeholder['sku_code'] - 1] ?? ''), // look here
-								'sku_description' => trim($row[$placeholder['sku_description'] - 1] ?? ''), // look here
-								'gross_sales' => trim($row[$placeholder['gross_sales'] - 1] ?? ''), // look here
-								'quantity' => trim($row[$placeholder['quantity'] - 1] ?? ''), // look here
-								'net_sales' => trim($row[$placeholder['net_sales'] - 1] ?? ''), // look here
+								'store_code' => trim($row[1] ?? ''),
+								'store_description' => trim($row[2] ?? ''),
+								'sku_code' => trim($row[3] ?? ''),
+								'sku_description' => trim($row[4] ?? ''),
+								'gross_sales' => trim($row[5] ?? ''),
+								'quantity' => trim($row[6] ?? ''),
+								'net_sales' => trim($row[7] ?? ''),
 							];
 						}
 
@@ -300,4 +227,5 @@ class Import_sell_out extends BaseController
 		$result = $this->Global_model->delete_temp_scan($this->session->get('sess_uid'), $file_name);
 		echo $result;
 	}
+
 }

@@ -103,6 +103,10 @@ $routes->group('cms/', static function ($routes) {
     $routes->group('import-sell-out', static function ($routes) {
         $routes->get('/', 'Cms\Import_sell_out::index');
         $routes->get('view/(:any)', 'Cms\Import_sell_out::view');
+        $routes->get('add/(:any)', 'Cms\Import_sell_out::add');
+        $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\Import_sell_out::import_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\Import_sell_out::fetch_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\Import_sell_out::delete_temp_scan_data');
     });
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {
@@ -155,6 +159,9 @@ $routes->group('cms/', static function ($routes) {
     
     $routes->group('newfile', static function ($routes) {
         $routes->get('/', 'Cms\Newfile::index');
+        $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\Newfile::import_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\Newfile::fetch_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\Newfile::delete_temp_scan_data');
     });
 
     $routes->get('store-branch', 'Cms\Store_Branch::index');
