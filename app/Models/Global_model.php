@@ -259,6 +259,10 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
                 w.name AS week,
                 v.created_date,
                 v.updated_date,
+                v.year as filter_year,
+                v.month as filter_month,
+                v.week as filter_week,
+                v.company as filter_company,
                 u.name AS imported_by,
                 ROW_NUMBER() OVER (
                     PARTITION BY v.year, v.month, v.week, c.name
@@ -919,6 +923,23 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         $builder = $this->db->table($table);
         $builder->whereIn($field, $field_value);
         $result = $builder->delete();
+        if ($result) {
+            return json_encode(['message' => 'success']);
+        } else {
+            return json_encode(['message' => 'failed']);
+        }
+    }
+
+    public function batch_delete_with_conditions($table, $conditions) {
+        $builder = $this->db->table($table);
+        foreach ($conditions as $cond) {
+            if (isset($cond['field'], $cond['values']) && is_array($cond['values'])) {
+                $builder->whereIn($cond['field'], $cond['values']);
+            }
+        }
+
+        $result = $builder->delete();
+
         if ($result) {
             return json_encode(['message' => 'success']);
         } else {

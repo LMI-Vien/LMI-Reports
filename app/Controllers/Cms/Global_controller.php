@@ -545,6 +545,17 @@ class Global_controller extends BaseController
 			        echo json_encode(['error' => $e->getMessage()]);
 			    }
 			break;
+			case 'batch_delete_with_conditions':
+			    try {
+			        $table = $this->request->getPost('table');
+			        $conditions = $this->request->getPost('conditions'); // Now an array
+
+			        $result_data = $this->Global_model->batch_delete_with_conditions($table, $conditions);
+			        echo $result_data;
+			    } catch (Exception $e) {
+			        echo json_encode(['error' => $e->getMessage()]);
+			    }
+			    break;
 			case 'batch_sort_update':
 			try { 	
 				$table = $_POST['table'];

@@ -1535,6 +1535,14 @@ function batch_delete(url, table, field, field_value, where_in_field, callback) 
     aJax.post(url, { event: "batch_delete", table, field, field_value, where_in_field }, response => callback(JSON.parse(response)));
 }
 
+function batch_delete_with_conditions(url, table, conditions, callback) {
+    aJax.post(url, {
+        event: "batch_delete_with_conditions",
+        table: table,
+        conditions: conditions
+    }, response => callback(JSON.parse(response)));
+}
+
 function batch_insert(url, insert_batch_data, batch_table, get_code, callback) {
     aJax.post(url, { event: "batch_insert", table: batch_table, get_code, insert_batch_data }, callback);
 }

@@ -288,7 +288,7 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 200px'>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.company+"','"+y.year+"','"+y.month+"','"+y.week+
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.filter_company+"','"+y.filter_year+"','"+y.filter_month+"','"+y.filter_week+
                             "')\" data-status='"+y.status+"' id='"+y.id+
                             "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             
@@ -1658,22 +1658,17 @@
                     `''`, 
                     `''`,
                     (res) => {
-                        let updateRecords = [];
-                        res.forEach(item => {
-                            item.updated_date = formatDate(new Date());
-                            item.updated_by = user_id;
-                            item.status = -2;
-                            updateRecords.push(item);
-                        })
+                        const conditions = [
+                            { field: "year", values: [year] },
+                            { field: "company", values: [company] },
+                            { field: "month", values: [month] },
+                            { field: "week", values: [week] }
+                        ];
 
-                        batch_update(url, updateRecords, "tbl_vmi", "id", false, (response) => {
-                            if (response.message !== 'success') {
-                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                            }
-                            modal.alert(success_delete_message, "success", function() {
-                                location.reload();
-                            });
+                        batch_delete_with_conditions(url, "tbl_vmi", conditions, function(resp) {
+                            modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                         });
+
                     }
                 );
             }
