@@ -1155,23 +1155,23 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         return $query->getResultArray(); 
     }
 
-    public function fetch_temp_data($limit, $offset, $year, $month, $week, $company, $id)
+    public function fetch_temp_data($limit, $page, $year, $month, $week, $company, $id)
     {
-        $builder = $this->db->table('tbl_temp_vmi')
+        $offset = ($page - 1) * $limit;
+
+        $baseQuery = $this->db->table('tbl_temp_vmi')
                       ->where('year', $year)
                       ->where('month', $month)
                       ->where('week', $week)
                       ->where('company', $company)
-                      ->where('created_by', $id)
-                      ->limit($limit, $offset)
-                      ->get();
+                      ->where('created_by', $id);
 
-        $totalRecords = $this->db->table('tbl_temp_vmi')->countAllResults(); // Count total records
+        $totalRecords = $baseQuery->countAllResults(false);
 
-        $data = $builder->getResultArray(); // Fetch results
+        $data = $baseQuery->limit($limit, $offset)->get()->getResultArray();
 
         return [
-            "data" => $builder->getResultArray(),
+            "data" => $data,
             "totalRecords" => $totalRecords
         ];
     }
@@ -1189,23 +1189,6 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
             return 'failed';
         }
     }
-
-    // public function fetch_scan_data($limit, $offset, $filename, $id) {
-    //     $builder = $this->db->table('tbl_sell_out_temp_space')
-    //                   ->where('file_name', $filename)
-    //                   ->where('created_by', $id)
-    //                   ->limit($limit, $offset)
-    //                   ->get();
-
-    //     $totalRecords = $this->db->table('tbl_sell_out_temp_space')->countAllResults(); // Count total records
-
-    //     $data = $builder->getResultArray(); // Fetch results
-
-    //     return [
-    //         "data" => $builder->getResultArray(),
-    //         "totalRecords" => $totalRecords
-    //     ];
-    // }
 
     public function fetch_scan_data($limit, $page, $filename, $id)
     {
