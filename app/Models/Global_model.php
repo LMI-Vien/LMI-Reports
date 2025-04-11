@@ -838,7 +838,7 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
     //     return $query->getResultArray();
     // }
 
-    public function fetch_existing_new($table, $selected_fields, $filters = [], $field_filter, $field = null, $value = null, $status = false)
+    public function fetch_existing_new($table, $selected_fields, $filters = [], $field_filter = null, $field = null, $value = null, $status = false)
     {
         if (empty($table) || empty($selected_fields)) {
             return [];
