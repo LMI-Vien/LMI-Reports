@@ -136,7 +136,7 @@ class Import_sell_out extends BaseController
 				return $this->response->setJSON(['message' => 'No file received.']);
 			}
 			
-			log_message('debug', 'Chunk file received: ' . $file->getName());
+			//log_message('debug', 'Chunk file received: ' . $file->getName());
 
 			$tempDir = WRITEPATH . 'uploads/temp_chunks/';
 	        if (!is_dir($tempDir)) {
@@ -146,7 +146,6 @@ class Import_sell_out extends BaseController
 			$file->move($tempDir, $fileName . "_part_" . $chunkIndex);
 
 			if (!file_exists($tempFilePath)) {
-				log_message('error', "Chunk not saved: $tempFilePath");
 				return $this->response->setJSON(['message' => "Error saving chunk $chunkIndex"]);
 			}
 
