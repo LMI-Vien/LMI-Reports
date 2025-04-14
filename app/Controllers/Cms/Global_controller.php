@@ -370,7 +370,24 @@ class Global_controller extends BaseController
 			// ------------------------------------------------ The one cALL be cALL solution -----------------------------------------------
 			// ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
 			// ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
-			
+			case 'fetch_existing':
+			    try {
+			        $table = $this->request->getPost('table');
+			        $selected_fields = $this->request->getPost('selected_fields');
+			        $field = $this->request->getPost('field') ?: null;
+			        $value = $this->request->getPost('value') ?: null;
+			        $status = $this->request->getPost('status') ?: false;
+			        if (empty($table) || empty($selected_fields)) {
+			            echo json_encode(['status' => 'error', 'message' => 'Table or selected fields are missing.']);
+			            exit;
+			        }
+
+			        $result_data = $this->Global_model->fetch_existing($table, $selected_fields, $field, $value, $status);
+			        echo json_encode(['status' => 'success', 'existing' => $result_data]);
+			    } catch (Exception $e) {
+			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
+			    }
+			    break; 			
 			case 'fetch_existing_new':
 			    try {
 			        $table = $this->request->getPost('table');
