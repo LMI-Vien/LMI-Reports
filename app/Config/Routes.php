@@ -62,6 +62,8 @@ $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('generate-pdf-asc', 'TradeDashboard::generatePdfASC');
     $routes->get('generate-excel-asc', 'TradeDashboard::generateExcelASC');
 
+     $routes->get('generate-pdf-asc_dashboard', 'TradeDashboard::generatePdfASCDashboard');
+     $routes->get('generate-excel-asc_dashboard', 'TradeDashboard::generateExcelASCDashboard');
 
     $routes->get('refresh-data', 'TradeDashboard::refreshPreAggregatedData');
     //refreshPreAggregatedData

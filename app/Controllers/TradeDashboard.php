@@ -1253,7 +1253,7 @@ class TradeDashboard extends BaseController
 	}
 
 	// ================================= Display table data for pdf export =================================
-	private function printTableData($pdf, $header, $data, $filterData) {
+	private function printTableData($pdf, $header, $data, $filterData, $columnWidth = []) {
 		$pageWidth = $pdf->getPageWidth();
 		$pageMargin = $pdf->getMargins();
 		$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / count($header);
@@ -1265,7 +1265,7 @@ class TradeDashboard extends BaseController
 				$pdf->AddPage();
 				$this->printHeader($pdf, "ASC Dashboard");
 				$this->printFilter($pdf, $filterData);
-				$this->printTableHeader($pdf, $header);
+				$this->printTableHeader($pdf, $header, $columnWidth);
 			}
 			
 			$pdf->SetFont('helvetica', '', 10);
@@ -1369,6 +1369,295 @@ class TradeDashboard extends BaseController
 
 		$pdf->Output($title . '.pdf', 'D');
 		exit;
+	}
+
+	public function generatePdfASCDashboard()
+	{
+		$asc = $this->request->getGet('asc');
+		$area = $this->request->getGet('area');
+		$brand = $this->request->getGet('brand');
+		$year = $this->request->getGet('year');
+		$store = $this->request->getGet('store');
+		$ba = $this->request->getGet('ba');
+		$type = $this->request->getGet('type');
+		$withba = $this->request->getGet('withba');
+		$limit = 99999;
+		$offset = 0;
+		
+		$date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $targetYear = null;
+	    $date = null;
+		
+	    if($year){
+			$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
+	    if(empty($area)){
+			$area = null;
+	    }
+	    if(empty($store)){
+			$store = null;
+	    }
+	    if(empty($ba)){
+			$ba = null;
+	    }
+	    if(empty($year)){
+			$year = null;
+	    }
+	    if(empty($area)){
+			$area = null;
+	    }
+	    if($withba == 'with_ba'){
+			$withba  = true;
+	    }else{
+			$withba = false;
+	    }
+		
+		$latest_vmi_data = $this->Dashboard_model->getLatestVmi($year);
+		
+		$ba = null;
+		$store = null;
+		if($latest_vmi_data){
+			$month = $latest_vmi_data['month_id'];
+			$year = $latest_vmi_data['year_id'];
+		}
+		if(empty($month)){
+			$month = null;
+	    }
+
+		$dataSM = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 20, 30, $brand, $ba, $store, $limit, $offset, $withba);
+		$dataOS =  $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 30, null, $brand, $ba, $store, $limit, $offset, $withba);
+		$dataNPD = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'npd', ['N-New Item'], $withba);
+		$dataHERO = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'hero', ['A-Top 500 Pharma/Beauty', 'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty', 'B-Remaining Class B net of BU Pharma/Beauty'], $withba);
+
+		$slowMoving = [];
+		foreach($dataSM['data'] as $row) {
+			$slowMoving[] = (object) array_merge((array) $row, ['sku_type' => 'slowMoving']);
+		}
+
+		$overStock = [];
+		foreach($dataOS['data'] as $row) {
+			$overStock[] = (object) array_merge((array) $row, ['sku_type' => 'overStock']);
+		}
+
+		$npd = [];
+		foreach($dataNPD['data'] as $row) {
+			$npd[] = (object) array_merge((array) $row, ['sku_type' => 'npd']);
+		}
+
+		$hero = [];
+		foreach($dataHERO['data'] as $row) {
+			$hero[] = (object) array_merge((array) $row, ['sku_type' => 'hero']);
+		}
+
+		$data = [
+			"data" => array_merge($slowMoving, $overStock, $npd, $hero)
+		];
+
+		$title = "ASC Dashboard 1";
+
+		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf->SetCreator('LMI SFA');
+		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
+		$pdf->SetTitle($title);
+		$pdf->setPrintHeader(false);
+		$pdf->setPrintFooter(false);
+		$pdf->AddPage();
+
+		$filterData = [
+			"Brand Ambassador" => $ba ?: "ALL",
+			"Brand" => $brand ?: "ALL",
+			"Area" => $area ?: "ALL",
+			"Area Sales Coordinator" => $asc ?: "ALL",
+			"Store" => $store ?: "ALL",
+			"Year" => $targetYear ?: "ALL",
+			"With BA" => $withba
+		];
+
+		$this->printHeader($pdf, $title);
+		$this->printFilter($pdf, $filterData);
+
+		$headers = [
+			"item_name" => "Item Name",
+			"sum_total_qty" => "Quantity",
+			"lmi_itmcde" => "LMI Code",
+			"rgdi_itmcde" => "RGDI Code",
+			"sku_type" => "SKU Type",
+		];
+
+		$columnWidth = [
+			"item_name" => 110,
+			"sum_total_qty" => 35,
+			"lmi_itmcde" => 40,
+			"rgdi_itmcde" => 40,
+			"sku_type" => 52,
+		];
+
+		$this->printTableHeader($pdf, $headers, $columnWidth);
+		// $this->printTableData($pdf, $headers, $data, $filterData);
+
+		$pdf->SetFont('helvetica', '', 10);
+		foreach($data as $key => $value) {
+			foreach($value as $data) {
+				$pdf->Cell(110, 10, $data->item_name, 1, 0, 'L');
+				$pdf->Cell(35, 10, $data->sum_total_qty, 1, 0, 'L');
+				$pdf->Cell(40, 10, $data->lmi_itmcde, 1, 0, 'L');
+				$pdf->Cell(40, 10, $data->rgdi_itmcde, 1, 0, 'L');
+				$pdf->Cell(52, 10, $data->sku_type, 1, 1, 'L');
+				// $pdf->MultiCell(100, 10, json_encode($data), 1, 'L', false, 1);
+			}
+		}
+
+		$pdf->Output($title . '.pdf', 'D');
+	}
+
+	public function generateExcelASCDashboard() {
+		$asc = $this->request->getGet('asc');
+		$area = $this->request->getGet('area');
+		$brand = $this->request->getGet('brand');
+		$year = $this->request->getGet('year');
+		$store = $this->request->getGet('store');
+		$ba = $this->request->getGet('ba');
+		$type = $this->request->getGet('type');
+		$withba = $this->request->getGet('withba');
+		$limit = 99999;
+		$offset = 0;
+		
+		$date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $targetYear = null;
+	    $date = null;
+		
+	    if($year){
+			$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
+	    if(empty($area)){
+			$area = null;
+	    }
+	    if(empty($store)){
+			$store = null;
+	    }
+	    if(empty($ba)){
+			$ba = null;
+	    }
+	    if(empty($year)){
+			$year = null;
+	    }
+	    if(empty($area)){
+			$area = null;
+	    }
+	    if($withba == 'with_ba'){
+			$withba  = true;
+	    }else{
+			$withba = false;
+	    }
+		
+		$latest_vmi_data = $this->Dashboard_model->getLatestVmi($year);
+		
+		$ba = null;
+		$store = null;
+		if($latest_vmi_data){
+			$month = $latest_vmi_data['month_id'];
+			$year = $latest_vmi_data['year_id'];
+		}
+		if(empty($month)){
+			$month = null;
+	    }
+
+		$dataSM = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 20, 30, $brand, $ba, $store, $limit, $offset, $withba);
+		$dataOS =  $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 30, null, $brand, $ba, $store, $limit, $offset, $withba);
+		$dataNPD = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'npd', ['N-New Item'], $withba);
+		$dataHERO = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'hero', ['A-Top 500 Pharma/Beauty', 'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty', 'B-Remaining Class B net of BU Pharma/Beauty'], $withba);
+
+		$slowMoving = [];
+		foreach($dataSM['data'] as $row) {
+			$slowMoving[] = (object) array_merge((array) $row, ['sku_type' => 'slowMoving']);
+		}
+
+		$overStock = [];
+		foreach($dataOS['data'] as $row) {
+			$overStock[] = (object) array_merge((array) $row, ['sku_type' => 'overStock']);
+		}
+
+		$npd = [];
+		foreach($dataNPD['data'] as $row) {
+			$npd[] = (object) array_merge((array) $row, ['sku_type' => 'npd']);
+		}
+
+		$hero = [];
+		foreach($dataHERO['data'] as $row) {
+			$hero[] = (object) array_merge((array) $row, ['sku_type' => 'hero']);
+		}
+
+		$data = [
+			"data" => array_merge($slowMoving, $overStock, $npd, $hero)
+		];
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$title = "ASC Dashboard 1";
+
+		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
+		$sheet->setCellValue('A2', 'Report: ' . $title);
+		$sheet->mergeCells('A1:E1');
+		$sheet->mergeCells('A2:E2');
+
+		$sheet->setCellValue('A4', 'Brand Ambassador: ' . ($ba ?: 'ALL'));
+		$sheet->setCellValue('B4', 'Brand: ' . ($brand ?: 'ALL'));
+		$sheet->setCellValue('C4', 'Area: ' . ($area ?: 'ALL'));
+
+		$sheet->setCellValue('A5', 'Area Sales Coordinator: ' . ($asc ?: 'ALL'));
+		$sheet->setCellValue('B5', 'Store: ' . ($store ?: 'ALL'));
+		$sheet->setCellValue('C5', 'Year: ' . ($year ?: 'ALL'));
+
+		$sheet->setCellValue('A6', 'With Ba: ' . ($withba));
+		$sheet->setCellValue('B6', 'Generated Date: ' . date('M d, Y, h:i:s A'));
+		
+		$headers = ['Item Name', 'Quantity', 'LMI Code', 'RGDI Code', 'Type of SKU'];
+	    $sheet->fromArray($headers, null, 'A8');
+	    $sheet->getStyle('A8:E8')->getFont()->setBold(true);
+
+		$rowNum = 9;
+		$batchSize = 5000;
+		$offset = 0;
+
+		do {
+			if(!$data || empty($data['data'])) {
+				break;
+			}
+
+			foreach($data['data'] as $row) {
+				$sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+				$sheet->setCellValueExplicit('B' . $rowNum, $row->sum_total_qty, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+				$sheet->setCellValueExplicit('C' . $rowNum, $row->lmi_itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+				$sheet->setCellValueExplicit('D' . $rowNum, $row->rgdi_itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+				$sheet->setCellValueExplicit('E' . $rowNum, $row->sku_type, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+				$rowNum++;
+			}
+		} while (count($data['data']) === $batchSize);
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+	    header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+	    header('Cache-Control: max-age=0');
+
+		foreach (range('A', 'E') as $columnID) {
+	        $sheet->getColumnDimension($columnID)->setAutoSize(true);
+	    }
+
+	    $writer = new Xlsx($spreadsheet);
+	    $writer->save('php://output');
+	    exit;
 	}
 
 	public function generateExcelASC() {

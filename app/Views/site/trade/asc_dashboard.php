@@ -386,8 +386,8 @@
             </div>
             <!-- Buttons -->
             <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
-                <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
+                <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('exportPDF')"><i class="fas fa-eye"></i> Preview</button>
+                <button class="btn btn-success" id="exportButton" onclick="handleAction('exportExcel')"><i class="fas fa-file-export"></i> Export</button>
             </div>
             </div>
         </div>
@@ -817,38 +817,93 @@
     }
 
     function handleAction(action) {
-        if (action === 'preview') {
-            checkOutput(
-                () => {
-                    let selectedASC = $('#asc_id').val();
-                    let selectedArea = $('#area_id').val();
-                    let selectedBrand = $('#brand_id').val();
-                    let selectedYear = $('#year').val();
-                    let selectedStore = $('#store_id').val();
-                    let selectedBa = $('#ba_id').val();
-                    let link = `FALSE-${selectedASC}-${selectedArea}-${selectedBrand}-${selectedYear}-${selectedStore}-${selectedBa}`;
-                    window.open(`<?= base_url()?>trade-dashboard/asc-dashboard-1-view/${link}`, '_blank');
-                },
-                () => {
-                    let selectedASC = $('#ascName').val();
-                    let selectedArea = $('#area').val();
-                    let selectedBrand = $('#brand').val();
-                    let selectedYear = $('#year').val();
-                    let selectedStore = $('#store_id').val();
-                    let selectedBA = $('#ba').val();
-                    let withBA = $('input[name="coveredASC"]:checked').val();
-                    let link = `TRUE-${selectedASC}-${selectedArea}-${selectedBrand}-${selectedYear}-${selectedStore}-${selectedBA}-${withBA}`;
-                    window.open(`<?= base_url()?>trade-dashboard/asc-dashboard-1-view/${link}`, '_blank');
-                }
-            );
-        } else if (action === 'export') {
-            checkOutput(
-                prepareExport, 
-                prepareExport1
-            );
-        } else {
-            alert('wtf are u doing?')
-        }
+        let selectedASC = $('#asc_id').val() || '0';
+        let selectedArea = $('#area_id').val() || '0';
+        let selectedBrand = $('#brand_id').val() || '0';
+        let selectedYear = $('#year').val() || '0';
+        let selectedStore = $('#store_id').val() || '0';
+        let selectedBa = $('#ba_id').val() || '0';
+        let withba = $("input[name='coveredASC']:checked").val();
+        let printData = [];
+
+        let tables = [
+            { id: "#slowMovingTable", type: "slowMoving" },
+            { id: "#overstockTable", type: "overStock" },
+            { id: "#npdTable", type: "npd" },
+            { id: "#heroTable", type: "hero" }
+        ];
+
+        
+        
+        let url = base_url + 'trade-dashboard/generate-' + (action === 'exportPDF' ? 'pdf' : 'excel') + '-asc_dashboard?'
+            + 'asc=' + encodeURIComponent(selectedASC)
+            + '&area=' + encodeURIComponent(selectedArea)
+            + '&brand=' + encodeURIComponent(selectedBrand)
+            + '&year=' + encodeURIComponent(selectedYear)
+            + '&store=' + encodeURIComponent(selectedStore)
+            + '&ba=' + encodeURIComponent(selectedBa)
+            + '&withba=' + encodeURIComponent(withba);
+
+
+        // window.open(url, '_blank');
+        let iframe = document.createElement('iframe');
+        iframe.style.display = "none";
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        // if (action === 'exportPDF') {
+        //     checkOutput(
+        //         () => {
+        //             let selectedASC = $('#asc_id').val();
+        //             let selectedArea = $('#area_id').val();
+        //             let selectedBrand = $('#brand_id').val();
+        //             let selectedYear = $('#year').val();
+        //             let selectedStore = $('#store_id').val();
+        //             let selectedBa = $('#ba_id').val();
+        //             let link = `FALSE-${selectedASC}-${selectedArea}-${selectedBrand}-${selectedYear}-${selectedStore}-${selectedBa}`;
+        //             window.open(`<?= base_url()?>trade-dashboard/asc-dashboard-1-view/${link}`, '_blank');
+        //         },
+        //         () => {
+        //             let selectedASC = $('#ascName').val();
+        //             let selectedArea = $('#area').val();
+        //             let selectedBrand = $('#brand').val();
+        //             let selectedYear = $('#year').val();
+        //             let selectedStore = $('#store_id').val();
+        //             let selectedBA = $('#ba').val();
+        //             let withBA = $('input[name="coveredASC"]:checked').val();
+        //             let link = `TRUE-${selectedASC}-${selectedArea}-${selectedBrand}-${selectedYear}-${selectedStore}-${selectedBA}-${withBA}`;
+        //             window.open(`<?= base_url()?>trade-dashboard/asc-dashboard-1-view/${link}`, '_blank');
+        //         }
+        //     );
+        // } else if (action === 'export') {
+        //     checkOutput(
+        //         prepareExport, 
+        //         prepareExport1
+        //     );
+        // } else {
+        //     alert('wtf are u doing?')
+        // }
+    }
+
+    function initializeData(tableId, type, selectedASC, selectedArea, selectedStore, selectedBrand, selectedBa, selectedYear, withba, url) {
+        data = {
+            asc: selectedASC === "0" ? null : selectedASC,
+            area: selectedArea === "0" ? null : selectedArea,
+            brand: selectedBrand === "0" ? null: selectedBrand,
+            store: selectedStore === "0" ? null: selectedStore,
+            ba: selectedBa === "0" ? null: selectedBa,
+            year: selectedYear === "0" ? null: selectedYear,
+            withba: withba,
+            trade_type: type,
+            limit: 10,
+            offset: 0,
+        };
+
+        return new Promise((resolve, reject) => {
+            aJax.get(url, data, function(res) {
+                resolve(res);
+            })
+        })
     }
 
     function prepareExport() {

@@ -368,6 +368,7 @@
     }
 
     $("#month_start").on("change", function() {
+        let selected = $("#month_end").val();
         let start = $("#month_start").val();
         let html = "<option value=''>Please select..</option>";
 
@@ -381,6 +382,7 @@
     });
 
     $("#month_end").on("change", function() {
+        let selected = $("#month_start").val();
         let end = $("#month_end").val();
         let html = "<option value=''>Please select..</option>";
 
