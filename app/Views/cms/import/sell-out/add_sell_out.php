@@ -120,8 +120,8 @@
         $("#file_code").val(parts[3]);
 
         dynamic_search(
-            "'tbl_sell_out_template_header_copy as a'", 
-            "'left join tbl_sell_out_template_details_copy b on a.id = b.template_header_id'", 
+            "'tbl_sell_out_template_header as a'", 
+            "'left join tbl_sell_out_template_details b on a.id = b.template_header_id'", 
             "'a.line_header, b.column_number, b.column_header'", 
             0, 0, 
             "'a.import_file_code:EQ=" + parts[3] + "'", "''", "''", 
@@ -153,8 +153,7 @@
                     }
                 });
 
-                dynamicPlaceholder = placeholder; // Assign globally
-                console.log("Dynamic placeholder ready:", dynamicPlaceholder);
+                dynamicPlaceholder = placeholder;
             }
         );
     })
@@ -236,7 +235,6 @@
             success: function(response) {
                 if (response.success) {
                     totalPages = Math.ceil(response.totalRecords / rowsPerPage);
-                    console.log(totalPages);
                     display_imported_data(response.data);
                 } else {
                     modal.alert("Failed to fetch data.", "error");
@@ -380,16 +378,11 @@
     }
 
     function validate_temp_data(data) {
-        let worker = new Worker(base_url + "assets/cms/js/validator_newfile.js");
+        let worker = new Worker(base_url + "assets/cms/js/validator_sell_out.js");
         worker.postMessage({ data, base_url });
 
         worker.onmessage = function(e) {
-            const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
-            
-            if (progress !== undefined) {
-                modal.loading_progress(true, `Processing... ${progress}%`);
-                return;
-            }
+            const { invalid, errorLogs, valid_data, err_counter } = e.data;
 
             if (invalid) {
                 let errorMsg = err_counter > 1000
@@ -400,8 +393,12 @@
                     $(".btn.save").prop("disabled", false);
                 });
 
-                // createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
+                createErrorLogFile(errorLogs, `Error_${formatReadableDate(new Date(), true)}`);
             } else if (Array.isArray(valid_data) && valid_data.length > 0) { 
+                let new_data = valid_data.map(record => ({
+                    ...record
+                }));
+
                 saveHeaderData(parts, function(header_id, headers) {
                     saveValidatedData(valid_data, header_id, headers);
                 });
@@ -409,6 +406,190 @@
                 modal.alert("No valid data found. Please check the file.", "error");
             }
         }
+    }
+
+    function createErrorLogFile(errorLogs, filename) {
+        let errorText = errorLogs.join("\n");
+        let blob = new Blob([errorText], { type: "text/plain" });
+        let url = URL.createObjectURL(blob);
+
+        $(".import_buttons").find("a.download-error-log").remove();
+
+        let $downloadBtn = $("<a>", {
+            href: url,
+            download: filename+".txt",
+            text: "Download Error Logs",
+            class: "download-error-log",
+            css: {
+                border: "1px solid white",
+                borderRadius: "10px",
+                display: "inline-block",
+                padding: "10px",
+                lineHeight: 0.5,
+                background: "#990000",
+                color: "white",
+                textAlign: "center",
+                cursor: "pointer",
+                textDecoration: "none",
+                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
+            }
+        });
+
+        $(".import_buttons").append($downloadBtn);
+    }
+
+    function saveValidatedData(valid_data, data_header_id, header) {
+        let batch_size = 5000;
+        let total_batches = Math.ceil(valid_data.length / batch_size);
+        let batch_index = 0;
+        let errorLogs = [];
+        let url = "<?= base_url('cms/global_controller');?>";
+        let table = 'tbl_sell_out_data_details';
+
+        let selected_fields = [
+            'id', 'data_header_id', 'month', 'year', 'customer_payment_group', 'template_id',
+            'file_name', 'line_number', 'store_code', 'store_description', 'sku_code', 'sku_description', 
+            'quantity', 'net_sales', 'gross_sales'
+        ];
+
+        const matchFields = [
+            'month', 'year', 'customer_payment_group', 'template_id',
+            'file_name', 'line_number', 'store_code', 'store_description', 'sku_code', 'sku_description', 
+            'quantity', 'net_sales', 'gross_sales'
+        ];  
+
+        const filters = [
+            '2025',
+            '3'
+        ];  
+
+        const matchType = "AND";  // Use "AND" or "OR" for matching logic
+
+        modal.loading_progress(true, "Validating and Saving data...");
+        let existingMap = new Map();
+        //aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields}, function(response) {
+        aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters:filters}, function(response) {
+            let result = JSON.parse(response);
+            let existingMap = new Map();
+
+            if (result.existing) {
+                result.existing.forEach(record => {
+                    let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+                    existingMap.set(key, record.id);
+                });
+            }
+
+            function processNextBatch() {
+                if (batch_index >= total_batches) {
+                    modal.loading_progress(false);
+                    if (errorLogs.length > 0) {
+                        console.log(errorLogs);
+                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                        modal.alert("Some records encountered errors. Check the log.", 'info');
+                    } else {
+                        modal.loading_progress(true, "Finishing data...");
+                        delete_temp_data();
+                        setTimeout(function(){
+                            modal.alert("All records saved/updated successfully!", 'success', () => {
+                                // location.reload()
+                                let href = "<?= base_url() ?>" + "cms/import-sell-out/";
+                                window.location.href = href;
+                            });
+                        }, 1000);
+                    }
+                    return;
+                }
+
+                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                let newRecords = [];
+                let updateRecords = [];
+
+                batch.forEach(row => {
+                    let matchedId = null;
+
+                    if (matchType === "AND") {
+                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+                        if (existingMap.has(key)) {
+                            matchedId = existingMap.get(key);
+                        }
+                    } else if (matchType === "OR") {
+                        for (let [key, id] of existingMap.entries()) {
+                            let keyParts = key.split("|");
+                            for (let field of matchFields) {
+                                if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
+                                    matchedId = id;
+                                    break; 
+                                }
+                            }
+                            if (matchedId) break;
+                        }
+                    }
+
+                    if (matchedId) {
+                        row.id = matchedId;
+                        updateRecords.push(row);
+                    } else {
+                        newRecords.push(row);
+                    }
+                });
+
+                function processUpdates() {
+                    return new Promise((resolve) => {
+                        if (updateRecords.length > 0) {
+                            console.log(updateRecords);
+                            batch_update(url, updateRecords, table, "id", false, (response) => {
+                                if (response.message !== 'success') {
+                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                }
+                                updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                function processInserts() {
+                    return new Promise((resolve) => {
+                        if (newRecords.length > 0) {
+                            console.log(newRecords, "newRecords");
+                            newRecords = batch.map(record => ({
+                                ...record,
+                                data_header_id: data_header_id,
+                                month: getMonthIdByName($("#month").val()),
+                                year: $("#year").val(),
+                                customer_payment_group: header[0].customer_payment_group,
+                                template_id: header[0].import_file_code,
+                            }));
+                            batch_insert(url, newRecords, table, false, (response) => {
+                                if (response.message === 'success') {
+                                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+                                } else {
+                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                }
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+
+                processUpdates()
+                    .then(processInserts)
+                    .then(() => {
+                        batch_index++;
+                        setTimeout(processNextBatch, 300);
+                    })
+                    .catch(error => {
+                        errorLogs.push(`Unexpected error: ${error}`);
+                        processNextBatch();
+                    });
+            }
+
+            setTimeout(processNextBatch, 1000);
+        });
     }
 
     function getMonthIdByName(name) {
@@ -419,7 +600,7 @@
     function saveHeaderData(parts, callback) {
         let header_data = [];
         dynamic_search(
-            "'tbl_sell_out_template_header_copy'", "''",
+            "'tbl_sell_out_template_header'", "''",
             "'id, import_file_code, file_type, template_column_count, first_line_is_header, line_header, customer_payment_group, remarks'",
             1, 0,
             "'import_file_code:EQ=" + parts[3] + "'", "''", "''",
@@ -439,14 +620,12 @@
 
                 let payload = {
                     event: "insert",
-                    table: "tbl_sell_out_data_header_copy",
+                    table: "tbl_sell_out_data_header",
                     data: data
                 };
 
                 aJax.post(url, payload, function (result) {
                     var obj = is_json(result);
-                    console.log(obj);
-                    console.log(obj.ID, 'saveHeaderData');
 
                     // Invoke callback with header ID
                     if (callback && typeof callback === "function") {
@@ -455,69 +634,6 @@
                 });
             }
         );
-    }
-
-    function saveValidatedData(valid_data, data_header_id, header) {
-        let batch_size = 1000;
-        let total_batches = Math.ceil(valid_data.length / batch_size);
-        let batch_index = 0;
-        let errorLogs = [];
-        let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_sell_out_data_details_copy';
-
-        function processNextBatch() {
-            if (batch_index >= total_batches) {
-                modal.loading_progress(false);
-                delete_temp_data();
-                modal.alert("All records saved/updated successfully!", 'success', () => {
-                    let href = "<?= base_url() ?>" + "cms/import-sell-out/";
-                    window.location.href = href;
-                });
-                return;
-            }
-
-            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-            let newRecords = batch.map(record => ({
-                ...record,
-                data_header_id: data_header_id,
-                month: $("#month").val(),
-                year: $("#year").val(),
-                customer_payment_group: header[0].customer_payment_group,
-                template_id: header[0].import_file_code,
-            }));
-
-            console.log(newRecords, 'newRecords');
-
-            function processInserts() {
-                return new Promise((resolve) => {
-                    if (newRecords.length > 0) {
-                        batch_insert(url, newRecords, table, false, (response) => {
-                            if (response.message === 'success') {
-                                updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
-                            } else {
-                                errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                            }
-                            resolve();
-                        });
-                    } else {
-                        resolve();
-                    }
-                });
-            }
-
-            processInserts()
-                .then(() => {
-                    batch_index++;
-                    setTimeout(processNextBatch, 300);
-                })
-                .catch(error => {
-                    errorLogs.push(`Unexpected error: ${error}`);
-                    batch_index++;
-                    processNextBatch();
-                });
-        }
-
-        setTimeout(processNextBatch, 1000);
     }
 
 </script>
