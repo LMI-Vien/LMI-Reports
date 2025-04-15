@@ -1220,21 +1220,50 @@
     }
 
     function import_sellout() {
-        let href = "<?= base_url() ?>" + "cms/import-sell-out/add/";
-
-        let payGroup = $("#pay_group").val();
-        let year = $("#year").val();
         let month = $("#month").val();
+        let year = $('#year option:selected').text();
+        let payGroup = $("#pay_group").val();
         let template = $("#template").val();
 
         if (payGroup == '' || year == '' || month == '' || template == '') {
             return modal.alert_custom("Fill up the Fields.", "Payment Group, Template, Month and Year cannot be empty", "error");
         }
 
-        href += `${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
+        check_current_db(
+            "tbl_sell_out_data_header_copy", 
+            ["month", "year", "customer_payment_group", "template_id"], 
+            [$("#month").val(), $('#year option:selected').text(), $("#pay_group").val(), $("#template").val()], 
+            "id" , 
+            null, 
+            null,
+            false, 
+            function(exists, duplicateFields) {
+                console.log(exists, duplicateFields, 'exists, duplicateFields')
+                if (!exists) {
+                    modal.confirm(confirm_add_message, function(result){
+                        if(result){ 
+                            console.log(result, "result")
+                            let href = "<?= base_url() ?>" + "cms/import-sell-out/add/";
 
-        // window.open(href, '_blank');
-        window.location.href = href;
+                            let payGroup = $("#pay_group").val();
+                            let year = $("#year").val();
+                            let month = $("#month").val();
+                            let template = $("#template").val();
+
+                            if (payGroup == '' || year == '' || month == '' || template == '') {
+                                return modal.alert_custom("Fill up the Fields.", "Payment Group, Template, Month and Year cannot be empty", "error");
+                            }
+
+                            href += `${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
+
+                            // window.open(href, '_blank');
+                            window.location.href = href;
+                        }
+                    });
+        
+                }             
+            }
+        );
     }
 
     let pay_group = [];
