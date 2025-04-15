@@ -120,8 +120,8 @@
         $("#file_code").val(parts[3]);
 
         dynamic_search(
-            "'tbl_sell_out_template_header_copy as a'", 
-            "'left join tbl_sell_out_template_details_copy b on a.id = b.template_header_id'", 
+            "'tbl_sell_out_template_header as a'", 
+            "'left join tbl_sell_out_template_details b on a.id = b.template_header_id'", 
             "'a.line_header, b.column_number, b.column_header'", 
             0, 0, 
             "'a.import_file_code:EQ=" + parts[3] + "'", "''", "''", 
@@ -444,7 +444,7 @@
         let batch_index = 0;
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_sell_out_data_details_copy';
+        let table = 'tbl_sell_out_data_details';
 
         let selected_fields = [
             'id', 'data_header_id', 'month', 'year', 'customer_payment_group', 'template_id',
@@ -600,7 +600,7 @@
     function saveHeaderData(parts, callback) {
         let header_data = [];
         dynamic_search(
-            "'tbl_sell_out_template_header_copy'", "''",
+            "'tbl_sell_out_template_header'", "''",
             "'id, import_file_code, file_type, template_column_count, first_line_is_header, line_header, customer_payment_group, remarks'",
             1, 0,
             "'import_file_code:EQ=" + parts[3] + "'", "''", "''",
@@ -620,7 +620,7 @@
 
                 let payload = {
                     event: "insert",
-                    table: "tbl_sell_out_data_header_copy",
+                    table: "tbl_sell_out_data_header",
                     data: data
                 };
 

@@ -92,7 +92,7 @@
     });
 
     function renderHeader(header_id) {
-        table = 'tbl_sell_out_data_header_copy a';
+        table = 'tbl_sell_out_data_header a';
         join = 'left join tbl_month b on a.month = b.id';
         fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
         limit = limit;
@@ -174,7 +174,7 @@
             event: "list",
             select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
             limit: limit,
-            table: "tbl_sell_out_data_details_copy",
+            table: "tbl_sell_out_data_details",
             query: new_query,
             offset: offset,
             order: {},
@@ -220,7 +220,7 @@
             query: new_query,
             offset: offset,
             limit: limit,
-            table : "tbl_sell_out_data_details_copy",
+            table : "tbl_sell_out_data_details",
             order : {},
             group: "",
         }
