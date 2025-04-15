@@ -60,6 +60,20 @@ class SyncData extends BaseCommand
     {
         $syncModel = new Sync_model();
         $db = Database::connect();
+
+        // Define parameters per method
+        $methodParams = [
+            'syncDataPriceCodeLMI'       => [5000, 'Watsons Personal Inc'],
+            'syncDataPriceCodeRGDI'      => [5000, 'Watsons Personal Inc'],
+            'syncDataitemfileLMI'        => [5000, 'Inventory', ['Packaging Materials']],
+            'syncDataitemfileRGDI'       => [5000, 'Inventory', ['Packaging Materials']],
+            'syncCusPaymentGroupRgdiData'=> [5000, 'Watsons Personal Inc'],
+            'syncCusPaymentGroupLmiData' => [5000, 'Watsons Personal Inc'],
+            'syncCustomerLmiData'        => [5000, 'Watsons Personal Inc'],
+            'syncCustomerRgdiData'       => [5000, 'Watsons Personal Inc']
+            // Methods like syncBrandData, syncClassificationData don't require parameters
+        ];
+
         $methods = [
             'syncDataPriceCodeLMI',
             'syncDataPriceCodeRGDI',
@@ -74,11 +88,18 @@ class SyncData extends BaseCommand
         ];
 
         $results = [];
+
         foreach ($methods as $index => $method) {
             $start_time = microtime(true);
 
             try {
-                $response = $syncModel->$method();
+                // Call with or without parameters
+                if (isset($methodParams[$method])) {
+                    $response = call_user_func_array([$syncModel, $method], $methodParams[$method]);
+                } else {
+                    $response = $syncModel->$method();
+                }
+
                 $status = 'success';
                 $errorMessage = null;
             } catch (\Exception $e) {
@@ -107,6 +128,6 @@ class SyncData extends BaseCommand
         }
 
         CLI::write("Data Sync Completed!", 'green');
-    
     }
+
 }
