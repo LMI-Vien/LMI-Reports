@@ -820,9 +820,14 @@ class Global_controller extends BaseController
 	        $responseData['ba_area_store_brand'] = $this->Global_model->get_valid_records_ba_area_store_brand();
 	    }
 
-	    if (!empty($request['payment_group'])) {
-	        $responseData['payment_group'] = $this->Global_model->get_valid_records("tbl_payment_group", 'customer_group_code');
+	    if (!empty($request['payment_group_lmi'])) {
+	        $responseData['payment_group_lmi'] = $this->Global_model->get_valid_records("tbl_cus_payment_group_lmi", 'customer_group_code');
 	    }
+
+	    if (!empty($request['payment_group_rgdi'])) {
+	        $responseData['payment_group_rgdi'] = $this->Global_model->get_valid_records("tbl_cus_payment_group_rgdi", 'customer_group_code');
+	    }
+
 	    if (!empty($request['customer_sku_code_lmi'])) {
 	        $responseData['customer_sku_code_lmi'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_lmi", 'cusitmcde');
 	    }

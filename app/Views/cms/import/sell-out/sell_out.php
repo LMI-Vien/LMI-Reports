@@ -1246,7 +1246,7 @@
             query : 'status >= 0',
             offset : 0,
             limit : 0,
-            table : "tbl_payment_group",
+            table : "tbl_cus_payment_group_lmi",
             order : {
                 field : "id",
                 order : "asc" 
