@@ -1623,6 +1623,51 @@ function autocomplete_field(field, field_id, options, description = "description
 	})
 }
 
+
+function autocomplete_field_multi(field, field_id, options, description = "description", id = "id", callback) {
+	field.autocomplete({
+		source: function(request, response) {
+			let term = request.term.split(/,\s*/).pop(); // get last term
+			let result = $.ui.autocomplete.filter(options.map(option => ({
+				label: option[description],
+				value: option[id],
+				info: option,
+			})), term);
+			let uniqueResults = [...new Set(result)];
+			response(uniqueResults.slice(0, 10));
+		},
+		focus: function () {
+			// prevent value from being inserted on focus
+			return false;
+		},
+		select: function(event, ui) {
+			let terms = field.val().split(/,\s*/);
+			// remove the current input
+			terms.pop();
+			// add the selected item
+			terms.push(ui.item.label);
+			// add placeholder for next entry
+			terms.push("");
+			field.val(terms.join(", "));
+
+			if (typeof callback === "function") {
+				callback(ui.item.info);
+			}
+
+			// append to hidden field value (optional logic)
+			let idTerms = field_id.val() ? field_id.val().split(",") : [];
+			idTerms.push(ui.item.value);
+			field_id.val(idTerms.join(","));
+
+			return false;
+		},
+		minLength: 0
+	}).on("focus", function () {
+		$(this).autocomplete("search", "");
+	});
+}
+
+
 // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⡹⢎⡔⢠⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⡀⠄⡀⠠⢀⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣻⣟⣿⡽⢧⡙⢌⠰⠁⠠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠡⠀⠌⠾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣟⣯⣷⠳⡜⢮⡙⠦⡑⠌⡄⢁⠀⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠁⡈⠀⡐⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
