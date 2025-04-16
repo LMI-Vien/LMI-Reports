@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Store_Branch extends BaseController
+class Store_branch extends BaseController
 {
     protected $session;
 

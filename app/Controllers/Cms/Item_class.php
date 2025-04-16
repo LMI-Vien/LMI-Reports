@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Item_Class extends BaseController
+class Item_class extends BaseController
 {
     protected $session;
 

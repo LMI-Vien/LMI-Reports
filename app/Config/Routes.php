@@ -169,7 +169,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('/', 'Cms\Newfile::index');
     });
 
-    $routes->get('store-branch', 'Cms\Store_Branch::index');
+    $routes->get('store-branch', 'Cms\Store_branch::index');
 
     $routes->group('area', static function ($routes) {
         $routes->get('/', 'Cms\Area::index');
@@ -183,7 +183,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->get('company', 'Cms\Company::index');
 
-    $routes->get('item-class', 'Cms\Item_Class::index');
+    $routes->get('item-class', 'Cms\Item_class::index');
 
     $routes->get('system-parameter', 'Cms\System_parameter::index');
 
