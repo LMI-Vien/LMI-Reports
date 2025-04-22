@@ -443,22 +443,19 @@
         if (actions === 'edit') $footer.append(buttons.edit);
         $footer.append(buttons.close);
 
-        // Disable background content interaction
-        $contentWrapper.attr('inert', '');
-
-        // Move focus inside modal when opened
-        $modal.on('shown.bs.modal', function () {
-            $(this).find('input, textarea, button, select').filter(':visible:first').focus();
-        });
-
         $modal.modal('show');
 
-        // Fix focus issue when modal is hidden
-        $modal.on('hidden.bs.modal', function () {
-            $contentWrapper.removeAttr('inert');  // Re-enable background interaction
-            if (window.lastFocusedElement) {
-                window.lastFocusedElement.focus();
-            }
+        $modal.off('shown.bs.modal').on('shown.bs.modal', function () {
+        // Disable background interaction
+        $contentWrapper.attr('inert', '');
+
+        // Now it's safe to focus inside the modal
+        $(this).find('input, textarea, button, select').filter(':visible:first').focus();
+        });
+
+        $modal.off('hidden.bs.modal').on('hidden.bs.modal', function () {
+            $contentWrapper.removeAttr('inert');
+            if (window.lastFocusedElement) window.lastFocusedElement.focus();
         });
     }
 
@@ -563,12 +560,11 @@
     }
 
     function delete_data(id) {
-        var code = '';
-
         get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-            code = res;
+            let code = res[id];
             message = is_json(confirm_delete_message);
-            message.message += `Delete Code <i><b>${code[id]}</b></i> from Agency Masterfile`;
+            message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
+
             modal.confirm(JSON.stringify(message), function(result){
                 if (result) {
                     var url = "<?= base_url('cms/global_controller');?>"; 
