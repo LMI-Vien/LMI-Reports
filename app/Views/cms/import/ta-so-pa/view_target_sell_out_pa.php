@@ -582,11 +582,16 @@
         });
     }
 
+    function toCurrencyFormat(value) {
+        return value ? Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+    }
+
     function populate_modal(inp_id) {
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
-            event : "list", select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
+            event : "list",
+            select : `id, payment_group, vendor, overall, kam_kas_kaa, sales_group, terms, channel, brand, exclusivity, category, 
             lmi_code, rgdi_code, customer_sku_code, item_description, item_status, srp, trade_discount, customer_cost, customer_cost_net_of_vat,
             january_tq, february_tq, march_tq, april_tq, may_tq, june_tq, july_tq, august_tq, september_tq, october_tq, november_tq, december_tq,
             january_ta, february_ta, march_ta, april_ta, may_ta, june_ta, july_ta, august_ta, september_ta, october_ta, november_ta, december_ta,
@@ -614,34 +619,34 @@
                     $('#customer_sku_code').val(d.customer_sku_code);
                     $('#item_description').val(d.item_description);
                     $('#item_status').val(d.item_status);
-                    $('#srp').val(d.srp);
-                    $('#trade_discount').val(d.trade_discount);
-                    $('#customer_cost').val(d.customer_cost);
+                    $('#srp').val(toCurrencyFormat(d.srp));
+                    $('#trade_discount').val(toCurrencyFormat(d.trade_discount));
+                    $('#customer_cost').val(toCurrencyFormat(d.customer_cost));
                     $('#customer_cost_net_of_vat').val(d.customer_cost_net_of_vat);
-                    $('#jan_tq').val(d.january_tq);
-                    $('#feb_tq').val(d.february_tq);
-                    $('#mar_tq').val(d.march_tq);
-                    $('#apr_tq').val(d.april_tq);
-                    $('#may_tq').val(d.may_tq);
-                    $('#jun_tq').val(d.june_tq);
-                    $('#jul_tq').val(d.july_tq);
-                    $('#aug_tq').val(d.august_tq);
-                    $('#sep_tq').val(d.september_tq);
-                    $('#oct_tq').val(d.october_tq);
-                    $('#nov_tq').val(d.november_tq);
-                    $('#dec_tq').val(d.december_tq);
-                    $('#jan_ta').val(d.january_ta);
-                    $('#feb_ta').val(d.february_ta);
-                    $('#mar_ta').val(d.march_ta);
-                    $('#apr_ta').val(d.april_ta);
-                    $('#may_ta').val(d.may_ta);
-                    $('#jun_ta').val(d.june_ta);
-                    $('#jul_ta').val(d.july_ta);
-                    $('#aug_ta').val(d.august_ta);
-                    $('#sep_ta').val(d.september_ta);
-                    $('#oct_ta').val(d.october_ta);
-                    $('#nov_ta').val(d.november_ta);
-                    $('#dec_ta').val(d.december_ta);
+                    $('#jan_tq').val(toCurrencyFormat(d.january_tq));
+                    $('#feb_tq').val(toCurrencyFormat(d.february_tq));
+                    $('#mar_tq').val(toCurrencyFormat(d.march_tq));
+                    $('#apr_tq').val(toCurrencyFormat(d.april_tq));
+                    $('#may_tq').val(toCurrencyFormat(d.may_tq));
+                    $('#jun_tq').val(toCurrencyFormat(d.june_tq));
+                    $('#jul_tq').val(toCurrencyFormat(d.july_tq));
+                    $('#aug_tq').val(toCurrencyFormat(d.august_tq));
+                    $('#sep_tq').val(toCurrencyFormat(d.september_tq));
+                    $('#oct_tq').val(toCurrencyFormat(d.october_tq));
+                    $('#nov_tq').val(toCurrencyFormat(d.november_tq));
+                    $('#dec_tq').val(toCurrencyFormat(d.december_tq));
+                    $('#jan_ta').val(toCurrencyFormat(d.january_ta));
+                    $('#feb_ta').val(toCurrencyFormat(d.february_ta));
+                    $('#mar_ta').val(toCurrencyFormat(d.march_ta));
+                    $('#apr_ta').val(toCurrencyFormat(d.april_ta));
+                    $('#may_ta').val(toCurrencyFormat(d.may_ta));
+                    $('#jun_ta').val(toCurrencyFormat(d.june_ta));
+                    $('#jul_ta').val(toCurrencyFormat(d.july_ta));
+                    $('#aug_ta').val(toCurrencyFormat(d.august_ta));
+                    $('#sep_ta').val(toCurrencyFormat(d.september_ta));
+                    $('#oct_ta').val(toCurrencyFormat(d.october_ta));
+                    $('#nov_ta').val(toCurrencyFormat(d.november_ta));
+                    $('#dec_ta').val(toCurrencyFormat(d.december_ta));
                 }); 
             }
         });
