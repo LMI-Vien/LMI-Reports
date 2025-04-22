@@ -110,8 +110,6 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('menu_update/(:num)', 'Cms\Cms_menu::menu_update');
     });
 
-    $routes->get('system-parameter', 'Cms\System_parameter::index');
-
     $routes->group('import-sell-out', static function ($routes) {
         $routes->get('/', 'Cms\Import_sell_out::index');
         $routes->get('view/(:any)', 'Cms\Import_sell_out::view');
@@ -171,12 +169,9 @@ $routes->group('cms/', static function ($routes) {
     
     $routes->group('newfile', static function ($routes) {
         $routes->get('/', 'Cms\Newfile::index');
-        $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\Newfile::import_temp_scan_data');
-        $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\Newfile::fetch_temp_scan_data');
-        $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\Newfile::delete_temp_scan_data');
     });
 
-    $routes->get('store-branch', 'Cms\Store_Branch::index');
+    $routes->get('store-branch', 'Cms\Store_branch::index');
 
     $routes->group('area', static function ($routes) {
         $routes->get('/', 'Cms\Area::index');
@@ -189,6 +184,12 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('year', 'Cms\Year::index');
 
     $routes->get('company', 'Cms\Company::index');
+
+    $routes->get('item-class', 'Cms\Item_class::index');
+
+    $routes->get('system-parameter', 'Cms\System_parameter::index');
+
+    $routes->get('announcement', 'Cms\Announcement::index');
 
     //Audit trail
     $routes->group('Audit_trail/', static function ($routes) {

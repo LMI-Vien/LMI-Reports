@@ -3,9 +3,8 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Newfile extends BaseController
+class Item_class extends BaseController
 {
     protected $session;
 
@@ -21,16 +20,16 @@ class Newfile extends BaseController
 	public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "Newfile",
-			"description"   =>  "Newfile",
+			"title"         =>  "Item Class Masterfile",
+			"description"   =>  "Item Class",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Newfile";
-		$data['PageName'] = 'Newfile';
-		$data['PageUrl'] = 'Newfile';
-		$data['buttons'] = [];
-		$data['content'] = "cms/newfile/newfile.php";
-		$data['session'] = session(); //for frontend accessing the session data
+		$data['title'] = "Item Class";
+		$data['PageName'] = 'Item Class';
+		$data['PageUrl'] = 'Item Class';
+		$data['buttons'] = ['add', 'search', 'filter'];
+		$data['content'] = "cms/item_class/item_class.php";
+		$data['session'] = session(); 
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
@@ -41,9 +40,10 @@ class Newfile extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/cms/css/main_style.css",//css sa style ni master Vien
+        		"assets/cms/css/main_style.css",
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);	
 	}
+
 }

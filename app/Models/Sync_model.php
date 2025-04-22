@@ -85,15 +85,17 @@ class Sync_model extends Model
 
 
     //optimized version
-    public function syncDataPriceCodeLMI($batchSize = 5000)
+    public function syncDataPriceCodeLMI($batchSize = 5000, $where)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
         try {
             while (true) {
                 $sourceData = $this->traccLmiDB->table('pricecodefile2')
+                                             ->where('LOWER(prccde)', $filter)
                                              ->limit($batchSize, $offset)
                                              ->get()
                                              ->getResultArray();
@@ -171,15 +173,17 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Price Code LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataPriceCodeRGDI($batchSize = 5000)
+    public function syncDataPriceCodeRGDI($batchSize = 5000, $where)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
         try {
             while (true) {
                 $sourceData = $this->traccRgdiDB->table('pricecodefile2')
+                                             ->where('LOWER(prccde)', $filter)    
                                              ->limit($batchSize, $offset)
                                              ->get()
                                              ->getResultArray();
@@ -257,18 +261,25 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Price Code RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataitemfileLMI($batchSize = 5000)
+    public function syncDataitemfileLMI($batchSize = 5000, $where, $brandCode)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
+        $brandCode = array_map('strtolower', $brandCode);
         try {
             while (true) {
-                $sourceData = $this->traccLmiDB->table('itemfile')
-                                             ->limit($batchSize, $offset)
-                                             ->get()
-                                             ->getResultArray();
+                $builder = $this->traccLmiDB->table('itemfile');
+                $builder->where('LOWER(itmtyp)', $filter);
+                foreach ($brandCode as $bc) {
+                    $builder->where('LOWER(brncde) !=', $bc);
+                }
+                $sourceData =    $builder
+                                 ->limit($batchSize, $offset)
+                                 ->get()
+                                 ->getResultArray();
 
                 if (empty($sourceData)) {
                     break;
@@ -357,18 +368,25 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Item File LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataitemfileRGDI($batchSize = 5000)
+    public function syncDataitemfileRGDI($batchSize = 5000, $where, $brandCode)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
+        $brandCode = array_map('strtolower', $brandCode);
         try {
             while (true) {
-                $sourceData = $this->traccRgdiDB->table('itemfile')
-                                             ->limit($batchSize, $offset)
-                                             ->get()
-                                             ->getResultArray();
+                $builder = $this->traccRgdiDB->table('itemfile');
+                $builder->where('LOWER(itmtyp)', $filter);
+                foreach ($brandCode as $bc) {
+                    $builder->where('LOWER(brncde) !=', $bc);
+                }
+                $sourceData =    $builder
+                                 ->limit($batchSize, $offset)
+                                 ->get()
+                                 ->getResultArray();
 
                 if (empty($sourceData)) {
                     break;
@@ -806,15 +824,17 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Classification with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCusPaymentGroupLmiData($batchSize = 5000)
+    public function syncCusPaymentGroupLmiData($batchSize = 5000, $where)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
         try {
             while (true) {
                 $sourceData = $this->traccLmiDB->table('customergroupfile')
+                                               ->where('LOWER(cusgrpcde)', $filter)
                                                ->limit($batchSize, $offset)
                                                ->get()
                                                ->getResultArray();
@@ -860,15 +880,17 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer Payment Group LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCusPaymentGroupRgdiData($batchSize = 5000)
+    public function syncCusPaymentGroupRgdiData($batchSize = 5000, $where)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
         try {
             while (true) {
                 $sourceData = $this->traccRgdiDB->table('customergroupfile')
+                                               ->where('LOWER(cusgrpcde)', $filter)
                                                ->limit($batchSize, $offset)
                                                ->get()
                                                ->getResultArray();
@@ -914,15 +936,17 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer Payment Group RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCustomerLmiData($batchSize = 5000)
+    public function syncCustomerLmiData($batchSize = 5000, $where)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
         try {
             while (true) {
                 $sourceData = $this->traccLmiDB->table('customerfile')
+                                               ->where('LOWER(prccde)', $filter)
                                                ->limit($batchSize, $offset)
                                                ->get()
                                                ->getResultArray();
@@ -997,15 +1021,17 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCustomerRgdiData($batchSize = 5000)
+    public function syncCustomerRgdiData($batchSize = 5000, $where)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
+        $filter = strtolower($where);
         try {
             while (true) {
                 $sourceData = $this->traccRgdiDB->table('customerfile')
+                                               ->where('LOWER(prccde)', $filter)
                                                ->limit($batchSize, $offset)
                                                ->get()
                                                ->getResultArray();

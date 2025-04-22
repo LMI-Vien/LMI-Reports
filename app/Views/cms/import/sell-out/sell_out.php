@@ -305,7 +305,7 @@
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_sell_out_data_header_copy as so",
+            table : "tbl_sell_out_data_header as so",
             join : [{
                 table : "tbl_month as m",
                 query : "m.id = so.month",
@@ -382,7 +382,7 @@
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_sell_out_data_header_copy as so",
+            table : "tbl_sell_out_data_header as so",
             order : {
                 field : "so.id", //field to order
                 order : "asc" //asc or desc
@@ -443,12 +443,12 @@
             query : " data_header_id = " + id,
             offset : offset,
             limit : limit,
-            table : "tbl_sell_out_data_details_copy",
+            table : "tbl_sell_out_data_details",
             order : {
                 field : "store_code",
                 order : "asc" 
             },
-            group : "tbl_sell_out_data_details_copy.store_code"
+            group : "tbl_sell_out_data_details.store_code"
 
         }
 
@@ -529,7 +529,7 @@
                         "Net Sales": item.remarks,
                     }
                     formattedData.push(newData); // Append new data to formattedData array
-                    table = 'tbl_sell_out_data_details_copy';
+                    table = 'tbl_sell_out_data_details';
                     join = '';
                     fields = 'COUNT(id) AS total_records';
                     limit = 0;
@@ -542,7 +542,7 @@
                             if (res && res.length > 0) {
                                 let total_records = res[0].total_records;
                                 for (let index = 0; index < total_records; index += 100000) {
-                                    table = 'tbl_sell_out_data_details_copy';
+                                    table = 'tbl_sell_out_data_details';
                                     join = '';
                                     fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
                                     limit = 100000;
@@ -577,7 +577,7 @@
 
             ids.length > 0 
                 ? dynamic_search(
-                    "'tbl_sell_out_data_header_copy a'", 
+                    "'tbl_sell_out_data_header a'", 
                     "'left join tbl_month b on a.month = b.id'", 
                     "'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks'", 
                     0, 
@@ -591,7 +591,7 @@
         };
 
         const batch_export = () => {
-            table = 'tbl_sell_out_data_header_copy';
+            table = 'tbl_sell_out_data_header';
             join = '';
             fields = 'COUNT(id) AS total_records';
             limit = 0;
@@ -604,7 +604,7 @@
                     if (res && res.length > 0) {
                         let total_records = res[0].total_records;
                         for (let index = 0; index < total_records; index += 100000) {
-                            table = 'tbl_sell_out_data_header_copy a';
+                            table = 'tbl_sell_out_data_header a';
                             join = 'left join tbl_month b on a.month = b.id';
                             fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
                             limit = 100000;
@@ -634,7 +634,7 @@
                                             "Net Sales": item.remarks,
                                         }
                                         formattedData.push(newData); // Append new data to formattedData array
-                                        table = 'tbl_sell_out_data_details_copy';
+                                        table = 'tbl_sell_out_data_details';
                                         join = '';
                                         fields = 'COUNT(id) AS total_records';
                                         limit = 0;
@@ -647,7 +647,7 @@
                                                 if (res && res.length > 0) {
                                                     let total_records = res[0].total_records;
                                                     for (let index = 0; index < total_records; index += 100000) {
-                                                        table = 'tbl_sell_out_data_details_copy a';
+                                                        table = 'tbl_sell_out_data_details a';
                                                         join = '';
                                                         fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
                                                         limit = 100000;
@@ -724,7 +724,7 @@
                     "Net Sales": item.remarks,
                 }
                 formattedData.push(newData); // Append new data to formattedData array
-                table = 'tbl_sell_out_data_details_copy';
+                table = 'tbl_sell_out_data_details';
                 join = '';
                 fields = 'COUNT(id) AS total_records';
                 limit = 0;
@@ -737,7 +737,7 @@
                         if (res && res.length > 0) {
                             let total_records = res[0].total_records;
                             for (let index = 0; index < total_records; index += 100000) {
-                                table = 'tbl_sell_out_data_details_copy a';
+                                table = 'tbl_sell_out_data_details a';
                                 join = '';
                                 fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
                                 limit = 100000;
@@ -779,7 +779,7 @@
             exportArrayToCSV(formattedData, `Sell Out - ${formatDate(new Date())}`, headerData);
         }
 
-        table = 'tbl_sell_out_data_header_copy a';
+        table = 'tbl_sell_out_data_header a';
         join = 'left join tbl_month b on a.month = b.id';
         fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
         limit = 0;
@@ -840,7 +840,7 @@
         // dynamic_search(tbl_name, join, table_fields, limit, offset, conditions, order, group, callback)
         dynamic_search(
             // "'tbl_sell_out_template_header'",
-            "'tbl_sell_out_template_header_copy'", 
+            "'tbl_sell_out_template_header'", 
             "''", 
             "'id, import_file_code, file_type, line_header'", 
             10, 
@@ -937,7 +937,7 @@
             $('#template_modal').modal('show');
         }
         dynamic_search(
-            "'tbl_sell_out_template_details_copy'", 
+            "'tbl_sell_out_template_details'", 
             // "'tbl_sell_out_template_details'", 
             "''", 
             "'template_header_id, id, column_header, column_number, file_header'", 
@@ -969,7 +969,7 @@
             $("#col_count").val(head.template_column_count)
         }
         dynamic_search(
-            "'tbl_sell_out_template_header_copy'", 
+            "'tbl_sell_out_template_header'", 
             // "'tbl_sell_out_template_header'", 
             "''", 
             "'id, import_file_code, file_type, template_column_count, line_header, customer_payment_group, remarks'", 
@@ -1042,7 +1042,7 @@
 
         data = {
             event: "insert",
-            table: "tbl_sell_out_template_header_copy",
+            table: "tbl_sell_out_template_header",
             data: headerarr
         };
 
@@ -1060,7 +1060,7 @@
                 })
             })
 
-            batch_insert(url, detailarr, 'tbl_sell_out_template_details_copy', false, (response) => {
+            batch_insert(url, detailarr, 'tbl_sell_out_template_details', false, (response) => {
                 modal.alert(success_save_message, 'success', function() {
                     $('#template_modal').modal('hide');
                 })
@@ -1080,7 +1080,7 @@
 
         let data = {
             event: "update",
-            table: "tbl_sell_out_template_header_copy",
+            table: "tbl_sell_out_template_header",
             field: "id",
             where: id,
             data: headerarr,
@@ -1096,7 +1096,7 @@
                 offset: 0,
                 order: "''",
                 table_fields: "'id, import_file_code, file_type, template_column_count, line_header, customer_payment_group, remarks'",
-                tbl_name: "'tbl_sell_out_template_header_copy'"
+                tbl_name: "'tbl_sell_out_template_header'"
             }
 
             aJax.post(url,data,function(result){
@@ -1114,7 +1114,7 @@
                     })
                 })
 
-                batch_update(url, detailarr, "tbl_sell_out_template_details_copy", "id", false, (response) => {
+                batch_update(url, detailarr, "tbl_sell_out_template_details", "id", false, (response) => {
                     modal.alert(success_update_message, 'success', function() {
                         $('#template_modal').modal('hide');
                     })
@@ -1133,9 +1133,9 @@
                             $("#template_list_modal").modal('hide')
                         });
                     }
-                    batch_delete(url, "tbl_sell_out_template_details_copy", "template_header_id", { id }, "", callback2)
+                    batch_delete(url, "tbl_sell_out_template_details", "template_header_id", { id }, "", callback2)
                 }
-                batch_delete(url, "tbl_sell_out_template_header_copy", "id", { id }, "", callback)
+                batch_delete(url, "tbl_sell_out_template_header", "id", { id }, "", callback)
             }
         });
     }
@@ -1220,21 +1220,50 @@
     }
 
     function import_sellout() {
-        let href = "<?= base_url() ?>" + "cms/import-sell-out/add/";
-
-        let payGroup = $("#pay_group").val();
-        let year = $("#year").val();
         let month = $("#month").val();
+        let year = $('#year option:selected').text();
+        let payGroup = $("#pay_group").val();
         let template = $("#template").val();
 
         if (payGroup == '' || year == '' || month == '' || template == '') {
             return modal.alert_custom("Fill up the Fields.", "Payment Group, Template, Month and Year cannot be empty", "error");
         }
 
-        href += `${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
+        check_current_db(
+            "tbl_sell_out_data_header", 
+            ["month", "year", "customer_payment_group", "template_id"], 
+            [$("#month").val(), $('#year option:selected').text(), $("#pay_group").val(), $("#template").val()], 
+            "id" , 
+            null, 
+            null,
+            false, 
+            function(exists, duplicateFields) {
+                console.log(exists, duplicateFields, 'exists, duplicateFields')
+                if (!exists) {
+                    modal.confirm(confirm_add_message, function(result){
+                        if(result){ 
+                            console.log(result, "result")
+                            let href = "<?= base_url() ?>" + "cms/import-sell-out/add/";
 
-        // window.open(href, '_blank');
-        window.location.href = href;
+                            let payGroup = $("#pay_group").val();
+                            let year = $("#year").val();
+                            let month = $("#month").val();
+                            let template = $("#template").val();
+
+                            if (payGroup == '' || year == '' || month == '' || template == '') {
+                                return modal.alert_custom("Fill up the Fields.", "Payment Group, Template, Month and Year cannot be empty", "error");
+                            }
+
+                            href += `${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
+
+                            // window.open(href, '_blank');
+                            window.location.href = href;
+                        }
+                    });
+        
+                }             
+            }
+        );
     }
 
     let pay_group = [];
@@ -1246,7 +1275,7 @@
             query : 'status >= 0',
             offset : 0,
             limit : 0,
-            table : "tbl_payment_group",
+            table : "tbl_cus_payment_group_lmi",
             order : {
                 field : "id",
                 order : "asc" 
@@ -1278,7 +1307,7 @@
             query : '',
             offset : 0,
             limit : 0,
-            table : "tbl_sell_out_template_header_copy",
+            table : "tbl_sell_out_template_header",
             order : {
                 field : "id",
                 order : "asc" 
