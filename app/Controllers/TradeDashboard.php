@@ -1199,6 +1199,221 @@ class TradeDashboard extends BaseController
 	    exit;
 	}
 
+	public function generatePDFOverallASC() {
+		$area = $this->request->getGet('area');
+	    $asc = $this->request->getGet('asc');
+	    $brand = $this->request->getGet('brand');
+	    $ba = $this->request->getGet('ba');
+	    $store = $this->request->getGet('store');
+	    $year = $this->request->getGet('year');
+
+		$date = null; 
+	    $lookup_month = null;
+	    $lyYear = 0;
+	    $selected_year = null;
+	    $targetYear = null;
+	    $date = null;
+		
+	    if($year) {
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$selected_year = $actual_year[0]['year'];
+	    	$date = $actual_year[0]['year'];
+	    	$targetYear = $actual_year[0]['id'];
+	    }
+		
+	    $filters = [
+		    'year' => $selected_year, 
+		    'asc_id' => $asc,
+		    'store_id' => $store,
+		    'area_id' => $area,
+		    'ba_id' => $ba,
+		    'brand_id' => $brand,
+		    'year_val' => $targetYear
+		];
+
+		// if(array_sum($filters) != 0) {
+		// 	$lySellOut = ["net_sales_january", "net_sales_february", "net_sales_march", "net_sales_april", "net_sales_may", "net_sales_june", "net_sales_july", "net_sales_august", "net_sales_september", "net_sales_october", "net_sales_november", "net_sales_december"];
+			
+			
+		// } else {
+		// 	echo print_r($data);
+		// }
+
+	    // return $this->response->setJSON([
+	    //  'data' => $data['data'],
+		// 	'area' => $area,
+		// 	'asc' => $asc,
+		// 	'brand' => $brand,
+		// 	'ba' => $ba,
+		// 	'store' => $store,
+		// 	'year' => $year,
+	    // ]);
+
+		$filterData = [
+			'Year' => $selected_year ?: "ALL",
+			'Area Sales Coordinator' => $asc ?: "ALL",
+			'Store' => $store ?: "ALL",
+			'Area' => $area ?: "ALL",
+			'Brand Ambassador' => $ba ?: "ALL",
+			'Brand' => $brand ?: "ALL",
+		];
+
+		$headers = [];
+
+		$title = 'Overall Area Sales Coordinator Dashboard Report';
+
+		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf->SetCreator('LMI SFA');
+		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
+		$pdf->SetTitle($title);
+		$pdf->setPrintHeader(false);
+		$pdf->setPrintFooter(false);
+		$pdf->AddPage();
+
+		$this->printHeader($pdf, $title);
+		$this->printFilter($pdf, $filterData);
+
+		$pdf->SetFont('helvetica', '', 9);
+		
+		// echo print_r($data['data'][0]);
+		if(array_sum($filters) != 0) {
+			$data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+			
+			$row = $data['data'][0];
+
+			$pageWidth = $pdf->getPageWidth();
+			$pageMargin = $pdf->getMargins();
+			$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / 13;
+
+			$pdf->Cell($width, 10, 'Metrics', 1, 0, 'C');
+			$pdf->SetFont('helvetica', 'B', 9);
+			$pdf->Cell($width, 10, 'January', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'February', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'March', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'April', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'May', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'June', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'July', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'August', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'September', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'October', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'November', 1, 0, 'C');
+			$pdf->Cell($width, 10, 'December', 1, 1, 'C');
+
+			$pdf->Cell($width, 10, 'LY Sell Out', 1, 0, 'C');
+			$pdf->SetFont('helvetica', '', 9);
+			$pdf->Cell($width, 10, $row->net_sales_january ? $row->net_sales_january : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_february ? $row->net_sales_february : '0,00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_march ? $row->net_sales_march : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_april ? $row->net_sales_april : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_may ? $row->net_sales_may : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_june ? $row->net_sales_june : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_july ? $row->net_sales_july : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_august ? $row->net_sales_august : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_september ? $row->net_sales_september : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_october ? $row->net_sales_october : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_november ? $row->net_sales_november : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->net_sales_december ? $row->net_sales_december : '0.00', 1, 1, 'C');
+
+			$pdf->SetFont('helvetica', 'B', 9);
+			$pdf->Cell($width, 10, 'Sales Report', 1, 0, 'C');
+			$pdf->SetFont('helvetica', '', 9);
+			$pdf->Cell($width, 10, $row->target_sales_january ? $row->target_sales_january : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_february ? $row->target_sales_february : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_march ? $row->target_sales_march : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_april ? $row->target_sales_april : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_may ? $row->target_sales_may : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_june ? $row->target_sales_june : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_july ? $row->target_sales_july : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_august ? $row->target_sales_august : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_september ? $row->target_sales_september : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_october ? $row->target_sales_october : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_november ? $row->target_sales_november : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->target_sales_december ? $row->target_sales_december : '0.00', 1, 1, 'C');
+
+			$pdf->SetFont('helvetica', 'B', 9);
+			$pdf->Cell($width, 10, 'Target Sales', 1, 0, 'C');
+			$pdf->SetFont('helvetica', '', 9);
+			$pdf->Cell($width, 10, $row->amount_january ? $row->amount_january : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_february ? $row->amount_february : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_march ? $row->amount_march : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_april ? $row->amount_april : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_may ? $row->amount_may : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_june ? $row->amount_june : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_july ? $row->amount_july : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_august ? $row->amount_august : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_september ? $row->amount_september : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_october ? $row->amount_october : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_november ? $row->amount_november : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->amount_december ? $row->amount_december : '0.00', 1, 1, 'C');
+
+			$pdf->SetFont('helvetica', 'B', 9);
+			$pdf->Cell($width, 10, 'Growth', 1, 0, 'C');
+			$pdf->SetFont('helvetica', '', 9);
+			$pdf->Cell($width, 10, $row->growth_january ? $row->growth_january : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_february ? $row->growth_february : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_march ? $row->growth_march : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_april ? $row->growth_april : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_may ? $row->growth_may : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_june ? $row->growth_june : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_july ? $row->growth_july : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_august ? $row->growth_august : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_september ? $row->growth_september : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_october ? $row->growth_october : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_november ? $row->growth_november : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->growth_december ? $row->growth_december : '0.00', 1, 1, 'C');
+
+			$pdf->SetFont('helvetica', 'B', 9);
+			$pdf->Cell($width, 10, '% Achieved', 1, 0, 'C');
+			$pdf->SetFont('helvetica', '', 9);
+			$pdf->Cell($width, 10, $row->achieved_january ? $row->achieved_january : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_february ? $row->achieved_february : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_march ? $row->achieved_march : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_april ? $row->achieved_april : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_may ? $row->achieved_may : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_june ? $row->achieved_june : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_july ? $row->achieved_july : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_august ? $row->achieved_august : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_september ? $row->achieved_september : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_october ? $row->achieved_october : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_november ? $row->achieved_november : '0.00', 1, 0, 'C');
+			$pdf->Cell($width, 10, $row->achieved_december ? $row->achieved_december : '0.00', 1, 1, 'C');
+		} else {
+			$data = $this->Dashboard_model->overallAscSalesReport($filters);
+			
+			$row = $data['data'];
+
+			$pageWidth = $pdf->getPageWidth();
+			$pageMargin = $pdf->getMargins();
+			$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / 6;
+
+			$pdf->SetFont('helvetica', 'B', 9);
+			$pdf->Cell($width, 10, "", 1, 0, 'C');
+			$pdf->Cell($width, 10, "LY Sellout", 1, 0, 'C');
+			$pdf->Cell($width, 10, "Sales Report", 1, 0, 'C');
+			$pdf->Cell($width, 10, "Target Sales", 1, 0, 'C');
+			$pdf->Cell($width, 10, "Growth", 1, 0, 'C');
+			$pdf->Cell($width, 10, "% Achieved", 1, 1, 'C');
+
+			foreach($row as $rowData) {
+				// $pdf->Cell($width, 10, "", 1, 0, 'C');
+				if(!empty($rowData['asc_name'])) {
+					$pdf->SetFont('helvetica', 'B', 9);
+					$pdf->Cell($width, 10, $rowData['asc_name'], 1, 0, 'C');
+					$pdf->SetFont('helvetica', '', 9);
+					$pdf->Cell($width, 10, $rowData['total_net_sales'], 1, 0, 'C');
+					$pdf->Cell($width, 10, $rowData['total_amount'], 1, 0, 'C');
+					$pdf->Cell($width, 10, $rowData['total_target_sales'], 1, 0, 'C');
+					$pdf->Cell($width, 10, $rowData['growth'], 1, 0, 'C');
+					$pdf->Cell($width, 10, $rowData['achieved'], 1, 1, 'C');
+				}
+			}
+		}
+
+		$pdf->Output($title . '.pdf', 'D');
+		exit;
+	}
+
 	// ================================= Header for pdf export =================================
 	private function printHeader($pdf, $title) {
 		$pdf->SetFont('helvetica', '', 12);
@@ -1921,7 +2136,7 @@ class TradeDashboard extends BaseController
 					['w' => 20,  't' => $row->brands],
 					['w' => 15,  't' => $row->growth],
 				];
-			
+				
 				// Determine the max row height
 				$maxLines = 1;
 				foreach ($cells as $cell) {

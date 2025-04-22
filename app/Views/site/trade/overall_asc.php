@@ -184,7 +184,7 @@
                             </div>
                             <div class="col-md">
                                  <select class="form-control" id="year">
-                                    <option value="0" disabled selected>Please year..</option>
+                                    <option value=0 disabled selected>Please year..</option>
                                     <?php
                                         if($year){
                                             foreach ($year as $value) {
@@ -505,6 +505,7 @@
             var achievedreport = '';
 
             if (result) {
+                console.log(result);
                 let salesData = result.data[0];
                 if(result.data.length > 0){
                     $.each(result.data, function(x,y) {
@@ -678,6 +679,7 @@
             area : selectedArea
         }
         aJax.post(url, data, function (result) {
+            console.log("Result: ", result);
             var html = '';
             var thead = `
                 <th class="tbl-title-field"></th>
@@ -780,12 +782,37 @@
             //     }
                 
             // });
-            alert('for review');
+            // alert('for review');
+            exportPDF();
         } else if (action === 'export') {
             prepareExport();
             // alert('wala pa huy');
         } else {
             alert('wala na rito boy!');
+        }
+
+        function exportPDF() {
+            let selectedAsc = $('#asc_id').val() || '0';
+            let selectedArea = $('#area_id').val() || '0';
+            let selectedBrand = $('#brand_id').val() || '0';
+            let selectedYear = $('#year').val() || '0';
+            let selectedStore = $('#store_id').val() || '0';
+            let selectedBa = $('#ba_id').val() || '0';
+
+            let url = base_url + 'trade-dashboard/generate-pdf-overall_asc?'
+                + 'asc=' + encodeURIComponent(selectedAsc)
+                + '&area=' + encodeURIComponent(selectedArea)
+                + '&brand=' + encodeURIComponent(selectedBrand)
+                + '&year=' + encodeURIComponent(selectedYear)
+                + '&store=' + encodeURIComponent(selectedStore)
+                + '&ba=' + encodeURIComponent(selectedBa);
+
+            // console.log(url);
+            // window.open(url, '_blank');
+            let iframe = document.createElement('iframe');
+            iframe.style.display = "none";
+            iframe.src = url;
+            document.body.appendChild(iframe);
         }
 
         function prepareExport() {

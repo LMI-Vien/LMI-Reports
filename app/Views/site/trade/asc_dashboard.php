@@ -833,8 +833,6 @@
             { id: "#heroTable", type: "hero" }
         ];
 
-        
-        
         let url = base_url + 'trade-dashboard/generate-' + (action === 'exportPDF' ? 'pdf' : 'excel') + '-asc_dashboard?'
             + 'asc=' + encodeURIComponent(selectedASC)
             + '&area=' + encodeURIComponent(selectedArea)
@@ -843,7 +841,6 @@
             + '&store=' + encodeURIComponent(selectedStore)
             + '&ba=' + encodeURIComponent(selectedBa)
             + '&withba=' + encodeURIComponent(withba);
-
 
         // window.open(url, '_blank');
         let iframe = document.createElement('iframe');
