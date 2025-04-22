@@ -115,6 +115,22 @@
     .modal-footer {
         margin-top: 40px;
     }
+
+    .expandable-textbox {
+        width: 100%;              /* Adjust as needed */
+        min-height: 38px;
+        max-height: 200px;
+        resize: none;
+        overflow-y: auto;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        background-color: #fff;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    }
+
 </style>
 
 <div class="content-wrapper p-4">
@@ -133,7 +149,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="minimum" class="col-form-label">Minimum Weeks of No Sales</label>
-                                    <input type="text" id="minimum" name="minimum" class="form-control required numbersonly" placeholder="e.g. 20">
+                                    <input type="text" id="minimum" name="minimum" class="form-control numbersonly" placeholder="e.g. 20">
                                 </div>
                             </div>
 
@@ -141,7 +157,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="maximum" class="col-form-label">Maximum Weeks of No Sales</label>
-                                    <input type="text" id="maximum" name="maximum" class="form-control required numbersonly" placeholder="e.g. 30">
+                                    <input type="text" id="maximum" name="maximum" class="form-control numbersonly" placeholder="e.g. 30">
                                 </div>
                             </div>
                         </div>
@@ -155,7 +171,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="overstock" class="col-form-label">Start Threshold (Weeks in Stock)</label>
-                                    <input type="text" id="overstock" name="overstock" class="form-control required numbersonly" placeholder="e.g. 31">
+                                    <input type="text" id="overstock" name="overstock" class="form-control numbersonly" placeholder="e.g. 31">
                                 </div>
                             </div>
                         </div>
@@ -169,7 +185,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="newItem" class="col-form-label">Select Item Class to be display in New Item SKU's</label>
-                                    <input type="text" id="newItem" name="newItem" class="form-control required" placeholder="-- Select Class --">
+                                    <!-- <input type="text" id="newItem" name="newItem" class="form-control" placeholder="-- Select Class --"> -->
+                                    <textarea id="newItem" name="newItem" class="form-control expandable-textbox" placeholder="-- Select Class --"></textarea>
                                     <input type="hidden" id="newItem_id">
                                     <input type="hidden" id="newItem_json" name="newItem_json">
                                 </div>
@@ -185,7 +202,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="hero" class="col-form-label">Select Item Class to be display in Hero SKU's</label>
-                                    <input type="text" id="hero" name="hero" class="form-control required" placeholder="-- Select Class --">
+                                    <!-- <input type="text" id="hero" name="hero" class="form-control" placeholder="-- Select Class --"> -->
+                                    <textarea id="hero" name="hero" class="form-control expandable-textbox" placeholder="-- Select Class --"></textarea>
                                     <input type="hidden" id="hero_id">
                                     <input type="hidden" id="hero_json" name="hero_json">
                                 </div>
@@ -203,7 +221,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="sales_incentives" class="col-form-label">Incentive Percentage (%)</label>
-                                    <input type="text" id="sales_incentives" name="sales_incentives" class="form-control required numbersonly" placeholder="e.g. 5">
+                                    <input type="text" id="sales_incentives" name="sales_incentives" class="form-control numbersonly" placeholder="e.g. 5">
                                 </div>
                             </div>
                         </div>
@@ -219,7 +237,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="payment_grp_lmi" class="col-form-label">Customer Group Code / Price Code (LMI)</label>
-                                    <input type="text" id="payment_grp_lmi" name="payment_grp_lmi" class="form-control required" placeholder="e.g. LMI">
+                                    <!-- <input type="text" id="payment_grp_lmi" name="payment_grp_lmi" class="form-control" placeholder="e.g. LMI"> -->
+                                    <textarea id="payment_grp_lmi" name="payment_grp_lmi" class="form-control expandable-textbox" placeholder="e.g. LMI"></textarea>
                                     <input type="hidden" id="payment_grp_lmi_id">
                                     <input type="hidden" id="payment_grp_lmi_json" name="payment_grp_lmi_json">
                                 </div>
@@ -228,7 +247,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="payment_grp_rgdi" class="col-form-label">Customer Group Code / Price Code (RGDI)</label>
-                                    <input type="text" id="payment_grp_rgdi" name="payment_grp_rgdi" class="form-control required" placeholder="e.g. RGDI">
+                                    <!-- <input type="text" id="payment_grp_rgdi" name="payment_grp_rgdi" class="form-control" placeholder="e.g. RGDI"> -->
+                                    <textarea id="payment_grp_rgdi" name="payment_grp_rgdi" class="form-control expandable-textbox" placeholder="e.g. RGDI"></textarea>
                                     <input type="hidden" id="payment_grp_rgdi_id">
                                     <input type="hidden" id="payment_grp_rgdi_json" name="payment_grp_rgdi_json">
                                 </div>
@@ -246,7 +266,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="brand_included" class="col-form-label">Included</label>
-                                    <input type="text" id="brand_included" name="brand_included" class="form-control required" placeholder="Inventory">
+                                    <!-- <input type="text" id="brand_included" name="brand_included" class="form-control" placeholder="Inventory"> -->
+                                    <textarea id="brand_included" name="brand_included" class="form-control expandable-textbox" placeholder="Inventory"></textarea>
                                     <input type="hidden" id="brand_included_id">
                                     <input type="hidden" id="brand_included_json" name="brand_included_json">
                                 </div>
@@ -255,7 +276,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="brand_excluded" class="col-form-label">Excluded</label>
-                                    <input type="text" id="brand_excluded" name="brand_excluded" class="form-control required" placeholder="Inventory">
+                                    <!-- <input type="text" id="brand_excluded" name="brand_excluded" class="form-control" placeholder="Inventory"> -->
+                                    <textarea id="brand_excluded" name="brand_excluded" class="form-control expandable-textbox" placeholder="Inventory"></textarea>
                                     <input type="hidden" id="brand_excluded_id">
                                     <input type="hidden" id="brand_excluded_json" name="brand_excluded_json">
                                 </div>
@@ -288,6 +310,8 @@
     let selectedNewItems = [];
     let selectedBrandExcluded = [];
     let selectedBrandIncluded = [];
+    // let selectedLMI = [];
+    // let selectedRGDI = [];
     
     $(document).ready(function() {
         get_data(query);
@@ -313,10 +337,8 @@
 
                 addNewItem(newItem_obj);
 
-                $("#newItem").val(
-                    selectedNewItems.map(item => item.item_class_description).join(", ") +
-                    (selectedNewItems.length > 0 ? ", " : "")
-                );
+                $("#newItem").val(selectedNewItems.map(item => item.item_class_description).join(", ") + (selectedNewItems.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#newItem")[0]);
                 $("#newItem_json").val(JSON.stringify(selectedNewItems));
             });
         }, {
@@ -331,10 +353,8 @@
 
                 addNewItem(item);
 
-                $("#newItem").val(
-                    selectedNewItems.map(item => item.item_class_description).join(", ") +
-                    (selectedNewItems.length > 0 ? ", " : "")
-                );
+                $("#newItem").val(selectedNewItems.map(item => item.item_class_description).join(", ") + (selectedNewItems.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#newItem")[0]);
                 $("#newItem_json").val(JSON.stringify(selectedNewItems));
 
                 return false;
@@ -357,10 +377,8 @@
 
                 addHeroItem(hero_obj);
 
-                $("#hero").val(
-                    selectedHeroItems.map(item => item.item_class_description).join(", ") +
-                    (selectedHeroItems.length > 0 ? ", " : "")
-                );
+                $("#hero").val(selectedHeroItems.map(item => item.item_class_description).join(", ") + (selectedHeroItems.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#hero")[0]);
                 $("#hero_json").val(JSON.stringify(selectedHeroItems));
             });
         }, {
@@ -375,10 +393,8 @@
 
                 addHeroItem(item);
 
-                $("#hero").val(
-                    selectedHeroItems.map(item => item.item_class_description).join(", ") +
-                    (selectedHeroItems.length > 0 ? ", " : "")
-                );
+                $("#hero").val(selectedHeroItems.map(item => item.item_class_description).join(", ") + (selectedHeroItems.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#hero")[0]);
                 $("#newItemhero_jsonjson").val(JSON.stringify(selectedHeroItems));
 
                 return false;
@@ -402,6 +418,7 @@
                 addBrandIncluded(brandcode_obj);
 
                 $("#brand_included").val(selectedBrandIncluded.map(item => item.brand_code).join(", ") + (selectedBrandIncluded.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#brand_included")[0]);
                 $("#brand_included_json").val(JSON.stringify(selectedBrandIncluded));
             });
         }, {
@@ -417,6 +434,7 @@
                 addBrandIncluded(item);
 
                 $("#brand_included").val(selectedBrandIncluded.map(item => item.brand_code).join(", ") + (selectedBrandIncluded.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#brand_included")[0]);
                 $("#brand_included_json").val(JSON.stringify(selectedBrandIncluded));
 
                 return false;
@@ -440,6 +458,7 @@
                 addBrandExcluded(brandcode_obj);
 
                 $("#brand_excluded").val(selectedBrandExcluded.map(item => item.brand_code).join(", ") + (selectedBrandExcluded.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#brand_excluded")[0]);
                 $("#brand_excluded_json").val(JSON.stringify(selectedBrandExcluded));
             });
             }, {
@@ -455,6 +474,7 @@
                     addBrandExcluded(item);
 
                     $("#brand_excluded").val(selectedBrandExcluded.map(item => item.brand_code).join(", ") + (selectedBrandExcluded.length > 0 ? ", " : ""));
+                    adjustTextareaHeight($("#brand_excluded")[0]);
                     $("#brand_excluded_json").val(JSON.stringify(selectedBrandExcluded));
 
                     return false;
@@ -486,6 +506,12 @@
         if (!selectedBrandIncluded.some(i => i.id === item.id)) {
             selectedBrandIncluded.push(item);
         }
+    }
+
+    // pag nag error lagay sa pinakataas 
+    function adjustTextareaHeight(el) {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
     }
 
         
@@ -539,8 +565,12 @@
                 let rgdi_labels = rgdi_data.map(item => item.code).join(", ");
 
                 // Set them into the input fields
+                // enable kapag madami na 
                 $('#payment_grp_lmi').val(lmi_labels);
+                // adjustTextareaHeight($('#payment_grp_lmi')[0]);
+
                 $('#payment_grp_rgdi').val(rgdi_labels);
+                // adjustTextareaHeight($('#payment_grp_rgdi')[0]); 
                
 
                 if (row.hero_sku) {
@@ -549,7 +579,7 @@
                         if (Array.isArray(hero_items)) {
                             selectedHeroItems = hero_items;
                             // Handle multiple hero items
-                            let hero_desc = hero_items.map(item => item.item_class_description).join(", ") + ", ";
+                            let hero_desc = hero_items.map(item => item.item_class_description).join(", ");
                             $('#hero').val(hero_desc);
                             $('#hero_json').val(row.hero_sku); // Store the whole JSON in the hidden field
                         } else {
@@ -569,7 +599,7 @@
                         let newItem_items = JSON.parse(row.new_item_sku);
                         if (Array.isArray(newItem_items)) {
                             selectedNewItems = newItem_items;
-                            let newItem_desc = newItem_items.map(item => item.item_class_description).join(", ") + ", ";
+                            let newItem_desc = newItem_items.map(item => item.item_class_description).join(", ");
                             $('#newItem').val(newItem_desc);
                             $('#newItem_json').val(row.new_item_sku); 
                         } else {
@@ -588,7 +618,7 @@
                         let brandIncluded_items = JSON.parse(row.brand_code_included);
                         if (Array.isArray(brandIncluded_items)) {
                             selectedBrandIncluded = brandIncluded_items;
-                            let brandIncluded_code = brandIncluded_items.map(item => item.brand_code).join(", ") + ", ";
+                            let brandIncluded_code = brandIncluded_items.map(item => item.brand_code).join(", ");
                             $('#brand_included').val(brandIncluded_code);
                             $('#brand_included_json').val(row.brand_code_included); 
                         } else {
@@ -607,7 +637,7 @@
                         let brandExcluded_items = JSON.parse(row.brand_code_excluded);
                         if (Array.isArray(brandExcluded_items)) {
                             selectedBrandExcluded = brandExcluded_items;
-                            let brandExcluded_code = brandExcluded_items.map(item => item.brand_code).join(", ") + ", ";
+                            let brandExcluded_code = brandExcluded_items.map(item => item.brand_code).join(", ");
                             $('#brand_excluded').val(brandExcluded_code);
                             $('#brand_excluded_json').val(row.brand_code_excluded);
                         } else {
@@ -772,32 +802,68 @@
             updateArray: (val) => selectedNewItems = val,
             hiddenField: '#newItem_json',
             displayKey: 'item_class_description'
-        }
+        },
+        // payment_grp_lmi: {
+        //     array: () => selectedLMI,
+        //     updateArray: (val) => selectedLMI = val,
+        //     hiddenField: '#payment_grp_lmi_json',
+        //     displayKey: 'code'
+        // },
+        // payment_grp_rgdi: {
+        //     array: () => selectedRGDI,
+        //     updateArray: (val) => selectedRGDI = val,
+        //     hiddenField: '#payment_grp_rgdi_json',
+        //     displayKey: 'code'
+        // }
 
     };
 
     Object.keys(multiAutocompleteConfigs).forEach(fieldId => {
-        $('#' + fieldId).on('keydown', function (e) {
+        const $input = $('#' + fieldId);
+
+        $input.on('keydown', function (e) {
             if (e.key === 'Backspace') {
                 let inputVal = $(this).val();
-                if ((inputVal.endsWith(", ") || inputVal.endsWith(",")) && this.selectionStart === inputVal.length) {
-                    const config = multiAutocompleteConfigs[this.id];
-                    if (!config) return;
+                const config = multiAutocompleteConfigs[this.id];
+                if (!config) return;
 
-                    let items = config.array();
-                    if (items.length > 0) {
-                        items.pop(); // remove last item
-                        config.updateArray(items); // update reference if needed
+                if (this.selectionStart === inputVal.length) {
+                    const parts = inputVal.split(',');
+                    const lastChunk = parts[parts.length - 1];
 
-                        let updatedInput = items.map(item => item[config.displayKey]).join(", ");
-                        if (updatedInput) updatedInput += ", ";
+                    // Check if user hasn't typed a new value after the last comma
+                    if (lastChunk.trim() === '' || parts.length === config.array().length) {
+                        let items = [...config.array()];
+                        if (items.length > 0) {
+                            items.pop();
+                            config.updateArray(items);
 
-                        $(this).val(updatedInput);
-                        $(config.hiddenField).val(JSON.stringify(items));
+                            let updatedInput = items.map(item => item[config.displayKey]).join(", ");
+                            $(this).val(updatedInput);
+                            $(config.hiddenField).val(JSON.stringify(items));
+                        }
+
+                        if (items.length === 0) {
+                            $(this).val('');
+                            config.updateArray([]);
+                            $(config.hiddenField).val('[]');
+                        }
+
+                        e.preventDefault();
                     }
-
-                    e.preventDefault();
                 }
+            }
+        });
+
+        $input.on('input', function () {
+            const config = multiAutocompleteConfigs[this.id];
+            if (!config) return;
+
+            const val = $(this).val();
+
+            if (val.trim() === '') {
+                config.updateArray([]);
+                $(config.hiddenField).val('[]');
             }
         });
     });
