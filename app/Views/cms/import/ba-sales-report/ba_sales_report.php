@@ -459,6 +459,38 @@
         $('.btn_status').hide();
     });
 
+    $(document).on('keypress', '#search_query', function(e) {     
+        let months = {
+            "Jan": 01,
+            "Feb": 02,
+            "Mar": 03,
+            "Apr": 04,
+            "May": 05,
+            "Jun": 06,
+            "Jul": 07,
+            "Aug": 08,
+            "Sep": 09,
+            "Oct": 10,
+            "Nov": 11,
+            "Dec": 12,
+        };
+
+        if (e.keyCode === 13) {
+            var keyword = $(this).val().trim();
+            // alert(keyword == 0);
+            offset = 1;
+
+            if(keyword == 0) {
+                query = " basr.status >= 0 ";
+            } else {
+                query = "(u.name like '%" + keyword + "%') OR "
+                        + "(basr.date like '%" + months[keyword] + "%')";
+            }
+            get_data(query);
+            get_pagination(query);
+        }
+    });
+
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
         $(".record-entries").val($(this).val());
