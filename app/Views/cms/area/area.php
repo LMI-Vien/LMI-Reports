@@ -15,6 +15,7 @@
         border: 0.5px solid gray;
         box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
     }
+
     .add_line {
         margin-right: 10px;
         margin-bottom: 10px;
@@ -44,6 +45,11 @@
         overflow-x: hidden !important;
         overflow-y: hidden !important;
     }
+
+    /* .store-table {
+        margin-top: 10px;
+        width: 100%;
+    } */
 </style>
 
     <div class="content-wrapper p-4">
@@ -127,8 +133,8 @@
                                     onclick="add_line()"
                                 >
                             </div>
-                            <div id="store_list">
-                            </div>
+                            <div id="store_list"></div>
+                            <div id="stores"></div>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -228,6 +234,10 @@
     let totalPages = 1;
     let dataset = [];
     let stores_under_area = []
+
+    let stores = new Set();
+    let html = "";
+    let paginator = 0;
     
     $(document).ready(function() {
         get_data(query);
@@ -271,6 +281,7 @@
     function close_modal(callback) {
         if (typeof modal.close === "function") {
             modal.close();
+            clear_stores();
         }
         setTimeout(callback, 300); 
     }
@@ -280,6 +291,7 @@
             modal.loading(true);
             open_modal('Edit Area', 'edit', id, () => {
                 modal.loading(false);
+                // clear_stores();
             });
         });
     }
@@ -289,6 +301,7 @@
             modal.loading(true);
             open_modal('View Area', 'view', id, () => {
                 modal.loading(false);
+                // clear_stores();
             });
         });
     }
@@ -304,6 +317,7 @@
 
         $modal.find('.modal-title b').html(addNbsp(msg));
         reset_modal_fields();
+        clear_stores();
 
         let buttons = {
             save: create_button('Save', 'save_data', 'btn save', function () {
@@ -337,17 +351,14 @@
             let line = get_max_number();
 
             let html = `
-            <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <input id='store_${line}' class='form-control' placeholder='Select store'>
-                <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
-                    <i class="fa fa-minus" aria-hidden="true"></i>
-                </button>
+            <div id="line" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                <input id='store' class='form-control' placeholder='Select store'>
             </div>
             `;
 
             $('#store_list').append(html);
 
-            $(`#store_${line}`).autocomplete({
+            $(`#store`).autocomplete({
                 source: function(request, response) {
                     var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
                     var uniqueResults = [...new Set(results)];
@@ -388,6 +399,11 @@
             }
         });
     }
+
+    function clear_stores() {
+        stores.clear();
+        $('#stores').empty();
+    }
     
     function reset_modal_fields() {
         $('#popup_modal #code, #popup_modal #description, #popup_modal #store').val('');
@@ -410,11 +426,23 @@
 
         return maxNumber;
     }
-
+    
+    
     function add_line() {
-        let line = get_max_number() + 1;
+        
+        let store_name = $('#store').val();
 
-        let html = `
+        if(store_name === '') {
+            // console.log(stores);
+        } else {
+            stores.add($('#store').val());
+
+            renderStores();
+        }
+
+        //let line = get_max_number() + 1;
+
+        /*let html = `
         <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
             <input id='store_${line}' class='form-control' placeholder='Select store'>
             <button type="button" class="rmv-btn" onclick="remove_line(${line})">
@@ -432,7 +460,117 @@
                 response(uniqueResults.slice(0, 10));
             },
         });
-        get_store('', `store_${line}`);
+        get_store('', `store_${line}`);*/
+    }
+
+    function renderStores(action = "") {
+        let store_array = Array.from(stores);
+        
+        if(action == "view") {
+            html = `
+                    <table class="table table-bordered mt-2" id="stores_list" border=1>
+                        <thead>
+                            <tr>
+                                <th>Store ID</th>
+                                <th>Store Name</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-body word_break">
+                `;
+        } else {
+            html = `
+                    <table class="table table-bordered mt-2" id="stores_list" border=1>
+                        <thead>
+                            <tr>
+                                <th>Store ID</th>
+                                <th>Store Name</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-body word_break">
+                `;
+        }
+
+        for(let i = paginator; i < paginator + 10; i++) {
+            if(store_array[i] != null) {
+                let storeDescription = store_array[i].split(' - ');
+                let rowClass = i % 2 === 0 ? "even-row" : "odd-row";
+
+                if(action == "view") {
+                    html += `
+                            <tr class=${rowClass}>
+                                <td>${storeDescription[0]}</td>
+                                <td style="width: 60%">${storeDescription[1]}</td>
+                            </tr>
+                        `
+                } else {
+                    html += `
+                            <tr class=${rowClass}>
+                                <td>${storeDescription[0]}</td>
+                                <td style="width: 60%">${storeDescription[1]}</td>
+                                <td align=middle>
+                                    <button type="button" class="rmv-btn" onclick="remove_store(${i})">
+                                        <i class="fa fa-minus" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            `
+                }
+            }
+        }
+
+        if(store_array.length > 10) {
+            console.log(paginator > store_array.length ? "disabled" : "");
+            console.log('paginator', paginator);
+            console.log('store array length', store_array.length);
+            html += `
+                                <tr>
+                                    <td colspan=3 align=right>
+                                        <button type="button" class="btn btn-warning" onclick="backPage('${action == "view" ? 'view' : ''}')" ${paginator == 0 ? "disabled" : ""}><</button>
+                                        <button type="button" class="btn btn-warning" onclick="nextPage('${action == "view" ? 'view' : ''}')" ${paginator + 10 > store_array.length ? "disabled" : ""}>></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `
+        }
+
+
+        $('#stores').html(html);
+        $('#store').val("");
+    }
+
+    function backPage(action = "") {
+        if(paginator >= 10) {
+            paginator -= 10;
+    
+            renderStores(action);
+        }
+    }
+
+    function nextPage(action = "") {
+        
+        let store_array = Array.from(stores);
+        
+        if(store_array[paginator + 10] != null) {
+            paginator += 10;
+
+            renderStores(action);
+        }
+    }
+
+    function remove_store(index) {
+        let store_array = Array.from(stores);
+        store_array.splice(index, 1);
+        stores = new Set(store_array);
+
+        if(store_array.length <= 10) {
+            paginator = 0;
+        }
+
+        console.log(store_array.length);
+
+        renderStores();
     }
 
     function remove_line(lineId) {
@@ -517,8 +655,9 @@
     //         }
     //     });
     // }
-
+    
     function populate_modal(inp_id, actions, callback) {
+        // clear_stores();
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -527,6 +666,7 @@
             query: query, 
             table: "tbl_area"
         };
+        let store_area = new Set();
 
         aJax.post(url, data, function(result) {
             var obj = is_json(result);
@@ -538,13 +678,37 @@
                     $('#id').val(d.id);
                     $('#code').val(d.code);
                     $('#description').val(d.description);
-                    $('#store').val(d.store);
+                    // $('#store').val(d.store);
 
                     var line = 0;
                     var readonly = '';
                     var disabled = '';
-                    let $store_list = $('#store_list');
+                    // let $store_list = $('#store_list');
 
+                    let html = `
+                        <div id="line" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                            <input id='store' class='form-control' placeholder='Select store'>
+                        </div>
+                        `;
+
+                    $('#store_list').append(html);
+
+                    $(`#store`).autocomplete({
+                        source: function(request, response) {
+                            var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                            var uniqueResults = [...new Set(results)];
+                            response(uniqueResults.slice(0, 10));
+                        },
+                        minLength: 0,
+                    }).focus(function () {
+                        $(this).autocomplete("search", "");
+                    });
+
+                    get_store('', `store`);
+
+                    // let line = get_max_number();
+
+                    
                     $.each(get_area_stores(d.id), (x, y) => {
                         if (actions === 'view') {
                             disabled = 'disabled';
@@ -555,7 +719,6 @@
                         }
 
                         totalRequests++;
-
                         // Pass the callback to the get_field_values function
                         get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
                             for (let key in res) {
@@ -565,39 +728,14 @@
                                         disabled = (line == 0) ? 'disabled' : '';
                                     }
 
-                                    let html = `
-                                    <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                        <input id='store_${line}' class='form-control' placeholder='Select store' value='${res1[key]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
-                                        <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
-                                            <i class="fa fa-minus" aria-hidden="true"></i>
-                                        </button>
-                                    </div>
-                                    `;
-
-                                    $('#store_list').append(html);
-
-                                    $(`#store_${line}`).autocomplete({
-                                        source: function(request, response) {
-                                            var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
-                                            var uniqueResults = [...new Set(results)];
-                                            response(uniqueResults.slice(0, 10));
-                                        },
-                                    });
-
-                                    get_store(x, `store_${line}`);
-                                    line++;
-
-                                    completedRequests++;
-
-                                    // model.loading(false);
-                                    if (completedRequests === totalRequests) {
-                                        if (callback) callback(); 
-                                    }
+                                    stores.add(key + ' - ' + res[key]);
                                 });
                             }
                         });
-
                     });
+                    
+                    renderStores('view');
+                    modal.loading(false);
 
                     if (d.status == 1) {
                         $('#status').prop('checked', true);
@@ -606,6 +744,7 @@
                     }
                 });
             }
+    
         });
     }
 
@@ -1211,21 +1350,24 @@
         var chk_status = $('#status').prop('checked');
         var linenum = 0;
         var store = '';
-        var unique_store = [];
-        var store_list = $('#store_list');
+        var unique_store = Array.from(stores);
+        // var store_list = $('#store_list');
 
-        store_list.find('input').each(function() {
-            if (!unique_store.includes($(this).val())) {
-                store = $(this).val().split(' - ');
+        // store_list.find('input').each(function() {
+        //     if (!unique_store.includes($(this).val())) {
+        //         store = $(this).val().split(' - ');
 
-                if(store.length == 2) {
-                    unique_store.push(store[1]);
-                } else {
-                    unique_store.push(store[1] + ' - ' + store[2]);
-                }
-            }
-            linenum++
-        });
+        //         if(store.length == 2) {
+        //             unique_store.push(store[1]);
+        //         } else {
+        //             unique_store.push(store[1] + ' - ' + store[2]);
+        //         }
+        //     }
+        //     linenum++
+        // });
+
+        console.log(unique_store);
+
         if (chk_status) {
             status_val = 1;
         } else {
@@ -1240,13 +1382,16 @@
                             let ids = [];
                             let hasDuplicate = false;
                             let valid = true;
-                            
+                            // console.log(unique_store);
                             $.each(unique_store, (x, y) => {
-                                if(ids.includes(y)) {
-                                    hasDuplicate = true;
-                                } else {
-                                    ids.push(y);
-                                }
+                                // if(ids.includes(y)) {
+                                //     hasDuplicate = true;
+                                // } else {
+                                //     ids.push(y);
+                                // }
+                                console.log(y);
+                                store = y.split(' - ');
+                                ids.push(store[1]);
                             });
 
                             if(hasDuplicate) {
@@ -1304,13 +1449,19 @@
                             let ids = [];
                             let hasDuplicate = false;
                             let valid = true;
+                            // console.log(unique_store);
                             $.each(unique_store, (x, y) => {
-                                if(ids.includes(y)) {
-                                    hasDuplicate = true;
-                                } else {
-                                    ids.push(y);
-                                }
+                                // if(ids.includes(y)) {
+                                //     hasDuplicate = true;
+                                // } else {
+                                //     ids.push(y);
+                                // }
+                                console.log(y);
+                                store = y.split(' - ');
+                                ids.push(store[1]);
                             });
+
+                            console.log(ids);
 
                             if(hasDuplicate) {
                                 console.log('Has duplicate');
