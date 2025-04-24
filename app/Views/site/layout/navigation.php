@@ -84,7 +84,7 @@
 
             // dynamic menu site
             function get_menu_site() {
-                var url = "<?= site_url('cms/cms_preference/get_site_menu'); ?>"; 
+                var url = "<?= site_url('cms/cms-preference/get-site-menu'); ?>"; 
                 $.get(url, function(response) {
                     $("#navButton").append(response); 
                 });

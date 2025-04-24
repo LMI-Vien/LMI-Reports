@@ -1,6 +1,5 @@
 <?php 
     $dir = dirname(__FILE__);
-    css($dir . "/assets/styles.css", "Audit Trail Style");
     $optionSet = '';
     foreach ($pageOption as $pageOptionLoop) {
         $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
@@ -9,7 +8,7 @@
 
 <div class="box audit_trail_div">
     <?php   
-        echo view("dynamic/template/buttons", $buttons);
+        echo view("cms/template/buttons", $buttons);
     ?>  
 	<?php 
         $optionSet = '';

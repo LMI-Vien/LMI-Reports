@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Error_logs extends BaseController
+class ErrorLogs extends BaseController
 {
     public function index()
 	{
@@ -135,10 +135,6 @@ class Error_logs extends BaseController
 		$date =  $uri->getSegment(5);
 		$session = session();
 		$date = str_replace('#', '', $date);
-		// if($this->log_exists($date) == 0){
-		// 	$session->setFlashdata('no_log', dialog_return("no_file"));
-		// 	redirect(base_url('cms/Error_logs'));
-		// }
 
 		$data["title"] = "Content Management";
 		$data["PageName"] = ("Error Logs");

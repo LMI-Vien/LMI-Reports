@@ -5,7 +5,7 @@ namespace App\Controllers\Cms;
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Import_sell_out extends BaseController
+class ImportSellOut extends BaseController
 {
     protected $session;
 

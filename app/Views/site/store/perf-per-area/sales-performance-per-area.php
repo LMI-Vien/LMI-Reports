@@ -206,7 +206,7 @@
                             <thead>
                                 <tr>
                                     <th 
-                                        colspan="8"
+                                        colspan="9"
                                         style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                         class="tbl-title-header"
                                     >
@@ -228,16 +228,16 @@
                             </thead>
                                   <tbody>
                                       <tr>
-                                          <td colspan="8" class="text-center py-4 text-muted">
+                                          <td colspan="9" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="8" class="text-center py-4 text-muted">
+                                          <td colspan="9" class="text-center py-4 text-muted">
                                               No data available
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="8" class="text-center py-4 text-muted">
+                                          <td colspan="9" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                   </tbody>

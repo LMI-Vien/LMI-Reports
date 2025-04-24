@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Import_ba_sales_report extends BaseController
+class ImportTargetSalesPs extends BaseController
 {
     protected $session;
 
@@ -21,15 +21,15 @@ class Import_ba_sales_report extends BaseController
 	{
 
 		$data['meta'] = array(
-			"title"         =>  "Import BA Sales Report",
-			"description"   =>  "Import BA Sales Report",
+			"title"         =>  "Import Target Sales Per Store",
+			"description"   =>  "Import Target Sales Per Store",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Import BA Sales Report";
-		$data['PageName'] = 'Import BA Sales Report';
-		$data['PageUrl'] = 'Import BA Sales Report';
-		$data['content'] = "cms/import/ba-sales-report/ba_sales_report.php";
-		$data['buttons'] = ['import', 'export', 'search'];
+		$data['title'] = "Import Target Sales Per Store";
+		$data['PageName'] = 'Import Target Sales Per Store';
+		$data['PageUrl'] = 'Import Target Sales Per Store';
+		$data['content'] = "cms/import/ta-so-ps/target_sales_ps.php";
+		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -51,19 +51,18 @@ class Import_ba_sales_report extends BaseController
 
 	public function view()
 	{
-
 		$uri = current_url(true);
 		$data['uri'] =$uri;
 
 		$data['meta'] = array(
-			"title"         =>  "View Import BA Sales Report",
-			"description"   =>  "View Import BA Sales Report",
+			"title"         =>  "Import Target Sales Per Store",
+			"description"   =>  "Import Target Sales Per Store",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "View Import BA Sales Report";
-		$data['PageName'] = 'View Import BA Sales Report';
-		$data['PageUrl'] = 'View Import BA Sales Report';
-		$data['content'] = "cms/import/ba-sales-report/view_sales_report.php";
+		$data['title'] = "Import Target Sales Per Store";
+		$data['PageName'] = 'Import Target Sales Per Store';
+		$data['PageUrl'] = 'Import Target Sales Per Store';
+		$data['content'] = "cms/import/ta-so-ps/view_target_sales_ps.php";
 		$data['buttons'] = [];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
@@ -81,7 +80,7 @@ class Import_ba_sales_report extends BaseController
         		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);	
+		return view("cms/layout/template", $data);		
 	}
 
 }

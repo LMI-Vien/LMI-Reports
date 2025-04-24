@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Import_target_sales_ps extends BaseController
+class ImportTargetSellOutPa extends BaseController
 {
     protected $session;
 
@@ -21,14 +21,14 @@ class Import_target_sales_ps extends BaseController
 	{
 
 		$data['meta'] = array(
-			"title"         =>  "Import Target Sales Per Store",
-			"description"   =>  "Import Target Sales Per Store",
+			"title"         =>  "Import Target sell Out Per Account",
+			"description"   =>  "Import Target sell Out Per Account",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Import Target Sales Per Store";
-		$data['PageName'] = 'Import Target Sales Per Store';
-		$data['PageUrl'] = 'Import Target Sales Per Store';
-		$data['content'] = "cms/import/ta-so-ps/target_sales_ps.php";
+		$data['title'] = "Import Target sell Out Per Account";
+		$data['PageName'] = 'Import Target sell Out Per Account';
+		$data['PageUrl'] = 'Import Target sell Out Per Account';
+		$data['content'] = "cms/import/ta-so-pa/target_sell_out_pa.php";
 		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
@@ -51,18 +51,19 @@ class Import_target_sales_ps extends BaseController
 
 	public function view()
 	{
+
 		$uri = current_url(true);
 		$data['uri'] =$uri;
 
 		$data['meta'] = array(
-			"title"         =>  "Import Target Sales Per Store",
-			"description"   =>  "Import Target Sales Per Store",
+			"title"         =>  "Import Target sell Out Per Account",
+			"description"   =>  "Import Target sell Out Per Account",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Import Target Sales Per Store";
-		$data['PageName'] = 'Import Target Sales Per Store';
-		$data['PageUrl'] = 'Import Target Sales Per Store';
-		$data['content'] = "cms/import/ta-so-ps/view_target_sales_ps.php";
+		$data['title'] = "Import Target sell Out Per Account";
+		$data['PageName'] = 'Import Target sell Out Per Account';
+		$data['PageUrl'] = 'Import Target sell Out Per Account';
+		$data['content'] = "cms/import/ta-so-pa/view_target_sell_out_pa.php";
 		$data['buttons'] = [];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
@@ -82,5 +83,4 @@ class Import_target_sales_ps extends BaseController
                     );
 		return view("cms/layout/template", $data);		
 	}
-
 }

@@ -450,7 +450,7 @@ ul.child_menu {
                     if (!exists) {
                         modal.confirm(confirm_add_message,function(result){
                             if(result){ 
-                                aJax.post("<?= base_url('cms/roles/menu_insert');?>",data,function(result){
+                                aJax.post("<?= base_url('cms/roles/menu-insert');?>",data,function(result){
                                    
                                     modal.loading(false);
                                     modal.alert(success_save_message, "success", function(){
@@ -474,7 +474,7 @@ ul.child_menu {
                         modal.confirm(confirm_update_message,function(result){
                             if(result){ 
                                 modal.loading(true);
-                                var customURL = "<?= base_url('cms/roles/delete_role_tagging');?>"; 
+                                var customURL = "<?= base_url('cms/roles/delete-role-tagging');?>"; 
                                 var data = {
                                     role_id : id
                                 }
@@ -547,7 +547,7 @@ ul.child_menu {
             user_role_data : role_id
         }
 
-        aJax.post("<?= base_url('cms/roles/menu_update');?>",data,function(result){
+        aJax.post("<?= base_url('cms/roles/menu-update');?>",data,function(result){
             modal.loading(false);
             modal.alert(success_update_message, "success", function(){
                 location.reload();
@@ -595,7 +595,7 @@ ul.child_menu {
         modal.confirm(confirm_delete_message,function(result){
             if(result){
                 modal.loading(true);
-                var customURL = "<?= base_url('cms/roles/delete_role_tagging');?>"; 
+                var customURL = "<?= base_url('cms/roles/delete-role-tagging');?>"; 
                 var data = {
                     role_id : id
                 }
@@ -1405,7 +1405,7 @@ ul.child_menu {
                                         updated_date: formatDate(new Date())
                                     }
                                 });
-                                var customURL = "<?= base_url('cms/role/delete_role_tagging');?>"; 
+                                var customURL = "<?= base_url('cms/role/delete-role-tagging');?>"; 
                                 var data = {
                                     role_id : id
                                 }

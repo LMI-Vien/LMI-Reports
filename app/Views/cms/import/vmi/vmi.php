@@ -250,6 +250,7 @@
     });
 
     function get_data(new_query) {
+        modal.loading(true);
         var data = {
             event: "list",
             select: "name",
@@ -263,6 +264,7 @@
             var result = JSON.parse(result);
             var html = '';
             var latestDate = null;
+            modal.loading(false);
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {

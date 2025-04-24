@@ -5,7 +5,7 @@ use \DateTime;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class Global_controller extends BaseController
+class GlobalController extends BaseController
 {
     public function index()
 	{

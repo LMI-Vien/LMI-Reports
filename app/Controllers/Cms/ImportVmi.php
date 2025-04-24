@@ -5,7 +5,7 @@ namespace App\Controllers\Cms;
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Import_vmi extends BaseController
+class ImportVmi extends BaseController
 {
     protected $session;
 

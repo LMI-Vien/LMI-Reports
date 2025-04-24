@@ -92,7 +92,7 @@
                 limit : limit
             };
 
-            aJax.post("<?=base_url('cms/error_logs/get_error_log_files');?>",data, function(result){
+            aJax.post("<?=base_url('cms/error-logs/get-error-log-files');?>",data, function(result){
                 obj = is_json(result);          
            // console.log(obj);
               obj = obj.data;
@@ -105,7 +105,7 @@
                             html += "<td>"+y.filename+"</td>";
                             html += "<td>"+y.date+"</td>";
                             html += "<td>"+y.lines+"</td>";
-                            html += "<td><a href='"+cms+"/error_logs/log/"+y.date_id+"' class='edit'><span class='fa fa-eye'></span></td>";
+                            html += "<td><a href='"+cms+"/error-logs/log/"+y.date_id+"' class='edit'><span class='fa fa-eye'></span></td>";
                         html += "</tr>";  
                     });
                 } else {
@@ -147,7 +147,7 @@
                 limit : limit
             };
 
-            aJax.post("<?=base_url('dynamic/error_logs/get_error_log_files_filter');?>",data, function(result){
+            aJax.post("<?=base_url('dynamic/error-logs/get-error-log-files-filter');?>",data, function(result){
                 var obj = is_json(result);
                 var html = "";
 

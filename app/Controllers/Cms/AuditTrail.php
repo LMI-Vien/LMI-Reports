@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Audit_trail extends BaseController
+class AuditTrail extends BaseController
 {
     public function index() {
 

@@ -93,11 +93,11 @@ $(document).ready(function () {
         });
     });
 
-    aJax.get("<?= base_url('cms/cms_preference/get_title');?>",function(data) {
+    aJax.get("<?= base_url('cms/cms-preference/get-title');?>",function(data) {
       $('.logo-lg').html(data);
     })
 
-    aJax.get(base_url + 'cms/cms_preference/get_menu', function (data) {
+    aJax.get(base_url + 'cms/cms-preference/get-menu', function (data) {
         var obj = is_json(data);
         $('.sidebar-menu').html(obj);
         initializeMenu();

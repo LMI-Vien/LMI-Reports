@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Site_menu extends BaseController
+class SiteMenu extends BaseController
 {
     protected $session;
 

@@ -3,9 +3,8 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
 
-class Brand_Ambassador extends BaseController
+class CmsMenu extends BaseController
 {
     protected $session;
 
@@ -18,24 +17,31 @@ class Brand_Ambassador extends BaseController
 	    }
 	}
 
-	public function index()
+    public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "Brand Ambassador",
-			"description"   =>  "Brand Ambassador",
+			"title"         =>  "CMS Menu",
+			"description"   =>  "CMS Menu",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Brand Ambassador";
-		$data['PageName'] = 'Brand Ambassador';
-		$data['PageUrl'] = 'Brand Ambassador';
-		$data['buttons'] = ['add', 'import', 'search', 'export', 'filter'];
-		$data['content'] = "cms/brand_ambassador/brand_ambassador.php";
+		$data['menu_group'] = '';
+		$data['menu_id'] = '';
+		$uri = current_url(true);
+		$totalSegments = $uri->getTotalSegments();
+		$data['menu_id'] = ($totalSegments >= 4) ? $uri->getSegment(4) : '';
+		$data['menu_group'] = ($totalSegments >= 5) ? $uri->getSegment(5) : '';
+
+		$data['title'] = "CMS Menu";
+		$data['PageName'] = 'CMS Menu';
+		$data['PageUrl'] = 'CMS Menu';
+		$data['buttons'] = ['add', 'search'];
+		$data['content'] = "cms/cmsmenu/cms_menu.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
-				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
-				"assets/js/moment.js"
+				"assets/js/moment.js",
+				"assets/cms/js/login/login_js.js"
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
@@ -44,7 +50,6 @@ class Brand_Ambassador extends BaseController
         		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);	
+		return view("cms/layout/template", $data);
 	}
-
 }

@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Item_class extends BaseController
+class SystemParameter extends BaseController
 {
     protected $session;
 
@@ -20,16 +20,21 @@ class Item_class extends BaseController
 	public function index()
 	{
 		$data['meta'] = array(
-			"title"         =>  "Item Class Masterfile",
-			"description"   =>  "Item Class",
+			"title"         =>  "System Parameter",
+			"description"   =>  "System Parameter",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Item Class";
-		$data['PageName'] = 'Item Class';
-		$data['PageUrl'] = 'Item Class';
-		$data['buttons'] = ['add', 'search', 'filter'];
-		$data['content'] = "cms/item_class/item_class.php";
-		$data['session'] = session(); 
+		$data['title'] = "System Parameter";
+		$data['PageName'] = 'System Parameter';
+		$data['PageUrl'] = 'System Parameter';
+		$data['buttons'] = [];
+		$data['content'] = "cms/maintenance/system_parameter/system_parameter.php";
+		$data['session'] = session();
+		$data['hero'] = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'*'", 0, 0, "''", "''", "''");
+		$data['newItem'] = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'*'", 0, 0, "''", "''", "''");
+		$data['brandExcluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "''", "''", "''");
+		$data['brandIncluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "''", "''", "''");
+
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",

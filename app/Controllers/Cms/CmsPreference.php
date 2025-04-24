@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Cms_preference extends BaseController
+class CmsPreference extends BaseController
 {
 
     public function get_title()

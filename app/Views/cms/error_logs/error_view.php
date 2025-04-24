@@ -54,7 +54,7 @@
     });
 
 	function get_data(){
-		var url = "<?=base_url('cms/error_logs/error_data');?>";
+		var url = "<?=base_url('cms/error-logs/error-data');?>";
 		var data = { date_id: "<?=$uri->getSegment(4);?>" };
 
         modal.loading(true);
@@ -114,7 +114,7 @@
     });
 
 	$(document).on('click', '#btn_close', function(){
-		location.href = "<?=base_url('cms/Error_logs');?>";
+		location.href = "<?=base_url('cms/error-logs');?>";
 	});
 
 </script>

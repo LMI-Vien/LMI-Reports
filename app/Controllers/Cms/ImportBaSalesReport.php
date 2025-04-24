@@ -4,7 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 
-class Import_target_sell_out_pa extends BaseController
+class ImportBaSalesReport extends BaseController
 {
     protected $session;
 
@@ -21,15 +21,15 @@ class Import_target_sell_out_pa extends BaseController
 	{
 
 		$data['meta'] = array(
-			"title"         =>  "Import Target sell Out Per Account",
-			"description"   =>  "Import Target sell Out Per Account",
+			"title"         =>  "Import BA Sales Report",
+			"description"   =>  "Import BA Sales Report",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Import Target sell Out Per Account";
-		$data['PageName'] = 'Import Target sell Out Per Account';
-		$data['PageUrl'] = 'Import Target sell Out Per Account';
-		$data['content'] = "cms/import/ta-so-pa/target_sell_out_pa.php";
-		$data['buttons'] = ['search', 'import', 'export'];
+		$data['title'] = "Import BA Sales Report";
+		$data['PageName'] = 'Import BA Sales Report';
+		$data['PageUrl'] = 'Import BA Sales Report';
+		$data['content'] = "cms/import/ba-sales-report/ba_sales_report.php";
+		$data['buttons'] = ['import', 'export', 'search'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -56,14 +56,14 @@ class Import_target_sell_out_pa extends BaseController
 		$data['uri'] =$uri;
 
 		$data['meta'] = array(
-			"title"         =>  "Import Target sell Out Per Account",
-			"description"   =>  "Import Target sell Out Per Account",
+			"title"         =>  "View Import BA Sales Report",
+			"description"   =>  "View Import BA Sales Report",
 			"keyword"       =>  ""
 		);
-		$data['title'] = "Import Target sell Out Per Account";
-		$data['PageName'] = 'Import Target sell Out Per Account';
-		$data['PageUrl'] = 'Import Target sell Out Per Account';
-		$data['content'] = "cms/import/ta-so-pa/view_target_sell_out_pa.php";
+		$data['title'] = "View Import BA Sales Report";
+		$data['PageName'] = 'View Import BA Sales Report';
+		$data['PageUrl'] = 'View Import BA Sales Report';
+		$data['content'] = "cms/import/ba-sales-report/view_sales_report.php";
 		$data['buttons'] = [];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
@@ -81,6 +81,7 @@ class Import_target_sell_out_pa extends BaseController
         		"assets/cms/css/main_style.css",//css sa style ni master Vien
         		"assets/css/style.css"
                     );
-		return view("cms/layout/template", $data);		
+		return view("cms/layout/template", $data);	
 	}
+
 }
