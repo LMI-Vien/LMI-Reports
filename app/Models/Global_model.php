@@ -1159,6 +1159,11 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         return $query->getResultArray(); 
     }
 
+    function get_item_class_counts() {
+        $query = $this->db->query("CALL Get_Item_Class_Counts()");
+        return $query->getResultArray();
+    }
+
     public function fetch_temp_data($limit, $page, $year, $month, $week, $company, $id)
     {
         $offset = ($page - 1) * $limit;

@@ -222,7 +222,7 @@
                         } else {
                           html+="<td class='center-content' style='width: 25%'>";
                           html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                        //   html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                           html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                           html+="</td>";
                         }
@@ -619,26 +619,67 @@
     //     })
     // }
 
-    // function proceed_delete(id) {
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event : "update",
-    //         table : "tbl_item_class",
-    //         field : "id",
-    //         where : id, 
-    //         data : {
-    //                 updated_date : formatDate(new Date()),
-    //                 updated_by : user_id,
-    //                 status : -2
-    //         }  
-    //     }
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result);
-    //         modal.alert(success_delete_message, 'success', function() {
-    //             location.reload();
-    //         });
-    //     }); 
-    // }
+    function delete_data(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event: "get_item_class_counts"
+        };
+
+        aJax.post(url, data, function(response) {
+            try {
+                var obj = JSON.parse(response);
+                console.log("Item Class Counts:", obj);
+
+                let item = obj.find(row => row.id == id);
+
+                if (!item) {
+                    modal.alert("Item not found in count list.", "error");
+                    return;
+                }
+
+                if (Number(item.new_item_count) > 0 || Number(item.hero_item_count) > 0) {
+                    modal.alert("This item is in use and cannot be deleted.", "error");
+                    return;
+                }
+
+                get_field_values("tbl_item_class", "item_class_code", "id", [id], (res) => {
+                    let class_code = res[id];
+                    let message = is_json(confirm_delete_message);
+                    message.message = `Delete <b><i>${class_code}</i></b> from Item Class Masterfile?`;
+
+                    modal.confirm(JSON.stringify(message), function(result) {
+                        if (result) {
+                            proceed_delete(id);
+                        }
+                    });
+                });
+
+            } catch (e) {
+                console.error("Failed to parse response:", response);
+            }
+        });
+    }
+
+    function proceed_delete(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "update",
+            table : "tbl_item_class",
+            field : "id",
+            where : id, 
+            data : {
+                    updated_date : formatDate(new Date()),
+                    updated_by : user_id,
+                    status : -2
+            }  
+        }
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            modal.alert(success_delete_message, 'success', function() {
+                location.reload();
+            });
+        }); 
+    }
 
     function formatDate(date) {
         const year = date.getFullYear();
