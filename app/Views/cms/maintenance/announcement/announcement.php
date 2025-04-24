@@ -5,6 +5,18 @@
         overflow-x: hidden !important;
         overflow-y: hidden !important;
     }
+
+    .table-responsive-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .table-responsive-wrapper table {
+        min-width: 1000px; /* Adjust based on your actual content */
+        width: 100%;
+        border-collapse: collapse;
+    }
+
 </style>
 
 <div class="content-wrapper p-4">
@@ -25,26 +37,26 @@
 
                     <div class="box-body">
                         <div class="col-md-12 list-data tbl-content" id="list-data">
-                            <table class= "table table-bordered listdata">
-                            <thead>
-                                <tr>
-                                    <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                        <th class='center-content'>Title</th>
-                                        <th class='center-content'>Description 1</th>
-                                        <th class='center-content'>Description 2</th>
-                                        <th class='center-content'>Description 3</th>
-                                        <!-- <th class='center-content'>Banner 1</th>
-                                        <th class='center-content'>Banner 2</th> -->
-                                        <th class='center-content'>Start Date</th>
-                                        <th class='center-content'>End Date</th>
-                                        <th class='center-content'>Status</th>
-                                        <th class='center-content'>Date Created</th>
-                                        <th class='center-content'>Date Modified</th>
-                                        <th class='center-content'>Action</th>
-                                    </tr>  
-                                </thead>
-                                <tbody class="table_body word_break"></tbody>
-                            </table>
+                            <div class="table-responsive-wrapper">
+                                <table class="table table-bordered listdata">
+                                    <thead>
+                                        <tr>
+                                            <th class='center-content'><input class="selectall" type="checkbox"></th>
+                                            <th class='center-content'>Title</th>
+                                            <th class='center-content'>Description 1</th>
+                                            <th class='center-content'>Description 2</th>
+                                            <th class='center-content'>Description 3</th>
+                                            <th class='center-content'>Start Date</th>
+                                            <th class='center-content'>End Date</th>
+                                            <th class='center-content'>Status</th>
+                                            <th class='center-content'>Date Created</th>
+                                            <th class='center-content'>Date Modified</th>
+                                            <th class='center-content'>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table_body word_break"></tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="list_pagination"></div>
                         <div class="form-group pull-right">
