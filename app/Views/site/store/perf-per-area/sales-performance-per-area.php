@@ -202,7 +202,7 @@
                 <div class="col-md-12">
                     <div class="card mt-4 p-4 shadow-sm hide-div">
                         <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
-                            <table id="info_for_asc" class="table table-bordered table-responsive">
+                            <table id="info_for_asc" class="table table-bordered table-responsive" style="width: 100% !important;">
                                 <thead>
                                     <tr>
                                         <th 
