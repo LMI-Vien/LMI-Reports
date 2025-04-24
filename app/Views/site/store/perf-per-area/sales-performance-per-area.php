@@ -199,49 +199,50 @@
                 <div class="card p-4 shadow-lg text-center text-muted table-empty">
                   <i class="fas fa-filter mr-2"></i> Please select a filter
                 </div>
+                <div class="col-md-12">
+                    <div class="card mt-4 p-4 shadow-sm hide-div">
+                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                            <table id="info_for_asc" class="table table-bordered table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="9"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            class="tbl-title-header"
+                                        >
+                                            Store Sales Performance per Area
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">Rank</th>
+                                        <th class="tbl-title-field">Area</th>
+                                        <th class="tbl-title-field">Area Sales Coordinator</th>
+                                        <th class="tbl-title-field">Actual Sales Report</th>
+                                        <th class="tbl-title-field">Target</th>
+                                        <th class="tbl-title-field">% Achieved</th>
+                                        <th class="tbl-title-field">% Growth</th>
+                                        <th class="tbl-title-field">Balance To Target</th>
+                                        <th class="tbl-title-field">Target Per Remaining Days</th>
 
-                <div class="card mt-4 p-4 shadow-sm hide-div">
-                    <div class="mb-3">
-                        <table id="info_for_asc" class="table table-bordered table-responsive">
-                            <thead>
-                                <tr>
-                                    <th 
-                                        colspan="9"
-                                        style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                        class="tbl-title-header"
-                                    >
-                                        Store Sales Performance per Area
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th class="tbl-title-field">Rank</th>
-                                    <th class="tbl-title-field">Area</th>
-                                    <th class="tbl-title-field">Area Sales Coordinator</th>
-                                    <th class="tbl-title-field">Actual Sales Report</th>
-                                    <th class="tbl-title-field">Target</th>
-                                    <th class="tbl-title-field">% Achieved</th>
-                                    <th class="tbl-title-field">% Growth</th>
-                                    <th class="tbl-title-field">Balance To Target</th>
-                                    <th class="tbl-title-field">Target Per Remaining Days</th>
-
-                                </tr>
-                            </thead>
-                                  <tbody>
-                                      <tr>
-                                          <td colspan="9" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="9" class="text-center py-4 text-muted">
-                                              No data available
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="9" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                  </tbody>
-                        </table>
+                                    </tr>
+                                </thead>
+                                      <tbody>
+                                          <tr>
+                                              <td colspan="9" class="text-center py-4 text-muted">
+                                              </td>
+                                          </tr>
+                                          <tr>
+                                              <td colspan="9" class="text-center py-4 text-muted">
+                                                  No data available
+                                              </td>
+                                          </tr>
+                                          <tr>
+                                              <td colspan="9" class="text-center py-4 text-muted">
+                                              </td>
+                                          </tr>
+                                      </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 
