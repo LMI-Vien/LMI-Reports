@@ -9,142 +9,107 @@
             }
         </style>
 
-        <!-- Main Header (Top Navigation) -->
         <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
-            <div class="container-fluid"> <!-- Changed container to container-fluid -->
-                <!-- Brand Logo -->
-                <a href="<?= base_url();?>" class="navbar-brand">
-                    <i class="fas fa-home"></i>
-                </a>
+          <div class="container-fluid">
 
-                <!-- Navbar Toggle Button (for mobile) -->
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <?php if (service('uri')->getSegment(1) !== 'dashboard'): ?>
+              <ul class="navbar-nav d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link bg-primary" data-widget="pushmenu" href="#" style="color: #FFF !important; border-radius: 5px;">
+                        <i id="sidebarToggleIcon" class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </li>
+              </ul>
+            <?php endif; ?>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
+              <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <div id="navButton" class="mr-auto">
-
-                    </div>
-                    <!-- Right Navbar Links -->
-                    <ul class="navbar-nav">
-                        <!-- Notifications Dropdown -->
-        <!--                 <li class="nav-item dropdown">
-                            <a class="nav-link" data-toggle="dropdown" href="#">
-                                <i class="fas fa-bell"></i>
-                                <span class="badge badge-warning navbar-badge">3</span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                                <span class="dropdown-header">3 Notifications</span>
-                                <div class="dropdown-divider"></div>
-                                <a href="#" class="dropdown-item">
-                                    <i class="fas fa-envelope mr-2"></i> 1 new message
-                                </a>
-                                <a href="#" class="dropdown-item">
-                                    <i class="fas fa-users mr-2"></i> 2 friend requests
-                                </a>
-                            </div>
-                        </li> -->
-
-                        <!-- User Profile Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" data-toggle="dropdown" href="#">
-                                <i class="fas fa-user"></i> Hi, <?= esc(session()->get('sess_site_name')) ?><br>
-                                <span id="currentDateTime" class="small text-muted"></span>
-                            </a>
-
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a id="logout" href="<?= base_url('login/logout')?>" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+              <div id="navButton" class="mr-auto"></div>
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                  <a class="nav-link" data-toggle="dropdown" href="#">
+                    <i class="fas fa-user"></i> Hi, <?= esc(session()->get('sess_site_name')) ?><br>
+                    <span id="currentDateTime" class="small text-muted"></span>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a id="logout" href="<?= base_url('login/logout') ?>" class="dropdown-item">
+                      <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </a>
+                  </div>
+                </li>
+              </ul>
             </div>
+          </div>
         </nav>
 
         <script>
 
-    $(document).ready(function () {
-        get_menu_site();
-        // $(".dropdown-item").on("click", function (e) {
-        //     e.preventDefault(); 
+        $(document).ready(function () {
+            $('body').removeClass('sidebar-mini');
+            $('body').addClass('sidebar-mini-no-expand');
+            updateDateTime();
+            updateSidebarIcon();
+              $(document).on('click', '[data-widget="pushmenu"]', function () {
+                setTimeout(updateSidebarIcon, 300); 
+              });
+              $(window).on('resize', function () {
+                setTimeout(updateSidebarIcon, 300);
+              });
+            get_menu_site();
 
-        //     $(".dropdown-item").removeClass("active");
+            $("#logout").on("click", function(e) {
+                e.preventDefault();
 
-        //     $(this).addClass("active");
-            
-        //     $(".nav-link").removeClass("active");
+                var logoutUrl = $(this).attr("href");
 
-        //     const parentMenu = $(this).closest(".dropdown").find(".nav-link");
-        //     parentMenu.addClass("active");
-        // });
-
-        // logout confirmation
-        $("#logout").on("click", function(e) {
-            e.preventDefault();
-
-            var logoutUrl = $(this).attr("href");
-
-            Swal.fire({
-                title: "Are you sure?",
-                text: "You will be logged out of your session.",
-                icon: "warning",
-                showCancelButton: true,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, log me out!",
-                cancelButtonText: "Cancel"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = logoutUrl;
-                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You will be logged out of your session.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, log me out!",
+                    cancelButtonText: "Cancel"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = logoutUrl;
+                    }
+                });
             });
-        });
 
-        // dynamic menu site
-        function get_menu_site() {
-            var url = "<?= site_url('cms/cms_preference/get_site_menu'); ?>"; 
-            $.get(url, function(response) {
-                $("#navButton").append(response); 
-            });
-        }
-
-       // get_menu_site();
-
-        // $("#dynamic-menu").on("click", ".nav-item.dropdown", function (e) {
-        //     e.stopPropagation();
-
-        //     var $this = $(this);
-            
-        //     if ($this.hasClass("show")) {
-        //         $this.removeClass("show expanded"); 
-        //         $this.find(".dropdown-menu").removeClass("show");
-        //     } else {
-        //         $(".nav-item.dropdown").removeClass("show expanded"); 
-        //         $(".dropdown-menu").removeClass("show"); 
-
-        //         $this.addClass("show expanded"); 
-        //         $this.find(".dropdown-menu").addClass("show");
-        //     }
-        // });
-
-        // $(document).on("click", function () {
-        //     $(".nav-item.dropdown").removeClass("show expanded");
-        //     $(".dropdown-menu").removeClass("show");
-        // });
-
-    });
-            function updateDateTime() {
-                let now = new Date();
-                let options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
-                let formattedDate = now.toLocaleDateString('en-US', options);
-                document.getElementById('currentDateTime').textContent = formattedDate;
+            // dynamic menu site
+            function get_menu_site() {
+                var url = "<?= site_url('cms/cms_preference/get_site_menu'); ?>"; 
+                $.get(url, function(response) {
+                    $("#navButton").append(response); 
+                });
             }
 
-            // Update time on page load
-            updateDateTime();
-        </script>
+        });
+
+        function updateSidebarIcon() {
+            const $body = $('body');
+          if ($body.hasClass('sidebar-collapse') || $body.hasClass('sidebar-open')) {
+            $('#sidebarToggleIcon')
+              .removeClass('fa-arrow-left')
+              .addClass('fa-arrow-right');
+          } else {
+            $('#sidebarToggleIcon')
+              .removeClass('fa-arrow-right')
+              .addClass('fa-arrow-left');
+          }
+        }
+
+        function updateDateTime() {
+            let now = new Date();
+            let options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            let formattedDate = now.toLocaleDateString('en-US', options);
+            document.getElementById('currentDateTime').textContent = formattedDate;
+        }
+
+    </script>

@@ -1,65 +1,185 @@
     
-	<?php 
-		$uri = current_url(true); 
-	?>
+<?php 
+	$uri = current_url(true); 
+?>
 	<?= view("site/layout/header", $meta); ?>
-	<body class="hold-transition layout-top-nav">
+    <body class="hold-transition sidebar-mini layout-fixed">
 	    <div class="wrapper">
 			<?= view("site/layout/navigation"); ?>	
 			<?= view($content); ?> 
-		
-			<?= view("site/layout/footer"); ?>
+		     <?= view("site/layout/footer"); ?> 
 		<div>
-    <script>
-        // Enable Bootstrap 4 multi-level dropdowns
-        $(document).ready(function () {
-            $('.dropdown-submenu a.dropdown-toggle').on("click", function(e) {
-                var $submenu = $(this).next(".dropdown-menu");
-                $submenu.toggleClass('show');
-                
-                // Close other open submenus
-                $(this).parents('.dropdown-submenu').siblings().find('.dropdown-menu').removeClass('show');
+<style>
 
-                e.stopPropagation();
-            });
+.main-sidebar.sidebar-dark-yellow {
+  background-color: #301311 !important;
+}
+    
+/* Default hidden state for filter */
+.filter-content {
+  display: none;
+  background-color: #301311;
+  padding: 10px;
+  color: #c2c7d0;
+  width: 100%;
+  font-size: 0.85rem;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  z-index: 1050;
+}
 
-            $('.dropdown').on("hidden.bs.dropdown", function () {
-                $('.dropdown-menu.show').removeClass('show');
-            });
-        });
-    </script>
+.ui-autocomplete {
+  z-index: 9999 !important;
+}
 
-    <style>
-        /* Custom styling for multi-level dropdown */
-        .dropdown-submenu {
-            position: relative;
-        }
+.filter-icon {
+  display: inline-block !important;  /* Ensure it is always visible */
+}
 
-        .dropdown-submenu .dropdown-menu {
-            top: 0;
-            left: 100%;
-            margin-top: -1px;
-        }
+.brand-link i {
+  display: inline-block;
+  font-size: 1.25rem;
+  margin-left: 7px;
+}
 
-        /* Make content fill the page */
-        .content-wrapper {
-            min-height: calc(100vh - 100px); /* Adjust based on header/footer height */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-        }
+.main-sidebar {
+  background-color: #301311 !important;
+}
 
-        /* Sticky Footer */
-        .main-footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #f8f9fa;
-            padding: 10px 0;
-            border-top: 1px solid #dee2e6;
-        }
-    </style>
+.brand-link {
+  background-color: #301311 !important;
+}
+
+/* Expanded Sidebar: Show filters normally */
+body:not(.sidebar-collapse) .filter-content {
+  display: block;
+  position: static;
+  width: 100%;
+}
+
+body.sidebar-collapse .main-sidebar:hover .filter-icon {
+  display: inline-block !important;  /* Always show the icon */
+}
+
+/* Collapsed Sidebar: Show filters on hover */
+body.sidebar-collapse .main-sidebar:hover .filter-hover .filter-content {
+  display: block !important;
+  position: static;
+  padding: 15px;
+  left: 100%;
+  top: 0;
+  width: 250px;
+  z-index: 1050;
+}
+
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background-color: #fff; /* Or use your theme color */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional visual polish */
+}
+
+///
+.nav-item .nav-link {
+  padding: 8px 10px; /* Adjust padding to fit */
+}
+
+.nav-item .nav-link span {
+  font-size: 10px; /* Reduce font size for date */
+  display: block;
+}
+
+///////
+.announcement-card {
+  margin-bottom: 20px;
+  margin: 20px;
+}
+
+.announcement-box {
+  margin: 20px;
+}
+
+.announcement-img {
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 0.25rem;
+}
+
+.announcement-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.announcement-desc {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+
+
+////
+.dashboard-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.dashboard-card {
+  flex: 0 0 calc(12.5% - 15px); /* 8 boxes per row (12 / 8 = 1.5 col units each) */
+  min-width: 150px;
+}
+
+.dashboard-card .card {
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 20px;
+}
+
+.box-icon i {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+
+.box-title {
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.box-value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.navbar-nav .nav-link i {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .navbar-nav .nav-item {
+    margin-right: 5px;
+  }
+}
+
+/* Optional: Make it scroll horizontally on very small screens */
+@media (max-width: 992px) {
+  .dashboard-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .dashboard-card {
+    flex: 0 0 auto;
+  }
+}
+</style>  
     </body>
 </html>
 

@@ -10,9 +10,9 @@ class Emails extends BaseConfig
 		public $protocol         = "sendgrid";
 		public $mailpath         = "/usr/sbin/sendmail";
 		public $smtp_host        = "smtp.gmail.com";
-		public $smtp_user        = "phpdev.unilab@gmail.com";
-		public $default_email    = "phpdev.unilab@gmail.com";
-		public $smtp_pass        = "phpdeveloper123";
+		public $smtp_user        = "";
+		public $default_email    = "";
+		public $smtp_pass        = "";
 		public $smtp_port        = 465;
 		public $smtp_timeout     = 300;
 		public $smtp_crypto      = "ssl";

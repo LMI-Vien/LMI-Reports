@@ -1,68 +1,48 @@
+<?= view("site/store/perf-per-month/sales-performance-per-month-filter"); ?> 
+
 <style>
-/*    .content{
-        margin-bottom: 35px;
-    }*/
     .content-wrapper, .content {
         margin-top: 0 !important;
         padding-top: 0 !important;
         padding-bottom: 30px;
     }
 
-  footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #f8f9fa;
-      padding: 10px;
-      text-align: center;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-  }
-
     .md-center {
-        padding: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-size: large;
-        font-weight: bold;
         color: white;
+        font-weight: bold;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem; 
         text-align: center;
-        border: 1px solid #ffffff;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
+        border: none;
         border-radius: 12px;
         transition: transform 0.2s ease-in-out;
-        background: linear-gradient(90deg, #fdb92a, #ff9800);
-    }
-
-    /* Title Styling */
-    .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
-        background: linear-gradient(to right, #143996, #007bff);
-        color: black !important;
-        text-align: center;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .tbl-title-header {
-        border-radius: 8px 8px 0px 0px !important;
     }
 
     th {
-        color: #fff !important;
+        color: #fff;
         background-color: #301311 !important;
     }
-    .tbl-title-bg{
+/*
+    #ExportPDF{
         color: #fff;
-        border-radius: 5px;
         background-color: #143996 !important;
-    }
-    #previewButton{
-      background-color: #143996 !important;
+    }*/
+
+    .paginate_button  {
+        font-size: 1em;
     }
 
-    .card-title {
-        text-align: center;
-        font-size: 1.25rem;
-        font-weight: bold;
+    /* Card Styling */
+    .card {
+        border-radius: 12px !important;
+        background: #ffffff;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .card-dark {
+        border-radius: 12px !important;
+        border: #dee2e6, solid, 1px;
     }
 
     /* Title Styling */
@@ -110,8 +90,8 @@
     .table tbody tr:hover {
         background: rgba(0, 123, 255, 0.1);
     }
-
-    .filter_buttons {
+/*
+    #refreshButton {
         width: 10em;
         height: 3em;
         border-radius: 12px;
@@ -121,23 +101,40 @@
     #clearButton {
         width: 10em;
         height: 3em;
-        border-radius: 13px;
+        border-radius: 12px;
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
     }
+*/
 
-    #exportButton{
-        background-color: #339933 !important;
+    .paginate_button {
+        font-size: 15px !important;
     }
+
     label {
-        float: left;
-    }
-    #table-skus{
-        display: none;
-    }
-    #consolidatedChart{
-        height: 200px;
+        display: flex !important;
+        align-items: center;
+        margin-bottom: 0px !important;
     }
 
+    .swal2-checkbox{
+        display: none !important;
+    }
+
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+      background-color: #ffc107 !important; /* Bootstrap's bg-warning */
+      border-color: #ffc107 !important;
+      color: #000 !important; /* Ensure text is readable */
+      font-weight: 500;
+    }
+
+    body .hide-div {
+      display: none;
+    }
+    
+/*    #data-graph{
+      display: none;
+    }*/
 </style>
 
 <div class="wrapper">
@@ -146,249 +143,194 @@
             <div class="container-fluid py-4">
 
                 <!-- Filters Section -->
-            <div class="card shadow-lg">
-                <div class="text-center md-center p-2">
-                    <h5 class="mt-1 mb-1">
-                        <i class="fas fa-filter"></i> 
-                        <span>
-                            F I L T E R
-                        </span>
-                    </h5>
+                <?php if (isset($breadcrumb)): ?>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb bg-transparent px-0 mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="<?= base_url() ?>">
+                                        <i class="fas fa-home"></i>
+                                    </a>
+                                </li>
+                                <?php 
+                                    $last = end($breadcrumb);
+                                    foreach ($breadcrumb as $label => $url): 
+                                        if ($url != ''):
+                                ?>
+                                    <li class="breadcrumb-item">
+                                        <?= $label ?>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?= $label ?>
+                                    </li>
+                                <?php 
+                                        endif;
+                                    endforeach; 
+                                ?>
+                            </ol>
+                        </nav>
+                        <!-- Right side content -->
+                        <div class="ml-auto text-muted small" style="white-space: nowrap;">
+                            <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
+
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="card p-4 shadow-lg text-center text-muted table-empty">
+                  <i class="fas fa-filter mr-2"></i> Please select a filter
                 </div>
-                    <div class="row p-4">
-                        <div class="col-md-6 column text-left" >
-                            <div class="col-md-12 mx-auto row py-2" >
-                                <label for="ascName" class="col-md-4 my-auto" >ASC Name</label>
-                                <div class="col-md" >
-                                    <input type="text" class="form-control" id="ascName" placeholder="Enter name">
-                                    <input type="hidden" id="asc_id">
-                                </div>
-                            </div>
-                            <div class="col-md-12 mx-auto row py-2" >
-                                <label for="area" class="col-md-4 my-auto" >Area</label>
-                                <div class="col-md" >
-                                    <input type="text" class="form-control" id="area" placeholder="Enter area">
-                                    <input type="hidden" id="area_id">
-                                </div>
-                            </div>
-                            <div class="col-md-12 mx-auto row py-2" >
-                                <label for="brand" class="col-md-4" >Brand</label>
-                                <div class="col-md" >
-                                    <input type="text" class="form-control" id="brand" placeholder="Enter brand">
-                                    <input type="hidden" id="brand_id">
-                                </div>
-                            </div>
-                            <div class="col-md-12 mx-auto row py-2" >
-                                <label for="year" class="col-md-4" >Year</label>
-                                <div class="col-md" >
-                                    <select class="form-control" id="year">
-                                        <option value="0">Please select..</option>
-                                        <?php
-                                            if($year){
-                                                $maxYear = max(array_column($year, 'year')); 
-                                                foreach ($year as $value) {
-                                                    $selected = ($value['year'] == $maxYear) ? 'selected' : '';
-                                                    echo "<option value='{$value['id']}' {$selected}>{$value['year']}</option>";
-                                                }
-                                            }
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>
+                    <!-- DataTables Section -->
+                
+                <div class="hide-div data-graph">
+                    <div class="card p-4 shadow-sm" id="data-graph">
+                        <div class="text-center">
+                            <h5 class="mb-3"><i class="fas fa-chart-bar"></i></h5>
                         </div>
-                        <div class="col-md-4 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
-                            <div class="col-md-12 mx-auto row my-2 py-2 text-left" >
-                                <label class="my-auto col-md-12" >Covered by Selected ASC</label>
-                            </div>
-                            <div class="col-md-12 mx-auto row py-2 text-center" >
-                                <div class="col-md-6 row" >
-                                    <input type="radio" name="coveredASC" value="with_ba" class="col-md-2"><span class="col-md-10">W/ BA</span>
-                                </div>
-                                <div class="col-md-6 row" >
-                                    <input type="radio" name="coveredASC" value="without_ba" class="col-md-2"><span class="col-md-10">W/O BA</span>
-                                </div>
-                            </div>
-                            <div class="col-md-12 mx-auto row py-2 text-left" >
-                                <label for="storeName" class="my-auto col-md-4" >Store Name</label>
-                                <div class="col-md" >
-                                    <input type="text" class="form-control" id="storeName" placeholder="Enter store">
-                                    <input type="hidden" id="store_id">
-                                </div>
-                            </div>
-                            <div class="col-md-12 mx-auto row py-2 text-left" >
-                                <label for="ba" class="my-auto col-md-4" >BA Name</label>
-                                <div class="col-md" >
-                                    <input type="text" class="form-control" id="ba" placeholder="Enter BA name">
-                                    <input type="hidden" id="ba_id">
-                                </div>
-                            </div>
+
+                        <div class="mb-3" style="overflow-x: auto; padding: 0px;">
+                            <div id="chartContainer" class="d-flex flex-row"></div>
                         </div>
-                        <div class="col-md-2">
-                            <!-- Refresh Button -->
-                            <div class="row">
-                                <div class="p-3 d-flex justify-content-end">
-                                    <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton">
-                                        <i class="fas fa-sync-alt"></i> Refresh
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="p-3 d-flex justify-content-end">
-                                    <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
-                                </div>
+                        <!-- Data Table -->
+                        <div class="table-responsive mt-4">
+                            <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                            <table class="table table-bordered text-center">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th class="tbl-title-field"></th>
+                                        <th class="tbl-title-field">Jan</th><th class="tbl-title-field">Feb</th><th class="tbl-title-field">Mar</th><th class="tbl-title-field">Apr</th><th class="tbl-title-field">May</th><th class="tbl-title-field">Jun</th>
+                                        <th class="tbl-title-field">Jul</th><th class="tbl-title-field">Aug</th><th class="tbl-title-field">Sep</th><th class="tbl-title-field">Oct</th><th class="tbl-title-field">Nov</th><th class="tbl-title-field">Dec</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="asc-dashboard-body">
+                                </tbody>
+                            </table>
                             </div>
                         </div>
                     </div>
-            </div>
-
-
-                <!-- DataTables Section -->
-            <div class="card p-4 shadow-sm" id="data-graph">
-                <div class="text-center">
-                    <h5 class="mb-3"><i class="fas fa-chart-bar"></i> ASC Performance</h5>
-                </div>
-
-                <div class="mb-3" style="overflow-x: auto; padding: 0px;">
-                    <div id="chartContainer" class="d-flex flex-row"></div>
-                </div>
-                <!-- Data Table -->
-                <div class="table-responsive mt-4">
-                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
-                    <table class="table table-bordered text-center">
-                        <thead class="thead-light">
-                            <tr>
-                                <th class="tbl-title-field"></th>
-                                <th class="tbl-title-field">Jan</th><th class="tbl-title-field">Feb</th><th class="tbl-title-field">Mar</th><th class="tbl-title-field">Apr</th><th class="tbl-title-field">May</th><th class="tbl-title-field">Jun</th>
-                                <th class="tbl-title-field">Jul</th><th class="tbl-title-field">Aug</th><th class="tbl-title-field">Sep</th><th class="tbl-title-field">Oct</th><th class="tbl-title-field">Nov</th><th class="tbl-title-field">Dec</th>
-                            </tr>
-                        </thead>
-                        <tbody class="asc-dashboard-body">
-                        </tbody>
-                    </table>
+                    <div class="ml-auto text-muted small" style="white-space: nowrap;">
+                        <strong>Note:</strong> <?= !empty($foot_note) ? $foot_note : 'N/A'; ?>
                     </div>
                 </div>
-            </div>
-            <div id="table-skus" style="overflow-x: auto; padding: 0px;">
-                <div class="row mt-12">
-                    <div class="d-flex flex-row">
-                        <div class="col-md-6">
-                            <div class="card p-6 shadow-sm">
-                                <table id="slowMovingTable" class="table table-bordered" style="width: 100%">
-                                    <thead>
-                                        <tr>
-                                            <th 
-                                                colspan="5"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                                class="tbl-title-header"
-                                            >
-                                                SLOW MOVING SKU'S
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                            <th class="tbl-title-field">SOH Qty</th>
-                                            <th class="tbl-title-field">Qty (W1)</th>
-                                            <th class="tbl-title-field">Qty (W2)</th>
-                                            <th class="tbl-title-field">Qty (W3)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="5">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                <div class="hide-div">
+                    <div id="table-skus" style="overflow-x: auto; padding: 0px;">
+                    <div class="row mt-12">
+                        <div class="d-flex flex-row">
+                            <div class="col-md-6">
+                                <div class="card p-6 shadow-sm">
+                                    <table id="slowMovingTable" class="table table-bordered" style="width: 100%">
+                                        <thead>
+                                            <tr>
+                                                <th 
+                                                    colspan="5"
+                                                    style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                    class="tbl-title-header"
+                                                >
+                                                    SLOW MOVING SKU'S
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th class="tbl-title-field">SKU</th>
+                                                <th class="tbl-title-field">SOH Qty</th>
+                                                <th class="tbl-title-field">Qty (W1)</th>
+                                                <th class="tbl-title-field">Qty (W2)</th>
+                                                <th class="tbl-title-field">Qty (W3)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="5">No data available</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card p-6 shadow-sm">
+                                    <table id="overstockTable" class="table table-bordered" style="width: 100%">
+                                        <thead>
+                                            <tr>
+                                                <th 
+                                                    colspan="5"
+                                                    style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                    class="tbl-title-header"
+                                                >OVERSTOCK SKU'S</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="tbl-title-field">SKU</th>
+                                                <th class="tbl-title-field">SOH Qty</th>
+                                                <th class="tbl-title-field">Qty (W1)</th>
+                                                <th class="tbl-title-field">Qty (W2)</th>
+                                                <th class="tbl-title-field">Qty (W3)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="5">No data available</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card p-6 shadow-sm">
+                                    <table id="npdTable" class="table table-bordered" style="width: 100%">
+                                        <thead>
+                                            <tr>
+                                                <th 
+                                                    colspan="5"
+                                                    style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                    class="tbl-title-header"
+                                                >NPD SKU'S</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="tbl-title-field">SKU</th>
+                                                <th class="tbl-title-field">SOH Qty</th>
+                                                <th class="tbl-title-field">Qty (W1)</th>
+                                                <th class="tbl-title-field">Qty (W2)</th>
+                                                <th class="tbl-title-field">Qty (W3)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="5">No data available</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card p-6 shadow-sm">
+                                    <table id="heroTable" class="table table-bordered" style="width: 100%">
+                                        <thead>
+                                            <tr>
+                                                <th 
+                                                    colspan="1"
+                                                    style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                    class="tbl-title-header"
+                                                >HERO SKU'S</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="tbl-title-field">SKU</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="5">No data available</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="card p-6 shadow-sm">
-                                <table id="overstockTable" class="table table-bordered" style="width: 100%">
-                                    <thead>
-                                        <tr>
-                                            <th 
-                                                colspan="5"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                                class="tbl-title-header"
-                                            >OVERSTOCK SKU'S</th>
-                                        </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                            <th class="tbl-title-field">SOH Qty</th>
-                                            <th class="tbl-title-field">Qty (W1)</th>
-                                            <th class="tbl-title-field">Qty (W2)</th>
-                                            <th class="tbl-title-field">Qty (W3)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="5">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="card p-6 shadow-sm">
-                                <table id="npdTable" class="table table-bordered" style="width: 100%">
-                                    <thead>
-                                        <tr>
-                                            <th 
-                                                colspan="5"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                                class="tbl-title-header"
-                                            >NPD SKU'S</th>
-                                        </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                            <th class="tbl-title-field">SOH Qty</th>
-                                            <th class="tbl-title-field">Qty (W1)</th>
-                                            <th class="tbl-title-field">Qty (W2)</th>
-                                            <th class="tbl-title-field">Qty (W3)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="5">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="card p-6 shadow-sm">
-                                <table id="heroTable" class="table table-bordered" style="width: 100%">
-                                    <thead>
-                                        <tr>
-                                            <th 
-                                                colspan="1"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                                class="tbl-title-header"
-                                            >HERO SKU'S</th>
-                                        </tr>
-                                        <tr>
-                                            <th class="tbl-title-field">SKU</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="5">No data available</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
                     </div>
-
+                    </div>
                 </div>
-            </div>
-            <!-- Buttons -->
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('exportPDF')"><i class="fas fa-eye"></i> Preview</button>
-                <button class="btn btn-success" id="exportButton" onclick="handleAction('exportExcel')"><i class="fas fa-file-export"></i> Export</button>
-            </div>
             </div>
         </div>
     </div>
@@ -396,20 +338,23 @@
 
 <!-- DataTables and Script -->
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- FileSaver -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     var base_url = "<?= base_url(); ?>";
     $(document).ready(function () {
-
+        
+        $('#inventoryStatus').select2({ placeholder: 'Select inventory statuses' });
         let asc = <?= json_encode($asc); ?>;
         let area = <?= json_encode($area); ?>;
         let brand = <?= json_encode($brand); ?>;
@@ -490,7 +435,6 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res)[0];
-                console.log(data.description);
 
                 $("#storeName").val(data.description);
                 $("#store_id").val(data.store);
@@ -510,41 +454,74 @@
             if (highestYear) {
                 $("#year").val(highestYear);
             }
+            $('.table-empty').show();
+            $('.hide-div').hide();
             $('#refreshButton').click();
         });
 
-        $(document).on('click', '#refreshButton', function () {
-            let selectedCoveredASC = $('input[name="coveredASC"]:checked').val();
-            if($('#ascName').val() == ""){
-                $('#asc_id').val('');
-            }
-            if($('#area').val() == ""){
-                $('#area_id').val('');
-            }
-            if($('#brand').val() == ""){
-                $('#brand_id').val('');
-            }
-            if($('#storeName').val() == ""){
-                $('#store_id').val('');
-            }
-            if($('#ba').val() == ""){
-                $('#ba_id').val('');
-            }
+        // $(document).on('click', '#refreshButton', function () {
+        //     let selectedCoveredASC = $('input[name="coveredASC"]:checked').val();
+        //     if($('#ascName').val() == ""){
+        //         $('#asc_id').val('');
+        //     }
+        //     if($('#area').val() == ""){
+        //         $('#area_id').val('');
+        //     }
+        //     if($('#brand').val() == ""){
+        //         $('#brand_id').val('');
+        //     }
+        //     if($('#storeName').val() == ""){
+        //         $('#store_id').val('');
+        //     }
+        //     if($('#ba').val() == ""){
+        //         $('#ba_id').val('');
+        //     }
 
-            if(selectedCoveredASC){
-                $('#data-graph').hide();
-                $('#table-skus').show();
-                    fetchDataTable();
-            }else{
-                $('#data-graph').show();
-                $('#table-skus').hide();
-                fetchData();
-            }
+        //     // if(selectedCoveredASC){
+        //     //     $('#data-graph').hide();
+        //     //     $('#table-skus').show();
+        //     //         fetchDataTable();
+        //     // }else{
+        //         $('#data-graph').show();
+        //         $('#table-skus').hide();
+        //         fetchData();
+        //     //}
 
 
-        });
+        // });
+        // $('#data-graph').show();
+        // $('#table-skus').hide();
+
         fetchData();
     });
+
+    $(document).on('click', '#refreshButton', function () {
+        const fields = [
+            { input: '#area', target: '#area_id' },
+            { input: '#brand', target: '#brand_id' },
+            { input: '#store', target: '#store_id' },
+            { input: '#item_classi', target: '#item_classi_id' },
+            { input: '#qtyscp', target: '#qtyscp' }
+        ];
+
+        let counter = 0;
+
+        fields.forEach(({ input, target }) => {
+            const val = $(input).val();
+            const hasValue = Array.isArray(val) ? val.length > 0 : val;
+            if (!hasValue || val === undefined) {
+                $(target).val('');
+            } else {
+                counter++;
+            }
+        });
+        if (counter >= 1) {
+            fetchData();
+            $('.table-empty').hide();
+            $('.data-graph').show();
+            $('#table-skus').hide();
+        }
+    });     
 
     // Define months
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -691,7 +668,7 @@
         let selectedStore = $('#store_id').val();
         let selectedBa = $('#ba_id').val();
         
-        url = base_url + 'trade-dashboard/trade-asc-dashboard-one';
+        url = base_url + 'store/get-sales-performance-per-month';
         var data = {
             asc : selectedASC,
             brand : selectedBrand,
@@ -730,7 +707,7 @@
                     html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>'+formatTwoDecimals(y.net_sales_january || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_february || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_march || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_april || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_may || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_june || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_july || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_august || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_september || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_october || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_november || "0.00")+'</td><td>'+formatTwoDecimals(y.net_sales_december || "0.00")+'</td></tr>';
                     html += '<tr><td style="background-color: #ffc107;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>'+formatTwoDecimals(y.amount_january || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_february || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_march || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_april || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_may || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_june || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_july || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_august || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_september || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_october || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_november || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_december || "0.00")+'</td></tr>';
                     html += '<tr><td style="background-color: #990000;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Target Sales</td><td>'+formatTwoDecimals(y.target_sales_january || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_february || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_march || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_april || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_may || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_june || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_july || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_august || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_september || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_october || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_november || "0.00")+'</td><td>'+formatTwoDecimals(y.target_sales_december || "0.00")+'</td></tr>';
-                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Growth</td><td>'+formatTwoDecimals(y.growth_january || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_february || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_march || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_april || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_may || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_june || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_july || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_august || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_september || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_october || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_november || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_december || "0.00")+'</td></tr>';
+                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Growth</td><td>'+formatTwoDecimals(y.growth_january || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_february || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_march || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_april || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_may || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_june || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_july || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_august || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_september || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_october || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_november || "0.00")+'</td><td>'+formatTwoDecimals(y.growth_december || "0.00")+'</td></tr>';
                     html += '<tr><td style="background-color: #339933;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Achieved</td><td>'+formatTwoDecimals(y.achieved_january || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_february || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_march || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_april || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_may || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_june || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_july || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_august || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_september || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_october || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_november || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_december || "0.00")+'</td></tr>';
 
                 });formatTwoDecimals
@@ -766,7 +743,7 @@
         $(tableId).DataTable({
             destroy: true,
             ajax: {
-                url: base_url + 'trade-dashboard/trade-asc-dashboard-one-tables',
+                url: base_url + 'store/get-sales-performance-per-table',
                 type: 'POST',
                 data: function (d) {
 

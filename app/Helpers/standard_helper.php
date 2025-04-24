@@ -1526,42 +1526,6 @@
 
 
     }
-    function is_cookie_id_existing($cookie_id){
-        $db = \Config\Database::connect(); 
-        $builder = $db->table("site_search_keywords");
-        $builder->distinct();
-        $builder->select("cookie_id");
-        $builder->where("cookie_id", $cookie_id);
-        $query  = $builder->get();
-        $result = $query->getResult();
-        
-        if (count($result) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    function get_pixel_urls($url) {
-        $db = \Config\Database::connect(); 
-        $builder = $db->table("site_url_pixel_list");
-        $builder->select("content");
-        $builder->where("url", $url);
-         $q =$builder->get();
-         return $q->getRow();
-     }
-     function get_corporate_social() {
-        $db = \Config\Database::connect(); 
-        $builder = $db->table("site_information");
-        $select = "site_fb_link as fb_link, site_twitter_link as tw_link, site_instagram_link as ig_link, site_pinterest_link as pi_link, 
-        site_linkedin_link as li_link, site_youtube_link as yt_link, site_fb_link_status as fb_status, site_twitter_link_status as tw_status, 
-        site_instagram_link_status as ig_status, site_pinterest_link_status as pi_status, site_linkedin_link_status as li_status, 
-        site_youtube_link_status as yt_status";
-       $builder->select($select);
-       $builder->where("site_id", 1);
-        $q =$builder->get();
-        $data = $q->getRow();
-        return $data;
-    }
     function get_row_data($table,$select,$site_id,$query = null, $limit = null) {
         $db = \Config\Database::connect(); 
         $builder = $db->table($table);
@@ -1700,78 +1664,6 @@
         $q =$builder->get();
         $data = $q->getRow();
         return $data;
-    }
-    function get_signup_ad($kw, $type=null, $s2=true) {
-        $db = \Config\Database::connect();
-        $int_flag = ($type == 'internal' && $s2) ? 1 : 0;
-
-        if ($type == 'by_product_page' && $s2) {
-            $builder = $db->table("site_product_info");
-            $builder->select("pv_signup_ad as image_loc, pv_signup_ad_behavior as behavior, pv_signup_ad_url as url");
-           
-            $builder->where("url", $kw);
-        } elseif ($type == 'by_article' && $s2) {
-            $builder = $db->table("site_articles");
-            $builder->select("article_signup_ad as image_loc, article_signup_ad_behavior as behavior, article_signup_ad_url as url");
-            
-            $builder->where("id", $kw);
-        } elseif ($type == 'by_category' && $s2) {
-            $builder = $db->table("site_product_categories");
-            $builder->select("pc_signup_ad as image_loc, pc_signup_ad_behavior as behavior, pc_signup_ad_url as url");
-            
-            $builder->where("category_url", $kw);
-        } else {
-            $builder = $db->table('site_signup_ads');
-            $builder->select("sua_image as image_loc, sua_title as title, sua_behavior as behavior, sua_url as url");
-            
-            $builder->like('sua_title', 'match'); 
-            $builder->orLike('sua_subtitle', $kw);
-            $builder->where('status', 1);
-            $builder->where('internal_store', $int_flag);
-        }
-        
-        $q = $builder->get();						
-        $ret = array();
-
-        if($int_flag) {
-            return $q->getResult();
-        }
-
-        foreach ($q->getResult() as $v) {
-            $ret['url'] = $v->url;
-            $ret['image_loc'] = $v->image_loc;
-            $ret['behavior'] = ($v->behavior == 0) ? "_blank" : "_self";
-        }
-
-        if ($q->getNumRows() AND $ret['image_loc'] == '') {
-            $ret = ($type == 'by_product_page') ? get_signup_ad("product_page",$type,false) : get_signup_ad("generic", $type, false);
-        }
-
-        if ( !$q->getNumRows() ) {
-            $ret['url'] = "https://www.unilab.com.ph/signup";
-            $ret['image_loc'] = ($type == 'by_product_page') ? 'assets/assets/images/generic_product_page_ad.jpg'  : 'assets/assets/images/banner-sidepanel-healthplus.jpg';
-            $ret['behavior'] = "_self";
-        }
-
-        return $ret;
-    }
-
-    function get_product_info_id($brand_name){
-        $db = \Config\Database::connect();
-
-        $builder = $db->table("site_product_info");
-        $builder->select("site_product_info.id AS product_info_id");
-        $builder->where("site_product_info.status", 1);
-        $builder->where("site_product_info.url", $brand_name);
-        
-        $q = $builder->get();
-        $data = $q->getRow();
-
-        if($data !== null){
-            return $data->product_info_id;
-        }else{
-            return 0;
-        }
     }
 
     function get_list_query($table, $query)

@@ -1,3 +1,5 @@
+<?= view("site/store/perf-per-area/sales-performance-per-area-filter"); ?> 
+
 <style>
     .content-wrapper, .content {
         margin-top: 0 !important;
@@ -84,6 +86,14 @@
         width: 100%;
     }
 
+    .table th {
+        color: white !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
+    }
+
     table {
         width: 100%;
         table-layout: fixed; /* Ensures fixed column widths */
@@ -107,12 +117,12 @@
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
     }
 
-    #clearButton {
+/*    #clearButton {
         width: 10em;
         height: 3em;
         border-radius: 13px;
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-    }
+    }*/
 
     /* Title Styling */
     .tbl-title-field {
@@ -129,6 +139,9 @@
         border-radius: 8px 8px 0px 0px !important;
     }
 
+    body .hide-div {
+      display: none;
+    }
     /* Set specific column widths */
     th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
     th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
@@ -147,110 +160,48 @@
         <div class="content">
             <div class="container-fluid py-4">
                 <!-- Filters Section -->
-                <div class="card shadow-sm">
-                    <div class="text-center md-center p-2">
-                        <h5 class="mt-1 mb-1">
-                            <i class="fas fa-filter"></i> 
-                            <span>
-                                F I L T E R
-                            </span>
-                        </h5>
-                    </div>
+ 
+                <?php if (isset($breadcrumb)): ?>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb bg-transparent px-0 mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="<?= base_url() ?>">
+                                        <i class="fas fa-home"></i>
+                                    </a>
+                                </li>
+                                <?php 
+                                    $last = end($breadcrumb);
+                                    foreach ($breadcrumb as $label => $url): 
+                                        if ($url != ''):
+                                ?>
+                                    <li class="breadcrumb-item">
+                                        <?= $label ?>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?= $label ?>
+                                    </li>
+                                <?php 
+                                        endif;
+                                    endforeach; 
+                                ?>
+                            </ol>
+                        </nav>
+                        <!-- Right side content -->
+                        <div class="ml-auto text-muted small" style="white-space: nowrap;">
+                            <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
 
-                    <div class="row p-4">
-                        <div class="col-md-6 column p-2 text-left">
-                            <div class="col-md p-1 row">
-                                <div class="col-md-3">
-                                    <label class="mt-2" for="store">Store Name</label>
-                                </div>
-                                <div class="col-md">
-                                    <input type="text" id="store" class="form-control" placeholder="Please select...">
-                                    <input type="hidden" id="store_id">
-                                </div>
-                            </div>
-                            <div class="col-md p-1 row">
-                                <div class="col-md-3">
-                                    <label class="mt-2" for="area">Area</label>
-                                </div>
-                                <div class="col-md">
-                                    <input type="text" id="area" class="form-control" placeholder="Please select...">
-                                    <input type="hidden" id="area_id">
-                                </div>
-                            </div>
-                            <div class="col-md p-1 row">
-                                <div class="col-md-3">
-                                    <label class="mt-2" for="month">Month/Year</label>
-                                </div>
-                                <div class="col-md row">
-                                    <div class="col-md-6">
-                                        <select class="form-control" id="month">
-                                            <option value="0" disabled selected>Please month..</option>
-                                            <?php
-                                                if($month){
-                                                    foreach ($month as $value) {
-                                                        echo "<option value=".$value['id'].">".$value['month']."</option>";
-                                                    }                                                
-                                                }
-                                            ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" id="year">
-                                            <option value="0" disabled selected>Please year..</option>
-                                            <?php
-                                                if($year){
-                                                    foreach ($year as $value) {
-                                                        echo "<option value=".$value['id'].">".$value['year']."</option>";
-                                                    }                                                
-                                                }
-                                            ?>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 p-2 text-left" style="border: #dee2e6, solid, 1px; border-radius: 12px;">
-                            <label class="p-2">Sort By</label>
-                            <div class="column">
-                                <select class="form-control col-md" id="sortBy">
-                                    <option value="rank">Rank</option>
-                                    <option value="area">Area</option>
-                                    <option value="asc_names">Area Sales Coordinator</option>
-                                    <option value="actual_sales">Actual Sales Report</option>
-                                    <option value="target_sales">Target</option>
-                                    <option value="percent_ach">% Arch</option>
-                                    <option value="balance_to_target">Balance to Target</option>
-                                    <option value="target_per_remaining_days">Target per Remaining Days</option>
-                                </select>
-                                <!-- <div class="col-md mt-3">
-                                    <input type="radio" name="sortOrder" value="asc" checked> Asc
-                                    <input type="radio" name="sortOrder" value="desc"> Desc
-                                </div> -->
-                                <div class="col-md mt-3">
-                                    <input type="radio" id="sort_asc" name="sortOrder" value="asc" checked>
-                                    <label for="sort_asc">Asc</label>
-
-                                    <input type="radio" id="sort_desc" name="sortOrder" value="desc">
-                                    <label for="sort_desc">Desc</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2 p-2 column">
-                            <div class="p-2 d-flex justify-content-end">
-                                <button class="btn btn-primary btn-sm p-2 filter-button" id="refreshButton">
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                </button>
-                            </div>
-                            <div class="p-2 d-flex justify-content-end">
-                                <button type="button" id="clearButton" class="btn btn-secondary btn-sm p-2 filter-button">Clear</button>
-                            </div>
                         </div>
                     </div>
+                <?php endif; ?>
+                <!-- DataTables Section -->
+                <div class="card p-4 shadow-lg text-center text-muted table-empty">
+                  <i class="fas fa-filter mr-2"></i> Please select a filter
                 </div>
 
-                <!-- DataTables Section -->
-                <div class="card mt-4 p-4 shadow-sm">
-                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                <div class="card mt-4 p-4 shadow-sm hide-div">
+                    <div class="mb-3">
                         <table id="info_for_asc" class="table table-bordered table-responsive">
                             <thead>
                                 <tr>
@@ -259,7 +210,7 @@
                                         style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                         class="tbl-title-header"
                                     >
-                                        INFORMATION FOR AREA SALES COORDINATOR
+                                        Store Sales Performance per Area
                                     </th>
                                 </tr>
                                 <tr>
@@ -269,37 +220,31 @@
                                     <th class="tbl-title-field">Actual Sales Report</th>
                                     <th class="tbl-title-field">Target</th>
                                     <th class="tbl-title-field">% Achieved</th>
+                                    <th class="tbl-title-field">% Growth</th>
                                     <th class="tbl-title-field">Balance To Target</th>
-                                    <th class="tbl-title-field">Target per Remaining days</th>
+                                    <th class="tbl-title-field">Target Per Remaining Days</th>
 
                                 </tr>
                             </thead>
-                            <tbody>
-                                    <tr>
-                                        <td colspan="8"></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="8" style="text-align: center;">No data available</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="8"></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="8"></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="8"></td>
-                                    </tr>
-                            </tbody>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="8" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="8" class="text-center py-4 text-muted">
+                                              No data available
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="8" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                  </tbody>
                         </table>
                     </div>
                 </div>
                 
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('export_pdf')"><i class="fas fa-eye"></i> PDF</button>
-                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export_excel')"><i class="fas fa-file-export"></i> Excel</button>
-                </div>
             </div>
         </div>
     </div>
@@ -309,12 +254,17 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
-<script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js"></script> -->
+<script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js"></script>
+ -->
 
-<!-- FileSaver -->
+ <!-- FileSaver -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
@@ -389,25 +339,58 @@
         });
 
 
+
+    });
+
         $(document).on('click', '#clearButton', function () {
             $('input[type="text"]').val('');
             $('input[type="checkbox"]').prop('checked', false);
             $('input[name="sortOrder"][value="ASC"]').prop('checked', true);
             $('input[name="sortOrder"][value="DESC"]').prop('checked', false);
             $('select').prop('selectedIndex', 0);
+            $('.table-empty').show();
+            $('.hide-div').hide();
             $('#refreshButton').click();
         });
 
+        // $(document).on('click', '#refreshButton', function () {
+        //     if($('#area').val() == ""){
+        //         $('#area_id').val('');
+        //     }
+        //     if($('#store').val() == ""){
+        //         $('#store_id').val('');
+        //     }
+        //     $('.table-empty').hide();
+        //     $('.hide-div').show();
+        //     fetchData();
+        // });
+
         $(document).on('click', '#refreshButton', function () {
-            if($('#area').val() == ""){
-                $('#area_id').val('');
+            const fields = [
+                { input: '#area', target: '#area_id' },
+                { input: '#brand', target: '#brand_id' },
+                { input: '#store', target: '#store_id' },
+                { input: '#item_classi', target: '#item_classi_id' },
+                { input: '#qtyscp', target: '#qtyscp' }
+            ];
+
+            let counter = 0;
+
+            fields.forEach(({ input, target }) => {
+                const val = $(input).val();
+                const hasValue = Array.isArray(val) ? val.length > 0 : val;
+                if (!hasValue || val === undefined) {
+                    $(target).val('');
+                } else {
+                    counter++;
+                }
+            });
+            if (counter >= 1) {
+                fetchData();
+                $('.table-empty').hide();
+                $('.hide-div').show();
             }
-            if($('#store').val() == ""){
-                $('#store_id').val('');
-            }
-            fetchData();
-        });
-    });
+        }); 
 
     function fetchData() {
         let selectedStore = $('#store_id').val();
@@ -435,7 +418,7 @@
             lengthChange: false,
             colReorder: true, 
             ajax: {
-                url: base_url + 'trade-dashboard/trade-info-asc',
+                url: base_url + 'store/get-sales-performance-per-area',
                 type: 'GET',
                 data: function(d) {
                     d.sort_field = selectedSortField;
@@ -500,7 +483,7 @@
             selectedYearName = "0";    
         }
 
-        let url = base_url + 'trade-dashboard/generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-asc?'
+        let url = base_url + 'store/per-area-generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '?'
             + 'sort_field=' + encodeURIComponent(selectedSortField)
             + '&sort=' + encodeURIComponent(selectedSortOrder)
             + '&store=' + encodeURIComponent(selectedStoreName || '')

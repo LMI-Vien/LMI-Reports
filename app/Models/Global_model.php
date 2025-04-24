@@ -688,23 +688,6 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         return $query->getNumRows();
     }
 
-    public function get_site_url($site_id)
-    {
-        $builder = $this->db->table('cms_sites');
-    
-        $builder->select('id, site_url');
-        $builder->where('id', $site_id);
-        $builder->where('status', 1);
-
-        $row = $builder->get()->getRowArray();
-        
-        if (!empty($row) && isset($row['site_url'])) {
-            return $row['site_url'];
-        } else {
-            return 0;
-        }
-    }
-
     function get_field_values($table, $field, $search_field, $ids)
     {
         if (empty($table) || empty($field) || empty($ids) || !is_array($ids)) {
@@ -997,7 +980,7 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         $query = $this->db->query("CALL get_area_where_in($areaCode)");
         return $query->getResultArray(); // Return data as an array
     }
-    function get_area($areaOffset) {
+    function getArea($areaOffset) {
         $query = $this->db->query("CALL get_area($areaOffset)");
         return $query->getResultArray(); // Return data as an array
     }
@@ -1015,7 +998,7 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         $query = $this->db->query("CALL get_asc_where_in($ascCode)");
         return $query->getResultArray(); // Return data as an array
     }
-    function get_asc($ascOffset) {
+    function getAsc($ascOffset) {
         $query = $this->db->query("CALL get_asc($ascOffset)");
         return $query->getResultArray(); // Return data as an array
     }
@@ -1029,7 +1012,7 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         $query = $this->db->query("CALL get_brand_ambassador_where_in($brandAmbassadorCode)");
         return $query->getResultArray(); // Return data as an array
     }
-    function get_brand_ambassador($brandAmbassadorOffset) {
+    function getBrandAmbassador($brandAmbassadorOffset) {
         $query = $this->db->query("CALL get_brand_ambassador($brandAmbassadorOffset)");
         return $query->getResultArray(); // Return data as an array
     }
@@ -1047,7 +1030,7 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         $query = $this->db->query("CALL get_store_branch_where_in($storeBranchCode)");
         return $query->getResultArray(); // Return data as an array
     }
-    function get_store_branch($storeBranchOffset) {
+    function getStoreBranch($storeBranchOffset) {
         $query = $this->db->query("CALL get_store_branch($storeBranchOffset)");
         return $query->getResultArray(); // Return data as an array
     }
@@ -1103,7 +1086,7 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
     }
 
     //additional temp
-    function get_brand_data($order, $limit, $offset) {
+    function getBrandData($order, $limit, $offset) {
         $query = $this->db->query("CALL get_brands('$order', $limit, $offset)");
         return $query->getResultArray(); // Return data as an array
     }
@@ -1151,27 +1134,27 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         return $results;
     }
 
-    function get_weeks() {
+    function getWeeks() {
         $query = $this->db->query("CALL get_weeks()");
         return $query->getResultArray(); // Return data as an array
     }
 
-    function get_months() {
+    function getMonths() {
         $query = $this->db->query("CALL get_months()");
         return $query->getResultArray(); // Return data as an array
     }
 
-    function get_years() {
+    function getYears() {
         $query = $this->db->query("CALL get_years()");
         return $query->getResultArray(); // Return data as an array
     }
 
-    function get_companies() {
+    function getCompanies() {
         $query = $this->db->query("CALL get_companies()");
         return $query->getResultArray(); // Return data as an array
     }
 
-    function get_item_classification() {
+    function getItemClassification() {
         $query = $this->db->query("CALL SearchDynamic('tbl_classification', null, 'id, item_class_code, item_class_description', 9999, 0, null, 'item_class_code', null)");
         return $query->getResultArray(); 
     }
@@ -1259,4 +1242,48 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
             return "failed";
         }
     }
+
+    function get_data(
+        string $table,
+        array $query = null,
+        int $limit = 1,
+        int $start = 0,
+        string $select = '*',
+        string $order_field = null,
+        string $order_type = 'ASC',
+        array $join = null,
+        string|array $group = null
+    ) {
+        $builder = $this->db->table($table);
+        $builder->select($select);
+
+        if (!empty($query)) {
+            $builder->where($query);
+        }
+
+        if (!empty($join)) {
+            foreach ($join as $j) {
+                if (isset($j['table'], $j['query'], $j['type'])) {
+                    $builder->join($j['table'], $j['query'], $j['type']);
+                }
+            }
+        }
+
+        if (!empty($order_field)) {
+            $safe_order_type = strtoupper($order_type) === 'DESC' ? 'DESC' : 'ASC';
+            $builder->orderBy($order_field, $safe_order_type);
+        }
+
+        if (!empty($group)) {
+            $builder->groupBy($group);
+        }
+
+        $builder->limit($limit, $start);
+
+        $q = $builder->get();
+        return $q->getResult();
+    }
+
 }
+
+

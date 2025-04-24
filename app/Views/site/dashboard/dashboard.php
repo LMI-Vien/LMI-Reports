@@ -1,184 +1,94 @@
+
 <style>
-    .col {
-      padding-right: 5px !important;
-      padding-left: 5px !important;
-    }
-    .card {
-      position: relative;
-      /* width: 190px; */
-      /* height: 254px; */
-      color: white;
-      background-color: black;
-      display: flex;
-      flex-direction: column;
-      justify-content: end;
-      padding: 12px;
-      gap: 12px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+.card:empty {
+  display: none;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.card-medium {
+  background-color: #fff;
+  border-radius: 0.5rem;
+}
 
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      left: -5px;
-      margin: auto;
-      border-radius: 10px;
-      background: linear-gradient(-45deg, red 0%, orange 100% );
-      z-index: -10;
-      pointer-events: none;
-      transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+.card-body {
+  background: linear-gradient(to bottom right, #79311d, #fffde7);
+}
 
-    .card::after {
-      content: "";
-      z-index: -1;
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(-45deg, gray 0%, white 100% );
-      transform: translate3d(0, 0, 0) scale(0.95);
-      filter: blur(20px);
-    }
+.announcement-title {
+  font-weight: 600;
+  color: #333;
+}
 
-    .heading {
-      font-size: 20px;
-      text-transform: capitalize;
-      font-weight: 700;
-    }
-
-    .card p:not(.heading) {
-      font-size: 14px;
-    }
-
-    .card p:last-child {
-      color: white;
-      font-weight: 600;
-    }
-
-    .card:hover::after {
-      filter: blur(30px);
-    }
-
-    .card:hover::before {
-      transform: rotate(-3deg) scaleX(1) scaleY(1);
-    }
-
-    table {
-      color:white;
-    }
-    .content {
-      padding: 20px;
-      margin-top: 20px;
-    }
+.announcement-desc {
+  color: #555;
+}
 </style>
 
-  <div class="row content">
-    <div class="col-md-4 col-sm-6 mb-3">
-      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
-              <h3 class="box-title">
-                <div class="box-icon">
-                  <i class="fas fa-users"></i>
-                </div>
-                Total Brand Ambassador
-              </h3>
-              <p class="box-value" id="ba-count">0</p>
-
-            </h1></div>
+<div class="content-wrapper p-3" style="display: block;">
+    <?php if (isset($breadcrumb)): ?>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent px-0 mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="<?= base_url() ?>">
+                            <i class="fas fa-home"></i>
+                        </a>
+                    </li>
+                    <?php 
+                        $last = end($breadcrumb);
+                        foreach ($breadcrumb as $label => $url): 
+                            if ($url != ''):
+                    ?>
+                        <li class="breadcrumb-item">
+                            <?= $label ?>
+                        </li>
+                    <?php else: ?>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <?= $label ?>
+                        </li>
+                    <?php 
+                            endif;
+                        endforeach; 
+                    ?>
+                </ol>
+            </nav>
+        </div>
+    <?php endif; ?>
+  <div class="card shadow-lg mb-4 bg-light border-0">
+    <div class="card-header text-dark rounded-top" style="background-color: #301311; color: #fff !important;">
+      <h4 class="mb-0">📢 Announcements</h4>
     </div>
-    <div class="col-md-4 col-sm-6 mb-3">
-      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
-              <h3 class="box-title">
-                <div class="box-icon">
-                  <i class="fas fa-store"></i>
-                </div>
-                Total Store
-              </h3>
-              <p class="box-value" id="store-count">0</p>
+    <div class="card-body">
 
-            </h1></div>
-    </div>
-    <div class="col-md-4 col-sm-6 mb-3">
-      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
-              <h3 class="box-title">
-                <div class="box-icon">
-                  <i class="fas fa-building"></i>
+      <?php if (!empty($announcements)): ?>
+        <?php foreach ($announcements as $announcement): ?>
+          <div class="card mb-3 shadow-sm border-left-warning card-medium bg-white">
+            <div class="row g-2 p-3">
+              <div class="col-md-12">
+                <div class="announcement-title" style="font-size: 1.1rem; font-weight: 600;">
+                  <?= $announcement->title ?>
                 </div>
-                Total Company
-              </h3>
-              <p class="box-value" id="company-count">0</p>
-
-            </h1></div>
-    </div>
-    <div class="col-md-4 col-sm-6 mb-3">
-      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
-              <h3 class="box-title">
-                <div class="box-icon">
-                  <i class="fas fa-users"></i>
+                <div class="announcement-desc text-muted" style="font-size: 0.95rem;">
+                  <?= $announcement->description_1 ?>
                 </div>
-                Total Team
-              </h3>
-              <p class="box-value" id="team-count">0</p>
-
-            </h1></div>
-    </div>
-    <div class="col-md-4 col-sm-6 mb-3">
-      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
-              <h3 class="box-title">
-                <div class="box-icon">
-                  <i class="fas fa-users"></i>
+                <div class="announcement-desc text-muted" style="font-size: 0.95rem;">
+                  <?= $announcement->description_2 ?>
                 </div>
-                Total Area
-              </h3>
-              <p class="box-value" id="area-count">0</p>
-
-            </h1></div>
-    </div>
-    <div class="col-md-4 col-sm-6 mb-3">
-      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
-              <h3 class="box-title">
-                <div class="box-icon">
-                  <i class="fas fa-briefcase"></i>
+                <div class="announcement-desc text-muted" style="font-size: 0.95rem;">
+                  <?= $announcement->description_3 ?>
                 </div>
-                Total Agency
-              </h3>
-              <p class="box-value" id="agency-count">0</p>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div class="text-center text-muted py-4">
+          <span style="font-size: 1.1rem; color: #fff;">No announcements at the moment.</span>
+        </div>
+      <?php endif; ?>
 
-            </h1></div>
-    </div>
-    <div class="col-md-4 col-sm-6 mb-3">
-      <div class="card text-center p-3 shadow"><h1 class="font-weight-bold">
-              <h3 class="box-title">
-                <div class="box-icon">
-                  <i class="fas fa-users"></i>
-                </div>
-                Total ASC
-              </h3>
-              <p class="box-value" id="asc-count">0</p>
-
-            </h1></div>
     </div>
   </div>
 
-<script>
-    $(document).ready(function() {
-        $.ajax({
-            url: '<?php echo base_url('dashboard/get-counts'); ?>',
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                $('#company-count').text(response.company);
-                $('#area-count').text(response.area);
-                $('#store-count').text(response.store);
-                $('#agency-count').text(response.agency);
-                $('#team-count').text(response.team);
-                $('#ba-count').text(response.ba);
-                $('#asc-count').text(response.asc);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching counts:', error);
-            }
-        });
-    });
-</script>
+</div>
 

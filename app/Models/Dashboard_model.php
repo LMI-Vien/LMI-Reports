@@ -453,59 +453,114 @@ class Dashboard_model extends Model
 	    $sql = "
 	        WITH monthly_totals AS (
 			    SELECT 
-			        SUM(DISTINCT CASE WHEN MONTH(s.date) = 1 THEN s.amount ELSE 0 END) AS amount_january,
+			        -- SUM(DISTINCT CASE WHEN MONTH(s.date) = 1 THEN s.amount ELSE 0 END) AS amount_january,
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 2 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_february,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 3 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_march,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 4 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_april,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 5 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_may,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 6 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_june,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 7 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_july,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 8 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_august,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 9 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_september,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 10 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_october,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 11 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_november,
+			        
+			        -- SUM(DISTINCT CASE 
+			        --     WHEN MONTH(s.date) = 12 THEN s.amount 
+			        --     ELSE 0 
+			        -- END) AS amount_december,
+					SUM(DISTINCT CASE WHEN MONTH(s.date) = 1 THEN 0 ELSE 0 END) AS amount_january,
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 2 THEN s.amount 
+			            WHEN MONTH(s.date) = 2 THEN 0 
 			            ELSE 0 
 			        END) AS amount_february,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 3 THEN s.amount 
+			            WHEN MONTH(s.date) = 3 THEN 0 
 			            ELSE 0 
 			        END) AS amount_march,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 4 THEN s.amount 
+			            WHEN MONTH(s.date) = 4 THEN 0
 			            ELSE 0 
 			        END) AS amount_april,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 5 THEN s.amount 
+			            WHEN MONTH(s.date) = 5 THEN 0
 			            ELSE 0 
 			        END) AS amount_may,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 6 THEN s.amount 
+			            WHEN MONTH(s.date) = 6 THEN 0
 			            ELSE 0 
 			        END) AS amount_june,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 7 THEN s.amount 
+			            WHEN MONTH(s.date) = 7 THEN 0
 			            ELSE 0 
 			        END) AS amount_july,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 8 THEN s.amount 
+			            WHEN MONTH(s.date) = 8 THEN 0
 			            ELSE 0 
 			        END) AS amount_august,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 9 THEN s.amount 
+			            WHEN MONTH(s.date) = 9 THEN 0 
 			            ELSE 0 
 			        END) AS amount_september,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 10 THEN s.amount 
+			            WHEN MONTH(s.date) = 10 THEN 0
 			            ELSE 0 
 			        END) AS amount_october,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 11 THEN s.amount 
+			            WHEN MONTH(s.date) = 11 THEN 0
 			            ELSE 0 
 			        END) AS amount_november,
 			        
 			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 12 THEN s.amount 
+			            WHEN MONTH(s.date) = 12 THEN 0
 			            ELSE 0 
 			        END) AS amount_december,
                 	GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS ba_sales_brands,
@@ -525,18 +580,31 @@ class Dashboard_model extends Model
 	        ),
 	        net_sales_totals AS (
             SELECT 
-                ROUND(SUM(CASE WHEN sodd.month = 1 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_january,
-                ROUND(SUM(CASE WHEN sodd.month = 2 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_february,
-                ROUND(SUM(CASE WHEN sodd.month = 3 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_march,
-                ROUND(SUM(CASE WHEN sodd.month = 4 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_april,
-                ROUND(SUM(CASE WHEN sodd.month = 5 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_may,
-                ROUND(SUM(CASE WHEN sodd.month = 6 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_june,
-                ROUND(SUM(CASE WHEN sodd.month = 7 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_july,
-                ROUND(SUM(CASE WHEN sodd.month = 8 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_august,
-                ROUND(SUM(CASE WHEN sodd.month = 9 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_september,
-                ROUND(SUM(CASE WHEN sodd.month = 10 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_october,
-                ROUND(SUM(CASE WHEN sodd.month = 11 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_november,
-                ROUND(SUM(CASE WHEN sodd.month = 12 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_december,
+                -- ROUND(SUM(CASE WHEN sodd.month = 1 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_january,
+                -- ROUND(SUM(CASE WHEN sodd.month = 2 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_february,
+                -- ROUND(SUM(CASE WHEN sodd.month = 3 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_march,
+                -- ROUND(SUM(CASE WHEN sodd.month = 4 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_april,
+                -- ROUND(SUM(CASE WHEN sodd.month = 5 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_may,
+                -- ROUND(SUM(CASE WHEN sodd.month = 6 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_june,
+                -- ROUND(SUM(CASE WHEN sodd.month = 7 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_july,
+                -- ROUND(SUM(CASE WHEN sodd.month = 8 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_august,
+                -- ROUND(SUM(CASE WHEN sodd.month = 9 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_september,
+                -- ROUND(SUM(CASE WHEN sodd.month = 10 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_october,
+                -- ROUND(SUM(CASE WHEN sodd.month = 11 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_november,
+                -- ROUND(SUM(CASE WHEN sodd.month = 12 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_december,
+
+                ROUND(SUM(0), 0) AS net_sales_january,
+                ROUND(SUM(0), 0) AS net_sales_february,
+                ROUND(SUM(0), 0) AS net_sales_march,
+                ROUND(SUM(0), 0) AS net_sales_april,
+                ROUND(SUM(0), 0) AS net_sales_may,
+                ROUND(SUM(0), 0) AS net_sales_june,
+                ROUND(SUM(0), 0) AS net_sales_july,
+                ROUND(SUM(0), 0) AS net_sales_august,
+                ROUND(SUM(0), 0) AS net_sales_september,
+                ROUND(SUM(0), 0) AS net_sales_october,
+                ROUND(SUM(0), 0) AS net_sales_november,
+                ROUND(SUM(0), 0) AS net_sales_december,
                 -- bd.brand_ambassadors AS net_sales_brand_ambassadors,
                 -- bd.ba_types AS net_sales_ba_types,
                 -- bd.ba_deployment_dates AS net_sales_ba_deployment_dates,
@@ -561,18 +629,30 @@ class Dashboard_model extends Model
 	        ),
 	        target_sales_totals AS (
             SELECT 
-                COALESCE(SUM(tsps.january), 0) AS target_sales_january,
-                COALESCE(SUM(tsps.february), 0) AS target_sales_february,
-                COALESCE(SUM(tsps.march), 0) AS target_sales_march,
-                COALESCE(SUM(tsps.april), 0) AS target_sales_april,
-                COALESCE(SUM(tsps.may), 0) AS target_sales_may,
-                COALESCE(SUM(tsps.june), 0) AS target_sales_june,
-                COALESCE(SUM(tsps.july), 0) AS target_sales_july,
-                COALESCE(SUM(tsps.august), 0) AS target_sales_august,
-                COALESCE(SUM(tsps.september), 0) AS target_sales_september,
-                COALESCE(SUM(tsps.october), 0) AS target_sales_october,
-                COALESCE(SUM(tsps.november), 0) AS target_sales_november,
-                COALESCE(SUM(tsps.december), 0) AS target_sales_december,
+                -- COALESCE(SUM(tsps.january), 0) AS target_sales_january,
+                -- COALESCE(SUM(tsps.february), 0) AS target_sales_february,
+                -- COALESCE(SUM(tsps.march), 0) AS target_sales_march,
+                -- COALESCE(SUM(tsps.april), 0) AS target_sales_april,
+                -- COALESCE(SUM(tsps.may), 0) AS target_sales_may,
+                -- COALESCE(SUM(tsps.june), 0) AS target_sales_june,
+                -- COALESCE(SUM(tsps.july), 0) AS target_sales_july,
+                -- COALESCE(SUM(tsps.august), 0) AS target_sales_august,
+                -- COALESCE(SUM(tsps.september), 0) AS target_sales_september,
+                -- COALESCE(SUM(tsps.october), 0) AS target_sales_october,
+                -- COALESCE(SUM(tsps.november), 0) AS target_sales_november,
+                -- COALESCE(SUM(tsps.december), 0) AS target_sales_december,
+ 				COALESCE(SUM(0), 0) AS target_sales_january,
+                COALESCE(SUM(0), 0) AS target_sales_february,
+                COALESCE(SUM(0), 0) AS target_sales_march,
+                COALESCE(SUM(0), 0) AS target_sales_april,
+                COALESCE(SUM(0), 0) AS target_sales_may,
+                COALESCE(SUM(0), 0) AS target_sales_june,
+                COALESCE(SUM(0), 0) AS target_sales_july,
+                COALESCE(SUM(0), 0) AS target_sales_august,
+                COALESCE(SUM(0), 0) AS target_sales_september,
+                COALESCE(SUM(0), 0) AS target_sales_october,
+                COALESCE(SUM(0), 0) AS target_sales_november,
+                COALESCE(SUM(0), 0) AS target_sales_december,
                 GROUP_CONCAT(DISTINCT st.description ORDER BY st.description SEPARATOR ', ') AS tsps_stores,
                 GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS tsps_brands,
         		GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS tsps_brand_ambassadors,

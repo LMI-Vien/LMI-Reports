@@ -1,4 +1,3 @@
- 
-<footer class="main-footer text-center">
-    <strong>Copyright &copy; 2025 LMI ICT  <a href="<?= base_url();?>">SFA</a>.</strong> All rights reserved.
+<footer class="main-footer bg-warning" style="text-align: center; color: #6b6464 !important;">
+  <strong>&copy; <?= date('Y') ?> LifeStrong Marketing Inc.</strong> All rights reserved.
 </footer>

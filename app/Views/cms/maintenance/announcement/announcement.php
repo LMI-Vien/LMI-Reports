@@ -83,11 +83,11 @@
                     </div>
                     <div class="mb-3">
                         <label for="desc_2" class="form-label">Description 2</label>
-                        <textarea class="form-control required" id="desc_2" aria-describedby="desc_2"></textarea>
+                        <textarea class="form-control" id="desc_2" aria-describedby="desc_2"></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="desc_3" class="form-label">Description 3</label>
-                        <textarea class="form-control required" id="desc_3" aria-describedby="desc_3"></textarea>
+                        <textarea class="form-control" id="desc_3" aria-describedby="desc_3"></textarea>
                     </div>
                     <!-- <div class="mb-3">
                         <label for="ban_1" class="form-label">Banner 1</label>

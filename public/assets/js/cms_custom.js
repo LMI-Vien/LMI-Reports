@@ -1614,7 +1614,6 @@ function autocomplete_field(field, field_id, options, description = "description
 			if (typeof callback === "function") {
 				callback(ui.item.info);
 			}
-
 			return false;
 		},
 		minLength: 0
@@ -1622,7 +1621,6 @@ function autocomplete_field(field, field_id, options, description = "description
 		$(this).autocomplete("search", "");
 	})
 }
-
 
 function autocomplete_field_multi(field, field_id, options, description = "description", id = "id", callback) {
 	field.autocomplete({

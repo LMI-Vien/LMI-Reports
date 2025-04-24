@@ -1,68 +1,48 @@
+<?= view("site/stocks/all-store/data-all-store-filter"); ?> 
+
 <style>
-/*    .content{
-        margin-bottom: 35px;
-    }*/
     .content-wrapper, .content {
         margin-top: 0 !important;
         padding-top: 0 !important;
         padding-bottom: 30px;
     }
 
-  footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #f8f9fa;
-      padding: 10px;
-      text-align: center;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-  }
-
     .md-center {
-        padding: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-size: large;
-        font-weight: bold;
         color: white;
+        font-weight: bold;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem; 
         text-align: center;
-        border: 1px solid #ffffff;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
+        border: none;
         border-radius: 12px;
         transition: transform 0.2s ease-in-out;
-        background: linear-gradient(90deg, #fdb92a, #ff9800);
-    }
-
-    /* Title Styling */
-    .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
-        background: linear-gradient(to right, #143996, #007bff);
-        color: black !important;
-        text-align: center;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .tbl-title-header {
-        border-radius: 8px 8px 0px 0px !important;
     }
 
     th {
-        color: #fff !important;
+        color: #fff;
         background-color: #301311 !important;
     }
-    .tbl-title-bg{
+/*
+    #ExportPDF{
         color: #fff;
-        border-radius: 5px;
         background-color: #143996 !important;
-    }
-    #previewButton{
-      background-color: #143996 !important;
+    }*/
+
+    .paginate_button  {
+        font-size: 1em;
     }
 
-    .card-title {
-        text-align: center;
-        font-size: 1.25rem;
-        font-weight: bold;
+    /* Card Styling */
+    .card {
+        border-radius: 12px !important;
+        background: #ffffff;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .card-dark {
+        border-radius: 12px !important;
+        border: #dee2e6, solid, 1px;
     }
 
     /* Title Styling */
@@ -111,38 +91,38 @@
         background: rgba(0, 123, 255, 0.1);
     }
 
-    .filter_buttons {
-        width: 10em;
-        height: 3em;
-        border-radius: 12px;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    .paginate_button {
+        font-size: 15px !important;
     }
 
-    #clearButton {
-        width: 10em;
-        height: 3em;
-        border-radius: 13px;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    #exportButton{
-        background-color: #339933 !important;
-    }
     label {
-        float: left;
-    }
-    #table-skus{
-        display: none;
+        display: flex !important;
+        align-items: center;
+        margin-bottom: 0px !important;
     }
 
+    .swal2-checkbox{
+        display: none !important;
+    }
+
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: #ffc107 !important; /* Bootstrap's bg-warning */
+  border-color: #ffc107 !important;
+  color: #000 !important; /* Ensure text is readable */
+  font-weight: 500;
+}
+
+body .hide-div {
+  display: none;
+}
 /* Set specific column widths */
-th:nth-child(1), td:nth-child(1) { width: 15%; }
-th:nth-child(2), td:nth-child(2) { width: 15%; }
-th:nth-child(3), td:nth-child(3) { width: 15%; }
-th:nth-child(4), td:nth-child(4) { width: 15%; } 
+th:nth-child(1), td:nth-child(1) { width: 20%; }
+th:nth-child(2), td:nth-child(2) { width: 25%; }
+th:nth-child(3), td:nth-child(3) { width: 20%; }
+th:nth-child(4), td:nth-child(4) { width: 20%; } 
 th:nth-child(5), td:nth-child(5) { width: 15%; } 
-th:nth-child(6), td:nth-child(6) { width: 15%; } 
-th:nth-child(7), td:nth-child(7) { width: 10%; } 
+th:nth-child(6), td:nth-child(6) { width: 20%; } 
 </style>
 
 <div class="wrapper">
@@ -151,213 +131,132 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             <div class="container-fluid py-4">
 
                 <!-- Filters Section -->
-            <div class="card shadow-lg">
-                <div class="text-center md-center p-2">
-                    <h5 class="mt-1 mb-1">
-                        <i class="fas fa-filter"></i> 
-                        <span>
-                            F I L T E R
-                        </span>
-                    </h5>
-                </div>
-                <div class="row p-4">
-                    <div class="col-md-3 column p-2 text-left">
-                        <div class="col-md p-1 row">
-                            <div class="col-md-4">
-                                <label for="brandAmbassador">Brand Ambassador</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="brandAmbassador" placeholder="Please select">
-                                <input type="hidden" id="ba_id">
-                            </div>
-                        </div>
-                        <div class="col-md p-1 row">
-                            <div class="col-md-3">
-                                <label for="area">Area</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="area" placeholder="Please select...">
-                                <input type="hidden" id="area_id">
-                            </div>
-                        </div>
-                        <div class="col-md p-1 row">
-                            <div class="col-md-3">
-                                <label for="brand">Brand</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="brand" placeholder="Please select...">
-                                <input type="hidden" id="brand_id">
-                            </div>
-                        </div>
-                    </div> 
-                    <div class="col-md-2 column p-2 text-left">
-                            <div class="col-md p-1 row">
-                                <div class="col-md-3">
-                                    <label for="month">Month</label>
-                                </div>
-                                <div class="col-md">
-                                    <select class="form-control" id="month">
-                                        <?php
-                                            if($month){
-                                                foreach ($month as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['month']."</option>";
-                                                }                                                
-                                            }
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md p-1 row">
-                                <div class="col-md-3">
-                                    <label for="week">Week</label>
-                                </div>
-                                <div class="col-md">
-                                    <select class="form-control" id="week">
-                                        <?php
-                                            if($week){
-                                                foreach ($week as $value) {
-                                                    echo "<option value=".$value['id'].">".$value['name']."</option>";
-                                                }                                                
-                                            }
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>   
-                    </div>     
-                    <div class="col-md-3 column p-2 text-left">
-                        <div class="col-md p-1 row">
-                            <div class="col-md-3">
-                                <label for="store">Store</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="store" placeholder="Please select...">
-                                <input type="hidden" id="store_id">
-                            </div>
-                        </div>
+                <?php if (isset($breadcrumb)): ?>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb bg-transparent px-0 mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="<?= base_url() ?>">
+                                        <i class="fas fa-home"></i>
+                                    </a>
+                                </li>
+                                <?php 
+                                    $last = end($breadcrumb);
+                                    foreach ($breadcrumb as $label => $url): 
+                                        if ($url != ''):
+                                ?>
+                                    <li class="breadcrumb-item">
+                                        <?= $label ?>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?= $label ?>
+                                    </li>
+                                <?php 
+                                        endif;
+                                    endforeach; 
+                                ?>
+                            </ol>
+                        </nav>
+                        <!-- Right side content -->
+                        <div class="ml-auto text-muted small" style="white-space: nowrap;">
+                            <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
 
-                        <div class="col-md p-1 row">
-                            <div class="col-md-3">
-                                <label for="item_classi">Item Category</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
-                                <input type="hidden" id="item_classi_id">
-                            </div>
-                        </div>
-                        <div class="col-md p-1 row">
-                            <div class="col-md-3">
-                                <label for="qtyscp">Qty Scope</label>
-                            </div>
-                            <div class="col-md">
-                                <input type="number" class="form-control" id="qtyscp" placeholder="Enter Qty">
-                            </div>
                         </div>
                     </div>
-                    <div class="col-md-2 column mt-1" style="border: 1px solid #dee2e6; border-radius: 12px;" >
-                        <div class="col-md-12 mx-auto row my-2 py-2 text-left" >
-                            <label class="my-auto col-md-12">Covered by Selected ASC</label>
-                        </div>
-                        <div class="col-md-12 mx-auto row py-2 text-center" >
-                            <div class="col-md-6 row" >
-                                <input type="radio" name="coveredASC" value="with_ba" class="col-md-2"><span class="col-md-10">W/ BA</span>
-                            </div>
-                            <div class="col-md-6 row" >
-                                <input type="radio" name="coveredASC" value="without_ba" class="col-md-2"><span class="col-md-10">W/O BA</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <!-- Refresh Button -->
-                        <div class="row">
-                            <div class="p-3 d-flex justify-content-end">
-                                <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton">
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                </button>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="p-3 d-flex justify-content-end">
-                                <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+                <?php endif; ?>
+                <!-- filter-->
                 <!-- DataTables Section -->
-                <div class="card mt-4 p-4 shadow-sm">
-                    <table id="table-kam-one" class="table table-bordered table-responsive">
-                        <thead>
-                            <tr>
-                                <th 
-                                    colspan="8"
-                                    style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                    class="tbl-title-header"
-                                >
-                                    SKU's IN STORE
-                                </th>
-                            </tr>
-                            <tr>
-                                <th class="tbl-title-field">Store</th>
-                                <th class="tbl-title-field">Area Sales Coordinator</th>
-                                <th class="tbl-title-field">Brand Ambassador</th>
-                                <th class="tbl-title-field">SKU</th>
-                                <th class="tbl-title-field">SKU Code</th>
-                                <th class="tbl-title-field">Item Class</th>
-                                <th class="tbl-title-field">Stock Qty</th>
+                <div class="row mt-4"><!-- use mt-4 or define mt-12 in custom CSS -->
+                    <div class="col-md-12">
+                        <div class="card p-4 shadow-lg text-center text-muted table-empty">
+                          <i class="fas fa-filter mr-2"></i> Please select a filter
+                        </div>
 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="7"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="7" style="text-align: center;">No data available</td>
-                            </tr>
-                            <tr>
-                                <td colspan="7"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="7"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="7"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end mt-3">
-                    <button class="btn btn-info mr-2" id="previewButton" onclick="handleAction('preview')"><i class="fas fa-eye"></i> Preview</button>
-                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export')"><i class="fas fa-file-export"></i> Export</button>
+                        <div class="card mt-4 p-4 shadow-sm hide-div">
+                            <table id="table_data_all_store" class="table table-bordered table-responsive">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="8"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            class="tbl-title-header"
+                                        >
+                                            OVERALL STOCK DATA OF ALL STORES
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">SKU</th>
+                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field">Item Class</th>
+                                        <th class="tbl-title-field">Total Qty</th>
+                                        <th class="tbl-title-field">Ave Sales Unit</th>
+                                        <th class="tbl-title-field">SWC</th>
+                                    </tr>
+                                </thead>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="7" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="7" class="text-center py-4 text-muted">
+                                              No data available
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="7" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                  </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- DataTables and Script -->
+<!-- Bootstrap 5 & DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js/minified/introjs.min.css">
+<!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+ -->
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!-- jQuery (Use 3.6.0 for Stability) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<!-- DataTables & Intro.js -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/intro.js/minified/intro.min.js"></script>
+
+<!-- Bootstrap JS (AFTER jQuery) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- FileSaver -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+
+    let ba = <?= json_encode($brand_ambassador); ?>;
+    let area = <?= json_encode($area); ?>;
+    let brand = <?= json_encode($brand); ?>;
+    let store = <?= json_encode($store_branch); ?>;
+    let item_classification = <?= json_encode($item_classification); ?>;
+
     $(document).ready(function() {
         fetchData();
 
-        let ba = <?= json_encode($brand_ambassador); ?>;
-        let area = <?= json_encode($area); ?>;
-        let brand = <?= json_encode($brand); ?>;
-        let store = <?= json_encode($store_branch); ?>;
-        let item_classification = <?= json_encode($item_classification); ?>;
-
+        $('#ItemClass').select2({ placeholder: 'Select Item Class' });
+        $('#inventoryStatus').select2({ placeholder: 'Select inventory statuses' });
         autocomplete_field($("#brandAmbassador"), $("#ba_id"), ba, "description", "id", function(result) {
 
             let url ="<?= base_url("cms/global_controller"); ?>";
@@ -497,30 +396,48 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             $('input[name="coveredASC"][value="with_ba"]').prop('checked', false);
             $('input[name="coveredASC"][value="without_ba"]').prop('checked', false);
             $('select').prop('selectedIndex', 0);
+            $('.select2').val(null).trigger('change');
+            // $('table[id^="table_"]').each(function () {
+            //     $(this).closest('.table-responsive').hide();
+            // });
+            $('.hide-div').hide();
+            $('.table-empty').show();
             $('#refreshButton').click();
         });
 
         $(document).on('click', '#refreshButton', function () {
-            if($('#brandAmbassador').val() == ""){
-                $('#ba_id').val('');
+            const fields = [
+                { input: '#ItemClass', target: '#ItemClass' },
+                { input: '#area', target: '#area_id' },
+                { input: '#brand', target: '#brand_id' },
+                { input: '#store', target: '#store_id' },
+                { input: '#item_classi', target: '#item_classi_id' },
+                { input: '#qtyscp', target: '#qtyscp' }
+            ];
+
+            let counter = 0;
+
+            fields.forEach(({ input, target }) => {
+                const val = $(input).val();
+                const hasValue = Array.isArray(val) ? val.length > 0 : val;
+                if (!hasValue || val === undefined) {
+                    $(target).val('');
+                } else {
+                    counter++;
+
+                    // Initialize Select2 if it's a select
+                    if ($(input).is('select') && !$(input).hasClass("select2-hidden-accessible")) {
+                        $(input).select2();
+                    }
+                }
+            });
+            if (counter >= 1) {
+                fetchData();
+                $('.table-empty').hide();
+                $('.hide-div').show();
             }
-            if($('#area').val() == ""){
-                $('#area_id').val('');
-            }
-            if($('#brand').val() == ""){
-                $('#brand_id').val('');
-            }
-            if($('#store').val() == ""){
-                $('#store_id').val('');
-            }
-            if($('#item_classi').val() == ""){
-                $('#item_classi_id').val('');
-            }
-            if($('#qtyscp').val() == ""){
-                $('#qtyscp').val('');
-            }
-            fetchData();
         });
+
 
         $('#previewButton').click(function() {
         });
@@ -539,17 +456,21 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
         let selectedStore = $('#store').val();
         let selectedItemCat = $('#item_classi').val();
         let selectedQty = $('#qtyscp').val();
-        
+        let selectedInventoryStatus = $('#inventoryStatus').val(); // returns an array
+        if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) return;
+       // table-empty
+        $('.table-empty').hide(); 
+        $('.table-responsive').show();        
         initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat, selectedQty);
     }
 
     function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null, selectedQty = 0) {
-        if ($.fn.DataTable.isDataTable('#table-kam-one')) {
-            let existingTable = $('#table-kam-one').DataTable();
+        if ($.fn.DataTable.isDataTable('#table_data_all_store')) {
+            let existingTable = $('#table_data_all_store').DataTable();
             existingTable.clear().destroy();
         }
 
-        let table = $('#table-kam-one').DataTable({
+        let table = $('#table_data_all_store').DataTable({
             paging: true,
             searching: false,
             ordering: true,
@@ -557,7 +478,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
             lengthChange: false,
             colReorder: true, 
             ajax: {
-                url: base_url + 'trade-dashboard/trade-kam-one',
+                url: base_url + 'stocks/get-data-all-store',
                 type: 'POST',
                 data: function(d) {
                     d.ba = selectedBa;
@@ -719,7 +640,7 @@ th:nth-child(7), td:nth-child(7) { width: 10%; }
 
         function fetchData(offset) {
             $.ajax({
-                url: baseUrl + 'trade-dashboard/trade-kam-one',
+                url: baseUrl + 'stocks/get-data-all-store',
                 type: 'GET',
                 data: {
                     ba: selectedBa === 0 ? null : selectedBa,

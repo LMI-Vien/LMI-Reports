@@ -109,9 +109,10 @@ class Cms_preference extends BaseController
 
 	public function get_site_menu() {
 	    $session = session();
-	    $select = 'site_menu.id, menu_url, menu_name, menu_type, menu_parent_id';
+	    $select = 'site_menu.id, menu_url, menu_name, menu_type, menu_parent_id, menu_icon';
 	    $query = 'status = 1 AND role_id = ' . $session->sess_site_role . ' AND menu_role_view = 1';
 	    $result = $this->Custom_model->get_site_menu_list('site_menu', $select, $query);
+	    //$icon = isset($menu->menu_icon) ? '<i class="' . $menu->menu_icon . '"></i> ' : '';
 	    $menuTree = [];
 	    $menuLookup = [];
 
@@ -139,7 +140,7 @@ class Cms_preference extends BaseController
 
 	    foreach ($menuTree as $menu) {
 	        $new_location = base_url() . $menu->menu_url;
-	        $icon = isset($menu->icon_class) ? '<i class="' . $menu->icon_class . '"></i> ' : '';
+	        $icon = isset($menu->menu_icon) ? '<i class="' . $menu->menu_icon . '"></i> ' : '';
 
 	        if (!empty($menu->children)) {
 	            $html .= '<li class="nav-item dropdown">';
@@ -149,7 +150,7 @@ class Cms_preference extends BaseController
 	            $html .= '<div class="dropdown-menu" aria-labelledby="menu-' . $menu->id . '">';
 	            foreach ($menu->children as $child) {
 	                $child_location = base_url() . $child->menu_url;
-	                $child_icon = isset($child->icon_class) ? '<i class="' . $menu->id . '"></i> ' : '';
+	                $child_icon = isset($child->menu_icon) ? '<i class="' . $menu->id . '"></i> ' : '';
 	                $html .= '<a class="dropdown-item" href="' . $child_location . '">' . $child_icon . $child->menu_name . '</a>';
 	            }
 	            $html .= '</div>';

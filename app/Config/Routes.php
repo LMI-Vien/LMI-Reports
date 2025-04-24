@@ -9,6 +9,64 @@ $routes->get('/', 'Login::login');
 $routes->get('/dashboard', 'Dashboard::index');
 $routes->get('/dashboard/get-counts', 'Dashboard::getCounts');
 
+
+
+$routes->group('stocks/', static function ($routes) {
+    //per store
+    $routes->get('data-per-store', 'StocksPerStore::dataPerStore');
+    $routes->get('get-data-per-store', 'StocksPerStore::getDataPerStore');
+    $routes->get('per-store-generate-pdf', 'StocksPerStore::generatePdf');
+    $routes->get('per-store-generate-excel-ba', 'StocksPerStore::generateExcel');
+
+    //all store
+    $routes->get('data-all-store', 'StocksAllStore::dataAllStore');
+    $routes->post('get-data-all-store', 'StocksAllStore::GetdataAllStore');
+    $routes->get('all-store-generate-pdf', 'StocksAllStore::generatePdf');
+    $routes->get('all-store-generate-excel-ba', 'StocksAllStore::generateExcel');
+
+    //week all store
+    $routes->get('data-week-all-store', 'StocksWeekAllStore::dataWeekAllStore');
+    $routes->post('get-data-week-all-store', 'StocksWeekAllStore::GetDataWeekAllStore');
+    $routes->get('all-store-generate-pdf', 'StocksWeekAllStore::generatePdf');
+    $routes->get('all-store-generate-excel-ba', 'StocksWeekAllStore::generateExcel');
+});
+
+$routes->group('store/', static function ($routes) {
+    //per ba
+    $routes->get('sales-performance-per-ba', 'StoreSalesPerfPerBa::perfPerBa');
+    $routes->post('get-sales-performance-per-ba', 'StoreSalesPerfPerBa::getPerfPerBa');
+    $routes->get('get-sales-performance-per-ba', 'StoreSalesPerfPerBa::getPerfPerBa');
+    $routes->get('per-ba-generate-pdf', 'StoreSalesPerfPerBa::generatePdf');
+    $routes->get('per-ba-generate-excel-ba', 'StoreSalesPerfPerBa::generateExcel');
+
+    //per area
+    $routes->get('sales-performance-per-area', 'StoreSalesPerfPerArea::perfPerArea');
+    $routes->get('get-sales-performance-per-area', 'StoreSalesPerfPerArea::getPerfPerArea');
+    $routes->post('get-sales-performance-per-area', 'StoreSalesPerfPerArea::getPerfPerArea');
+    $routes->get('per-area-generate-pdf', 'StoreSalesPerfPerArea::generatePdf');
+    $routes->get('per-area-generate-excel-ba', 'StoreSalesPerfPerArea::generateExcel');
+
+    //per month
+    $routes->get('sales-performance-per-month', 'StoreSalesPerfPerMonth::perfPerMonth');
+    $routes->post('get-sales-performance-per-month', 'StoreSalesPerfPerMonth::getPerfPerMonth');
+    $routes->post('get-sales-performance-per-table', 'StoreSalesPerfPerMonth::getPerfPerTable');
+    $routes->get('per-month-generate-pdf', 'StoreSalesPerfPerMonth::generatePdf');
+    $routes->get('per-month-generate-excel-ba', 'StoreSalesPerfPerMonth::generateExcel');
+
+
+    $routes->get('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');
+    $routes->post('trade-asc-dashboard-one', 'TradeDashboard::trade_asc_dashboard_one');
+    $routes->get('trade-asc-dashboard-one-tables', 'TradeDashboard::trade_asc_dashboard_one_tables');
+    $routes->post('trade-asc-dashboard-one-tables', 'TradeDashboard::trade_asc_dashboard_one_tables');
+    //overall
+    $routes->get('sales-overall-performance', 'StoreSalesPerfOverall::perfPerOverall');
+    $routes->post('get-sales-overall-performance', 'StoreSalesPerfOverall::getPerfPerOverall');
+    $routes->get('overall-performance-generate-pdf', 'StoreSalesPerfOverall::generatePdf');
+    $routes->get('overall-performance-generate-excel-ba', 'StoreSalesPerfOverall::generateExcel');
+});
+
+
+
 //dashboard routes
 $routes->group('trade-dashboard/', static function ($routes) {
     $routes->get('ba', 'TradeDashboard::ba');

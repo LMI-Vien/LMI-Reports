@@ -1,3 +1,5 @@
+<?= view("site/store/perf-per-ba/sales-performance-per-ba-filter"); ?> 
+
 <style>
     .content-wrapper, .content {
         margin-top: 0 !important;
@@ -56,14 +58,22 @@
         background-color: #301311 !important;
     }
 
-    #previewButton{
+/*    #previewButton{
         color: #fff;
         background-color: #143996 !important;
     }
-
+*/
     #overall_ba_sales_tbl {
         table-layout: fixed;
         width: 100%;
+    }
+
+    .table th {
+        color: white !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
     }
 
     table {
@@ -89,13 +99,13 @@
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
     }
 
-    #clearButton {
+/*    #clearButton {
         width: 10em;
         height: 3em;
         border-radius: 13px;
         box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
     }
-
+*/
     .card {
         border-radius: 12px !important;
         background: #ffffff;
@@ -107,6 +117,10 @@
         border: #dee2e6, solid, 1px;
     }
 
+    body .hide-div {
+      display: none;
+    }
+    
     /* Set specific column widths */
     th:nth-child(1), td:nth-child(1) { width: 5%; } /* Rank */
     th:nth-child(2), td:nth-child(2) { width: 5%; } /* Store Code */
@@ -118,163 +132,112 @@
     th:nth-child(8), td:nth-child(8) { width: 10%; } /* Balance To Target */
     th:nth-child(9), td:nth-child(9) { width: 10%; } /* Possible Incentives */
     th:nth-child(10), td:nth-child(10) { width: 10%; } /* Target per Remaining days */
-    th:nth-child(10), td:nth-child(10) { width: 5%; }
-    th:nth-child(10), td:nth-child(10) { width: 5%; }
-    th:nth-child(10), td:nth-child(10) { width: 10%; } 
-    th:nth-child(10), td:nth-child(10) { width: 5%; } 
-    th:nth-child(10), td:nth-child(10) { width: 5%; } 
+    th:nth-child(11), td:nth-child(11) { width: 5%; }
+    th:nth-child(12), td:nth-child(12) { width: 5%; }
+    th:nth-child(13), td:nth-child(13) { width: 10%; } 
+    th:nth-child(14), td:nth-child(14) { width: 5%; } 
+    th:nth-child(15), td:nth-child(15) { width: 5%; } 
 </style>
 
 <div class="wrapper">
     <div class="content-wrapper">
         <div class="content">
             <div class="container-fluid py-4">
-                <div class="card shadow-lg" style="width: 100%;">
-                    <div class="md-center p-2 col">
-                        <h5 class="mt-1 mb-1">
-                            <i class="fas fa-filter"></i> 
-                            <span>
-                                F I L T E R
-                            </span>
-                        </h5>
-                    </div>
+                <!-- Filters Section -->
+                <?php if (isset($breadcrumb)): ?>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb bg-transparent px-0 mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="<?= base_url() ?>">
+                                        <i class="fas fa-home"></i>
+                                    </a>
+                                </li>
+                                <?php 
+                                    $last = end($breadcrumb);
+                                    foreach ($breadcrumb as $label => $url): 
+                                        if ($url != ''):
+                                ?>
+                                    <li class="breadcrumb-item">
+                                        <?= $label ?>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?= $label ?>
+                                    </li>
+                                <?php 
+                                        endif;
+                                    endforeach; 
+                                ?>
+                            </ol>
+                        </nav>
+                        <!-- Right side content -->
+                        <div class="ml-auto text-muted small" style="white-space: nowrap;">
+                            <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
 
-                    <div class="row p-4">
-                        <div class="col-md-6 column text-left">
-                            <div class="col-md-12 row p-2">
-                                <div class="col-md-3">
-                                    <label for="store" class="pl-2">Store Name</label>
-                                </div>
-                                <div class="col-md-9">
-                                    <input type="text" id="store" class="form-control" placeholder="Please select...">
-                                    <input type="hidden" id="store_id">
-                                </div>
-                            </div>
-                            <div class="col-md-12 row p-2">
-                                <div class="col-md-3">
-                                    <label for="area" class="pl-2">Area</label>
-                                </div>
-                                <div class="col-md-9">
-                                    <input type="text" id="area" class="form-control" placeholder="Please select...">
-                                    <input type="hidden" id="area_id">
-                                </div>
-                            </div>
-                            <div class="col-md-12 row p-2">
-                                <div class="col-md-3">
-                                    <label for="month" class="pl-2">Month/Year</label>
-                                </div>
-                                <div class="row col-md">
-                                    <div class="col-md-6">
-                                        <select class="form-control" id="month">
-                                            <option value="0">Select Month...</option>
-                                            <?php
-                                                if($month){
-                                                    foreach ($month as $value) {
-                                                        echo "<option value=".$value['id'].">".$value['month']."</option>";
-                                                    }                                                
-                                                }
-                                            ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <select class="form-control" id="year">
-                                            <option value="0">Select Year...</option>
-                                            <?php
-                                                if($year){
-                                                    foreach ($year as $value) {
-                                                        echo "<option value=".$value['id'].">".$value['year']."</option>";
-                                                    }                                                
-                                                }
-                                            ?>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-left column card-dark p-2">
-                                <label class="col-md">Sort By</label>
-    
-                                <div class="col-md">
-                                    <select class="form-control" id="sortBy">
-                                        <option value="rank">Rank</option>
-                                        <option value="store_code">Store Code</option>
-                                        <option value="area">Area</option>
-                                        <option value="store_name">Store Name</option>
-                                        <option value="actual_sales">Actual Sales</option>
-                                        <option value="target">Target</option>
-                                        <option value="arch">%Arch</option>
-                                        <option value="balance_to_target">Balance to Target</option>
-                                        <option value="Possible_incentives">Possible Incentives</option>
-                                        <option value="target_per_rem_days">Target per Remaining Days</option>
-                                    </select>
-                                </div>
-    
-                                <div class="col-md pt-2 row">
-                                    <div class="col-md">
-                                        <input type="radio" name="sortOrder" value="ASC" checked> Ascending
-                                    </div>
-                                    <div class="col-md">
-                                        <input type="radio" name="sortOrder" value="DESC"> Descending
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2 column">
-                            <div class="p-2 d-flex justify-content-end">
-                                <button class="btn btn-primary btn-sm filter_buttons" id="refreshButton" style="border-radius: 13px;"><i class="fas fa-sync-alt"></i> Refresh</button>
-                            </div>
-                            <div class="p-2 d-flex justify-content-end">
-                                <button id="clearButton" class="btn btn-secondary btn-sm filter_buttons"><i class="fas fa-sync-alt"></i> Clear</button>
-                            </div>
-                            <div class="d-flex justify-content-end mt-3">
-                                <button class="btn btn-secondary" id="toggleColumnsButton"><i class="fas fa-columns"></i> Toggle Columns</button>
-                            </div>
-
-                        </div>
-                        <div class="sortable row text-center p-2" id="columnToggleContainer" class="mb-3">
-                            <strong class="col">Select Columns:</strong>
                         </div>
                     </div>
-                </div>
-
+                <?php endif; ?>
                 <!-- DataTables Section -->
-                <div class="card mt-4 p-4 shadow-sm">
-                    <div class="tbl-title-header p-2"><h5>OVERALL BA SALES TARGET</h5></div>
+
+                <div class="card p-4 shadow-lg text-center text-muted table-empty">
+                  <i class="fas fa-filter mr-2"></i> Please select a filter
+                </div>
+                <div class="card mt-4 p-4 shadow-sm hide-div">
+                    <div class="form-group">
+                        <button class="btn btn-secondary" id="toggleColumnsButton"><i class="fas fa-columns"></i> Toggle Columns</button>
+                    </div>
+
+                    <div class="sortable row text-center p-2" id="columnToggleContainer" class="mb-3">
+                        <strong class="col">Select Columns:</strong>
+                    </div>
                     <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
                         <table id="overall_ba_sales_tbl" class="table table-bordered table-responsive">
                             <thead>
                                 <tr>
+                                    <th 
+                                        colspan="15"
+                                        style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                        class="tbl-title-header"
+                                    >Store Sales Performance per Brand Ambassador</th>
+                                </tr>                                
+                                <tr>
                                     <th class="tbl-title-field">Rank</th>
-                                    <th class="tbl-title-field">Store Code</th>
                                     <th class="tbl-title-field">Area</th>
-                                    <th class="tbl-title-field">Store Name</th>
-                                    <th class="tbl-title-field">Actual Sales</th>
-                                    <th class="tbl-title-field">Target</th>
-                                    <th class="tbl-title-field">% Ach</th>
-                                    <th class="tbl-title-field">Balance To Target</th>
-                                    <th class="tbl-title-field">Possible Incentives</th>
-                                    <th class="tbl-title-field">Target per Remaining days</th>
-                                    <th class="tbl-title-field sort">LY Scanned Data</th>
+                                    <th class="tbl-title-field">Store Code / Store Name</th>
                                     <th class="tbl-title-field sort">Brand Ambassador</th>
                                     <th class="tbl-title-field sort">Deployed Date</th>
-                                    <th class="tbl-title-field sort">Brand</th>
-                                    <th class="tbl-title-field sort">Growth</th>
+                                    <th class="tbl-title-field sort">Brand Handle</th>
+                                    <th class="tbl-title-field sort">LY Scanned Data</th>
+                                    <th class="tbl-title-field">Actual Sales Report</th>
+                                    <th class="tbl-title-field">Target</th>
+                                    <th class="tbl-title-field">% Achieved</th>
+                                    <th class="tbl-title-field sort">%Growth</th>
+                                    <th class="tbl-title-field">Balance To Target</th>
+                                    <th class="tbl-title-field">Possible Incentives</th>
+                                    <th class="tbl-title-field">Target Per Remaining Days</th>
 
                                 </tr>
                             </thead>
-                            <tbody>
-                                <td colspan="15">No data available</td>
-                            </tbody>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="15" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="15" class="text-center py-4 text-muted">
+                                              No data available
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="15" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                  </tbody>
                         </table>
                     </div>
                 </div>
                 
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-info" id="previewButton" onclick="handleAction('export_pdf')"><i class="fas fa-file-export"></i> PDF</button>
-                    <button class="btn btn-success" id="exportButton" onclick="handleAction('export_excel')"><i class="fas fa-file-export"></i> Excel</button>
-                </div>
             </div>
         </div>
     </div>
@@ -308,8 +271,7 @@
         $( ".sortable" ).sortable({
             revert: true
         });
-
-        initializeTable();
+        //initializeTable();
 
         autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
             let data = {
@@ -391,15 +353,42 @@
             $('#columnToggleContainer').toggle();
         });
 
+        // $(document).on('click', '#refreshButton', function () {
+        //     if($('#area').val() == ""){
+        //         $('#area_id').val('');
+        //     }
+        //     if($('#store').val() == ""){
+        //         $('#store_id').val('');
+        //     }
+        //     fetchData();
+        // });
+
         $(document).on('click', '#refreshButton', function () {
-            if($('#area').val() == ""){
-                $('#area_id').val('');
+            const fields = [
+                { input: '#area', target: '#area_id' },
+                { input: '#brand', target: '#brand_id' },
+                { input: '#store', target: '#store_id' },
+                { input: '#item_classi', target: '#item_classi_id' },
+                { input: '#qtyscp', target: '#qtyscp' }
+            ];
+
+            let counter = 0;
+
+            fields.forEach(({ input, target }) => {
+                const val = $(input).val();
+                const hasValue = Array.isArray(val) ? val.length > 0 : val;
+                if (!hasValue || val === undefined) {
+                    $(target).val('');
+                } else {
+                    counter++;
+                }
+            });
+            if (counter >= 1) {
+                fetchData();
+                $('.table-empty').hide();
+                $('.hide-div').show();
             }
-            if($('#store').val() == ""){
-                $('#store_id').val('');
-            }
-            fetchData();
-        });
+        });       
 
         $(document).on('click', '#clearButton', function () {
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
@@ -407,6 +396,8 @@
             $('input[name="sortOrder"][value="DESC"]').prop('checked', false);
             $('.main_all').addClass('active');
             $('select').prop('selectedIndex', 0);
+            $('.table-empty').show();
+            $('.hide-div').hide();
             $('#refreshButton').click();
         });
     });
@@ -418,7 +409,6 @@
         let selectedYear = $('#year').val();
         let selectedSortField = $('#sortBy').val();
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-
         initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
     }
 
@@ -437,7 +427,7 @@
             lengthChange: false,
             colReorder: true, 
             ajax: {
-                url: base_url + 'trade-dashboard/trade-overall-ba',
+                url: base_url + 'store/get-sales-performance-per-ba',
                 type: 'GET',
                 data: function(d) {
                     d.sort_field = selectedSortField;
@@ -688,7 +678,7 @@
         let selectedSortField = $('#sortBy').val();
         let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
-        let url = base_url + 'trade-dashboard/generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-overall-ba?'
+        let url = base_url + 'store/per-ba-generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '?'
             + 'sort_field=' + encodeURIComponent(selectedSortField)
             + '&sort=' + encodeURIComponent(selectedSortOrder)
             + '&store=' + encodeURIComponent(selectedStore)

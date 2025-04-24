@@ -314,7 +314,7 @@ class Login extends BaseController
 
 	public function token($user_id, $user_email)
     {
-        $salt = md5('Unilab CMS' . date('Y-m-d H:i:s'));
+        $salt = md5('LMI CMS' . date('Y-m-d H:i:s'));
         $token = md5($user_email . $salt);
         $data = array(
             "token"=>$token,

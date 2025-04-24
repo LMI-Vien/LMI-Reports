@@ -19,8 +19,6 @@ use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Session\Session;
 use App\Models\Global_model;
 use App\Models\Custom_model;
-use App\Models\Gmodel;
-use App\Models\User_model;
 use App\Models\Dashboard_model;
 
 class BaseController extends Controller
@@ -36,8 +34,6 @@ class BaseController extends Controller
 	protected $helpers = [];
 	protected $Global_model;
     protected $Custom_model;
-    protected $Gmodel;
-    protected $User_model;
     protected $Dashboard_model;
 
 	/** @var Session */
@@ -60,8 +56,6 @@ class BaseController extends Controller
 		$this->db = \Config\Database::connect();
 		$this->Global_model = new Global_model();
         $this->Custom_model = new Custom_model();
-        $this->Gmodel = new Gmodel();
-        $this->User_model = new User_model();
         $this->Dashboard_model = new Dashboard_model();
 	}
 
