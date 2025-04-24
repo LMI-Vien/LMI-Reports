@@ -5,6 +5,45 @@
         overflow-x: hidden !important;
         overflow-y: hidden !important;
     }
+
+    .ui-widget {
+        z-index: 1051 !important;
+    }
+
+    .add_line {
+        margin-right: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        min-width: 75px;
+        max-height: 30px;
+        line-height: 0.5;
+        background-color: #339933;
+        color: white;
+        border: 1px solid #267326;
+        border-radius: 10px;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .add_line:disabled {
+        background-color: gray !important;
+        color: black !important;
+    }
+
+    .rmv-btn {
+        border-radius: 20px;
+        background-color: #C80000;
+        color: white;
+        border: 0.5px solid #990000;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .rmv-btn:disabled {
+        border-radius: 20px;
+        background-color: gray;
+        color: black;
+        border: 0.5px solid gray;
+        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
+    }
 </style>
 
 <div class="content-wrapper p-4">
@@ -31,6 +70,7 @@
                                     <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                     <th class='center-content'>Store/Branch Code</th>
                                     <th class='center-content'>Store/Branch Description</th>
+                                    <!-- <th class='center-content'>Store/Branch Brand Ambassador</th> -->
                                     <th class='center-content'>Status</th>
                                     <th class='center-content'>Date Created</th>
                                     <th class='center-content'>Date Modified</th>
@@ -80,6 +120,21 @@
                         <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
                         <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                     </div>
+
+                    <div class="form-group">
+                        <div class="row" >
+                            <label class="col" >Store/Branch Brand Ambassador</label>
+                            <input
+                                type="button"
+                                value="Add BA"
+                                class="row add_line"
+                                onclick="add_line()"
+                            >
+                        </div>
+                        <div id="baName_list">
+                        </div>
+                    </div>
+
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="status" checked>
                         <label class="form-check-label" for="status">Active</label>
@@ -146,6 +201,7 @@
                                     <th class='center-content'>Line #</th>
                                     <th class='center-content'>Store/Branch Code</th>
                                     <th class='center-content'>Store/Branch Description</th>
+                                    <th class='center-content'>Store/Branch Brand Ambassador</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
                             </thead>
@@ -205,6 +261,80 @@
             get_data(new_query);
         }
     });
+
+    function get_max_number() {
+        let storeElements = $('[id^="baName_"]');
+        
+        let maxNumber = Math.max(
+            0,
+            ...storeElements.map(function () {
+                return parseInt(this.id.replace("baName_", ""), 10) || 0;
+            }).get()
+        );
+
+        return maxNumber;
+    }
+
+    let brandAmbassadorName = [];
+    function get_baName(id, dropdown_id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list",
+            select : "id, code, name, status",
+            query : 'status >= 0',
+            offset : 0,
+            limit : 0,
+            table : "tbl_brand_ambassador",
+            order : {
+                field : "id",
+                order : "asc" 
+            }
+        }
+
+        aJax.post(url,data,function(res){
+            var result = JSON.parse(res);
+            var html = '';
+    
+            if(result) {
+                if (result.length > 0) {
+                    var selected = '';
+                    
+                    brandAmbassadorName = [];
+                    result.forEach(function (y) {
+                        brandAmbassadorName.push(y.code + ' - ' + y.name);
+                    });
+                }
+            }
+        });
+    }
+
+    function add_line() {
+        let line = get_max_number() + 1;
+
+        let html = `
+        <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+            <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador'>
+            <button type="button" class="rmv-btn" onclick="remove_line(${line})">
+                <i class="fa fa-minus" aria-hidden="true"></i>
+            </button>
+        </div>
+        `;
+
+        $('#baName_list').append(html);
+
+        $(`#baName_${line}`).autocomplete({
+            source: function(request, response) {
+                var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
+                var uniqueResults = [...new Set(results)];
+                response(uniqueResults.slice(0, 10));
+            },
+        });
+        get_baName('', `baName_${line}`);
+    }
+
+    function remove_line(lineId) {
+        $(`#line_${lineId}`).remove();
+    }
 
     $(document).on('click', '#search_button', function(event) {
         $('.btn_status').hide();
@@ -292,6 +422,7 @@
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + trimText(y.code) + "</td>";
                         html += "<td scope=\"col\">" + trimText(y.description) + "</td>";
+                        // html += "<td scope=\"col\">" + (y.brand_ambassador) + "</td>";
                         html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -344,6 +475,7 @@
     });
 
     $('#btn_add').on('click', function() {
+        get_baName('', 'brandAmba_0');
         open_modal('Add New Store/Branch', 'add', '');
     });
 
@@ -367,6 +499,9 @@
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#popup_modal');
+
+        let $baName_list = $('#baName_list');
+
         let $footer = $modal.find('.modal-footer');
         let $contentWrapper = $('.content-wrapper');
 
@@ -389,14 +524,59 @@
             })
         };
 
-        if (['edit', 'view'].includes(actions)) populate_modal(id);
+        // if (['edit', 'view'].includes(actions)) populate_modal(id);
+        if (['edit', 'view'].includes(actions)) {
+            populate_modal(id, actions, () => {
+                modal.loading(false); 
+            });
+        }
         
         let isReadOnly = actions === 'view';
         set_field_state('#code, #description, #status', isReadOnly);
 
+        $baName_list.empty()        
         $footer.empty();
-        if (actions === 'add') $footer.append(buttons.save);
-        if (actions === 'edit') $footer.append(buttons.edit);
+        if (actions === 'add') {
+            
+            let line = get_max_number();
+
+            let html = `
+            <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador'>
+                <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
+                    <i class="fa fa-minus" aria-hidden="true"></i>
+                </button>
+            </div>
+            `;
+
+            $('#baName_list').append(html);
+
+            $(`#baName_${line}`).autocomplete({
+                source: function(request, response) {
+                    var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
+                    var uniqueResults = [...new Set(results)];
+                    response(uniqueResults.slice(0, 10));
+                },
+                minLength: 0,
+            }).focus(function () {
+                $(this).autocomplete("search", "");
+            });
+            
+            $('.add_line').attr('disabled', false)
+            $('.add_line').attr('readonly', false)
+            $footer.append(buttons.save)
+        };
+
+        // $footer.empty();
+        // if (actions === 'add') $footer.append(buttons.save);
+        // if (actions === 'edit') $footer.append(buttons.edit);
+        if (actions === 'edit') {
+            $footer.append(buttons.edit)
+            set_field_state('.add_line', false)
+        };
+        if (actions === 'view') {
+            set_field_state('.add_line', true)
+        }
         $footer.append(buttons.close);
 
         // Disable background content interaction
@@ -419,7 +599,7 @@
     };
 
     function reset_modal_fields() {
-        $('#popup_modal #code, #popup_modal #description, #popup_modal').val('');
+        $('#popup_modal #code, #popup_modal #description, #popup_modal, #brand_amba, #popup_modal').val('');
         $('#popup_modal #status').prop('checked', true);
     };
 
@@ -438,7 +618,10 @@
         return new_btn;
     };
 
-    function populate_modal(inp_id) {
+    function populate_modal(inp_id, actions) {
+        // console.log("save_data called with action:", actions);
+        // return;
+
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -446,7 +629,8 @@
             select : "id, code, description, status",
             query : query, 
             table : "tbl_store"
-        }
+        };
+
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
@@ -459,12 +643,90 @@
                     } else {
                         $('#status').prop('checked', false)
                     }
+
+                    let line = 0;
+                    var readonly = '';
+                    var disabled = '';
+
+                    let $baName_list = $('#baName_list');
+
+                    $.each(get_store_ba(asc.id), (x, y) => {
+                        if (actions === 'view') {
+                            readonly = 'readonly';
+                            disabled = 'disabled';
+                        } else {
+                            readonly = '';
+                            disabled = '';
+                        }
+                        get_field_values('tbl_brand_ambassador', 'name', 'id', [y.brand_ambassador_id], (res) => {
+                            for (let key in res) {
+                                get_field_values('tbl_brand_ambassador', 'code', 'id', [key], (res1) => {
+                                    for (let key1 in res1) {
+                                        if (actions === 'edit') {
+                                            if (line === 0) {
+                                                readonly = '';
+                                                disabled = 'disabled';
+                                            } else {
+                                                readonly = 'readonly';
+                                                disabled = '';
+                                            }
+                                        }
+
+                                        let html = `
+                                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                            <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador' value='${res1[key]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+                                            <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+                                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        `;
+
+                                        $baName_list.append(html); 
+
+                                        $(`#baName_${line}`).autocomplete({
+                                            source: function(request, response) {
+                                                var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
+                                                var uniqueResults = [...new Set(results)];
+                                                response(uniqueResults.slice(0, 10));
+                                            },
+                                        });
+
+                                        get_baName(x, `baName_${line}`); 
+
+                                        line++; 
+                                    }
+                                });
+                            }
+                        });
+                    });
                 }); 
             }
         });
     };
 
-    function save_data(action, id) {
+    function get_store_ba(id) {
+        var data = {
+            event : "list",
+            select : "id, store_id, brand_ambassador_id",
+            query : "id > 0 and store_id = " + id,
+            offset : 0,
+            limit : 0,
+            table : "tbl_brand_ambassador_group",
+            order : {
+                field : "id",
+                order : "asc" 
+            }
+        }
+        var result = '';
+
+        aJax.post_async(url, data, function(res) {
+            result = JSON.parse(res);
+        })
+
+        return result;
+    }
+
+    function save_data(actions, id) {
         var code = $('#code').val().trim();
         var description = $('#description').val().trim();
         var chk_status = $('#status').prop('checked');
@@ -473,13 +735,83 @@
         } else {
             status_val = 0;
         }
+        var linenum = 0;
+        var brandAmba = '';
+        var unique_brandAmba = [];
+        var brandAmba_list = $('#baName_list');
+
+        brandAmba_list.find('input').each(function() {
+            if (!unique_brandAmba.includes($(this).val())) {
+                brandAmba = $(this).val().split(' - ');
+
+                if (brandAmba.length == 2) {
+                    unique_brandAmba.push(brandAmba[1]);
+                } else {
+                    unique_brandAmba.push(brandAmba[1] + ' - ' + brandAmba[2]);
+                }
+            }
+            linenum++
+        });
+
         if (id !== undefined && id !== null && id !== '') {
             check_current_db("tbl_store", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
                 if (!exists) {
-                    modal.confirm(confirm_update_message, function(result){
+                    modal.confirm(confirm_update_message,function(result){
                         if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, description, status_val, id)
+                            let ids = [];
+                            let hasDuplicate = false;
+                            let valid = true;
+                            
+                            $.each(unique_brandAmba, (x, y) => {
+                                if(ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            });
+
+                            if(hasDuplicate) {
+                                console.log('Has duplicate');
+                                modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
+                            } else {
+                                let batch = [];
+                                get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
+                                    if(res.length == 0) {
+                                        valid = false;
+                                    } else {
+                                        modal_alert = 'success';
+                                            $.each(res, (x, y) => {
+                                            let data = {
+                                                'store_id': id, // temp placeholder, will set below
+                                                'brand_ambassador_id': y,
+                                                'created_by': user_id,
+                                                'created_date': formatDate(new Date()),
+                                            };
+                                            batch.push(data);
+                                        })
+                                    }
+
+                                    console.log(batch);
+                                })
+    
+                                if(valid) {
+                                    save_to_db(code, description, brandAmba, status_val, id, (obj) => {
+                                        total_delete(url, 'tbl_brand_ambassador_group', 'store_id', id);
+    
+                                        batch_insert(url, batch, 'tbl_brand_ambassador_group', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
+                                    })
+                                    
+                                } else {
+                                    modal.loading(false);
+                                    modal.alert('BA not found', 'error', function() {});
+                                }
+                            }
+
                         }
                     });
 
@@ -488,19 +820,69 @@
         }else{
             check_current_db("tbl_store", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
                 if (!exists) {
-                    modal.confirm(confirm_add_message, function(result){
+                    modal.confirm(confirm_add_message,function(result){
                         if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, description, status_val, null)
+                            let ids = [];
+                            let hasDuplicate = false;
+                            let valid = true;
+                            $.each(unique_brandAmba, (x, y) => {
+                                if(ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
+                            });
+
+                            if(hasDuplicate) {
+                                console.log('Has duplicate');
+                                modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
+                            } else {
+                                let batch = [];
+                                get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
+                                    console.log(res);
+                                    if(res.length == 0) {
+                                        valid = false;
+                                    } else {
+                                        modal_alert = 'success';
+                                        $.each(res, (x, y) => {
+                                            let data = {
+                                                'store_id': id, 
+                                                'brand_ambassador_id': y,
+                                                'created_by': user_id,
+                                                'created_date': formatDate(new Date()),
+                                            };
+                                            batch.push(data);
+                                        });
+                                    }
+
+                                    console.log(batch);
+                                })
+    
+                                if(valid) {
+                                    save_to_db(code, description, brandAmba, status_val, id, (obj) => {
+                                        insert_batch = batch.map(batch => ({...batch, store_id: obj.ID}));
+        
+                                        batch_insert(url, insert_batch, 'tbl_brand_ambassador_group', false, () => {
+                                            modal.loading(false);
+                                            modal.alert(success_update_message, "success", function() {
+                                                location.reload();
+                                            });
+                                        })
+                                    })
+                                    
+                                } else {
+                                    modal.loading(false);
+                                    modal.alert('BA not found', 'error', function() {});
+                                }
+                            }
                         }
                     });
-
                 }                  
             });
         }
-    };
+    }
 
-    function save_to_db(inp_code, inp_description, status_val, id) {
+    function save_to_db(inp_code, inp_description, inp_brandAmba, status_val, id, cb) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -537,10 +919,8 @@
 
         aJax.post(url,data,function(result){
             var obj = is_json(result);
+            cb(obj)
             modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function() {
-                location.reload();
-            });
         });
     };
 
@@ -749,7 +1129,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['store/branch code', 'store/branch description', 'status'];
+            let td_validator = ['store/branch code', 'store/branch description', 'store/branch brand ambassador', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -818,6 +1198,7 @@
             return {
                 "Store/Branch Code": row["Store/Branch Code"] || "",
                 "Store/Branch Description": row["Store/Branch Description"] || "",
+                "Store/Branch Brand Ambassador": row["Store/Branch Brand Ambassador"] || "",
                 "Status": row["Status"] || "",
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
@@ -1165,8 +1546,16 @@
             {
                 "Store/Branch Code": "",
                 "Store/Branch Description": "",
+                "Store/Branch Brand Ambassador": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
+            },
+            {
+                "Store/Branch Code": "",
+                "Store/Branch Description": "",
+                "Store/Branch Brand Ambassador": "",
+                "Status": "",
+                "NOTE:": "Brand Ambassadors should be separated by commas. eg(BA1, BA2, BA3)"
             }
         ]
 
