@@ -1248,6 +1248,46 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         }
     }
 
+    // ----------==========|| week on week scan data ||==========----------
+    public function fetch_wkonwk_data($limit, $page, $filename, $id)
+    {
+        $offset = ($page - 1) * $limit;
+
+        $builder = $this->db->table('tbl_wkonwk_temp_space')
+                      ->where('file_name', $filename)
+                      ->where('created_by', $id)
+                      ->orderBy('id', 'ASC')
+                      ->limit($limit, $offset)
+                      ->get();
+
+        $data = $builder->getResultArray();
+
+        $totalRecords = $this->db->table('tbl_wkonwk_temp_space')
+                          ->where('file_name', $filename)
+                          ->where('created_by', $id)
+                          ->countAllResults();
+
+        return [
+            "data" => $data,
+            "totalRecords" => $totalRecords
+        ];
+    }
+
+    public function delete_temp_wkonwk($id, $filename)
+    {
+        $builder = $this->db->table('tbl_wkonwk_temp_space');
+        $builder->where('created_by', $id);
+        $builder->where('file_name', $filename);
+        
+        $deleted = $builder->delete();
+
+        if ($deleted) {
+            return 'success';
+        } else {
+            return 'failed';
+        }
+    }
+
     function get_data(
         string $table,
         array $query = null,

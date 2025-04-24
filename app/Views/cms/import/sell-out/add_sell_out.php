@@ -110,21 +110,21 @@
         decoded = decodeURIComponent(template_id);
         parts = decoded.split("-");
         
-        $("#paygrp").val(parts[0]);
-        dynamic_search("'tbl_month'", "''", "'month'", 1, 0, "'id:EQ="+parts[2]+"'", "''", "''", (res)=>{
+        $("#paygrp").val(parts[1]);
+        dynamic_search("'tbl_month'", "''", "'month'", 1, 0, "'id:EQ="+parts[3]+"'", "''", "''", (res)=>{
             $("#month").val(res[0].month);
         })
-        dynamic_search("'tbl_year'", "''", "'year'", 1, 0, "'id:EQ="+parts[1]+"'", "''", "''", (res)=>{
+        dynamic_search("'tbl_year'", "''", "'year'", 1, 0, "'id:EQ="+parts[2]+"'", "''", "''", (res)=>{
             $("#year").val(res[0].year);
         })
-        $("#file_code").val(parts[3]);
+        $("#file_code").val(parts[4]);
 
         dynamic_search(
             "'tbl_sell_out_template_header as a'", 
             "'left join tbl_sell_out_template_details b on a.id = b.template_header_id'", 
             "'a.line_header, b.column_number, b.column_header'", 
             0, 0, 
-            "'a.import_file_code:EQ=" + parts[3] + "'", "''", "''", 
+            "'a.import_file_code:EQ=" + parts[4] + "'", "''", "''", 
             (res) => {
                 const mapping = {
                     1: 'store_code',
@@ -459,8 +459,8 @@
         ];  
 
         const filters = [
-            '2025',
-            '3'
+            $("#year").val(),
+            $("#month").val()
         ];  
 
         const matchType = "AND";  // Use "AND" or "OR" for matching logic
@@ -603,11 +603,12 @@
             "'tbl_sell_out_template_header'", "''",
             "'id, import_file_code, file_type, template_column_count, first_line_is_header, line_header, customer_payment_group, remarks'",
             1, 0,
-            "'import_file_code:EQ=" + parts[3] + "'", "''", "''",
+            "'import_file_code:EQ=" + parts[4] + "'", "''", "''",
             (res) => {
                 header_data = res;
 
                 let data = {
+                    company : parts[0],
                     month: getMonthIdByName($("#month").val()),
                     year: $("#year").val(),
                     customer_payment_group: header_data[0].customer_payment_group,

@@ -251,14 +251,22 @@
                         </div>
 
                         <div class="row">
+                            <div class="col-md-12">
+                                <label for="company" class="ml-2 form-label fw-semibold my-2">Choose Company:</label>
+                                <select id="company" class="ml-2 form-select uniform-dropdown">
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
-                                <label for="year" class="ml-2 form-label fw-semibold me-2">Choose Year:</label>
+                                <label for="year" class="ml-2 form-label fw-semibold my-2">Choose Year:</label>
                                 <select id="year" class="ml-2 form-select uniform-dropdown">
                                 </select>
                             </div>
 
                             <div class="col-md-6">
-                                <label for="month" class="ml-2 form-label fw-semibold me-2">Choose Month:</label>
+                                <label for="month" class="ml-2 form-label fw-semibold my-2">Choose Month:</label>
                                 <select id="month" class="ml-2 form-select uniform-dropdown">
                                 </select>
                             </div>
@@ -287,15 +295,17 @@
     var url = "<?= base_url('cms/global_controller');?>";
 
     $(document).ready(function() {
-      get_data(query);
-      get_pagination(query);
+        console.log(modal)
+        get_data(query);
+        get_pagination(query);
 
-      getpaygroup();
-      getTemplates();
-      populatedropdown('#pay_group', pay_group);
-      populatedropdown('#template', templates);
-      populatedropdown('#pay_grp', pay_group);
-      populatedropdown('#file_type', ["xlsx", "xml"],);
+        getpaygroup();
+        getTemplates();
+
+        populatedropdown('#pay_group', pay_group);
+        populatedropdown('#template', templates);
+        populatedropdown('#pay_grp', pay_group);
+        populatedropdown('#file_type', ["xlsx", "xml"]);
     });
 
     function get_data(query) {
@@ -1145,6 +1155,7 @@
         $("#add_scan_data").modal('show')
         get_year("year")
         get_month("month")
+        get_company("company")
     })
 
     $("#btn_templates").click(() => {
@@ -1219,20 +1230,55 @@
         })
     }
 
+    function get_company(selected_class) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "list",
+            select : "id, name",
+            query : 'status >= 0',
+            offset : 0,
+            limit : 0,
+            table : "tbl_company",
+            order : {
+                field : "id",
+                order : "asc" 
+            }
+        }
+
+        aJax.post(url,data,function(res){
+            var result = JSON.parse(res);
+            var html = '';
+            html += '<option id="default_val" value="">Select Company</option>';
+            
+    
+            if(result) {
+                if (result.length > 0) {
+                    var selected = '';
+                    
+                    result.forEach(function (y) {
+                        html += `<option value="${y.id}">${y.name}</option>`;
+                    });
+                }
+            }
+            $('#'+selected_class).html(html);
+        })
+    }
+
     function import_sellout() {
+        let company = $("#company").val();
         let month = $("#month").val();
         let year = $('#year option:selected').text();
         let payGroup = $("#pay_group").val();
         let template = $("#template").val();
 
-        if (payGroup == '' || year == '' || month == '' || template == '') {
-            return modal.alert_custom("Fill up the Fields.", "Payment Group, Template, Month and Year cannot be empty", "error");
+        if (company == '' || payGroup == '' || year == '' || month == '' || template == '') {
+            return modal.alert_custom("Fill up the Fields.", "Company, Payment Group, Template, Month and Year cannot be empty", "error");
         }
 
         check_current_db(
             "tbl_sell_out_data_header", 
-            ["month", "year", "customer_payment_group", "template_id"], 
-            [$("#month").val(), $('#year option:selected').text(), $("#pay_group").val(), $("#template").val()], 
+            ["company", "month", "year", "customer_payment_group", "template_id"], 
+            [company, month, year, payGroup, template], 
             "id" , 
             null, 
             null,
@@ -1245,16 +1291,17 @@
                             console.log(result, "result")
                             let href = "<?= base_url() ?>" + "cms/import-sell-out/add/";
 
+                            let company = $("#company").val();
                             let payGroup = $("#pay_group").val();
                             let year = $("#year").val();
                             let month = $("#month").val();
                             let template = $("#template").val();
 
-                            if (payGroup == '' || year == '' || month == '' || template == '') {
-                                return modal.alert_custom("Fill up the Fields.", "Payment Group, Template, Month and Year cannot be empty", "error");
+                            if (company =='' ||payGroup == '' || year == '' || month == '' || template == '') {
+                                return modal.alert_custom("Fill up the Fields.", "Company, Payment Group, Template, Month and Year cannot be empty", "error");
                             }
 
-                            href += `${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
+                            href += `${encodeURIComponent(company)}-${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
 
                             // window.open(href, '_blank');
                             window.location.href = href;

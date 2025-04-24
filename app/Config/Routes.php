@@ -179,6 +179,14 @@ $routes->group('cms/', static function ($routes) {
         $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\Import_sell_out::delete_temp_scan_data');
     });
 
+    $routes->group('import-week-on-week', static function ($routes) {
+        $routes->get('/', 'Cms\Import_week_on_week::index');
+        $routes->get('view/(:any)', 'Cms\Import_week_on_week::view');
+        $routes->match(['GET', 'POST'], 'import-temp-wkonwk-data', 'Cms\Import_week_on_week::import_temp_wkonwk_data');
+        $routes->match(['GET', 'POST'], 'fetch-temp-wkonwk-data', 'Cms\Import_week_on_week::fetch_temp_wkonwk_data');
+        $routes->match(['GET', 'POST'], 'delete-temp-wkonwk-data', 'Cms\Import_week_on_week::delete_temp_wkonwk_data');
+    });
+
     $routes->group('import-target-sell-out-pa', static function ($routes) {
         $routes->get('/', 'Cms\Import_target_sell_out_pa::index');
         $routes->get('view/(:any)', 'Cms\Import_target_sell_out_pa::view');

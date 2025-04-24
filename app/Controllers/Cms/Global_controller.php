@@ -409,9 +409,11 @@ class Global_controller extends BaseController
 			        $field_filter = [];
 			        if($table == "tbl_vmi"){
 			        	$field_filter = ['year', 'month', 'week', 'company'];
-			        }else{
+			        }else if ($table == "tbl_sell_out_data_details"){
 			        	$field_filter = ['year', 'month'];
-			        }
+			        } else if($table == "tbl_week_on_week_details") {
+						$field_filter = ['year', 'week'];
+					}
             		
 			        if (empty($table) || empty($selected_fields)) {
 			            echo json_encode(['status' => 'error', 'message' => 'Table or selected fields are missing.']);
@@ -420,7 +422,7 @@ class Global_controller extends BaseController
 
 			        $result_data = $this->Global_model->fetch_existing_new($table, $selected_fields, $filters, $field_filter, $field, $value, $status);
 			        echo json_encode(['status' => 'success', 'existing' => $result_data]);
-			    } catch (Exception $e) {
+			    } catch (\Exception $e) {
 			        echo json_encode(['status' => 'error', 'message' => 'Error fetching data: ' . $e->getMessage()]);
 			    }
 			    break;

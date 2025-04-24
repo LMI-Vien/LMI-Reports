@@ -11,11 +11,15 @@ self.onmessage = async function(e) {
     let index = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?payment_group=1`);   
-        let ba_data = await get_ba_valid_response.json();
+        let get_ba_valid_response_lmi = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?payment_group_lmi=1`);   
+        let ba_data_lmi = await get_ba_valid_response_lmi.json();
+
+        // let get_ba_valid_response_rgdi = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?payment_group_rgdi=1`);   
+        // let ba_data_rgdi = await get_ba_valid_response_rgdi.json();
 
         let cusgrp_lookup = {};
-        ba_data.payment_group.forEach(group => cusgrp_lookup[group.customer_group_code.toLowerCase()] = group.id);
+        ba_data_lmi.payment_group_lmi.forEach(group => cusgrp_lookup[group.customer_group_code.toLowerCase()] = group.id);
+        // ba_data_rgdi.payment_group_rgdi.forEach(group => cusgrp_lookup[group.customer_group_code.toLowerCase()] = group.id);
 
         function processBatch() {
             if (index >= data.length) {
