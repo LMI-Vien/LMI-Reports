@@ -165,7 +165,7 @@ body .hide-div {
                       <div class="card p-4 shadow-lg text-center text-muted table-empty">
                           <i class="fas fa-filter mr-2"></i> Please select a filter
                       </div>
-
+                        <div class="hide-div">
                         <div class="hide-div">
                             <table id="table_slowMoving" class="table table-bordered">
                                 <thead>
@@ -307,6 +307,36 @@ body .hide-div {
                                       </tr>
                                   </tbody>
                             </table>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button 
+                                class="btn btn-primary mr-2" 
+                                id="ExportPDF"
+                                data-title="Step 5: Exporting the Report (PDF)"
+                                data-intro="Paki palitan to haha" 
+                                data-step="10"
+                                onclick="handleAction('export_pdf')"
+                            >
+                                <i class="fas fa-file-export"></i> PDF
+                            </button>
+                            <button 
+                                class="btn btn-success" 
+                                id="exportButton"
+                                id="step11" 
+                                data-title="Step 6: Exporting the Report (Excel)"
+                                data-intro="
+                                Once satisfied with the report:<br><br>
+                                Click the Export button.<br>
+                                Choose between PDF or Excel format.<br>
+                                The file will be generated and downloaded to your device.<br><br>
+                                <small>Tip: Use PDF for sharing and Excel for further data analysis.</small><br><br>
+                                Click Next" 
+                                data-step="11"
+                                onclick="handleAction('export_excel')"
+                            >
+                                <i class="fas fa-file-export"></i> Excel
+                            </button>
+                        </div>
                         </div>
                     </div>
                 </div>

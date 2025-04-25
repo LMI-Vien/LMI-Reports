@@ -70,41 +70,18 @@
                     <input type="hidden" id="brand_id">
                 </div>
                 
-                <!-- Buttons -->
+              <!-- Buttons -->
                 <div class="form-group">
                   <div class="row">
-                    <!-- Row 1: Refresh + Clear -->
                     <div class="col-6 mb-2">
-                      <button class="btn btn-primary btn-block btn-sm"
-                              id="ExportPDF"
-                              data-title="Step 5: Exporting the Report (PDF)"
-                              data-intro="Paki palitan to haha"
-                              data-step="10"
-                              onclick="handleAction('export_pdf')">
-                        <i class="fas fa-file-export"></i> PDF
-                      </button>                      
+                        <button type="button" class="btn btn-secondary btn-block btn-sm" id="clearButton">
+                           <i class="fas fa-sync-alt"></i> Clear
+                        </button>
                     </div>
                     <div class="col-6 mb-2">
                       <button type="button" class="btn btn-primary btn-block btn-sm" id="refreshButton">
                         <i class="fas fa-sync-alt"></i> Refresh
                       </button>
-                    </div>
-
-                    <!-- Row 2: PDF + Excel -->
-                    <div class="col-6 mb-2">
-                      <button class="btn btn-success btn-block btn-sm"
-                              id="exportButton"
-                              data-title="Step 6: Exporting the Report (Excel)"
-                              data-intro="Once satisfied with the report:<br><br>Click the Export button.<br>Choose between PDF or Excel format.<br>The file will be generated and downloaded to your device.<br><br><small>Tip: Use PDF for sharing and Excel for further data analysis.</small><br><br>Click Next"
-                              data-step="11"
-                              onclick="handleAction('export_excel')">
-                        <i class="fas fa-file-export"></i> Excel
-                      </button>
-                    </div>
-                    <div class="col-6 mb-2">
-                        <button type="button" class="btn btn-secondary btn-block btn-sm" id="clearButton">
-                           <i class="fas fa-sync-alt"></i> Clear
-                        </button>
                     </div>
                   </div>
                 </div>
