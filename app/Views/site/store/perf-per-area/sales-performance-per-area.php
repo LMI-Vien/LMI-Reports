@@ -206,7 +206,7 @@
                                 <thead>
                                     <tr>
                                         <th 
-                                            colspan="9"
+                                            colspan="10"
                                             style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                             class="tbl-title-header"
                                         >
@@ -217,6 +217,7 @@
                                         <th class="tbl-title-field">Rank</th>
                                         <th class="tbl-title-field">Area</th>
                                         <th class="tbl-title-field">Area Sales Coordinator</th>
+                                        <th class="tbl-title-field">LY Scan Data</th>
                                         <th class="tbl-title-field">Actual Sales Report</th>
                                         <th class="tbl-title-field">Target</th>
                                         <th class="tbl-title-field">% Achieved</th>
@@ -228,16 +229,16 @@
                                 </thead>
                                       <tbody>
                                           <tr>
-                                              <td colspan="9" class="text-center py-4 text-muted">
+                                              <td colspan="10" class="text-center py-4 text-muted">
                                               </td>
                                           </tr>
                                           <tr>
-                                              <td colspan="9" class="text-center py-4 text-muted">
+                                              <td colspan="10" class="text-center py-4 text-muted">
                                                   No data available
                                               </td>
                                           </tr>
                                           <tr>
-                                              <td colspan="9" class="text-center py-4 text-muted">
+                                              <td colspan="10" class="text-center py-4 text-muted">
                                               </td>
                                           </tr>
                                       </tbody>
