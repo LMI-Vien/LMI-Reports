@@ -112,6 +112,11 @@
                     </div>
 
                         <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" name="name" class="form-control required" id="name">
+                        </div>
+
+                        <div class="form-group">
                             <label>Deployment Date</label>
                             <input type="date" class="form-control required" id="deployment_date">
                         </div>
@@ -137,7 +142,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label>Area</label>
                             <select name="area" class="form-control required" id="area">
                             </select>
@@ -147,7 +152,9 @@
                             <label>Store</label>
                             <select name="store" class="form-control required" id="store">
                             </select>
-                        </div>
+                        </div> -->
+
+                        
 
                         <div class="form-group">
                             <label>Team</label>
@@ -236,9 +243,9 @@
                                             <th class='center-content' scope="col">Deployment Date</th>
                                             <th class='center-content' scope="col">Agency</th>
                                             <th class='center-content' scope="col">Brand</th>
-                                            <th class='center-content' scope="col">Store</th>
+                                            <!-- <th class='center-content' scope="col">Store</th> -->
                                             <th class='center-content' scope="col">Team</th>
-                                            <th class='center-content' scope="col">Area</th>
+                                            <!-- <th class='center-content' scope="col">Area</th> -->
                                             <th class='center-content' scope="col">Type</th>
                                             <th class='center-content' scope="col">Status</th>
                                         </tr>
@@ -658,7 +665,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['ba name', 'deployment date', 'agency', 'brand', 'store', 'team', 'area', 'type' ,'status'];
+            let td_validator = ['ba name', 'deployment date', 'agency', 'brand', 'team', 'type' ,'status'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -731,6 +738,8 @@
         dataset = [];
 
         const file = $("#file")[0].files[0];
+        console.log(file);
+
         if (!file) {
             modal.loading_progress(false);
             modal.alert('Please select a file to upload', 'error', () => {});
@@ -2310,9 +2319,9 @@ function saveValidatedData(valid_data, brand_per_ba) {
                 "Deployment Date": "",
                 "Agency": "",
                 "Brand": "",
-                "Store": "",
+                // "Store": "",
                 "Team": "",
-                "Area": "",
+                // "Area": "",
                 "Type": "",
                 "Status": "",
                 "NOTE:":"Please do not change the column headers."
