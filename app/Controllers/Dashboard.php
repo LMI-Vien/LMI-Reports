@@ -42,10 +42,12 @@ class Dashboard extends BaseController
 		$data['PageName'] = 'Dashboard';
 		$data['PageUrl'] = 'Dashboard';
 		$data["breadcrumb"] = array('Announcements' => '');
+		$today = date('Y-m-d H:i:s');
+
 		$query = [
 		    'status' => 1,
-		    'start_date >=' => date('Y-m-d') . ' 00:00:00',
-		    'end_date <='  => date('Y-m-d') . ' 23:59:59',
+		    'start_date <=' => $today,
+		    'end_date >='   => $today,
 		];
 		$data['announcements'] = $this->Global_model->get_data('tbl_announcements', $query, 999, 0, 'title, description_1, description_2, description_3, start_date, end_date', 'title', 'ASC', null, null);
 
