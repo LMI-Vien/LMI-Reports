@@ -101,7 +101,7 @@ class ImportSellOut extends BaseController
 		$data['buttons'] = ['search'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
-		$data['month'] = $this->Global_model->get_months();
+		$data['month'] = $this->Global_model->getMonths();
 		$data['js'] = array(
 				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",

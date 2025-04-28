@@ -408,7 +408,8 @@ class GlobalController extends BaseController
 
 			        $field_filter = [];
 			        if($table == "tbl_vmi"){
-			        	$field_filter = ['year', 'month', 'week', 'company'];
+			        	// $field_filter = ['year', 'month', 'week', 'company'];
+			        	$field_filter = ['year', 'week', 'company'];
 			        }else if ($table == "tbl_sell_out_data_details"){
 			        	$field_filter = ['year', 'month'];
 			        } else if($table == "tbl_week_on_week_details") {

@@ -1164,13 +1164,18 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         return $query->getResultArray();
     }
 
-    public function fetch_temp_data($limit, $page, $year, $month, $week, $company, $id)
+    // public function fetch_temp_data($limit, $page, $year, $month, $week, $company, $id)
+    public function fetch_temp_data($limit, $page, $year, $week, $company, $id)
     {
-        $offset = ($page - 1) * $limit;
+        if ($page == 0) {
+            $offset = 0;
+        } else {
+            $offset = ($page - 1) * $limit;
+        }
 
         $baseQuery = $this->db->table('tbl_temp_vmi')
                       ->where('year', $year)
-                      ->where('month', $month)
+                    //   ->where('month', $month)
                       ->where('week', $week)
                       ->where('company', $company)
                       ->where('created_by', $id);

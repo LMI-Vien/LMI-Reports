@@ -55,7 +55,7 @@
                                     <th class='center-content'>Imported By</th>
                                     <th class='center-content'>Company</th>
                                     <th class='center-content'>Year</th>
-                                    <th class='center-content'>Month</th>
+                                    <!-- <th class='center-content'>Month</th> -->
                                     <th class='center-content'>Week</th>
                                     <th class='center-content'>Date Modified</th>
                                     <th class='center-content'>Actions</th>
@@ -123,14 +123,14 @@
                                             <select id="yearSelect" class="form-select uniform-dropdown">
                                             </select>
                                         </div>
-                                        <div class="col-12 d-flex align-items-center">
+                                        <!-- <div class="col-12 d-flex align-items-center">
                                             <label for="monthSelect" class="form-label fw-semibold me-2">Choose Month:</label>
                                             <select id="monthSelect" class="form-select uniform-dropdown">
                                             </select>
-                                        </div>
+                                        </div> -->
                                         <div class="col-12 d-flex align-items-center">
                                             <label for="weekSelect" class="form-label fw-semibold me-2">Choose Week:</label>
-                                            <select id="weekSelect" class="form-select uniform-dropdown">
+                                            <select id="weekSelect" class="form-select uniform-dropdown" onfocus="updateWeeks()">
                                             </select>
                                         </div>
                                         <div class="col-12 d-flex align-items-center">
@@ -204,14 +204,14 @@
                             <select id="year_select" class="form-select uniform-dropdown">
                             </select>
                         </div>
-                        <div class="col-12 d-flex align-items-center">
+                        <!-- <div class="col-12 d-flex align-items-center">
                             <label for="month_select" class="form-label fw-semibold me-2">Choose Month:</label>
                             <select id="month_select" class="form-select uniform-dropdown">
                             </select>
-                        </div>
+                        </div> -->
                         <div class="col-12 d-flex align-items-center">
                             <label for="week_select" class="form-label fw-semibold me-2">Choose Week:</label>
-                            <select id="week_select" class="form-select uniform-dropdown">
+                            <select id="week_select" class="form-select uniform-dropdown" onfocus="updateWeeks()">
                             </select>
                         </div>
                         <div class="col-12 d-flex align-items-center">
@@ -281,7 +281,7 @@
                         html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
                         html += "<td scope=\"col\">" + (y.company) + "</td>";
                         html += "<td scope=\"col\">" + (y.year) + "</td>";
-                        html += "<td scope=\"col\">" + (y.month) + "</td>";
+                        // html += "<td scope=\"col\">" + (y.month) + "</td>";
                         html += "<td scope=\"col\">" + (y.week) + "</td>";
                         html += "<td scope=\"col\">" + (latestDate ? ViewDateformat(latestDate) : "N/A") + "</td>";
                         let href = "<?= base_url()?>"+"cms/import-vmi/view/"+`${y.company}-${y.year}-${y.month}-${y.week}`;
@@ -290,7 +290,8 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                             html+="<td class='center-content' style='width: 25%; min-width: 200px'>";
-                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.filter_company+"','"+y.filter_year+"','"+y.filter_month+"','"+y.filter_week+
+                            // html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.filter_company+"','"+y.filter_year+"','"+y.filter_month+"','"+y.filter_week+
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.filter_company+"','"+y.filter_year+"','"+y.filter_week+
                             "')\" data-status='"+y.status+"' id='"+y.id+
                             "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                             
@@ -298,7 +299,8 @@
                             "' target='_blank' id='"+y.id+
                             "' title='View'><span class='glyphicon glyphicon-pencil'>View</span>";
 
-                            html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.company+"','"+y.year+"','"+y.month+"','"+y.week+
+                            // html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.company+"','"+y.year+"','"+y.month+"','"+y.week+
+                            html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.company+"','"+y.year+"','"+y.week+
                             "')\" data-status='"+y.status+"' id='"+y.id+
                             "' title='Export Batch'><span class='glyphicon glyphicon-pencil'>Export</span>";
 
@@ -418,10 +420,66 @@
         $("#import_modal").find('.modal-title').find('b').html(title)
         $('#import_modal').modal('show');
         get_year('yearSelect');
-        get_month('monthSelect');
+        // get_month('monthSelect');
         get_company('companySelect');
-        get_week('weekSelect');
+        // get_week('weekSelect');
     });
+
+    function updateWeeks() {
+        let selectedYear = $('#yearSelect option:selected').text()
+        let year_select = $('#year_select option:selected').text()
+        console.log(selectedYear, 'selectedYear')
+        console.log(year_select, 'year_select')
+        populateDropdown('weekSelect', getCalendarWeeks(selectedYear), 'display', 'id');
+        populateDropdown('week_select', getCalendarWeeks(year_select), 'display', 'id');
+    }
+
+    const getCalendarWeeks = (year) => {
+        const weeks = [];
+        const startDate = new Date(year, 0, 1); // Jan 1
+        const day = startDate.getDay(); // day of the week (0 = Sunday)
+
+        const firstMonday = new Date(startDate);
+        if (day !== 1) {
+            const offset = (day === 0 ? 1 : (9 - day)); 
+            firstMonday.setDate(startDate.getDate() + offset);
+        }
+
+        let currentDate = new Date(firstMonday);
+        let weekNumber = 1;
+
+        while (currentDate.getFullYear() <= year) {
+            const weekStart = new Date(currentDate);
+            const weekEnd = new Date(currentDate);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+
+            if (weekStart.getFullYear() > year) break;
+
+            weeks.push({
+                id: weekNumber,
+                display: `Week ${weekNumber} (${weekStart.toISOString().slice(0, 10)} - ${weekEnd.toISOString().slice(0, 10)})`,
+                week: weekNumber++,
+                start: weekStart.toISOString().slice(0, 10),
+                end: weekEnd.toISOString().slice(0, 10),
+            });
+
+            currentDate.setDate(currentDate.getDate() + 7);
+        }
+
+        return weeks;
+    }
+
+    const populateDropdown = (selected_class, result, textKey = 'name', valueKey = 'id') => {
+        let html = '<option id="default_val" value=" ">Select</option>';
+
+        if (result && result.length > 0) {
+            result.forEach((item) => {
+                html += `<option value="${item[valueKey]}">${item[textKey]}</option>`;
+            });
+        }
+
+        $('#' + selected_class).html(html);
+    };
 
     function formatDate(date) {
         const year = date.getFullYear();
@@ -455,11 +513,12 @@
         }
 
         var inp_year = $('#yearSelect').val()?.trim();
-        var inp_month = $('#monthSelect').val()?.trim();
+        // var inp_month = $('#monthSelect').val()?.trim();
         var inp_week = $('#weekSelect').val()?.trim();
         var inp_company = $('#companySelect').val()?.trim();
 
-        const fields = { inp_year, inp_month, inp_week, inp_company };
+        // const fields = { inp_year, inp_month, inp_week, inp_company };
+        const fields = { inp_year, inp_week, inp_company };
         for (const [key, value] of Object.entries(fields)) {
             if (!value) {
                 return modal.alert(`Please select a ${key.replace("inp_", "")}.`, 'error', () => {});
@@ -481,7 +540,7 @@
             formData.append("totalChunks", totalChunks);
             formData.append("fileName", file.name);
             formData.append("inp_year", inp_year);
-            formData.append("inp_month", inp_month);
+            // formData.append("inp_month", inp_month);
             formData.append("inp_week", inp_week);
             formData.append("inp_company", inp_company);
 
@@ -542,11 +601,12 @@
         btn.prop("disabled", true);
 
         var inp_year = $('#yearSelect').val()?.trim();
-        var inp_month = $('#monthSelect').val()?.trim();
+        // var inp_month = $('#monthSelect').val()?.trim();
         var inp_week = $('#weekSelect').val()?.trim();
         var inp_company = $('#companySelect').val()?.trim();
 
-        const fields = { inp_year, inp_month, inp_week, inp_company };
+        // const fields = { inp_year, inp_month, inp_week, inp_company };
+        const fields = { inp_year, inp_week, inp_company };
         for (const [key, value] of Object.entries(fields)) {
             if (!value) {
                 btn.prop("disabled", false);
@@ -558,9 +618,9 @@
 
         let allData = [];
 
-        function fetchAllPages(page = 0) {
+        function fetchAllPages(page = 1) {
             inp_year = $('#yearSelect').val()?.trim();
-            inp_month = $('#monthSelect').val()?.trim();
+            // inp_month = $('#monthSelect').val()?.trim();
             inp_week = $('#weekSelect').val()?.trim();
             inp_company = $('#companySelect').val()?.trim();
 
@@ -568,14 +628,17 @@
                 url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
                 method: "GET",
 
-                data: { page, limit: 5000, inp_year, inp_month, inp_week, inp_company}, // Fetch in larger chunks
+                // data: { page, limit: 5000, inp_year, inp_month, inp_week, inp_company}, // Fetch in larger chunks
+                data: { page, limit: 5000, inp_year, inp_week, inp_company}, // Fetch in larger chunks
                 success: function(response) {
+                    console.log(response, 'look here')
                     if (response.success && response.data.length > 0) {
                         allData = allData.concat(response.data);
                         if (response.data.length === 5000) {
-                            fetchAllPages(page + 5000);
+                            fetchAllPages(page + 1);
                         } else {
-                            validate_temp_data(allData, inp_year, inp_month, inp_week, inp_company);
+                            // validate_temp_data(allData, inp_year, inp_month, inp_week, inp_company);
+                            validate_temp_data(allData, inp_year, inp_week, inp_company);
                         }
                     } else {
                         modal.loading_progress(false);
@@ -592,7 +655,9 @@
         fetchAllPages();
     }
 
-    function validate_temp_data(data, inp_year, inp_month, inp_week, inp_company) {
+    // function validate_temp_data(data, inp_year, inp_month, inp_week, inp_company) 
+    function validate_temp_data(data, inp_year, inp_week, inp_company) 
+    {
         modal.loading(true, "Validating data...");
 
         let worker = new Worker(base_url + "assets/cms/js/validator_vmi.js");
@@ -622,7 +687,7 @@
                 let new_data = valid_data.map(record => ({
                     ...record,
                     year: inp_year,
-                    month: inp_month,
+                    // month: inp_month,
                     week: inp_week,
                     company: inp_company
                 }));
@@ -706,22 +771,24 @@
         let selected_fields = [
             'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
             'supplier', 'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 
-            'in_transit', 'year', 'month', 'week', 'company'
+            // 'in_transit', 'year', 'month', 'week', 'company'
+            'in_transit', 'year', 'week', 'company'
         ];
 
         const matchFields = [
             'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 
-            'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'
+            // 'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'
+            'c_group', 'dept', 'c_class', 'sub_class', 'on_hand', 'in_transit', 'year', 'week', 'company'
         ];  
 
 
         var inp_year = $('#yearSelect').val()?.trim();
-        var inp_month = $('#monthSelect').val()?.trim();
+        // var inp_month = $('#monthSelect').val()?.trim();
         var inp_week = $('#weekSelect').val()?.trim();
         var inp_company = $('#companySelect').val()?.trim();
         const filters = [
                 inp_year,
-                inp_month,
+                // inp_month,
                 inp_week,
                 inp_company
         ];  
@@ -1234,8 +1301,8 @@
         $("#export_modal").find('.modal-title').find('b').html(title)
         $('#export_modal').modal('show');
         get_year('year_select');
-        get_month('month_select');
-        get_week('week_select');
+        // get_month('month_select');
+        // get_week('week_select');
         get_company('company_select');
     });
 
@@ -1244,7 +1311,7 @@
 
         const company = $('#company_select').val()?.trim();
         const year = $('#year_select').val()?.trim();
-        const month = $('#month_select').val()?.trim();
+        // const month = $('#month_select').val()?.trim();
         const week = $('#week_select').val()?.trim();
 
         let filterArr = []
@@ -1254,9 +1321,9 @@
         if(year) {
             filterArr.push(`year:EQ=${year}`);
         }
-        if(month) {
-            filterArr.push(`month:EQ=${month}`);
-        }
+        // if(month) {
+        //     filterArr.push(`month:EQ=${month}`);
+        // }
         if(week) {
             filterArr.push(`week:EQ=${week}`);
         }
@@ -1331,9 +1398,10 @@
                     res.forEach(det => {
                         let rec_company = det.company;
                         let rec_year = det.year;
-                        let rec_month = det.month;
+                        // let rec_month = det.month;
                         let rec_week = det.week;
-                        let currentRecord = { rec_company, rec_year, rec_month, rec_week };
+                        // let currentRecord = { rec_company, rec_year, rec_month, rec_week };
+                        let currentRecord = { rec_company, rec_year, rec_week };
                         count+=1;
 
                         let newData = {
@@ -1524,12 +1592,14 @@
         }
     }
 
-    function export_data(company, year, month, week) {
+    // function export_data(company, year, month, week) 
+    function export_data(company, year, week) 
+    {
         var formattedData = [];
         let filterArr = []
         filterArr.push(`c.name:EQ=${company}`);
         filterArr.push(`y.year:EQ=${year}`);
-        filterArr.push(`m.month:EQ=${month}`);
+        // filterArr.push(`m.month:EQ=${month}`);
         filterArr.push(`w.name:EQ=${week}`);
 
         let filter = filterArr.join(',')
@@ -1538,7 +1608,7 @@
                 "'tbl_vmi v'", 
                 "'left join tbl_company c on v.company = c.id "+
                 "left join tbl_year y on v.year = y.id "+
-                "left join tbl_month m on v.month = m.id "+
+                // "left join tbl_month m on v.month = m.id "+
                 "left join tbl_week w on v.week = w.id'", 
                 "'COUNT(v.id) as total_records'", 
                 0, 
@@ -1556,7 +1626,7 @@
 
                                 "'left join tbl_company c on v.company = c.id "+
                                 "left join tbl_year y on v.year = y.id "+
-                                "left join tbl_month m on v.month = m.id "+
+                                // "left join tbl_month m on v.month = m.id "+
                                 "left join tbl_week w on v.week = w.id'", 
 
                                 "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
@@ -1631,7 +1701,9 @@
         exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
     }
 
-    function delete_data(company, year, month, week) {
+    // function delete_data(company, year, month, week) 
+    function delete_data(company, year, week) 
+    {
         modal.confirm(confirm_delete_message,function(result){
             if(result){ 
                 var url = "<?= base_url('cms/global_controller');?>";
@@ -1639,7 +1711,7 @@
                 let filterArr = []
                 filterArr.push(`c.name:EQ=${company}`);
                 filterArr.push(`y.year:EQ=${year}`);
-                filterArr.push(`m.month:EQ=${month}`);
+                // filterArr.push(`m.month:EQ=${month}`);
                 filterArr.push(`w.name:EQ=${week}`);
 
                 let filter = filterArr.join(',')
@@ -1649,7 +1721,7 @@
     
                     "'left join tbl_company c on v.company = c.id "+
                     "left join tbl_year y on v.year = y.id "+
-                    "left join tbl_month m on v.month = m.id "+
+                    // "left join tbl_month m on v.month = m.id "+
                     "left join tbl_week w on v.week = w.id'", 
     
                     "'v.id'", 
@@ -1663,7 +1735,7 @@
                         const conditions = [
                             { field: "year", values: [year] },
                             { field: "company", values: [company] },
-                            { field: "month", values: [month] },
+                            // { field: "month", values: [month] },
                             { field: "week", values: [week] }
                         ];
 

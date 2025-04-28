@@ -57,9 +57,7 @@
                     </label>
                 </div>
 
-                <div class="col"></div>
-
-                <div class="col-md-3 d-flex justify-content-end">
+                <div class="col d-flex justify-content-end import_buttons" id="import_buttons">
                     <label 
                         for="process_file" 
                         class="custom-file-upload save" 
@@ -105,10 +103,25 @@
     let parts = "";
     let months = <?= json_encode($month) ?>;
     let dynamicPlaceholder = null; // global variable
+    let companyString = "";
 
     $(document).ready(function() {
+        const test = async () => {
+            let customer_sku_code_lmi = await fetch(`${url}/get_valid_ba_data?customer_sku_code_lmi=1`);
+            let customer_sku_code_data_lmi = await customer_sku_code_lmi.json();
+            let customer_sku_code_lookup_lmi = {};
+            customer_sku_code_data_lmi.customer_sku_code_lmi.forEach(group => customer_sku_code_lookup_lmi[group.cusitmcde.toLowerCase()] = group.recid);        
+            console.log(customer_sku_code_data_lmi, 'customer_sku_code_data_lmi')
+            console.log(customer_sku_code_lookup_lmi, 'customer_sku_code_lookup_lmi')
+        }
+        test();
+
         decoded = decodeURIComponent(template_id);
         parts = decoded.split("-");
+
+        dynamic_search("'tbl_company'", "''", "'name'", 1, 0, "'id:EQ="+parts[0]+"'", "''", "''", (res)=>{
+            companyString = res[0].name
+        })
         
         $("#paygrp").val(parts[1]);
         dynamic_search("'tbl_month'", "''", "'month'", 1, 0, "'id:EQ="+parts[3]+"'", "''", "''", (res)=>{
@@ -379,7 +392,7 @@
 
     function validate_temp_data(data) {
         let worker = new Worker(base_url + "assets/cms/js/validator_sell_out.js");
-        worker.postMessage({ data, base_url });
+        worker.postMessage({ data, base_url, companyString });
 
         worker.onmessage = function(e) {
             const { invalid, errorLogs, valid_data, err_counter } = e.data;
@@ -413,29 +426,31 @@
         let blob = new Blob([errorText], { type: "text/plain" });
         let url = URL.createObjectURL(blob);
 
-        $(".import_buttons").find("a.download-error-log").remove();
+        $(".import_buttons").find("label.download-error-log").remove();
 
-        let $downloadBtn = $("<a>", {
-            href: url,
-            download: filename+".txt",
+        let $downloadLabel = $("<label>", {
             text: "Download Error Logs",
-            class: "download-error-log",
+            class: "download-error-log custom-file-upload delete",
             css: {
-                border: "1px solid white",
-                borderRadius: "10px",
+                marginRight: "10px",
+                marginTop: "10px",
+                marginBottom: "10px",
                 display: "inline-block",
-                padding: "10px",
-                lineHeight: 0.5,
-                background: "#990000",
-                color: "white",
-                textAlign: "center",
-                cursor: "pointer",
-                textDecoration: "none",
-                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
+                padding: "6px 12px"
             }
         });
 
-        $(".import_buttons").append($downloadBtn);
+        let $hiddenLink = $("<a>", {
+            href: url,
+            download: filename + ".txt",
+            style: "display: none"
+        });
+
+        $downloadLabel.on("click", function() {
+            $hiddenLink[0].click();
+        });
+
+        $(".import_buttons").append($downloadLabel).append($hiddenLink);
     }
 
     function saveValidatedData(valid_data, data_header_id, header) {
