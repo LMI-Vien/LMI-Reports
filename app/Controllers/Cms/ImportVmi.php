@@ -92,7 +92,7 @@ class ImportVmi extends BaseController
 	        $totalChunks = $this->request->getPost('totalChunks');
 	        $fileName = $this->request->getPost('fileName');
 	        $year = $this->request->getPost('inp_year');
-	        $month = $this->request->getPost('inp_month');
+	        // $month = $this->request->getPost('inp_month');
 	        $week = $this->request->getPost('inp_week');
 	        $company = $this->request->getPost('inp_company');
 
@@ -152,7 +152,7 @@ class ImportVmi extends BaseController
 	                            'in_transit' => trim($row[11]) ? $row[11] : 0,
 	                            'average_sales_unit' => trim($row[12]) ? $row[12] : 0.00,
 	                            'year' => $year,
-	                            'month' => $month,
+	                            // 'month' => $month,
 	                            'week' => $week,
 	                            'company' => $company,
 	                            'created_date' => date('Y-m-d H:i:s'),
@@ -193,7 +193,7 @@ class ImportVmi extends BaseController
 	                            'in_transit' => trim($row[11]) ? $row[11] : 0,
 	                            'average_sales_unit' => trim($row[12]) ? $row[12] : 0.00,
 	                            'year' => $year,
-	                            'month' => $month,
+	                            // 'month' => $month,
 	                            'week' => $week,
 	                            'company' => $company,
 	                            'created_date' => date('Y-m-d H:i:s'),
@@ -237,11 +237,12 @@ class ImportVmi extends BaseController
 		    $page = $this->request->getGet('page') ?? 1;
     		$limit = $this->request->getGet('limit') ?? 1000;
     		$year = $this->request->getGet('inp_year') ?? '';
-    		$month = $this->request->getGet('inp_month') ?? '';
+    		// $month = $this->request->getGet('inp_month') ?? '';
     		$week = $this->request->getGet('inp_week') ?? '';
     		$company = $this->request->getGet('inp_company') ?? '';
 
-    		$result = $this->Global_model->fetch_temp_data($limit, $page, $year, $month, $week, $company, $this->session->get('sess_uid'));
+    		// $result = $this->Global_model->fetch_temp_data($limit, $page, $year, $month, $week, $company, $this->session->get('sess_uid'));
+    		$result = $this->Global_model->fetch_temp_data($limit, $page, $year, $week, $company, $this->session->get('sess_uid'));
 		    return $this->response->setJSON([
 		        "success" => true,
 		        "data" => $result['data'],

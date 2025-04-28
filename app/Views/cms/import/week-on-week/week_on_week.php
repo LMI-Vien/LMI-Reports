@@ -422,10 +422,9 @@
         const startDate = new Date(year, 0, 1); // Jan 1
         const day = startDate.getDay(); // day of the week (0 = Sunday)
 
-        // Calculate the first Monday of the year
         const firstMonday = new Date(startDate);
         if (day !== 1) {
-            const offset = (day === 0 ? -6 : 1 - day);
+            const offset = (day === 0 ? 1 : (9 - day)); 
             firstMonday.setDate(startDate.getDate() + offset);
         }
 
@@ -780,6 +779,36 @@
                 modal.alert("No valid data found. Please check the file.", "error");
             }
         }
+    }
+
+    function createErrorLogFile(errorLogs, filename) {
+        let errorText = errorLogs.join("\n");
+        let blob = new Blob([errorText], { type: "text/plain" });
+        let url = URL.createObjectURL(blob);
+
+        $(".import_buttons").find("a.download-error-log").remove();
+
+        let $downloadBtn = $("<a>", {
+            href: url,
+            download: filename+".txt",
+            text: "Download Error Logs",
+            class: "download-error-log",
+            css: {
+                border: "1px solid white",
+                borderRadius: "10px",
+                display: "inline-block",
+                padding: "10px",
+                lineHeight: 0.5,
+                background: "#990000",
+                color: "white",
+                textAlign: "center",
+                cursor: "pointer",
+                textDecoration: "none",
+                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
+            }
+        });
+
+        $(".import_buttons").append($downloadBtn);
     }
 
     const saveHeaderData = (callback) => {
