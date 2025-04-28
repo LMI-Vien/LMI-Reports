@@ -14,9 +14,9 @@
         <li class="nav-item filter-hover">
           <div class="filter-content">
             <div class="p-2">
-
-              <h6 class="text-white mb-3"><i class="fas fa-filter mr-2" style="color: #ffc107;"></i>FILTERS</h6>
-
+                <div style="text-align: center;">
+                  <h6 class="text-white mt-3 mb-2"><i class="fas fa-filter mr-2" style="color: #ffc107;"></i>FILTERS</h6>
+                </div>
                 <div class="form-group">
                   <label for="ItemClass">Item Class</label>
                   <select id="ItemClass" name="ItemClass[]" class="form-control select2" multiple>
@@ -28,9 +28,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="item_classi">Item Category</label>
-                    <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
-                    <input type="hidden" id="item_classi_id">
+                  <label for="item_classi">Item Category</label>
+                  <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
+                  <input type="hidden" id="item_classi_id">
                 </div>
 
                 <div class="form-group">
@@ -44,18 +44,30 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="item_classi">Vendor Name</label>
-                    <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
-                    <input type="hidden" id="vendor_name_id">
+                  <label for="item_classi">Week From</label>
+                  <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
+                  <input type="hidden" id="vendor_name_id">
                 </div>
 
-              <!-- Buttons -->
+                <div class="form-group">
+                  <label for="item_classi">Week To</label>
+                  <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
+                  <input type="hidden" id="vendor_name_id">
+                </div>
+
+                <div class="form-group">
+                  <label for="item_classi">Data Source</label>
+                  <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
+                  <input type="hidden" id="vendor_name_id">
+                </div>
+
+                <!-- Buttons -->
                 <div class="form-group">
                   <div class="row">
                     <div class="col-6 mb-2">
-                        <button type="button" class="btn btn-secondary btn-block btn-sm" id="clearButton">
-                           <i class="fas fa-sync-alt"></i> Clear
-                        </button>
+                      <button type="button" class="btn btn-secondary btn-block btn-sm" id="clearButton">
+                        <i class="fas fa-sync-alt"></i> Clear
+                      </button>
                     </div>
                     <div class="col-6 mb-2">
                       <button type="button" class="btn btn-primary btn-block btn-sm" id="refreshButton">
@@ -64,10 +76,9 @@
                     </div>
                   </div>
                 </div>
-
+              </div>
             </div>
-          </div>
-        </li>
+          </li>
 
       </ul>
     </nav>

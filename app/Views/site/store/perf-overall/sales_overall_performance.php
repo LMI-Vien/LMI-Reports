@@ -1,133 +1,12 @@
-<?= view("site/store/perf-overall/sales-overall-performance-filter"); ?> 
+<?php
+    $dir = dirname(__FILE__);
+    $minify = new \App\Libraries\MinifyLib();
 
-<style>
-    .content-wrapper, .content {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-        padding-bottom: 30px;
-    }
+    echo $minify->css($dir . '/assets/custom.css', 'Store Custom CSS');
+    echo $minify->js($dir . '/assets/function.js', 'App Functions JS');
+?>
 
-    .md-center {
-        color: white;
-        font-weight: bold;
-        font-family: 'Poppins', sans-serif;
-        font-size: 1.5rem; 
-        text-align: center;
-        background: linear-gradient(90deg, #fdb92a, #ff9800);
-        border: none;
-        border-radius: 12px;
-        transition: transform 0.2s ease-in-out;
-    }
-
-    th {
-        color: #fff;
-        background-color: #301311 !important;
-    }
-/*
-    #ExportPDF{
-        color: #fff;
-        background-color: #143996 !important;
-    }*/
-
-    .paginate_button  {
-        font-size: 1em;
-    }
-
-    /* Card Styling */
-    .card {
-        border-radius: 12px !important;
-        background: #ffffff;
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .card-dark {
-        border-radius: 12px !important;
-        border: #dee2e6, solid, 1px;
-    }
-
-    /* Title Styling */
-    .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
-        background: linear-gradient(to right, #143996, #007bff);
-        color: black !important;
-        text-align: center;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .tbl-title-header {
-        border-radius: 8px 8px 0px 0px !important;
-    }
-
-    /* Table Styling */
-    .table {
-        margin-bottom: 0;
-        border-collapse: separate; /* Required for border-radius */
-        border-spacing: 0; /* Ensures borders don't separate */
-        border-radius: 12px 12px 0px 0px;
-        overflow: hidden; /* Ensures inner content respects border-radius */
-    }
-
-    .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
-        background: linear-gradient(to right, #143996, #007bff);
-        color: white !important;
-        text-align: center;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .tbl-title-header {
-        border-radius: 8px 8px 0px 0px !important;
-    }
-
-    th {
-        color: #fff !important;
-        background-color: #301311 !important;
-    }
-    .tbl-title-bg{
-        color: #fff;
-        border-radius: 5px;
-        background-color: #143996 !important;
-    }
-
-
-    .card-title {
-        text-align: center;
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
-
-    .tbl-title-header {
-        border-radius: 8px 8px 0px 0px !important;
-    }
-
-    body .hide-div {
-      display: none;
-    }
-    
-    /* Table Styling /
-    .table {
-        margin-bottom: 0;
-        border-collapse: separate; / Required for border-radius /
-        border-spacing: 0; / Ensures borders don't separate /
-        border-radius: 12px 12px 0px 0px;
-        overflow: hidden; / Ensures inner content respects border-radius */
-    }
-
-    #table-skus{
-        display: none;
-    }
-    th:nth-child(1), td:nth-child(1) { width: 20%; } 
-    th:nth-child(2), td:nth-child(2) { width: 20%; }
-    th:nth-child(3), td:nth-child(3) { width: 20%; }
-    th:nth-child(4), td:nth-child(4) { width: 15%; }
-    th:nth-child(5), td:nth-child(5) { width: 15%; }
-    th:nth-child(6), td:nth-child(6) { width: 15%; }
-    th:nth-child(7), td:nth-child(7) { width: 20%; }
-</style>
+<?= view("site/store/perf-overall/sales_overall_performance_filter"); ?> 
 
 <div class="wrapper">
     <div class="content-wrapper">
@@ -249,16 +128,6 @@
         </div>
     </div>
 </div>
-
-<!-- DataTables and Script -->
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     let months = <?= json_encode($month); ?>;

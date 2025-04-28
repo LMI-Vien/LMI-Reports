@@ -1,0 +1,32 @@
+{
+  "name": "ci4lte",
+  "version": "1.0.0",
+  "description": "<img width=\"1440\" alt=\"image\" src=\"https://github.com/willnode/ci4-admin-lte/assets/20214420/728c1913-6176-43d2-8f60-b7f91a737d95\">",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^5.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-terser": "^2.1.0",
+    "gulp-uglify": "^3.0.2"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.5",
+    "chart.js": "^4.4.9",
+    "datatables.net": "^2.2.2",
+    "datatables.net-dt": "^2.2.2",
+    "file-saver": "^2.0.5",
+    "intro.js": "^7.2.0",
+    "jquery": "^3.7.1",
+    "jquery-ui": "^1.14.1",
+    "select2": "^4.1.0-rc.0",
+    "xlsx": "^0.18.5"
+  }
+}

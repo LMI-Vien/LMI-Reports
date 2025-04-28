@@ -38,10 +38,12 @@ class StoreSalesPerfPerBa extends BaseController
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-performance-per-ba'),'Store Sales Performance per Brand Ambassador' => '');
 		$data["source"] = "Actual Sales Report / Scan Data";
 		$data["source_date"] = 'Monthly(temp)';	
-		$data['content'] = "site/store/perf-per-ba/sales-performance-per-ba";
+		$data['content'] = "site/store/perf-per-ba/sales_performance_per_ba";
 		$data['js'] = array(
+			"assets/site/bundle/js/bundle.min.js"
                     );
         $data['css'] = array(
+        	"assets/site/bundle/css/bundle.min.css"
                     );
 		return view("site/layout/template", $data);
 	}

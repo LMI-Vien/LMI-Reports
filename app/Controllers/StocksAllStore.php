@@ -28,22 +28,37 @@ class StocksAllStore extends BaseController
 		);
 		$data['month'] = $this->Global_model->getMonths();
 		$data['week'] = $this->Global_model->getWeeks();
-		$data['item_classification'] = $this->Global_model->getItemClassification();
+		$data['itemClassi'] = $this->Global_model->getItemClassification();
 		$data['title'] = "Trade Dashboard";
-		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
-		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-all-store'),'Overall Stock Data of all Stores' => '');
-		$data["source"] = "VMI";
-		$data["source_date"] = 'Calendar week 1';
-		$data['content'] = "site/stocks/all-store/data-all-store";
+		$siteMenuData = $this->Global_model->get_by_menu_url('stocks/data-all-store');
+		if($siteMenuData){
+			$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-all-store'), $siteMenuData[0]->menu_name => '');
+			//static
+			$data["source"] = "VMI";
+			//get recent week
+			$data["source_date"] = 'Calendar week 1';
+			$data["pageName"] = $siteMenuData[0]->menu_name;			
+		}else{
+			$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-all-store'),'Overall Stock Data of all Stores' => '');
+			$data["source"] = "VMI";
+			$data["source_date"] = 'Calendar week 1';
+			$data["pageName"] = '';			
+		}
+
+		$data['content'] = "site/stocks/all-store/data_all_store";
 		$data['asc'] = $this->Global_model->getAsc(0);
 		$data['area'] = $this->Global_model->getArea(0);
 		$data['brand'] = $this->Global_model->getBrandData("ASC", 99999, 0);
 		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
-		$data['brand_ambassador'] = $this->Global_model->getBrandAmbassador(0);
+		$data['brandAmbassador'] = $this->Global_model->getBrandAmbassador(0);
+		$data['company'] = $this->Global_model->getCompanies(0);
+		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['js'] = array(
+			"assets/site/bundle/js/bundle.min.js"
                     );
         $data['css'] = array(
+        	"assets/site/bundle/css/bundle.min.css"
                     );
 		return view("site/layout/template", $data);
 	}

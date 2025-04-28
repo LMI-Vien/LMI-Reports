@@ -35,10 +35,12 @@ class StoreSalesPerfOverall extends BaseController
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-overall-performance'),'Overall Stores Sales Performance' => '');
 		$data["source"] = "Scan Data";
 		$data["source_date"] = 'Monthly(temp)';	
-		$data['content'] = "site/store/perf-overall/sales-overall-performance";
+		$data['content'] = "site/store/perf-overall/sales_overall_performance";
 		$data['js'] = array(
+			"assets/site/bundle/js/bundle.min.js"
                     );
         $data['css'] = array(
+        	"assets/site/bundle/css/bundle.min.css"
                     );
 		return view("site/layout/template", $data);
 	}

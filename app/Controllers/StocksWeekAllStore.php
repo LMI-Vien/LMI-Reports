@@ -33,15 +33,16 @@ class StocksWeekAllStore extends BaseController
 		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-week-all-store'),'Week by Week Stock Data of all Stores' => '');
 		$data["source"] = "VMI";
 		$data["source_date"] = '';
-		$data['content'] = "site/stocks/week-all-store/data-week-all-store";
+		$data['content'] = "site/stocks/week-all-store/data_week_all_store";
 		$data['brand_ambassador'] = $this->Global_model->getBrandAmbassador(0);
 		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
 		$data['month'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
-
 		$data['js'] = array(
+			"assets/site/bundle/js/bundle.min.js"
                     );
         $data['css'] = array(
+        	"assets/site/bundle/css/bundle.min.css"
                     );
 		return view("site/layout/template", $data);
 	}

@@ -38,10 +38,12 @@ class StoreSalesPerfPerArea extends BaseController
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-performance-per-area'),'Store Sales Performance per Area' => '');
 		$data["source"] = "Actual Sales Report / Scan Data";
 		$data["source_date"] = 'Monthly(temp)';	
-		$data['content'] = "site/store/perf-per-area/sales-performance-per-area";
+		$data['content'] = "site/store/perf-per-area/sales_performance_per_area";
 		$data['js'] = array(
+			"assets/site/bundle/js/bundle.min.js"
                     );
         $data['css'] = array(
+        	"assets/site/bundle/css/bundle.min.css"
                     );
 		return view("site/layout/template", $data);
 	}

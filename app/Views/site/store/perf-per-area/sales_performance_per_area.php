@@ -1,159 +1,12 @@
-<?= view("site/store/perf-per-area/sales-performance-per-area-filter"); ?> 
+<?php
+    $dir = dirname(__FILE__);
+    $minify = new \App\Libraries\MinifyLib();
 
-<style>
-    .content-wrapper, .content {
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-        padding-bottom: 30px;
-    }
+    echo $minify->css($dir . '/assets/custom.css', 'Store Custom CSS');
+    echo $minify->js($dir . '/assets/function.js', 'App Functions JS');
+?>
 
-    footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        background: #f8f9fa;
-        padding: 10px;
-        text-align: center;
-        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-    }
-
-    .md-center {
-        padding: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-size: large;
-        font-weight: bold;
-        color: white;
-        text-align: center;
-        border: 1px solid #ffffff;
-        border-radius: 12px;
-        transition: transform 0.2s ease-in-out;
-        background: linear-gradient(90deg, #fdb92a, #ff9800);
-    }
-
-    th {
-        color: #fff;
-        background-color: #301311 !important;
-    }
-
-    .tbl-title-bg {
-        color: #fff;
-        border-radius: 5px;
-        background-color: #143996 !important;
-        padding: 10px;
-        text-align: center;
-    }
-
-    #previewButton{
-        color: #fff;
-        background-color: #143996 !important;
-    }
-
-    .tbl-title-header {
-        border-radius: 8px 8px 0px 0px ;
-        color: #fff;
-        border-radius: 5px;
-        background-color: #301311 ;
-        padding: 10px;
-        text-align: center;
-    }
-    .tbl-title-field {
-        background: linear-gradient(to right, #143996, #007bff);
-        color: #fff;
-        text-align: center;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .filter-button {
-        width: 10em;
-        height: 3em;
-        border-radius: 12px;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    #exportButton {
-        color: white;
-    }
-
-    #previewButton{
-        color: #fff;
-        background-color: #143996 !important;
-    }
-
-    #dataTable4 {
-        table-layout: fixed;
-        width: 100%;
-    }
-
-    .table th {
-        color: white !important;
-    }
-
-    .table-bordered {
-        border: 1px solid #ddd;
-    }
-
-    table {
-        width: 100%;
-        table-layout: fixed; /* Ensures fixed column widths */
-        border-collapse: collapse;
-    }
-
-    th, td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: left;
-        min-width: 100px; /* Prevents shrinking */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .filter_buttons {
-        width: 10em;
-        height: 3em;
-        border-radius: 12px;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-    }
-
-/*    #clearButton {
-        width: 10em;
-        height: 3em;
-        border-radius: 13px;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-    }*/
-
-    /* Title Styling */
-    .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
-        background: linear-gradient(to right, #143996, #007bff);
-        color: white !important;
-        text-align: center;
-        padding: 10px;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .tbl-title-header {
-        border-radius: 8px 8px 0px 0px !important;
-    }
-
-    body .hide-div {
-      display: none;
-    }
-    /* Set specific column widths */
-    th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
-    th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
-    th:nth-child(3), td:nth-child(3) { width: 10%; } /* Area */
-    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Store Name */
-    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Actual Sales */
-    th:nth-child(6), td:nth-child(6) { width: 10%; } /* Target */
-    th:nth-child(7), td:nth-child(7) { width: 10%; } /* % Ach */
-    th:nth-child(8), td:nth-child(8) { width: 10%; } /* Balance To Target */
-    th:nth-child(9), td:nth-child(9) { width: 10%; } /* Possible Incentives */
-    th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days */
-</style>
+<?= view("site/store/perf-per-area/sales_performance_per_area_filter"); ?> 
 
 <div class="wrapper">
     <div class="content-wrapper">
@@ -280,24 +133,6 @@
         </div>
     </div>
 </div>
-
-<!-- DataTables and Script -->
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<!-- <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.0/css/colReorder.dataTables.min.css">
-<script src="https://cdn.datatables.net/colreorder/1.5.0/js/dataTables.colReorder.min.js"></script>
- -->
-
- <!-- FileSaver -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var base_url = "<?= base_url(); ?>";
@@ -471,7 +306,9 @@
                 { data: 'area' },
                 { data: 'asc_names' },
                 { data: 'actual_sales', render: formatTwoDecimals },
+                { data: 'actual_sales', render: formatTwoDecimals },
                 { data: 'target_sales' },
+                { data: 'percent_ach' },
                 { data: 'percent_ach' },
                 { data: 'balance_to_target', render: formatTwoDecimals },
                 { data: 'target_per_remaining_days', render: formatNoDecimals }

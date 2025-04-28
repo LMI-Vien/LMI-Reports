@@ -37,15 +37,18 @@ class StoreSalesPerfPerMonth extends BaseController
 		$data["source_date"] = 'Monthly(temp)';	
 		$data["foot_note"] = 'With BA = Actual Sales, Without BA = Scanned Data';	
 
-		$data['content'] = "site/store/perf-per-month/sales-performance-per-month";
+		$data['content'] = "site/store/perf-per-month/sales_performance_per_month";
 		$data['asc'] = $this->Global_model->getAsc(0);
 		$data['area'] = $this->Global_model->getArea(0);
 		$data['brand'] = $this->Global_model->getBrandData("ASC", 99999, 0);
 		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
 		$data['brand_ambassador'] = $this->Global_model->getBrandAmbassador(0);
 		$data['js'] = array(
+			"assets/site/bundle/js/bundle.min.js",
+			"assets/site/js/chart.min.js"
                     );
         $data['css'] = array(
+        	"assets/site/bundle/css/bundle.min.css"
                     );
 		return view("site/layout/template", $data);
 	}

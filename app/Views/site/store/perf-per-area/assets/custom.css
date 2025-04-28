@@ -1,0 +1,111 @@
+
+    .content-wrapper, .content {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 30px;
+    }
+
+    .md-center {
+        color: white;
+        font-weight: bold;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem; 
+        text-align: center;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    th {
+        color: #fff;
+        background-color: #301311 !important;
+    }
+
+    .paginate_button  {
+        font-size: 1em;
+    }
+
+    .card {
+        border-radius: 12px !important;
+        background: #ffffff;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .card-dark {
+        border-radius: 12px !important;
+        border: #dee2e6, solid, 1px;
+    }
+
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: black !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+    }
+
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate; /* Required for border-radius */
+        border-spacing: 0; /* Ensures borders don't separate */
+        border-radius: 12px 12px 0px 0px;
+        overflow: hidden; /* Ensures inner content respects border-radius */
+    }
+
+    .table th {
+        color: white !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
+    }
+
+    .table thead {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    .table tbody tr {
+        transition: background 0.3s ease-in-out;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(0, 123, 255, 0.1);
+    }
+
+    .paginate_button {
+        font-size: 15px !important;
+    }
+
+    label {
+        display: flex !important;
+        align-items: center;
+        margin-bottom: 0px !important;
+    }
+
+    .swal2-checkbox{
+        display: none !important;
+    }
+
+    body .hide-div {
+      display: none;
+    }
+
+    th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
+    th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
+    th:nth-child(3), td:nth-child(3) { width: 10%; } /* Area */
+    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Store Name */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Actual Sales */
+    th:nth-child(6), td:nth-child(6) { width: 10%; } /* Target */
+    th:nth-child(7), td:nth-child(7) { width: 10%; } /* % Ach */
+    th:nth-child(8), td:nth-child(8) { width: 10%; } /* Balance To Target */
+    th:nth-child(9), td:nth-child(9) { width: 10%; } /* Possible Incentives */
+    th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days */

@@ -36,10 +36,12 @@ class StocksPerStore extends BaseController
 		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-per-store'),'Stock Data per Store' => '');
 		$data["source"] = "VMI";
 		$data["source_date"] = 'Calendar week 1';
-		$data['content'] = "site/stocks/per-store/data-per-store.php";
+		$data['content'] = "site/stocks/per-store/data_per_store";
 		$data['js'] = array(
+			"assets/site/bundle/js/bundle.min.js"
                     );
         $data['css'] = array(
+        	"assets/site/bundle/css/bundle.min.css"
                     );
 		return view("site/layout/template", $data);
 	}

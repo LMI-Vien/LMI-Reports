@@ -1,0 +1,115 @@
+
+    th:nth-child(1), td:nth-child(1) { width: 5%; } /* Rank */
+    th:nth-child(2), td:nth-child(2) { width: 5%; } /* Store Code */
+    th:nth-child(3), td:nth-child(3) { width: 5%; } /* Area */
+    th:nth-child(4), td:nth-child(4) { width: 10%; } /* Store Name */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Actual Sales */
+    th:nth-child(6), td:nth-child(6) { width: 10%; } /* Target */
+    th:nth-child(7), td:nth-child(7) { width: 5%; } /* % Ach */
+    th:nth-child(8), td:nth-child(8) { width: 10%; } /* Balance To Target */
+    th:nth-child(9), td:nth-child(9) { width: 10%; } /* Possible Incentives */
+    th:nth-child(10), td:nth-child(10) { width: 10%; } /* Target per Remaining days */
+    th:nth-child(11), td:nth-child(11) { width: 5%; }
+    th:nth-child(12), td:nth-child(12) { width: 5%; }
+    th:nth-child(13), td:nth-child(13) { width: 10%; } 
+    th:nth-child(14), td:nth-child(14) { width: 5%; } 
+    th:nth-child(15), td:nth-child(15) { width: 5%; } 
+
+    .content-wrapper, .content {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 30px;
+    }
+
+    .md-center {
+        color: white;
+        font-weight: bold;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem; 
+        text-align: center;
+        background: linear-gradient(90deg, #fdb92a, #ff9800);
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
+    }
+    th {
+        color: #fff;
+        background-color: #301311 !important;
+    }
+
+    .tbl-title-bg {
+        color: #fff;
+        border-radius: 5px;
+        background-color: #143996 !important;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .tbl-title-field {
+        /* background: linear-gradient(to right, #007bff, #143996); */
+        background: linear-gradient(to right, #143996, #007bff);
+        color: white !important;
+        text-align: center;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .tbl-title-header {
+        border-radius: 8px 8px 0px 0px !important;
+        font-weight: bold; 
+        color: white;
+        background-color: #301311 !important;
+    }
+
+    #overall_ba_sales_tbl {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .table th {
+        color: white !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd;
+    }
+
+    table {
+        width: 100%;
+        table-layout: fixed; /* Ensures fixed column widths */
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+        min-width: 100px; /* Prevents shrinking */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .filter_buttons {
+        width: 10em;
+        height: 3em;
+        border-radius: 12px;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .card {
+        border-radius: 12px !important;
+        background: #ffffff;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .card-dark {
+        border-radius: 12px !important;
+        border: #dee2e6, solid, 1px;
+    }
+
+    body .hide-div {
+      display: none;
+    }
+    

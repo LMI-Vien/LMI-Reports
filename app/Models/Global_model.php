@@ -156,6 +156,13 @@ class Global_model extends Model
         return $q->getResult();
     }
 
+    function get_by_menu_url($url) {
+        $builder = $this->db->table('site_menu')
+                            ->where("menu_url", $url);
+        $q = $builder->get();
+        return $q->getResult();
+    }
+
     function get_by_site_id($table, $id) {
         $builder = $this->db->table($table)
                             ->where("site_id", $id);
@@ -397,33 +404,6 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         endif;
         // return "$table,$field,$where";
     }
-
-    // public function batch_update($table, $data, $primaryKey, $get_code, $where_in) {
-    //     if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
-    //         return "failed";
-    //     }
-
-    //     if (!isset($get_code)) {
-    //         $get_code = false; // Ensure `$get_code` is always defined
-    //     }
-
-    //     $updateData = [];
-    //     $updatedIds = []; // To store the updated primary keys
-    //     foreach ($data as $row) {
-    //         if (isset($row[$primaryKey]) && in_array($row[$primaryKey], $where_in)) {
-    //             $updateData[] = $row;
-    //             $updatedIds[] = $row[$primaryKey]; 
-    //         }
-
-    //     }
-
-    //     if (empty($updateData)) {
-    //         return "failed"; 
-    //     }
-
-    //     $result = $this->db->table($table)->updateBatch($updateData, $primaryKey);
-    //     return $result ? $updatedIds : "failed";
-    // }
 
     public function batch_update($table, $data, $primaryKey, $get_code = null, $where_in = null) {
         if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
@@ -791,40 +771,6 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         return $builder->get()->getResultArray();
     }
 
-    // public function fetch_existing_new($table, $selected_fields, $filters = [], $field = null, $value = null, $status = false)
-    // {
-    //     if (empty($table) || empty($selected_fields)) {
-    //         return [];
-    //     }
-
-    //     $builder = $this->db->table($table);
-    //     $builder->select($selected_fields);
-
-    //     if ($status == 'true' || $status === true) {
-    //         $builder->where('status >=', 0);            
-    //     }
-
-    //     if ($field) {
-    //         $builder->where($field, $value);
-    //     }
-
-    //     if (!empty($filters)) {
-    //         $field_filter = ['year', 'month', 'week', 'company'];
-
-    //         if (count($filters) === count($field_filter)) {
-    //             $conditions = [];
-    //             foreach ($field_filter as $index => $columnName) {
-    //                 $conditions[$columnName] = $filters[$index]; 
-    //             }
-    //             $builder->groupStart()->Where($conditions)->groupEnd();
-    //         }
-    //     }
-
-    //     $query = $builder->get();
-
-    //     return $query->getResultArray();
-    // }
-
     public function fetch_existing_new($table, $selected_fields, $filters = [], $field_filter = null, $field = null, $value = null, $status = false)
     {
         if (empty($table) || empty($selected_fields)) {
@@ -1145,17 +1091,22 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
     }
 
     function getYears() {
-        $query = $this->db->query("CALL get_years()");
+        $query = $this->db->query("CALL SearchDynamic('tbl_year', null, 'id, year', 9999, 0, 'status:EQ=1', 'year', null)");
         return $query->getResultArray(); // Return data as an array
     }
 
     function getCompanies() {
-        $query = $this->db->query("CALL get_companies()");
+        $query = $this->db->query("CALL SearchDynamic('tbl_company', null, 'id, name', 9999, 0, 'status:EQ=1', 'name', null)");
         return $query->getResultArray(); // Return data as an array
     }
 
+    function getBrandLabelData() {
+        $query = $this->db->query("CALL SearchDynamic('tbl_brand_label_type', null, 'id, label', 9999, 0, null, 'label', null)");
+        return $query->getResultArray(); 
+    }
+
     function getItemClassification() {
-        $query = $this->db->query("CALL SearchDynamic('tbl_classification', null, 'id, item_class_code, item_class_description', 9999, 0, null, 'item_class_code', null)");
+        $query = $this->db->query("CALL SearchDynamic('tbl_classification', null, 'id, item_class_code, item_class_description', 9999, 0, 'status:EQ=1', 'item_class_code', null)");
         return $query->getResultArray(); 
     }
 
