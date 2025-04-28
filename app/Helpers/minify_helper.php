@@ -1,51 +1,71 @@
 <?php
 
-    function css($file,$title =null) {
-        echo "\n";
-        if($title != null){
-            echo "<!--" . $title . "-->" . "\n";
+if (!function_exists('css')) {
+    function css(string $file, string $title = null): void
+    {
+        echo PHP_EOL;
+        if ($title !== null) {
+            echo "<!-- {$title} -->" . PHP_EOL;
         }
-        echo '<style type="text/css">';
-        $Content = minify_css(file_get_contents($file)); 
-        $Content = "?> ".$Content; 
-        eval($Content);
-        echo "</style>\n\n";
-    }
 
-    function js($file,$title =null) {
-        echo "\n";
-        if($title != null){
-            echo "<!--" . $title . "-->" . "\n";
+        if (!file_exists($file)) {
+            echo "<!-- CSS file not found: {$file} -->" . PHP_EOL;
+            return;
         }
-        echo '<script type="text/javascript">';
 
-        $Content = minify_css(file_get_contents($file)); 
-        $Content = "?> ".$Content; 
-        eval($Content);
-        echo "</script>\n\n";
+        echo '<style type="text/css">' . minify_css(file_get_contents($file)) . '</style>' . PHP_EOL . PHP_EOL;
     }
+}
 
-    function minify_css($css) {
+if (!function_exists('js')) {
+    function js(string $file, string $title = null): void
+    {
+        echo PHP_EOL;
+        if ($title !== null) {
+            echo "<!-- {$title} -->" . PHP_EOL;
+        }
+
+        $path = realpath($file);
+        if ($path && file_exists($path)) {
+            echo '<script type="text/javascript">' . minify_js(file_get_contents($path)) . '</script>' . PHP_EOL . PHP_EOL;
+        } else {
+            echo "<!-- JS file not found: {$file} -->" . PHP_EOL;
+        }
+    }
+}
+
+if (!function_exists('minify_css')) {
+    function minify_css(string $css): string
+    {
+        // Remove comments, tabs, spaces, newlines, etc.
         $pattern = '/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
         $css = preg_replace($pattern, '', $css);
-        preg_match_all('/(\'[^\']*?\'|"[^"]*?")/ims', $css, $hit, PREG_PATTERN_ORDER);
-        for ($i=0; $i < count($hit[1]); $i++) {
-            $css = str_replace($hit[1][$i], '##########' . $i . '##########', $css);
-        }
-        $css = preg_replace('/;[\s\r\n\t]*?}[\s\r\n\t]*/ims', "}\r\n", $css);
-        $css = preg_replace('/;[\s\r\n\t]*?([\r\n]?[^\s\r\n\t])/ims', ';$1', $css);
-        $css = preg_replace('/[\s\r\n\t]*:[\s\r\n\t]*?([^\s\r\n\t])/ims', ':$1', $css);
-        $css = preg_replace('/[\s\r\n\t]*,[\s\r\n\t]*?([^\s\r\n\t])/ims', ',$1', $css);
-        $css = preg_replace('/[\s\r\n\t]*{[\s\r\n\t]*?([^\s\r\n\t])/ims', '{$1', $css);
-        $css = preg_replace('/([\d\.]+)[\s\r\n\t]+(px|em|pt|%)/ims', '$1$2', $css);
-        $css = preg_replace('/([^\d\.]0)(px|em|pt|%)/ims', '$1', $css);
-        $css = preg_replace('/\p{Zs}+/ims',' ', $css);
-        $css = str_replace(array("\r\n", "\r", "\n"), '', $css);
-        for ($i=0; $i < count($hit[1]); $i++) {
-            $css = str_replace('##########' . $i . '##########', $hit[1][$i], $css);
-        }
-        return $css;
+        $css = preg_replace('/\s+/', ' ', $css);
+        $css = preg_replace('/\s*([{}|:;,])\s+/', '$1', $css);
+        $css = str_replace(';}', '}', $css);
+        return trim($css);
     }
+}
 
+if (!function_exists('minify_js')) {
+    function minify_js(string $js): string
+    {
+        // 1. Remove single-line comments, but only those not in strings
+        $js = preg_replace('#(?<!:)//.*$#m', '', $js);
 
+        // 2. Remove multi-line comments (/* ... */)
+        $js = preg_replace('#/\*.*?\*/#s', '', $js);
+
+        // 3. Remove unnecessary whitespace (but not inside strings)
+        $tokens = preg_split('/("[^"]*"|\'[^\']*\')/', $js, -1, PREG_SPLIT_DELIM_CAPTURE);
+        foreach ($tokens as $i => $token) {
+            if ($i % 2 == 0) {
+                // Outside of quotes: trim and normalize spaces
+                $tokens[$i] = preg_replace('/\s+/', ' ', $token);
+            }
+        }
+
+        return trim(implode('', $tokens));
+    }
+}
 

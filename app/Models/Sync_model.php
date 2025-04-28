@@ -768,6 +768,54 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Brand with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
+    public function syncBrandLabelData($batchSize = 5000)
+    {
+        $offset = 0;
+        $totalRecordsSynced = 0;
+        $errorMessage = null;
+        $status = 'success';
+        try {
+            while (true) {
+                $sourceData = $this->traccLmiDB->table('brand_label_type')
+                                               ->limit($batchSize, $offset)
+                                               ->get()
+                                               ->getResultArray();
+
+                if (empty($sourceData)) {
+                    break;
+                }
+
+                $values = [];
+                foreach ($sourceData as $row) {
+                    $values[] = "(
+                        '" . addslashes($row['id']) . "',
+                        '" . addslashes($row['label']) . "',
+                        '" . addslashes($row['created_date']) . "',
+                        '" . addslashes($row['modified_date']) . "'
+                    )";
+                }
+
+                if (!empty($values)) {
+                    $sql = "INSERT INTO tbl_brand_label_type (id, label, created_date, modified_date) 
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                              label = VALUES(label), 
+                              created_date = VALUES(created_date),
+                              modified_date = VALUES(modified_date);";
+
+                    $this->sfaDB->query($sql);
+                    $totalRecordsSynced += count($sourceData);
+                }
+
+                $offset += $batchSize;
+            }
+        } catch (\Exception $e) {
+            $status = 'error';
+            $errorMessage = $e->getMessage();
+        }    
+        return $status === 'success' ? "Data sync completed for Brand Label with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    }    
+
     public function syncClassificationData($batchSize = 5000)
     {
         $offset = 0;

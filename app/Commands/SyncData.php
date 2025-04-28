@@ -80,6 +80,7 @@ class SyncData extends BaseCommand
             'syncDataitemfileLMI',
             'syncDataitemfileRGDI',
             'syncBrandData',
+            'syncBrandLabelData',
             'syncClassificationData',
             'syncCusPaymentGroupRgdiData',
             'syncCusPaymentGroupLmiData',
