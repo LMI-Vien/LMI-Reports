@@ -838,4 +838,70 @@ class GlobalController extends BaseController
 	    return $this->response->setJSON($responseData);
 	}
 
+    public function log()
+    {
+        helper('activity_helper');
+
+        $module  = $this->request->getPost('module');
+        $action  = $this->request->getPost('action');
+        $remarks = $this->request->getPost('remarks');
+
+        // You can add validation here if needed
+
+        log_activity($module, $action, $remarks);
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Activity logged successfully.'
+        ]);
+    }
+
+public function save_import_log_file()
+{
+    $content = $this->request->getPost('content');
+    $fileName = $this->request->getPost('fileName');
+
+    if (!$content || !$fileName) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Missing content or filename.'
+        ]);
+    }
+
+    $uploadPath = WRITEPATH . 'uploads/import_logs/'; // e.g., writable/uploads/import_logs/
+
+    // 🛠️ Check if directory exists, if not create it
+    if (!is_dir($uploadPath)) {
+        mkdir($uploadPath, 0777, true); // <-- THIS CREATES the missing folders
+    }
+
+    $filePath = $uploadPath . $fileName;
+
+    if (file_put_contents($filePath, $content) !== false) {
+        $relativePath = 'uploads/import_logs/' . $fileName; // relative path
+        return $this->response->setJSON([
+            'status' => 'success',
+            'file_path' => $relativePath
+        ]);
+    } else {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Failed to write file.'
+        ]);
+    }
+    
+}
+
+public function downloadLog($filename)
+{
+    $filePath = WRITEPATH . 'uploads/import_logs/' . $filename;
+
+    if (!file_exists($filePath)) {
+        throw new \CodeIgniter\Exceptions\PageNotFoundException("File not found.");
+    }
+
+    return $this->response->download($filePath, null);
+}
+
+
 }

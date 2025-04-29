@@ -203,8 +203,17 @@ $routes->group('cms/', static function ($routes) {
     $routes->group('global_controller/', static function ($routes) {
         $routes->post('/', 'Cms\GlobalController::index');
         $routes->get('get_valid_ba_data', 'Cms\GlobalController::get_valid_ba_data');
+        $routes->post('log', 'Cms\GlobalController::log');
+        $routes->post('log', 'Cms\GlobalController::log');
+        $routes->post('save_import_log_file', 'Cms\GlobalController::save_import_log_file');
+        $routes->post('save_import_log_file', 'Cms\GlobalController::save_import_log_file');    
+        
     });
 
+    $routes->group('uploads/', static function ($routes) {
+        $routes->get('download/log/(:any)', 'Cms\GlobalController::downloadLog/$1');   
+    });
+    
     $routes->group('login/', static function ($routes) {
         $routes->get('/', 'Cms\Login::login');
         $routes->get('forgot', 'Cms\Login::forgot');

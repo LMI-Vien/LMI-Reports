@@ -90,5 +90,5 @@ class Autoload extends AutoloadConfig
      *
      * @var list<string>
      */
-    public $helpers = ['standard','minify','emails','string','form','directory','assets','custom','url'];
+    public $helpers = ['standard','minify','emails','string','form','directory','assets','custom','url', 'activity_helper'];
 }
