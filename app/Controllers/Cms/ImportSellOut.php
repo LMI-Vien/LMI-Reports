@@ -167,21 +167,39 @@ class ImportSellOut extends BaseController
 	            $totalInserted = 0;
 
 	            if (str_ends_with($fileName, '.csv')) {
-	                $handle = fopen($finalFilePath, 'r');
-	                if ($handle !== false) {
-	                    $headerSkipped = false;
-	                    $counter = 0;
-	                    $line_number = 0;
-	                    while (($row = fgetcsv($handle, 1000, ",")) !== false) {
-	                        if (!$headerSkipped) {
-	                            $headerSkipped = true;
-	                            continue; 
-	                        }
-	                        $row = array_pad($row, 8, null);
-	                        $counter++;
-	                        $line_number++;
-							if ($counter >= 5) { // look here
-		                        $batchData[] = [
+					$handle = fopen($finalFilePath, 'r');
+					if ($handle !== false) {
+						$allRows = [];
+						$headerSkipped = false;
+				
+						while (($row = fgetcsv($handle, 1000, ",")) !== false) {
+							if (!$headerSkipped) {
+								$headerSkipped = true;
+								continue; // skip header
+							}
+							$allRows[] = array_pad($row, 8, null); // ensure at least 8 columns
+						}
+				
+						fclose($handle);
+				
+						// Remove last line if required
+						if (!empty($placeholder['exclude_last_line']) && $placeholder['exclude_last_line'] === true) {
+							array_pop($allRows);
+						}
+				
+						$totalRows = count($allRows);
+						$startLine = $placeholder['start_line_read'] ?? 1;
+						$endLine = $totalRows - $placeholder['end_line_read'] ?? $totalRows;
+				
+						$counter = 0;
+						$line_number = 0;
+				
+						foreach ($allRows as $row) {
+							$counter++;
+							$line_number++;
+				
+							if ($counter >= $startLine && $counter <= $endLine) {
+								$batchData[] = [
 									'created_date' => date('Y-m-d H:i:s'),
 									'created_by' => $this->session->get('sess_uid'),
 									'stuff' => $line_number.'_stuff',
@@ -192,24 +210,30 @@ class ImportSellOut extends BaseController
 									'template_id' => $template_id,
 									'file_name' => $fileName,
 									'line_number' => $line_number,
-									'store_code' => trim($row[1] ?? ''), // look here
-									'store_description' => trim($row[2] ?? ''), // look here
-									'sku_code' => trim($row[3] ?? ''), // look here
-									'sku_description' => trim($row[4] ?? ''), // look here
-									'gross_sales' => trim($row[5] ?? ''), // look here
-									'quantity' => trim($row[6] ?? ''), // look here
-									'net_sales' => trim($row[7] ?? '') // look here
-		                        ];
-		                    }
-	                        if (count($batchData) === $batchSize) {
-	                            $this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
-	                            $totalInserted += count($batchData);
-	                            $batchData = [];
-	                        }
-	                    }
-	                    fclose($handle);
-	                }
-	            } elseif (str_ends_with($fileName, '.xls') || str_ends_with($fileName, '.xlsx')) {
+									'store_code' => trim($row[1] ?? ''),
+									'store_description' => trim($row[2] ?? ''),
+									'sku_code' => trim($row[3] ?? ''),
+									'sku_description' => trim($row[4] ?? ''),
+									'gross_sales' => trim($row[5] ?? ''),
+									'quantity' => trim($row[6] ?? ''),
+									'net_sales' => trim($row[7] ?? '')
+								];
+							}
+				
+							if (count($batchData) === $batchSize) {
+								$this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
+								$totalInserted += count($batchData);
+								$batchData = [];
+							}
+						}
+				
+						// Insert remaining data
+						if (!empty($batchData)) {
+							$this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
+							$totalInserted += count($batchData);
+						}
+					}
+				} elseif (str_ends_with($fileName, '.xls') || str_ends_with($fileName, '.xlsx')) {
 	                $reader = IOFactory::createReaderForFile($finalFilePath);
 	                $reader->setReadDataOnly(true);
 	                $spreadsheet = $reader->load($finalFilePath);
@@ -217,13 +241,18 @@ class ImportSellOut extends BaseController
 	                $rows = $worksheet->toArray();
 
 	                array_shift($rows); 
+					$totalRows = count($rows);
 	                $counter = 0;
 	                $line_number = 0;
 	                foreach ($rows as $row) {
 	                    $row = array_pad($row, 8, null);
 	                    $counter++;
 	                    $line_number++;
-						if ($counter >= $placeholder['start_line_read'] -1) { // look here
+
+						$startLine = $placeholder['start_line_read'] ?? 1;
+						$endLine = $totalRows - $placeholder['end_line_read'] ?? $totalRows;
+
+						if ($counter >= $startLine && $counter <= $endLine) { // look here
 						
 							$batchData[] = [
 								'created_date' => date('Y-m-d H:i:s'),

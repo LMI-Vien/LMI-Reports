@@ -106,16 +106,6 @@
     let companyString = "";
 
     $(document).ready(function() {
-        const test = async () => {
-            let customer_sku_code_lmi = await fetch(`${url}/get_valid_ba_data?customer_sku_code_lmi=1`);
-            let customer_sku_code_data_lmi = await customer_sku_code_lmi.json();
-            let customer_sku_code_lookup_lmi = {};
-            customer_sku_code_data_lmi.customer_sku_code_lmi.forEach(group => customer_sku_code_lookup_lmi[group.cusitmcde.toLowerCase()] = group.recid);        
-            console.log(customer_sku_code_data_lmi, 'customer_sku_code_data_lmi')
-            console.log(customer_sku_code_lookup_lmi, 'customer_sku_code_lookup_lmi')
-        }
-        test();
-
         decoded = decodeURIComponent(template_id);
         parts = decoded.split("-");
 
@@ -135,7 +125,7 @@
         dynamic_search(
             "'tbl_sell_out_template_header as a'", 
             "'left join tbl_sell_out_template_details b on a.id = b.template_header_id'", 
-            "'a.line_header, b.column_number, b.column_header'", 
+            "'a.line_header, a.end_line_read, b.column_number, b.column_header'", 
             0, 0, 
             "'a.import_file_code:EQ=" + parts[4] + "'", "''", "''", 
             (res) => {
@@ -150,7 +140,8 @@
                 };
 
                 const placeholder = {
-                    start_line_read: parseInt(res[0]?.line_header ?? 1)
+                    start_line_read: parseInt(res[0]?.line_header ?? 1),
+                    end_line_read: parseInt(res[0]?.end_line_read ?? 1)
                 };
 
                 res.forEach(item => {
@@ -299,7 +290,13 @@
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
 
-                if (column === 'status' && typeof value === 'string') {
+                if (['gross_sales', 'net_sales'].includes(column)) {
+                    value = parseFloat(value);
+                    value = isNaN(value) ? "" : value.toFixed(2);
+                } else if (column === 'quantity') {
+                    value = parseFloat(value);
+                    value = isNaN(value) ? "" : value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                } else if (column === 'status' && typeof value === 'string') {
                     value = value.replace(/\s*\(.*?\)/g, "");
                 }
 

@@ -151,10 +151,10 @@
                                     <label for="pay_grp" class="form-label">Customer Payment Group</label>
                                     <input type="text" class="form-control required" id="pay_grp" >
                                 </div>
-    
+
                                 <div class="col-md-6">
-                                    <label for="remarks" class="form-label">Remarks</label>
-                                    <input type="text" class="form-control required" id="remarks" >
+                                    <label for="col_count" class="form-label">Template Column Count</label>
+                                    <input type="text" class="form-control required" id="col_count" >
                                 </div>
                             </div>
 
@@ -165,16 +165,31 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="col_count" class="form-label">Template Column Count</label>
-                                    <input type="text" class="form-control required" id="col_count" >
+                                    <label for="end_line_read" class="form-label">Exclude bottom lines</label>
+                                    <input type="text" class="form-control required" id="end_line_read" >
                                 </div>
                             </div>
 
-                            <small>
-                                <span style="color: red;">Note: </span>
-                                If the header is not on the first line of the import file, specify the exact
-                                row number where the header is located
-                            </small>
+                            <div class="row">
+                                <small class="col-md-6">
+                                    <span style="color: red;">Note: </span>
+                                    If the header is not on the first line of the import file, specify the exact
+                                    row number where the header is located
+                                </small>
+
+                                <small class="col-md-6">
+                                    <span style="color: red;">Note: </span>
+                                    If the header is not on the first line of the import file, specify the exact
+                                    row number where the header is located
+                                </small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label for="remarks" class="form-label">Remarks</label>
+                                    <input type="text" class="form-control required" id="remarks" >
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -995,7 +1010,7 @@
 
     function add_template() {
         $('#template_list_modal').modal('hide');
-        $("#file_code, #file_type, #pay_grp, #remarks, #line_head, #col_count")
+        $("#file_code, #file_type, #pay_grp, #remarks, #line_head, #end_line_read, #col_count")
         .val('')
         let data = [1,2,3,4,5,6,7];
         let html = "";
@@ -1047,6 +1062,7 @@
             customer_payment_group: $("#pay_grp").val(),
             remarks: $("#remarks").val(),
             line_header: $("#line_head").val(),
+            end_line_read: $("#end_line_read").val(),
             template_column_count: $("#col_count").val(),
         };
 
@@ -1085,6 +1101,7 @@
             customer_payment_group: $("#pay_grp").val(),
             remarks: $("#remarks").val(),
             line_header: $("#line_head").val(),
+            end_line_read: $("#end_line_read").val(),
             template_column_count: $("#col_count").val(),
         };
 
@@ -1105,7 +1122,7 @@
                 limit: 1,
                 offset: 0,
                 order: "''",
-                table_fields: "'id, import_file_code, file_type, template_column_count, line_header, customer_payment_group, remarks'",
+                table_fields: "'id, import_file_code, file_type, template_column_count, line_header, end_line_read, customer_payment_group, remarks'",
                 tbl_name: "'tbl_sell_out_template_header'"
             }
 
