@@ -126,12 +126,6 @@
                         <div class="form-group">
                             <div class="row" >
                                 <label class="col" >Store</label>
-                                <input
-                                    type="button"
-                                    value="Add Store"
-                                    class="row add_line"
-                                    onclick="add_line()"
-                                >
                             </div>
                             <div id="store_list"></div>
                             <div id="stores"></div>
@@ -236,8 +230,11 @@
     let stores_under_area = []
 
     let stores = new Set();
+    let removed_stores = [];
+    let added_stores = [];
     let html = "";
-    let paginator = 0;
+    let paginator = 1;
+    let counter = 0;
     
     $(document).ready(function() {
         get_data(query);
@@ -307,6 +304,7 @@
     }
     
     function open_modal(msg, actions, id) {
+        console.log(id);
         window.lastFocusedElement = document.activeElement;
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
@@ -351,9 +349,15 @@
             let line = get_max_number();
 
             let html = `
-            <div id="line" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <input id='store' class='form-control' placeholder='Select store'>
-            </div>
+                <div id="line" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                    <input id='store' class='form-control' placeholder='Select store'>
+                </div>
+                <input
+                    type="button"
+                    value="Add Store"
+                    class="row add_line"
+                    onclick="add_line()"
+                >
             `;
 
             $('#store_list').append(html);
@@ -428,16 +432,24 @@
     }
     
     
-    function add_line() {
+    function add_line(id = null, action = "") {
         
         let store_name = $('#store').val();
 
         if(store_name === '') {
-            // console.log(stores);
+            console.log(stores);
         } else {
+            let store = $('#store').val();
+            added_stores.push(store);
             stores.add($('#store').val());
 
-            renderStores();
+            // console.log(stores);
+
+            if(stores.size >= 11) {
+                renderStores(id, action, true);
+            } else {
+                renderStores(id, action);
+            }
         }
 
         //let line = get_max_number() + 1;
@@ -463,8 +475,14 @@
         get_store('', `store_${line}`);*/
     }
 
-    function renderStores(action = "") {
+    function renderStores(id = null, action = "", pager = false) {
         let store_array = Array.from(stores);
+        console.log("Size", stores.size);
+        console.log(counter);
+
+        // console.log("id", id);
+        // console.log("paginator", paginator);
+        // console.log("action", action);
         
         if(action == "view") {
             html = `
@@ -491,7 +509,9 @@
                 `;
         }
 
-        for(let i = paginator; i < paginator + 10; i++) {
+
+        for(let i = 0; i < 10; i++) {
+            console.log(counter);
             if(store_array[i] != null) {
                 let storeDescription = store_array[i].split(' - ');
                 let rowClass = i % 2 === 0 ? "even-row" : "odd-row";
@@ -502,14 +522,14 @@
                                 <td>${storeDescription[0]}</td>
                                 <td style="width: 60%">${storeDescription[1]}</td>
                             </tr>
-                        `
+                            `
                 } else {
                     html += `
                             <tr class=${rowClass}>
                                 <td>${storeDescription[0]}</td>
                                 <td style="width: 60%">${storeDescription[1]}</td>
                                 <td align=middle>
-                                    <button type="button" class="rmv-btn" onclick="remove_store(${i})">
+                                    <button type="button" class="rmv-btn" onclick="remove_store(${i}, ${id}, '${action}', ${counter})">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
                                     </button>
                                 </td>
@@ -519,58 +539,76 @@
             }
         }
 
-        if(store_array.length > 10) {
-            console.log(paginator > store_array.length ? "disabled" : "");
-            console.log('paginator', paginator);
-            console.log('store array length', store_array.length);
-            html += `
-                                <tr>
-                                    <td colspan=3 align=right>
-                                        <button type="button" class="btn btn-warning" onclick="backPage('${action == "view" ? 'view' : ''}')" ${paginator == 0 ? "disabled" : ""}><</button>
-                                        <button type="button" class="btn btn-warning" onclick="nextPage('${action == "view" ? 'view' : ''}')" ${paginator + 10 > store_array.length ? "disabled" : ""}>></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `
-        }
+        // console.log(stores.size < 10);
+        // console.log(stores.size);
+        // console.log("Stores", stores);
 
+        html += `
+                            <tr>
+                                <td colspan=3 align=right>
+                                    <button type="button" class="btn btn-warning" onclick="backPage(${id}, '${action == "view" ? 'view' : ''}')" ${counter == 0 ? "disabled" : ""}><</button>
+                                    <button type="button" class="btn btn-warning" onclick="nextPage(${id}, '${action == "view" ? 'view' : ''}')" ${(pager && (counter < stores.size)) ? '' : 'disabled'}>></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `
 
         $('#stores').html(html);
         $('#store').val("");
     }
 
-    function backPage(action = "") {
-        if(paginator >= 10) {
-            paginator -= 10;
-    
-            renderStores(action);
+    function backPage(id = null, action = "") {
+        if(paginator >= 1) {
+            paginator -= 1;
+            counter -= 10;
+            
+            if(id) {
+                get_store_list(id, paginator, action);
+            } else {
+                renderStores(id, action, true);
+            }
         }
     }
 
-    function nextPage(action = "") {
-        
+    function nextPage(id = null, action = "") {
         let store_array = Array.from(stores);
+        let pager = (counter - stores.size < 10) ? false : true;
+        // console.log(id);
         
-        if(store_array[paginator + 10] != null) {
-            paginator += 10;
+        paginator += 1;
+        counter += 10;
 
-            renderStores(action);
+        if(id) {
+            get_store_list(id, paginator, action);
+        } else {
+            console.log("hello");
+            renderStores(id, action, pager);
         }
     }
 
-    function remove_store(index) {
+    function remove_store(index, id = null, action = "", counter) {
         let store_array = Array.from(stores);
-        store_array.splice(index, 1);
-        stores = new Set(store_array);
+        
+        removed_stores.push(store_array[index]);
+        
+        stores.delete(store_array[index]);
+        
+        // console.log("Stores", stores);
+        // console.log("Removed", removed_stores);
 
         if(store_array.length <= 10) {
-            paginator = 0;
+            paginator = 1;
         }
 
-        console.log(store_array.length);
+        console.log(stores);
 
-        renderStores();
+        if(stores.size >= 10) {
+            counter = 0;
+        }
+
+        (id, action, (store_count/10 > 1 ? true : false));
+        // console.log(index);
     }
 
     function remove_line(lineId) {
@@ -655,95 +693,207 @@
     //         }
     //     });
     // }
+
+    let store_count = 0;
+    function get_store_count(id, action) {
+        let data = {
+            event: "list",
+            query: "area_id = " + id,
+            select: "id",
+            table: "tbl_store_group"
+        }
+
+        aJax.post(url, data, function(result) {
+            let count = 0;
+            console.log(id);
+
+            if(id == null) {
+                count = stores.size;
+
+                console.log(count);
+            } else {
+                $.each(is_json(result), (x, y) => {
+                    count++;
+                })
+                store_count = count;
+    
+                // console.log("By 10", store_count/10);
+                console.log(store_count);
+    
+                renderStores(id, action, (store_count - counter > 10 ? true : false));
+            }
+        })
+    }
+
+    function get_store_list(area_id, offset, actions) {
+        var url = "<?= base_url('cms/global_controller');?>";
+
+        // console.log(removed_stores ?? removed_stores.map(store => `${store}`).join(','));
+        var data = {
+            query: "a.area_id = " + area_id,
+            event: "list",
+            select: "a.store_id, b.description",
+            limit: 10,
+            offset: offset,
+            table: "tbl_store_group a",
+            join: [
+                {
+                    table: "tbl_store b",
+                    query: "a.store_id = b.id",
+                    type: "left"
+                }
+            ]
+        };
+
+        aJax.post(url, data, function(result) {
+            // console.log("Result", result);
+            // console.log(store_count);
+            let removed = [];
+            // console.log("hello");
+
+            removed_stores.forEach(store => {
+                let store_details = store.split(' - ');
+                let store_code = store_details[0];
+                removed.push(store_code);
+            })
+
+            // console.log(removed);
+            
+            stores = new Set();
+            $.each(is_json(result), (x, y) => {
+                if(!removed.includes(y.store_id)) {
+                    stores.add(y.store_id + ' - ' + y.description);
+                    // console.log(y.description)
+                }
+            })
+            
+            get_store_count(area_id, actions);
+            // 
+        });
+    }
     
     function populate_modal(inp_id, actions, callback) {
-        // clear_stores();
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
-            event: "list", 
+            event: "list",
             select: "id, code, description, status",
-            query: query, 
-            table: "tbl_area"
+            query: query,
+            table: "tbl_area",
         };
-        let store_area = new Set();
+        paginator = 1;
+        removed_stores = [];
+        added_stores = [];
 
         aJax.post(url, data, function(result) {
             var obj = is_json(result);
-            if (obj) {
-                var totalRequests = 0; // Count the total number of AJAX requests
-                var completedRequests = 0; // Track completed requests
 
-                $.each(obj, function(index, d) {
-                    $('#id').val(d.id);
-                    $('#code').val(d.code);
-                    $('#description').val(d.description);
-                    // $('#store').val(d.store);
+            get_store_list(obj[0].id, 1, actions);
+            modal.loading(false);
 
-                    var line = 0;
-                    var readonly = '';
-                    var disabled = '';
-                    // let $store_list = $('#store_list');
-
-                    let html = `
+            let html = `
                         <div id="line" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
                             <input id='store' class='form-control' placeholder='Select store'>
                         </div>
+                        <input
+                            type="button"
+                            value="Add Store"
+                            class="row add_line"
+                            onclick="add_line(${obj[0].id}, '${actions}')"
+                        >
                         `;
 
-                    $('#store_list').append(html);
+            $('#store_list').append(html);
 
-                    $(`#store`).autocomplete({
-                        source: function(request, response) {
-                            var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
-                            var uniqueResults = [...new Set(results)];
-                            response(uniqueResults.slice(0, 10));
-                        },
-                        minLength: 0,
-                    }).focus(function () {
-                        $(this).autocomplete("search", "");
-                    });
+            $(`#store`).autocomplete({
+                source: function(request, response) {
+                    var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+                    var uniqueResults = [...new Set(results)];
+                    response(uniqueResults.slice(0, 10));
+                },
+                minLength: 0,
+            }).focus(function () {
+                $(this).autocomplete("search", "");
+            });
 
-                    get_store('', `store`);
+            get_store('', `store`);
 
-                    // let line = get_max_number();
+            $('#id').val(obj[0].id);
+            $('#code').val(obj[0].code);
+            $('#description').val(obj[0].description);
+            
+            // var obj = is_json(result);
+            // if (obj) {
+            //     var totalRequests = 0; // Count the total number of AJAX requests
+            //     var completedRequests = 0; // Track completed requests
+
+            //     $.each(obj, function(index, d) {
+            //         $('#id').val(d.id);
+            //         $('#code').val(d.code);
+            //         $('#description').val(d.description);
+            //         // $('#store').val(d.store);
+
+            //         var line = 0;
+            //         var readonly = '';
+            //         var disabled = '';
+            //         // let $store_list = $('#store_list');
+
+            //         let html = `
+            //             <div id="line" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+            //                 <input id='store' class='form-control' placeholder='Select store'>
+            //             </div>
+            //             `;
+
+            //         $('#store_list').append(html);
+
+            //         $(`#store`).autocomplete({
+            //             source: function(request, response) {
+            //                 var results = $.ui.autocomplete.filter(storeDescriptions, request.term);
+            //                 var uniqueResults = [...new Set(results)];
+            //                 response(uniqueResults.slice(0, 10));
+            //             },
+            //             minLength: 0,
+            //         }).focus(function () {
+            //             $(this).autocomplete("search", "");
+            //         });
+
+            //         get_store('', `store`);
+
+            //         // let line = get_max_number();
 
                     
-                    $.each(get_area_stores(d.id), (x, y) => {
-                        if (actions === 'view') {
-                            disabled = 'disabled';
-                            readonly = 'readonly';
-                        } else {
-                            readonly = '';
-                            disabled = '';
-                        }
+            //         $.each(get_area_stores(d.id), (x, y) => {
+            //             if (actions === 'view') {
+            //                 disabled = 'disabled';
+            //                 readonly = 'readonly';
+            //             } else {
+            //                 readonly = '';
+            //                 disabled = '';
+            //             }
 
-                        totalRequests++;
-                        // Pass the callback to the get_field_values function
-                        get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
-                            for (let key in res) {
-                                get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
-                                    if (actions === 'edit') {
-                                        readonly = (line == 0) ? 'readonly' : '';
-                                        disabled = (line == 0) ? 'disabled' : '';
-                                    }
+            //             totalRequests++;
+            //             // Pass the callback to the get_field_values function
+            //             get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
+            //                 for (let key in res) {
+            //                     get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
+            //                         if (actions === 'edit') {
+            //                             readonly = (line == 0) ? 'readonly' : '';
+            //                             disabled = (line == 0) ? 'disabled' : '';
+            //                         }
 
-                                    stores.add(key + ' - ' + res[key]);
-                                });
-                            }
-                        });
-                    });
-                    
-                    renderStores('view');
-                    modal.loading(false);
+            //                         stores.add(key + ' - ' + res[key]);
+            //                     });
+            //                 }
+            //             });
+            //         });
 
-                    if (d.status == 1) {
-                        $('#status').prop('checked', true);
-                    } else {
-                        $('#status').prop('checked', false);
-                    }
-                });
-            }
+            //         if (d.status == 1) {
+            //             $('#status').prop('checked', true);
+            //         } else {
+            //             $('#status').prop('checked', false);
+            //         }
+            //     });
+            // }
     
         });
     }
@@ -1329,11 +1479,10 @@
                 field : field,
                 order : order 
             }
-
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); 
+            var obj = is_json(result);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
@@ -1398,42 +1547,47 @@
                                 console.log('Has duplicate');
                                 modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
                             } else {
-                                let batch = [];
-                                get_field_values('tbl_store', 'id', 'description', ids, (res) => {
-                                    if(res.length == 0) {
-                                        valid = false;
-                                    } else {
-                                        modal_alert = 'success';
-                                        $.each(res, (x, y) => {
-                                            let data = {
-                                                'area_id': id,
-                                                'store_id': y,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date())
-                                            };
-                                            batch.push(data);
-                                        })
-                                    }
+                                console.log("ID", id);
+                                console.log("Removed", removed_stores);
+                                console.log("Added", added_stores);
+                                
+                                // DELETE FROM tbl_store_group WHERE area_id = id AND store_id = store_code
+                                // let batch = [];
+                                // get_field_values('tbl_store', 'id', 'description', ids, (res) => {
+                                //     if(res.length == 0) {
+                                //         valid = false;
+                                //     } else {
+                                //         modal_alert = 'success';
+                                //         $.each(res, (x, y) => {
+                                //             let data = {
+                                //                 'area_id': id,
+                                //                 'store_id': y,
+                                //                 'created_by': user_id,
+                                //                 'created_date': formatDate(new Date())
+                                //             };
+                                //             batch.push(data);
+                                //         })
+                                //     }
 
-                                    console.log(batch);
-                                })
+                                //     console.log(batch);
+                                // })
     
-                                if(valid) {
-                                    save_to_db(code, description, store, status_val, id, (obj) => {
-                                        total_delete(url, 'tbl_store_group', 'area_id', id);
+                                // if(valid) {
+                                //     save_to_db(code, description, store, status_val, id, (obj) => {
+                                //         total_delete(url, 'tbl_store_group', 'area_id', id);
     
-                                        batch_insert(url, batch, 'tbl_store_group', false, () => {
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
-                                            });
-                                        })
-                                    })
+                                //         batch_insert(url, batch, 'tbl_store_group', false, () => {
+                                //             modal.loading(false);
+                                //             modal.alert(success_update_message, "success", function() {
+                                //                 location.reload();
+                                //             });
+                                //         })
+                                //     })
                                     
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('Store not found', 'error', function() {});
-                                }
+                                // } else {
+                                //     modal.loading(false);
+                                //     modal.alert('Store not found', 'error', function() {});
+                                // }
                             }
 
                         }
@@ -1467,43 +1621,45 @@
                                 console.log('Has duplicate');
                                 modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
                             } else {
-                                let batch = [];
-                                get_field_values('tbl_store', 'id', 'description', ids, (res) => {
-                                    console.log(res);
-                                    if(res.length == 0) {
-                                        valid = false;
-                                    } else {
-                                        modal_alert = 'success';
-                                        $.each(res, (x, y) => {
-                                            let data = {
-                                                'area_id': id,
-                                                'store_id': y,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date())
-                                            };
-                                            batch.push(data);
-                                        })
-                                    }
+                                console.log("Removed", removed_stores);
+                                console.log("Added", added_stores);
+                                // let batch = [];
+                                // get_field_values('tbl_store', 'id', 'description', ids, (res) => {
+                                //     console.log(res);
+                                //     if(res.length == 0) {
+                                //         valid = false;
+                                //     } else {
+                                //         modal_alert = 'success';
+                                //         $.each(res, (x, y) => {
+                                //             let data = {
+                                //                 'area_id': id,
+                                //                 'store_id': y,
+                                //                 'created_by': user_id,
+                                //                 'created_date': formatDate(new Date())
+                                //             };
+                                //             batch.push(data);
+                                //         })
+                                //     }
 
-                                    console.log(batch);
-                                })
+                                //     console.log(batch);
+                                // })
     
-                                if(valid) {
-                                    save_to_db(code, description, store, status_val, id, (obj) => {
-                                        insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
+                                // if(valid) {
+                                //     save_to_db(code, description, store, status_val, id, (obj) => {
+                                //         insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
         
-                                        batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
-                                            });
-                                        })
-                                    })
+                                //         batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
+                                //             modal.loading(false);
+                                //             modal.alert(success_update_message, "success", function() {
+                                //                 location.reload();
+                                //             });
+                                //         })
+                                //     })
                                     
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('Store not found', 'error', function() {});
-                                }
+                                // } else {
+                                //     modal.loading(false);
+                                //     modal.alert('Store not found', 'error', function() {});
+                                // }
                             }
                         }
                     });
