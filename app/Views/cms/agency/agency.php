@@ -538,7 +538,7 @@
                 action: "Update",
                 remarks: "Updated agency information",
                 new_data: JSON.stringify(updated_data),
-                old_data: `ID: ${id}`
+                old_data: ''
             });
 
             data = {
@@ -563,7 +563,7 @@
                 action: "Insert",
                 remarks: "Inserted new agency",
                 new_data: JSON.stringify(inserted_data),
-                old_data: "N/A"
+                old_data: ""
             });
 
             data = {
@@ -588,8 +588,7 @@
                     <br>Duration: ${duration}
                 `;
                 const link = '-';
-
-                logActivity("Agency Module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
+                logActivity("Manual Insert Palitan mo to Agency Module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
                 
                 modal.loading(false);
                 modal.alert(modal_alert_success, 'success', function () {

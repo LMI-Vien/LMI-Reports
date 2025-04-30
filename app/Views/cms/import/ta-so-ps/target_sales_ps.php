@@ -81,15 +81,9 @@
                                         <th class='center-content'>Imported Date</th>
                                         <th class='center-content'>Imported By</th>
                                         <th class='center-content'>Year</th>
+                                        <th class='center-content'>Status</th>   
                                         <th class='center-content'>Date Modified</th>
                                         <th class='center-content'>Action</th>
-                                        <!-- <th class='center-content'><input class="selectall" type="checkbox"></th>
-                                        <th class='center-content'>Location</th>
-                                        <th class='center-content'>Location Description</th>
-                                        <th class='center-content'>Status</th>
-                                        <th class='center-content'>Date Created</th>
-                                        <th class='center-content'>Date Modified</th>
-                                        <th class='center-content'>Action</th> -->
                                     </tr>
                                 </thead>
                                 <tbody class="table_body word_break"></tbody>
@@ -419,6 +413,7 @@
                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                     html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
                     html += "<td scope=\"col\">" + (y.year) + "</td>";
+                    html += "<td scope=\"col\">" + (y.status) + "</td>";
                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                     let href = "<?= base_url()?>"+"cms/import-target-sales-ps/view/"+`${y.year}`;
@@ -944,7 +939,7 @@
         $(".import_buttons").find("a.download-error-log").remove();
         setTimeout(() => {
             btn.prop("disabled", false);
-        }, 4000);
+        }, 2000);
         const year = $('#yearSelect').val()?.trim();
 
         const fields = { year };
@@ -1010,11 +1005,11 @@
                     ...record,
                     year: year,
                 }));
-                console.log(year);
-                checkDataSalesPerStore(year);
-                //saveValidatedData(new_data);
+                console.log(year, 'year');
+                checkDataSalesPerStore(year, new_data);
+                //
             } else {
-                modal.alert("No valid data found. Please check the file.", "error");
+                return modal.alert(`No valid data found. Please check the file.`, 'error', () => {});
             }
         };
 
@@ -1086,13 +1081,10 @@
         updatePaginationControls();
     }
 
-    function checkDataSalesPerStore(year){
-        new_query = "a.year = "+year;
+    function checkDataSalesPerStore(year, new_data){
+        new_query = "status = 1 AND a.year = "+year;
         var data = {
             event: "list",
-            // select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
-            // "a.july, a.august, a.september, a.october, a.november, a.december, "+
-            // "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status",
             select: "a.created_date , a.year",
             query: new_query,
             offset: offset,
@@ -1106,7 +1098,14 @@
         };
 
         aJax.post(url, data, function(result) {
-            console.log(result);
+            result = is_json(result);
+            if(result.length > 0){
+                console.log('here');
+                return modal.alert(`Target Sales Per Store Data Already Exist!`, 'error', () => {});
+            }else{
+                saveValidatedData(new_data);
+            }
+            
         });
     }
 

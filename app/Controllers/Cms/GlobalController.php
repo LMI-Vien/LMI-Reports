@@ -511,14 +511,9 @@ class GlobalController extends BaseController
 
 					//insert audit trail	 
 	                if(isset($data['status'])){
-
 	                    if($data['status'] == -2){
-	                    	print_r($old_data);
-					die();
 	                        $this->audit_trail_controller("Delete", $data, $old_data);    
 	                    } else {
-	                    	print_r($old_data);
-					die();
 	                        $this->audit_trail_controller("Update", $data, $old_data);
 	                    }
 	                } else {
