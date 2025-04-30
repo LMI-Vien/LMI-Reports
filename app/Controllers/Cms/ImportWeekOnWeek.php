@@ -59,6 +59,8 @@ class ImportWeekOnWeek extends BaseController
 			$chunkIndex = $this->request->getPost('chunkIndex');
 	        $totalChunks = $this->request->getPost('totalChunks');
 	        $fileName = $this->request->getPost('fileName');
+			$year = $this->request->getPost('year');
+			$week = $this->request->getPost('week');
 
 			if (!$file) {
 				return $this->response->setJSON(['message' => 'No file received.']);
@@ -115,6 +117,8 @@ class ImportWeekOnWeek extends BaseController
 									'stuff' => $line_number.'_stuff',
 									'file_name' => $fileName,
 									'line_number' => $line_number,
+									'year' => $year,
+									'week' => $week,
 		                        ];
 		                    }
 	                        if (count($batchData) === $batchSize) {
@@ -146,6 +150,8 @@ class ImportWeekOnWeek extends BaseController
 								'stuff' => $line_number.'_stuff',
 								'file_name' => $fileName,
 								'line_number' => $line_number,
+								'year' => $year,
+								'week' => $week,
 								'item' => trim($row[0] ?? ''), // look here
 								'item_name' => trim($row[1] ?? ''), // look here
 								'label_type' => trim($row[2] ?? ''), // look here
@@ -195,8 +201,10 @@ class ImportWeekOnWeek extends BaseController
 		$page = $this->request->getGet('page') ?? 1;
 		$limit = $this->request->getGet('limit') ?? 1000;
 		$file_name = $this->request->getGet('file_name');
+		$year = $this->request->getGet('year');
+		$week = $this->request->getGet('week');
 
-		$result = $this->Global_model->fetch_wkonwk_data($limit, $page, $file_name, $this->session->get('sess_uid'));
+		$result = $this->Global_model->fetch_wkonwk_data($limit, $page, $file_name, $this->session->get('sess_uid'), $year, $week);
 		return $this->response->setJSON([
 			"success" => true,
 			"data" => $result['data'],
@@ -206,7 +214,9 @@ class ImportWeekOnWeek extends BaseController
 
 	public function deleteTempWeekOnWeekData(){
 		$file_name = $this->request->getPost('file_name');
-		$result = $this->Global_model->delete_temp_wkonwk($this->session->get('sess_uid'), $file_name);
+		$year = $this->request->getPost('year');
+		$week = $this->request->getPost('week');
+		$result = $this->Global_model->delete_temp_wkonwk($this->session->get('sess_uid'), $file_name, $year, $week);
 		echo $result;
 	}
 
