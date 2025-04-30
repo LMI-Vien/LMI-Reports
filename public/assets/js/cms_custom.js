@@ -502,6 +502,14 @@ var modal = {
 		    }
 		  });
 	},
+	show: function(message, size, cb) {
+	    Swal.fire({
+	        html: message,
+	        width: size === 'large' ? '60%' : (size === 'small' ? '30%' : '40%'),
+	        confirmButtonText: 'OK',
+	        willClose: cb
+	    });
+	},
 	alert_custom: function(title, text, icon, cb) {
 	    Swal.close();
 	    Swal.fire({
@@ -1665,6 +1673,69 @@ function autocomplete_field_multi(field, field_id, options, description = "descr
 	});
 }
 
+function logActivity(module, action, remarks, link, new_data, old_data) {
+    $.ajax({
+        url: base_url+"cms/global_controller/log", 
+        method: 'POST',
+        data: {
+            module: module,
+            action: action,
+            remarks: remarks,
+            link: link,
+            new_data: new_data,
+            old_data: old_data
+        },
+        success: function(response) {
+            console.log(response.message); // success confirmation
+        },
+        error: function(xhr, status, error) {
+            console.error('Logging failed:', error);
+        }
+    });
+}
+
+function formatDuration(start, end) {
+    const diffMs = end - start;
+    const seconds = Math.floor((diffMs / 1000) % 60);
+    const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    return `${hours}h ${minutes}m ${seconds}s`;
+}
+
+function saveImportDetailsToServer(data, headers = [], filePrefix = 'import_details', callback) {
+    const now = new Date();
+    const safeFileName = `${filePrefix}_${formatReadableDate(now, true).replace(/[:,\s]/g, '')}.txt`;
+    const headerLine = headers.join(', ');
+
+    const contentLines = data.map(row => {
+        return headers.map(key => row[key] || 'N/A').join(', ');
+    });
+
+    const fileContent = [headerLine, ...contentLines].join("\n");
+    const formData = new FormData();
+    formData.append('content', fileContent);
+    formData.append('fileName', safeFileName);
+
+    $.ajax({
+        url: "<?= base_url('cms/global_controller/save_import_log_file') ?>",
+        method: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.status === 'success') {
+                callback(response.file_path);
+            } else {
+                console.error('Error saving file:', response.message);
+                callback(null);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', error);
+            callback(null);
+        }
+    });
+}
 
 // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⡹⢎⡔⢠⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⡀⠄⡀⠠⢀⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
 // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣻⣟⣿⡽⢧⡙⢌⠰⠁⠠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠡⠀⠌⠾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿

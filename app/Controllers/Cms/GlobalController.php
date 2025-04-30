@@ -504,16 +504,21 @@ class GlobalController extends BaseController
 					//get old data for audit trail
 					$query = $field . " = " . $where;
 					$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*" ,null,null,null);
-					
+
 					//update new data
 					$status = $this->Global_model->update_data($table,$data,$field,$where);
 					echo $status;	
 
 					//insert audit trail	 
 	                if(isset($data['status'])){
+
 	                    if($data['status'] == -2){
+	                    	print_r($old_data);
+					die();
 	                        $this->audit_trail_controller("Delete", $data, $old_data);    
 	                    } else {
+	                    	print_r($old_data);
+					die();
 	                        $this->audit_trail_controller("Update", $data, $old_data);
 	                    }
 	                } else {
@@ -760,9 +765,10 @@ class GlobalController extends BaseController
 	{
 		$session = session();
 		// $data2['site_id'] = isset($new_data['site_id'])?$new_data['site_id']:null;
-	    $data2['user_id'] = $session->sess_uid;
-	  	$data2['url'] =str_replace(base_url("cms") . '/', "", $_SERVER['HTTP_REFERER']); ;
+	    $data2['user'] = $session->sess_name;
 	  	$data2['action'] = strip_tags(ucwords($action));
+	  	$data2['remarks'] = '';
+	  	$data2['module'] =str_replace(base_url("cms") . '/', "", $_SERVER['HTTP_REFERER']); ;
 	  	if($new_data != null){
 	  		$data2['new_data'] = json_encode($new_data);
 	  	}
@@ -770,9 +776,10 @@ class GlobalController extends BaseController
 	  	if($old_data != null){
 	  		$data2['old_data'] = json_encode($old_data);
 	  	}
-	  	
-	  	$data2['created_date'] = date('Y-m-d H:i:s'); 
-	  	$this->Global_model->save_data('cms_audit_trail',$data2);
+	  	$data2['link'] = '-'; 
+	  	$data2['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; 
+	  	$data2['created_at'] = date('Y-m-d H:i:s'); 
+	  	$this->Global_model->save_data('activity_logs',$data2);
 	}
 
 	public function audit_trail()
@@ -845,10 +852,13 @@ class GlobalController extends BaseController
         $module  = $this->request->getPost('module');
         $action  = $this->request->getPost('action');
         $remarks = $this->request->getPost('remarks');
+        $link = $this->request->getPost('link');
+        $new_data = $this->request->getPost('new_data');
+        $old_data = $this->request->getPost('old_data');
 
         // You can add validation here if needed
 
-        log_activity($module, $action, $remarks);
+        log_activity($module, $action, $remarks, $link, $new_data, $old_data);
 
         return $this->response->setJSON([
             'status'  => 'success',
@@ -876,9 +886,9 @@ public function save_import_log_file()
     }
 
     $filePath = $uploadPath . $fileName;
-
+    $base_url = base_url();
     if (file_put_contents($filePath, $content) !== false) {
-        $relativePath = 'uploads/import_logs/' . $fileName; // relative path
+        $relativePath = '/cms/uploads/download/log/' . $fileName; // relative path
         return $this->response->setJSON([
             'status' => 'success',
             'file_path' => $relativePath

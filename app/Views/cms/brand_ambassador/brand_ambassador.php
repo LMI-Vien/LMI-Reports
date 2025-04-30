@@ -1762,7 +1762,9 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
             if (id !== undefined && id !== null && id !== '') {
                 code = $('#code').val();
-                check_current_db("tbl_brand_ambassador", ["store", "code"], [store, code], "status", "id", id, true, function(exists) {
+                //check_current_db("tbl_brand_ambassador", ["store", "code"], [store, code], "status", "id", id, true, function(exists) {
+                check_current_db("tbl_brand_ambassador", ["store", "code"], [code, agency], "status" , "id", id, true, function(exists, duplicateFields) {
+
                     if (!exists) {
                         modal.confirm(confirm_update_message, function(result) {
                             if (result) {
@@ -1889,6 +1891,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
         if (id !== undefined && id !== null && id !== '') {
             modal_alert_success = success_update_message;
+            console.log('here');
             data = {
                 event: "update",
                 table: "tbl_brand_ambassador",

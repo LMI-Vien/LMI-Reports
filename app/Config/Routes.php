@@ -186,7 +186,7 @@ $routes->group('cms/', static function ($routes) {
     $routes->get('announcement', 'Cms\Announcement::index');
 
     //Audit trail
-    $routes->group('audit-trail/', static function ($routes) {
+    $routes->group('audit-logs/', static function ($routes) {
         $routes->get('/', 'Cms\AuditTrail::index');
     });
 

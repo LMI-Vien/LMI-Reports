@@ -262,12 +262,10 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
                 v.id,
                 c.name AS company,
                 y.year,
-                m.month,
-                w.name AS week,
+                v.week AS week,
                 v.created_date,
                 v.updated_date,
                 v.year as filter_year,
-                v.month as filter_month,
                 v.week as filter_week,
                 v.company as filter_company,
                 u.name AS imported_by,
@@ -279,8 +277,6 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
             LEFT JOIN cms_users u ON u.id = v.created_by
             LEFT JOIN tbl_company c ON c.id = v.company
             LEFT JOIN tbl_year y ON y.id = v.year
-            LEFT JOIN tbl_month m ON m.id = v.month
-            LEFT JOIN tbl_week w ON w.id = v.week
             " . ($query ? "WHERE $query" : "") . "
         ) t
         WHERE row_num = 1

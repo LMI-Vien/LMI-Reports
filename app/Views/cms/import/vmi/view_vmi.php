@@ -27,11 +27,10 @@
                     <input type="text" class="form-control p-2 col-3" id="year" readonly disabled>
                 </div>
                 <div class="d-flex flex-row">
-                    <label for="month" class="form-label p-2 col-2">Month</label>
-                    <input type="text" class="form-control p-2 col-3" id="month" readonly disabled>
-                    <div class="p-2 col-1"></div>
-                    <label for="week" class="form-label p-2 col-3">Week</label>
+                    <label for="week" class="form-label p-2 col-2">Week</label>
                     <input type="text" class="form-control p-2 col-3" id="week" readonly disabled>
+                    <div class="p-2 col-1"></div>
+                    <label for="week" class="form-label p-2 col-3"></label>
                 </div>
             </div>
             <div class="box">
@@ -77,7 +76,7 @@
 <script>
     var params = "<?=$uri->getSegment(4);?>";
     paramlist = params.split('-')
-    var query = `v.status >= 0 and c.name = '${paramlist[0]}' and y.year = '${paramlist[1]}' and m.month = '${paramlist[2]}' and w.name = '${decodeURIComponent(paramlist[3])}'`;
+    var query = `v.status >= 0 and c.name = '${paramlist[0]}' and y.year = '${paramlist[1]}' and v.week = '${decodeURIComponent(paramlist[2])}'`;
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
@@ -86,8 +85,7 @@
         $("#sell_out_title").html(addNbsp("VIEW VMI DATA"));
         $("#company").val(paramlist[0]);
         $("#year").val(paramlist[1]);
-        $("#month").val(paramlist[2]);
-        $("#week").val(decodeURIComponent(paramlist[3]));
+        $("#week").val(decodeURIComponent(paramlist[2]));
 
         get_data(query);
         get_pagination(query);
@@ -118,11 +116,6 @@
                 {
                     table: "tbl_year y",
                     query: "y.id = v.year",
-                    type: "left"
-                },
-                {
-                    table: "tbl_month m",
-                    query: "m.id = v.month",
                     type: "left"
                 },
                 {
@@ -205,11 +198,6 @@
                 {
                     table: "tbl_year y",
                     query: "y.id = v.year",
-                    type: "left"
-                },
-                {
-                    table: "tbl_month m",
-                    query: "m.id = v.month",
                     type: "left"
                 },
                 {

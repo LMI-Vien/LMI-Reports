@@ -1211,11 +1211,13 @@
                     if (matchedId) {
                         row.id = matchedId;
                         row.updated_by = user_id;
+                        row.status = 3;
                         row.updated_date = formatDate(new Date());
                         delete row.created_date; // Unset created_date
                         updateRecords.push(row);
 
                     } else {
+                        row.status = 3;
                         row.created_by = user_id;
                         row.created_date = formatDate(new Date());
                         newRecords.push(row);

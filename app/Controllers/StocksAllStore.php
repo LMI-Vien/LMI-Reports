@@ -21,6 +21,22 @@ class StocksAllStore extends BaseController
 
 	public function dataAllStore()
 	{	
+
+	// log_activity('Inventory', 'Sync', 'Successfully Sync Tracc to Ginee Inventory!
+	// Saving Time : 
+	// Start : 2025-01-09 03:38:08 PM
+	// End : 2025-01-09 03:38:09 PM
+	// Duration : 0 Hours, 0 Minutes, 1 Seconds.
+	// Process Items : 
+	// Date Encoded : 2025-01-09
+	// Date Modified : 2025-01-09
+
+	// Details
+	// SKU Code	Item Description	Warehouse Location	Tracc Inventory	Ginee Inventory	
+	// CD020	Cathy Doll Aqua Non Greasy Body Sun Serum SPF50 10ml	ONLINE	337	252	
+	// CD021	Cathy Doll Aura Whitening Serum Foam Cleanser 100ml	ONLINE	180	20
+	// ');
+
 		$data['meta'] = array(
 			"title"         =>  "LMI Portal",
 			"description"   =>  "LMI Portal Wep application",

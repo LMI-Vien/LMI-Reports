@@ -11,7 +11,7 @@ if (!function_exists('log_activity')) {
      * @param string $remarks
      * @return void
      */
-    function log_activity(string $module, string $action, string $remarks = '')
+    function log_activity(string $module, string $action, string $remarks = '', string $link = '', string $new_data = '', string $old_data = '')
     {
         $db = \Config\Database::connect();
 
@@ -22,6 +22,9 @@ if (!function_exists('log_activity')) {
             'module'      => $module,
             'action'      => $action,
             'remarks'     => $remarks,
+            'link'        => $link,
+            'new_data'     => $new_data,
+            'old_data'     => $old_data,
             'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
             'created_at'  => date('Y-m-d H:i:s'),
         ];

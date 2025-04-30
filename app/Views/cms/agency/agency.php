@@ -519,45 +519,86 @@
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
+        const now = new Date();
+        const start_time = now;
+        let valid_data = []; // to log into file
 
         if (id !== undefined && id !== null && id !== '') {
             modal_alert_success = success_update_message;
+            const updated_data = {
+                code: inp_code,
+                agency: inp_agency,
+                updated_date: formatDate(now),
+                updated_by: user_id,
+                status: status_val
+            };
+
+            valid_data.push({
+                module: "Agency Module",
+                action: "Update",
+                remarks: "Updated agency information",
+                new_data: JSON.stringify(updated_data),
+                old_data: `ID: ${id}`
+            });
+
             data = {
                 event: "update",
                 table: "tbl_agency",
                 field: "id",
                 where: id,
-                data: {
-                    code: inp_code,
-                    agency: inp_agency,
-                    updated_date: formatDate(new Date()),
-                    updated_by: user_id,
-                    status: status_val
-                }
+                data: updated_data
             };
         } else {
             modal_alert_success = success_save_message;
+            const inserted_data = {
+                code: inp_code,
+                agency: inp_agency,
+                created_date: formatDate(now),
+                created_by: user_id,
+                status: status_val
+            };
+
+            valid_data.push({
+                module: "Agency Module",
+                action: "Insert",
+                remarks: "Inserted new agency",
+                new_data: JSON.stringify(inserted_data),
+                old_data: "N/A"
+            });
+
             data = {
                 event: "insert",
                 table: "tbl_agency",
-                data: {
-                    code: inp_code,
-                    agency: inp_agency,
-                    created_date: formatDate(new Date()),
-                    created_by: user_id,
-                    status: status_val
-                }
+                data: inserted_data
             };
         }
 
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function() {
-                location.reload();
-            });
+        aJax.post(url, data, function(result) {
+            const obj = is_json(result);
+            const end_time = new Date();
+            const duration = formatDuration(start_time, end_time);
+            //const headers = ['module', 'action', 'remarks', 'new_data', 'old_data'];
+
+            //saveImportDetailsToServer(valid_data, headers, 'agency_logs', function(filePath) {
+                const remarks = `
+                    Action: ${valid_data[0].action}
+                    <br>${valid_data[0].remarks}
+                    <br>Start Time: ${formatReadableDate(start_time)}
+                    <br>End Time: ${formatReadableDate(end_time)}
+                    <br>Duration: ${duration}
+                `;
+                const link = '-';
+
+                logActivity("Agency Module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
+                
+                modal.loading(false);
+                modal.alert(modal_alert_success, 'success', function () {
+                    location.reload();
+                });
+            //});
         });
     }
+
 
     function delete_data(id) {
         get_field_values('tbl_agency', 'code', 'id', [id], function(res) {

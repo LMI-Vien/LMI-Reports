@@ -24,7 +24,28 @@
             $('.table-empty').show();
             $('#refreshButton').click();
         });
+        
+        var remarks = `Successfully Sync Tracc to Ginee Inventory!\nSaving Time:\nStart: 2025-01-09 03:38:08 PM\nEnd: 2025-01-09 03:38:09 PM\nDuration: 1 Second.\n\nDetails:\nSKU: CD020 - Cathy Doll Aqua Non Greasy Body Sun Serum SPF50 10ml`;
+        logActivity('Inventory', 'Sync', remarks);
     });
+
+    function logActivity(module, action, remarks) {
+        $.ajax({
+            url: base_url+"cms/global_controller/log", 
+            method: 'POST',
+            data: {
+                module: module,
+                action: action,
+                remarks: remarks
+            },
+            success: function(response) {
+                console.log(response.message); // success confirmation
+            },
+            error: function(xhr, status, error) {
+                console.error('Logging failed:', error);
+            }
+        });
+    }
 
     $(document).on('click', '#refreshButton', function () {
         const fields = [
