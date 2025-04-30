@@ -393,7 +393,7 @@
         $('#filter_modal').modal('hide');
     })
 
-    function get_data(query, field = "code, updated_date", order = "asc, desc") {
+    function get_data(query, field = "id, updated_date", order = "asc, desc") {
         var data = {
             event : "list",
             select : "id, code, description, status, updated_date, created_date",
@@ -494,6 +494,111 @@
         open_modal('View Store/Branch', 'view', id);
     };
 
+    // fully functional
+    // function open_modal(msg, actions, id) {
+    //     window.lastFocusedElement = document.activeElement;
+    //     $(".form-control").css('border-color','#ccc');
+    //     $(".validate_error_message").remove();
+    //     let $modal = $('#popup_modal');
+
+    //     let $baName_list = $('#baName_list');
+
+    //     let $footer = $modal.find('.modal-footer');
+    //     let $contentWrapper = $('.content-wrapper');
+
+    //     $modal.find('.modal-title b').html(addNbsp(msg));
+    //     reset_modal_fields();
+
+    //     let buttons = {
+    //         save: create_button('Save', 'save_data', 'btn save', function () {
+    //             if (validate.standard("form-modal")) {
+    //                 save_data('save', null);
+    //             }
+    //         }),
+    //         edit: create_button('Update', 'edit_data', 'btn update', function () {
+    //             if (validate.standard("form-modal")) {
+    //                 save_data('update', id);
+    //             }
+    //         }),
+    //         close: create_button('Close', 'close_data', 'btn caution', function () {
+    //             $modal.modal('hide');
+    //         })
+    //     };
+
+    //     // if (['edit', 'view'].includes(actions)) populate_modal(id);
+    //     if (['edit', 'view'].includes(actions)) {
+    //         populate_modal(id, actions, () => {
+    //             modal.loading(false); 
+    //         });
+    //     }
+        
+    //     let isReadOnly = actions === 'view';
+    //     set_field_state('#code, #description, #status', isReadOnly);
+
+    //     $baName_list.empty()        
+    //     $footer.empty();
+    //     if (actions === 'add') {
+            
+    //         let line = get_max_number();
+
+    //         let html = `
+    //         <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+    //             <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador'>
+    //             <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
+    //                 <i class="fa fa-minus" aria-hidden="true"></i>
+    //             </button>
+    //         </div>
+    //         `;
+
+    //         $('#baName_list').append(html);
+
+    //         $(`#baName_${line}`).autocomplete({
+    //             source: function(request, response) {
+    //                 var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
+    //                 var uniqueResults = [...new Set(results)];
+    //                 response(uniqueResults.slice(0, 10));
+    //             },
+    //             minLength: 0,
+    //         }).focus(function () {
+    //             $(this).autocomplete("search", "");
+    //         });
+            
+    //         $('.add_line').attr('disabled', false)
+    //         $('.add_line').attr('readonly', false)
+    //         $footer.append(buttons.save)
+    //     };
+
+    //     // $footer.empty();
+    //     // if (actions === 'add') $footer.append(buttons.save);
+    //     // if (actions === 'edit') $footer.append(buttons.edit);
+    //     if (actions === 'edit') {
+    //         $footer.append(buttons.edit)
+    //         set_field_state('.add_line', false)
+    //     };
+    //     if (actions === 'view') {
+    //         set_field_state('.add_line', true)
+    //     }
+    //     $footer.append(buttons.close);
+
+    //     // Disable background content interaction
+    //     $contentWrapper.attr('inert', '');
+
+    //     // Move focus inside modal when opened
+    //     $modal.on('shown.bs.modal', function () {
+    //         $(this).find('input, textarea, button, select').filter(':visible:first').focus();
+    //     });
+
+    //     $modal.modal('show');
+
+    //     // Fix focus issue when modal is hidden
+    //     $modal.on('hidden.bs.modal', function () {
+    //         $contentWrapper.removeAttr('inert');  // Re-enable background interaction
+    //         if (window.lastFocusedElement) {
+    //             window.lastFocusedElement.focus();
+    //         }
+    //     });
+    // };
+
     function open_modal(msg, actions, id) {
         window.lastFocusedElement = document.activeElement;
         $(".form-control").css('border-color','#ccc');
@@ -524,25 +629,23 @@
             })
         };
 
-        // if (['edit', 'view'].includes(actions)) populate_modal(id);
         if (['edit', 'view'].includes(actions)) {
             populate_modal(id, actions, () => {
                 modal.loading(false); 
             });
         }
-        
+
         let isReadOnly = actions === 'view';
         set_field_state('#code, #description, #status', isReadOnly);
 
-        $baName_list.empty()        
+        $baName_list.empty();        
         $footer.empty();
         if (actions === 'add') {
-            
             let line = get_max_number();
 
             let html = `
             <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador'>
+                <input id='baName_${line}' class='form-control ba-autocomplete' data-value="" placeholder='Select Brand Ambassador'>
                 <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
                     <i class="fa fa-minus" aria-hidden="true"></i>
                 </button>
@@ -551,31 +654,57 @@
 
             $('#baName_list').append(html);
 
-            $(`#baName_${line}`).autocomplete({
+            const baInput = $(`#baName_${line}`);
+
+            baInput.autocomplete({
                 source: function(request, response) {
-                    var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
-                    var uniqueResults = [...new Set(results)];
-                    response(uniqueResults.slice(0, 10));
+                    let term = request.term.toLowerCase();
+                    let customOptions = [
+                        { label: "Vacant", value: "-5" },  // Non-numeric ID for Vacant
+                        { label: "Non BA", value: "-6" }   // Non-numeric ID for Non BA
+                    ];
+
+                    let filtered = $.ui.autocomplete.filter(brandAmbassadorName, term).map(name => ({
+                        label: name,
+                        value: name
+                    }));
+
+                    response([...customOptions, ...filtered]);
                 },
                 minLength: 0,
+                select: function(event, ui) {
+                    // Store selected value in data attribute
+                    $(this).val(ui.item.label);
+                    
+                    // Format the value as "ID - Name" for both BA and special cases
+                    if (ui.item.value === "-5") {
+                        $(this).data("value", "-5 - Vacant");  // Format Vacant as "ID - Name"
+                        console.log("Vacant", ui.item.value);
+                    } else if (ui.item.value === "-6") {
+                        $(this).data("value", "-6 - Non BA");  // Format Non BA as "ID - Name"
+                        console.log("Non BA", ui.item.value);
+                    } else {
+                        $(this).data("value", ui.item.value);  // Regular BA (already formatted correctly)
+                        console.log("saks lang", ui.item.value);
+                    }
+                    
+                    return false;  // prevent default behavior
+                }
             }).focus(function () {
                 $(this).autocomplete("search", "");
             });
-            
-            $('.add_line').attr('disabled', false)
-            $('.add_line').attr('readonly', false)
-            $footer.append(buttons.save)
-        };
 
-        // $footer.empty();
-        // if (actions === 'add') $footer.append(buttons.save);
-        // if (actions === 'edit') $footer.append(buttons.edit);
+            $('.add_line').attr('disabled', false);
+            $('.add_line').attr('readonly', false);
+            $footer.append(buttons.save);
+        }
+
         if (actions === 'edit') {
-            $footer.append(buttons.edit)
-            set_field_state('.add_line', false)
-        };
+            $footer.append(buttons.edit);
+            set_field_state('.add_line', false);
+        }
         if (actions === 'view') {
-            set_field_state('.add_line', true)
+            set_field_state('.add_line', true);
         }
         $footer.append(buttons.close);
 
@@ -596,7 +725,8 @@
                 window.lastFocusedElement.focus();
             }
         });
-    };
+    }
+
 
     function reset_modal_fields() {
         $('#popup_modal #code, #popup_modal #description, #popup_modal, #brand_amba, #popup_modal').val('');
@@ -618,91 +748,205 @@
         return new_btn;
     };
 
-    function populate_modal(inp_id, actions) {
-        // console.log("save_data called with action:", actions);
-        // return;
+    // function populate_modal(inp_id, actions) {
+    //     var query = "status >= 0 and id = " + inp_id;
+    //     var url = "<?= base_url('cms/global_controller');?>";
+    //     var data = {
+    //         event : "list", 
+    //         select : "id, code, description, status",
+    //         query : query, 
+    //         table : "tbl_store"
+    //     };
 
+    //     aJax.post(url,data,function(result){
+    //         var obj = is_json(result);
+    //         if(obj){
+    //             $.each(obj, function(index,asc) {
+    //                 $('#id').val(asc.id);
+    //                 $('#code').val(asc.code);
+    //                 $('#description').val(asc.description);
+    //                 if(asc.status == 1) {
+    //                     $('#status').prop('checked', true)
+    //                 } else {
+    //                     $('#status').prop('checked', false)
+    //                 }
+
+    //                 let line = 0;
+    //                 var readonly = '';
+    //                 var disabled = '';
+
+    //                 let $baName_list = $('#baName_list');
+
+    //                 $.each(get_store_ba(asc.id), (x, y) => {
+    //                     if (actions === 'view') {
+    //                         readonly = 'readonly';
+    //                         disabled = 'disabled';
+    //                     } else {
+    //                         readonly = '';
+    //                         disabled = '';
+    //                     }
+    //                     get_field_values('tbl_brand_ambassador', 'name', 'id', [y.brand_ambassador_id], (res) => {
+    //                         for (let key in res) {
+    //                             get_field_values('tbl_brand_ambassador', 'code', 'id', [key], (res1) => {
+    //                                 for (let key1 in res1) {
+    //                                     if (actions === 'edit') {
+    //                                         if (line === 0) {
+    //                                             readonly = '';
+    //                                             disabled = 'disabled';
+    //                                         } else {
+    //                                             readonly = 'readonly';
+    //                                             disabled = '';
+    //                                         }
+    //                                     }
+
+    //                                     let html = `
+    //                                     <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+    //                                         <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador' value='${res1[key]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+    //                                         <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+    //                                             <i class="fa fa-minus" aria-hidden="true"></i>
+    //                                         </button>
+    //                                     </div>
+    //                                     `;
+
+    //                                     $baName_list.append(html); 
+
+    //                                     $(`#baName_${line}`).autocomplete({
+    //                                         source: function(request, response) {
+    //                                             var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
+    //                                             var uniqueResults = [...new Set(results)];
+    //                                             response(uniqueResults.slice(0, 10));
+    //                                         },
+    //                                     });
+
+    //                                     get_baName(x, `baName_${line}`); 
+
+    //                                     line++; 
+    //                                 }
+    //                             });
+    //                         }
+    //                     });
+    //                 });
+    //             }); 
+    //         }
+    //     });
+    // };
+
+    function populate_modal(inp_id, actions) {
         var query = "status >= 0 and id = " + inp_id;
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event : "list", 
-            select : "id, code, description, status",
-            query : query, 
-            table : "tbl_store"
+        var url   = "<?= base_url('cms/global_controller');?>";
+        var data  = {
+            event:   "list",
+            select:  "id, code, description, status",
+            query:   query,
+            table:   "tbl_store"
         };
 
-        aJax.post(url,data,function(result){
+        aJax.post(url, data, function(result) {
             var obj = is_json(result);
-            if(obj){
-                $.each(obj, function(index,asc) {
-                    $('#id').val(asc.id);
-                    $('#code').val(asc.code);
-                    $('#description').val(asc.description);
-                    if(asc.status == 1) {
-                        $('#status').prop('checked', true)
-                    } else {
-                        $('#status').prop('checked', false)
+            if (!obj) return;
+
+            $.each(obj, function(_, asc) {
+                $('#id').val(asc.id);
+                $('#code').val(asc.code);
+                $('#description').val(asc.description);
+                $('#status').prop('checked', asc.status == 1);
+
+                let line = 0;
+                let $baName_list = $('#baName_list');
+                $baName_list.empty(); 
+
+                $.each(get_store_ba(asc.id), (x, y) => {
+                    var baId = y.brand_ambassador_id;
+                    // determine readonly/disabled for the remove-button + input
+                    var inputReadonly = '';
+                    var btnDisabled   = '';
+                    if (actions === 'view') {
+                        inputReadonly = 'readonly';
+                        btnDisabled   = 'disabled';
+                    } else if (actions === 'edit') {
+                        if (line === 0) {
+                            inputReadonly = '';
+                            btnDisabled   = 'disabled';
+                        } else {
+                            inputReadonly = 'readonly';
+                            btnDisabled   = '';
+                        }
                     }
 
-                    let line = 0;
-                    var readonly = '';
-                    var disabled = '';
+                
+                    if (baId < 0) {
+                        var displayName = baId === -5 ? 'Vacant' : 'Non BA';
 
-                    let $baName_list = $('#baName_list');
+                        var html = `
+                        <div id="line_${line}" style="display:flex;align-items:center;gap:5px;margin-top:3px;">
+                        <input id="baName_${line}"
+                                class="form-control"
+                                placeholder="Select Brand Ambassador"
+                                value="${displayName}"
+                                ${inputReadonly} />
+                        <button type="button"
+                                class="rmv-btn"
+                                onclick="remove_line(${line})"
+                                ${btnDisabled}>
+                            <i class="fa fa-minus" aria-hidden="true"></i>
+                        </button>
+                        </div>
+                        `;
+                        $baName_list.append(html);
+                        line++;
+                        return;  // skip the DB lookups
+                    }
 
-                    $.each(get_store_ba(asc.id), (x, y) => {
-                        if (actions === 'view') {
-                            readonly = 'readonly';
-                            disabled = 'disabled';
-                        } else {
-                            readonly = '';
-                            disabled = '';
-                        }
-                        get_field_values('tbl_brand_ambassador', 'name', 'id', [y.brand_ambassador_id], (res) => {
-                            for (let key in res) {
-                                get_field_values('tbl_brand_ambassador', 'code', 'id', [key], (res1) => {
-                                    for (let key1 in res1) {
-                                        if (actions === 'edit') {
-                                            if (line === 0) {
-                                                readonly = '';
-                                                disabled = 'disabled';
-                                            } else {
-                                                readonly = 'readonly';
-                                                disabled = '';
-                                            }
+
+                    get_field_values('tbl_brand_ambassador', 'name', 'id', [y.brand_ambassador_id], (res) => {
+                        for (let key in res) {
+                            get_field_values('tbl_brand_ambassador', 'code', 'id', [key], (res1) => {
+                                for (let key1 in res1) {
+                                    let readonly = '', disabled = '';
+                                    if (actions === 'edit') {
+                                        if (line === 0) {
+                                            readonly = '';
+                                            disabled = 'disabled';
+                                        } else {
+                                            readonly = 'readonly';
+                                            disabled = '';
                                         }
-
-                                        let html = `
-                                        <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-                                            <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador' value='${res1[key]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
-                                            <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
-                                                <i class="fa fa-minus" aria-hidden="true"></i>
-                                            </button>
-                                        </div>
-                                        `;
-
-                                        $baName_list.append(html); 
-
-                                        $(`#baName_${line}`).autocomplete({
-                                            source: function(request, response) {
-                                                var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
-                                                var uniqueResults = [...new Set(results)];
-                                                response(uniqueResults.slice(0, 10));
-                                            },
-                                        });
-
-                                        get_baName(x, `baName_${line}`); 
-
-                                        line++; 
+                                    } else if (actions === 'view') {
+                                        readonly = 'readonly';
+                                        disabled = 'disabled';
                                     }
-                                });
-                            }
-                        });
+
+                                    let html = `
+                                    <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+                                        <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador' value='${res1[key]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
+                                        <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
+                                            <i class="fa fa-minus" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    `;
+
+                                    $baName_list.append(html); 
+
+                                    $(`#baName_${line}`).autocomplete({
+                                        source: function(request, response) {
+                                            var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
+                                            var uniqueResults = [...new Set(results)];
+                                            response(uniqueResults.slice(0, 10));
+                                        },
+                                    });
+
+                                    get_baName(x, `baName_${line}`); 
+
+                                    line++; 
+                                }
+                            });
+                        }
                     });
-                }); 
-            }
+                });
+            });
         });
-    };
+    }
+
 
     function get_store_ba(id) {
         var data = {
@@ -726,162 +970,326 @@
         return result;
     }
 
-    function save_data(actions, id) {
-        var code = $('#code').val().trim();
-        var description = $('#description').val().trim();
-        var chk_status = $('#status').prop('checked');
-        if (chk_status) {
-            status_val = 1;
-        } else {
-            status_val = 0;
-        }
-        var linenum = 0;
-        var brandAmba = '';
-        var unique_brandAmba = [];
-        var brandAmba_list = $('#baName_list');
+    // fully functional
+    // function save_data(actions, id) {
+    //     var code = $('#code').val().trim();
+    //     var description = $('#description').val().trim();
+    //     var chk_status = $('#status').prop('checked');
+    //     if (chk_status) {
+    //         status_val = 1;
+    //     } else {
+    //         status_val = 0;
+    //     }
+    //     var linenum = 0;
+    //     var brandAmba = '';
+    //     var unique_brandAmba = [];
+    //     var brandAmba_list = $('#baName_list');
 
-        brandAmba_list.find('input').each(function() {
-            if (!unique_brandAmba.includes($(this).val())) {
-                brandAmba = $(this).val().split(' - ');
+    //     brandAmba_list.find('input').each(function() {
+    //         if (!unique_brandAmba.includes($(this).val())) {
+    //             brandAmba = $(this).val().split(' - ');
 
-                if (brandAmba.length == 2) {
-                    unique_brandAmba.push(brandAmba[1]);
-                } else {
-                    unique_brandAmba.push(brandAmba[1] + ' - ' + brandAmba[2]);
-                }
-            }
-            linenum++
-        });
+    //             if (brandAmba.length == 2) {
+    //                 unique_brandAmba.push(brandAmba[1]);
+    //             } else {
+    //                 unique_brandAmba.push(brandAmba[1] + ' - ' + brandAmba[2]);
+    //             }
+    //         }
+    //         linenum++
+    //     });
 
-        if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_store", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_update_message,function(result){
-                        if(result){ 
-                            let ids = [];
-                            let hasDuplicate = false;
-                            let valid = true;
+    //     if (id !== undefined && id !== null && id !== '') {
+    //         check_current_db("tbl_store", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
+    //             if (!exists) {
+    //                 modal.confirm(confirm_update_message,function(result){
+    //                     if(result){ 
+    //                         let ids = [];
+    //                         let hasDuplicate = false;
+    //                         let valid = true;
                             
-                            $.each(unique_brandAmba, (x, y) => {
-                                if(ids.includes(y)) {
-                                    hasDuplicate = true;
-                                } else {
-                                    ids.push(y);
-                                }
-                            });
+    //                         $.each(unique_brandAmba, (x, y) => {
+    //                             if(ids.includes(y)) {
+    //                                 hasDuplicate = true;
+    //                             } else {
+    //                                 ids.push(y);
+    //                             }
+    //                         });
 
-                            if(hasDuplicate) {
-                                console.log('Has duplicate');
-                                modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
-                            } else {
-                                let batch = [];
-                                get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
-                                    if(res.length == 0) {
-                                        valid = false;
-                                    } else {
-                                        modal_alert = 'success';
-                                            $.each(res, (x, y) => {
-                                            let data = {
-                                                'store_id': id, // temp placeholder, will set below
-                                                'brand_ambassador_id': y,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date()),
-                                            };
-                                            batch.push(data);
-                                        })
-                                    }
+    //                         if(hasDuplicate) {
+    //                             console.log('Has duplicate');
+    //                             modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
+    //                         } else {
+    //                             let batch = [];
+    //                             get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
+    //                                 if(res.length == 0) {
+    //                                     valid = false;
+    //                                 } else {
+    //                                     modal_alert = 'success';
+    //                                         $.each(res, (x, y) => {
+    //                                         let data = {
+    //                                             'store_id': id, // temp placeholder, will set below
+    //                                             'brand_ambassador_id': y,
+    //                                             'created_by': user_id,
+    //                                             'created_date': formatDate(new Date()),
+    //                                         };
+    //                                         batch.push(data);
+    //                                     })
+    //                                 }
 
-                                    console.log(batch);
-                                })
+    //                                 console.log(batch);
+    //                             })
     
-                                if(valid) {
-                                    save_to_db(code, description, brandAmba, status_val, id, (obj) => {
-                                        total_delete(url, 'tbl_brand_ambassador_group', 'store_id', id);
+    //                             if(valid) {
+    //                                 save_to_db(code, description, brandAmba, status_val, id, (obj) => {
+    //                                     total_delete(url, 'tbl_brand_ambassador_group', 'store_id', id);
     
-                                        batch_insert(url, batch, 'tbl_brand_ambassador_group', false, () => {
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
-                                            });
-                                        })
-                                    })
+    //                                     batch_insert(url, batch, 'tbl_brand_ambassador_group', false, () => {
+    //                                         modal.loading(false);
+    //                                         modal.alert(success_update_message, "success", function() {
+    //                                             location.reload();
+    //                                         });
+    //                                     })
+    //                                 })
                                     
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('BA not found', 'error', function() {});
-                                }
-                            }
+    //                             } else {
+    //                                 modal.loading(false);
+    //                                 modal.alert('BA not found', 'error', function() {});
+    //                             }
+    //                         }
 
-                        }
-                    });
+    //                     }
+    //                 });
 
-                }             
-            });
-        }else{
-            check_current_db("tbl_store", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_add_message,function(result){
-                        if(result){ 
-                            let ids = [];
-                            let hasDuplicate = false;
-                            let valid = true;
-                            $.each(unique_brandAmba, (x, y) => {
-                                if(ids.includes(y)) {
-                                    hasDuplicate = true;
-                                } else {
-                                    ids.push(y);
-                                }
-                            });
+    //             }             
+    //         });
+    //     }else{
+    //         check_current_db("tbl_store", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
+    //             if (!exists) {
+    //                 modal.confirm(confirm_add_message,function(result){
+    //                     if(result){ 
+    //                         let ids = [];
+    //                         let hasDuplicate = false;
+    //                         let valid = true;
+    //                         $.each(unique_brandAmba, (x, y) => {
+    //                             if(ids.includes(y)) {
+    //                                 hasDuplicate = true;
+    //                             } else {
+    //                                 ids.push(y);
+    //                             }
+    //                         });
 
-                            if(hasDuplicate) {
-                                console.log('Has duplicate');
-                                modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
-                            } else {
-                                let batch = [];
-                                get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
-                                    console.log(res);
-                                    if(res.length == 0) {
-                                        valid = false;
-                                    } else {
-                                        modal_alert = 'success';
-                                        $.each(res, (x, y) => {
-                                            let data = {
-                                                'store_id': id, 
-                                                'brand_ambassador_id': y,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date()),
-                                            };
-                                            batch.push(data);
-                                        });
-                                    }
+    //                         if(hasDuplicate) {
+    //                             console.log('Has duplicate');
+    //                             modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
+    //                         } else {
+    //                             let batch = [];
+    //                             get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
+    //                                 console.log(res);
+    //                                 return;
+    //                                 if(res.length == 0) {
+    //                                     valid = false;
+    //                                 } else {
+    //                                     modal_alert = 'success';
+    //                                     $.each(res, (x, y) => {
+    //                                         let data = {
+    //                                             'store_id': id, 
+    //                                             'brand_ambassador_id': y,
+    //                                             'created_by': user_id,
+    //                                             'created_date': formatDate(new Date()),
+    //                                         };
+    //                                         batch.push(data);
+    //                                     });
+    //                                 }
 
-                                    console.log(batch);
-                                })
+    //                                 console.log(batch);
+    //                             })
     
-                                if(valid) {
-                                    save_to_db(code, description, brandAmba, status_val, id, (obj) => {
-                                        insert_batch = batch.map(batch => ({...batch, store_id: obj.ID}));
+    //                             if(valid) {
+    //                                 save_to_db(code, description, brandAmba, status_val, id, (obj) => {
+    //                                     insert_batch = batch.map(batch => ({...batch, store_id: obj.ID}));
         
-                                        batch_insert(url, insert_batch, 'tbl_brand_ambassador_group', false, () => {
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
-                                            });
-                                        })
-                                    })
+    //                                     batch_insert(url, insert_batch, 'tbl_brand_ambassador_group', false, () => {
+    //                                         modal.loading(false);
+    //                                         modal.alert(success_update_message, "success", function() {
+    //                                             location.reload();
+    //                                         });
+    //                                     })
+    //                                 })
                                     
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('BA not found', 'error', function() {});
-                                }
-                            }
-                        }
+    //                             } else {
+    //                                 modal.loading(false);
+    //                                 modal.alert('BA not found', 'error', function() {});
+    //                             }
+    //                         }
+    //                     }
+    //                 });
+    //             }                  
+    //         });
+    //     }
+    // }
+
+    function save_data(actions, id) {
+        var code        = $('#code').val().trim();
+        var description = $('#description').val().trim();
+        var chk_status  = $('#status').prop('checked');
+        var status_val  = chk_status ? 1 : 0;
+        var linenum     = 0;
+        var unique_brandAmba = [];
+        var brandAmba_list   = $('#baName_list');
+
+        let modal_alert_success = actions === 'update' ? success_update_message : success_save_message;
+
+        // 1) parse + dedupe into numeric IDs
+        brandAmba_list.find('input').each(function() {
+            var raw   = $(this).val().trim();    // "-5 - Vacant", "123 - John Doe", or "Non BA"
+            var parts = raw.split(' - ');
+            var baId;
+
+            if (parts.length === 2 && !isNaN(parts[0])) {
+                baId = parseInt(parts[0], 10);
+            } else if (raw === "Vacant") {
+                baId = -5;
+            } else if (raw === "Non BA") {
+                baId = -6;
+            } else {
+                // neither a known special nor a valid "N - name"
+                return;
+            }
+
+            if (unique_brandAmba.indexOf(baId) === -1) {
+                unique_brandAmba.push(baId);
+            }
+
+            linenum++;
+        });
+        console.log('Unique Brand Ambassador IDs:', unique_brandAmba);
+
+        if (unique_brandAmba.length === 0) {
+            return modal.alert('Please select at least one Brand Ambassador before saving.', 'warning', function() {
+
+                }
+            );
+        }
+
+        function hasDuplicates(arr) {
+            var seen = {};
+            for (var i = 0; i < arr.length; i++) {
+                if (seen[arr[i]]) return true;
+                seen[arr[i]] = true;
+            }
+            return false;
+        }
+
+        function finalize_and_insert(storeId, batch) {
+            save_to_db(code, description, unique_brandAmba, status_val, storeId, function(obj) {
+                var finalStoreId = storeId || obj.ID;
+                if (storeId) {
+                    total_delete(url, 'tbl_brand_ambassador_group', 'store_id', finalStoreId);
+                }
+                batch.forEach(function(item) {
+                    item.store_id = finalStoreId;
+                });
+                batch_insert(url, batch, 'tbl_brand_ambassador_group', false, function() {
+                    modal.loading(false);
+                    modal.alert(modal_alert_success, "success", function() {
+                        location.reload();
                     });
-                }                  
+                });
             });
+        }
+
+        // core batch builder + lookup
+        function buildAndSave(storeId) {
+            if (hasDuplicates(unique_brandAmba)) {
+                return modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', function() {
+                });
+            }
+
+            var special = unique_brandAmba.filter(function(x) { return x < 0; });
+            var normal  = unique_brandAmba.filter(function(x) { return x > 0; });
+            var batch   = [];
+            // var valid   = true;
+
+            // push Vacant/Non BA immediately
+            special.forEach(function(y) {
+                batch.push({
+                    store_id:            storeId,
+                    brand_ambassador_id: y,
+                    created_by:          user_id,
+                    created_date:        formatDate(new Date())
+                });
+            });
+
+            // lookup the rest in one go
+            if (normal.length) {
+                get_field_values('tbl_brand_ambassador', 'code', 'code', normal,   
+                    function(res) {
+                        console.log('Response from get_field_values (id→code):', res);
+                        // e.g. { "1": "1878" }
+
+                        // 1) extract the returned codes:
+                        var foundCodes = Object.values(res).map(x => parseInt(x, 10)); 
+                        //    [1878]
+
+                        // 2) see which of your input codes are missing:
+                        var missing = normal.filter(code => foundCodes.indexOf(code) === -1);
+
+                        if (missing.length > 0) {
+                            modal.loading(false);
+                            return modal.alert(
+                                'The following Brand Ambassador codes were not found in the masterfile: '
+                                + missing.join(', '),
+                                'error'
+                            );
+                        }
+
+                        // 3) build your batch using the IDs (the keys) as brand_ambassador_id:
+                        Object.keys(res).forEach(function(idStr) {
+                            batch.push({
+                                store_id:            storeId,
+                                brand_ambassador_id: parseInt(idStr, 10), // this is the PK id
+                                created_by:          user_id,
+                                created_date:        formatDate(new Date())
+                            });
+                        });
+
+                        finalize_and_insert(storeId, batch);
+                    }
+            );
+
+            } else {
+                // no lookups needed
+                finalize_and_insert(storeId, batch);
+            }
+        }
+
+        if (id) {
+            check_current_db("tbl_store", ["code", "description"], [code, description], "status", "id", id, true,
+                function(exists) {
+                    if (!exists) {
+                        modal.confirm(confirm_update_message, function(result) {
+                            if (result) {
+                                buildAndSave(id, success_update_message);
+                            }
+                        });
+                    }
+                }
+            );
+        } else {
+            check_current_db("tbl_store", ["code"], [code], "status", null, null, true,
+                function(exists) {
+                    if (!exists) {
+                        modal.confirm(confirm_add_message, function(result) {
+                            if (result) {
+                                buildAndSave(null, modal_alert_success);
+                            }
+                        });
+                    }
+                }
+            );
         }
     }
-
+ 
     function save_to_db(inp_code, inp_description, inp_brandAmba, status_val, id, cb) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
