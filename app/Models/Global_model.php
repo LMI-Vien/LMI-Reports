@@ -896,8 +896,7 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
     function get_valid_records_tracc_data($table, $column_name) {
         $builder = $this->db->table($table)
             ->select(['recid', $column_name, 'itmcde'])
-            ->where('cusitmcde !=', '')
-            ->groupBy('itmcde');
+            ->where('cusitmcde !=', '');
         $query = $builder->get();
         return $query->getResultArray();
     }

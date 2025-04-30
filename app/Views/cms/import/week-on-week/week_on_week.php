@@ -114,6 +114,7 @@
                             <table class="table table-bordered listdata">
                                 <thead class="table-dark text-center">
                                     <tr>
+                                        <th>Line #</th>
                                         <th>Item</th>
                                         <th>Item Name</th>
                                         <th>Label Type</th>
@@ -591,9 +592,14 @@
                 return acc;
             }, {});
 
-            let td_validator = ['item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'];
+            let td_validator = ['line_number','item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'];
             td_validator.forEach(column => {
-                let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
+                let value = "";
+                if (column == 'line_number') {
+                    value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] - 3 : "";
+                } else {
+                    value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : "";
+                }
 
                 if (column === 'status' && typeof value === 'string') {
                     value = value.replace(/\s*\(.*?\)/g, "");
