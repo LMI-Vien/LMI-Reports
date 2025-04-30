@@ -185,65 +185,71 @@
         }
     });
 
-$(document).on('click', '.view_history', function(e) {
-    e.preventDefault();
-    modal.loading(true);
+    $(document).on('click', '.view_history', function (e) {
+        e.preventDefault();
+        modal.loading(true);
 
-    const data_id = $(this).attr("data-id");
-    const query = "id = " + data_id;
-    const url = "<?= base_url("cms/global_controller"); ?>";
+        const data_id = $(this).attr("data-id");
+        const query = "id = " + data_id;
+        const url = "<?= base_url("cms/global_controller"); ?>";
 
-    const data = {
-        event: "list",
-        select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
-        query: query,
-        offset: offset,
-        limit: limit,
-        table: "activity_logs",
-        order: {
-            field: "created_at",
-            order: "desc"
-        }
-    };
+        const data = {
+            event: "list",
+            select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
+            query: query,
+            offset: offset,
+            limit: limit,
+            table: "activity_logs",
+            order: {
+                field: "created_at",
+                order: "desc"
+            }
+        };
 
-    aJax.post(url, data, (response) => {
-        modal.loading(false);
-        const result = JSON.parse(response);
+        aJax.post(url, data, (response) => {
+            modal.loading(false);
+            const result = JSON.parse(response);
+            if (!result || result.length === 0) return;
 
-        if (!result || result.length === 0) return;
+            const entry = result[0];
 
-        const entry = result[0];
-        const newData = is_json(entry.new_data) || {};
-        const oldData = is_json(entry.old_data) || {};
-        const allKeys = new Set([...Object.keys(newData), ...Object.keys(oldData)]);
+            const newData = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
+            let oldData = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
 
-        let html = '<table class="col-md-12 table table-bordered m-t-20"><thead><tr>';
-        html += '<th class="center-align-format al-100-px">Field</th>';
-        html += '<th class="center-align-format al-370-px">Old Data</th>';
-        html += '<th class="center-align-format al-370-px">New Data</th>';
-        html += '</tr></thead><tbody>';
+            // Fix: If old_data is an array with one object, extract the first object
+            if (Array.isArray(oldData) && oldData.length === 1) {
+                oldData = oldData[0];
+            }
 
-        if (allKeys.size > 0) {
-            allKeys.forEach(key => {
-                const oldVal = oldData[key] ?? 'No Data';
-                const newVal = newData[key] ?? 'No Data';
-                const changed = oldVal !== newVal;
+            const allKeys = new Set([...Object.keys(newData), ...Object.keys(oldData)]);
 
-                html += '<tr>';
-                html += `<td class="al-100-px">${key}</td>`;
-                html += `<td class="w-370-px">${oldVal}</td>`;
-                html += `<td class="w-370-px ${changed ? 'bg-c7cdfa' : ''}">${newVal}</td>`;
-                html += '</tr>';
-            });
-        } else {
-            html += '<tr><td colspan="3" class="text-center">No changes found</td></tr>';
-        }
+            let html = '<table class="col-md-12 table table-bordered m-t-20"><thead><tr>';
+            html += '<th class="center-align-format al-100-px">Field</th>';
+            html += '<th class="center-align-format al-370-px">Old Data</th>';
+            html += '<th class="center-align-format al-370-px">New Data</th>';
+            html += '</tr></thead><tbody>';
 
-        html += '</tbody></table>';
+            if (allKeys.size > 0) {
+                allKeys.forEach(key => {
+                    const oldVal = oldData[key] ?? 'No Data';
+                    const newVal = newData[key] ?? 'No Data';
+                    const changed = oldVal !== newVal;
 
-        modal.show('<div class="scroll-500">' + html + '</div>', "large", function () {});
+                    html += '<tr>';
+                    html += `<td class="al-100-px">${key}</td>`;
+                    html += `<td class="w-370-px">${oldVal}</td>`;
+                    html += `<td class="w-370-px ${changed ? 'bg-c7cdfa' : ''}">${newVal}</td>`;
+                    html += '</tr>';
+                });
+            } else {
+                html += '<tr><td colspan="3" class="text-center">No changes found</td></tr>';
+            }
+
+            html += '</tbody></table>';
+
+            modal.show('<div class="scroll-500">' + html + '</div>', "large", function () { });
+        });
     });
-});
 
     $(document).on('click', '#btn_filter', function() {
         var from = $('.start-date').val();

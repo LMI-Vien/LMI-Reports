@@ -812,13 +812,7 @@
             modal_obj = confirm_unpublish_message;
             modal_alert_success = success_unpublish_message;
         }
-        // var counter = 0; 
-        // $('.select:checked').each(function () {
-        //     var id = $(this).attr('data-id');
-        //     if(id){
-        //         counter++;
-        //     }
-        //  });
+
         modal.confirm(modal_obj, function (result) {
             if (result) {
                 var url = "<?= base_url('cms/global_controller');?>";
@@ -880,36 +874,6 @@
             hour12: true 
         });
     }
-
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false); 
-    //     clear_import_table();
-        
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const data = new Uint8Array(e.target.result);
-    //         const workbook = XLSX.read(data, { type: "array" });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-    //     reader.readAsArrayBuffer(file);
-    // }
 
     // with special characters
     function read_xl_file() {
@@ -1046,7 +1010,9 @@
                     ...record,
                     year: year,
                 }));
-                saveValidatedData(new_data);
+                console.log(year);
+                checkDataSalesPerStore(year);
+                //saveValidatedData(new_data);
             } else {
                 modal.alert("No valid data found. Please check the file.", "error");
             }
@@ -1118,6 +1084,30 @@
         modal.loading(false);
         $(".import_table").html(html);
         updatePaginationControls();
+    }
+
+    function checkDataSalesPerStore(year){
+        new_query = "a.year = "+year;
+        var data = {
+            event: "list",
+            // select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
+            // "a.july, a.august, a.september, a.october, a.november, a.december, "+
+            // "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status",
+            select: "a.created_date , a.year",
+            query: new_query,
+            offset: offset,
+            limit: 1,
+            table: "tbl_target_sales_per_store a",
+            order : {
+                field : "a.id",
+                order : "asc" 
+            },
+            group: "a.year"
+        };
+
+        aJax.post(url, data, function(result) {
+            console.log(result);
+        });
     }
 
 
