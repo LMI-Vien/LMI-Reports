@@ -481,7 +481,9 @@
             type: "POST",
             data: { 
                 action: "delete_temp_records",
-                file_name: file_name
+                file_name: file_name,
+                year : $("#year").val(),
+                week: $("#week").val(),
             },
             success: function (response) { console.log(response) },
             error: function (xhr, status, error) { console.log(xhr, status, error) }
@@ -490,10 +492,18 @@
 
     const read_xl_file = async () => {
         const file = $("#file")[0].files[0];
+        const year = $("#year").val();
+        const week = $("#week").val();
 
         if (!file) {
             modal.loading_progress(false);
             modal.alert('Please select a file to upload', 'error', () => {});
+            return;
+        }
+
+        if (!year || !week) {
+            modal.loading_progress(false);
+            modal.alert(`Month and Week are required fields.`, 'error', () => {});
             return;
         }
 
@@ -516,6 +526,8 @@
             formData.append("chunkIndex", chunkIndex);
             formData.append("totalChunks", totalChunks);
             formData.append("fileName", file.name);
+            formData.append("year", $("#year").val());
+            formData.append("week", $("#week").val());
 
             try {
                 let response = await fetch("<?= base_url('cms/import-week-on-week/import-temp-wkonwk-data'); ?>", {
@@ -545,7 +557,9 @@
             data: {
                 page: currentPage,
                 limit: rowsPerPage,
-                file_name: file_name
+                file_name: file_name,
+                year: $("#year").val(),
+                week: $("#week").val(),
             },
             dataType: "json",
             success: function(response) {
@@ -720,34 +734,56 @@
         }
 
         let file_name = file.name;
+        let year = $("#year").val();
+        let week = $("#week").val();
 
-        modal.loading(true, "Fetching all data from temporary table...");
-
-        let allData = [];
-
-        function fetchAllPages(page = 1) {
-            $.ajax({
-                url: "<?= base_url('cms/import-week-on-week/fetch-temp-wkonwk-data'); ?>",
-                method: "GET",
-
-                data: { page, limit: 5000, file_name}, // Fetch in larger chunks
-                success: function(response) {
-                    allData = allData.concat(response.data);
-                    if (response.data.length === 5000) {
-                        fetchAllPages(page + 1);
-                    } 
-                    else {
-                        validate_temp_data(allData)
-                    }
-                },
-                error: function(xhr) {
-                    modal.loading(false);
-                    modal.alert("Error fetching data: " + xhr.responseText, "error");
-                }
-            });
+        if (!year || !week) {
+            modal.loading_progress(false);
+            modal.alert(`Month and Week are required fields.`, 'error', () => {});
+            return;
         }
 
-        fetchAllPages()
+        check_current_db(
+            "tbl_week_on_week_header", 
+            ["year", "week", "file_name"], 
+            [year, week, file_name], 
+            "id" , 
+            null, 
+            null,
+            false, 
+            function(exists, duplicateFields) {
+                console.log(exists, duplicateFields)
+                if (!exists) {
+                    modal.loading(true, "Fetching all data from temporary table...");
+
+                    let allData = [];
+
+                    function fetchAllPages(page = 1) {
+                        $.ajax({
+                            url: "<?= base_url('cms/import-week-on-week/fetch-temp-wkonwk-data'); ?>",
+                            method: "GET",
+
+                            data: { page, limit: 5000, file_name, year, week}, // Fetch in larger chunks
+                            success: function(response) {
+                                allData = allData.concat(response.data);
+                                if (response.data.length === 5000) {
+                                    fetchAllPages(page + 1);
+                                } 
+                                else {
+                                    validate_temp_data(allData)
+                                }
+                            },
+                            error: function(xhr) {
+                                modal.loading(false);
+                                modal.alert("Error fetching data: " + xhr.responseText, "error");
+                            }
+                        });
+                    }
+
+                    fetchAllPages()
+                }
+            }
+        )
     }
 
     const validate_temp_data = (data) => {

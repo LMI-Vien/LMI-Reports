@@ -1201,13 +1201,15 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
     }
 
     // ----------==========|| week on week scan data ||==========----------
-    public function fetch_wkonwk_data($limit, $page, $filename, $id)
+    public function fetch_wkonwk_data($limit, $page, $filename, $id, $year, $week)
     {
         $offset = ($page - 1) * $limit;
 
         $builder = $this->db->table('tbl_wkonwk_temp_space')
                       ->where('file_name', $filename)
                       ->where('created_by', $id)
+                      ->where('year', $year)
+                      ->where('week', $week)
                       ->orderBy('id', 'ASC')
                       ->limit($limit, $offset)
                       ->get();
@@ -1217,6 +1219,8 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         $totalRecords = $this->db->table('tbl_wkonwk_temp_space')
                           ->where('file_name', $filename)
                           ->where('created_by', $id)
+                          ->where('year', $year)
+                          ->where('week', $week)
                           ->countAllResults();
 
         return [
@@ -1225,11 +1229,13 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
         ];
     }
 
-    public function delete_temp_wkonwk($id, $filename)
+    public function delete_temp_wkonwk($id, $filename, $year, $week)
     {
         $builder = $this->db->table('tbl_wkonwk_temp_space');
         $builder->where('created_by', $id);
         $builder->where('file_name', $filename);
+        $builder->where('year', $year);
+        $builder->where('week', $week);
         
         $deleted = $builder->delete();
 
