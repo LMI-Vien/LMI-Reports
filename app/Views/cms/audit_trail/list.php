@@ -1,10 +1,3 @@
-<?php 
-    $optionSet = '';
-    foreach ($pageOption as $pageOptionLoop) {
-        $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
-    } 
-?>
-
 <div class="content-wrapper p-4">
     <div class="card">
         <div class="text-center page-title md-center">
@@ -43,11 +36,11 @@
                              </table>
                         </div>
                         <div class="list_pagination"></div>
-                        <div class="form-group record-entries pull-right">
-                            <label>Show</label> 
-                               <select id="record-entries">
-                                 <?php echo $optionSet;?>
-                               </select>
+                        <div class="form-group pull-right">
+                            <label>Show</label>
+                            <select class="record-entries">
+                                <?= $optionSet; ?>
+                            </select>
                             <label>Entries</label>
                         </div>
                     </div>
@@ -65,21 +58,11 @@
    // var offset = 0;
     $(document).ready(function() {
         get_data(query);
-        get_pagination();
+        get_pagination(query);
         $("#form_search").removeClass( "pull-right" );
         $(document).on('cut copy paste input', '.start-date, .end-date', function(e) {
             e.preventDefault();
         });
-    });
-
-	$(document).on("change", ".record-entries select", function(e) {
-        $(".record-entries option").removeAttr("selected");
-        $(".record-entries select").val($(this).val());
-        $(".record-entries option:selected").attr("selected","selected");
-        var record_entries = $(this).prop( "selected",true ).val();
-        limit = parseInt(record_entries);
-        offset = 1;
-        get_data();
     });
     
     function get_data(query) {
@@ -177,12 +160,28 @@
         modal.loading(false);
     });
 
-    $(document).on('keypress', '#search_query', function(e) {                          
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
+    $(document).on('keydown', '#search_query', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        if (event.key == 'Enter') {
+            search_input = $('#search_query').val();
             offset = 1;
-            get_data(keyword);
+            new_query = query;
+            new_query += ' and user like \'%'+search_input+'%\' or '+query+' and module like \'%'+search_input+'%\' or '+query+' and action like \'%'+search_input+'%\'';
+            get_data(new_query);
+            get_pagination(new_query);
         }
+    });
+
+    $(document).on('click', '#search_button', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        offset = 1;
+        new_query = query;
+        new_query += ' and user like \'%'+search_input+'%\' or '+query+' and module like \'%'+search_input+'%\' or '+query+' and action like \'%'+search_input+'%\'';
+        get_data(new_query);
+        get_pagination(new_query);
     });
 
     $(document).on('click', '.view_history', function (e) {
@@ -251,27 +250,37 @@
         });
     });
 
-    $(document).on('click', '#btn_filter', function() {
-        var from = $('.start-date').val();
-        var to = $('.end-date').val();
-        var keyword = $('.search-query').val();
-        $('.start-date').css('border-color','#ccc');
-        $('.end-date').css('border-color','#ccc');
-        offset = 1;
-        if (!from) {
-          $('.start-date').css('border-color','red');
-        } else if (!to) {
-          $('.end-date').css('border-color','red');
+    $(document).on('click', '#btnFilterDr', function() {
+        var startDate = $('#startDate').val();
+        var endDate   = $('#endDate').val();
+
+        $('.start-date, .end-date').css('border-color', '#ccc');
+
+        if (!startDate) {
+            $('.start-date').css('border-color', 'red');
+            return;
         }
-        get_data(null);
+
+        if (!endDate) {
+            $('.end-date').css('border-color', 'red');
+            return;
+        }
+
+        offset = 1;
+        query  = "DATE(created_at) >= '" + startDate + "'"
+                + " AND DATE(created_at) <= '" + endDate   + "'"
+                + " AND id != 0";
+
+        get_data(query);
     });
 
-   $(document).on('click', '#btn_reset', function() {
+
+   $(document).on('click', '#btnResetDr', function() {
         $('.start-date').val('');
         $('.end-date').val('');
         $('.search-query').val('');
-        query = "user_id != 0";
-        get_data();
+        query = "id != 0";
+        get_data(query);
     });
 
 </script>

@@ -182,14 +182,45 @@
 								</div>';
 					  break;
 
-                case 'date_range':
-                      echo '<div class="form-group drange">
-	                            <input type="text" class="range-date start-date form-control" placeholder="Date From" style="width: 95px;"  >
-	                            <input type="text" class="range-date end-date form-control" placeholder="Date To" style="width: 95px;"   disabled>
-	                            <button type="button" id="btn_filter" class="btn-default btn-filter btn-sm cms-btn"  ><i class="fa fa-filter"></i> Filter</button>
-	                            <a href="#" path="" id="btn_reset" class="btn_reset btn-sm btn btn-default col-bday-4 cms-btn" ><span class="fa fa fa-refresh"></span> Reset </a>
-                            </div>';
-                      break;
+				case 'date_range':
+					echo '<div class="form-group drange">
+							<div class="date-picker">
+								<i class="fa fa-calendar"></i>
+								<input
+								type="text"
+								id="startDate"
+								class="range-date start-date form-control"
+								placeholder="Date From"
+								>
+							</div>
+							<div class="date-picker">
+								<i class="fa fa-calendar"></i>
+								<input
+								type="text"
+								id="endDate"
+								class="range-date end-date form-control"
+								placeholder="Date To"
+								>
+							</div>
+
+							<button
+								type="button"
+								id="btnFilterDr"
+								class="btn-filter cms-btn btn-sm"
+							>
+								<i class="fa fa-filter"></i> Filter
+							</button>
+
+							<button
+								type="button"
+								id="btnResetDr"
+								class="btn-reset cms-btn btn-sm"
+							>
+								<i class="fas fa-redo-alt"></i> Reset
+							</button>
+							</div>
+							';
+					break;
                       
                case 'category':
                   echo '<a href="#" id="btn_category" class="btn_category btn-sm btn-default cms-btn"><span class="fa fa fa-plus "></span> Category</a>';
@@ -237,17 +268,23 @@
 	}
 
 	.range-date.start-date {
-	    width: 90px;
-	    display: inline-block;
-		height: 31px;
-		border-radius: 7px;
+		padding: 8px 12px 8px 36px;  
+		min-width: 100px;
+		height: 36px;
+		border: 1px solid #ddd;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		transition: border-color .2s, box-shadow .2s;
 	}
 
 	.range-date.end-date {
-	    width: 90px;
-	    display: inline-block;
-	    height: 31px;
-		border-radius: 7px;
+		padding: 8px 12px 8px 36px;  
+		min-width: 100px;
+		height: 36px;
+		border: 1px solid #ddd;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		transition: border-color .2s, box-shadow .2s;
 	}
 
 	.menu-tips{
@@ -345,6 +382,50 @@
 		margin-right: -95px !important;
 	}
 
+	/* 2) Date-picker icon wrapper */
+	.date-picker {
+		position: relative;
+		display: inline-block;
+	}
+
+	.date-picker .fa-calendar {
+		position: absolute;
+		left: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #bbb;
+		font-size: 1rem;
+		pointer-events: none;
+	}
+	
+
+	/* 4) Filter button & reset */
+	.btn-filter, .btn-reset {
+		background: #28a745;
+		color: #fff !important;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 6px;
+		box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+		transition: transform .1s, box-shadow .2s;
+	}
+
+	.btn-filter:focus, .btn-reset:focus {
+        color: white !important ; 
+        background-color: #339933 !important ; 
+        border: 0px solid #15C815 !important ; 
+    }
+
+	.btn-filter:hover, .btn-reset:hover {
+        color: white !important ; 
+        background-color: #339933 !important ; 
+        border: 0px solid #15C815 !important ; 
+    }
+
+	.ui-datepicker {
+		z-index: 9999 !important;  
+	}
+
 </style>
 
 <script type="text/javascript">
@@ -382,10 +463,17 @@
         e.preventDefault();
     });
 
-    $(document).on('click', '#btn_reset', function(){
+    $(document).on('click', '#btnResetDr', function(){
     	$('.start-date').val('');
-    	$('.end-date').val('').prop('disabled', true);
     	$('#search_query').val('');
     });
+
+	// jQuery UI Datepicker
+	$('.range-date').datepicker({
+		dateFormat: 'yy-mm-dd',
+		changeMonth: true,
+		changeYear: true
+	});
+
 
 </script>
