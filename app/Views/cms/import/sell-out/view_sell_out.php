@@ -49,15 +49,14 @@
                 <table class= "table table-bordered listdata" style="width: 100%">
                     <thead>
                         <tr>
-                            <!-- <th class='center-content'><input class ="selectall" type ="checkbox"></th> -->
                             <th class='center-content'>File Name</th>
-                            <!-- <th class='center-content'>Line Number</th> -->
                             <th class='center-content'>Store Code</th>
                             <th class='center-content'>Store Description</th>
                             <th class='center-content'>SKU Code</th>
                             <th class='center-content'>SKU Description</th>
                             <th class='center-content'>Quantity</th>
                             <th class='center-content'>Net Sales</th>
+                            <th class='center-content'>Gross Sales</th>
                         </tr>  
                     </thead>
                     <tbody class="table_body word_break"></tbody>
@@ -118,47 +117,6 @@
             }
         )
     }
-
-    // function renderDetails(header_id) {
-    //     table = 'tbl_sell_out_data_details a';
-    //     join = '';
-    //     fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
-    //     limit = 0;
-    //     dynaoffset = 0;
-    //     filter = `data_header_id:EQ=${header_id}`;
-    //     order = '';
-    //     group = '';
-    //     dynamic_search(
-    //         `'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${dynaoffset}`,`'${filter}'`, `'${order}'`,`'${group}'`, 
-    //         (result) => {
-    //             var html = '';
-    //             if(result) {
-    //                 if (result.length > 0) {
-    //                     $.each(result, function(x,y) {
-    //                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-    //                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
-    //                         html += "<tr class='" + rowClass + "'>";
-    //                         // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-    //                         html += "<td scope=\"col\">" + y.file_name + "</td>";
-    //                         // html += "<td scope=\"col\">" + y.line_number + "</td>";
-    //                         html += "<td scope=\"col\">" + y.store_code + "</td>";
-    //                         html += "<td scope=\"col\">" + y.store_description + "</td>";
-    //                         html += "<td scope=\"col\">" + y.sku_code + "</td>";
-    //                         html += "<td scope=\"col\">" + y.sku_description + "</td>";
-    //                         html += "<td scope=\"col\">" + y.quantity + "</td>";
-    //                         html += "<td scope=\"col\">" + y.net_sales + "</td>";
-                            
-    //                         html += "</tr>";   
-    //                     });
-    //                 } else {
-    //                     html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-    //                 }
-    //             };
-    //             $('.table_body').html(html);
-    //         }
-    //     )
-    // }
     
     function addNbsp(inputString) {
         return inputString.split('').map(char => {
@@ -172,7 +130,7 @@
     function renderDetails(new_query) {
         var data = {
             event: "list",
-            select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
+            select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales, gross_sales",
             limit: limit,
             table: "tbl_sell_out_data_details",
             query: new_query,
@@ -186,23 +144,30 @@
 
             if(result) {
                 if (result.length > 0) {
-                    $.each(result, function(x,y) {
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+                    $.each(result, function(x, y) {
+                    var status = (parseInt(y.status) === 1) ? "Active" : "Inactive";
+                    var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
-                        html += "<tr class='" + rowClass + "'>";
-                        // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + y.file_name + "</td>";
-                        // html += "<td scope=\"col\">" + y.line_number + "</td>";
-                        html += "<td scope=\"col\">" + y.store_code + "</td>";
-                        html += "<td scope=\"col\">" + y.store_description + "</td>";
-                        html += "<td scope=\"col\">" + y.sku_code + "</td>";
-                        html += "<td scope=\"col\">" + y.sku_description + "</td>";
-                        html += "<td scope=\"col\">" + y.quantity + "</td>";
-                        html += "<td scope=\"col\">" + y.net_sales + "</td>";
-                        
-                        html += "</tr>";   
-                    });
+                    let formattedQuantity = parseFloat(y.quantity);
+                    formattedQuantity = isNaN(formattedQuantity) ? "" : formattedQuantity.toLocaleString('en-US', { minimumFractionDigits: 0 });
+
+                    let formattedNetSales = parseFloat(y.net_sales);
+                    formattedNetSales = isNaN(formattedNetSales) ? "" : formattedNetSales.toFixed(2);
+
+                    let formattedGrossSales = parseFloat(y.gross_sales);
+                    formattedGrossSales = isNaN(formattedGrossSales) ? "" : formattedGrossSales.toFixed(2);
+
+                    html += "<tr class='" + rowClass + "'>";
+                    html += "<td scope=\"col\">" + y.file_name + "</td>";
+                    html += "<td scope=\"col\">" + y.store_code + "</td>";
+                    html += "<td scope=\"col\">" + y.store_description + "</td>";
+                    html += "<td scope=\"col\">" + y.sku_code + "</td>";
+                    html += "<td scope=\"col\">" + y.sku_description + "</td>";
+                    html += "<td scope=\"col\">" + formattedQuantity + "</td>";
+                    html += "<td scope=\"col\">" + formattedNetSales + "</td>";
+                    html += "<td scope=\"col\">" + formattedGrossSales + "</td>";
+                    html += "</tr>";
+                });
                 } else {
                     html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
                 }

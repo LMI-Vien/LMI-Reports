@@ -842,7 +842,15 @@ class GlobalController extends BaseController
 	    if (!empty($request['store_area'])) {
 	        $responseData['store_area'] = $this->Global_model->get_valid_records_store_group();
 	    }
-	    return $this->response->setJSON($responseData);
+		if (!empty($request['item_class'])) {
+	        $responseData['item_class'] = $this->Global_model->get_valid_records("tbl_item_class", 'item_class_description');
+	    }
+		if (!empty($request['label_type'])) {
+	        $responseData['label_type'] = $this->Global_model->dynamic_search(
+				"'tbl_brand_label_type'", "''", "'id, label'", 0, 0, "''", "''", "''"
+			);
+	    }
+ 	    return $this->response->setJSON($responseData);
 	}
 
     public function log()

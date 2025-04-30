@@ -11,6 +11,35 @@ self.onmessage = async function(e) {
     let index = 0;
 
     try {
+        let customer_sku_code_lookup = {};
+
+        let customer_sku_code_response = await Promise.all([
+            fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?customer_sku_code_lmi=1`),
+            fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?customer_sku_code_rgdi=1`)
+        ]);
+
+        let [customer_sku_code_data_lmi, customer_sku_code_data_rgdi] = await Promise.all(
+            customer_sku_code_response.map(response => response.json())
+        );
+
+        customer_sku_code_data_lmi.customer_sku_code_lmi.forEach(group => {
+            customer_sku_code_lookup[group.cusitmcde.toLowerCase()] = group.recid;
+        });
+
+        customer_sku_code_data_rgdi.customer_sku_code_rgdi.forEach(group => {
+            customer_sku_code_lookup[group.cusitmcde.toLowerCase()] = group.recid;
+        });
+
+        let label_type = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?label_type=1`);
+        let label_type_data = await label_type.json();
+        let label_type_lookup = {};
+        label_type_data.label_type.forEach(group => label_type_lookup[group.label.toLowerCase()] = group.id);  
+
+        let item_class = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?item_class=1`);
+        let item_class_data = await item_class.json();
+        let item_class_lookup = {};
+        item_class_data.item_class.forEach(group => item_class_lookup[group.item_class_description.toLowerCase()] = group.id);  
+
         function processBatch() {
             if (index >= data.length) {
                 // Final message with results
@@ -35,6 +64,9 @@ self.onmessage = async function(e) {
                     addErrorLog(`Invalid quantity: "${quantity}" is not a number`);
                     continue;
                 }
+                item_name = customer_sku_code_lookup[item_name.toLowerCase()] || addErrorLog("Invalid SKU Code");
+                label_type =  label_type_lookup[label_type.toLowerCase()] || addErrorLog("Invalid Label Code");
+                item_class = item_class_lookup[item_class.toLowerCase()] || addErrorLog("Invalid Item Class");
     
                 function addErrorLog(message) {
                     invalid = true;
