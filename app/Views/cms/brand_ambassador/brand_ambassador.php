@@ -2358,22 +2358,22 @@ function saveValidatedData(valid_data, brand_per_ba) {
         const fetchStores = (callback) => {
             const processResponse = (res) => {
                 let agency_ids = [];
-                let store_ids = [];
+                // let store_ids = [];
                 let team_ids = [];
-                let area_ids = [];
+                // let area_ids = [];
                 let brand_ids = [];
 
                 let agency_map = {}
-                let store_map = {};
+                // let store_map = {};
                 let team_map = {};
-                let area_map = {};
+                // let area_map = {};
                 let brand_map = {};
 
                 res.forEach(item => {
                     agency_ids.push(`${item.agency}`);
-                    store_ids.push(`${item.store}`);
+                    // store_ids.push(`${item.store}`);
                     team_ids.push(`${item.team}`);
-                    area_ids.push(`${item.area}`);
+                    // area_ids.push(`${item.area}`);
                     brand_ids.push(`${item.id}`);
                 });
 
@@ -2391,19 +2391,19 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     }
                 );
 
-                dynamic_search(
-                    "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
-                    (result) => {
-                        result.forEach(
-                            item => {
-                                if (!store_map[item.id]) {
-                                    store_map[item.id] = {};
-                                }
-                                store_map[item.id] = item.description;
-                            }
-                        );
-                    }
-                );
+                // dynamic_search(
+                //     "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
+                //     (result) => {
+                //         result.forEach(
+                //             item => {
+                //                 if (!store_map[item.id]) {
+                //                     store_map[item.id] = {};
+                //                 }
+                //                 store_map[item.id] = item.description;
+                //             }
+                //         );
+                //     }
+                // );
 
                 dynamic_search(
                     "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
@@ -2419,19 +2419,19 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     }
                 );
 
-                dynamic_search(
-                    "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
-                    (result) => {
-                        result.forEach(
-                            item => {
-                                if (!area_map[item.id]) {
-                                    area_map[item.id] = {};
-                                }
-                                area_map[item.id] = item.description;
-                            }
-                        );
-                    }
-                );
+                // dynamic_search(
+                //     "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
+                //     (result) => {
+                //         result.forEach(
+                //             item => {
+                //                 if (!area_map[item.id]) {
+                //                     area_map[item.id] = {};
+                //                 }
+                //                 area_map[item.id] = item.description;
+                //             }
+                //         );
+                //     }
+                // );
                 
                 dynamic_search(
                     "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
@@ -2452,16 +2452,17 @@ function saveValidatedData(valid_data, brand_per_ba) {
                 formattedData = res.map(({ 
                     id, 
                     code, description, deployed_date, type, status, 
-                    agency, store, team, area
+                    // agency, store, team, area
+                    agency, team
                 }) => ({
                     "BA Code": code,
                     "BA Name": description,
                     "Deployment Date": deployed_date,
                     Agency: agency_map[agency],
                     Brand: brand_map[id],
-                    Store: store_map[store],
+                    // Store: store_map[store],
                     Team: team_map[team],
-                    Area: area_map[area].trim(),
+                    // Area: area_map[area].trim(),
                     Type: type === "1" ? "Outright" : "Consign",
                     Status: status === "1" ? "Active" : "Inactive",
                 }));
@@ -2509,7 +2510,8 @@ function saveValidatedData(valid_data, brand_per_ba) {
                             dynamic_search(
                                 "'tbl_brand_ambassador'", 
                                 "''", 
-                                "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
+                                "'id, code, name as description, deployment_date as deployed_date, type, status, agency, team'",
+                                // "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
                                 100000, 
                                 index, 
                                 `''`, 
@@ -2519,22 +2521,22 @@ function saveValidatedData(valid_data, brand_per_ba) {
                                     console.log(res, 'look here');
 
                                     let agency_ids = [];
-                                    let store_ids = [];
+                                    // let store_ids = [];
                                     let team_ids = [];
-                                    let area_ids = [];
+                                    // let area_ids = [];
                                     let brand_ids = [];
 
                                     let agency_map = {}
-                                    let store_map = {};
+                                    // let store_map = {};
                                     let team_map = {};
-                                    let area_map = {};
+                                    // let area_map = {};
                                     let brand_map = {};
 
                                     res.forEach(item => {
                                         agency_ids.push(`${item.agency}`);
-                                        store_ids.push(`${item.store}`);
+                                        // store_ids.push(`${item.store}`);
                                         team_ids.push(`${item.team}`);
-                                        area_ids.push(`${item.area}`);
+                                        // area_ids.push(`${item.area}`);
                                         brand_ids.push(`${item.id}`);
                                     });
 
@@ -2552,19 +2554,19 @@ function saveValidatedData(valid_data, brand_per_ba) {
                                         }
                                     );
 
-                                    dynamic_search(
-                                        "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
-                                        (result) => {
-                                            result.forEach(
-                                                item => {
-                                                    if (!store_map[item.id]) {
-                                                        store_map[item.id] = {};
-                                                    }
-                                                    store_map[item.id] = item.description;
-                                                }
-                                            );
-                                        }
-                                    );
+                                    // dynamic_search(
+                                    //     "'tbl_store'", "''", "'id, description'", 0, 0, `'id:IN=${store_ids.join('|')}'`, `''`, `''`,
+                                    //     (result) => {
+                                    //         result.forEach(
+                                    //             item => {
+                                    //                 if (!store_map[item.id]) {
+                                    //                     store_map[item.id] = {};
+                                    //                 }
+                                    //                 store_map[item.id] = item.description;
+                                    //             }
+                                    //         );
+                                    //     }
+                                    // );
 
                                     dynamic_search(
                                         "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
@@ -2580,19 +2582,19 @@ function saveValidatedData(valid_data, brand_per_ba) {
                                         }
                                     );
 
-                                    dynamic_search(
-                                        "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
-                                        (result) => {
-                                            result.forEach(
-                                                item => {
-                                                    if (!area_map[item.id]) {
-                                                        area_map[item.id] = {};
-                                                    }
-                                                    area_map[item.id] = item.description;
-                                                }
-                                            );
-                                        }
-                                    );
+                                    // dynamic_search(
+                                    //     "'tbl_area'", "''", "'id, description'", 0, 0, `'id:IN=${area_ids.join('|')}'`, `''`, `''`,
+                                    //     (result) => {
+                                    //         result.forEach(
+                                    //             item => {
+                                    //                 if (!area_map[item.id]) {
+                                    //                     area_map[item.id] = {};
+                                    //                 }
+                                    //                 area_map[item.id] = item.description;
+                                    //             }
+                                    //         );
+                                    //     }
+                                    // );
                                     
                                     dynamic_search(
                                         "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
@@ -2613,16 +2615,17 @@ function saveValidatedData(valid_data, brand_per_ba) {
                                     let newData = res.map(({ 
                                         id, 
                                         code, description, deployed_date, type, status, 
-                                        agency, store, team, area
+                                        // agency, store, team, area
+                                        agency, team
                                     }) => ({
                                         Code: code,
                                         Name: description,
                                         "Deployment Date": deployed_date,
                                         Agency: agency_map[agency],
                                         Brand: brand_map[id],
-                                        Store: store_map[store],
+                                        // Store: store_map[store],
                                         Team: team_map[team],
-                                        Area: area_map[area].trim(),
+                                        // Area: area_map[area].trim(),
                                         Type: type === "1" ? "Outright" : "Consign",
                                         Status: status === "1" ? "Active" : "Inactive",
                                     }));
