@@ -293,7 +293,7 @@
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "ba.id, ba.code, ba.name, ba.deployment_date, a.agency, s.description as store, t.team_description, ar.description as area, ba.status, ba.type, ba.updated_date, ba.created_date",
+            select : "ba.id, ba.code, ba.name, ba.deployment_date, a.agency, t.team_description, ba.status, ba.type, ba.updated_date, ba.created_date",
             query : query,
             offset : offset,
             limit : limit,
@@ -308,21 +308,21 @@
                     query: "a.id = ba.agency",
                     type: "left"
                 },
-                {
-                    table: "tbl_store s",
-                    query: "s.id = ba.store",
-                    type: "left"
-                },
+                // {
+                //     table: "tbl_store s",
+                //     query: "s.id = ba.store",
+                //     type: "left"
+                // },
                 {
                     table: "tbl_team t",
                     query: "t.id = ba.team",
                     type: "left"
-                },
-                {
-                    table: "tbl_area ar",
-                    query: "ar.id = ba.area",
-                    type: "left"
                 }
+                // {
+                //     table: "tbl_area ar",
+                //     query: "ar.id = ba.area",
+                //     type: "left"
+                // }
             ]            
             
 
@@ -392,21 +392,21 @@
                     query: "a.id = ba.agency",
                     type: "left"
                 },
-                {
-                    table: "tbl_store s",
-                    query: "s.id = ba.store",
-                    type: "left"
-                },
+                // {
+                //     table: "tbl_store s",
+                //     query: "s.id = ba.store",
+                //     type: "left"
+                // },
                 {
                     table: "tbl_team t",
                     query: "t.id = ba.team",
                     type: "left"
                 },
-                {
-                    table: "tbl_area ar",
-                    query: "ar.id = ba.area",
-                    type: "left"
-                }
+                // {
+                //     table: "tbl_area ar",
+                //     query: "ar.id = ba.area",
+                //     type: "left"
+                // }
             ] 
 
         }
@@ -431,7 +431,8 @@
         search_input = $('#search_query').val();
         offset = 1;
         new_query = query;
-        new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%' OR b.brand_description LIKE '%" + search_input + "%')";
+        // new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR t.team_description LIKE '%" +  search_input + "%' OR b.brand_description LIKE '%" + search_input + "%')";
+        new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%')";
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -443,7 +444,7 @@
             search_input = $('#search_query').val();
             offset = 1;
             new_query = query;
-            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR s.description LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%' OR ar.description LIKE '%" + search_input + "%')";
+            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%')";
             get_data(new_query);
             get_pagination(new_query);
         }
