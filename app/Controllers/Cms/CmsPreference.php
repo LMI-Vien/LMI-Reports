@@ -164,4 +164,25 @@ class CmsPreference extends BaseController
 
 	    return $html;
 	}
+
+	public function getPendingApprovals()
+	{
+	    $session = session();
+	    $role = intval($session->sess_role);
+
+	    $roleStatusMap = [
+	        3 => 3, // Head approval
+	        4 => 4  // Final approval
+	    ];
+
+	    if (isset($roleStatusMap[$role])) {
+	        $query = "ps.status = " . $roleStatusMap[$role];
+	        $limit = 99999;
+	        $offset = 0;
+
+	        $result = $this->Global_model->get_per_store_grouped($query, $limit, $offset);
+	        echo is_array($result) ? count($result) : 0;
+	    }
+	}
+
 }

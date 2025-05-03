@@ -1420,8 +1420,12 @@
     
                                 if(valid) {
                                     save_to_db(code, description, store, status_val, id, (obj) => {
-                                        total_delete(url, 'tbl_store_group', 'area_id', id);
-    
+                                        //total_delete(url, 'tbl_store_group', 'area_id', id);
+                                        const conditions = {
+                                            area_id: id
+                                        };
+                                        total_delete(url, 'tbl_store_group', conditions);
+                                        
                                         batch_insert(url, batch, 'tbl_store_group', false, () => {
                                             modal.loading(false);
                                             modal.alert(success_update_message, "success", function() {

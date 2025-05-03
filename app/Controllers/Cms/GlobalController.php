@@ -91,6 +91,11 @@ class GlobalController extends BaseController
 					    echo json_encode($result_data);
 					    break;
 					}
+					if ($table === 'tbl_sales_per_store_grouped') {
+					    $result_data = $this->Global_model->get_per_store_grouped($query, $limit, ($offset - 1) * $limit);
+					    echo json_encode($result_data);
+					    break;
+					}
 
 					$result_data = $this->Global_model->get_data_list($table, $query, $limit, ($offset - 1) * $limit, $select,$order_field,$order_type, $join, $group);
 
@@ -524,42 +529,103 @@ class GlobalController extends BaseController
 				}
 			break;
 
+			// case 'total_delete':
+			// try { 
+			// 	$table = $_POST['table'];
+			// 	$field = $_POST['field'];
+			// 	$where = $_POST['where'];
+
+			// 	// echo json_encode(['debug' => "$table,$field,$where"]);
+
+			// 	// Get old data for audit trail before deletion
+			// 	$query = "$field = '$where'";
+			// 	$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*", null, null, null);
+
+			// 	// Perform delete operation
+			// 	$status = $this->Global_model->total_delete($table, $field, $where);
+			// 	echo $status;
+
+			// 	// Insert audit trail for deletion
+			// 	$this->audit_trail_controller("Delete", null, $old_data);
+			// } catch (Exception $e) {
+			// 	echo "Error deleting data: " . $e->getMessage();
+			// }
+			// break;
 			case 'total_delete':
-			try { 
-				$table = $_POST['table'];
-				$field = $_POST['field'];
-				$where = $_POST['where'];
+				try {
+				    $table = $_POST['table'];
+				    $conditions = $_POST['conditions'];
 
-				// echo json_encode(['debug' => "$table,$field,$where"]);
+				    if (!is_array($conditions) || empty($conditions)) {
+				        throw new Exception("Invalid or missing conditions.");
+				    }
 
-				// Get old data for audit trail before deletion
-				$query = "$field = '$where'";
-				$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*", null, null, null);
+				    $queryParts = [];
+				    foreach ($conditions as $field => $value) {
+				        $escapedField = $this->db->escapeString($field);
+				        $escapedValue = $this->db->escape($value);
+				        $queryParts[] = "$escapedField = $escapedValue";
+				    }
+				    $query = implode(" AND ", $queryParts);
 
-				// Perform delete operation
-				$status = $this->Global_model->total_delete($table, $field, $where);
-				echo $status;
+				    $old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*", null, null, null);
 
-				// Insert audit trail for deletion
-				$this->audit_trail_controller("Delete", null, $old_data);
-			} catch (Exception $e) {
-				echo "Error deleting data: " . $e->getMessage();
-			}
-			break;
-			case 'batch_delete':
+				    $status = $this->Global_model->delete_where($table, $query); 
+				    echo $status;
+
+				    $this->audit_trail_controller("Delete", null, $old_data);
+
+				} catch (Exception $e) {
+				    echo "Error deleting data: " . $e->getMessage();
+				}
+				break;
+			case 'group_update':
 			    try {
+			        $table = $this->request->getPost('table');
+			        $conditions = json_decode($this->request->getPost('conditions'), true); 
+			        $update_data = json_decode($this->request->getPost('update_data'), true); 
+			        $isHistorical = $this->request->getPost('historical');
 
-			    	$table = $this->request->getPost('table');
-			        $field = $this->request->getPost('field');
-			        $field_value = $this->request->getPost('field_value');
-			        $where_in = $this->request->getPost('where_in');
+			        if (!is_array($conditions) || empty($conditions)) {
+			            throw new Exception("Invalid or missing conditions.");
+			        }
+			        if (!is_array($update_data) || empty($update_data)) {
+			            throw new Exception("Missing update data.");
+			        }
 
-			        $result_data = $this->Global_model->batch_delete($table, $field, $field_value, $where_in);
-		        	echo $result_data;
+			        $old_data = $this->Global_model->get_data_list($table, $conditions, 1, 0, "*", null, null, null);
+
+			        $status = $this->Global_model->update_where($table, $update_data, $conditions);
+			        echo $status;
+
+			        if ($isHistorical) {
+			            $year = $this->request->getPost('year');
+			            $action = $this->request->getPost('action');
+			            $remarks = $this->request->getPost('remarks');
+			            $this->target_sales_per_store_approval_history($year, $action, $remarks);
+			        }
+
+			        $this->audit_trail_controller("Update", $update_data, $old_data);
+
 			    } catch (Exception $e) {
-			        echo json_encode(['error' => $e->getMessage()]);
+			        echo "Error updating data: " . $e->getMessage();
 			    }
-			break;
+			    break;
+
+			case 'batch_delete':
+				    try {
+
+				    	$table = $this->request->getPost('table');
+				        $field = $this->request->getPost('field');
+				        $field_value = $this->request->getPost('field_value');
+				        $where_in = $this->request->getPost('where_in');
+
+				        $result_data = $this->Global_model->batch_delete($table, $field, $field_value, $where_in);
+			        	echo $result_data;
+				    } catch (Exception $e) {
+				        echo json_encode(['error' => $e->getMessage()]);
+				    }
+				break;
 			case 'batch_delete_with_conditions':
 			    try {
 			        $table = $this->request->getPost('table');
@@ -572,55 +638,55 @@ class GlobalController extends BaseController
 			    }
 			    break;
 			case 'batch_sort_update':
-			try { 	
-				$table = $_POST['table'];
-				$field = $_POST['field'];
-				$datas = $_POST['data'];
-				
-                foreach ($datas as $key) {
-					$where = $key['id'];
-					$data =  $key['sort_order'];
-					//update new data
-					$status = $this->Global_model->batch_sort_update_data($table,$data,$field,$where);
-					echo $data . '<br>';
-				}
+				try { 	
+					$table = $_POST['table'];
+					$field = $_POST['field'];
+					$datas = $_POST['data'];
+					
+	                foreach ($datas as $key) {
+						$where = $key['id'];
+						$data =  $key['sort_order'];
+						//update new data
+						$status = $this->Global_model->batch_sort_update_data($table,$data,$field,$where);
+						echo $data . '<br>';
+					}
 
-				echo $status;	
-				
-				
-			} catch (Exception $e) {
-				echo "Error updating data: " . $e->getMessage();
-			}
-			break;
+					echo $status;	
+					
+					
+				} catch (Exception $e) {
+					echo "Error updating data: " . $e->getMessage();
+				}
+				break;
 
 			case 'delete':
-				try { 
-					$table = $_POST['table'];
-					$id = "";
-					$old_data = "";
+					try { 
+						$table = $_POST['table'];
+						$id = "";
+						$old_data = "";
 
-					if(isset($_POST['site_id'])) {
-						$id = $_POST['site_id'];
-						$status = $this->Global_model->tagging_delete_data($table,$id);
-					}
-					else {
-						$id = $_POST['id'];
-						//get old data for audit trail
-						$query = "id = " . $id;
-						$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*" ,null,null,null);
-						//delete data
-						$status = $this->Global_model->delete_data($table,$id);
-					}
-					echo $status;
+						if(isset($_POST['site_id'])) {
+							$id = $_POST['site_id'];
+							$status = $this->Global_model->tagging_delete_data($table,$id);
+						}
+						else {
+							$id = $_POST['id'];
+							//get old data for audit trail
+							$query = "id = " . $id;
+							$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*" ,null,null,null);
+							//delete data
+							$status = $this->Global_model->delete_data($table,$id);
+						}
+						echo $status;
 
-					if($old_data)
-					{ //deletion of tagging data will not log in audit trail - chan
-						$this->audit_trail_controller("Remove", null, $old_data);
+						if($old_data)
+						{ //deletion of tagging data will not log in audit trail - chan
+							$this->audit_trail_controller("Remove", null, $old_data);
+						}
+					} catch (Exception $e) {
+		        		echo "Error deleting data: " . $e->getMessage();
 					}
-				} catch (Exception $e) {
-	        		echo "Error deleting data: " . $e->getMessage();
-				}
-			break;
+				break;
 
 			case 'pagination':
 				$query = $_POST['query'];
@@ -775,6 +841,17 @@ class GlobalController extends BaseController
 	  	$data2['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; 
 	  	$data2['created_at'] = date('Y-m-d H:i:s'); 
 	  	$this->Global_model->save_data('activity_logs',$data2);
+	}
+
+	public function target_sales_per_store_approval_history($year, $action, $remarks = null)
+	{
+		$session = session();
+	    $data['reference_year'] = $year;
+	  	$data['approver_id'] = $session->sess_uid;
+	  	$data['action'] = $action;
+	  	$data['remarks'] = $remarks;
+	  	$data['action_date'] = date('Y-m-d H:i:s'); 
+	  	$this->Global_model->save_data('tbl_target_sales_per_store_approval_history',$data);
 	}
 
 	public function audit_trail()

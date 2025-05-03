@@ -486,6 +486,38 @@ var modal = {
 		    }
 		  });
 	},
+	confirmWithRemarks: function(data, cb) {
+	    var mdl_data = is_json(data);
+	    Swal.close();
+	    Swal.fire({
+	        title: mdl_data.message,
+	        icon: "question",
+	        iconHtml: "?",
+	        cancelButtonColor: "#FE9900",
+	        confirmButtonColor: "#339933",
+	        confirmButtonText: mdl_data.confirm,
+	        cancelButtonText: mdl_data.cancel,
+	        showCancelButton: true,
+	        allowOutsideClick: false,
+	        showCloseButton: true,
+	        input: 'textarea',
+	        inputPlaceholder: 'Enter remarks here...',
+	        inputAttributes: {
+	            'aria-label': 'Enter remarks'
+	        },
+	        inputValidator: (value) => {
+	            if (!value) {
+	                return 'Remarks cannot be empty!';
+	            }
+	        }
+	    }).then((result) => {
+	        if (result.isConfirmed) {
+	            cb(true, result.value); 
+	        } else {
+	            cb(false, null); 
+	        }
+	    });
+	},
 	alert : function(data, icon = 'success', cb){
 			Swal.close();
 			Swal.fire({
@@ -1523,16 +1555,48 @@ function goToLastPage() {
     }
 }
 
-function total_delete(url, delete_table, delete_field, delete_where) {
+// function total_delete(url, delete_table, delete_field, delete_where) {
+//     data = {
+//         event : "total_delete",
+//         table : delete_table,
+//         field : delete_field,
+//         where : delete_where
+//     }
+//     aJax.post(url,data,function(result){
+//         // console.log(result)
+//     })
+// }
+
+function total_delete(url, delete_table, conditions) {
     data = {
         event : "total_delete",
         table : delete_table,
-        field : delete_field,
-        where : delete_where
+        conditions : conditions
     }
     aJax.post(url,data,function(result){
-        // console.log(result)
+        if(result){
+        	//location.reload();
+        }
     })
+}
+
+function group_update(url, update_table, conditions, update_data, isHistorical = false, year = null, action = null, remarks = null) {
+    let data = {
+        event: "group_update",
+        table: update_table,
+        historical: isHistorical,
+        year: year,
+        action: action,
+        remarks: remarks,
+	    conditions : JSON.stringify(conditions),
+	    update_data : JSON.stringify(update_data)
+    };
+
+    aJax.post(url, data, function(result) {
+        if (result) {
+            location.reload();
+        }
+    });
 }
 
 function batch_update(url, data, table, primaryKey, get_code, callback) {

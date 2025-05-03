@@ -153,17 +153,17 @@ class Login extends BaseController
 			$this->Global_model->update_data($table,$user_data,$field,$where);
 
 	        // Handle session and password expiration
-	        $expiration_days = $this->check_expiration_of_password($user->id);
-	        if ($expiration_days > 90) {
-	            //$this->send_email($user->email);
-	            echo json_encode(['count' => 6, 'result' => null, 'message' => 'Password expired', 'attempts' => $login_attempts]);
-	            return;
-	        }
+	        // $expiration_days = $this->check_expiration_of_password($user->id);
+	        // if ($expiration_days > 90) {
+	        //     //$this->send_email($user->email);
+	        //     echo json_encode(['count' => 6, 'result' => null, 'message' => 'Password expired', 'attempts' => $login_attempts]);
+	        //     return;
+	        // }
 
-	        $days_left = 90 - $expiration_days;
-	        if ($expiration_days > 83) {
-	            $session->setFlashdata('toast_message', "You have $days_left day(s) left before your password expires. Please change immediately.");
-	        }
+	        // $days_left = 90 - $expiration_days;
+	        // if ($expiration_days > 83) {
+	        //     $session->setFlashdata('toast_message', "You have $days_left day(s) left before your password expires. Please change immediately.");
+	        // }
 
 	        $this->set_session($data);
 	        echo json_encode(['count' => 3, 'result' => $data, 'message' => 'Login successful', 'attempts' => $login_attempts]);

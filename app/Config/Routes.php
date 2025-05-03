@@ -144,6 +144,8 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('get-menu', 'Cms\CmsPreference::get_menu');
         $routes->get('get-title', 'Cms\CmsPreference::get_title');
         $routes->get('get-site-menu', 'Cms\CmsPreference::get_site_menu');
+        $routes->get('get-pending-approvals', 'Cms\CmsPreference::getPendingApprovals');
+        
     });
 
     $routes->group('roles/', static function ($routes) {

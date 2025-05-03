@@ -28,6 +28,38 @@
                     <input hidden type="text" class="form-control p-2 col-3" id="s2" readonly disabled>
                 </div>
             </div>
+
+            <div class="table-responsive mt-4">
+                <h5>Approval History</h5>
+                <table class="table table-bordered table-striped" id="approval-history-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Approver Name</th>
+                            <th>Action</th>
+                            <th>Remarks</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($approval_history)): ?>
+                            <?php foreach ($approval_history as $row): ?>
+                                <tr>
+                                    <td><?= esc($row->name) ?></td>
+                                    <td><?= esc($row->action) ?></td>
+                                    <td><?= esc($row->remarks ?: '-') ?></td>
+                                    <td><?= date('F j, Y H:i', strtotime($row->action_date)) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    No data available
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
             <div class="box">
                 <table class="table table-bordered listdata">
                     <thead>
@@ -138,7 +170,7 @@
 
 <script>
     var params = "<?=$uri->getSegment(4);?>";
-    var query = `a.status >= 0 and b.year = ${params}`;
+    var query = `a.status >= 0 and a.year = ${params}`;
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -191,7 +223,6 @@
         };
 
         aJax.post(url, data, function(result) {
-            // console.log("Raw result:", result);
 
             var result = JSON.parse(result);
             var html = '';
@@ -199,7 +230,6 @@
             if (result && result.length > 0) {
                 var count = 1;
                 $.each(result, function(x, y) {
-                    console.log(count);
                     count+=1;
                     var status = (parseInt(y.status) === 1) ? "Active" : "Inactive";
                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";

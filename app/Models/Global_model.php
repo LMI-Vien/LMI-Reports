@@ -253,39 +253,68 @@ class Global_model extends Model
         return $q->getResult();
     }
 
-public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
-{
-    $sql = "
-        SELECT *
-        FROM (
-            SELECT 
-                v.id,
-                c.name AS company,
-                y.year,
-                v.week AS week,
-                v.created_date,
-                v.updated_date,
-                v.year as filter_year,
-                v.week as filter_week,
-                v.company as filter_company,
-                u.name AS imported_by,
-                ROW_NUMBER() OVER (
-                    PARTITION BY v.year, v.month, v.week, c.name
-                    ORDER BY v.updated_date DESC
-                ) AS row_num
-            FROM tbl_vmi v
-            LEFT JOIN cms_users u ON u.id = v.created_by
-            LEFT JOIN tbl_company c ON c.id = v.company
-            LEFT JOIN tbl_year y ON y.id = v.year
-            " . ($query ? "WHERE $query" : "") . "
-        ) t
-        WHERE row_num = 1
-        LIMIT $offset, $limit
-    ";
+    public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
+    {
+        $sql = "
+            SELECT *
+            FROM (
+                SELECT 
+                    v.id,
+                    c.name AS company,
+                    y.year,
+                    v.week AS week,
+                    v.created_date,
+                    v.updated_date,
+                    v.year as filter_year,
+                    v.week as filter_week,
+                    v.company as filter_company,
+                    u.name AS imported_by,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY v.year, v.month, v.week, c.name
+                        ORDER BY v.updated_date DESC
+                    ) AS row_num
+                FROM tbl_vmi v
+                LEFT JOIN cms_users u ON u.id = v.created_by
+                LEFT JOIN tbl_company c ON c.id = v.company
+                LEFT JOIN tbl_year y ON y.id = v.year
+                " . ($query ? "WHERE $query" : "") . "
+            ) t
+            WHERE row_num = 1
+            LIMIT $offset, $limit
+        ";
 
-    return $this->db->query($sql)->getResult();
-}
+        return $this->db->query($sql)->getResult();
+    }
 
+    public function get_per_store_grouped($query = null, $limit = 99999, $offset = 0)
+    {
+        $sql = "
+            SELECT *
+            FROM (
+                SELECT 
+                    ps.id,
+                    ps.year,
+                    ps.status,
+                    ps.created_date,
+                    ps.updated_date,
+                    y.year as filter_year,
+                    u.name AS imported_by,
+                    u.id AS imported_by_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY ps.year, ps.status
+                        ORDER BY ps.updated_date DESC
+                    ) AS row_num
+                FROM tbl_target_sales_per_store ps
+                LEFT JOIN cms_users u ON u.id = ps.created_by
+                LEFT JOIN tbl_year y ON y.id = ps.year
+                " . ($query ? "WHERE $query" : "") . "
+            ) t
+            WHERE row_num = 1
+            LIMIT $offset, $limit
+        ";
+
+        return $this->db->query($sql)->getResult();
+    }
 
     function check_db_exist($table, $conditions = [], $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = 'asc', $join = null, $group = null, $params = [], $useOr = false, $action = null)
     {
@@ -399,6 +428,26 @@ public function get_vmi_grouped_with_latest_updated($query = null, $limit = 9999
             return "failed";
         endif;
         // return "$table,$field,$where";
+    }
+
+    public function delete_where($table, $where)
+    {
+        try {
+            return $this->db->table($table)->where($where)->delete();
+        } catch (\Exception $e) {
+            log_message('error', 'Delete failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function update_where($table, $data, array $where)
+    {
+        try {
+            return $this->db->table($table)->where($where)->update($data);
+        } catch (\Exception $e) {
+            log_message('error', 'Update failed: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function batch_update($table, $data, $primaryKey, $get_code = null, $where_in = null) {

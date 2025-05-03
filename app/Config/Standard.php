@@ -150,6 +150,24 @@ class Standard extends BaseConfig
                                 "confirm"  => "Send",
                                 "cancel"   => "Cancel",
                             );
+
+    public $confirm_approve= array(
+                                "message"  => "Are you sure you want to approve this record?",
+                                "confirm"  => "Yes",
+                                "cancel"   => "No",
+                            );
+    public $confirm_send_approval= array(
+                                "message"  => "Are you sure you want to send this for approval?",
+                                "confirm"  => "Yes",
+                                "cancel"   => "No",
+                            );
+
+
+    public $confirm_disapprove= array(
+                                "message"  => "Are you sure you want to disapprove this record?",
+                                "confirm"  => "Yes",
+                                "cancel"   => "No",
+                            );
     
     public $confirm_submit= array(
                                 "message"  => "Are you sure you want to submit this record?",

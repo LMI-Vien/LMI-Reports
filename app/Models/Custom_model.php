@@ -259,6 +259,7 @@ class Custom_model extends Model
                 'menu_role_read' => $role_access_rights['menu_role_read'],
                 'menu_role_write' => $role_access_rights['menu_role_write'],
                 'menu_role_delete' => $role_access_rights['menu_role_delete'],
+                'menu_role_approve' => $role_access_rights['menu_role_approve'],
                 'menu_role_updated_date' => $role_access_rights['menu_role_updated_date'],
                 'menu_role_created_date' => $role_access_rights['menu_role_created_date'],
             ));
@@ -280,6 +281,7 @@ class Custom_model extends Model
                 'menu_role_view' => $role_access_rights['menu_role_view'],
                 'menu_role_generate' => $role_access_rights['menu_role_generate'],
                 'menu_role_export' => $role_access_rights['menu_role_export'],
+                'menu_role_filter' => $role_access_rights['menu_role_filter'],
                 'menu_role_updated_date' => $role_access_rights['menu_role_updated_date'],
                 'menu_role_created_date' => $role_access_rights['menu_role_created_date'],
             ));

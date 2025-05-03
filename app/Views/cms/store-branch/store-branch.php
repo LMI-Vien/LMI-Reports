@@ -1184,7 +1184,12 @@
             save_to_db(code, description, unique_brandAmba, status_val, storeId, function(obj) {
                 var finalStoreId = storeId || obj.ID;
                 if (storeId) {
-                    total_delete(url, 'tbl_brand_ambassador_group', 'store_id', finalStoreId);
+                    //total_delete(url, 'tbl_brand_ambassador_group', 'store_id', finalStoreId);
+                    const conditions = {
+                        store_id: finalStoreId
+                    };
+                    total_delete(url, 'tbl_brand_ambassador_group', conditions);
+
                 }
                 batch.forEach(function(item) {
                     item.store_id = finalStoreId;

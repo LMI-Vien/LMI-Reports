@@ -1650,24 +1650,46 @@ class Dashboard_model extends Model
 
 	public function refreshPreAggregatedData()
 	{
+
+		//old
+	        // WITH brand_data AS (
+	        //     SELECT 
+	        //         ba.store AS store_id,
+	        //         a_asc.description AS asc_name,
+	        //         a.description as area_name,
+	        //         GROUP_CONCAT(DISTINCT ba.type ORDER BY ba.type SEPARATOR ', ') AS ba_types,
+	        //         GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates,
+	        //         GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
+	        //         GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
+	        //     FROM tbl_brand_ambassador ba
+	        //     LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+	        //     LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+	        //     LEFT JOIN tbl_area a ON ba.area = a.id
+	        //     LEFT JOIN tbl_area_sales_coordinator a_asc ON a.id = a_asc.area_id
+	        //     WHERE ba.status >= 0
+	        //     GROUP BY ba.store
+	        // )
 	    $sql = "
-	        WITH brand_data AS (
-	            SELECT 
-	                ba.store AS store_id,
-	                a_asc.description AS asc_name,
-	                a.description as area_name,
-	                GROUP_CONCAT(DISTINCT ba.type ORDER BY ba.type SEPARATOR ', ') AS ba_types,
-	                GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates,
-	                GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
-	                GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
-	            FROM tbl_brand_ambassador ba
-	            LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-	            LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-	            LEFT JOIN tbl_area a ON ba.area = a.id
-	            LEFT JOIN tbl_area_sales_coordinator a_asc ON a.id = a_asc.area_id
-	            WHERE ba.status >= 0
-	            GROUP BY ba.store
-	        ), item_brands AS (
+			WITH brand_data AS (
+			    SELECT 
+			        s.id AS store_id,
+			        s.description AS store_name,
+			        asc.description AS asc_name,
+			        a.description AS area_name,
+			        GROUP_CONCAT(DISTINCT ba.type ORDER BY ba.type SEPARATOR ', ') AS ba_types,
+			        GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates,
+			        GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
+			        GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
+			    FROM tbl_store s
+			    LEFT JOIN tbl_brand_ambassador_group bag ON s.id = bag.store_id
+			    LEFT JOIN tbl_brand_ambassador ba ON bag.ba_id = ba.id AND ba.status >= 0
+			    LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+			    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+			    LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
+			    LEFT JOIN tbl_area a ON sg.area_id = a.id
+			    LEFT JOIN tbl_area_sales_coordinator asc ON a.id = asc.area_id
+			    GROUP BY s.id, s.description, asc.description, a.description
+			), item_brands AS (
 	            SELECT
 	                tv.id,
 	                tv.item,
@@ -1680,7 +1702,6 @@ class Dashboard_model extends Model
 	                tv.item_class,
 	                tv.store as store_id,
 	                tv.year,
-	                tv.month,
 	                tv.week,
 	                tv.company,
 	                tv.status,
@@ -1727,7 +1748,6 @@ class Dashboard_model extends Model
 	            ib.asc_name,
 	            ib.area_name,
 	            ib.year,
-	            ib.month,
 	            ib.week,
 	            ib.company,
 	            ib.status
@@ -1750,6 +1770,149 @@ class Dashboard_model extends Model
 	        'total_inserted' => count($allData)
 	    ];
 	}
+
+	public function refreshPreAggregatedData_forchecking()
+	{
+	    $sql = "
+			WITH brand_data AS (
+			    SELECT 
+			        s.id AS store_id,
+			        s.description AS store_name,
+			        asc.description AS asc_name,
+			        a.description AS area_name,
+			        GROUP_CONCAT(DISTINCT ba.type ORDER BY ba.type SEPARATOR ', ') AS ba_types,
+			        GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates,
+			        GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
+			        GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
+			    FROM tbl_store s
+			    LEFT JOIN tbl_brand_ambassador_group bag ON s.id = bag.store_id
+			    LEFT JOIN tbl_brand_ambassador ba ON bag.ba_id = ba.id AND ba.status >= 0
+			    LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+			    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+			    LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
+			    LEFT JOIN tbl_area a ON sg.area_id = a.id
+			    LEFT JOIN tbl_area_sales_coordinator asc ON a.id = asc.area_id
+			    GROUP BY s.id, s.description, asc.description, a.description
+			), item_brands AS (
+	        SELECT 
+	            ib.id,
+	            ib.item,
+	            ib.item_name,
+	            ib.vmi_status,
+	            ib.supplier,
+	            ib.average_sales_unit,
+	            ib.item_class,
+	            ib.store_id,
+	            ib.on_hand + ib.in_transit AS total_qty,
+	            ib.ambassador_names,
+	            ib.ba_types,
+	            ib.ba_deployment_dates,
+	            ib.lmi_itmcde,
+	            ib.rgdi_itmcde,
+	            ib.lmi_itmclass,
+	            ib.rgdi_itmclass,
+	            ib.brands,
+	            ib.store_name,
+	            ib.asc_name,
+	            ib.area_name,
+	            ib.year,
+	            ib.week,
+	            ib.company,
+	            ib.status
+	        FROM item_brands ib
+	    ";
+	    $query    = $this->db->query($sql);
+	    $allData  = $query->getResultArray();
+	    if (empty($allData)) {
+	        return ['total_inserted' => 0];
+	    }
+
+	    $existingRows = $this->db
+	        ->table('tbl_vmi_pre_aggregated_data')
+	        ->select('item, store_id, week, year, company, item_class, supplier')
+	        ->get()
+	        ->getResult();
+
+	    // build a quick lookup
+	    $exists = [];
+	    foreach ($existingRows as $r) {
+	        $exists[ implode('|', [
+	            $r->item,
+	            $r->item_name,
+	            $r->vmi_status,
+	            $r->item_class,
+	            $r->company,
+	            $r->supplier,
+	            $r->item_class,
+	            $r->store_id,
+	            $r->store_code,
+	            $r->total_qty,
+	            $r->average_sales_unit,
+	            $r->ambassador_names,
+	            $r->ba_deployment_dates,
+	            $r->lmi_itmcde,
+	            $r->rgdi_itmcde,
+	            $r->lmi_itmclass,
+	            $r->rgdi_itmclass,
+	            $r->brands,
+	            $r->store_name,
+	            $r->asc_name,
+	            $r->area_name,
+	            $r->year,
+	            $r->week,
+	            $r->company,
+	            $r->status
+	        ]) ] = true;
+	    }
+
+	    $toInsert = [];
+	    foreach ($allData as $row) {
+	        $key = implode('|', [
+	            $row['item'],
+	            $row['item_name'],
+	            $row['vmi_status'],
+	            $row['item_class'],
+	            $row['supplier'],
+	            $row['item_class'],
+	            $row['store_id'],
+	            $row['store_code'],
+	            $row['total_qty'],
+	            $row['average_sales_unit'],
+	            $row['ambassador_names'],
+	            $row['ba_deployment_dates'],
+	            $row['lmi_itmcde'],
+	            $row['rgdi_itmcde'],
+	            $row['lmi_itmclass'],
+	            $row['rgdi_itmclass'],
+	            $row['brands'],
+	            $row['store_name'],
+	            $row['asc_name'],
+	            $row['area_name'],
+	            $row['year'],
+	            $row['week'],
+	            $row['company'],
+	            $row['status'],
+	        ]);
+	        if (! isset($exists[$key])) {
+	            $toInsert[] = $row;
+	        }
+	    }
+
+	    $totalNew = count($toInsert);
+	    if ($totalNew > 0) {
+	        $batchSize = 10000;
+	        foreach (array_chunk($toInsert, $batchSize) as $chunk) {
+	            $this->db
+	                 ->table('tbl_vmi_pre_aggregated_data')
+	                 ->insertBatch($chunk);
+	        }
+	    }
+
+	    return [
+	        'total_inserted' => $totalNew
+	    ];
+	}
+
 
     public function updateConsolidatedData()
     {

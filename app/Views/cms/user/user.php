@@ -135,10 +135,14 @@
     var query = "u.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
+    var role = '<?=$session->sess_role;?>';
     $(document).ready(function() {
       get_data(query);
       get_pagination(query);
       get_data_user_roles();
+        if(role == 1){
+            $( '<a href="#" id="btn_unblock" data-status=3 class=" btn_status btn-sm btn btn-default cms-btn" style="display: none;"> Unblock </a>' ).insertAfter( $( ".btn_trash" ) );
+        }
     });
 
     $('#update_pass').change(function(){
@@ -194,7 +198,7 @@
             limit : limit,
             table : "cms_users u",
             order : {
-                field : "u.name", //field to order
+                field : "u.created_date", //field to order
                 order : "asc" //asc or desc
             },
             join : [ //optional
@@ -227,7 +231,9 @@
                         html+="<td>"+status+"</a></td>";
                         html+="<td class='center-content'>";
                         html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                        if(y.id > 3){
+                            html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";    
+                        }
                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                         html+="</td>";
                         html+="</tr>";
@@ -904,28 +910,67 @@
         $(this).attr('aria-hidden', 'true'); // Restore aria-hidden when modal closes
     });
 
-        $(document).on('click', '.btn_status', function (e) {
-            var status = $(this).attr("data-status");
-            var modal_obj = "";
-            var modal_alert_success = "";
-            var hasExecuted = false; // Prevents multiple executions
+    //dito
 
-            if (parseInt(status) === -2) {
-                modal_obj = confirm_delete_message;
-                modal_alert_success = success_delete_message;
-                offset = 1;
-            } else if (parseInt(status) === 1) {
-                modal_obj = confirm_publish_message;
-                modal_alert_success = success_publish_message;
-            } else {
-                modal_obj = confirm_unpublish_message;
-                modal_alert_success = success_unpublish_message;
-            }
-            modal.confirm(modal_obj, function (result) {
-                if (result) {
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var dataList = [];
-                    
+    $(document).on('click', '.btn_status', function (e) {
+        var status = $(this).attr("data-status");
+        var modal_obj = "";
+        var modal_alert_success = "";
+        var hasExecuted = false; // Prevents multiple executions
+
+        if (parseInt(status) === -2) {
+            modal_obj = confirm_delete_message;
+            modal_alert_success = success_delete_message;
+            offset = 1;
+        } else if (parseInt(status) === 1) {
+            modal_obj = confirm_publish_message;
+            modal_alert_success = success_publish_message;
+        } else if (parseInt(status) === 0) {
+            modal_obj = confirm_unpublish_message;
+            modal_alert_success = success_unpublish_message;
+        }else{
+            modal_obj = confirm_unblock_message;
+            modal_alert_success = success_unblock_message;           
+        }
+        modal.confirm(modal_obj, function (result) {
+            if (result) {
+                var url = "<?= base_url('cms/global_controller');?>";
+                var dataList = [];
+
+                if (parseInt(status) === 3) {
+                    $('.selectall').prop('checked', false);
+                    let hasAlertExecuted = false;
+
+                    $('.select:checked').each(function () {
+
+                        var id = $(this).attr('data-id');
+                        var data = {
+                            event: "update",
+                            table: "cms_users",
+                            field: "id",
+                            where: id,
+                            data: {
+                                updated_date: formatDate(new Date()),
+                                updated_by: user_id,
+                                user_error_logs: 0,
+                                user_block_logs: 0,
+                                user_lock_time: ''
+                            }
+                        };
+
+                        aJax.post(url, data, function (result) {
+                            var obj = is_json(result);
+                            if (!hasAlertExecuted) {
+                                hasAlertExecuted = true;
+                                modal.alert(success_update_message, "success", function (cb) {
+                                    if (cb) {
+                                        location.reload();
+                                    }
+                                });
+                            }
+                        });
+                    });
+                } else {
                     $('.select:checked').each(function () {
                         var id = $(this).attr('data-id');
                         dataList.push({
@@ -943,9 +988,10 @@
                     if (dataList.length === 0) return;
 
                     var processed = 0;
+
                     dataList.forEach(function (data, index) {
                         aJax.post(url, data, function (result) {
-                            if (hasExecuted) return; // Prevents multiple executions
+                            if (hasExecuted) return;
 
                             modal.loading(false);
                             processed++;
@@ -967,6 +1013,8 @@
                         });
                     });
                 }
-            });
+            }
+
         });
+    });
 </script>

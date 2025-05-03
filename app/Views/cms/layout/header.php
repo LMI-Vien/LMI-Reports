@@ -56,8 +56,10 @@
         var failed_transaction_message = '<?= dialog("failed_transaction"); ?>';
         var missing_user_input_message = '<?= dialog("missing_input"); ?>';
         var error_value_used = '<?= dialog("value_used"); ?>';
-        var success_delete_message = '<?= dialog("delete_success"); ?>';
         var confirm_export_message = '<?= confirm("confirm_export"); ?>';
+        var confirm_approve_message = '<?= confirm("confirm_approve"); ?>';
+        var confirm_disapprove_message = '<?= confirm("confirm_disapprove"); ?>';
+        var confirm_send_approval_message = '<?= confirm("confirm_send_approval"); ?>';
         var base_url = '<?= base_url();?>';
         var csrf_name = "<?= csrf_token(); ?>";
         var csrf_hash = "<?= csrf_hash(); ?>";

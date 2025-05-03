@@ -2,6 +2,9 @@
 .main-sidebar {
   background-color: #301311;
 }
+.notification-data {
+    display: none;
+}
 
 <?php
     //get url for db table checking on user role
@@ -36,14 +39,30 @@
   </ul>
 
   <!-- Right navbar links -->
-  <ul class="navbar-nav ml-auto">
-    <!-- Messages Dropdown Menu -->
-    <li class="nav-signout">
-      <a class="nav-link logout-btn" href="<?= base_url('cms/login/sign_out');?>">
-        <i class="fa fa-sign-out-alt mr-2"></i> Sign Out 
-      </a>
-    </li>
-  </ul>
+    <ul class="navbar-nav ml-auto">
+      <!-- Notification Icon -->
+      <li class="nav-item dropdown notification-data">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+          <i class="fa fa-bell"></i>
+          <span class="badge badge-danger navbar-badge" id="notificationCount">0</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+          <span class="dropdown-header" id="approvalCount">0 Pending Approvals</span>
+          <div class="dropdown-divider"></div>
+          <a href="<?= base_url('cms/import-target-sales-ps'); ?>" class="dropdown-item">
+            <i class="fas fa-exclamation-circle mr-2"></i> View Pending Approvals
+          </a>
+          <div class="dropdown-divider"></div>
+        </div>
+      </li>
+
+      <!-- Sign Out -->
+      <li class="nav-signout">
+        <a class="nav-link logout-btn" href="<?= base_url('cms/login/sign_out'); ?>">
+          <i class="fa fa-sign-out-alt mr-2"></i> Sign Out 
+        </a>
+      </li>
+    </ul>
 </nav>
 
 <!-- Main Sidebar Container -->
@@ -66,6 +85,7 @@
 
 <script>
 var menu_url = 'cms/'+'<?=$combine_url;?>';
+var session_role = '<?= $session->sess_role?>';
 
 $(document).ready(function () {
     $(".logout-btn").on("click", function(e) {
@@ -96,6 +116,12 @@ $(document).ready(function () {
     aJax.get("<?= base_url('cms/cms-preference/get-title');?>",function(data) {
       $('.logo-lg').html(data);
     })
+//  aJax.get("<?= base_url('cms/cms-preference/get-pending-approvals'); ?>?session_role=" + session_role, function(data) {
+    aJax.get("<?= base_url('cms/cms-preference/get-pending-approvals'); ?>", function(data) {
+        console.log(data);
+            $('#notificationCount').html(data);
+            $('#approvalCount').html(data + ' Pending Approvals');
+    });
 
     aJax.get(base_url + 'cms/cms-preference/get-menu', function (data) {
         var obj = is_json(data);
@@ -176,15 +202,18 @@ $('.brand-link').on('click', function (e) {
 
   $(window).on('load', function() { 
     user_role_editor();
+    //static values from user roles
+    if(parseInt(session_role) === 3 || parseInt(session_role) === 4){
+        user_role_approver();
+    }
   });
 
   function user_role_editor() {
-    var user_role = '<?= $session->sess_role?>';
-    var query = "cms_menu.status >= 0 AND menu_url = '"+menu_url+"' AND role_id = '"+user_role+"'"; 
+    var query = "cms_menu.status >= 0 AND menu_url = '"+menu_url+"' AND role_id = '"+session_role+"'"; 
     var url = "<?= base_url("cms/global_controller");?>";
     var data = {
         event : "list",
-        select : "cms_menu.id as menu_id, menu_url,menu_parent_id,menu_level ,status, role_id,cms_menu_roles.menu_id as menu_roles_id,menu_role_read,menu_role_write,menu_role_delete",
+        select : "cms_menu.id as menu_id, menu_url,menu_parent_id,menu_level ,status, role_id,cms_menu_roles.menu_id as menu_roles_id,menu_role_read,menu_role_write,menu_role_delete, menu_role_approve",
         query : query,
         offset : offset,
         limit : 1,
@@ -206,8 +235,9 @@ $('.brand-link').on('click', function (e) {
                 var role_read = y.menu_role_read;
                 var role_write = y.menu_role_write;
                 var role_delete = y.menu_role_delete;
+                var role_approve = y.menu_role_approve;
 
-                if(role_read == 0 && role_delete == 0 && role_write == 0){
+                if(role_read == 0 && role_delete == 0 && role_write == 0 && role_approve == 0){
                     location.href = "<?= base_url('cms');?>";
                 }
 
@@ -274,15 +304,39 @@ $('.brand-link').on('click', function (e) {
            });
         }
     });
+  }
 
-    // AJAX.config.base_url("<?= base_url();?>");
-    // AJAX.select.select("cms_menu.id as menu_id, menu_url,menu_parent_id,menu_level ,status, role_id,cms_menu_roles.menu_id as menu_roles_id,menu_role_read,menu_role_write,menu_role_delete");
-    // AJAX.select.table("cms_menu");
-    // AJAX.select.join.left("cms_menu_roles", "cms_menu_roles.menu_id", "cms_menu.id");
-    // AJAX.select.exec(function(result) {
-    //   var result = JSON.parse(result);
+  function user_role_approver() {
+    var query = "cms_menu.status >= 0 AND menu_url = 'cms/import-target-sales-ps' AND role_id = '"+session_role+"'"; 
+    var url = "<?= base_url("cms/global_controller");?>";
+    var data = {
+        event : "list",
+        select : "cms_menu.id as menu_id, menu_url,menu_parent_id,menu_level ,status, role_id,cms_menu_roles.menu_id as menu_roles_id,menu_role_read,menu_role_write,menu_role_delete, menu_role_approve",
+        query : query,
+        offset : offset,
+        limit : 1,
+        table : "cms_menu",
+        join : [
+            {
+                table: "cms_menu_roles",
+                query: "cms_menu_roles.menu_id = cms_menu.id",
+                type: "left"
+            }
+        ]            
+        
 
-    // });
+    }    
+    aJax.post(url,data, function(result){
+        obj = is_json(result);
+        if(obj.length > 0){
+           $.each(obj,function(x,y){
+                var role_approve = y.menu_role_approve;
+                if (role_approve == 1) {
+                  $('.notification-data').show();
+                }
+           });
+        }
+    });
   }
 
 </script>

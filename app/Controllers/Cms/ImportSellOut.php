@@ -141,7 +141,14 @@ class ImportSellOut extends BaseController
 			$tempDir = WRITEPATH . 'uploads/temp_chunks/';
 	        if (!is_dir($tempDir)) {
 	            mkdir($tempDir, 0777, true);
-	        }			
+	        }	
+
+	        foreach (glob($tempDir . '*') as $tempFile) {
+	            if (filemtime($tempFile) < time() - 86400) { // 86400 seconds = 1 day
+	                unlink($tempFile);
+	            }
+	        }
+	        		
 			$tempFilePath = $tempDir . $fileName . "_part_" . $chunkIndex;
 			$file->move($tempDir, $fileName . "_part_" . $chunkIndex);
 

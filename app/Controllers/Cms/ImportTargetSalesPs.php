@@ -51,6 +51,7 @@ class ImportTargetSalesPs extends BaseController
 
 	public function view()
 	{
+
 		$uri = current_url(true);
 		$data['uri'] =$uri;
 
@@ -59,10 +60,31 @@ class ImportTargetSalesPs extends BaseController
 			"description"   =>  "Import Target Sales Per Store",
 			"keyword"       =>  ""
 		);
+
+
+		$year = $uri->getSegment(4);
+		if(intval($year)){
+			$query = "h.id >= 1 and reference_year = ".$year;
+		}else{
+			$query = "h.id >= 1";
+		}
+
+		$select = "h.id, h.remarks, h.action, h.action_date, h.approver_id, u.name";
+		$join = [
+		    [
+		        'table' => 'cms_users u',
+		        'query' => 'u.id = h.approver_id',
+		        'type' => 'left'
+		    ]
+		];
+		$approval_history = $this->Global_model->get_data_list("tbl_target_sales_per_store_approval_history h", $query, 999,0, $select, "action_date", "desc", $join, null);
+		$data['approval_history'] = $approval_history;
 		$data['title'] = "Import Target Sales Per Store";
 		$data['PageName'] = 'Import Target Sales Per Store';
 		$data['PageUrl'] = 'Import Target Sales Per Store';
 		$data['content'] = "cms/import/ta-so-ps/view_target_sales_ps.php";
+
+
 		$data['buttons'] = [];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');

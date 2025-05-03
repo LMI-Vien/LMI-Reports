@@ -346,9 +346,10 @@
 
     
 <script>
-    var query = "a.status >= 0";
+    var query = "ps.status >= 0";
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
+    var user_role = '<?=$session->sess_role;?>';
     var url = "<?= base_url('cms/global_controller');?>";
     var base_url = '<?= base_url();?>';
 
@@ -364,56 +365,50 @@
     });
 
     function get_data(new_query) {
+        modal.loading(true);
         var data = {
             event: "list",
-            // select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
-            // "a.july, a.august, a.september, a.october, a.november, a.december, "+
-            // "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status",
-            select: "a.created_date, u.name imported_by, b.year, a.updated_date, a.year yearval, b.id as year_id",
+            select: "name",
             query: new_query,
             offset: offset,
             limit: limit,
-            table: "tbl_target_sales_per_store a",
-            order : {
-                field : "a.id",
-                order : "asc" 
-            },
-            join: [
-                {
-                    table: "tbl_store s1",
-                    query: "s1.id = a.location",
-                    type: "left"
-                },
-                {
-                    table: "tbl_year b",
-                    query: "a.year = b.id",
-                    type: "left"
-                },
-                {
-                    table: "cms_users u",
-                    query: "u.id = a.created_by",
-                    type: "left"
-                }
-            ],
-            group: "b.year"
+            table: "tbl_sales_per_store_grouped"
         };
 
         aJax.post(url, data, function(result) {
-            // console.log("Raw result:", result);
-
             var result = JSON.parse(result);
             var html = '';
-
+            modal.loading(false);
             if (result && result.length > 0) {
                 $.each(result, function(x, y) {
-                    var status = (parseInt(y.status) === 1) ? "Active" : "Inactive";
+                    let statusText = "-";
+                    switch (parseInt(y.status)) {
+                        case 1:
+                            statusText = "Approved";
+                            break;
+                        case 2:
+                            statusText = "Draft";
+                            break;
+                        case 3:
+                            statusText = "For Head Approval";
+                            break;
+                        case 4:
+                            statusText = "For Final Approval";
+                            break;
+                        case 5:
+                            statusText = "Rejected";
+                            break;
+                        case 0:
+                            statusText = "Inactive";
+                            break;
+                    }
                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                     html += "<tr class='" + rowClass + "'>";
                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                     html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
-                    html += "<td scope=\"col\">" + (y.year) + "</td>";
-                    html += "<td scope=\"col\">" + (y.status) + "</td>";
+                    html += "<td scope=\"col\">" + (y.filter_year) + "</td>";
+                    html += "<td scope=\"col\">" + statusText + "</td>";
                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
                     let href = "<?= base_url()?>"+"cms/import-target-sales-ps/view/"+`${y.year}`;
@@ -421,22 +416,50 @@
                     if (y.id == 0) {
                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                     } else {
-                        html+="<td class='center-content'>";
-                        
-                        html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year_id+
-                        "')\" data-status='"+y.status+"' id='"+y.id+
-                        "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                        const status = parseInt(y.status);
+                        const importedBy = parseInt(y.imported_by_id);
+                        const role = parseInt(user_role);
 
-                        html+="<a class='btn-sm btn view' href='"+ href +"' data-status='"+y.status+
-                        "' target='_blank' id='"+y.id+
-                        "' title='View'><span class='glyphicon glyphicon-pencil'>View</span>";
+                        html += "<td class='center-content'>";
 
-                        html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.yearval+
-                        "')\" data-status='"+y.status+"' id='"+y.id+
-                        "' title='Export Details'><span class='glyphicon glyphicon-pencil'>Export</span>";
+                        const buildBtn = (className, fnName, label) => {
+                            return `<a class='btn-sm btn ${className}' onclick="${fnName}('${y.year}')" data-status='${status}' id='${y.id}' title='${label} Item'>
+                                        <span class='glyphicon glyphicon-pencil'>${label}</span>
+                                    </a>`;
+                        };
 
-                        html+="</td>";
+                        if (status < 1 ) {
+                            html += buildBtn('delete', 'delete_data', 'Delete');
+                        }
+
+                        if ((parseInt(status) === 5 || parseInt(status) === 2) && parseInt(importedBy) === parseInt(user_id)) {
+                            html += buildBtn('delete', 'delete_data', 'Delete');
+                            html += buildBtn('view', 'send_for_approval_data', 'Send for Approval');
+                        }
+
+                        if (status === 2 && importedBy === user_id) {
+                            html += buildBtn('disapprove', 'disapprove_data', 'Disapprove');
+                            html += buildBtn('view', 'approve_data', 'Approve');
+                        }
+
+                        if (status === 3 && parseInt(role) === 3) {
+                            html += buildBtn('disapprove', 'disapprove_data', 'Disapprove');
+                            html += buildBtn('view', 'approve_data', 'Approve');
+                        }
+
+                        if (status === 4 && parseInt(role) === 4) {
+                            html += buildBtn('disapprove', 'disapprove_data', 'Disapprove');
+                            html += buildBtn('view', 'approve_data', 'Approve');
+                        }
+
+                        html += `<a class='btn-sm btn view' href='${href}' data-status='${status}' target='_blank' id='${y.id}' title='View'>
+                                    <span class='glyphicon glyphicon-pencil'>View</span>
+                                </a>`;
+
+                        html += buildBtn('save', 'export_data', 'Export');
+                        html += "</td>";
                     }
+
 
                     html += "</tr>";
                 });
@@ -452,29 +475,29 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-          select: "a.created_date, u.name imported_by, b.year, a.updated_date",
+          select: "ps.created_date, u.name imported_by, b.year, ps.updated_date",
           query: new_query,
           offset: offset,
           limit: limit,
-          table: "tbl_target_sales_per_store a",
+          table: "tbl_target_sales_per_store ps",
           order : {
-              field : "a.id",
+              field : "ps.id",
               order : "asc" 
           },
           join: [
               {
                   table: "tbl_store s1",
-                  query: "s1.id = a.location",
+                  query: "s1.id = ps.location",
                   type: "left"
               },
               {
                   table: "tbl_year b",
-                  query: "a.year = b.id",
+                  query: "ps.year = b.id",
                   type: "left"
               },
               {
                   table: "cms_users u",
-                  query: "u.id = a.created_by",
+                  query: "u.id = ps.created_by",
                   type: "left"
               }
           ],
@@ -738,27 +761,72 @@
         modal.confirm(confirm_delete_message,function(result){
             if(result){
                 var url = "<?= base_url('cms/global_controller');?>";
-                var formattedData = [];
-        
-                dynamic_search(
-                    "'tbl_target_sales_per_store'", 
-                    "''", 
-                    "'id'", 
-                    0, 
-                    0, 
-                    `'year:EQ=${year}'`,  
-                    `''`, 
-                    `''`,
-                    (res) => {
-                        year = [year];
-                        console.log(year);
-                        batch_delete(url, "tbl_target_sales_per_store", "year", year, 'year', function(resp) {
-                            modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
-                        });
-                    }
-                )
+                const conditions = {
+                    year: year
+                };
+                const appvr_conditions = {
+                    reference_year: year
+                };
+                total_delete(url, 'tbl_target_sales_per_store', conditions);
+                total_delete(url, 'tbl_target_sales_per_store_approval_history', appvr_conditions);
             }
         })
+    }
+
+    function send_for_approval_data(year) {
+        modal.confirm(confirm_send_approval_message,function(result){
+            if(result){
+                var url = "<?= base_url('cms/global_controller');?>";
+                var status = 3;
+                const conditions = {
+                    year: year
+                };
+                const update_data = {
+                    status: status
+                };
+                //isHistorical = false, year = null, action = null, remarks = null
+                group_update(url, 'tbl_target_sales_per_store', conditions, update_data, true, year, 'Sent for Approval', null);
+            }
+        })
+    }
+
+    function approve_data(year) {
+        modal.confirm(confirm_approve_message,function(result){
+            if(result){
+                var url = "<?= base_url('cms/global_controller');?>";
+                var status = 3;
+                //static role
+                if(parseInt(user_role) === 3){
+                    status = 4;
+                }else{
+                    status = 1;
+                }
+                const conditions = {
+                    year: year
+                };
+                const update_data = {
+                    status: status
+                };
+                //group_update(url, 'tbl_target_sales_per_store', conditions, update_data);
+                group_update(url, 'tbl_target_sales_per_store', conditions, update_data, true, year, 'Approved', null);
+            }
+        })
+    }
+
+    function disapprove_data(year) {
+        modal.confirmWithRemarks(confirm_disapprove_message, function(isConfirmed, remarks){
+            if (isConfirmed) {
+                var url = "<?= base_url('cms/global_controller');?>";
+                var status = 5;
+                const conditions = {
+                    year: year
+                };
+                const update_data = {
+                    status: status
+                };
+                group_update(url, 'tbl_target_sales_per_store', conditions, update_data, true, year, 'Disapproved', remarks);
+            }
+        });
     }
 
     function formatDate(date) {
@@ -920,8 +988,6 @@
                 return fixedRow;
             });
 
-            console.log(jsonData);
-
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -1005,9 +1071,7 @@
                     ...record,
                     year: year,
                 }));
-                console.log(year, 'year');
                 checkDataSalesPerStore(year, new_data);
-                //
             } else {
                 return modal.alert(`No valid data found. Please check the file.`, 'error', () => {});
             }
@@ -1082,7 +1146,7 @@
     }
 
     function checkDataSalesPerStore(year, new_data){
-        new_query = "status = 1 AND a.year = "+year;
+        new_query = "status IN (1, 3, 4, 5) AND a.year = " + year;
         var data = {
             event: "list",
             select: "a.created_date , a.year",
@@ -1100,7 +1164,6 @@
         aJax.post(url, data, function(result) {
             result = is_json(result);
             if(result.length > 0){
-                console.log('here');
                 return modal.alert(`Target Sales Per Store Data Already Exist!`, 'error', () => {});
             }else{
                 saveValidatedData(new_data);
@@ -1121,7 +1184,7 @@
         let selected_fields = [
             'id', 'ba_code', 'location', 'january', 'february', 'march', 'april',
             'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
-            'year'
+            'year', 'status'
 
         ];
 
@@ -1142,7 +1205,8 @@
         aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
             let result = JSON.parse(response);
             let existingMap = new Map();
-
+            let statusMap = new Map();
+   
             if (result.existing) {
                 result.existing.forEach(record => {
                     let key = matchFields.map(field => {
@@ -1151,6 +1215,7 @@
                     }).join("|");
 
                     existingMap.set(key, record.id);
+                    statusMap.set(key, record.status);
                 });
             }
 
@@ -1181,6 +1246,7 @@
 
                         if (existingMap.has(key)) {
                             matchedId = existingMap.get(key);
+                            matchedStatus = statusMap.get(key);
                         }
                     } else if (matchType === "OR") {
                         for (let [key, id] of existingMap.entries()) {
@@ -1190,6 +1256,7 @@
                                 let formattedValue = floatFields.includes(field) ? parseFloat(value) || 0 : String(value).trim().toLowerCase();
                                 if (keyParts.includes(formattedValue)) {
                                     matchedId = id;
+                                    matchedStatus = statusMap.get(key);
                                     break;
                                 }
                             }
@@ -1200,13 +1267,13 @@
                     if (matchedId) {
                         row.id = matchedId;
                         row.updated_by = user_id;
-                        row.status = 3;
+                        row.status = matchedStatus;
                         row.updated_date = formatDate(new Date());
                         delete row.created_date; // Unset created_date
                         updateRecords.push(row);
 
                     } else {
-                        row.status = 3;
+                        row.status = 2; //draft
                         row.created_by = user_id;
                         row.created_date = formatDate(new Date());
                         newRecords.push(row);
@@ -1541,8 +1608,6 @@
                                     }
                                 )
                             }
-                        } else {
-                            console.log('No data received');
                         }
                     }
                 )

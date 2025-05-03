@@ -131,7 +131,7 @@ self.onmessage = async function(e) {
                         ba_code,
                         location,
                         ...monthlyValues,
-                        status: 1,
+                        status: 3,
                         created_by: user_id,
                         created_date: date_of_creation
                     });
