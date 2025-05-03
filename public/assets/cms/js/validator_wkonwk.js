@@ -64,9 +64,9 @@ self.onmessage = async function(e) {
                     addErrorLog(`Invalid quantity: "${quantity}" is not a number`);
                     continue;
                 }
-                item_name = customer_sku_code_lookup[item_name.toLowerCase()] || addErrorLog("Invalid SKU Code");
-                label_type =  label_type_lookup[label_type.toLowerCase()] || addErrorLog("Invalid Label Code");
-                item_class = item_class_lookup[item_class.toLowerCase()] || addErrorLog("Invalid Item Class");
+                item = customer_sku_code_lookup[item.trim().toLowerCase()] || addErrorLog("Invalid SKU Code: "+item);
+                label_type =  label_type_lookup[label_type.trim().toLowerCase()] || addErrorLog("Invalid Label Code: "+label_type);
+                item_class = item_class_lookup[item_class.trim().toLowerCase()] || addErrorLog("Invalid Item Class: "+item_class);
     
                 function addErrorLog(message) {
                     invalid = true;

@@ -97,39 +97,48 @@ class ImportWeekOnWeek extends BaseController
 	            $totalInserted = 0;
 
 	            if (str_ends_with($fileName, '.csv')) {
-	                $handle = fopen($finalFilePath, 'r');
-	                if ($handle !== false) {
-	                    $headerSkipped = false;
-	                    $counter = 0;
-	                    $line_number = 0;
-	                    while (($row = fgetcsv($handle, 1000, ",")) !== false) {
-	                        if (!$headerSkipped) {
-	                            $headerSkipped = true;
-	                            continue; 
-	                        }
-	                        $row = array_pad($row, 8, null);
-	                        $counter++;
-	                        $line_number++;
-							if ($counter >= 5) { // look here
-		                        $batchData[] = [
+					$handle = fopen($finalFilePath, 'r');
+					if ($handle !== false) {
+						$headerSkipped = false;
+						$counter = 0;
+						$line_number = 0;
+						while (($row = fgetcsv($handle, 1000, ",")) !== false) {
+							if (!$headerSkipped) {
+								$headerSkipped = true;
+								continue; 
+							}
+							$row = array_pad($row, 12, null); // ensure same number of columns as in Excel case
+							$counter++;
+							$line_number++;
+				
+							if ($counter >= 4) { // start from 5th row (0-based logic with header already skipped)
+								$batchData[] = [
 									'created_date' => date('Y-m-d H:i:s'),
 									'created_by' => $this->session->get('sess_uid'),
-									'stuff' => $line_number.'_stuff',
+									'stuff' => $line_number . '_stuff',
 									'file_name' => $fileName,
 									'line_number' => $line_number,
 									'year' => $year,
 									'week' => $week,
-		                        ];
-		                    }
-	                        if (count($batchData) === $batchSize) {
-	                            $this->Custom_model->batch_insert('tbl_wkonwk_temp_space', $batchData);
-	                            $totalInserted += count($batchData);
-	                            $batchData = [];
-	                        }
-	                    }
-	                    fclose($handle);
-	                }
-	            } elseif (str_ends_with($fileName, '.xls') || str_ends_with($fileName, '.xlsx')) {
+									'item' => trim($row[0] ?? ''),
+									'item_name' => trim($row[1] ?? ''),
+									'label_type' => trim($row[2] ?? ''),
+									'status' => trim($row[3] ?? ''),
+									'item_class' => trim($row[4] ?? ''),
+									'pog_store' => trim($row[6] ?? ''),
+									'quantity' => trim($row[7] ?? ''),
+								];
+							}
+				
+							if (count($batchData) === $batchSize) {
+								$this->Custom_model->batch_insert('tbl_wkonwk_temp_space', $batchData);
+								$totalInserted += count($batchData);
+								$batchData = [];
+							}
+						}
+						fclose($handle);
+					}
+				} elseif (str_ends_with($fileName, '.xls') || str_ends_with($fileName, '.xlsx')) {
 	                $reader = IOFactory::createReaderForFile($finalFilePath);
 	                $reader->setReadDataOnly(true);
 	                $spreadsheet = $reader->load($finalFilePath);
