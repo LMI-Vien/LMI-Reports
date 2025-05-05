@@ -714,45 +714,37 @@ class GlobalController extends BaseController
 
 				echo json_encode($result_return);
 				break;
-
 			case 'batch_insert':
-			    try {
-			        $table = $this->request->getPost('table');
-			        $insertBatchData = $this->request->getPost('insert_batch_data');
-			        $get_code = $this->request->getPost('get_code');//true or false lang pang return ng code 
+			    $table = $this->request->getPost('table');
+			    $jsonData = $this->request->getPost('insert_batch_data');
+			    $rawFlag = $this->request->getPost('get_code'); 
 
-			        if (empty($table) || empty($insertBatchData)) {
-			            return $this->response->setJSON([
-			                "message" => "Table name or data is missing"
-			            ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
-			        }
-
-			        // Perform batch insert and get the number of inserted rows
-			        $insertedCount = $this->Custom_model->batch_insert($table, $insertBatchData, $get_code);
-
-			        if ($insertedCount === false) {
-			            return $this->response->setJSON([
-			                "message" => "Database insert failed"
-			            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
-			        }
-					if (is_array($insertedCount)) {
-					    $message = 'success';
-					} else {
-					    $message = 'error';
-					}
-			        return $this->response->setJSON([
-			            "message" => $message,
-
-			            "inserted" => $insertedCount
-			        ]);
-
-			    } catch (Exception $e) {
-			        return $this->response->setJSON([
-			            "message" => "Error updating data: " . $e->getMessage()
-			        ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+			    if (empty($table) || empty($jsonData)) {
+			        return $this->response
+			                    ->setStatusCode(400)
+			                    ->setJSON(['message' => 'Table name or data is missing']);
 			    }
+			    $insertBatchData = is_string($jsonData)
+			        ? json_decode($jsonData, true)
+			        : $jsonData;
 
-					break;
+			    $getCode = filter_var($rawFlag, FILTER_VALIDATE_BOOLEAN);
+
+			    $result = $this->Custom_model
+			                   ->batch_insert($table, $insertBatchData, $getCode);
+
+			    if ($result === false) {
+			        return $this->response
+			                    ->setStatusCode(500)
+			                    ->setJSON(['message' => 'Database insert failed']);
+			    }
+			    return $this->response
+			                ->setJSON([
+			                   'message'  => 'success',
+			                   'inserted' => $result
+			                ]);
+
+			    break;
 
 			case 'get_last_inserted_code':
 		        try {

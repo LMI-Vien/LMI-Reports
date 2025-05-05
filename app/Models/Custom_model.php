@@ -158,47 +158,43 @@ class Custom_model extends Model
         return $this;
     }
 
-    public function batch_insert($table, $insert_batch_data, $get_code = false) {
-        if (!is_array($insert_batch_data) || empty($insert_batch_data)) {
-            return "Invalid or empty data";
+    public function batch_insert(string $table, array $insert_batch_data, bool $get_code = false)
+    {
+        if (empty($insert_batch_data)) {
+            return false;  
         }
 
-        try {
+        $inserted = [];
+        $this->db->transStart();
+
+        foreach ($insert_batch_data as $row) {
             $builder = $this->db->table($table);
-            
-            $query = $this->db->query("SELECT MAX(id) as max_id FROM {$table}");
-            $row = $query->getRow();
-            $startingId = $row ? (int) $row->max_id : 0;
 
-            $builder->insertBatch($insert_batch_data);
-            $updatedStatus = $this->db->affectedRows();
+            $builder->insert($row);
 
-            $insertedIds = [];
-
-            if (!isset($get_code)) {
-                $get_code = false; // Ensure `$get_code` is always defined
+            if ($this->db->affectedRows() !== 1) {
+                $this->db->transRollback();
+                return false;
             }
 
-            foreach ($insert_batch_data as $index => $data) {
-                $entry = ['id' => $startingId + $index + 1];
-                if ($get_code === true && isset($data['code']) || $get_code == 'true' && isset($data['code'])) {
-                    $entry['code'] = $data['code'];
-                }
+            $newId = (int) $this->db->insertID();
+            $entry = ['id' => $newId];
 
-                $insertedIds[] = $entry;
+            if ($get_code && isset($row['code'])) {
+                $entry['code'] = $row['code'];
             }
 
-            // Return inserted IDs only if updates were successful, else return "failed"
-            return ($updatedStatus > 0 && !empty($insertedIds)) ? $insertedIds : "failed";
-        } catch (\Exception $e) {
-            return [
-                "message"  => "Error: " . $e->getMessage(),
-                "sql_error" => $this->db->error(),
-                "inserted" => 0
-            ];
+            $inserted[] = $entry;
         }
-    }
 
+        $this->db->transComplete();
+
+        if (! $this->db->transStatus()) {
+            return false;
+        }
+
+        return $inserted;
+    }
 
     public function delete_field_tagging($site_id){
         $this->db->query('DELETE `cms_site_package_field_tagging` FROM `cms_site_package_field_tagging` 
