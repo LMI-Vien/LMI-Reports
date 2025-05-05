@@ -1351,20 +1351,20 @@
         var linenum = 0;
         var store = '';
         var unique_store = Array.from(stores);
-        // var store_list = $('#store_list');
+        var store_list = $('#store_list');
 
-        // store_list.find('input').each(function() {
-        //     if (!unique_store.includes($(this).val())) {
-        //         store = $(this).val().split(' - ');
+        store_list.find('input').each(function() {
+            if (!unique_store.includes($(this).val())) {
+                store = $(this).val().split(' - ');
 
-        //         if(store.length == 2) {
-        //             unique_store.push(store[1]);
-        //         } else {
-        //             unique_store.push(store[1] + ' - ' + store[2]);
-        //         }
-        //     }
-        //     linenum++
-        // });
+                if(store.length == 2) {
+                    unique_store.push(store[1]);
+                } else {
+                    unique_store.push(store[1] + ' - ' + store[2]);
+                }
+            }
+            linenum++
+        });
 
         console.log(unique_store);
 
@@ -1451,11 +1451,11 @@
                             let valid = true;
                             // console.log(unique_store);
                             $.each(unique_store, (x, y) => {
-                                // if(ids.includes(y)) {
-                                //     hasDuplicate = true;
-                                // } else {
-                                //     ids.push(y);
-                                // }
+                                if(ids.includes(y)) {
+                                    hasDuplicate = true;
+                                } else {
+                                    ids.push(y);
+                                }
                                 console.log(y);
                                 store = y.split(' - ');
                                 ids.push(store[1]);
