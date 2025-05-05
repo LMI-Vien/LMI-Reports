@@ -63,14 +63,17 @@ class SyncData extends BaseCommand
 
         // Define parameters per method
         $methodParams = [
-            'syncDataPriceCodeLMI'       => [5000, 'Watsons Personal Inc'],
-            'syncDataPriceCodeRGDI'      => [5000, 'Watsons Personal Inc'],
-            'syncDataitemfileLMI'        => [5000, 'Inventory', ['Packaging Materials']],
-            'syncDataitemfileRGDI'       => [5000, 'Inventory', ['Packaging Materials']],
-            'syncCusPaymentGroupRgdiData'=> [5000, 'Watsons Personal Inc'],
-            'syncCusPaymentGroupLmiData' => [5000, 'Watsons Personal Inc'],
-            'syncCustomerLmiData'        => [5000, 'Watsons Personal Inc'],
-            'syncCustomerRgdiData'       => [5000, 'Watsons Personal Inc']
+            'syncDataPriceCodeLMI'       => ['Watsons', 5000],
+            'syncDataPriceCodeRGDI'      => ['Watsons', 5000],
+            'syncDataitemfileLMI'        => ['Inventory', ['Packaging Materials'], 5000],
+            'syncDataitemfileRGDI'       => ['Inventory', ['Packaging Materials'], 5000],
+            'syncBrandData'              => [5000],
+            'syncBrandLabelData'         => [5000],
+            'syncClassificationData'     => [5000],
+            'syncCusPaymentGroupRgdiData'=> ['Watsons Personal Care Stores', 5000],
+            'syncCusPaymentGroupLmiData' => ['Watsons Personal Care Stores', 5000],
+            'syncCustomerLmiData'        => ['Watsons', 5000],
+            'syncCustomerRgdiData'       => ['Watsons', 5000]
             // Methods like syncBrandData, syncClassificationData don't require parameters
         ];
 

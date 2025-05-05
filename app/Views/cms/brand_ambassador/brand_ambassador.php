@@ -1386,7 +1386,7 @@ function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
 
                 if (valid) {
                     save_to_db(name, deployment_date, agency, team, type, status_val, code, id, (obj) => {
-                        insert_batch = batch.map(batch => ({...batch, ba_code: obj.ID}));
+                        insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
                         if(id){
                             insert_batch = batch.map(batch => ({...batch, ba_id: id}));
                         }

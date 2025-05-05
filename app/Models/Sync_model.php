@@ -7,7 +7,8 @@ use CodeIgniter\Model;
 class Sync_model extends Model
 {
     protected $traccLmiDB;
-    protected $sfaDB;
+    protected $traccRgdiDB;
+    protected $sfaDB; 
 
     public function __construct()
     {
@@ -17,75 +18,13 @@ class Sync_model extends Model
         $this->sfaDB = \Config\Database::connect('default');
     }
 
-    // public function syncData($batchSize = 5000)
-    // {
-    //     $offset = 0;
-    //     while (true) {
-    //         echo "Processing offset: $offset\n";
-
-    //         $sourceData = $this->traccLmiDB->table('pricecodefile1')
-    //                                      ->limit($batchSize, $offset)
-    //                                      ->get()
-    //                                      ->getResultArray();
-
-    //         if (empty($sourceData)) {
-    //             break;
-    //         }
-
-    //         $batchInsertData = [];
-    //         $updateData = [];
-
-    //         foreach ($sourceData as $row) {
-    //             $existingRecord = $this->sfaDB->table('pricecodefile1tmp')
-    //                                              ->select('id, prccde, prcdsc, curcde, chkmanual, withpromo, promdtefrm, promdteto, refnum, allowmanualentry, alloweditdiscount')
-    //                                              ->where('id', $row['recid'])
-    //                                              ->get()
-    //                                              ->getRowArray();
-
-    //             $newData = [
-    //                 'id' => $row['recid'],
-    //                 'prccde' => $row['prccde'],
-    //                 'prcdsc' => $row['prcdsc'],
-    //                 'curcde' => $row['curcde'],
-    //                 'chkmanual' => $row['chkmanual'],
-    //                 'withpromo' => $row['withpromo'],
-    //                 'promdtefrm' => $row['promdtefrm'],
-    //                 'promdteto' => $row['promdteto'],
-    //                 'refnum' => $row['refnum'],
-    //                 'allowmanualentry' => $row['allowmanualentry'],
-    //                 'alloweditdiscount' => $row['alloweditdiscount'],
-    //             ];
-
-    //             if ($existingRecord) {
-    //                 if ($newData != $existingRecord) {
-    //                     $updateData[] = $newData;
-    //                 }
-    //             } else {
-    //                 $batchInsertData[] = $newData;
-    //             }
-    //         }
-
-    //         if (!empty($batchInsertData)) {
-    //             $this->sfaDB->table('pricecodefile1tmp')->insertBatch($batchInsertData);
-    //         }
-
-    //         if (!empty($updateData)) {
-    //             foreach ($updateData as $data) {
-    //                 $this->sfaDB->table('pricecodefile1tmp')
-    //                                ->where('id', $data['id'])
-    //                                ->update($data);
-    //             }
-    //         }
-
-    //         $offset += $batchSize;
-    //     }
-
-    //     return "Data synchronization completed in batches of $batchSize.";
-    // }
-
+    private function esc($value): string
+    {
+        return addslashes((string) $value);
+    }
 
     //optimized version
-    public function syncDataPriceCodeLMI($batchSize = 5000, $where)
+    public function syncDataPriceCodeLMI($where, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -107,29 +46,29 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        " . (empty($row['prcdte']) ? "NULL" : "'" . addslashes($row['prcdte']) . "'") . ",
-                        " . (empty($row['upddte']) ? "NULL" : "'" . addslashes($row['upddte']) . "'") . ",
-                        '" . addslashes($row['prccde']) . "',
-                        '" . addslashes($row['itmcde']) . "',
-                        '" . addslashes($row['itmdsc']) . "',
-                        '" . addslashes($row['untmea']) . "',
-                        '" . addslashes($row['groprc']) . "',
-                        '" . addslashes($row['prcdst1']) . "',
-                        '" . addslashes($row['prcdst2']) . "',
-                        '" . addslashes($row['prcdst3']) . "',
-                        '" . addslashes($row['prcdst4']) . "',
-                        '" . addslashes($row['untprc']) . "',
-                        '" . addslashes($row['curcde']) . "',
-                        '" . addslashes($row['disper']) . "',
-                        '" . addslashes($row['markup']) . "',
-                        '" . addslashes($row['untcst']) . "',
-                        '" . addslashes($row['disamt']) . "',
-                        '" . addslashes($row['groprcgross']) . "',
-                        '" . addslashes($row['cusitmcde']) . "',
-                        '" . addslashes($row['salquota']) . "',
-                        '" . addslashes($row['cusitmdsc']) . "',
-                        '" . addslashes($row['gwpbasis']) . "'
+                        '" . $this->esc($row['recid']) . "',
+                        " . (empty($row['prcdte']) ? "NULL" : "'" . $this->esc($row['prcdte']) . "'") . ",
+                        " . (empty($row['upddte']) ? "NULL" : "'" . $this->esc($row['upddte']) . "'") . ",
+                        '" . $this->esc($row['prccde']) . "',
+                        '" . $this->esc($row['itmcde']) . "',
+                        '" . $this->esc($row['itmdsc']) . "',
+                        '" . $this->esc($row['untmea']) . "',
+                        '" . $this->esc($row['groprc']) . "',
+                        '" . $this->esc($row['prcdst1']) . "',
+                        '" . $this->esc($row['prcdst2']) . "',
+                        '" . $this->esc($row['prcdst3']) . "',
+                        '" . $this->esc($row['prcdst4']) . "',
+                        '" . $this->esc($row['untprc']) . "',
+                        '" . $this->esc($row['curcde']) . "',
+                        '" . $this->esc($row['disper']) . "',
+                        '" . $this->esc($row['markup']) . "',
+                        '" . $this->esc($row['untcst']) . "',
+                        '" . $this->esc($row['disamt']) . "',
+                        '" . $this->esc($row['groprcgross']) . "',
+                        '" . $this->esc($row['cusitmcde']) . "',
+                        '" . $this->esc($row['salquota']) . "',
+                        '" . $this->esc($row['cusitmdsc']) . "',
+                        '" . $this->esc($row['gwpbasis']) . "'
                     )";
                 }
 
@@ -173,7 +112,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Price Code LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataPriceCodeRGDI($batchSize = 5000, $where)
+    public function syncDataPriceCodeRGDI($where, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -195,29 +134,29 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        " . (empty($row['prcdte']) ? "NULL" : "'" . addslashes($row['prcdte']) . "'") . ",
-                        " . (empty($row['upddte']) ? "NULL" : "'" . addslashes($row['upddte']) . "'") . ",
-                        '" . addslashes($row['prccde']) . "',
-                        '" . addslashes($row['itmcde']) . "',
-                        '" . addslashes($row['itmdsc']) . "',
-                        '" . addslashes($row['untmea']) . "',
-                        '" . addslashes($row['groprc']) . "',
-                        '" . addslashes($row['prcdst1']) . "',
-                        '" . addslashes($row['prcdst2']) . "',
-                        '" . addslashes($row['prcdst3']) . "',
-                        '" . addslashes($row['prcdst4']) . "',
-                        '" . addslashes($row['untprc']) . "',
-                        '" . addslashes($row['curcde']) . "',
-                        '" . addslashes($row['disper']) . "',
-                        '" . addslashes($row['markup']) . "',
-                        '" . addslashes($row['untcst']) . "',
-                        '" . addslashes($row['disamt']) . "',
-                        '" . addslashes($row['groprcgross']) . "',
-                        '" . addslashes($row['cusitmcde']) . "',
-                        '" . addslashes($row['salquota']) . "',
-                        '" . addslashes($row['cusitmdsc']) . "',
-                        '" . addslashes($row['gwpbasis']) . "'
+                        '" . $this->esc($row['recid']) . "',
+                        " . (empty($row['prcdte']) ? "NULL" : "'" . $this->esc($row['prcdte']) . "'") . ",
+                        " . (empty($row['upddte']) ? "NULL" : "'" . $this->esc($row['upddte']) . "'") . ",
+                        '" . $this->esc($row['prccde']) . "',
+                        '" . $this->esc($row['itmcde']) . "',
+                        '" . $this->esc($row['itmdsc']) . "',
+                        '" . $this->esc($row['untmea']) . "',
+                        '" . $this->esc($row['groprc']) . "',
+                        '" . $this->esc($row['prcdst1']) . "',
+                        '" . $this->esc($row['prcdst2']) . "',
+                        '" . $this->esc($row['prcdst3']) . "',
+                        '" . $this->esc($row['prcdst4']) . "',
+                        '" . $this->esc($row['untprc']) . "',
+                        '" . $this->esc($row['curcde']) . "',
+                        '" . $this->esc($row['disper']) . "',
+                        '" . $this->esc($row['markup']) . "',
+                        '" . $this->esc($row['untcst']) . "',
+                        '" . $this->esc($row['disamt']) . "',
+                        '" . $this->esc($row['groprcgross']) . "',
+                        '" . $this->esc($row['cusitmcde']) . "',
+                        '" . $this->esc($row['salquota']) . "',
+                        '" . $this->esc($row['cusitmdsc']) . "',
+                        '" . $this->esc($row['gwpbasis']) . "'
                     )";
                 }
 
@@ -261,7 +200,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Price Code RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataitemfileLMI($batchSize = 5000, $where, $brandCode)
+    public function syncDataitemfileLMI($where, $brandCode, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -288,36 +227,36 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['supdsc']) . "',
-                        '" . addslashes($row['itmcde']) . "',
-                        '" . addslashes($row['itmdsc']) . "',
-                        '" . addslashes($row['untmea']) . "',
-                        '" . addslashes($row['conver']) . "',
-                        '" . addslashes($row['untcst1']) . "',
-                        '" . addslashes($row['untcst2']) . "',
-                        '" . addslashes($row['crilvl']) . "',
-                        '" . addslashes($row['remarks']) . "',
-                        '" . addslashes($row['wardsc']) . "',
-                        '" . addslashes($row['avecst']) . "',
-                        '" . addslashes($row['status']) . "',
-                        '" . addslashes($row['untcst']) . "',
-                        '" . addslashes($row['untprc']) . "',
-                        '" . addslashes($row['brndsc']) . "',
-                        '" . addslashes($row['itmcladsc']) . "',
-                        '" . addslashes($row['supcde']) . "',
-                        '" . addslashes($row['warcde']) . "',
-                        '" . addslashes($row['brncde']) . "',
-                        '" . addslashes($row['itmclacde']) . "',
-                        '" . addslashes($row['barcde']) . "',
-                        '" . addslashes($row['inactive']) . "',
-                        '" . addslashes($row['itmtyp']) . "',
-                        '" . addslashes($row['multium']) . "',
-                        '" . addslashes($row['reqsernum']) . "',
-                        '" . addslashes($row['taxcde']) . "',
-                        '" . addslashes($row['itmbal']) . "',
-                        '" . addslashes($row['itmclass']) . "',
-                        '" . addslashes($row['itmsrc']) . "'
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['supdsc']) . "',
+                        '" . $this->esc($row['itmcde']) . "',
+                        '" . $this->esc($row['itmdsc']) . "',
+                        '" . $this->esc($row['untmea']) . "',
+                        '" . $this->esc($row['conver']) . "',
+                        '" . $this->esc($row['untcst1']) . "',
+                        '" . $this->esc($row['untcst2']) . "',
+                        '" . $this->esc($row['crilvl']) . "',
+                        '" . $this->esc($row['remarks']) . "',
+                        '" . $this->esc($row['wardsc']) . "',
+                        '" . $this->esc($row['avecst']) . "',
+                        '" . $this->esc($row['status']) . "',
+                        '" . $this->esc($row['untcst']) . "',
+                        '" . $this->esc($row['untprc']) . "',
+                        '" . $this->esc($row['brndsc']) . "',
+                        '" . $this->esc($row['itmcladsc']) . "',
+                        '" . $this->esc($row['supcde']) . "',
+                        '" . $this->esc($row['warcde']) . "',
+                        '" . $this->esc($row['brncde']) . "',
+                        '" . $this->esc($row['itmclacde']) . "',
+                        '" . $this->esc($row['barcde']) . "',
+                        '" . $this->esc($row['inactive']) . "',
+                        '" . $this->esc($row['itmtyp']) . "',
+                        '" . $this->esc($row['multium']) . "',
+                        '" . $this->esc($row['reqsernum']) . "',
+                        '" . $this->esc($row['taxcde']) . "',
+                        '" . $this->esc($row['itmbal']) . "',
+                        '" . $this->esc($row['itmclass']) . "',
+                        '" . $this->esc($row['itmsrc']) . "'
                     )";
                 }
 
@@ -368,7 +307,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Item File LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncDataitemfileRGDI($batchSize = 5000, $where, $brandCode)
+    public function syncDataitemfileRGDI($where, $brandCode, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -395,36 +334,36 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['supdsc']) . "',
-                        '" . addslashes($row['itmcde']) . "',
-                        '" . addslashes($row['itmdsc']) . "',
-                        '" . addslashes($row['untmea']) . "',
-                        '" . addslashes($row['conver']) . "',
-                        '" . addslashes($row['untcst1']) . "',
-                        '" . addslashes($row['untcst2']) . "',
-                        '" . addslashes($row['crilvl']) . "',
-                        '" . addslashes($row['remarks']) . "',
-                        '" . addslashes($row['wardsc']) . "',
-                        '" . addslashes($row['avecst']) . "',
-                        '" . addslashes($row['status']) . "',
-                        '" . addslashes($row['untcst']) . "',
-                        '" . addslashes($row['untprc']) . "',
-                        '" . addslashes($row['brndsc']) . "',
-                        '" . addslashes($row['itmcladsc']) . "',
-                        '" . addslashes($row['supcde']) . "',
-                        '" . addslashes($row['warcde']) . "',
-                        '" . addslashes($row['brncde']) . "',
-                        '" . addslashes($row['itmclacde']) . "',
-                        '" . addslashes($row['barcde']) . "',
-                        '" . addslashes($row['inactive']) . "',
-                        '" . addslashes($row['itmtyp']) . "',
-                        '" . addslashes($row['multium']) . "',
-                        '" . addslashes($row['reqsernum']) . "',
-                        '" . addslashes($row['taxcde']) . "',
-                        '" . addslashes($row['itmbal']) . "',
-                        '" . addslashes($row['itmclass']) . "',
-                        '" . addslashes($row['itmsrc']) . "'
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['supdsc']) . "',
+                        '" . $this->esc($row['itmcde']) . "',
+                        '" . $this->esc($row['itmdsc']) . "',
+                        '" . $this->esc($row['untmea']) . "',
+                        '" . $this->esc($row['conver']) . "',
+                        '" . $this->esc($row['untcst1']) . "',
+                        '" . $this->esc($row['untcst2']) . "',
+                        '" . $this->esc($row['crilvl']) . "',
+                        '" . $this->esc($row['remarks']) . "',
+                        '" . $this->esc($row['wardsc']) . "',
+                        '" . $this->esc($row['avecst']) . "',
+                        '" . $this->esc($row['status']) . "',
+                        '" . $this->esc($row['untcst']) . "',
+                        '" . $this->esc($row['untprc']) . "',
+                        '" . $this->esc($row['brndsc']) . "',
+                        '" . $this->esc($row['itmcladsc']) . "',
+                        '" . $this->esc($row['supcde']) . "',
+                        '" . $this->esc($row['warcde']) . "',
+                        '" . $this->esc($row['brncde']) . "',
+                        '" . $this->esc($row['itmclacde']) . "',
+                        '" . $this->esc($row['barcde']) . "',
+                        '" . $this->esc($row['inactive']) . "',
+                        '" . $this->esc($row['itmtyp']) . "',
+                        '" . $this->esc($row['multium']) . "',
+                        '" . $this->esc($row['reqsernum']) . "',
+                        '" . $this->esc($row['taxcde']) . "',
+                        '" . $this->esc($row['itmbal']) . "',
+                        '" . $this->esc($row['itmclass']) . "',
+                        '" . $this->esc($row['itmsrc']) . "'
                     )";
                 }
 
@@ -495,106 +434,106 @@ class Sync_model extends Model
     //             $values = [];
     //             foreach ($sourceData as $row) {
     //                 $values[] = "(
-    //                     '" . addslashes($row['recid']) . "',
-    //                     '" . addslashes($row['ptycde']) . "',
-    //                     '" . addslashes($row['olditmcde']) . "',
-    //                     '" . addslashes($row['saldisact']) . "',
-    //                     '" . addslashes($row['purdisact']) . "',
-    //                     '" . addslashes($row['scpwddis']) . "',
-    //                     '" . addslashes($row['supdsc']) . "',
-    //                     '" . addslashes($row['itmcde']) . "',
-    //                     '" . addslashes($row['itmdsc']) . "',
-    //                     '" . addslashes($row['untmea']) . "',
-    //                     '" . addslashes($row['untmea2']) . "',
-    //                     '" . addslashes($row['conver']) . "',
-    //                     '" . addslashes($row['untcst1']) . "',
-    //                     '" . addslashes($row['untcst2']) . "',
-    //                     '" . addslashes($row['crilvl']) . "',
-    //                     '" . addslashes($row['remarks']) . "',
-    //                     '" . addslashes($row['wardsc']) . "',
-    //                     '" . addslashes($row['avecst']) . "',
-    //                     '" . addslashes($row['maxlvl']) . "',
-    //                     '" . addslashes($row['status']) . "',
-    //                     '" . addslashes($row['lstcst']) . "',
-    //                     '" . addslashes($row['untcst']) . "',
-    //                     '" . addslashes($row['untprc']) . "',
-    //                     '" . addslashes($row['brndsc']) . "',
-    //                     '" . addslashes($row['itmcladsc']) . "',
-    //                     '" . addslashes($row['itmmdl']) . "',
-    //                     '" . addslashes($row['supcde']) . "',
-    //                     '" . addslashes($row['warcde']) . "',
-    //                     '" . addslashes($row['brncde']) . "',
-    //                     '" . addslashes($row['itmclacde']) . "',
-    //                     '" . addslashes($row['salum']) . "',
-    //                     '" . addslashes($row['srtum']) . "',
-    //                     '" . addslashes($row['recum']) . "',
-    //                     '" . addslashes($row['prtum']) . "',
-    //                     '" . addslashes($row['invum']) . "',
-    //                     '" . addslashes($row['barcde']) . "',
-    //                     '" . addslashes($row['cstdebcde']) . "',
-    //                     '" . addslashes($row['cstcrecde']) . "',
-    //                     '" . addslashes($row['inactive']) . "',
-    //                     '" . addslashes($row['itmtyp']) . "',
-    //                     '" . addslashes($row['cgsactcde']) . "',
-    //                     '" . addslashes($row['salactcde']) . "',
-    //                     '" . addslashes($row['invactcde']) . "',
-    //                     '" . addslashes($row['srtactcde']) . "',
-    //                     '" . addslashes($row['multium']) . "',
-    //                     '" . addslashes($row['reqsernum']) . "',
-    //                     '" . addslashes($row['taxcde']) . "',
-    //                     '" . addslashes($row['prtactcde']) . "',
-    //                     '" . addslashes($row['puractcde']) . "',
-    //                     '" . addslashes($row['purtaxcde']) . "',
-    //                     '" . addslashes($row['salewtcde']) . "',
-    //                     '" . addslashes($row['purewtcde']) . "',
-    //                     '" . addslashes($row['salevatcde']) . "',
-    //                     '" . addslashes($row['purevatcde']) . "',
-    //                     '" . addslashes($row['salcur']) . "',
-    //                     '" . addslashes($row['purcur']) . "',
-    //                     '" . addslashes($row['itmrem1']) . "',
-    //                     '" . addslashes($row['itmrem2']) . "',
-    //                     '" . addslashes($row['itmrem3']) . "',
-    //                     '" . addslashes($row['itmbal']) . "',
-    //                     '" . addslashes($row['strqty']) . "',
-    //                     '" . addslashes($row['chknontrd']) . "',
-    //                     '" . addslashes($row['package']) . "',
-    //                     '" . addslashes($row['rebdte']) . "',
-    //                     '" . addslashes($row['itmprt']) . "',
-    //                     '" . addslashes($row['gldepcde']) . "',
-    //                     '" . addslashes($row['reqbatchnum']) . "',
-    //                     '" . addslashes($row['logdte']) . "',
-    //                     '" . addslashes($row['itmsubclacde']) . "',
-    //                     '" . addslashes($row['linenum']) . "',
-    //                     '" . addslashes($row['saltarget01']) . "',
-    //                     '" . addslashes($row['saltarget02']) . "',
-    //                     '" . addslashes($row['saltarget03']) . "',
-    //                     '" . addslashes($row['saltarget04']) . "',
-    //                     '" . addslashes($row['saltarget05']) . "',
-    //                     '" . addslashes($row['saltarget06']) . "',
-    //                     '" . addslashes($row['saltarget07']) . "',
-    //                     '" . addslashes($row['saltarget08']) . "',
-    //                     '" . addslashes($row['saltarget09']) . "',
-    //                     '" . addslashes($row['saltarget10']) . "',
-    //                     '" . addslashes($row['saltarget11']) . "',
-    //                     '" . addslashes($row['saltarget12']) . "',
-    //                     '" . addslashes($row['recumcon']) . "',
-    //                     '" . addslashes($row['itmdeptcde']) . "',
-    //                     '" . addslashes($row['itmmerchcatcde']) . "',
-    //                     '" . addslashes($row['itmhierarchy']) . "',
-    //                     '" . addslashes($row['itmclass']) . "',
-    //                     '" . addslashes($row['itmtag']) . "',
-    //                     '" . addslashes($row['itmsrc']) . "',
-    //                     '" . addslashes($row['itminvmvmnttyp']) . "',
-    //                     '" . addslashes($row['tariffcde']) . "',
-    //                     '" . addslashes($row['bomactcde']) . "',
-    //                     '" . addslashes($row['itmpalletcap']) . "',
-    //                     '" . addslashes($row['splblum']) . "',
-    //                     '" . addslashes($row['chkmultibarcde']) . "',
-    //                     '" . addslashes($row['multibarcde']) . "',
-    //                     '" . addslashes($row['purseractcde']) . "',
-    //                     '" . addslashes($row['minOQ']) . "',
-    //                     '" . addslashes($row['chkreorder']) . "',
-    //                     '" . addslashes($row['maxOQ']) . "'
+    //                     '" . $this->esc($row['recid']) . "',
+    //                     '" . $this->esc($row['ptycde']) . "',
+    //                     '" . $this->esc($row['olditmcde']) . "',
+    //                     '" . $this->esc($row['saldisact']) . "',
+    //                     '" . $this->esc($row['purdisact']) . "',
+    //                     '" . $this->esc($row['scpwddis']) . "',
+    //                     '" . $this->esc($row['supdsc']) . "',
+    //                     '" . $this->esc($row['itmcde']) . "',
+    //                     '" . $this->esc($row['itmdsc']) . "',
+    //                     '" . $this->esc($row['untmea']) . "',
+    //                     '" . $this->esc($row['untmea2']) . "',
+    //                     '" . $this->esc($row['conver']) . "',
+    //                     '" . $this->esc($row['untcst1']) . "',
+    //                     '" . $this->esc($row['untcst2']) . "',
+    //                     '" . $this->esc($row['crilvl']) . "',
+    //                     '" . $this->esc($row['remarks']) . "',
+    //                     '" . $this->esc($row['wardsc']) . "',
+    //                     '" . $this->esc($row['avecst']) . "',
+    //                     '" . $this->esc($row['maxlvl']) . "',
+    //                     '" . $this->esc($row['status']) . "',
+    //                     '" . $this->esc($row['lstcst']) . "',
+    //                     '" . $this->esc($row['untcst']) . "',
+    //                     '" . $this->esc($row['untprc']) . "',
+    //                     '" . $this->esc($row['brndsc']) . "',
+    //                     '" . $this->esc($row['itmcladsc']) . "',
+    //                     '" . $this->esc($row['itmmdl']) . "',
+    //                     '" . $this->esc($row['supcde']) . "',
+    //                     '" . $this->esc($row['warcde']) . "',
+    //                     '" . $this->esc($row['brncde']) . "',
+    //                     '" . $this->esc($row['itmclacde']) . "',
+    //                     '" . $this->esc($row['salum']) . "',
+    //                     '" . $this->esc($row['srtum']) . "',
+    //                     '" . $this->esc($row['recum']) . "',
+    //                     '" . $this->esc($row['prtum']) . "',
+    //                     '" . $this->esc($row['invum']) . "',
+    //                     '" . $this->esc($row['barcde']) . "',
+    //                     '" . $this->esc($row['cstdebcde']) . "',
+    //                     '" . $this->esc($row['cstcrecde']) . "',
+    //                     '" . $this->esc($row['inactive']) . "',
+    //                     '" . $this->esc($row['itmtyp']) . "',
+    //                     '" . $this->esc($row['cgsactcde']) . "',
+    //                     '" . $this->esc($row['salactcde']) . "',
+    //                     '" . $this->esc($row['invactcde']) . "',
+    //                     '" . $this->esc($row['srtactcde']) . "',
+    //                     '" . $this->esc($row['multium']) . "',
+    //                     '" . $this->esc($row['reqsernum']) . "',
+    //                     '" . $this->esc($row['taxcde']) . "',
+    //                     '" . $this->esc($row['prtactcde']) . "',
+    //                     '" . $this->esc($row['puractcde']) . "',
+    //                     '" . $this->esc($row['purtaxcde']) . "',
+    //                     '" . $this->esc($row['salewtcde']) . "',
+    //                     '" . $this->esc($row['purewtcde']) . "',
+    //                     '" . $this->esc($row['salevatcde']) . "',
+    //                     '" . $this->esc($row['purevatcde']) . "',
+    //                     '" . $this->esc($row['salcur']) . "',
+    //                     '" . $this->esc($row['purcur']) . "',
+    //                     '" . $this->esc($row['itmrem1']) . "',
+    //                     '" . $this->esc($row['itmrem2']) . "',
+    //                     '" . $this->esc($row['itmrem3']) . "',
+    //                     '" . $this->esc($row['itmbal']) . "',
+    //                     '" . $this->esc($row['strqty']) . "',
+    //                     '" . $this->esc($row['chknontrd']) . "',
+    //                     '" . $this->esc($row['package']) . "',
+    //                     '" . $this->esc($row['rebdte']) . "',
+    //                     '" . $this->esc($row['itmprt']) . "',
+    //                     '" . $this->esc($row['gldepcde']) . "',
+    //                     '" . $this->esc($row['reqbatchnum']) . "',
+    //                     '" . $this->esc($row['logdte']) . "',
+    //                     '" . $this->esc($row['itmsubclacde']) . "',
+    //                     '" . $this->esc($row['linenum']) . "',
+    //                     '" . $this->esc($row['saltarget01']) . "',
+    //                     '" . $this->esc($row['saltarget02']) . "',
+    //                     '" . $this->esc($row['saltarget03']) . "',
+    //                     '" . $this->esc($row['saltarget04']) . "',
+    //                     '" . $this->esc($row['saltarget05']) . "',
+    //                     '" . $this->esc($row['saltarget06']) . "',
+    //                     '" . $this->esc($row['saltarget07']) . "',
+    //                     '" . $this->esc($row['saltarget08']) . "',
+    //                     '" . $this->esc($row['saltarget09']) . "',
+    //                     '" . $this->esc($row['saltarget10']) . "',
+    //                     '" . $this->esc($row['saltarget11']) . "',
+    //                     '" . $this->esc($row['saltarget12']) . "',
+    //                     '" . $this->esc($row['recumcon']) . "',
+    //                     '" . $this->esc($row['itmdeptcde']) . "',
+    //                     '" . $this->esc($row['itmmerchcatcde']) . "',
+    //                     '" . $this->esc($row['itmhierarchy']) . "',
+    //                     '" . $this->esc($row['itmclass']) . "',
+    //                     '" . $this->esc($row['itmtag']) . "',
+    //                     '" . $this->esc($row['itmsrc']) . "',
+    //                     '" . $this->esc($row['itminvmvmnttyp']) . "',
+    //                     '" . $this->esc($row['tariffcde']) . "',
+    //                     '" . $this->esc($row['bomactcde']) . "',
+    //                     '" . $this->esc($row['itmpalletcap']) . "',
+    //                     '" . $this->esc($row['splblum']) . "',
+    //                     '" . $this->esc($row['chkmultibarcde']) . "',
+    //                     '" . $this->esc($row['multibarcde']) . "',
+    //                     '" . $this->esc($row['purseractcde']) . "',
+    //                     '" . $this->esc($row['minOQ']) . "',
+    //                     '" . $this->esc($row['chkreorder']) . "',
+    //                     '" . $this->esc($row['maxOQ']) . "'
     //                 )";
     //             }
 
@@ -732,9 +671,9 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['brncde']) . "',
-                        '" . addslashes($row['brndsc']) . "',
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['brncde']) . "',
+                        '" . $this->esc($row['brndsc']) . "',
                         1, 
                         NULL,
                         NULL,
@@ -788,10 +727,10 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['id']) . "',
-                        '" . addslashes($row['label']) . "',
-                        '" . addslashes($row['created_date']) . "',
-                        '" . addslashes($row['modified_date']) . "'
+                        '" . $this->esc($row['id']) . "',
+                        '" . $this->esc($row['label']) . "',
+                        '" . $this->esc($row['created_date']) . "',
+                        '" . $this->esc($row['modified_date']) . "'
                     )";
                 }
 
@@ -836,9 +775,9 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['itmclacde']) . "',
-                        '" . addslashes($row['itmcladsc']) . "',
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['itmclacde']) . "',
+                        '" . $this->esc($row['itmcladsc']) . "',
                         1, 
                         NULL,
                         NULL, 
@@ -872,7 +811,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Classification with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCusPaymentGroupLmiData($batchSize = 5000, $where)
+    public function syncCusPaymentGroupLmiData($where, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -894,8 +833,8 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['cusgrpcde']) . "',
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['cusgrpcde']) . "',
                         1, 
                         NULL,
                         NULL, 
@@ -928,7 +867,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer Payment Group LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCusPaymentGroupRgdiData($batchSize = 5000, $where)
+    public function syncCusPaymentGroupRgdiData($where, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -950,8 +889,8 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['cusgrpcde']) . "',
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['cusgrpcde']) . "',
                         1, 
                         NULL,
                         NULL, 
@@ -984,7 +923,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer Payment Group RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCustomerLmiData($batchSize = 5000, $where)
+    public function syncCustomerLmiData($where, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -1006,23 +945,23 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['warcde']) . "',
-                        '" . addslashes($row['cuscde']) . "',
-                        '" . addslashes($row['cusdsc']) . "',
-                        '" . addslashes($row['trmcde']) . "',
-                        '" . addslashes($row['cusadd1']) . "',
-                        '" . addslashes($row['tinnum']) . "',
-                        '" . addslashes($row['smncde']) . "',
-                        '" . addslashes($row['prccde']) . "',
-                        '" . addslashes($row['aractcde']) . "',
-                        '" . addslashes($row['cusgrpdsc']) . "',
-                        '" . addslashes($row['curcde']) . "',
-                        '" . addslashes($row['advactcde']) . "',
-                        '" . addslashes($row['consig']) . "',
-                        '" . addslashes($row['outright']) . "',
-                        '" . addslashes($row['warcdenum']) . "',
-                        '" . addslashes($row['warloccde']) . "',
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['warcde']) . "',
+                        '" . $this->esc($row['cuscde']) . "',
+                        '" . $this->esc($row['cusdsc']) . "',
+                        '" . $this->esc($row['trmcde']) . "',
+                        '" . $this->esc($row['cusadd1']) . "',
+                        '" . $this->esc($row['tinnum']) . "',
+                        '" . $this->esc($row['smncde']) . "',
+                        '" . $this->esc($row['prccde']) . "',
+                        '" . $this->esc($row['aractcde']) . "',
+                        '" . $this->esc($row['cusgrpdsc']) . "',
+                        '" . $this->esc($row['curcde']) . "',
+                        '" . $this->esc($row['advactcde']) . "',
+                        '" . $this->esc($row['consig']) . "',
+                        '" . $this->esc($row['outright']) . "',
+                        '" . $this->esc($row['warcdenum']) . "',
+                        '" . $this->esc($row['warloccde']) . "',
                         1, 
                         NULL,
                         NULL, 
@@ -1069,7 +1008,7 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    public function syncCustomerRgdiData($batchSize = 5000, $where)
+    public function syncCustomerRgdiData($where, $batchSize = 5000)
     {
         $offset = 0;
         $totalRecordsSynced = 0;
@@ -1091,23 +1030,23 @@ class Sync_model extends Model
                 $values = [];
                 foreach ($sourceData as $row) {
                     $values[] = "(
-                        '" . addslashes($row['recid']) . "',
-                        '" . addslashes($row['warcde']) . "',
-                        '" . addslashes($row['cuscde']) . "',
-                        '" . addslashes($row['cusdsc']) . "',
-                        '" . addslashes($row['trmcde']) . "',
-                        '" . addslashes($row['cusadd1']) . "',
-                        '" . addslashes($row['tinnum']) . "',
-                        '" . addslashes($row['smncde']) . "',
-                        '" . addslashes($row['prccde']) . "',
-                        '" . addslashes($row['aractcde']) . "',
-                        '" . addslashes($row['cusgrpdsc']) . "',
-                        '" . addslashes($row['curcde']) . "',
-                        '" . addslashes($row['advactcde']) . "',
-                        '" . addslashes($row['consig']) . "',
-                        '" . addslashes($row['outright']) . "',
-                        '" . addslashes($row['warcdenum']) . "',
-                        '" . addslashes($row['warloccde']) . "',
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['warcde']) . "',
+                        '" . $this->esc($row['cuscde']) . "',
+                        '" . $this->esc($row['cusdsc']) . "',
+                        '" . $this->esc($row['trmcde']) . "',
+                        '" . $this->esc($row['cusadd1']) . "',
+                        '" . $this->esc($row['tinnum']) . "',
+                        '" . $this->esc($row['smncde']) . "',
+                        '" . $this->esc($row['prccde']) . "',
+                        '" . $this->esc($row['aractcde']) . "',
+                        '" . $this->esc($row['cusgrpdsc']) . "',
+                        '" . $this->esc($row['curcde']) . "',
+                        '" . $this->esc($row['advactcde']) . "',
+                        '" . $this->esc($row['consig']) . "',
+                        '" . $this->esc($row['outright']) . "',
+                        '" . $this->esc($row['warcdenum']) . "',
+                        '" . $this->esc($row['warloccde']) . "',
                         1, 
                         NULL,
                         NULL, 
