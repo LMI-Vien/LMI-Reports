@@ -679,13 +679,10 @@
                     // Format the value as "ID - Name" for both BA and special cases
                     if (ui.item.value === "-5") {
                         $(this).data("value", "-5 - Vacant");  // Format Vacant as "ID - Name"
-                        console.log("Vacant", ui.item.value);
                     } else if (ui.item.value === "-6") {
                         $(this).data("value", "-6 - Non BA");  // Format Non BA as "ID - Name"
-                        console.log("Non BA", ui.item.value);
                     } else {
                         $(this).data("value", ui.item.value);  // Regular BA (already formatted correctly)
-                        console.log("saks lang", ui.item.value);
                     }
                     
                     return false;  // prevent default behavior
@@ -875,7 +872,7 @@
 
                 
                     if (baId < 0) {
-                        var displayName = baId === -5 ? 'Vacant' : 'Non BA';
+                        var displayName = parseInt(baId) === -5 ? 'Vacant' : 'Non BA';
 
                         var html = `
                         <div id="line_${line}" style="display:flex;align-items:center;gap:5px;margin-top:3px;">
@@ -970,164 +967,7 @@
         return result;
     }
 
-    // fully functional
-    // function save_data(actions, id) {
-    //     var code = $('#code').val().trim();
-    //     var description = $('#description').val().trim();
-    //     var chk_status = $('#status').prop('checked');
-    //     if (chk_status) {
-    //         status_val = 1;
-    //     } else {
-    //         status_val = 0;
-    //     }
-    //     var linenum = 0;
-    //     var brandAmba = '';
-    //     var unique_brandAmba = [];
-    //     var brandAmba_list = $('#baName_list');
-
-    //     brandAmba_list.find('input').each(function() {
-    //         if (!unique_brandAmba.includes($(this).val())) {
-    //             brandAmba = $(this).val().split(' - ');
-
-    //             if (brandAmba.length == 2) {
-    //                 unique_brandAmba.push(brandAmba[1]);
-    //             } else {
-    //                 unique_brandAmba.push(brandAmba[1] + ' - ' + brandAmba[2]);
-    //             }
-    //         }
-    //         linenum++
-    //     });
-
-    //     if (id !== undefined && id !== null && id !== '') {
-    //         check_current_db("tbl_store", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
-    //             if (!exists) {
-    //                 modal.confirm(confirm_update_message,function(result){
-    //                     if(result){ 
-    //                         let ids = [];
-    //                         let hasDuplicate = false;
-    //                         let valid = true;
-                            
-    //                         $.each(unique_brandAmba, (x, y) => {
-    //                             if(ids.includes(y)) {
-    //                                 hasDuplicate = true;
-    //                             } else {
-    //                                 ids.push(y);
-    //                             }
-    //                         });
-
-    //                         if(hasDuplicate) {
-    //                             console.log('Has duplicate');
-    //                             modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
-    //                         } else {
-    //                             let batch = [];
-    //                             get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
-    //                                 if(res.length == 0) {
-    //                                     valid = false;
-    //                                 } else {
-    //                                     modal_alert = 'success';
-    //                                         $.each(res, (x, y) => {
-    //                                         let data = {
-    //                                             'store_id': id, // temp placeholder, will set below
-    //                                             'brand_ambassador_id': y,
-    //                                             'created_by': user_id,
-    //                                             'created_date': formatDate(new Date()),
-    //                                         };
-    //                                         batch.push(data);
-    //                                     })
-    //                                 }
-
-    //                                 console.log(batch);
-    //                             })
-    
-    //                             if(valid) {
-    //                                 save_to_db(code, description, brandAmba, status_val, id, (obj) => {
-    //                                     total_delete(url, 'tbl_brand_ambassador_group', 'store_id', id);
-    
-    //                                     batch_insert(url, batch, 'tbl_brand_ambassador_group', false, () => {
-    //                                         modal.loading(false);
-    //                                         modal.alert(success_update_message, "success", function() {
-    //                                             location.reload();
-    //                                         });
-    //                                     })
-    //                                 })
-                                    
-    //                             } else {
-    //                                 modal.loading(false);
-    //                                 modal.alert('BA not found', 'error', function() {});
-    //                             }
-    //                         }
-
-    //                     }
-    //                 });
-
-    //             }             
-    //         });
-    //     }else{
-    //         check_current_db("tbl_store", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
-    //             if (!exists) {
-    //                 modal.confirm(confirm_add_message,function(result){
-    //                     if(result){ 
-    //                         let ids = [];
-    //                         let hasDuplicate = false;
-    //                         let valid = true;
-    //                         $.each(unique_brandAmba, (x, y) => {
-    //                             if(ids.includes(y)) {
-    //                                 hasDuplicate = true;
-    //                             } else {
-    //                                 ids.push(y);
-    //                             }
-    //                         });
-
-    //                         if(hasDuplicate) {
-    //                             console.log('Has duplicate');
-    //                             modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', () => {});
-    //                         } else {
-    //                             let batch = [];
-    //                             get_field_values('tbl_brand_ambassador', 'id', 'name', ids, (res) => {
-    //                                 console.log(res);
-    //                                 return;
-    //                                 if(res.length == 0) {
-    //                                     valid = false;
-    //                                 } else {
-    //                                     modal_alert = 'success';
-    //                                     $.each(res, (x, y) => {
-    //                                         let data = {
-    //                                             'store_id': id, 
-    //                                             'brand_ambassador_id': y,
-    //                                             'created_by': user_id,
-    //                                             'created_date': formatDate(new Date()),
-    //                                         };
-    //                                         batch.push(data);
-    //                                     });
-    //                                 }
-
-    //                                 console.log(batch);
-    //                             })
-    
-    //                             if(valid) {
-    //                                 save_to_db(code, description, brandAmba, status_val, id, (obj) => {
-    //                                     insert_batch = batch.map(batch => ({...batch, store_id: obj.ID}));
-        
-    //                                     batch_insert(url, insert_batch, 'tbl_brand_ambassador_group', false, () => {
-    //                                         modal.loading(false);
-    //                                         modal.alert(success_update_message, "success", function() {
-    //                                             location.reload();
-    //                                         });
-    //                                     })
-    //                                 })
-                                    
-    //                             } else {
-    //                                 modal.loading(false);
-    //                                 modal.alert('BA not found', 'error', function() {});
-    //                             }
-    //                         }
-    //                     }
-    //                 });
-    //             }                  
-    //         });
-    //     }
-    // }
-
+    // this is for the new code like 141-31-41 - John Doe
     function save_data(actions, id) {
         var code        = $('#code').val().trim();
         var description = $('#description').val().trim();
@@ -1139,36 +979,33 @@
 
         let modal_alert_success = actions === 'update' ? success_update_message : success_save_message;
 
-        // 1) parse + dedupe into numeric IDs
+        // 1) parse + dedupe into unique string codes
         brandAmba_list.find('input').each(function() {
-            var raw   = $(this).val().trim();    // "-5 - Vacant", "123 - John Doe", or "Non BA"
-            var parts = raw.split(' - ');
-            var baId;
+            var raw = $(this).val().trim(); // e.g. "141-41-2 - John Doe"
+            var baCode;
 
-            if (parts.length === 2 && !isNaN(parts[0])) {
-                baId = parseInt(parts[0], 10);
-            } else if (raw === "Vacant") {
-                baId = -5;
+            if (raw === "Vacant") {
+                baCode = "-5";
             } else if (raw === "Non BA") {
-                baId = -6;
+                baCode = "-6";
             } else {
-                // neither a known special nor a valid "N - name"
-                return;
+                var parts = raw.split(' - ');
+                if (parts.length === 2) {
+                    baCode = parts[0].trim(); // allow codes like "141-41-2"
+                } else {
+                    return; // invalid format
+                }
             }
 
-            if (unique_brandAmba.indexOf(baId) === -1) {
-                unique_brandAmba.push(baId);
+            if (!unique_brandAmba.includes(baCode)) {
+                unique_brandAmba.push(baCode);
             }
 
             linenum++;
         });
-        console.log('Unique Brand Ambassador IDs:', unique_brandAmba);
 
         if (unique_brandAmba.length === 0) {
-            return modal.alert('Please select at least one Brand Ambassador before saving.', 'warning', function() {
-
-                }
-            );
+            return modal.alert('Please select at least one Brand Ambassador before saving.', 'warning');
         }
 
         function hasDuplicates(arr) {
@@ -1184,16 +1021,14 @@
             save_to_db(code, description, unique_brandAmba, status_val, storeId, function(obj) {
                 var finalStoreId = storeId || obj.ID;
                 if (storeId) {
-                    //total_delete(url, 'tbl_brand_ambassador_group', 'store_id', finalStoreId);
-                    const conditions = {
-                        store_id: finalStoreId
-                    };
+                    const conditions = { store_id: finalStoreId };
                     total_delete(url, 'tbl_brand_ambassador_group', conditions);
-
                 }
+
                 batch.forEach(function(item) {
                     item.store_id = finalStoreId;
                 });
+
                 batch_insert(url, batch, 'tbl_brand_ambassador_group', false, function() {
                     modal.loading(false);
                     modal.alert(modal_alert_success, "success", function() {
@@ -1203,95 +1038,82 @@
             });
         }
 
-        // core batch builder + lookup
         function buildAndSave(storeId) {
             if (hasDuplicates(unique_brandAmba)) {
-                return modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error', function() {
-                });
+                return modal.alert('Brand Ambassador cannot be duplicated. Please check your input carefully.', 'error');
             }
 
-            var special = unique_brandAmba.filter(function(x) { return x < 0; });
-            var normal  = unique_brandAmba.filter(function(x) { return x > 0; });
+            var special = unique_brandAmba.filter(code => code === "-5" || code === "-6");
+            var normal  = unique_brandAmba.filter(code => code !== "-5" && code !== "-6");
             var batch   = [];
-            // var valid   = true;
 
-            // push Vacant/Non BA immediately
-            special.forEach(function(y) {
+            // Handle Vacant / Non BA
+            special.forEach(function(code) {
                 batch.push({
-                    store_id:            storeId,
-                    brand_ambassador_id: y,
-                    created_by:          user_id,
-                    created_date:        formatDate(new Date())
+                    store_id: storeId,
+                    brand_ambassador_id: parseInt(code, 10), // store as -5 or -6
+                    created_by: user_id,
+                    created_date: formatDate(new Date())
                 });
             });
 
-            // lookup the rest in one go
-            if (normal.length) {
-                get_field_values('tbl_brand_ambassador', 'code', 'code', normal,   
-                    function(res) {
-                        console.log('Response from get_field_values (id→code):', res);
-                        // e.g. { "1": "1878" }
+            if (normal.length > 0) {
+                get_field_values('tbl_brand_ambassador', 'code', 'code', normal, function(res) {
+                    // res is { 1: '2025-05-001', 2: '123-45-6', ... }
 
-                        // 1) extract the returned codes:
-                        var foundCodes = Object.values(res).map(x => parseInt(x, 10)); 
-                        //    [1878]
+                    // build code → id map
+                    var codeToId = {};
+                    Object.entries(res).forEach(function([idStr, codeStr]) {
+                        codeToId[codeStr] = parseInt(idStr, 10);
+                    });
 
-                        // 2) see which of your input codes are missing:
-                        var missing = normal.filter(code => foundCodes.indexOf(code) === -1);
+                    // find missing codes
+                    var missing = normal.filter(function(code) {
+                        return !(code in codeToId);
+                    });
 
-                        if (missing.length > 0) {
-                            modal.loading(false);
-                            return modal.alert(
-                                'The following Brand Ambassador codes were not found in the masterfile: '
-                                + missing.join(', '),
-                                'error'
-                            );
-                        }
-
-                        // 3) build your batch using the IDs (the keys) as brand_ambassador_id:
-                        Object.keys(res).forEach(function(idStr) {
-                            batch.push({
-                                store_id:            storeId,
-                                brand_ambassador_id: parseInt(idStr, 10), // this is the PK id
-                                created_by:          user_id,
-                                created_date:        formatDate(new Date())
-                            });
-                        });
-
-                        finalize_and_insert(storeId, batch);
+                    if (missing.length) {
+                        modal.loading(false);
+                        return modal.alert('The following Brand Ambassador codes were not found in the masterfile: ' + missing.join(', '),'error');
                     }
-            );
 
+                    // build your batch using the mapped IDs
+                    Object.entries(codeToId).forEach(function([codeStr, id]) {
+                        batch.push({
+                        store_id:            storeId,
+                        brand_ambassador_id: id,
+                        created_by:          user_id,
+                        created_date:        formatDate(new Date())
+                        });
+                    });
+
+                    finalize_and_insert(storeId, batch);
+                });
             } else {
-                // no lookups needed
                 finalize_and_insert(storeId, batch);
             }
         }
 
         if (id) {
-            check_current_db("tbl_store", ["code", "description"], [code, description], "status", "id", id, true,
-                function(exists) {
-                    if (!exists) {
-                        modal.confirm(confirm_update_message, function(result) {
-                            if (result) {
-                                buildAndSave(id, success_update_message);
-                            }
-                        });
-                    }
+            check_current_db("tbl_store", ["code", "description"], [code, description], "status", "id", id, true, function(exists) {
+                if (!exists) {
+                    modal.confirm(confirm_update_message, function(result) {
+                        if (result) {
+                            buildAndSave(id);
+                        }
+                    });
                 }
-            );
+            });
         } else {
-            check_current_db("tbl_store", ["code"], [code], "status", null, null, true,
-                function(exists) {
-                    if (!exists) {
-                        modal.confirm(confirm_add_message, function(result) {
-                            if (result) {
-                                buildAndSave(null, modal_alert_success);
-                            }
-                        });
-                    }
+            check_current_db("tbl_store", ["code"], [code], "status", null, null, true, function(exists) {
+                if (!exists) {
+                    modal.confirm(confirm_add_message, function(result) {
+                        if (result) {
+                            buildAndSave(null);
+                        }
+                    });
                 }
-            );
+            });
         }
     }
  
@@ -1348,7 +1170,7 @@
                     var url = "<?= base_url('cms/global_controller');?>"; 
                     var data = {
                         event: "list",
-                        select: "s.id, s.code, s.description, COUNT(asg.store_id) AS storeid_count, COUNT(ba.store) as bra_count",
+                        select: "s.id, s.code, s.description, COUNT(asg.store_id) AS storeid_count",
                         query: "s.id = " + id, 
                         offset: offset,  
                         limit: limit,   
@@ -1357,11 +1179,6 @@
                             {
                                 table: "tbl_store_group asg",
                                 query: "asg.store_id = s.id",
-                                type: "left"
-                            },
-                            {
-                                table: "tbl_brand_ambassador ba",
-                                query: "ba.store = s.id",
                                 type: "left"
                             }
                         ],
