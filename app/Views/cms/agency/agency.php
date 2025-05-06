@@ -588,7 +588,7 @@
                     <br>Duration: ${duration}
                 `;
                 const link = '-';
-                logActivity("Manual Insert Palitan mo to Agency Module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
+                logActivity("agency-module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
                 
                 modal.loading(false);
                 modal.alert(modal_alert_success, 'success', function () {
@@ -789,6 +789,7 @@
     }
 
     function saveValidatedData(valid_data) {
+        const overallStart = new Date();
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
@@ -806,7 +807,16 @@
 
         // Fetch existing records
         aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-            let result = JSON.parse(response);
+            // let result = JSON.parse(response);
+            const result = JSON.parse(response);
+            const allEntries = result.existing || [];
+
+            // Build a Set of codes you're importing:
+            const codeSet = new Set(valid_data.map(r => r.code));
+
+            // Keep only the rows whose code matches:
+            const originalEntries = allEntries.filter(rec => codeSet.has(rec.code));
+
             let existingMap = new Map(); // Stores records using composite keys
 
             if (result.existing) {
@@ -824,6 +834,21 @@
             function processNextBatch() {
                 if (batch_index >= total_batches) {
                     modal.loading_progress(false);
+
+                    const overallEnd = new Date();
+                    const duration = formatDuration(overallStart, overallEnd);
+
+                    const remarks = `
+                        Action: Import/Update Agency Batch
+                        <br>Processed ${valid_data.length} records
+                        <br>Errors: ${errorLogs.length}
+                        <br>Start: ${formatReadableDate(overallStart)}
+                        <br>End: ${formatReadableDate(overallEnd)}
+                        <br>Duration: ${duration}
+                    `;
+
+                    logActivity("import-agency-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+
                     if (errorLogs.length > 0) {
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
                         modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
