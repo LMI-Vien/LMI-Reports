@@ -49,8 +49,19 @@ class Dashboard extends BaseController
 		    'start_date <=' => $today,
 		    'end_date >='   => $today,
 		];
-		$data['announcements'] = $this->Global_model->get_data('tbl_announcements', $query, 999, 0, 'title, description_1, description_2, description_3, start_date, end_date', 'title', 'ASC', null, null);
-
+		$data['announcements'] = $this->Global_model->get_data('tbl_announcements', $query, 999, 0, 'id, title, description_1, description_2, description_3, start_date, end_date', 'title', 'ASC', null, null);
+		$data['announcementTypes'] = [
+			'System Update'     => '#007BFF',
+			'Event Notification'=> '#28A745',
+			'Policy Update'     => '#FD7E14',
+			'Downtime Alert'    => '#DC3545',
+			'Holiday Advisory'  => '#FFC107',
+			'Security Notice'   => '#343A40',
+			'Promotion or Offer'=> '#6F42C1',
+			'Personnel Update'  => '#795548',
+			'User Reminder'     => '#6C757D',
+		];
+		
 		$data['content'] = "site/dashboard/dashboard";
 		$data['js'] = array(
                     );

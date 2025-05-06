@@ -188,9 +188,9 @@
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td style='width: 10%'>" + y.title + "</td>";
-                        html += "<td style='width: 20%'>" + trimText(y.description_1) + "</td>";
-                        html += "<td style='width: 20%'>" + trimText(y.description_2) + "</td>";
-                        html += "<td style='width: 20%'>" + trimText(y.description_3) + "</td>";
+                        html += "<td style='width: 20%'>" + trimText(y.description_1, 50) + "</td>";
+                        html += "<td style='width: 20%'>" + trimText(y.description_2, 50) + "</td>";
+                        html += "<td style='width: 20%'>" + trimText(y.description_3, 50) + "</td>";
                         // html += "<td style='width: 10%'>" + y.banner_1 + "</td>";
                         // html += "<td style='width: 10%'>" + y.banner_2 + "</td>";
                         html += "<td class='center-content' style='width: 10%'>" + (y.start_date ? ViewDateformat(y.start_date) : "N/A") + "</td>";
