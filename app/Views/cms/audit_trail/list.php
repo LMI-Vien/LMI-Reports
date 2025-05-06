@@ -184,71 +184,73 @@
         get_pagination(new_query);
     });
 
-    $(document).on('click', '.view_history', function (e) {
-        e.preventDefault();
-        modal.loading(true);
+    // $(document).on('click', '.view_history', function (e) {
+    //     e.preventDefault();
+    //     modal.loading(true);
 
-        const data_id = $(this).attr("data-id");
-        const query = "id = " + data_id;
-        const url = "<?= base_url("cms/global_controller"); ?>";
+    //     const data_id = $(this).attr("data-id");
+    //     const query = "id = " + data_id;
+    //     const url = "<?= base_url("cms/global_controller"); ?>";
 
-        const data = {
-            event: "list",
-            select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
-            query: query,
-            offset: offset,
-            limit: limit,
-            table: "activity_logs",
-            order: {
-                field: "created_at",
-                order: "desc"
-            }
-        };
+    //     const data = {
+    //         event: "list",
+    //         select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
+    //         query: query,
+    //         offset: offset,
+    //         limit: limit,
+    //         table: "activity_logs",
+    //         order: {
+    //             field: "created_at",
+    //             order: "desc"
+    //         }
+    //     };
 
-        aJax.post(url, data, (response) => {
-            modal.loading(false);
-            const result = JSON.parse(response);
-            if (!result || result.length === 0) return;
+    //     aJax.post(url, data, (response) => {
+    //         console.log(response);
+    //         modal.loading(false);
+    //         const result = JSON.parse(response);
+    //         if (!result || result.length === 0) return;
 
-            const entry = result[0];
+    //         const entry = result[0];
 
-            const newData = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
-            let oldData = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
+    //         const newData = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
+    //         let oldData = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
 
-            // Fix: If old_data is an array with one object, extract the first object
-            if (Array.isArray(oldData) && oldData.length === 1) {
-                oldData = oldData[0];
-            }
+    //         // Fix: If old_data is an array with one object, extract the first object
+    //         if (Array.isArray(oldData) && oldData.length === 1) {
+    //             oldData = oldData[0];
+    //         }
 
-            const allKeys = new Set([...Object.keys(newData), ...Object.keys(oldData)]);
+    //         const allKeys = new Set([...Object.keys(newData), ...Object.keys(oldData)]);
 
-            let html = '<table class="col-md-12 table table-bordered m-t-20"><thead><tr>';
-            html += '<th class="center-align-format al-100-px">Field</th>';
-            html += '<th class="center-align-format al-370-px">Old Data</th>';
-            html += '<th class="center-align-format al-370-px">New Data</th>';
-            html += '</tr></thead><tbody>';
+    //         let html = '<table class="col-md-12 table table-bordered m-t-20"><thead><tr>';
+    //         html += '<th class="center-align-format al-100-px">Field</th>';
+    //         html += '<th class="center-align-format al-370-px">Old Data</th>';
+    //         html += '<th class="center-align-format al-370-px">New Data</th>';
+    //         html += '</tr></thead><tbody>';
 
-            if (allKeys.size > 0) {
-                allKeys.forEach(key => {
-                    const oldVal = oldData[key] ?? 'No Data';
-                    const newVal = newData[key] ?? 'No Data';
-                    const changed = oldVal !== newVal;
+    //         if (allKeys.size > 0) {
+    //             allKeys.forEach(key => {
+    //                 const oldVal = oldData[key] ?? 'No Data';
+    //                 const newVal = newData[key] ?? 'No Data';
+    //                 const changed = oldVal !== newVal;
 
-                    html += '<tr>';
-                    html += `<td class="al-100-px">${key}</td>`;
-                    html += `<td class="w-370-px">${oldVal}</td>`;
-                    html += `<td class="w-370-px ${changed ? 'bg-c7cdfa' : ''}">${newVal}</td>`;
-                    html += '</tr>';
-                });
-            } else {
-                html += '<tr><td colspan="3" class="text-center">No changes found</td></tr>';
-            }
+    //                 html += '<tr>';
+    //                 html += `<td class="al-100-px">${key}</td>`;
+    //                 html += `<td class="w-370-px">${oldVal}</td>`;
+    //                 html += `<td class="w-370-px ${changed ? 'bg-c7cdfa' : ''}">${newVal}</td>`;
+    //                 html += '</tr>';
+    //             });
+    //         } else {
+    //             html += '<tr><td colspan="3" class="text-center">No changes found</td></tr>';
+    //         }
 
-            html += '</tbody></table>';
+    //         html += '</tbody></table>';
 
-            modal.show('<div class="scroll-500">' + html + '</div>', "large", function () { });
-        });
-    });
+    //         modal.show('<div class="scroll-500">' + html + '</div>', "large", function () { });
+    //     });
+    // });
+
 
     $(document).on('click', '#btnFilterDr', function() {
         var startDate = $('#startDate').val();
@@ -281,6 +283,620 @@
         $('.search-query').val('');
         query = "id != 0";
         get_data(query);
+    });
+
+    // mapping of the created_by and updated_by fields to usernames
+    // $(document).on('click', '.view_history', function (e) {
+    //     e.preventDefault();
+    //     modal.loading(true);
+
+    //     const dataId = $(this).attr('data-id');
+    //     const url    = "<?= base_url('cms/global_controller') ?>";
+
+    //     // 1) Fetch the activity log entry
+    //     aJax.post(url, {
+    //         event:  'list',
+    //         select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
+    //         query:  'id=' + dataId,
+    //         table:  'activity_logs',
+    //         order:  { 
+    //             field: 'created_at',
+    //             order: 'desc' 
+    //         },
+    //         limit:  1
+    //     }, (resp) => {
+    //         const entry   = JSON.parse(resp)[0] || {};
+    //         let newData = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
+    //         let oldData = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
+
+    //         // If oldData is an array of one, just unpack it
+    //         if (Array.isArray(oldData) && oldData.length === 1) {
+    //             oldData = oldData[0];
+    //         }
+
+    //         // 2) Convert status codes (0/1) into human-readable labels
+    //         [newData, oldData].forEach(obj => {
+    //             if (obj.status !== undefined) {
+    //                 obj.status = obj.status == 1 ? 'Active' : 'Inactive';
+    //             }
+    //         });
+
+    //         // Helper to build & show the diff table
+    //         function renderTable() {
+    //             modal.loading(false);
+
+    //             const allKeys = new Set([
+    //                 ...Object.keys(oldData),
+    //                 ...Object.keys(newData)
+    //             ]);
+
+    //             let html = `
+    //                 <table class="col-md-12 table table-bordered m-t-20">
+    //                 <thead>
+    //                     <tr>
+    //                     <th class="center-align-format al-100-px">Field</th>
+    //                     <th class="center-align-format al-370-px">Old Data</th>
+    //                     <th class="center-align-format al-370-px">New Data</th>
+    //                     </tr>
+    //                 </thead>
+    //                 <tbody>
+    //             `;
+
+    //             if (allKeys.size) {
+    //                 allKeys.forEach(key => {
+    //                 const o = oldData[key] ?? 'No Data';
+    //                 const n = newData[key] ?? 'No Data';
+    //                 const changed = o !== n;
+
+    //                 html += `
+    //                     <tr>
+    //                     <td class="al-100-px">${key}</td>
+    //                     <td class="w-370-px">${o}</td>
+    //                     <td class="w-370-px ${changed ? 'bg-c7cdfa' : ''}">${n}</td>
+    //                     </tr>
+    //                 `;
+    //                 });
+    //             } else {
+    //                 html += `
+    //                 <tr>
+    //                     <td colspan="3" class="text-center">No changes found</td>
+    //                 </tr>
+    //                 `;
+    //             }
+
+    //             html += `
+    //                 </tbody>
+    //                 </table>
+    //             `;
+
+    //             modal.show(
+    //                 '<div class="scroll-500">' + html + '</div>',
+    //                 'large'
+    //             );
+    //         }
+
+            
+
+    //         // 3) Gather any user-ID fields we need to lookup
+    //         const idsToLookup = new Set();
+    //             // // created_by 
+    //             // if (newData.created_by) idsToLookup.add(newData.created_by);
+    //             // if (oldData.created_by) idsToLookup.add(oldData.created_by);
+
+    //             // // updated_by
+    //             // if (newData.updated_by) idsToLookup.add(newData.updated_by);
+    //             // if (oldData.updated_by) idsToLookup.add(oldData.updated_by);
+
+    //             ['created_by', 'updated_by'].forEach(field => {
+    //                 if (newData[field]) idsToLookup.add(newData[field]);
+    //                 if (oldData[field]) idsToLookup.add(oldData[field]);
+    //             });
+
+    //             // if there's nothing to map, just render immediately
+    //             if (idsToLookup.size === 0) {
+    //                 return renderTable();
+    //             }
+
+
+    //         // 4) Batch-fetch all usernames at once
+    //         const idList = Array.from(idsToLookup).join(',');
+    //             aJax.post(url, {
+    //                 event:  'list',
+    //                 select: 'id, username',
+    //                 query:  'id IN (' + idList + ')',
+    //                 table:  'cms_users'
+    //             }, (userResp) => {
+    //                 const users = JSON.parse(userResp);
+    //                 const userMap   = {};
+    //             users.forEach(u => { userMap[u.id] = u.username; });
+
+                
+    //             // if (newData.created_by && map[newData.created_by]) {
+    //             //     newData.created_by = map[newData.created_by];
+    //             // }
+    //             // if (oldData.created_by && map[oldData.created_by]) {
+    //             //     oldData.created_by = map[oldData.created_by];
+    //             // }
+    //             // if (newData.updated_by && map[newData.updated_by]) {
+    //             //     newData.updated_by = map[newData.updated_by];
+    //             // }
+    //             // if (oldData.updated_by && map[oldData.updated_by]) {
+    //             //     oldData.updated_by = map[oldData.updated_by];
+    //             // }
+
+    //             // 5) Swap IDs for usernames in both oldData & newData
+    //             ['created_by', 'updated_by'].forEach(field => {
+    //                 if (newData[field] && userMap[newData[field]]) {
+    //                     newData[field] = userMap[newData[field]];
+    //                 }
+    //                 if (oldData[field] && userMap[oldData[field]]) {
+    //                     oldData[field] = userMap[oldData[field]];
+    //                 }
+    //             });
+
+    //             renderTable();
+    //         });
+    //     });
+    // });
+
+
+    // THIS IS GOOD STUFF, it works but needed to review why on earth it works. 
+    // ——————————————————————————————
+    // 0) Module lookup configurations
+    // ——————————————————————————————
+    const lookupConfigs = {
+        'brand-ambassador': [                   // module name
+            {
+                field:  'agency',               // name of the (JSON) field in newData/oldData
+                table:  'tbl_agency',           // lookup table 
+                select: 'id, agency',           // fields to select from the lookup table
+                value:  'agency'                // label to display in the table
+            },
+            {
+                field:  'team',
+                table:  'tbl_team',           
+                select: 'id, team_description',
+                value:  'team_description'
+            },  
+        ],
+        'asc': [
+            {
+                field:  'area_id',
+                table:  'tbl_area',
+                select: 'id, code, description',
+                value:  'description'
+            }, 
+        ],
+        'store-group-module': [
+            {
+                field:  'store_id',
+                table:  'tbl_store',
+                select: 'id, code, description',
+                value:  'description'
+            },
+            {
+                field:  'area_id',
+                table:  'tbl_area',
+                select: 'id, code, description',
+                value:  'description'
+            },
+        ],
+        'store-group-module-import': [
+            {
+                field:  'store_id',
+                table:  'tbl_store',
+                select: 'id, code, description',
+                value:  'description'
+            },
+            {
+                field:  'area_id',
+                table:  'tbl_area',
+                select: 'id, code, description',
+                value:  'description'
+            },
+        ],
+        'area': [
+            {
+                field:  'store_id',
+                table:  'tbl_store',
+                select: 'id, code, description',
+                value:  'description'
+            },
+            {
+                field:  'area_id',
+                table:  'tbl_area',
+                select: 'id, code, description',
+                value:  'description'
+            },
+        ], 
+        // import-module
+        
+    };
+
+    // ——————————————————————————————
+    // 1) Generic field‐mapping helper
+    // Returns a Promise that resolves once newData/oldData are updated
+    // ——————————————————————————————
+
+    function mapField(fieldConfig, newData, oldData, url) {
+        return new Promise(resolve => {
+            const { field, table, select, value } = fieldConfig;
+
+            // Ensure we have arrays of objects to work with
+            const newArr = Array.isArray(newData) ? newData : [newData];
+            const oldArr = Array.isArray(oldData) ? oldData : [oldData];
+
+            // collect unique IDs from every row
+            const ids = new Set();
+            newArr.concat(oldArr).forEach(obj => {
+            if (obj && obj[field] != null) ids.add(obj[field]);
+            });
+
+            if (!ids.size) {
+                console.log(`[mapField] nothing to map for ${field}`);
+                return resolve();
+            }
+
+            console.log(`[mapField] fetching ${field} IDs:`, Array.from(ids));
+
+            aJax.post(url, {
+                event:  'list',
+                table:  table,
+                select: select,
+                query:  'id IN (' + Array.from(ids).join(',') + ')'
+                }, resp => {
+                const rows = JSON.parse(resp);
+                console.log(`[mapField] got rows for ${field}:`, rows);
+
+                // build id → label map
+                const lookup = {};
+                rows.forEach(r => lookup[r.id] = r[value]);
+
+                // overwrite every object's field
+                newArr.concat(oldArr).forEach(obj => {
+                    if (obj && obj[field] != null && lookup[obj[field]]) {
+                    obj[field] = lookup[obj[field]];
+                    }
+                });
+
+                resolve();
+            });
+        });
+    }
+
+
+
+    $(document).on('click', '.view_history', function (e) {
+        e.preventDefault();
+        modal.loading(true);
+
+        const dataId = $(this).attr('data-id');
+        const url    = "<?= base_url('cms/global_controller') ?>";
+
+        aJax.post(url, {
+            event:  'list',
+            select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
+            query:  'id=' + dataId,
+            table:  'activity_logs',
+            order:  { field: 'created_at', order: 'desc' },
+            limit:  1
+        }, (resp) => {
+            const entry   = JSON.parse(resp)[0] || {};
+            console.log('RAW ENTRY:', entry);
+
+            let newData   = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
+            let oldData   = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
+
+
+            // 1) normalize into arrays
+            const normalize = x => Array.isArray(x) ? x : [x];
+            const newArr = normalize(newData);
+            const oldArr = normalize(oldData);
+
+            console.log('Parsed newData:', newData);
+            console.log('Parsed oldData:', oldData);
+
+            // 2) Status code → label
+            [newArr, oldArr].forEach(arr => {
+                arr.forEach(obj => {
+                    if (obj.status !== undefined) {
+                    const code = parseInt(obj.status, 10);
+                    switch (code) {
+                        case 1:
+                            obj.status = 'Active';
+                        break;
+                        case -2:
+                            obj.status = 'Deleted';
+                        break;
+                        default:
+                            obj.status = 'Inactive';
+                    }
+                    }
+                });
+            });
+
+            // 2.1) Type code → label (brand-ambassador only)
+            if (entry.module === 'brand-ambassador') {
+                [newArr, oldArr].forEach(arr => {
+                    arr.forEach(obj => {
+                        if (obj.type !== undefined) {
+                            obj.type = obj.type == 1 ? 'Outright' : 'Consign';
+                        }
+                    });
+                });
+            }
+
+            // 3) Module‐specific lookups via switch‐case
+            let configsToMap;
+            switch (entry.module) {
+                case 'brand-ambassador':
+                    configsToMap = lookupConfigs['brand-ambassador'];
+                    break;
+                case 'asc':
+                    configsToMap = lookupConfigs['asc'];
+                    break;
+                case 'store-group-module':
+                    configsToMap = lookupConfigs['store-group-module'];
+                    break;
+                case 'store-group-module-import':
+                    configsToMap = lookupConfigs['store-group-module-import'];
+                    break;
+                case 'area':
+                    configsToMap = lookupConfigs['area'];
+                    break;
+                default:
+                    configsToMap = [];
+            }
+
+            console.log('Mapping configs for module', entry.module, configsToMap);
+
+            // Kick off one mapField promise per config
+            const mapPromises = configsToMap.map(cfg =>
+                mapField(cfg, newArr, oldArr, url)
+            );
+
+            Promise.all(mapPromises).then(() => {
+                console.log('After mapField: newData =', newArr);
+                console.log('After mapField: oldData =', oldArr);
+
+                // 4) Now do the generic created_by / updated_by lookup
+                const idsToLookup = new Set();
+                newArr.concat(oldArr).forEach(obj => {
+                    if (obj.created_by) idsToLookup.add(obj.created_by);
+                    if (obj.updated_by) idsToLookup.add(obj.updated_by);
+                });
+
+                if (idsToLookup.size === 0) {
+                    return renderTable();
+                }
+
+                aJax.post(url, {
+                    event:  'list',
+                    select: 'id, username',
+                    query:  'id IN (' + Array.from(idsToLookup).join(',') + ')',
+                    table:  'cms_users'
+                }, (userResp) => {
+                    const users = JSON.parse(userResp);
+                    const userMap = users.reduce((m,u) => (m[u.id]=u.username, m), {});
+
+                    users.forEach(u => { userMap[u.id] = u.username; });
+
+                    [newArr, oldArr].forEach(arr => {
+                        arr.forEach(obj => {
+                            if (obj.created_by && userMap[obj.created_by]) {
+                                obj.created_by = userMap[obj.created_by];
+                            }
+                            if (obj.updated_by && userMap[obj.updated_by]) {
+                                obj.updated_by = userMap[obj.updated_by];
+                            }
+                        });
+                    });
+
+                    renderTable();
+                });
+            });
+
+            // 5) renderTable 
+            // function renderTable() {
+            //     modal.loading(false);
+
+            //     // 1) Normalize into arrays
+            //     const newArr = Array.isArray(newData) ? newData : [newData];
+            //     const oldArr = Array.isArray(oldData) ? oldData : [oldData];
+
+            //     // 2) Group rows by area_id
+            //     const groupBy = (arr) => arr.reduce((g, r) => {
+            //         const key = r.area_id;
+            //         (g[key] = g[key] || []).push(r);
+            //         return g;
+            //     }, {});
+            //         const newGroups = groupBy(newArr);
+            //         const oldGroups = groupBy(oldArr);
+
+            //         // 3) Collapse each group into a summary object
+            //         const toRender = Object.keys(newGroups).map(area_id => {
+            //         const ns = newGroups[area_id];
+            //         const os = oldGroups[area_id] || [];
+
+            //         const summaryNew = {}, summaryOld = {};
+            //         const keys = Object.keys(ns[0]);
+
+            //         keys.forEach(key => {
+            //         if (key === 'store_id') {
+            //             // join all distinct store_ids
+            //             summaryNew.store_id = [...new Set(ns.map(r => r.store_id))].join(', ');
+            //             summaryOld.store_id = os.length
+            //             ? [...new Set(os.map(r => r.store_id))].join(', ')
+            //             : 'No Data';
+            //         } else {
+            //             // take the first value (identical across the group)
+            //             summaryNew[key] = ns[0][key] ?? 'No Data';
+            //             summaryOld[key] = os[0]?.[key] ?? 'No Data';
+            //         }
+            //         });
+
+            //         return { new: summaryNew, old: summaryOld };
+            //     });
+
+            //     // 4) Collect all field names across summaries
+            //     const allKeys = new Set();
+            //         toRender.forEach(pair => {
+            //             Object.keys(pair.new).forEach(k => allKeys.add(k));
+            //             Object.keys(pair.old).forEach(k => allKeys.add(k));
+            //     });
+
+            //     // 5) Render the table
+            //     let html = `
+            //         <table class="table table-bordered m-t-20">
+            //         <thead>
+            //             <tr><th>Field</th><th>Old Data</th><th>New Data</th></tr>
+            //         </thead>
+            //         <tbody>
+            //     `;
+            //     toRender.forEach(pair => {
+            //         Array.from(allKeys).forEach(key => {
+            //         const o = pair.old[key] ?? 'No Data';
+            //         const n = pair.new[key] ?? 'No Data';
+            //         const changed = o !== n;
+            //         html += `
+            //             <tr>
+            //             <td>${key}</td>
+            //             <td>${o}</td>
+            //             <td class="${changed ? 'bg-c7cdfa' : ''}">${n}</td>
+            //             </tr>
+            //         `;
+            //         });
+            //     });
+            //     if (toRender.length === 0) {
+            //         html += `<tr><td colspan="3" class="text-center">No changes found</td></tr>`;
+            //     }
+            //     html += `</tbody></table>`;
+
+            //     modal.show('<div class="scroll-500">'+html+'</div>', 'large');
+            // }
+
+            // which modules should always be grouped & collapsed by area_id
+            const areaSummaryModules = new Set([
+                'store-group-module-import',
+                // add more module keys here as needed…
+            ]);
+
+            function renderTable() {
+                modal.loading(false);
+
+                // 1) normalize
+                const newArr = Array.isArray(newData) ? newData : [newData];
+                const oldArr = Array.isArray(oldData) ? oldData : [oldData];
+
+                let toRender;
+
+                if (areaSummaryModules.has(entry.module)) {
+                    // ————————————————————————
+                    // Group & collapse by area_id
+                    // ————————————————————————
+                    const group = arr => arr.reduce((g,r) => {
+                        (g[r.area_id] = g[r.area_id]||[]).push(r);
+                        return g;
+                    }, {});
+
+                    const newGroups = group(newArr);
+                    const oldGroups = group(oldArr);
+
+                    toRender = Object.keys(newGroups).map(area_id => {
+                    const ns = newGroups[area_id],
+                            os = oldGroups[area_id] || [],
+                            summaryNew = {},
+                            summaryOld = {},
+                            keys = Object.keys(ns[0]);
+
+                    keys.forEach(key => {
+                        if (key === 'store_id') {
+                        summaryNew.store_id = [...new Set(ns.map(r=>r.store_id))].join(', ');
+                        summaryOld.store_id = os.length
+                            ? [...new Set(os.map(r=>r.store_id))].join(', ')
+                            : 'No Data';
+                        } else {
+                        summaryNew[key] = ns[0][key] ?? 'No Data';
+                        summaryOld[key] = os[0]?.[key] ?? 'No Data';
+                        }
+                    });
+
+                        return { new: summaryNew, old: summaryOld };
+                    });
+
+                } else {
+                    // ————————————————————————
+                    // Your old “collapse only if everything except store_id is identical”
+                    // ————————————————————————
+                    let summaryNew = {}, summaryOld = {};
+
+                    if (newArr.length > 1) {
+                        const keys = Object.keys(newArr[0]);
+                        const allSame = keys.every(k => {
+                        if (k === 'store_id') return true;
+                            return newArr.every(r=>r[k]===newArr[0][k]) &&
+                                oldArr.every(r=>r[k]===oldArr[0]?.[k]);
+                    });
+
+                        if (allSame) {
+                            keys.forEach(k => {
+                                if (k === 'store_id') {
+                                    summaryNew.store_id = [...new Set(newArr.map(r=>r.store_id))].join(', ');
+                                    summaryOld.store_id = oldArr.length
+                                    ? [...new Set(oldArr.map(r=>r.store_id))].join(', ')
+                                    : 'No Data';
+                                } else {
+                                    summaryNew[k] = newArr[0][k] ?? 'No Data';
+                                    summaryOld[k] = oldArr[0]?.[k] ?? 'No Data';
+                                }
+                            });
+                        }
+                    }
+
+                    toRender = Object.keys(summaryNew).length
+                    ? [{ new: summaryNew, old: summaryOld }]
+                    : newArr.map((_,i) => ({ new: newArr[i], old: oldArr[i]||{} }));
+                }
+
+                // ————————————————————————
+                // now render `toRender` exactly as before
+                // ————————————————————————
+                const allKeys = new Set();
+                    toRender.forEach(pair => {
+                        Object.keys(pair.new).forEach(k=>allKeys.add(k));
+                        Object.keys(pair.old).forEach(k=>allKeys.add(k));
+                    });
+
+                let html = `
+                    <table class="table table-bordered m-t-20">
+                    <thead>
+                        <tr><th>Field</th><th>Old Data</th><th>New Data</th></tr>
+                    </thead>
+                    <tbody>
+                `;
+                toRender.forEach(pair => {
+                    Array.from(allKeys).forEach(key => {
+                    const o = pair.old[key] ?? 'No Data';
+                    const n = pair.new[key] ?? 'No Data';
+                    const changed = o !== n;
+                    html += `
+                        <tr>
+                        <td>${key}</td>
+                        <td>${o}</td>
+                        <td class="${changed?'bg-c7cdfa':''}">${n}</td>
+                        </tr>
+                    `;
+                    });
+                });
+                
+                if (toRender.length===0) {
+                    html += `<tr><td colspan="3" class="text-center">No changes found</td></tr>`;
+                }
+                html += `</tbody></table>`;
+
+                modal.show('<div class="scroll-500">'+html+'</div>', 'large');
+            }
+        });
     });
 
 </script>
