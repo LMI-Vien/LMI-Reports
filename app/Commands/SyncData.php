@@ -61,7 +61,6 @@ class SyncData extends BaseCommand
         $syncModel = new Sync_model();
         $db = Database::connect();
 
-        // Define parameters per method
         $methodParams = [
             'syncDataPriceCodeLMI'       => ['Watsons', 5000],
             'syncDataPriceCodeRGDI'      => ['Watsons', 5000],
@@ -74,7 +73,6 @@ class SyncData extends BaseCommand
             'syncCusPaymentGroupLmiData' => ['Watsons Personal Care Stores', 5000],
             'syncCustomerLmiData'        => ['Watsons', 5000],
             'syncCustomerRgdiData'       => ['Watsons', 5000]
-            // Methods like syncBrandData, syncClassificationData don't require parameters
         ];
 
         $methods = [

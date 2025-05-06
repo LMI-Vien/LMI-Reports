@@ -202,7 +202,7 @@
                                         <th class='center-content' scope="col">Line #</th>
                                         <th class='center-content' scope="col">Area Code</th>
                                         <th class='center-content' scope="col">Area Description</th>
-                                        <th class='center-content' scope="col">Stores/Branches</th>
+                                        <th class='center-content' scope="col">Store Codes</th>
                                         <th class='center-content' scope="col">Status</th>
                                     </tr>
                                 </thead>
@@ -433,7 +433,6 @@
         let store_name = $('#store').val();
 
         if(store_name === '') {
-            // console.log(stores);
         } else {
             stores.add($('#store').val());
 
@@ -520,9 +519,6 @@
         }
 
         if(store_array.length > 10) {
-            console.log(paginator > store_array.length ? "disabled" : "");
-            console.log('paginator', paginator);
-            console.log('store array length', store_array.length);
             html += `
                                 <tr>
                                     <td colspan=3 align=right>
@@ -567,9 +563,6 @@
         if(store_array.length <= 10) {
             paginator = 0;
         }
-
-        console.log(store_array.length);
-
         renderStores();
     }
 
@@ -820,8 +813,6 @@
                 return fixedRow;
             });
 
-            console.log(jsonData);
-
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -879,8 +870,7 @@
                 return acc;
             }, {});
 
-            // 
-            let td_validator = ['area code', 'area description', 'stores', 'status']; 
+            let td_validator = ['area code', 'area description', 'store codes', 'status']; 
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -981,15 +971,15 @@
         modal.loading(true);
 
         let jsonData = dataset.map(row => {
-            if (row["Stores"]) {
-                let storeList = row["Stores"].split(",").map(item => item.trim().toLowerCase());
-                row["Stores"] = [...new Set(storeList)]; // Remove duplicates
+            if (row["Store Codes"]) {
+                let storeList = row["Store Codes"].split(",").map(item => item.trim().toLowerCase());
+                row["Store Codes"] = [...new Set(storeList)]; // Remove duplicates
             }
             return {
                 "Area Code": row["Area Code"] || "",
                 "Area Description": row["Area Description"] || "", 
                 "Status": row["Status"] || "", 
-                "Stores": row["Stores"] || "", 
+                "Store Codes": row["Store Codes"] || "", 
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
             };
@@ -1366,8 +1356,6 @@
             linenum++
         });
 
-        console.log(unique_store);
-
         if (chk_status) {
             status_val = 1;
         } else {
@@ -1382,20 +1370,17 @@
                             let ids = [];
                             let hasDuplicate = false;
                             let valid = true;
-                            // console.log(unique_store);
                             $.each(unique_store, (x, y) => {
                                 // if(ids.includes(y)) {
                                 //     hasDuplicate = true;
                                 // } else {
                                 //     ids.push(y);
                                 // }
-                                console.log(y);
                                 store = y.split(' - ');
                                 ids.push(store[1]);
                             });
 
                             if(hasDuplicate) {
-                                console.log('Has duplicate');
                                 modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
                             } else {
                                 let batch = [];
@@ -1414,8 +1399,6 @@
                                             batch.push(data);
                                         })
                                     }
-
-                                    console.log(batch);
                                 })
     
                                 if(valid) {
@@ -1453,27 +1436,21 @@
                             let ids = [];
                             let hasDuplicate = false;
                             let valid = true;
-                            // console.log(unique_store);
                             $.each(unique_store, (x, y) => {
                                 if(ids.includes(y)) {
                                     hasDuplicate = true;
                                 } else {
                                     ids.push(y);
                                 }
-                                console.log(y);
                                 store = y.split(' - ');
                                 ids.push(store[1]);
                             });
 
-                            console.log(ids);
-
                             if(hasDuplicate) {
-                                console.log('Has duplicate');
                                 modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
                             } else {
                                 let batch = [];
                                 get_field_values('tbl_store', 'id', 'description', ids, (res) => {
-                                    console.log(res);
                                     if(res.length == 0) {
                                         valid = false;
                                     } else {
@@ -1488,8 +1465,6 @@
                                             batch.push(data);
                                         })
                                     }
-
-                                    console.log(batch);
                                 })
     
                                 if(valid) {
@@ -1589,14 +1564,11 @@
                     };
 
                     aJax.post(url, data, function(response) {
-                        console.log("Raw Response:", response);
 
                         try {
                             var obj = JSON.parse(response);
-                            console.log("Parsed Response Data:", obj);
 
                             if (!Array.isArray(obj)) { 
-                                console.error("Invalid response format:", response);
                                 modal.alert("Error processing response data.", "error", ()=>{});
                                 return;
                             }
@@ -1609,17 +1581,12 @@
                             // Convert team_count to an integer
                             var Count = Number(obj[0].arsc_count) || 0;
                             var bracount = Number(obj[0].bra_count) || 0;
-
-                            console.log("ASC COUNT MOTO: ",Count);
-                            console.log("BRA AMBA COUNT MOTO",bracount);
-
                             if (Count > 0 || bracount > 0) { 
                                 modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
                             } else {
                                 proceed_delete(id); 
                             }
                         } catch (e) {
-                            console.error("Error parsing response:", e, response);
                             modal.alert("Error processing response data.", "error", ()=>{});
                         }
                     });
@@ -1732,14 +1699,14 @@
                 "Area Code": "",
                 "Area Description": "",
                 "Status": "",
-                "Stores": "",
+                "Store Codes": "",
                 "NOTE:": "Please do not change the column headers."
             },
             {
                 "Area Code": "",
                 "Area Description": "",
                 "Status": "",
-                "Stores": "",
+                "Store Codes": "",
                 "NOTE:": "Stores should be separated by commas. eg(Store1, Store2, Store3)"
             }
         ]
@@ -1822,8 +1789,6 @@
                                 }
                             )
                         }
-                    } else {
-                        console.log('No data received');
                     }
                 }
             )

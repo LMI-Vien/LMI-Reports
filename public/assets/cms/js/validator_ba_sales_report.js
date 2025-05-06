@@ -17,21 +17,59 @@ self.onmessage = async function (e) {
         let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brands=1&ba_area_store_brand=1`);
         let ba_data = await get_ba_valid_response.json();
 
-        brand_records = ba_data.brands;
+        // Normalize brand lookup
         let brand_lookup = {};
-        brand_records.forEach(brand => brand_lookup[brand.brand_description] = brand.id);
-
-        let ba_checklist = {};
-        ba_data.ba_area_store_brand.forEach(item => {
-            ba_checklist[item.code] = {
-                id: item.id,
-                area_id: item.area_id,
-                area_code: item.area_code,
-                store_id: item.store_id,
-                store_code: item.store_code,
-                brands: item.brands ? item.brands.split(',').map(b => b.trim().toLowerCase()) : []
-            };
+        ba_data.brands.forEach(brand => {
+            brand_lookup[brand.brand_description.toLowerCase()] = brand.id;
         });
+
+        // Transform ba_area_store_brand into lookup by area + store + ba
+        let ba_checklist = [];
+        // console.log(ba_data.ba_area_store_brand);
+        // return;
+        ba_data.ba_area_store_brand.forEach(entry => {
+            let ba_codes = entry.brand_ambassador_code
+                ? entry.brand_ambassador_code.split(',').map(b => b.trim())
+                : [null];
+            let ba_ids = entry.brand_ambassador_id
+                ? entry.brand_ambassador_id.split(',').map(id => id.trim())
+                : [null];
+            let store_codes = entry.store_code
+                ? entry.store_code.split(',').map(s => s.trim())
+                : [];
+            let store_ids = entry.store_id
+                ? entry.store_id.split(',').map(id => id.trim())
+                : [];
+
+            ba_codes.forEach((ba_code, ba_idx) => {
+                store_codes.forEach((store_code, store_idx) => {
+                    ba_checklist.push({
+                        area_code: entry.area_code,
+                        store_code: store_code,
+                        ba_code: ba_code || "",
+
+                        area_id: entry.area_id,
+                        store_id: store_ids[store_idx] || null,
+                        ba_id: ba_ids[ba_idx] || null,
+
+                        brand_ids: entry.brand_id
+                            ? entry.brand_id.split(',').map(id => id.trim())
+                            : [],
+                        brand_names: entry.brand_name
+                            ? entry.brand_name.split(',').map(name => name.trim().toLowerCase())
+                            : []
+                    });
+                });
+            });
+        });
+
+        function findMatch(area_code, store_code, ba_code) {
+            return ba_checklist.find(entry =>
+                entry.area_code === area_code &&
+                entry.store_code === store_code &&
+                (entry.ba_code === ba_code || (!entry.ba_code && ba_code === ""))
+            );
+        }
 
         function processBatch() {
             if (index >= data.length) {
@@ -43,72 +81,46 @@ self.onmessage = async function (e) {
                 let row = data[index];
                 let tr_count = index + 1;
 
-                let ba_code = row["BA Code"]?.trim() || "";
                 let area_code = row["Area Code"]?.trim() || "";
                 let store_code = row["Store Code"]?.trim() || "";
+                let ba_code = row["BA Code"]?.trim() || "";
                 let brand = row["Brand"]?.trim() || "";
                 let date = row["Date"] || "";
                 let amount = row["Amount"]?.trim() || "";
                 let user_id = row["Created by"]?.trim() || "";
                 let date_of_creation = row["Created Date"]?.trim() || "";
 
-                // Check for empty values
-                if (ba_code === "") {
+                if (area_code === "" || store_code === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Empty Brand Ambassador Code at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Missing Area or Store Code at line #: ${tr_count}`);
                     err_counter++;
                     continue;
                 }
 
-                let matchedBA = ba_checklist[ba_code];
-                if (!matchedBA) {
+                let match = findMatch(area_code, store_code, ba_code);
+
+                if (!match) {
                     invalid = true;
-                    errorLogs.push(`⚠️ BA Code "${ba_code}" not found in system at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ No match for Area "${area_code}", Store "${store_code}", BA "${ba_code}" at line #: ${tr_count}`);
                     err_counter++;
                     continue;
                 }
 
-                if (area_code === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Empty Area Code at line #: ${tr_count}`);
-                    err_counter++;
-                } else if (matchedBA.area_code !== area_code) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Area Code "${area_code}" for BA Code "${ba_code}" at line #: ${tr_count}`);
-                    err_counter++;
-                }
-
-                if (store_code === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Empty Store Code at line #: ${tr_count}`);
-                    err_counter++;
-                } else if (matchedBA.store_code !== store_code) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store Code "${store_code}" for BA Code "${ba_code}" at line #: ${tr_count}`);
-                    err_counter++;
-                }
-
-                if (brand !== "") {
-                    let brandLower = brand.toLowerCase();
-                    if (!matchedBA.brands.includes(brandLower)) {
+                if (brand) {
+                    let brand_lower = brand.toLowerCase();
+                    if (!match.brand_names.includes(brand_lower)) {
                         invalid = true;
-                        errorLogs.push(`⚠️ Brand "${brand}" is not associated with BA Code "${ba_code}" at line #: ${tr_count}`);
+                        errorLogs.push(`⚠️ Brand "${brand}" not valid for Area "${area_code}", Store "${store_code}", BA "${ba_code}" at line #: ${tr_count}`);
                         err_counter++;
+                        continue;
                     }
-                }
-
-                let normalized_brand_lookup = {};
-                for (let key in brand_lookup) {
-                    normalized_brand_lookup[key.toLowerCase()] = brand_lookup[key];
-                }
-
-                let brand_lower = brand.toLowerCase();
-                if (brand_lower in normalized_brand_lookup) {
-                    brand = normalized_brand_lookup[brand_lower];
-                } else {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Brand at line #: ${tr_count}`);
-                    err_counter++;
+                    brand = brand_lookup[brand_lower] || null;
+                    if (!brand) {
+                        invalid = true;
+                        errorLogs.push(`⚠️ Brand "${brand}" not recognized at line #: ${tr_count}`);
+                        err_counter++;
+                        continue;
+                    }
                 }
 
                 let dateObj = new Date(date);
@@ -116,25 +128,26 @@ self.onmessage = async function (e) {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Date at line #: ${tr_count}`);
                     err_counter++;
+                    continue;
                 } else {
                     date = formatDateForDB(date);
                 }
 
                 let cleanedAmount = amount.replace(/,/g, '');
-
-                if (cleanedAmount === "" || isNaN(cleanedAmount) || isNaN(parseFloat(cleanedAmount))) {
+                if (cleanedAmount === "" || isNaN(cleanedAmount)) {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Amount at line #: ${tr_count}`);
                     err_counter++;
+                    continue;
                 } else {
                     amount = parseFloat(cleanedAmount);
                 }
 
                 if (!invalid) {
                     valid_data.push({
-                        area_id: matchedBA.area_id,
-                        store_id: matchedBA.store_id,
-                        ba_id: matchedBA.id,
+                        area_id: match.area_id,
+                        store_id: match.store_id,
+                        ba_id: match.ba_id,
                         brand: brand,
                         date: date,
                         amount: amount,

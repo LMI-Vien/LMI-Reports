@@ -878,13 +878,17 @@ class GlobalController extends BaseController
 	    if (!empty($request['stores'])) {
 	        $responseData['stores'] = $this->Global_model->get_valid_records("tbl_store", ['code', 'description']);
 	    }
+
 	    if (!empty($request['areas'])) {
 	        $responseData['areas'] = $this->Global_model->get_valid_records("tbl_area", 'code');
 	    }
-	    if (!empty($request['ba_store_area'])) {
-	        $responseData['ba_store_area'] = $this->Global_model->get_valid_records_ba_area_store_group();
+
+	    if (!empty($request['store_ba'])) {
+	        $responseData['store_ba'] = $this->Global_model->get_valid_records_store_ba_group();
 	    }
 
+
+	    //check this
 	    if (!empty($request['ba_area_store_brand'])) {
 	        $responseData['ba_area_store_brand'] = $this->Global_model->get_valid_records_ba_area_store_brand();
 	    }

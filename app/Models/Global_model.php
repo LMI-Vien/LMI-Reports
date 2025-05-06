@@ -1082,47 +1082,104 @@ class Global_model extends Model
     }
 
     function get_valid_records_store_group() {
-        $results = $this->db->table('tbl_store_group')
-            ->select('id, area_id, store_id')
+        $results = $this->db->table('tbl_store_group sg')
+            ->select('sg.id, sg.area_id, sg.store_id, a.code as area_code')
+            ->join('tbl_area a', 'a.id = sg.area_id', 'left')
+            ->where('a.status', 1)
             ->get()
             ->getResultArray();
-
-            return $results;
-
-    }
-
-    function get_valid_records_ba_area_store_group() {
-        $results = $this->db->table('tbl_brand_ambassador')
-            ->select('id, area, store')
-            ->get()
-            ->getResultArray();
-
-            return $results;
-    }
-
-    function get_valid_records_ba_area_store_brand() {
-        $builder = $this->db->table('tbl_brand_ambassador ba');
-        $builder->select("
-            ba.id,
-            ba.code,
-            ba.store AS store_id,
-            ba.area AS area_id,
-            ba.name AS ba_name,
-            s.code AS store_code,
-            a.code AS area_code,
-            GROUP_CONCAT(b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
-        ");
-        $builder->where('ba.status', 1);
-        $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
-        $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
-        $builder->join('tbl_store s', 'ba.store = s.id', 'left');
-        $builder->join('tbl_area a', 'ba.area = a.id', 'left');
-        $builder->groupBy('ba.id');
-
-        $results = $builder->get()->getResultArray();
 
         return $results;
     }
+
+    function get_valid_records_store_ba_group() {
+        $results = $this->db->table('tbl_brand_ambassador_group bag')
+            ->select('bag.id, bag.store_id, bag.brand_ambassador_id as ba_id, ba.code as ba_code')
+            ->join('tbl_brand_ambassador ba', 'ba.id = bag.brand_ambassador_id', 'left')
+            ->where('ba.status', 1)
+            ->get()
+            ->getResultArray();
+
+            return $results;
+    }
+
+    // function get_valid_records_ba_area_store_brand() {
+    //     $builder = $this->db->table('tbl_brand_ambassador ba');
+    //     $builder->select("
+    //         ba.id,
+    //         ba.code,
+    //         ba.store AS store_id,
+    //         ba.area AS area_id,
+    //         ba.name AS ba_name,
+    //         s.code AS store_code,
+    //         a.code AS area_code,
+    //         GROUP_CONCAT(b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
+    //     ");
+    //     $builder->where('ba.status', 1);
+    //     $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
+    //     $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
+    //     $builder->join('tbl_store s', 'ba.store = s.id', 'left');
+    //     $builder->join('tbl_area a', 'ba.area = a.id', 'left');
+    //     $builder->groupBy('ba.id');
+
+    //     $results = $builder->get()->getResultArray();
+
+    //     return $results;
+    // }
+
+    function get_valid_records_ba_area_store_brand() {
+        $builder = $this->db->table('tbl_store_group sg');
+        $builder->select("
+            a.id AS area_id,
+            a.description AS area_name,
+            a.code AS area_code,
+            GROUP_CONCAT(DISTINCT s.id ORDER BY s.id SEPARATOR ', ') AS store_id,
+            GROUP_CONCAT(DISTINCT s.code ORDER BY s.code SEPARATOR ', ') AS store_code,
+            GROUP_CONCAT(DISTINCT s.description ORDER BY s.description SEPARATOR ', ') AS store_name,
+            GROUP_CONCAT(DISTINCT b.id ORDER BY b.id SEPARATOR ', ') AS brand_id,
+            GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brand_name,
+            GROUP_CONCAT(DISTINCT
+                CASE
+                    WHEN bag.brand_ambassador_id = -5 THEN '-5'
+                    WHEN bag.brand_ambassador_id = -6 THEN '-6'
+                    ELSE ba.code
+                END
+                ORDER BY ba.code SEPARATOR ', '
+            ) AS brand_ambassador_code,
+            GROUP_CONCAT(DISTINCT
+                CASE
+                    WHEN bag.brand_ambassador_id = -5 THEN 'Vacant'
+                    WHEN bag.brand_ambassador_id = -6 THEN 'Non BA'
+                    ELSE ba.name
+                END
+                ORDER BY ba.name SEPARATOR ', '
+            ) AS brand_ambassador_name,
+            GROUP_CONCAT(DISTINCT
+                    CASE
+                        WHEN bag.brand_ambassador_id = -5 THEN '-5'
+                        WHEN bag.brand_ambassador_id = -6 THEN '-6'
+                        ELSE ba.id
+                    END
+                    ORDER BY ba.id SEPARATOR ', '
+                ) AS brand_ambassador_id
+        ");
+
+        $builder->join('tbl_area a', 'a.id = sg.area_id', 'left');
+        $builder->join('tbl_store s', 's.id = sg.store_id', 'left');
+        $builder->join('tbl_brand_ambassador_group bag', 'bag.store_id = s.id', 'left');
+        $builder->join('tbl_brand_ambassador ba', 'ba.id = bag.brand_ambassador_id', 'left');
+        $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
+        $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
+
+        $builder->where('a.status', 1);
+        $builder->where('s.status', 1);
+        // Do not filter by ba.status to include -5 and -6
+
+        $builder->groupBy('a.code');
+
+        return $builder->get()->getResultArray();
+    }
+
 
     function getWeeks() {
         $query = $this->db->query("CALL get_weeks()");

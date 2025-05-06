@@ -201,7 +201,7 @@
                                     <th class='center-content'>Line #</th>
                                     <th class='center-content'>Store/Branch Code</th>
                                     <th class='center-content'>Store/Branch Description</th>
-                                    <th class='center-content'>Store/Branch Brand Ambassador</th>
+                                    <th class='center-content'>Store/Branch Brand Ambassador Code</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
                             </thead>
@@ -300,6 +300,8 @@
                     var selected = '';
                     
                     brandAmbassadorName = [];
+                    brandAmbassadorName.push("Vacant");
+                    brandAmbassadorName.push("Non BA");
                     result.forEach(function (y) {
                         brandAmbassadorName.push(y.code + ' - ' + y.name);
                     });
@@ -660,8 +662,8 @@
                 source: function(request, response) {
                     let term = request.term.toLowerCase();
                     let customOptions = [
-                        { label: "Vacant", value: "-5" },  // Non-numeric ID for Vacant
-                        { label: "Non BA", value: "-6" }   // Non-numeric ID for Non BA
+                       // { label: "Vacant", value: "-5" },  // Non-numeric ID for Vacant
+                       // { label: "Non BA", value: "-6" }   // Non-numeric ID for Non BA
                     ];
 
                     let filtered = $.ui.autocomplete.filter(brandAmbassadorName, term).map(name => ({
@@ -698,7 +700,7 @@
 
         if (actions === 'edit') {
             $footer.append(buttons.edit);
-            set_field_state('.add_line', false);
+            //set_field_state('.add_line', false);
         }
         if (actions === 'view') {
             set_field_state('.add_line', true);
@@ -870,8 +872,8 @@
                         }
                     }
 
-                
                     if (baId < 0) {
+                        //$('.add_line').attr('disabled', true);
                         var displayName = parseInt(baId) === -5 ? 'Vacant' : 'Non BA';
 
                         var html = `
@@ -890,6 +892,15 @@
                         </div>
                         `;
                         $baName_list.append(html);
+                        $(`#baName_${line}`).autocomplete({
+                            source: function(request, response) {
+                                var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
+                                var uniqueResults = [...new Set(results)];
+                                response(uniqueResults.slice(0, 10));
+                            },
+                        });
+
+                        get_baName(x, `baName_${line}`); 
                         line++;
                         return;  // skip the DB lookups
                     }
@@ -921,7 +932,6 @@
                                         </button>
                                     </div>
                                     `;
-
                                     $baName_list.append(html); 
 
                                     $(`#baName_${line}`).autocomplete({
@@ -1186,15 +1196,12 @@
                     };
 
                     aJax.post(url, data, function(response) {
-                        console.log("Raw Response:", response);
 
                         try {
                             var obj = JSON.parse(response);
-                            console.log("Parsed Response Data:", obj);
 
                             // Handle empty or invalid response more gracefully
                             if (!Array.isArray(obj)) { 
-                                console.error("Invalid response format:", response);
                                 modal.alert("Error processing response data.", "error", ()=>{});
                                 return;
                             }
@@ -1208,16 +1215,12 @@
                             var Count = Number(obj[0].storeid_count) || 0;
                             var count2 = Number(obj[0].bra_count) || 0;
 
-                            console.log("storeid_count:", Count);
-                            console.log("bra_count:", count2);
-
                             if (Count > 0 || count2 > 0) { 
                                 modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
                             } else {
                                 proceed_delete(id); 
                             }
                         } catch (e) {
-                            console.error("Error parsing response:", e, response);
                             modal.alert("Error processing response data.", "error", ()=>{});
                         }
                     });
@@ -1300,8 +1303,6 @@
                 return fixedRow;
             });
 
-            console.log(jsonData); 
-
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -1359,7 +1360,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['store/branch code', 'store/branch description', 'store/branch brand ambassador', 'status'];
+            let td_validator = ['store/branch code', 'store/branch description', 'store/branch brand ambassador code', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -1425,10 +1426,14 @@
         modal.loading(true);
 
         let jsonData = dataset.map(row => {
+            if (row["Store/Branch Brand Ambassador Code"]) {
+                let baList = row["Store/Branch Brand Ambassador Code"].split(",").map(item => item.trim().toLowerCase());
+                row["Store/Branch Brand Ambassador Code"] = [...new Set(baList)]; // Remove duplicates
+            }
             return {
                 "Store/Branch Code": row["Store/Branch Code"] || "",
                 "Store/Branch Description": row["Store/Branch Description"] || "",
-                "Store/Branch Brand Ambassador": row["Store/Branch Brand Ambassador"] || "",
+                "Store/Branch Brand Ambassador Code": row["Store/Branch Brand Ambassador Code"] || "",
                 "Status": row["Status"] || "",
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
@@ -1436,12 +1441,12 @@
         });
 
         let worker = new Worker(base_url + "assets/cms/js/validator_store.js");
-        worker.postMessage({ data: jsonData, base_url: base_url });
+        worker.postMessage({ data: jsonData, base_url });
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
 
-            let { invalid, errorLogs, valid_data, err_counter, brand_per_ba } = e.data;
+            let { invalid, errorLogs, valid_data, err_counter, ba_per_store } = e.data;
             if (invalid) {
                 let errorMsg = err_counter > 1000 
                     ? '⚠️ Too many errors detected. Please download the error log for details.'
@@ -1454,7 +1459,7 @@
             } else if (valid_data && valid_data.length > 0) {
                 btn.prop("disabled", false);
                 updateSwalProgress("Validation Completed", 10);
-                setTimeout(() => saveValidatedData(valid_data), 500);
+                setTimeout(() => saveValidatedData(valid_data, ba_per_store), 500);
             } else {
                 btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
@@ -1467,31 +1472,177 @@
         };
     };
 
-    function saveValidatedData(valid_data) {
+    //backup
+    // function saveValidatedData(valid_data, ba_per_store) {
+    //     let batch_size = 5000;
+    //     let total_batches = Math.ceil(valid_data.length / batch_size);
+    //     let batch_index = 0;
+    //     let retry_count = 0;
+    //     let max_retries = 5; 
+    //     let errorLogs = [];
+    //     let url = "<?= base_url('cms/global_controller');?>";
+    //     let table = 'tbl_store';
+    //     let selected_fields = ['id', 'code', 'description'];
+
+    //     //for lookup of duplicate recors
+    //     const matchFields = ["code", "description"];  
+    //     const matchType = "OR";  //use OR/AND depending on the condition
+    //     modal.loading_progress(true, "Validating and Saving data...");
+
+    //     // Fetch existing records to determine insert vs. update
+    //     aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+    //         let result = JSON.parse(response);
+    //         let existingMap = new Map(); // Stores records using composite keys
+
+    //         if (result.existing) {
+    //             result.existing.forEach(record => {
+    //                 let key = matchFields.map(field => record[field] || "").join("|"); 
+    //                 existingMap.set(key, record.id);
+    //             });
+    //         }
+
+    //         function updateOverallProgress(stepName, completed, total) {
+    //             let progress = Math.round((completed / total) * 100);
+    //             updateSwalProgress(stepName, progress);
+    //         }
+
+    //         function processNextBatch() {
+    //             if (batch_index >= total_batches) {
+    //                 modal.loading_progress(false);
+    //                 if (errorLogs.length > 0) {
+    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+    //                     modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+    //                 } else {
+    //                     modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+    //                 }
+    //                 return;
+    //             }
+
+    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+    //             let newRecords = [];
+    //             let updateRecords = [];
+
+    //             batch.forEach(row => {
+    //                 let matchedId = null;
+
+    //                 if (matchType === "AND") {
+    //                     let key = matchFields.map(field => row[field] || "").join("|");
+    //                     if (existingMap.has(key)) {
+    //                         matchedId = existingMap.get(key);
+    //                     }
+    //                 } else {
+    //                     for (let [key, id] of existingMap.entries()) {
+    //                         let keyParts = key.split("|");
+
+    //                         // for (let field of matchFields) {
+    //                         //     if (keyParts.includes(row[field])) {
+    //                         //         matchedId = id;
+    //                         //     }
+    //                         // }
+
+    //                         if (keyParts[0] === row["code"]) {
+    //                             matchedId = id;
+    //                             break; // Stop looping once a match is found
+    //                         }
+
+    //                         // if (matchedId) break; // Stop looping if we found a match
+    //                     }
+    //                 }
+
+    //                 if (matchedId) {
+    //                     row.id = matchedId;
+    //                     row.updated_date = formatDate(new Date());
+    //                     delete row.created_date;
+    //                     updateRecords.push(row);
+    //                 } else {
+    //                     row.created_by = user_id;
+    //                     row.created_date = formatDate(new Date());
+    //                     newRecords.push(row);
+    //                 }
+    //             });
+
+    //             function processUpdates() {
+    //                 return new Promise((resolve) => {
+    //                     if (updateRecords.length > 0) {
+    //                         batch_update(url, updateRecords, "tbl_store", "id", false, (response) => {
+    //                             if (response.message !== 'success') {
+    //                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+    //                             }
+    //                             resolve();
+    //                         });
+    //                     } else {
+    //                         resolve();
+    //                     }
+    //                 });
+    //             }
+
+    //             function processInserts() {
+    //                 return new Promise((resolve) => {
+    //                     if (newRecords.length > 0) {
+    //                         batch_insert(url, newRecords, "tbl_store", false, (response) => {
+    //                             if (response.message === 'success') {
+    //                                 updateOverallProgress("Saving Store...", batch_index + 1, total_batches);
+    //                             } else {
+    //                                 errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+    //                             }
+    //                             resolve();
+    //                         });
+    //                     } else {
+    //                         resolve();
+    //                     }
+    //                 });
+    //             }
+
+    //             function handleSaveError() {
+    //                 if (retry_count < max_retries) {
+    //                     retry_count++;
+    //                     let wait_time = Math.pow(2, retry_count) * 1000;
+    //                     setTimeout(() => {
+    //                         processInserts().then(() => {
+    //                             batch_index++;
+    //                             retry_count = 0;
+    //                             processNextBatch();
+    //                         }).catch(handleSaveError);
+    //                     }, wait_time);
+    //                 } else {
+    //                     modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+    //                 }
+    //             }
+
+    //             // Execute updates first, then inserts, then proceed to next batch
+    //             processUpdates()
+    //                 .then(processInserts)
+    //                 .then(() => {
+    //                     batch_index++;
+    //                     setTimeout(processNextBatch, 300);
+    //                 })
+    //                 .catch(handleSaveError);
+    //         }
+
+    //         setTimeout(processNextBatch, 1000);
+    //     });
+    // }
+
+    function saveValidatedData(valid_data, ba_per_store) {
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
-        let retry_count = 0;
-        let max_retries = 5; 
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_store';
         let selected_fields = ['id', 'code', 'description'];
 
-        //for lookup of duplicate recors
-        const matchFields = ["code", "description"];  
+        const existingMapByCode = new Map(), existingMapByDescription = new Map();
         const matchType = "OR";  //use OR/AND depending on the condition
+
         modal.loading_progress(true, "Validating and Saving data...");
 
-        // Fetch existing records to determine insert vs. update
-        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+        aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
             let result = JSON.parse(response);
-            let existingMap = new Map(); // Stores records using composite keys
-
             if (result.existing) {
                 result.existing.forEach(record => {
-                    let key = matchFields.map(field => record[field] || "").join("|"); 
-                    existingMap.set(key, record.id);
+                    existingMapByCode.set(record.code, record.id);
+                    existingMapByDescription.set(record.description, record.id);
                 });
             }
 
@@ -1503,6 +1654,7 @@
             function processNextBatch() {
                 if (batch_index >= total_batches) {
                     modal.loading_progress(false);
+
                     if (errorLogs.length > 0) {
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
                         modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
@@ -1517,34 +1669,26 @@
                 let updateRecords = [];
 
                 batch.forEach(row => {
-                    let matchedId = null;
+                    let matchByCode = existingMapByCode.get(row.code);
+                    let matchByDescription = existingMapByDescription.get(row.description);
+
+                    let matchFound = false;
+                    let existingId = null;
 
                     if (matchType === "AND") {
-                        let key = matchFields.map(field => row[field] || "").join("|");
-                        if (existingMap.has(key)) {
-                            matchedId = existingMap.get(key);
+                        if (matchByCode && matchByDescription && matchByCode === matchByDescription) {
+                            matchFound = true;
+                            existingId = matchByCode;
                         }
-                    } else {
-                        for (let [key, id] of existingMap.entries()) {
-                            let keyParts = key.split("|");
-
-                            // for (let field of matchFields) {
-                            //     if (keyParts.includes(row[field])) {
-                            //         matchedId = id;
-                            //     }
-                            // }
-
-                            if (keyParts[0] === row["code"]) {
-                                matchedId = id;
-                                break; // Stop looping once a match is found
-                            }
-
-                            // if (matchedId) break; // Stop looping if we found a match
+                    } else if (matchType === "OR") {
+                        if (matchByCode || matchByDescription) {
+                            matchFound = true;
+                            existingId = matchByCode || matchByDescription;
                         }
                     }
 
-                    if (matchedId) {
-                        row.id = matchedId;
+                    if (matchFound) {
+                        row.id = existingId;
                         row.updated_date = formatDate(new Date());
                         delete row.created_date;
                         updateRecords.push(row);
@@ -1555,66 +1699,113 @@
                     }
                 });
 
-                function processUpdates() {
-                    return new Promise((resolve) => {
-                        if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_store", "id", false, (response) => {
-                                if (response.message !== 'success') {
-                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function processInserts() {
-                    return new Promise((resolve) => {
-                        if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_store", false, (response) => {
-                                if (response.message === 'success') {
-                                    updateOverallProgress("Saving Store...", batch_index + 1, total_batches);
-                                } else {
-                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function handleSaveError() {
-                    if (retry_count < max_retries) {
-                        retry_count++;
-                        let wait_time = Math.pow(2, retry_count) * 1000;
-                        setTimeout(() => {
-                            processInserts().then(() => {
-                                batch_index++;
-                                retry_count = 0;
-                                processNextBatch();
-                            }).catch(handleSaveError);
-                        }, wait_time);
+                function processUpdates(callback) {
+                    if (updateRecords.length > 0) {
+                        batch_update(url, updateRecords, "tbl_store", "id", true, (response) => {
+                            if (response.message !== 'success') {
+                                errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                            }
+                            updateOverallProgress("Updating Stores...", batch_index + 1, total_batches);
+                            processBaPerStore(updateRecords.map(r => ({ id: r.id, code: r.code })), ba_per_store, callback);
+                        });
                     } else {
-                        modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+                        callback(); // Proceed even if no updates
                     }
                 }
 
-                // Execute updates first, then inserts, then proceed to next batch
-                processUpdates()
-                    .then(processInserts)
-                    .then(() => {
+                function processInserts() {
+                    if (newRecords.length > 0) {
+                        batch_insert(url, newRecords, "tbl_store", true, (response) => {
+                            if (response.message === 'success') {
+                                let inserted_ids = response.inserted;
+                                updateOverallProgress("Saving Stores...", batch_index + 1, total_batches);
+                                processBaPerStore(inserted_ids, ba_per_store, function() {
+                                    batch_index++;
+                                    setTimeout(processNextBatch, 300);
+                                });
+                            } else {
+                                errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                batch_index++;
+                                setTimeout(processNextBatch, 300);
+                            }
+                        });
+                    } else {
                         batch_index++;
                         setTimeout(processNextBatch, 300);
-                    })
-                    .catch(handleSaveError);
+                    }
+                }
+
+                processUpdates(processInserts);
             }
 
             setTimeout(processNextBatch, 1000);
         });
+    }
+
+    function processBaPerStore(inserted_ids, ba_per_store, callback) {
+        let batch_size = 5000;
+        let baBatchIndex = 0;
+        let baDataKeys = Object.keys(ba_per_store);
+        let total_ba_batches = Math.ceil(baDataKeys.length / batch_size);
+        let insertedMap = {};
+
+        inserted_ids.forEach(({ id, code }) => {
+            insertedMap[code] = id;
+        });
+
+        function processNextStoreBatch() {
+            if (baBatchIndex >= total_ba_batches) {
+                callback();
+                return;
+            }
+
+            let chunkKeys = baDataKeys.slice(baBatchIndex * batch_size, (baBatchIndex + 1) * batch_size);
+            let chunkData = [];
+            let storeIdsToDelete = [];
+
+            chunkKeys.forEach(code => {
+                if (insertedMap[code]) {
+                    let store_id = insertedMap[code];
+                    let ba_ids = ba_per_store[code];
+                    storeIdsToDelete.push(store_id);
+                    ba_ids.forEach(ba_id => {
+                        chunkData.push({
+                            store_id: store_id,
+                            brand_ambassador_id: ba_id,
+                            created_by: user_id,
+                            created_date: formatDate(new Date()),
+                            updated_date: formatDate(new Date())
+                        });
+                    });
+                }
+            });
+
+            function insertNewStoreRecords(chunkData) {
+                if (chunkData.length > 0) {
+                    batch_insert(url, chunkData, "tbl_brand_ambassador_group", false, function(response) {
+                        baBatchIndex++;
+                        setTimeout(processNextStoreBatch, 100);
+                    });
+                } else {
+                    baBatchIndex++;
+                    setTimeout(processNextStoreBatch, 100);
+                }
+            }
+
+            if (storeIdsToDelete.length > 0) {
+                batch_delete(url, "tbl_brand_ambassador_group", "store_id", storeIdsToDelete, 'brand_ambassador_id', function(resp) {
+                    insertNewStoreRecords(chunkData);
+                });
+            } else {
+                insertNewStoreRecords(chunkData);
+            }
+        }
+
+        if (baDataKeys.length > 0) {
+            processNextStoreBatch();
+        } else {
+            callback();
+        }
     }
 
     function createErrorLogFile(errorLogs, filename) {
@@ -1776,14 +1967,14 @@
             {
                 "Store/Branch Code": "",
                 "Store/Branch Description": "",
-                "Store/Branch Brand Ambassador": "",
+                "Store/Branch Brand Ambassador Code": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             },
             {
                 "Store/Branch Code": "",
                 "Store/Branch Description": "",
-                "Store/Branch Brand Ambassador": "",
+                "Store/Branch Brand Ambassador Code": "",
                 "Status": "",
                 "NOTE:": "Brand Ambassadors should be separated by commas. eg(BA1, BA2, BA3)"
             }
@@ -1834,11 +2025,9 @@
             dynamic_search("'tbl_store'", "''", "'COUNT(id) as total_records'", 0, 0, `''`,  `''`, `''`, (res) => {
                 if (res && res.length > 0) {
                     let total_records = res[0].total_records;
-                    console.log(total_records, 'total records');
 
                     for (let index = 0; index < total_records; index += 100000) {
                         dynamic_search("'tbl_store'", "''", "'code, description, status'", 100000, index, `''`,  `''`, `''`, (res) => {
-                            console.log(res, 'look here')
                             let newData = res.map(({ 
                                 code, description, status
                             }) => ({
@@ -1849,8 +2038,6 @@
                             formattedData.push(...newData); // Append new data to formattedData array
                         })
                     }
-                } else {
-                    console.log('No data received');
                 }
             })
         };
