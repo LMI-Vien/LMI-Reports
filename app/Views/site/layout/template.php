@@ -18,7 +18,7 @@
 /* Default hidden state for filter */
 .filter-content {
   display: none;
-  background-color: #301311;
+  /* background-color: #301311; */
   padding: 10px;
   color: #c2c7d0;
   width: 100%;
@@ -47,9 +47,9 @@
   background-color: #301311 !important;
 }
 
-.brand-link {
+/* .brand-link {
   background-color: #301311 !important;
-}
+} */
 
 /* Expanded Sidebar: Show filters normally */
 body:not(.sidebar-collapse) .filter-content {

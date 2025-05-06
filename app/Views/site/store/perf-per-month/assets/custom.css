@@ -87,10 +87,9 @@
     }
 
     label {
-        display: flex !important;
-        align-items: center;
-        margin-bottom: 0px !important;
-    }
+        color: #fff;
+        font-size: .9rem;
+      }
 
     .swal2-checkbox{
         display: none !important;
@@ -106,3 +105,48 @@
     body .hide-div {
       display: none;
     }
+
+    
+    .select2-selection__choice__display {
+        margin-left: 0.5rem;
+      }
+  
+      .select2 {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        background-color: #fff;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      
+      .select2:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        outline: none;
+      }
+  
+      .btn-group-toggle {
+        gap: 0.1rem; /* Adds spacing between buttons if using flex-wrap */
+      }
+            
+      .btn-group-toggle .btn {
+        color: #fff;
+        border-radius: 5px !important;
+        border-color: #666;
+        background-color: rgba(255, 255, 255, 0.05);
+        text-align: center;
+        white-space: nowrap;
+        transition: background-color 0.2s;
+      }
+            
+      .btn-group-toggle .btn.active {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+      }
+            
+      .btn-group-toggle .btn:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+      }

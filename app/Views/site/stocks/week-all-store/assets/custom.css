@@ -86,9 +86,8 @@
     }
 
     label {
-        display: flex !important;
-        align-items: center;
-        margin-bottom: 0px !important;
+      color: #fff;
+      font-size: .9rem;
     }
 
     .swal2-checkbox{
@@ -104,4 +103,23 @@
 
     body .hide-div {
       display: none;
+    }
+
+    .select2-selection__choice__display {
+      margin-left: 0.5rem;
+    }
+
+    .select2 {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: #fff;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    .select2:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      outline: none;
     }

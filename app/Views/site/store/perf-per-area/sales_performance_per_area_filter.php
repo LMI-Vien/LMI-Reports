@@ -10,30 +10,31 @@
 
     <!-- Sidebar Content -->
     <div class="sidebar">
-        <nav class="mt-2">
+        <nav>
             <ul class="nav nav-pills nav-sidebar flex-column" role="menu" data-accordion="false">
 
                 <!-- Filter Section -->
                 <li class="nav-item filter-hover">
                     <div class="filter-content">
-                        <div class="p-2">
+                        <div>
                             <div style="text-align: center;">
-                                <h6 class="text-white mt-3 mb-2"><i class="fas fa-filter mr-2" style="color: #ffc107;"></i>FILTERS</h6>
+                                <h6 class="text-white mb-2"><i class="fas fa-filter mr-2" style="color: #ffc107;"></i>FILTERS</h6>
                             </div>
-                            <div class="form-group">
-                                <label for="brand_ambassadors">Area</label>
+                            <div class="form-group card-dark mb-3 p-2">
+                                <label for="area" class="mb-2"><i class="fas fa-map-marker-alt mr-1"></i> Area</label>
                                 <input type="text" class="form-control" id="area" placeholder="Please select...">
                                 <input type="hidden" id="area_id">
                             </div>
-                            <div class="form-group">
-                                <label for="brand_ambassadors">Area Sales Coordinator</label>
+                            <div class="form-group card-dark mb-3 p-2">
+                                <label for="asc_name" class="mb-2"><i class="fas fa-user-tie mr-1"></i> Area Sales Coordinator</label>
                                 <input type="text" class="form-control" id="asc_name" placeholder="Please select...">
                                 <input type="hidden" id="asc_name_id">
                             </div>
                             <!-- Filter by Type -->
-                            <div class="form-group">
-                                <label>BA Type</label>
-                                <div class="btn-group btn-group-toggle d-flex flex-wrap" data-toggle="buttons">
+                            <div class="form-group card-dark mb-3 p-2">
+                                <label class="mb-2"><i class="fas fa-tags mr-1"></i> BA Type</label>
+                                <!-- <div class="btn-group btn-group-toggle d-flex flex-wrap" data-toggle="buttons"> -->
+                                <div class="btn-group btn-group-toggle d-flex flex-wrap gap-2" data-toggle="buttons">
                                     <label class="btn btn-outline-light btn-sm active">
                                         <input type="radio" name="filterType" value="3" checked> All
                                     </label>
@@ -46,23 +47,23 @@
                                 </div>
                             </div>
                             <!-- Brand -->
-                            <div class="form-group">
-                                <label for="brand">Item Brand</label>
+                            <div class="form-group card-dark mb-3 p-2">
+                                <label for="brand" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Item Brand</label>
                                 <input type="text" class="form-control" id="brand" placeholder="Please select...">
                                 <input type="hidden" id="brand_id">
                             </div>
-                            <div class="form-group">
-                                <label for="brand">Year</label>
+                            <div class="form-group card-dark mb-3 p-2">
+                                <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Year</label>
                                 <input type="text" class="form-control" id="brand" placeholder="Please select">
                                 <input type="hidden" id="brand_id">
                             </div>
-                            <div class="form-group">
-                                <label for="brand">Month From</label>
+                            <div class="form-group card-dark mb-3 p-2">
+                                <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Month From</label>
                                 <input type="text" class="form-control" id="brand" placeholder="Please select...">
                                 <input type="hidden" id="brand_id">
                             </div>
-                            <div class="form-group">
-                                <label for="brand">Month To</label>
+                            <div class="form-group card-dark mb-3 p-2">
+                                <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Month To</label>
                                 <input type="text" class="form-control" id="brand" placeholder="Please select...">
                                 <input type="hidden" id="brand_id">
                             </div>

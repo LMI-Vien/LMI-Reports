@@ -7,18 +7,20 @@
 
   <!-- Sidebar Content -->
   <div class="sidebar">
-    <nav class="mt-2">
+    <nav>
       <ul class="nav nav-pills nav-sidebar flex-column" role="menu" data-accordion="false">
 
         <!-- Filter Section -->
         <li class="nav-item filter-hover">
           <div class="filter-content">
-            <div class="p-2">
+            <div>
                 <div style="text-align: center;">
-                  <h6 class="text-white mt-3 mb-2"><i class="fas fa-filter mr-2" style="color: #ffc107;"></i>FILTERS</h6>
+                  <h6 class="text-white mb-2"><i class="fas fa-filter mr-2" style="color: #ffc107;"></i>FILTERS</h6>
                 </div>
-                <div class="form-group">
-                  <label for="ItemClass">Item Class</label>
+                <div class="form-group card-dark mb-3 p-2">
+                  <label for="ItemClass" class="mb-2">
+                    <i class="fas fa-cubes mr-1"></i> Item Class
+                  </label>
                   <select id="ItemClass" name="ItemClass[]" class="form-control select2" multiple>
                     <option value="slowMoving">A</option>
                     <option value="overStock">Au</option>
@@ -27,14 +29,18 @@
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="item_classi">Item Category</label>
+                <div class="form-group card-dark mb-3 p-2">
+                  <label for="item_classi" class="mb-2">
+                    <i class="fas fa-tags mr-1"></i> Item Category
+                  </label>
                   <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
                   <input type="hidden" id="item_classi_id">
                 </div>
 
-                <div class="form-group">
-                  <label for="inventoryStatus">Inventory Status</label>
+                <div class="form-group card-dark mb-3 p-2">
+                  <label for="inventoryStatus" class="mb-2">
+                    <i class="fas fa-warehouse mr-1"></i> Inventory Status
+                  </label>
                   <select id="inventoryStatus" name="InventoryStatus[]" class="form-control select2" multiple>
                     <option value="slowMoving">Slow Moving</option>
                     <option value="overStock">Overstocks</option>
@@ -43,38 +49,47 @@
                   </select>
                 </div>
 
-                <div class="form-group">
-                  <label for="item_classi">Week From</label>
-                  <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
+                <div class="form-group card-dark mb-3 p-2">
+                  <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Year</label>
+                  <select id="year" class="form-select">
+                  </select>
+                  <input type="hidden" id="year">
+                </div>
+
+                <div class="form-group card-dark mb-3 p-2">
+                  <label for="week_from" class="mb-2"><i class="fas fa-calendar-alt mr-1"></i> Week From</label>
+                  <select id="week_from" class="form-select" onfocus="updateWeeks('week_from')">
+                  </select>
                   <input type="hidden" id="vendor_name_id">
                 </div>
 
-                <div class="form-group">
-                  <label for="item_classi">Week To</label>
-                  <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
+                <div class="form-group card-dark mb-3 p-2">
+                <label for="week_to" class="mb-2"><i class="fas fa-calendar-alt mr-1"></i> Week To</label>
+                  <select id="week_to" class="form-select" onfocus="updateWeeks('week_to')">
+                  </select>
                   <input type="hidden" id="vendor_name_id">
                 </div>
 
-                <div class="form-group">
-                  <label for="item_classi">Data Source</label>
+                <div class="form-group card-dark mb-3 p-2">
+                  <label for="data_source" class="mb-2"><i class="fas fa-database mr-1"></i> Data Source</label>
                   <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
                   <input type="hidden" id="vendor_name_id">
                 </div>
 
                 <!-- Buttons -->
                 <div class="form-group">
-                  <div class="row">
-                    <div class="col-6 mb-2">
-                      <button type="button" class="btn btn-secondary btn-block btn-sm" id="clearButton">
+                    <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <button type="button" class="btn btn-secondary w-100 btn-sm" id="clearButton">
                         <i class="fas fa-sync-alt"></i> Clear
-                      </button>
+                        </button>
                     </div>
-                    <div class="col-6 mb-2">
-                      <button type="button" class="btn btn-primary btn-block btn-sm" id="refreshButton">
+                    <div class="col-12 col-md-6">
+                        <button type="button" class="btn btn-primary w-100 btn-sm" id="refreshButton">
                         <i class="fas fa-sync-alt"></i> Refresh
-                      </button>
+                        </button>
                     </div>
-                  </div>
+                    </div>
                 </div>
               </div>
             </div>
@@ -84,3 +99,12 @@
     </nav>
   </div>
 </aside>
+
+<script>
+  let years = <?php echo json_encode($year); ?>;
+  
+  $(document).ready(function() {
+    // look at app\Views\site\stocks\week-all-store\assets\function.js
+    populateDropdown('year', years, 'year', 'id')
+  })
+</script>
