@@ -11,7 +11,7 @@ self.onmessage = async function(e) {
     let index = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1&ba_area_store_brand=1`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1&ba_area_store_brand=1&item_classification=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         let ba_checklist = {};
@@ -43,6 +43,9 @@ self.onmessage = async function(e) {
 
         let store_lookup = {};
         ba_data.stores.forEach(store => store_lookup[store.code.toLowerCase()] = store.id);
+
+        let item_class_lookup = {};
+        ba_data.item_classification.forEach(item_class => item_class_lookup[item_class.item_class_code.toLowerCase()] = item_class.id);
 
         let item_lookup = {};
         let item_records = company == 1 ? ba_data.customer_sku_code_rgdi : ba_data.customer_sku_code_lmi;
@@ -128,6 +131,9 @@ self.onmessage = async function(e) {
 
                 let store_id = store_lookup[store.toLowerCase()];
                 if (!store_id) addErrorLog("Invalid Store");
+
+                let item_classi = item_class_lookup[item_class.toLowerCase()];
+                if (!item_classi) addErrorLog("Invalid item Class");
 
                 let matched = ba_checklist[store.toLowerCase()];
                 if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");

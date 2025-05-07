@@ -916,6 +916,9 @@ class GlobalController extends BaseController
 				"'tbl_brand_label_type'", "''", "'id, label'", 0, 0, "''", "''", "''"
 			);
 	    }
+	    if (!empty($request['item_classification'])) {
+	        $responseData['item_classification'] = $this->Global_model->get_valid_records("tbl_item_class", 'item_class_code');
+	    }
  	    return $this->response->setJSON($responseData);
 	}
 
