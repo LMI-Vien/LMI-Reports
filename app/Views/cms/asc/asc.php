@@ -1164,6 +1164,7 @@
     }
 
     function saveValidatedData(valid_data) {
+        const overallStart = new Date();
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
@@ -1181,7 +1182,19 @@
 
         // Fetch existing records to determine insert vs. update
         aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-            let result = JSON.parse(response);
+            // let result = JSON.parse(response);
+            const result = JSON.parse(response);
+            const allEntries = result.existing || [];
+
+            // Build a Set of codes you're importing:
+            const codeSet = new Set(valid_data.map(r => r.code));
+            const descSet = new Set(valid_data.map(r => r.description.trim().toLowerCase()));
+
+            // Keep only the rows whose code matches:
+            const originalEntries = allEntries.filter(r =>
+                codeSet.has(r.code) || descSet.has(r.description)
+            );
+
             let existingMap = new Map(); // Stores records using composite keys
 
             if (result.existing) {
@@ -1199,6 +1212,21 @@
             function processNextBatch() {
                 if (batch_index >= total_batches) {
                     modal.loading_progress(false);
+
+                    const overallEnd = new Date();
+                    const duration = formatDuration(overallStart, overallEnd);
+
+                    const remarks = `
+                        Action: Import/Update ASC Batch
+                        <br>Processed ${valid_data.length} records
+                        <br>Errors: ${errorLogs.length}
+                        <br>Start: ${formatReadableDate(overallStart)}
+                        <br>End: ${formatReadableDate(overallEnd)}
+                        <br>Duration: ${duration}
+                    `;
+
+                    logActivity("asc-module-import", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+
                     if (errorLogs.length > 0) {
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
                         modal.alert("Some records encountered errors. Check the log.", 'info', () => {});

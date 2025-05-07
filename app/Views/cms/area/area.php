@@ -1040,11 +1040,9 @@
             // Build a Set of codes you're importing:
             const codeSet = new Set(valid_data.map(r => r.code.trim().toLowerCase()));
             const descSet = new Set(valid_data.map(r => r.description.trim().toLowerCase()));
-            console.log("descSet", descSet);
-            console.log("codeSet", codeSet);
 
             const originalEntries = allEntries.filter(r =>
-            codeSet.has(r.code) || descSet.has(r.description)
+                codeSet.has(r.code) || descSet.has(r.description)
             );
 
             if (result.existing) {
@@ -1258,14 +1256,7 @@
                 <br>End: ${formatReadableDate(overallEnd)}
                 <br>Duration: ${duration}
             `;
-            logActivity(
-                "store-group-module-import",
-                "Import Store Group Batch",
-                remarks,
-                "-",
-                JSON.stringify([]),
-                JSON.stringify([])
-            );
+            logActivity("store-group-module-import", "Import Store Group Batch", remarks, "-", JSON.stringify([]), JSON.stringify([]));
             return callback();
         }
 
@@ -1293,14 +1284,7 @@
                 <br>End: ${formatReadableDate(overallEnd)}
                 <br>Duration: ${duration}
             `;
-            logActivity(
-                "store-group-module-import",
-                "Import Store Group Batch",
-                remarks,
-                "-",
-                JSON.stringify(allNewEntries),
-                JSON.stringify(originalEntries)
-            );
+            logActivity("store-group-module-import", "Import Store Group Batch", remarks, "-", JSON.stringify(allNewEntries), JSON.stringify(originalEntries));
             return callback();
             }
 
@@ -1329,29 +1313,22 @@
 
             // helper to insert after delete
             function insertNew() {
-            if (chunkData.length) {
-                batch_insert(url, chunkData, "tbl_store_group", false, () => {
-                storeBatchIndex++;
-                setTimeout(processNextStoreBatch, 100);
+                if (chunkData.length) {
+                    batch_insert(url, chunkData, "tbl_store_group", false, () => {
+                        storeBatchIndex++;
+                    setTimeout(processNextStoreBatch, 100);
                 });
-            } else {
-                storeBatchIndex++;
-                setTimeout(processNextStoreBatch, 100);
-            }
+                } else {
+                    storeBatchIndex++;
+                    setTimeout(processNextStoreBatch, 100);
+                }
             }
 
             // delete old then insert new
             if (areaIdsToDelete.length) {
-            batch_delete(
-                url,
-                "tbl_store_group",
-                "area_id",
-                areaIdsToDelete,
-                "store_id",
-                () => insertNew()
-            );
+                batch_delete(url, "tbl_store_group", "area_id", areaIdsToDelete, "store_id", () => insertNew());
             } else {
-            insertNew();
+                insertNew();
             }
         }
     }
