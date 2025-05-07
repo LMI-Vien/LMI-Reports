@@ -48,7 +48,7 @@ self.onmessage = async function(e) {
         con_data.customer_sku_code_rgdi.forEach(group => customer_sku_code_lookup_rgdi[group.cusitmcde.toLowerCase()] = group.recid); 
 
         let ba_checklist = {};
-        ba_data.ba_area_store_brand.forEach(entry => {
+        con_data.ba_area_store_brand.forEach(entry => {
             let ba_codes = entry.brand_ambassador_cod ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
             let ba_ids = entry.brand_ambassador_id ? entry.brand_ambassador_id.split(',').map(id => id.trim()) : [null];
             let store_codes = entry.store_code ? entry.store_code.split(',').map(s => s.trim()) : [];
