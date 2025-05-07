@@ -463,7 +463,15 @@
             {
                 field:  'area_id',
                 table:  'tbl_area',
-                select: 'id, code, description',
+                select: 'id, description',
+                value:  'description'
+            }, 
+        ],
+        'asc-module-import': [
+            {
+                field:  'area_id',
+                table:  'tbl_area',
+                select: 'id, description',
                 value:  'description'
             }, 
         ],
@@ -471,13 +479,13 @@
             {
                 field:  'store_id',
                 table:  'tbl_store',
-                select: 'id, code, description',
+                select: 'id, description',
                 value:  'description'
             },
             {
                 field:  'area_id',
                 table:  'tbl_area',
-                select: 'id, code, description',
+                select: 'id, description',
                 value:  'description'
             },
         ],
@@ -485,13 +493,13 @@
             {
                 field:  'store_id',
                 table:  'tbl_store',
-                select: 'id, code, description',
+                select: 'id, description',
                 value:  'description'
             },
             {
                 field:  'area_id',
                 table:  'tbl_area',
-                select: 'id, code, description',
+                select: 'id, description',
                 value:  'description'
             },
         ],
@@ -499,18 +507,100 @@
             {
                 field:  'store_id',
                 table:  'tbl_store',
-                select: 'id, code, description',
+                select: 'id, description',
                 value:  'description'
             },
             {
                 field:  'area_id',
                 table:  'tbl_area',
-                select: 'id, code, description',
+                select: 'id, description',
                 value:  'description'
             },
         ], 
-        // import-module
-        
+        'ba-per-store-module-import': [
+            {
+                field:  'store_id',
+                table:  'tbl_store',
+                select: 'id, description',
+                value: 'description'
+            },
+            {
+                field:  'brand_ambassador_id',
+                table:  'tbl_brand_ambassador',
+                select: 'id, name',
+                value:  'name'
+            },
+        ],
+        'ba-brand-group-module': [
+            {
+                field:  'store_id', 
+                table:  'tbl_store',
+                select: 'id, description',
+                value: 'description'
+            },
+            {
+                field:  'brand_ambassador_id',
+                table:  'tbl_brand_ambassador',
+                select: 'id, name',
+                value:  'name'
+            },
+        ],
+        'store-branch': [
+            {
+                field: 'store_id',
+                table: 'tbl_store',
+                select: 'id, description',
+                value: 'description'
+            },
+            {
+                field:  'brand_ambassador_id',
+                table:  'tbl_brand_ambassador',
+                select: 'id, name',
+                value:  'name'
+            },
+        ],
+        'ba-brand-module': [
+            {
+                field:  'brand_id',
+                table:  'tbl_brand',
+                select: 'id, brand_code',
+                value:  'brand_code'
+            },
+            {
+                field:  'ba_id',
+                table:  'tbl_brand_ambassador',
+                select: 'id, name',
+                value:  'name'
+            },
+        ],
+        'brand-ambassador-module-import': [
+            {
+                field: 'team',
+                table: 'tbl_team',
+                select: 'id, team_description',
+                value: 'team_description'
+            },
+            {
+                field: 'agency',
+                table: 'tbl_agency',
+                select: 'id, agency',
+                value: 'agency'
+            },
+        ],
+        'ba-module-import': [
+            {
+                field:  'ba_id',
+                table:  'tbl_brand_ambassador',
+                select: 'id, name',
+                value:  'name'
+            },
+            {
+                field: 'brand_id',
+                table: 'tbl_brand',
+                select: 'id, brand_code',
+                value: 'brand_code'
+            },
+        ],
     };
 
     // ——————————————————————————————
@@ -616,7 +706,7 @@
             });
 
             // 2.1) Type code → label (brand-ambassador only)
-            if (entry.module === 'brand-ambassador') {
+            if (entry.module === 'brand-ambassador' || entry.module === 'brand-ambassador-module-import') {
                 [newArr, oldArr].forEach(arr => {
                     arr.forEach(obj => {
                         if (obj.type !== undefined) {
@@ -629,23 +719,19 @@
             // 3) Module‐specific lookups via switch‐case
             let configsToMap;
             switch (entry.module) {
-                case 'brand-ambassador':
-                    configsToMap = lookupConfigs['brand-ambassador'];
-                    break;
-                case 'asc':
-                    configsToMap = lookupConfigs['asc'];
-                    break;
-                case 'store-group-module':
-                    configsToMap = lookupConfigs['store-group-module'];
-                    break;
-                case 'store-group-module-import':
-                    configsToMap = lookupConfigs['store-group-module-import'];
-                    break;
-                case 'area':
-                    configsToMap = lookupConfigs['area'];
-                    break;
-                default:
-                    configsToMap = [];
+                case 'brand-ambassador':               configsToMap = lookupConfigs['brand-ambassador']; break;
+                case 'asc':                            configsToMap = lookupConfigs['asc']; break;
+                case 'store-group-module':             configsToMap = lookupConfigs['store-group-module']; break;
+                case 'store-group-module-import':      configsToMap = lookupConfigs['store-group-module-import']; break;
+                case 'area':                           configsToMap = lookupConfigs['area']; break;
+                case 'asc-module-import':              configsToMap = lookupConfigs['asc-module-import']; break;
+                case 'ba-per-store-module-import':     configsToMap = lookupConfigs['ba-per-store-module-import']; break;
+                case 'ba-brand-group-module':          configsToMap = lookupConfigs['ba-brand-group-module']; break;
+                case 'store-branch':                   configsToMap = lookupConfigs['store-branch']; break;
+                case 'ba-brand-module':                configsToMap = lookupConfigs['ba-brand-module']; break;
+                case 'brand-ambassador-module-import': configsToMap = lookupConfigs['brand-ambassador-module-import']; break;
+                case 'ba-module-import':               configsToMap = lookupConfigs['ba-module-import']; break;
+                default:                               configsToMap = []; 
             }
 
             console.log('Mapping configs for module', entry.module, configsToMap);
@@ -696,7 +782,7 @@
                 });
             });
 
-            // 5) renderTable 
+            // 5) renderTable (BASIS)
             // function renderTable() {
             //     modal.loading(false);
 

@@ -1030,6 +1030,7 @@
         function finalize_and_insert(storeId, batch) {
             save_to_db(code, description, unique_brandAmba, status_val, storeId, function(obj) {
                 var finalStoreId = storeId || obj.ID;
+                const batchStart = new Date();
                 if (storeId) {
                     const conditions = { store_id: finalStoreId };
                     total_delete(url, 'tbl_brand_ambassador_group', conditions);
@@ -1040,6 +1041,20 @@
                 });
 
                 batch_insert(url, batch, 'tbl_brand_ambassador_group', false, function() {
+                    
+                    const batchEnd = new Date();
+                    const duration = formatDuration(batchStart, batchEnd);
+
+                    const remarks = `
+                        Action: Create Batch Store Groups
+                        <br>Inserted ${batch.length} records for area ID ${id}
+                        <br>Start Time: ${formatReadableDate(batchStart)}
+                        <br>End Time: ${formatReadableDate(batchEnd)}
+                        <br>Duration: ${duration}
+                    `;
+
+                    logActivity("ba-brand-group-module", "Update Batch", remarks, "-", JSON.stringify(batch), "");
+
                     modal.loading(false);
                     modal.alert(modal_alert_success, "success", function() {
                         location.reload();
@@ -1624,6 +1639,7 @@
     // }
 
     function saveValidatedData(valid_data, ba_per_store) {
+        const overallStart = new Date();
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
@@ -1638,7 +1654,17 @@
         modal.loading_progress(true, "Validating and Saving data...");
 
         aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
-            let result = JSON.parse(response);
+            // let result = JSON.parse(response);
+            const result = JSON.parse(response);
+            const allEntries = result.existing || [];
+
+            const codeSet = new Set(valid_data.map(r => r.code.trim().toLowerCase()));
+            const descSet = new Set(valid_data.map(r => r.description.trim().toLowerCase()));
+
+            const originalEntries = allEntries.filter(r =>
+                codeSet.has(r.code) || descSet.has(r.description)
+            );
+
             if (result.existing) {
                 result.existing.forEach(record => {
                     existingMapByCode.set(record.code, record.id);
@@ -1654,6 +1680,20 @@
             function processNextBatch() {
                 if (batch_index >= total_batches) {
                     modal.loading_progress(false);
+
+                    const overallEnd = new Date();
+                    const duration = formatDuration(overallStart, overallEnd);
+
+                    const remarks = `
+                        Action: Import/Update Area Batch
+                        <br>Processed ${valid_data.length} records
+                        <br>Errors: ${errorLogs.length}
+                        <br>Start: ${formatReadableDate(overallStart)}
+                        <br>End: ${formatReadableDate(overallEnd)}
+                        <br>Duration: ${duration}
+                    `;
+
+                    logActivity("import-store-branch-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
 
                     if (errorLogs.length > 0) {
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
@@ -1742,37 +1782,137 @@
         });
     }
 
-    function processBaPerStore(inserted_ids, ba_per_store, callback) {
-        let batch_size = 5000;
-        let baBatchIndex = 0;
-        let baDataKeys = Object.keys(ba_per_store);
-        let total_ba_batches = Math.ceil(baDataKeys.length / batch_size);
-        let insertedMap = {};
+    // backup
+    // function processBaPerStore(inserted_ids, ba_per_store, callback) {
+    //     let batch_size = 5000;
+    //     let baBatchIndex = 0;
+    //     let baDataKeys = Object.keys(ba_per_store);
+    //     let total_ba_batches = Math.ceil(baDataKeys.length / batch_size);
+    //     let insertedMap = {};
 
+    //     inserted_ids.forEach(({ id, code }) => {
+    //         insertedMap[code] = id;
+    //     });
+
+    //     function processNextStoreBatch() {
+    //         if (baBatchIndex >= total_ba_batches) {
+    //             callback();
+    //             return;
+    //         }
+
+    //         let chunkKeys = baDataKeys.slice(baBatchIndex * batch_size, (baBatchIndex + 1) * batch_size);
+    //         let chunkData = [];
+    //         let storeIdsToDelete = [];
+
+    //         chunkKeys.forEach(code => {
+    //             if (insertedMap[code]) {
+    //                 let store_id = insertedMap[code];
+    //                 let ba_ids = ba_per_store[code];
+    //                 storeIdsToDelete.push(store_id);
+    //                 ba_ids.forEach(ba_id => {
+    //                     chunkData.push({
+    //                         store_id: store_id,
+    //                         brand_ambassador_id: ba_id,
+    //                         created_by: user_id,
+    //                         created_date: formatDate(new Date()),
+    //                         updated_date: formatDate(new Date())
+    //                     });
+    //                 });
+    //             }
+    //         });
+
+    //         function insertNewStoreRecords(chunkData) {
+    //             if (chunkData.length > 0) {
+    //                 batch_insert(url, chunkData, "tbl_brand_ambassador_group", false, function(response) {
+    //                     baBatchIndex++;
+    //                     setTimeout(processNextStoreBatch, 100);
+    //                 });
+    //             } else {
+    //                 baBatchIndex++;
+    //                 setTimeout(processNextStoreBatch, 100);
+    //             }
+    //         }
+
+    //         if (storeIdsToDelete.length > 0) {
+    //             batch_delete(url, "tbl_brand_ambassador_group", "store_id", storeIdsToDelete, 'brand_ambassador_id', function(resp) {
+    //                 insertNewStoreRecords(chunkData);
+    //             });
+    //         } else {
+    //             insertNewStoreRecords(chunkData);
+    //         }
+    //     }
+
+    //     if (baDataKeys.length > 0) {
+    //         processNextStoreBatch();
+    //     } else {
+    //         callback();
+    //     }
+    // }
+
+    function processBaPerStore(inserted_ids, ba_per_store, callback) {
+        const url               = "<?= base_url('cms/global_controller');?>";
+        const overallStart      = new Date();
+        const batch_size        = 5000;
+        let baBatchIndex        = 0;
+        let baDataKeys          = Object.keys(ba_per_store);
+        let total_ba_batches    = Math.ceil(baDataKeys.length / batch_size);
+
+        let allNewEntries       = [];    // accumulate for final log
+
+        // build map of store_code → store_id
+        let insertedMap = {};
         inserted_ids.forEach(({ id, code }) => {
             insertedMap[code] = id;
         });
 
+        // ——— 1) Early exit if nothing to do ———
+        if (baDataKeys.length === 0) {
+            const overallEnd = new Date();
+            const duration   = formatDuration(overallStart, overallEnd);
+            const remarks    = `
+                Action: Import BA-Brand
+                <br>Processed 0 records
+                <br>Start: ${formatReadableDate(overallStart)}
+                <br>End: ${formatReadableDate(overallEnd)}
+                <br>Duration: ${duration}
+            `;
+            logActivity("ba-brand-module-import", "Import BA-Per-Store Batch", remarks, "-", JSON.stringify(allNewEntries), JSON.stringify([]));
+            return callback();
+        }
+
+        // ——— 2) Process in batches ———
         function processNextStoreBatch() {
+            // 2a) All done?
             if (baBatchIndex >= total_ba_batches) {
-                callback();
-                return;
+                const overallEnd = new Date();
+                const duration   = formatDuration(overallStart, overallEnd);
+                const remarks    = `
+                    Action: Import BA-Per-Store Batch
+                    <br>Processed ${allNewEntries.length} records
+                    <br>Start: ${formatReadableDate(overallStart)}
+                    <br>End: ${formatReadableDate(overallEnd)}
+                    <br>Duration: ${duration}
+                `;
+                logActivity("ba-per-store-module-import", "Import BA-Per-Store Batch", remarks, "-", JSON.stringify(allNewEntries), JSON.stringify([]));
+                return callback();
             }
 
-            let chunkKeys = baDataKeys.slice(baBatchIndex * batch_size, (baBatchIndex + 1) * batch_size);
-            let chunkData = [];
+            // 2b) Build this chunk’s payload
+           
+            const chunkKeys      = baDataKeys.slice(baBatchIndex * batch_size,(baBatchIndex + 1) * batch_size);
+            let chunkData        = [];
             let storeIdsToDelete = [];
 
             chunkKeys.forEach(code => {
-                if (insertedMap[code]) {
-                    let store_id = insertedMap[code];
-                    let ba_ids = ba_per_store[code];
+                const store_id = insertedMap[code];
+                const ba_ids   = ba_per_store[code];
+                if (store_id && Array.isArray(ba_ids)) {
                     storeIdsToDelete.push(store_id);
                     ba_ids.forEach(ba_id => {
                         chunkData.push({
-                            store_id: store_id,
+                            store_id,
                             brand_ambassador_id: ba_id,
-                            created_by: user_id,
+                            created_by:   user_id,
                             created_date: formatDate(new Date()),
                             updated_date: formatDate(new Date())
                         });
@@ -1780,7 +1920,11 @@
                 }
             });
 
-            function insertNewStoreRecords(chunkData) {
+            // accumulate for final summary
+            allNewEntries = allNewEntries.concat(chunkData);
+
+            // helper to insert after delete
+            function insertNewStoreRecords() {
                 if (chunkData.length > 0) {
                     batch_insert(url, chunkData, "tbl_brand_ambassador_group", false, function(response) {
                         baBatchIndex++;
@@ -1792,20 +1936,16 @@
                 }
             }
 
+            // 2c) Delete old then insert new (with logging)
             if (storeIdsToDelete.length > 0) {
-                batch_delete(url, "tbl_brand_ambassador_group", "store_id", storeIdsToDelete, 'brand_ambassador_id', function(resp) {
-                    insertNewStoreRecords(chunkData);
-                });
+                batch_delete(url, "tbl_brand_ambassador_group", "store_id", storeIdsToDelete, "brand_ambassador_id", () => insertNewStoreRecords());
             } else {
-                insertNewStoreRecords(chunkData);
+                insertNewStoreRecords();
             }
         }
 
-        if (baDataKeys.length > 0) {
-            processNextStoreBatch();
-        } else {
-            callback();
-        }
+        // kick it off
+        processNextStoreBatch();
     }
 
     function createErrorLogFile(errorLogs, filename) {
