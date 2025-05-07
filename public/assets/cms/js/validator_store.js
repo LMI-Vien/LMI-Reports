@@ -76,15 +76,15 @@ self.onmessage = async function(e) {
 
                         if (store_ba_global_tag_map[ba_id] && store_ba_global_tag_map[ba_id] !== code) {
                             invalid = true;
-                            if (!invalid_ba) {
-                                invalid_ba = true;
-                                if (s === store_ba_global_tag_map[ba_id].toLowerCase()) {
-                                    errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store.`);
-                                } else {
-                                    errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store (${store_ba_global_tag_map[ba_id]}).`);
-                                }
-                                err_counter++;
-                            }
+                            // if (!invalid_ba) {
+                            //     invalid_ba = true;
+                            //     if (s === store_ba_global_tag_map[ba_id].toLowerCase()) {
+                            //         errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store.`);
+                            //     } else {
+                            //         errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store (${store_ba_global_tag_map[ba_id]}).`);
+                            //     }
+                            //     err_counter++;
+                            // }
                         } else {
                             if (!ba_per_store[code].includes(ba_id)) {
                                 ba_per_store[code].push(ba_id);

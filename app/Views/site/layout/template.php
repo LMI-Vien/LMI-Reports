@@ -190,6 +190,6 @@ body.sidebar-collapse .main-sidebar:hover .filter-hover .filter-content {
 <?php endif; ?>
 <script type="text/javascript">
 	var base_url = "<?= base_url();?>";
-  var url = "<?= base_url('cms/controller');?>";
+  var url = "<?= base_url('cms/global_controller');?>";
 </script>
 

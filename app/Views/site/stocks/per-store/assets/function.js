@@ -1,5 +1,5 @@
     $(document).ready(function () {
-
+        console.log(url);
        // fetchData();
         $('#inventoryStatus').select2({ placeholder: 'Select inventory statuses' });
         $(document).on('click', '#clearButton', function () {
@@ -19,8 +19,33 @@
             $('#refreshButton').click();
         });
 
+        autocomplete_field($("#area"), $("#area_id"), area, "description", "id", function(result) {
+            //let url = url;
+            let data = {
+                event: "list",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                query: "a.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_area a",
+                join: [
+                    {
+                        table: "tbl_area_sales_coordinator asc",
+                        query: "a.id = asc.area_id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let data = JSON.parse(result);
+                $("#asc_name").val(data[0].asc_description);
+                $("#asc_name_id").val(data[0].asc_id);
+            })
+        });
+
         autocomplete_field($("#brand_ambassadors"), $("#ba_id"), brand_ambassadors, "description", "id", function(result) {
-            let url = url;
+            //let url = url;
             let data = {
                 event: "list",
                 select: "tbl_store.id, tbl_store.description",
@@ -38,6 +63,7 @@
             }
 
             aJax.post(url, data, function(result) {
+                console.log(result);
                 let store_name = JSON.parse(result);
                 $("#store_branch").val(store_name[0].description);
                 $("#store_id").val(store_name[0].id);
@@ -45,7 +71,7 @@
         });
 
         autocomplete_field($("#store_branch"), $("#store_id"), store_branch, "description", "id", function(result) {
-            let url = url;
+            //let url = url;
             let data = {
                 event: "list",
                 select: "tbl_brand_ambassador.id, tbl_brand_ambassador.name",

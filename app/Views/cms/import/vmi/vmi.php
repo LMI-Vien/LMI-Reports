@@ -425,10 +425,8 @@
     });
 
     function updateWeeks() {
-        let selectedYear = $('#yearSelect option:selected').text()
-        let year_select = $('#year_select option:selected').text()
-        console.log(selectedYear, 'selectedYear')
-        console.log(year_select, 'year_select')
+        let selectedYear = $('#yearSelect option:selected').text();
+        let year_select = $('#year_select option:selected').text();
         populateDropdown('weekSelect', getCalendarWeeks(selectedYear), 'display', 'id');
         populateDropdown('week_select', getCalendarWeeks(year_select), 'display', 'id');
     }
@@ -635,7 +633,6 @@
                 // data: { page, limit: 5000, inp_year, inp_month, inp_week, inp_company}, // Fetch in larger chunks
                 data: { page, limit: 5000, inp_year, inp_week, inp_company}, // Fetch in larger chunks
                 success: function(response) {
-                    console.log(response, 'look here')
                     if (response.success && response.data.length > 0) {
                         allData = allData.concat(response.data);
                         if (response.data.length === 5000) {
@@ -695,6 +692,8 @@
                     week: inp_week,
                     company: inp_company
                 }));
+                // console.log(new_data);
+                // return;
                 saveValidatedData(new_data);
             } else {
                 modal.alert("No valid data found. Please check the file.", "error");
@@ -860,7 +859,8 @@
 
                 // Update overall progress
                 const progress = Math.round((batch_index / total_batches) * 100);
-                updateSwalProgress(`Saving Data... ${progress}%`);
+
+                updateSwalProgress(`Saving Data...`, progress);
 
                 // No artificial delay! Continue immediately
                 processNextBatch();

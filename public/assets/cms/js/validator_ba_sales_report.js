@@ -5,7 +5,8 @@ self.onmessage = async function (e) {
     let errorLogs = [];
     let valid_data = [];
     var err_counter = 0;
-    let batchSize = 2000;
+    const ERROR_LOG_LIMIT = 1000;
+    const BATCH_SIZE = 2000;
     let index = 0;
 
     function formatDateForDB(dateStr) {
@@ -17,16 +18,16 @@ self.onmessage = async function (e) {
         let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brands=1&ba_area_store_brand=1`);
         let ba_data = await get_ba_valid_response.json();
 
-        // Normalize brand lookup
+        // Brand lookup normalization
         let brand_lookup = {};
         ba_data.brands.forEach(brand => {
             brand_lookup[brand.brand_description.toLowerCase()] = brand.id;
         });
 
-        // Transform ba_area_store_brand into lookup by area + store + ba
+        // Prepare BA checklist and store-area map
         let ba_checklist = [];
-        // console.log(ba_data.ba_area_store_brand);
-        // return;
+        let storeAreaMap = {}; // NEW
+
         ba_data.ba_area_store_brand.forEach(entry => {
             let ba_codes = entry.brand_ambassador_code
                 ? entry.brand_ambassador_code.split(',').map(b => b.trim())
@@ -41,6 +42,10 @@ self.onmessage = async function (e) {
                 ? entry.store_id.split(',').map(id => id.trim())
                 : [];
 
+            store_codes.forEach(code => {
+                storeAreaMap[code] = entry.area_code; // NEW
+            });
+
             ba_codes.forEach((ba_code, ba_idx) => {
                 store_codes.forEach((store_code, store_idx) => {
                     ba_checklist.push({
@@ -49,6 +54,7 @@ self.onmessage = async function (e) {
                         ba_code: ba_code || "",
 
                         area_id: entry.area_id,
+                        asc_id: entry.asc_id || null,
                         store_id: store_ids[store_idx] || null,
                         ba_id: ba_ids[ba_idx] || null,
 
@@ -77,7 +83,7 @@ self.onmessage = async function (e) {
                 return;
             }
 
-            for (let i = 0; i < batchSize && index < data.length; i++, index++) {
+            for (let i = 0; i < BATCH_SIZE && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
 
@@ -90,44 +96,52 @@ self.onmessage = async function (e) {
                 let user_id = row["Created by"]?.trim() || "";
                 let date_of_creation = row["Created Date"]?.trim() || "";
 
-                if (area_code === "" || store_code === "") {
+                function addErrorLog(message) {
                     invalid = true;
-                    errorLogs.push(`⚠️ Missing Area or Store Code at line #: ${tr_count}`);
                     err_counter++;
+                    if (errorLogs.length < ERROR_LOG_LIMIT) {
+                        errorLogs.push(`⚠️ ${message} at line #: ${tr_count}`);
+                    }
+                }
+
+                if (area_code === "" || store_code === "") {
+                    addErrorLog("Missing Area or Store Code");
+                    continue;
+                }
+
+                // 🆕 Validate store-area tagging
+                let expected_area = storeAreaMap[store_code];
+                if (!expected_area) {
+                    addErrorLog(`Store "${store_code}" not found in area-store mapping`);
+                    continue;
+                }
+                if (expected_area !== area_code) {
+                    addErrorLog(`Store "${store_code}" is not tagged to Area "${area_code}"`);
                     continue;
                 }
 
                 let match = findMatch(area_code, store_code, ba_code);
-
                 if (!match) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ No match for Area "${area_code}", Store "${store_code}", BA "${ba_code}" at line #: ${tr_count}`);
-                    err_counter++;
+                    addErrorLog(`No match for Area "${area_code}", Store "${store_code}", BA "${ba_code}"`);
                     continue;
                 }
 
                 if (brand) {
                     let brand_lower = brand.toLowerCase();
                     if (!match.brand_names.includes(brand_lower)) {
-                        invalid = true;
-                        errorLogs.push(`⚠️ Brand "${brand}" not valid for Area "${area_code}", Store "${store_code}", BA "${ba_code}" at line #: ${tr_count}`);
-                        err_counter++;
+                        addErrorLog(`Brand "${brand}" not valid for Area "${area_code}", Store "${store_code}", BA "${ba_code}"`);
                         continue;
                     }
                     brand = brand_lookup[brand_lower] || null;
                     if (!brand) {
-                        invalid = true;
-                        errorLogs.push(`⚠️ Brand "${brand}" not recognized at line #: ${tr_count}`);
-                        err_counter++;
+                        addErrorLog(`Brand "${brand}" not recognized`);
                         continue;
                     }
                 }
 
                 let dateObj = new Date(date);
                 if (isNaN(dateObj.getTime())) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Date at line #: ${tr_count}`);
-                    err_counter++;
+                    addErrorLog("Invalid Date");
                     continue;
                 } else {
                     date = formatDateForDB(date);
@@ -135,9 +149,7 @@ self.onmessage = async function (e) {
 
                 let cleanedAmount = amount.replace(/,/g, '');
                 if (cleanedAmount === "" || isNaN(cleanedAmount)) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Amount at line #: ${tr_count}`);
-                    err_counter++;
+                    addErrorLog("Invalid Amount");
                     continue;
                 } else {
                     amount = parseFloat(cleanedAmount);
@@ -149,6 +161,7 @@ self.onmessage = async function (e) {
                         store_id: match.store_id,
                         ba_id: match.ba_id,
                         brand: brand,
+                        asc_id: match.asc_id || null,
                         date: date,
                         amount: amount,
                         status: 1,

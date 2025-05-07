@@ -26,9 +26,11 @@ class StocksPerStore extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
-		$data['brand_ambassador'] = $this->Global_model->getBrandAmbassador(0);
-		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
+		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
+		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
 		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
+		$data['asc'] = $this->Global_model->getAsc(0);
+		$data['areas'] = $this->Global_model->getArea(0);
 		
 		$data['title'] = "Trade Dashboard";
 		$data['page_name'] = 'Trade Dashboard';

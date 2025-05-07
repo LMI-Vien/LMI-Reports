@@ -5,9 +5,11 @@ self.onmessage = async function(e) {
     let errorLogs = [];
     let valid_data = [];
     let err_counter = 0;
+    const ERROR_LOG_LIMIT = 1000; // Reduce error log limit
+    const BATCH_SIZE = 2000; // Reduce batch size
 
     try {
-        let get_tsp_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&ba=1`);
+        let get_tsp_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&ba=1&ba_area_store_brand=1`);
         let fetch_data = await get_tsp_valid_response.json();
 
         let store_lookup = createLookup(fetch_data.stores, "code", "code");
@@ -15,6 +17,31 @@ self.onmessage = async function(e) {
         ba_records = fetch_data.ba;
         let ba_lookup = {};
         ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
+
+        let ba_checklist = {};
+        ba_data.ba_area_store_brand.forEach(entry => {
+            let ba_codes = entry.brand_ambassador_cod ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
+            let ba_ids = entry.brand_ambassador_id ? entry.brand_ambassador_id.split(',').map(id => id.trim()) : [null];
+            let store_codes = entry.store_code ? entry.store_code.split(',').map(s => s.trim()) : [];
+            let store_ids = entry.store_id ? entry.store_id.split(',').map(id => id.trim()) : [];
+            let brand_ids = entry.brand_id ? entry.brand_id.split(',').map(id => id.trim()) : [];
+
+            store_codes.forEach((store_code, store_idx) => {
+                if (!ba_checklist[store_code.toLowerCase()]) {
+                    ba_checklist[store_code.toLowerCase()] = {
+                        area_code: entry.area_code,
+                        store_code: store_code,
+                        ba_code: ba_codes[0] || "",
+                        area_id: entry.area_id,
+                        asc_id: entry.asc_id || null,
+                        store_id: store_ids[store_idx] || null,
+                        ba_id: ba_ids.join(',') || null,
+                        brand_ids: brand_ids.join(','),
+                        brand_names: entry.brand_name ? entry.brand_name.split(',').map(name => name.trim().toLowerCase()) : []
+                    };
+                }
+            });
+        });
 
         function createLookup(records, key1, key2) {
             let lookup = {};
@@ -73,13 +100,21 @@ self.onmessage = async function(e) {
             // let progress = Math.round((index / data.length) * 100);
             // self.postMessage({ progress });
     
-            for (let i = 0; i < batchSize && index < data.length; i++, index++) {
+            for (let i = 0; i < BATCH_SIZE && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
                 let ba_code = row["BA Code"] ? row["BA Code"].trim() : "";
                 let location = row["Location"] ? row["Location"].trim() : "";
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
+    
+                function addErrorLog(message) {
+                    invalid = true;
+                    err_counter++;
+                    if (errorLogs.length < ERROR_LOG_LIMIT) {
+                        errorLogs.push(`⚠️ ${message} at line #: ${tr_count}`);
+                    }
+                }
     
                 if (location.length > 25 || location === "") {
                     invalid = true;
@@ -125,15 +160,22 @@ self.onmessage = async function(e) {
                     errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
                     err_counter++;
                 }
+
+                let matched = ba_checklist[location.toLowerCase()];
+                if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
     
                 if (!invalid) {
                     valid_data.push({
                         ba_code,
-                        location,
+                        location: matched?.store_code || null,
                         ...monthlyValues,
-                        status: 3,
+                        status: 2,
                         created_by: user_id,
-                        created_date: date_of_creation
+                        created_date: date_of_creation,
+                        area_id: matched?.area_id || null,
+                        asc_id: matched?.asc_id || null,
+                        brand_ids: matched?.brand_ids || [],
+                        brand_ambassador_ids: matched?.ba_id || null
                     });
                 }
             }

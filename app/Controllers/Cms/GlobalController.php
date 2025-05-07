@@ -887,8 +887,6 @@ class GlobalController extends BaseController
 	        $responseData['store_ba'] = $this->Global_model->get_valid_records_store_ba_group();
 	    }
 
-
-	    //check this
 	    if (!empty($request['ba_area_store_brand'])) {
 	        $responseData['ba_area_store_brand'] = $this->Global_model->get_valid_records_ba_area_store_brand();
 	    }

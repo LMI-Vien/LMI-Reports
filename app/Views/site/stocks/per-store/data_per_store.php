@@ -254,10 +254,12 @@
 <script src="https://cdn.jsdelivr.net/npm/intro.js/minified/intro.min.js"></script>
 <script>
 
-    let brand_ambassadors = <?= json_encode($brand_ambassador) ?>;
-    let store_branch = <?= json_encode($store_branch) ?>;
+    let brand_ambassadors = <?= json_encode($brand_ambassadors) ?>;
+    let store_branch = <?= json_encode($store_branches) ?>;
     let brands = <?= json_encode($brands) ?>;
-
+    let area = <?= json_encode($areas) ?>;
+    let asc = <?= json_encode($asc) ?>;
+   // let url = <?= base_url('cms/controller')?>;
     function startTutorial() {
         introJs().start();
     }

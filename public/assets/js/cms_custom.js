@@ -619,7 +619,11 @@ function updateSwalProgress(title, progress) {
         progress = 90;
     }
     $("#progress-bar").css("width", progress + "%");
-    $("#currentTitle").text(`Processing: ${title} (${progress}%)`);
+    if(progress){
+    	$("#currentTitle").text(`Processing: ${title} (${progress}%)`);
+    }else{
+    	$("#currentTitle").text(`Processing: ${title}`);
+    }
 }
 
 
