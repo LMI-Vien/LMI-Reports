@@ -1489,176 +1489,6 @@
         get_data(query, column_filter, order_filter);
     })
 
-    // functional, 
-    // function save_data(actions, id) {
-    //     var code = $('#code').val();
-    //     var description = $('#description').val();
-    //     var chk_status = $('#status').prop('checked');
-    //     var linenum = 0;
-    //     var store = '';
-    //     var unique_store = Array.from(stores);
-    //     var store_list = $('#store_list');
-
-    //     store_list.find('input').each(function() {
-    //         if (!unique_store.includes($(this).val())) {
-    //             store = $(this).val().split(' - ');
-
-    //             if(store.length == 2) {
-    //                 unique_store.push(store[1]);
-    //             } else {
-    //                 unique_store.push(store[1] + ' - ' + store[2]);
-    //             }
-    //         }
-    //         linenum++
-    //     });
-
-    //     console.log(unique_store);
-
-    //     if (chk_status) {
-    //         status_val = 1;
-    //     } else {
-    //         status_val = 0;
-    //     }
-
-    //     if (id !== undefined && id !== null && id !== '') {
-    //         check_current_db("tbl_area", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
-    //             if (!exists) {
-    //                 modal.confirm(confirm_update_message,function(result){
-    //                     if(result){ 
-    //                         let ids = [];
-    //                         let hasDuplicate = false;
-    //                         let valid = true;
-    //                         // console.log(unique_store);
-    //                         $.each(unique_store, (x, y) => {
-    //                             // if(ids.includes(y)) {
-    //                             //     hasDuplicate = true;
-    //                             // } else {
-    //                             //     ids.push(y);
-    //                             // }
-    //                             console.log(y);
-    //                             store = y.split(' - ');
-    //                             ids.push(store[1]);
-    //                         });
-
-    //                         if(hasDuplicate) {
-    //                             console.log('Has duplicate');
-    //                             modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
-    //                         } else {
-    //                             let batch = [];
-    //                             get_field_values('tbl_store', 'id', 'description', ids, (res) => {
-    //                                 if(res.length == 0) {
-    //                                     valid = false;
-    //                                 } else {
-    //                                     modal_alert = 'success';
-    //                                     $.each(res, (x, y) => {
-    //                                         let data = {
-    //                                             'area_id': id,
-    //                                             'store_id': y,
-    //                                             'created_by': user_id,
-    //                                             'created_date': formatDate(new Date())
-    //                                         };
-    //                                         batch.push(data);
-    //                                     })
-    //                                 }
-
-    //                                 console.log(batch);
-    //                             })
-    
-    //                             if(valid) {
-    //                                 save_to_db(code, description, store, status_val, id, (obj) => {
-    //                                     total_delete(url, 'tbl_store_group', 'area_id', id);
-    
-    //                                     batch_insert(url, batch, 'tbl_store_group', false, () => {
-    //                                         modal.loading(false);
-    //                                         modal.alert(success_update_message, "success", function() {
-    //                                             location.reload();
-    //                                         });
-    //                                     })
-    //                                 })
-                                    
-    //                             } else {
-    //                                 modal.loading(false);
-    //                                 modal.alert('Store not found', 'error', function() {});
-    //                             }
-    //                         }
-
-    //                     }
-    //                 });
-
-    //             }             
-    //         });
-    //     }else{
-    //         check_current_db("tbl_area", ["code", "description"], [code, description], "status" , null, null, true, function(exists, duplicateFields) {
-    //             if (!exists) {
-    //                 modal.confirm(confirm_add_message,function(result){
-    //                     if(result){ 
-    //                         let ids = [];
-    //                         let hasDuplicate = false;
-    //                         let valid = true;
-    //                         // console.log(unique_store);
-    //                         $.each(unique_store, (x, y) => {
-    //                             if(ids.includes(y)) {
-    //                                 hasDuplicate = true;
-    //                             } else {
-    //                                 ids.push(y);
-    //                             }
-    //                             console.log(y);
-    //                             store = y.split(' - ');
-    //                             ids.push(store[1]);
-    //                         });
-
-    //                         console.log(ids);
-
-    //                         if(hasDuplicate) {
-    //                             console.log('Has duplicate');
-    //                             modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
-    //                         } else {
-    //                             let batch = [];
-    //                             get_field_values('tbl_store', 'id', 'description', ids, (res) => {
-    //                                 console.log(res);
-    //                                 if(res.length == 0) {
-    //                                     valid = false;
-    //                                 } else {
-    //                                     modal_alert = 'success';
-    //                                     $.each(res, (x, y) => {
-    //                                         let data = {
-    //                                             'area_id': id,
-    //                                             'store_id': y,
-    //                                             'created_by': user_id,
-    //                                             'created_date': formatDate(new Date())
-    //                                         };
-    //                                         batch.push(data);
-    //                                     })
-    //                                 }
-
-    //                                 console.log(batch);
-    //                             })
-    
-    //                             if(valid) {
-    //                                 save_to_db(code, description, store, status_val, id, (obj) => {
-    //                                     insert_batch = batch.map(batch => ({...batch, area_id: obj.ID}));
-        
-    //                                     batch_insert(url, insert_batch, 'tbl_store_group', false, () => {
-    //                                         modal.loading(false);
-    //                                         modal.alert(success_update_message, "success", function() {
-    //                                             location.reload();
-    //                                         });
-    //                                     })
-    //                                 })
-                                    
-    //                             } else {
-    //                                 modal.loading(false);
-    //                                 modal.alert('Store not found', 'error', function() {});
-    //                             }
-    //                         }
-    //                     }
-    //                 });
-    //             }                  
-    //         });
-    //     }
-    // }
-
-    // testing mo to
     function save_data(actions, id) {
         var code = $('#code').val();
         var description = $('#description').val();
@@ -1668,212 +1498,225 @@
         var unique_store = Array.from(stores);
         var store_list = $('#store_list');
 
-        store_list.find('input').each(function() {
-            if (!unique_store.includes($(this).val())) {
-                store = $(this).val().split(' - ');
+        let store_codes = [];
+        $.each(unique_store, (x, y) => {
+            store = y.split(' - ');
+            store_codes.push(store[1]);
+        });
+        let search_string = store_codes.join('|');
 
-                if(store.length == 2) {
-                    unique_store.push(store[1]);
+        dynamic_search(
+            "'tbl_store_group a'", 
+            "'left join tbl_store b on a.store_id = b.id'", 
+            "'a.id, a.area_id, a.store_id, b.id as store_id, b.description as store_description'", 
+            0, 
+            0, 
+            `'b.description:IN=${search_string}'`,
+            `''`, 
+            `''`,
+            (res) => {
+                console.clear();
+                console.log(res, res.length, search_string, actions);
+                let err_msg = 'These stores have already been added to a different Area.';
+                
+                let invalidItems = res.filter(item => item.area_id !== id);
+
+                if (invalidItems.length !== 0) {
+                    $.each(invalidItems, function(index, item) {
+                        console.log(`id: ${id}`, `area id: ${item.area_id}`, `store id: ${item.store_id}`);
+                    });
+
+                    modal.loading(false);
+                    modal.alert(err_msg, 'error', function() {});
+                    return;
                 } else {
-                    unique_store.push(store[1] + ' - ' + store[2]);
+                    proceedWithRestOfLogic();
                 }
             }
-            linenum++
-        });
+        );
 
-        if (chk_status) {
-            status_val = 1;
-        } else {
-            status_val = 0;
-        }
-
-        if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_area", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_update_message,function(result){
-                        if(result){ 
-                            let ids = [];
-                            let hasDuplicate = false;
-                            let valid = true;
-                            $.each(unique_store, (x, y) => {
-                                // if(ids.includes(y)) {
-                                //     hasDuplicate = true;
-                                // } else {
-                                //     ids.push(y);
-                                // }
-                                store = y.split(' - ');
-                                ids.push(store[1]);
-                            });
-
-                            if(hasDuplicate) {
-                                modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
-                            } else {
-                                let batch = [];
-                                get_field_values('tbl_store', 'id', 'description', ids, (res) => {
-                                    if(res.length == 0) {
-                                        valid = false;
-                                    } else {
-                                        modal_alert = 'success';
-                                        $.each(res, (x, y) => {
-                                            let data = {
-                                                'area_id': id,
-                                                'store_id': y,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date())
-                                            };
-                                            batch.push(data);
-                                        })
-                                    }
-                                })
+        function proceedWithRestOfLogic() {
+            store_list.find('input').each(function() {
+                if (!unique_store.includes($(this).val())) {
+                    store = $(this).val().split(' - ');
     
-                                // if(valid) {
-                                //     save_to_db(code, description, store, status_val, id, (obj) => {
-                                //         //total_delete(url, 'tbl_store_group', 'area_id', id);
-                                //         const conditions = {
-                                //             area_id: id
-                                //         };
-                                //         total_delete(url, 'tbl_store_group', conditions);
-                                        
-                                //         batch_insert(url, batch, 'tbl_store_group', false, () => {
-                                //             modal.loading(false);
-                                //             modal.alert(success_update_message, "success", function() {
-                                //                 location.reload();
-                                //             });
-                                //         })
-                                //     })
-                                    
-                                // } else {
-                                //     modal.loading(false);
-                                //     modal.alert('Store not found', 'error', function() {});
-                                // }
-
-                                if(valid) {
-                                    save_to_db(code, description, store, status_val, id, (obj) => {
-                                        //total_delete(url, 'tbl_store_group', 'area_id', id);
-                                        const conditions = {
-                                            area_id: id
-                                        };
-
-                                        const batchStart = new Date();
-
-                                        total_delete(url, 'tbl_store_group', conditions);
-                                        
-                                        batch_insert(url, batch, 'tbl_store_group', false, () => {
-
-                                            const batchEnd = new Date();
-                                            const duration = formatDuration(batchStart, batchEnd);
-
-                                            const remarks = `
-                                                Action: Create Batch Store Groups
-                                                <br>Inserted ${batch.length} records for area ID ${id}
-                                                <br>Start Time: ${formatReadableDate(batchStart)}
-                                                <br>End Time: ${formatReadableDate(batchEnd)}
-                                                <br>Duration: ${duration}
-                                            `;
-
-                                            logActivity("store-group-module", "Update Batch", remarks, "-", JSON.stringify(batch), "");
-
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
-                                            });
-                                        })
-                                    })
-
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('Store not found', 'error', function() {});
-                                }
-                            }
-
-                        }
-                    });
-
-                }             
+                    if(store.length == 2) {
+                        unique_store.push(store[1]);
+                    } else {
+                        unique_store.push(store[1] + ' - ' + store[2]);
+                    }
+                }
+                linenum++
             });
-        }else{
-            check_current_db("tbl_area", ["code", "description"], [code, description], "status" , null, null, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_add_message,function(result){
-                        if(result){ 
-                            let ids = [];
-                            let hasDuplicate = false;
-                            let valid = true;
-                            $.each(unique_store, (x, y) => {
-                                if(ids.includes(y)) {
-                                    hasDuplicate = true;
-                                } else {
-                                    ids.push(y);
-                                }
-                                store = y.split(' - ');
-                                ids.push(store[1]);
-                            });
-
-                            if(hasDuplicate) {
-                                modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
-                            } else {
-                                let batch = [];
-                                get_field_values('tbl_store', 'id', 'description', ids, (res) => {
-                                    if(res.length == 0) {
-                                        valid = false;
-                                    } else {
-                                        modal_alert = 'success';
-                                        $.each(res, (x, y) => {
-                                            let data = {
-                                                'area_id': id,
-                                                'store_id': y,
-                                                'created_by': user_id,
-                                                'created_date': formatDate(new Date())
-                                            };
-                                            batch.push(data);
-                                        })
-                                    }
-                                })
     
-                                if (valid) {
-                                    save_to_db(code, description, store, status_val, id, (obj) => {
-                                        // 1) build your batch payload
-                                        const insertBatchData = batch.map(item => ({ 
-                                            ...item, 
-                                            area_id: obj.ID 
-                                        }));
-
-                                        // 2) record start time for logging
-                                        const batchStart = new Date();
-
-                                        // 3) perform the batch insert
-                                        batch_insert(url, insertBatchData, 'tbl_store_group', false, () => {
-                                            // 4) record end time & compute duration
-                                            const batchEnd = new Date();
-                                            const duration = formatDuration(batchStart, batchEnd);
-
-                                            // 5) assemble your batch‐insert log entry
-                                            const remarks = `
-                                                Action: Create Batch Store Groups
-                                                <br>Inserted ${insertBatchData.length} records for area ID ${obj.ID}
-                                                <br>Start Time: ${formatReadableDate(batchStart)}
-                                                <br>End Time: ${formatReadableDate(batchEnd)}
-                                                <br>Duration: ${duration}
-                                            `;
-                                            // 6) fire your logActivity
-                                            logActivity("store-group-module", "Create Batch", remarks, "-", JSON.stringify(insertBatchData), "");
-
-                                            modal.loading(false);
-                                            modal.alert(success_update_message, "success", function() {
-                                                location.reload();
+            if (chk_status) {
+                status_val = 1;
+            } else {
+                status_val = 0;
+            }
+    
+            if (id !== undefined && id !== null && id !== '') {
+                check_current_db("tbl_area", ["code", "description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
+                    if (!exists) {
+                        modal.confirm(confirm_update_message,function(result){
+                            if(result){ 
+                                let ids = [];
+                                let hasDuplicate = false;
+                                let valid = true;
+                                $.each(unique_store, (x, y) => {
+                                    store = y.split(' - ');
+                                    ids.push(store[1]);
+                                });
+    
+                                if(hasDuplicate) {
+                                    modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
+                                } else {
+                                    let batch = [];
+                                    get_field_values('tbl_store', 'id', 'description', ids, (res) => {
+                                        if(res.length == 0) {
+                                            valid = false;
+                                        } else {
+                                            modal_alert = 'success';
+                                            $.each(res, (x, y) => {
+                                                let data = {
+                                                    'area_id': id,
+                                                    'store_id': y,
+                                                    'created_by': user_id,
+                                                    'created_date': formatDate(new Date())
+                                                };
+                                                batch.push(data);
+                                            })
+                                        }
+                                    })
+    
+                                    if(valid) {
+                                        save_to_db(code, description, store, status_val, id, (obj) => {
+                                            const conditions = {
+                                                area_id: id
+                                            };
+    
+                                            const batchStart = new Date();
+    
+                                            total_delete(url, 'tbl_store_group', conditions);
+                                            
+                                            batch_insert(url, batch, 'tbl_store_group', false, () => {
+    
+                                                const batchEnd = new Date();
+                                                const duration = formatDuration(batchStart, batchEnd);
+    
+                                                const remarks = `
+                                                    Action: Create Batch Store Groups
+                                                    <br>Inserted ${batch.length} records for area ID ${id}
+                                                    <br>Start Time: ${formatReadableDate(batchStart)}
+                                                    <br>End Time: ${formatReadableDate(batchEnd)}
+                                                    <br>Duration: ${duration}
+                                                `;
+    
+                                                logActivity("store-group-module", "Update Batch", remarks, "-", JSON.stringify(batch), "");
+    
+                                                modal.loading(false);
+                                                modal.alert(success_update_message, "success", function() {
+                                                    location.reload();
+                                                });
+                                            })
+                                        })
+    
+                                    } else {
+                                        modal.loading(false);
+                                        modal.alert('Store not found', 'error', function() {});
+                                    }
+                                }
+    
+                            }
+                        });
+    
+                    }             
+                });
+            }else{
+                check_current_db("tbl_area", ["code", "description"], [code, description], "status" , null, null, true, function(exists, duplicateFields) {
+                    if (!exists) {
+                        modal.confirm(confirm_add_message,function(result){
+                            if(result){ 
+                                let ids = [];
+                                let hasDuplicate = false;
+                                let valid = true;
+                                $.each(unique_store, (x, y) => {
+                                    if(ids.includes(y)) {
+                                        hasDuplicate = true;
+                                    } else {
+                                        ids.push(y);
+                                    }
+                                    store = y.split(' - ');
+                                    ids.push(store[1]);
+                                });
+    
+                                if(hasDuplicate) {
+                                    modal.alert('Stores cannot be duplicated. Please check stores carefully.', 'error', () => {});
+                                } else {
+                                    let batch = [];
+                                    get_field_values('tbl_store', 'id', 'description', ids, (res) => {
+                                        if(res.length == 0) {
+                                            valid = false;
+                                        } else {
+                                            modal_alert = 'success';
+                                            $.each(res, (x, y) => {
+                                                let data = {
+                                                    'area_id': id,
+                                                    'store_id': y,
+                                                    'created_by': user_id,
+                                                    'created_date': formatDate(new Date())
+                                                };
+                                                batch.push(data);
+                                            })
+                                        }
+                                    })
+        
+                                    if (valid) {
+                                        save_to_db(code, description, store, status_val, id, (obj) => {
+                                            // 1) build your batch payload
+                                            const insertBatchData = batch.map(item => ({ 
+                                                ...item, 
+                                                area_id: obj.ID 
+                                            }));
+    
+                                            // 2) record start time for logging
+                                            const batchStart = new Date();
+    
+                                            // 3) perform the batch insert
+                                            batch_insert(url, insertBatchData, 'tbl_store_group', false, () => {
+                                                // 4) record end time & compute duration
+                                                const batchEnd = new Date();
+                                                const duration = formatDuration(batchStart, batchEnd);
+    
+                                                // 5) assemble your batch‐insert log entry
+                                                const remarks = `
+                                                    Action: Create Batch Store Groups
+                                                    <br>Inserted ${insertBatchData.length} records for area ID ${obj.ID}
+                                                    <br>Start Time: ${formatReadableDate(batchStart)}
+                                                    <br>End Time: ${formatReadableDate(batchEnd)}
+                                                    <br>Duration: ${duration}
+                                                `;
+                                                // 6) fire your logActivity
+                                                logActivity("store-group-module", "Create Batch", remarks, "-", JSON.stringify(insertBatchData), "");
+    
+                                                modal.loading(false);
+                                                modal.alert(success_update_message, "success", function() {
+                                                    location.reload();
+                                                });
                                             });
                                         });
-                                    });
-                                } else {
-                                    modal.loading(false);
-                                    modal.alert('Store not found', 'error', function() {});
+                                    } else {
+                                        modal.loading(false);
+                                        modal.alert('Store not found', 'error', function() {});
+                                    }
                                 }
                             }
-                        }
-                    });
-                }                  
-            });
+                        });
+                    }                  
+                });
+            }
         }
+
     }
 
     function save_to_db(inp_code, inp_description, inp_store, status_val, id, cb) {
