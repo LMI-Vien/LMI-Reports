@@ -69,20 +69,57 @@ self.onmessage = async function(e) {
                 } else if (Array.isArray(bas)) {
                     ba_list = bas.map(s => String(s).trim().toLowerCase());
                 }
-                console.log(ba_list);
+                //console.log(ba_list);
+                // for (let s of ba_list) {
+                //     if (s in ba_lookup) {
+                //         let ba_id = ba_lookup[s];
+
+                //         if (store_ba_global_tag_map[ba_id] && store_ba_global_tag_map[ba_id] !== code) {
+                //             invalid = true;
+                //             // if (!invalid_ba) {
+                //             //     invalid_ba = true;
+                //             //     if (s === store_ba_global_tag_map[ba_id].toLowerCase()) {
+                //             //         errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store.`);
+                //             //     } else {
+                //             //         errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store (${store_ba_global_tag_map[ba_id]}).`);
+                //             //     }
+                //             //     err_counter++;
+                //             // }
+                //         } else {
+                //             if (!ba_per_store[code].includes(ba_id)) {
+                //                 ba_per_store[code].push(ba_id);
+                //             }
+                //             store_ba_global_tag_map[ba_id] = code;
+                //         }
+                //     } else {
+                //         if (!invalid_ba) {
+                //             if (!["active", "inactive"].includes(bas)) {
+                //                 invalid = true;
+                //                 invalid_ba = true;
+                //                 errorLogs.push(`⚠️ Invalid Brand Ambassador at line #: ${tr_count}`);
+                //                 err_counter++;
+                //             }
+                            
+                //         }
+                //     }
+                // }
                 for (let s of ba_list) {
-                    if (s in ba_lookup) {
+                    if (s === 'vacant') {
+                        if (!ba_per_store[code].includes(-5)) {
+                            ba_per_store[code].push(-5);
+                        }
+                    } else if (s === 'non ba' || s === 'nonba') {
+                        if (!ba_per_store[code].includes(-6)) {
+                            ba_per_store[code].push(-6);
+                        }
+                    } else if (s in ba_lookup) {
                         let ba_id = ba_lookup[s];
 
                         if (store_ba_global_tag_map[ba_id] && store_ba_global_tag_map[ba_id] !== code) {
-                            invalid = true;
+                            //invalid = true;
                             // if (!invalid_ba) {
                             //     invalid_ba = true;
-                            //     if (s === store_ba_global_tag_map[ba_id].toLowerCase()) {
-                            //         errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store.`);
-                            //     } else {
-                            //         errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store (${store_ba_global_tag_map[ba_id]}).`);
-                            //     }
+                            //     errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store (${store_ba_global_tag_map[ba_id]}).`);
                             //     err_counter++;
                             // }
                         } else {
@@ -93,13 +130,16 @@ self.onmessage = async function(e) {
                         }
                     } else {
                         if (!invalid_ba) {
-                            invalid = true;
-                            invalid_ba = true;
-                            errorLogs.push(`⚠️ Invalid Brand Ambassador at line #: ${tr_count}`);
-                            err_counter++;
+                            if (!["active", "inactive"].includes(s)) {
+                                invalid = true;
+                                invalid_ba = true;
+                                errorLogs.push(`⚠️ Invalid Brand Ambassador "${s}" at line #: ${tr_count}`);
+                                err_counter++;
+                            }
                         }
                     }
                 }
+
                 unique_code.add(code);
             }
 
@@ -134,3 +174,4 @@ self.onmessage = async function(e) {
         self.postMessage({ invalid: true, errorLogs: [`Validation failed: ${error.message}`], err_counter: 1 });
     }
 };
+
