@@ -19,7 +19,7 @@ self.onmessage = async function(e) {
         ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
 
         let ba_checklist = {};
-        ba_data.ba_area_store_brand.forEach(entry => {
+        fetch_data.ba_area_store_brand.forEach(entry => {
             let ba_codes = entry.brand_ambassador_cod ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
             let ba_ids = entry.brand_ambassador_id ? entry.brand_ambassador_id.split(',').map(id => id.trim()) : [null];
             let store_codes = entry.store_code ? entry.store_code.split(',').map(s => s.trim()) : [];
@@ -162,7 +162,7 @@ self.onmessage = async function(e) {
                 }
 
                 let matched = ba_checklist[location.toLowerCase()];
-                if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
+                if (!matched?.store_id) addErrorLog("Invalid BA not tagged to any store");
     
                 if (!invalid) {
                     valid_data.push({
