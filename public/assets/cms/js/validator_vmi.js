@@ -7,7 +7,7 @@ self.onmessage = async function(e) {
     let valid_data = [];
     let err_counter = 0;
     const ERROR_LOG_LIMIT = 1000; // Reduce error log limit
-    const BATCH_SIZE = 2000; // Reduce batch size
+    const BATCH_SIZE = 2500; // Reduce batch size
     let index = 0;
 
     try {
@@ -136,7 +136,7 @@ self.onmessage = async function(e) {
                 if (!item_classi) addErrorLog("Invalid item Class");
 
                 let matched = ba_checklist[store.toLowerCase()];
-                if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
+                //if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
 
                 if (!invalid) {
                     valid_data.push({
