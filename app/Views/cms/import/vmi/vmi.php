@@ -868,7 +868,9 @@
 
             function finishImport() {
                 const headers = ['store', 'item', 'item_name']; 
-                saveImportDetailsToServer(valid_data, headers, 'import_vmi', function(filePath) {
+                const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+
+                saveImportDetailsToServer(valid_data, headers, 'import_vmi', url, function(filePath) {
                     const end_time = new Date();
                     const duration = formatDuration(start_time, end_time);
 

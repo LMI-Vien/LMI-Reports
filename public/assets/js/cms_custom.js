@@ -1770,7 +1770,8 @@ function formatDuration(start, end) {
     return `${hours}h ${minutes}m ${seconds}s`;
 }
 
-function saveImportDetailsToServer(data, headers = [], filePrefix = 'import_details', callback) {
+// backup 
+function saveImportDetailsToServer(data, headers = [], filePrefix = 'import_details', url, callback) {
     const now = new Date();
     const safeFileName = `${filePrefix}_${formatReadableDate(now, true).replace(/[:,\s]/g, '')}.txt`;
     const headerLine = headers.join(', ');
@@ -1785,7 +1786,8 @@ function saveImportDetailsToServer(data, headers = [], filePrefix = 'import_deta
     formData.append('fileName', safeFileName);
 
     $.ajax({
-        url: "<?= base_url('cms/global_controller/save_import_log_file') ?>",
+        // url: "<?= base_url('cms/global_controller/save_import_log_file') ?>",
+		url: url,
         method: "POST",
         data: formData,
         processData: false,
