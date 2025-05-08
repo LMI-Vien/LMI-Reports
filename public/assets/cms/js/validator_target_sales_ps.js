@@ -162,7 +162,7 @@ self.onmessage = async function(e) {
                 }
 
                 let matched = ba_checklist[location.toLowerCase()];
-                if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
+                //if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
     
                 if (!invalid) {
                     valid_data.push({
