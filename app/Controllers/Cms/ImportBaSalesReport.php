@@ -32,6 +32,10 @@ class ImportBaSalesReport extends BaseController
 		$data['buttons'] = ['import', 'export', 'search'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
+		$data['areaMap'] = $this->Global_model->dynamic_search("'tbl_area'", "''", "'id, description'", 0, 0, "''", "''", "''");
+		$data['ascMap'] = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'id, description'", 0, 0, "''", "''", "''");
+		$data['baMap'] = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'id, name'", 0, 0, "''", "''", "''");
+
 		$data['js'] = array(
 				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",

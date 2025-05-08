@@ -1283,17 +1283,29 @@
                 });
 
                 function finishImport() {
+                    let yearArr = <?= json_encode($yearMap); ?>;
+
+                    const yearLookup = Object.fromEntries(
+                        yearArr.map(item => [ item.id, item.year ])
+                    );
+                    
+                    const dataWithNames = valid_data.map(row => ({
+                        ba_code:  row.ba_code,
+                        location: row.location,
+                        year: yearLookup[row.year]
+                    }));
+
                     const headers = ['ba_code', 'location', 'year']; 
                     const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
 
-                    saveImportDetailsToServer(valid_data, headers, 'target_sales_per_store', url, function(filePath) {
+                    saveImportDetailsToServer(dataWithNames, headers, 'target_sales_per_store', url, function(filePath) {
                         console.log("valid data: ", valid_data);
                         const end_time = new Date();
                         const duration = formatDuration(start_time, end_time);
 
                         let remarks = `
                             Import Completed Successfully!
-                            <br>Total Records: ${valid_data.length}
+                            <br>Total Records: ${dataWithNames.length}
                             <br>Start Time: ${formatReadableDate(start_time)}
                             <br>End Time: ${formatReadableDate(end_time)}
                             <br>Duration: ${duration}`;

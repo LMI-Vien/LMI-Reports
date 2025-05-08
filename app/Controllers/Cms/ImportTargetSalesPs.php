@@ -32,6 +32,8 @@ class ImportTargetSalesPs extends BaseController
 		$data['buttons'] = ['search', 'import', 'export'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
+		$data['yearMap'] = $this->Global_model->dynamic_search("'tbl_year'", "''", "'id, year'", 0, 0, "''", "''", "''");
+
 		$data['js'] = array(
 				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
