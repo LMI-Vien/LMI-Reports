@@ -20,7 +20,7 @@ self.onmessage = async function(e) {
 
         let ba_checklist = {};
         fetch_data.ba_area_store_brand.forEach(entry => {
-            let ba_codes = entry.brand_ambassador_cod ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
+            let ba_codes = entry.brand_ambassador_code ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
             let ba_ids = entry.brand_ambassador_id ? entry.brand_ambassador_id.split(',').map(id => id.trim()) : [null];
             let store_codes = entry.store_code ? entry.store_code.split(',').map(s => s.trim()) : [];
             let store_ids = entry.store_id ? entry.store_id.split(',').map(id => id.trim()) : [];
@@ -161,8 +161,29 @@ self.onmessage = async function(e) {
                     err_counter++;
                 }
 
-                let matched = ba_checklist[location.toLowerCase()];
-                if (!matched?.store_id) addErrorLog("Invalid BA not tagged to any store");
+                // let matched = ba_checklist[location.toLowerCase()];
+                // if (!matched?.location) addErrorLog("Invalid BA not tagged to any store");
+
+                // get the normalized store code & BA ID
+                const storeKey = row["Location"].trim().toLowerCase();
+                const thisBaId = ba_lookup[ row["BA Code"].trim().toLowerCase() ];
+
+                // look up the checklist entry
+                const matched = ba_checklist[storeKey];
+
+                if (!matched) {
+                    addErrorLog("Store not in BA area store mapping");
+                } else {
+                // split the CSV of allowed BA IDs into an array
+                const allowedBaIds = (matched.ba_id || "")
+                    .split(",")
+                    .map(id => id.trim());
+                
+                // test whether thisBaId is in that array
+                    if (!allowedBaIds.includes(String(thisBaId))) {
+                        addErrorLog("Invalid BA not tagged to any store");
+                    }
+                }
     
                 if (!invalid) {
                     valid_data.push({
