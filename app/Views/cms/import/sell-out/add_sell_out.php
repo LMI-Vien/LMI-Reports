@@ -199,9 +199,9 @@
             formData.append("totalChunks", totalChunks);
             formData.append("fileName", file.name);
             formData.append("header_id", "1");
-            formData.append("month", "1");
-            formData.append("year", "2020");
-            formData.append("customer_payment_group", "Watsons Personal Inc");
+            formData.append("month", getMonthIdByName($("#month").val()));
+            formData.append("year", $("#year").val());
+            formData.append("customer_payment_group", $('#paygrp').val());
             formData.append("template_id", "1");
             formData.append("placeholder", JSON.stringify(dynamicPlaceholder));
 

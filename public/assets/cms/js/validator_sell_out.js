@@ -12,26 +12,6 @@ self.onmessage = async function(e) {
     let index = 0;
 
     try {
-        // let get_ba_valid_response_lmi = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?payment_group_lmi=1`);   
-        // let ba_data_lmi = await get_ba_valid_response_lmi.json();
-        // let cusgrp_lookup_lmi = {};
-        // ba_data_lmi.payment_group_lmi.forEach(group => cusgrp_lookup_lmi[group.customer_group_code.toLowerCase()] = group.id);
-
-        // let get_ba_valid_response_rgdi = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?payment_group_rgdi=1`);   
-        // let ba_data_rgdi = await get_ba_valid_response_rgdi.json();
-        // let cusgrp_lookup_rgdi = {};
-        // ba_data_rgdi.payment_group_rgdi.forEach(group => cusgrp_lookup_rgdi[group.customer_group_code.toLowerCase()] = group.id);
-
-        // let customer_sku_code_lmi = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?customer_sku_code_lmi=1`);
-        // let customer_sku_code_data_lmi = await customer_sku_code_lmi.json();
-        // let customer_sku_code_lookup_lmi = {};
-        // customer_sku_code_data_lmi.customer_sku_code_lmi.forEach(group => customer_sku_code_lookup_lmi[group.cusitmcde.toLowerCase()] = group.recid);        
-        
-        // let customer_sku_code_rgdi = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?customer_sku_code_rgdi=1`);
-        // let customer_sku_code_data_rgdi = await customer_sku_code_rgdi.json();
-        // let customer_sku_code_lookup_rgdi = {};
-        // customer_sku_code_data_rgdi.customer_sku_code_rgdi.forEach(group => customer_sku_code_lookup_rgdi[group.cusitmcde.toLowerCase()] = group.recid); 
-
         let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?payment_group_lmi=1&payment_group_rgdi=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1&ba_area_store_brand=1`);   
         let con_data = await get_ba_valid_response.json();
 
