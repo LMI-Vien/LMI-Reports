@@ -601,6 +601,34 @@
                 value: 'brand_code'
             },
         ],
+        'import-sell-out': [
+            {
+                field:  'month',
+                table:  'tbl_month',
+                select: 'id, month',
+                value:  'month'
+            },
+            {
+                field:  'year',
+                table:  'tbl_year',           
+                select: 'id, year',
+                value:  'year'
+            },  
+            {
+                field:  'company',
+                table:  'tbl_company',           
+                select: 'id, name',
+                value:  'company'
+            },  
+        ],
+        'import-week-on-week': [
+            {
+                field:  'year',
+                table:  'tbl_year',           
+                select: 'id, year',
+                value:  'year'
+            }, 
+        ],
     };
 
     // ——————————————————————————————
@@ -717,8 +745,9 @@
             }
 
             // 3) Module‐specific lookups via switch‐case
+            let moduleKey = entry.module.split('/')[0];
             let configsToMap;
-            switch (entry.module) {
+            switch (moduleKey) {
                 case 'brand-ambassador':               configsToMap = lookupConfigs['brand-ambassador']; break;
                 case 'asc':                            configsToMap = lookupConfigs['asc']; break;
                 case 'store-group-module':             configsToMap = lookupConfigs['store-group-module']; break;
@@ -731,6 +760,8 @@
                 case 'ba-brand-module':                configsToMap = lookupConfigs['ba-brand-module']; break;
                 case 'brand-ambassador-module-import': configsToMap = lookupConfigs['brand-ambassador-module-import']; break;
                 case 'ba-module-import':               configsToMap = lookupConfigs['ba-module-import']; break;
+                case 'import-sell-out':                configsToMap = lookupConfigs['import-sell-out']; break;
+                case 'import-week-on-week':            configsToMap = lookupConfigs['import-week-on-week']; break;
                 default:                               configsToMap = []; 
             }
 
