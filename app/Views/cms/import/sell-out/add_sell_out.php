@@ -134,9 +134,9 @@
                     2: 'store_description',
                     3: 'sku_code',
                     4: 'sku_description',
-                    5: 'gross_sales',
-                    6: 'quantity',
-                    7: 'net_sales'
+                    5: 'quantity',
+                    6: 'net_sales',
+                    7: 'gross_sales',
                 };
 
                 const placeholder = {
@@ -277,6 +277,7 @@
         let tr_counter = (currentPage - 1) * rowsPerPage;
 
         paginatedData.forEach(row => {
+            console.log(row)
             let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
             html += `<tr class="${rowClass}">`;
             html += `<td>${tr_counter + 1}</td>`;
@@ -457,6 +458,7 @@
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_sell_out_data_details';
+        const start_time = new Date();
 
         let selected_fields = [
             'id', 'data_header_id', 'month', 'year', 'customer_payment_group', 'template_id',
@@ -504,6 +506,7 @@
                         setTimeout(function(){
                             modal.alert("All records saved/updated successfully!", 'success', () => {
                                 // location.reload()
+                                logAll(start_time, valid_data)
                                 let href = "<?= base_url() ?>" + "cms/import-sell-out/";
                                 window.location.href = href;
                             });
@@ -601,6 +604,43 @@
             }
 
             setTimeout(processNextBatch, 1000);
+        });
+    }
+
+    function logAll(start_time, valid_data) {
+        const headers = 
+        [
+            `data_header_id`, 
+            `month`, 
+            `year`, 
+            `customer_payment_group`, 
+            `template_id`, 
+            `file_name`, 
+            `line_number`, 
+            `store_code`, 
+            `brand_ambassador_ids`, 
+            `store_description`, 
+            `sku_code`, 
+            `sku_description`, 
+            `quantity`, 
+            `net_sales`, 
+            `gross_sales`,
+        ];
+        const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+        saveImportDetailsToServer(valid_data, headers, 'import_sell_out', url, function(filePath) {
+            const end_time = new Date();
+            const duration = formatDuration(start_time, end_time);
+
+            let remarks = `
+                Import Completed Successfully!
+                <br>Total Records: ${valid_data.length}
+                <br>Start Time: ${formatReadableDate(start_time)}
+                <br>End Time: ${formatReadableDate(end_time)}
+                <br>Duration: ${duration}`;
+
+            let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
+
+            logActivity('Add Sell Out Module', 'Import Data', remarks, link, null, null);
         });
     }
 

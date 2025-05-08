@@ -889,6 +889,7 @@
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_week_on_week_details';
+        const start_time = new Date();
 
         let selected_fields = [
             'id', 'header_id', 'file_name', 'line_number', 'item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'
@@ -929,6 +930,16 @@
                         delete_temp_data();
                         setTimeout(function(){
                             modal.alert("All records saved/updated successfully!", 'success', () => {
+                                let logData = [];
+                                logData = valid_data.map(record => ({
+                                    ...record,
+                                    header_id: data_header_id,
+                                    created_date: formatDate(new Date()),
+                                    created_by: '<?=$session->sess_uid;?>',
+                                    week: $("#week").val(),
+                                    year: $("#year").val()
+                                }));
+                                logAll(start_time, logData)
                                 let href = "<?= base_url() ?>" + "cms/import-week-on-week/";
                                 window.location.href = href;
                             });
@@ -1024,6 +1035,43 @@
             }
 
             setTimeout(processNextBatch, 1000);
+        });
+    }
+
+    function logAll(start_time, valid_data) {
+        const headers = 
+        [
+            `created_date`, 
+            `created_by`, 
+            `file_name`, 
+            `line_number`, 
+            `item`, 
+            `item_name`, 
+            `label_type`, 
+            `status`, 
+            `item_class`, 
+            `pog_store`, 
+            `quantity`, 
+            `header_id`, 
+            `year`, 
+            `week`
+        ];
+        const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+        saveImportDetailsToServer(valid_data, headers, 'import_sales_file', url, function(filePath) {
+            console.log(valid_data[0])
+            const end_time = new Date();
+            const duration = formatDuration(start_time, end_time);
+
+            let remarks = `
+                Import Completed Successfully!
+                <br>Total Records: ${valid_data.length}
+                <br>Start Time: ${formatReadableDate(start_time)}
+                <br>End Time: ${formatReadableDate(end_time)}
+                <br>Duration: ${duration}`;
+
+            let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
+
+            logActivity('Add Sales File Module', 'Import Data', remarks, link, null, null);
         });
     }
 </script>
