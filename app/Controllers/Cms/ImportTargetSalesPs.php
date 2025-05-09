@@ -85,6 +85,7 @@ class ImportTargetSalesPs extends BaseController
 		$data['PageName'] = 'Import Target Sales Per Store';
 		$data['PageUrl'] = 'Import Target Sales Per Store';
 		$data['content'] = "cms/import/ta-so-ps/view_target_sales_ps.php";
+		$data['yearMap'] = $this->Global_model->dynamic_search("'tbl_year'", "''", "'id, year'", 0, 0, "''", "''", "''");
 
 
 		$data['buttons'] = [];

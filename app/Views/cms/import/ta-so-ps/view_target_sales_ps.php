@@ -22,7 +22,7 @@
             <div class="d-flex flex-column text-left" style="margin-top: 20px;">
                 <div class="d-flex flex-row">
                     <label for="year" class="form-label p-2 col-2">Year</label>
-                    <input type="text" class="form-control p-2 col-3" id="year" readonly disabled>
+                    <input type="text" class="form-control p-2 col-3" id="year" name="year" readonly disabled>
                     <div hidden class="p-2 col-1"></div>
                     <label hidden for="s2" class="form-label p-2 col-3">Stuff 2</label>
                     <input hidden type="text" class="form-control p-2 col-3" id="s2" readonly disabled>
@@ -175,6 +175,8 @@
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
 
+    let yearMap = <?= json_encode ($yearMap) ?>;
+
     $(document).ready(function() {
         $("#sell_out_title").html(addNbsp("VIEW TARGET SALES PER STORE"));
         $("#year").val(params)
@@ -188,7 +190,7 @@
             event: "list",
             select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
             "a.july, a.august, a.september, a.october, a.november, a.december, "+
-            "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status, ba.name as ba_name",
+            "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status, ba.name as ba_name, b.year as year",
             // select: "a.created_date, u.name imported_by, b.year, a.updated_date",
             query: new_query,
             offset: offset,
@@ -228,6 +230,7 @@
             var html = '';
 
             if (result && result.length > 0) {
+                let yearValue = result[0].year;
                 var count = 1;
                 $.each(result, function(x, y) {
                     count+=1;
@@ -244,6 +247,7 @@
                     html += "<td scope=\"col\">" + status + "</td>";
                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+                    $('#year').val(yearValue);
 
                     if (y.id == 0) {
                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
