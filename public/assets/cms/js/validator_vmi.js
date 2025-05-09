@@ -17,7 +17,7 @@ self.onmessage = async function(e) {
         let ba_checklist = {};
 
         ba_data.ba_area_store_brand.forEach(entry => {
-            let ba_codes = entry.brand_ambassador_cod ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
+            let ba_codes = entry.brand_ambassador_code ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
             let ba_ids = entry.brand_ambassador_id ? entry.brand_ambassador_id.split(',').map(id => id.trim()) : [null];
             let store_codes = entry.store_code ? entry.store_code.split(',').map(s => s.trim()) : [];
             let store_ids = entry.store_id ? entry.store_id.split(',').map(id => id.trim()) : [];
@@ -138,9 +138,15 @@ self.onmessage = async function(e) {
                 let matched = ba_checklist[store.toLowerCase()];
                 //if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
 
+                const rawStoreCode = row.store.trim().toLowerCase();
+
+                const storeId = matched?.store_id || store_lookup[rawStoreCode] || null;
+
                 if (!invalid) {
                     valid_data.push({
-                        store: matched?.store_code || null,
+                        store: storeId,
+                        // store code ang inilalagay neto
+                        // store: matched?.store_code || null, 
                         item,
                         item_name,
                         item_class,
