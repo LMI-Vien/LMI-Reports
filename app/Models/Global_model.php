@@ -964,11 +964,11 @@ class Global_model extends Model
 
     function get_valid_records_tracc_data($table, $column_name, $where = null) {
         $builder = $this->db->table($table)
-            ->select(['recid', $column_name, 'itmcde'])
-            ->where('cusitmcde !=', '');
-
-        if ($where) {
+            ->select(['recid', $column_name, 'itmcde']);
+        if (!empty($where)) {
             $builder->groupBy($where);
+        }else{
+            $builder->where('cusitmcde !=', '');
         }
 
         $query = $builder->get();
