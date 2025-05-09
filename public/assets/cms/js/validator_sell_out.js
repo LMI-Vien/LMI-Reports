@@ -88,10 +88,13 @@ self.onmessage = async function(e) {
                 
                 if (companyString == 'LMI') {
                     customer_payment_group = cusgrp_lookup_lmi[customer_payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group (LMI)");
-                    sku_code = customer_sku_code_lookup_lmi[sku_code.toLowerCase()] || addErrorLog("Invalid SKU Code (LMI)");
+                    //temp lang pinatanggal ni boss dani ngani
+                    //sku_code = customer_sku_code_lookup_lmi[sku_code.toLowerCase()] || addErrorLog("Invalid SKU Code (LMI)");
+                    sku_code = sku_code;
                 } else {
                     customer_payment_group = cusgrp_lookup_rgdi[customer_payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group (RGDI)");
-                    sku_code = customer_sku_code_lookup_rgdi[sku_code.toLowerCase()] || addErrorLog("Invalid SKU Code (RGDI)");
+                    //sku_code = customer_sku_code_lookup_rgdi[sku_code.toLowerCase()] || addErrorLog("Invalid SKU Code (RGDI)");
+                    sku_code = sku_code;    
                 }
 
                 let matched = ba_checklist[store_code.toLowerCase()];

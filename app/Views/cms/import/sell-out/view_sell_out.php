@@ -54,9 +54,9 @@
                             <th class='center-content'>Store Description</th>
                             <th class='center-content'>SKU Code</th>
                             <th class='center-content'>SKU Description</th>
+                            <th class='center-content'>Gross Sales</th>
                             <th class='center-content'>Quantity</th>
                             <th class='center-content'>Net Sales</th>
-                            <th class='center-content'>Gross Sales</th>
                         </tr>  
                     </thead>
                     <tbody class="table_body word_break"></tbody>
@@ -163,9 +163,9 @@
                     html += "<td scope=\"col\">" + y.store_description + "</td>";
                     html += "<td scope=\"col\">" + y.sku_code + "</td>";
                     html += "<td scope=\"col\">" + y.sku_description + "</td>";
+                    html += "<td scope=\"col\">" + formattedGrossSales + "</td>";
                     html += "<td scope=\"col\">" + formattedQuantity + "</td>";
                     html += "<td scope=\"col\">" + formattedNetSales + "</td>";
-                    html += "<td scope=\"col\">" + formattedGrossSales + "</td>";
                     html += "</tr>";
                 });
                 } else {
