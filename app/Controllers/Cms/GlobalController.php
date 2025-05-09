@@ -25,12 +25,16 @@ class GlobalController extends BaseController
 
 						$limit = isset($_POST['limit'])? $_POST['limit'] : 99999;
 						$offset = isset($_POST['offset'])? $_POST['offset'] : 1;
+						if($offset == 0){
+							$offset = 1;
+						}
 						$order_field = isset($_POST['order']['field'])? $_POST['order']['field'] : null;
 						$order_type = isset($_POST['order']['order']) ? $_POST['order']['order']: null;
 						$join = isset($_POST['join']) ? $_POST['join']: null;
 						$group= isset($_POST['group']) ? $_POST['group']: null;
 
 						$result_data_list = $this->Global_model->get_data_list($table, $query, $limit, ($offset - 1) * $limit, $select,$order_field,$order_type, $join, $group);
+
 						$count_data = $this->Global_model->get_data_list($table, $query,null, null, $select,$order_field,$order_type, $join, $group);
 						$result_data_pagination = $this->Global_model->get_data_list_count($select,$table, $query ,$offset, $join);
 						
@@ -100,6 +104,64 @@ class GlobalController extends BaseController
 					$result_data = $this->Global_model->get_data_list($table, $query, $limit, ($offset - 1) * $limit, $select,$order_field,$order_type, $join, $group);
 
 			        echo json_encode($result_data);
+			    } catch (Error $e) {
+	        		echo "Error displaying a list from database: " . $e->getMessage();
+				}
+			break;
+			case 'list2':
+				try {
+					$query = $_POST['query'];
+					$table = $_POST['table']; 
+					$select =  $_POST['select'];
+					$isChangePassword = isset($_POST['isChangePassword']) ? $_POST['isChangePassword'] : "false";
+					$users_table = array("cms_users", "cms_historical_passwords");
+
+					if (in_array($table, $users_table) && $isChangePassword == "true") {
+						$salt = $this->Global_model->get_password_salt($_POST['id']);
+						$password = hash("sha256", $_POST['password']);
+						$salted_password = hash("sha256", $password.$salt);
+
+						if ($table == "cms_historical_passwords") {
+							$query = "user_id = ". $_POST['id'] ." and password = '". $salted_password ."'";
+						} else {
+							$query = "id = ". $_POST['id'] ." and password = '". $salted_password ."'";
+						}						
+					}
+
+					if(strpos($select, '*') !== false){
+						$data = array('message' => "Asterisk is not allowed!");
+						echo json_encode($data);
+						break;
+					}
+
+					$limit = isset($_POST['limit'])? $_POST['limit'] : 99999;
+					$offset = isset($_POST['offset'])? $_POST['offset'] : 1;
+					// print_r($limit);
+					// die();
+					$order_field = isset($_POST['order']['field'])? $_POST['order']['field'] : null;
+					$order_type = isset($_POST['order']['order']) ? $_POST['order']['order']: null;
+					$join = isset($_POST['join']) ? $_POST['join']: null;
+					$group= isset($_POST['group']) ? $_POST['group']: null;
+
+					if ($table === 'tbl_vmi_grouped') {
+					    $result_data = $this->Global_model->get_vmi_grouped_with_latest_updated($query, $limit, ($offset - 1) * $limit);
+					    echo json_encode($result_data);
+					    break;
+					}
+					if ($table === 'tbl_sales_per_store_grouped') {
+					    $result_data = $this->Global_model->get_per_store_grouped($query, $limit, ($offset - 1) * $limit);
+					    echo json_encode($result_data);
+					    break;
+					}
+
+					$result_data = $this->Global_model->get_data_list($table, $query, $limit, ($offset - 1) * $limit, $select,$order_field,$order_type, $join, $group);
+					$total = $this->Global_model->count_data_list($table, $query, $join, $group);
+
+			        //echo json_encode($result_data);
+			        echo json_encode([
+						'data' => $result_data,
+						'total_records' => $total
+					]);
 			    } catch (Error $e) {
 	        		echo "Error displaying a list from database: " . $e->getMessage();
 				}

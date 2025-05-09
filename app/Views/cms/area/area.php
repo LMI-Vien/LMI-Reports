@@ -221,7 +221,7 @@
     </div>
     
 <script>
-    var query = "status >= 0";
+    var query = "a.status >= 0";
     var column_filter = '';
     var order_filter = '';
     var limit = 10; 
@@ -347,7 +347,7 @@
         $store_list.empty()
         $footer.empty();
         if (actions === 'add') {
-            
+
             let line = get_max_number();
 
             let html = `
@@ -436,7 +436,7 @@
         } else {
             stores.add($('#store').val());
 
-            renderStores();
+            runStores();
         }
 
         //let line = get_max_number() + 1;
@@ -462,97 +462,215 @@
         get_store('', `store_${line}`);*/
     }
 
-    function renderStores(action = "") {
-        let store_array = Array.from(stores);
+    // function runStores(action = "") {
+    //     let store_array = Array.from(stores);
         
-        if(action == "view") {
-            html = `
+    //     if(action == "view") {
+    //         html = `
+    //                 <table class="table table-bordered mt-2" id="stores_list" border=1>
+    //                     <thead>
+    //                         <tr>
+    //                             <th>Store ID</th>
+    //                             <th>Store Name</th>
+    //                         </tr>
+    //                     </thead>
+    //                     <tbody class="table-body word_break">
+    //             `;
+    //     } else {
+    //         html = `
+    //                 <table class="table table-bordered mt-2" id="stores_list" border=1>
+    //                     <thead>
+    //                         <tr>
+    //                             <th>Store ID</th>
+    //                             <th>Store Name</th>
+    //                             <th></th>
+    //                         </tr>
+    //                     </thead>
+    //                     <tbody class="table-body word_break">
+    //             `;
+    //     }
+
+    //     for(let i = paginator; i < paginator + 10; i++) {
+    //         if(store_array[i] != null) {
+    //             let storeDescription = store_array[i].split(' - ');
+    //             let rowClass = i % 2 === 0 ? "even-row" : "odd-row";
+
+    //             if(action == "view") {
+    //                 html += `
+    //                         <tr class=${rowClass}>
+    //                             <td>${storeDescription[0]}</td>
+    //                             <td style="width: 60%">${storeDescription[1]}</td>
+    //                         </tr>
+    //                     `
+    //             } else {
+    //                 html += `
+    //                         <tr class=${rowClass}>
+    //                             <td>${storeDescription[0]}</td>
+    //                             <td style="width: 60%">${storeDescription[1]}</td>
+    //                             <td align=middle>
+    //                                 <button type="button" class="rmv-btn" onclick="remove_store(${i})">
+    //                                     <i class="fa fa-minus" aria-hidden="true"></i>
+    //                                 </button>
+    //                             </td>
+    //                         </tr>
+    //                         `
+    //             }
+    //         }
+    //     }
+
+    //     if(store_array.length > 10) {
+    //         html += `
+    //                             <tr>
+    //                                 <td colspan=3 align=right>
+    //                                     <button type="button" class="btn btn-warning" onclick="backPage('${action == "view" ? 'view' : ''}')" ${paginator == 0 ? "disabled" : ""}><</button>
+    //                                     <button type="button" class="btn btn-warning" onclick="nextPage('${action == "view" ? 'view' : ''}')" ${paginator + 10 > store_array.length ? "disabled" : ""}>></button>
+    //                                 </td>
+    //                             </tr>
+    //                         </tbody>
+    //                     </table>
+    //                 `
+    //     }
+
+
+    //     $('#stores').html(html);
+    //     $('#store').val("");
+    // }
+
+
+    let StorecurrentPage = 1;
+    const BASE_PAGE_SIZE = 10; // stays constant
+    let StoreLimit = BASE_PAGE_SIZE;
+    let StoreTotalRecords = 0;
+    let StoreTotalPages = 1;
+
+    function runStores(action, area_id) {
+        const StoreOffset = StorecurrentPage;
+        renderStores(area_id, StoreOffset, StoreLimit, action);
+    }
+
+    function renderStores(area_id, StoreOffset, StoreLimit, action) {
+        console.log(StoreOffset, 'StoreOffset', StoreLimit, 'StoreLimit');
+        query = "status = 1 AND area_id = " + area_id;
+        field = "s.description";
+        order = "asc";
+
+        var data = {
+            event: "list_pagination",
+            select: "s.code, s.description, s.status",
+            query: query,
+            offset: StoreOffset,
+            limit: StoreLimit,
+            table: "tbl_store_group sg",
+            join: [
+                {
+                    table: "tbl_store s",
+                    query: "s.id = sg.store_id",
+                    type: "left"
+                }
+            ],
+            order: {
+                field: field,
+                order: order
+            }
+        };
+
+        aJax.post(url, data, function(result) {
+            var result = JSON.parse(result);
+            console.log(result);
+            var obj_list = result.list;
+            var html = '';
+
+            if (action == "view") {
+                html = `
                     <table class="table table-bordered mt-2" id="stores_list" border=1>
                         <thead>
                             <tr>
-                                <th>Store ID</th>
+                                <th>Store Code</th>
                                 <th>Store Name</th>
                             </tr>
                         </thead>
                         <tbody class="table-body word_break">
                 `;
-        } else {
-            html = `
+            } else {
+                html = `
                     <table class="table table-bordered mt-2" id="stores_list" border=1>
                         <thead>
                             <tr>
-                                <th>Store ID</th>
+                                <th>Store Code</th>
                                 <th>Store Name</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody class="table-body word_break">
                 `;
-        }
+            }
 
-        for(let i = paginator; i < paginator + 10; i++) {
-            if(store_array[i] != null) {
-                let storeDescription = store_array[i].split(' - ');
-                let rowClass = i % 2 === 0 ? "even-row" : "odd-row";
+            if (result && result.list) {
+                $.each(obj_list, function(x, y) {
+                    var status = parseInt(y.status) === 1 ? "Active" : "Inactive";
+                    var rowClass = x % 2 === 0 ? "even-row" : "odd-row";
 
-                if(action == "view") {
-                    html += `
-                            <tr class=${rowClass}>
-                                <td>${storeDescription[0]}</td>
-                                <td style="width: 60%">${storeDescription[1]}</td>
-                            </tr>
-                        `
-                } else {
-                    html += `
-                            <tr class=${rowClass}>
-                                <td>${storeDescription[0]}</td>
-                                <td style="width: 60%">${storeDescription[1]}</td>
-                                <td align=middle>
-                                    <button type="button" class="rmv-btn" onclick="remove_store(${i})">
+                    html += "<tr class='" + rowClass + "'>";
+                    html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(y.description, 10) + "</td>";
+                    if (action !== "view") {
+                        html += `<td align="middle">
+                                    <button type="button" class="rmv-btn" onclick="remove_store('${y.code}', ${area_id})">
                                         <i class="fa fa-minus" aria-hidden="true"></i>
                                     </button>
-                                </td>
-                            </tr>
-                            `
-                }
+                                </td>`;
+                    }
+                    html += "</tr>";
+                });
+
+                StoreTotalRecords = result.pagination.total_record;
+                console.log(StoreTotalRecords);
+                StoreTotalPages = Math.ceil(StoreTotalRecords / BASE_PAGE_SIZE);
+
+                html += `
+                    <tr>
+                        <td colspan="${action === 'view' ? 2 : 3}" align="right">
+                            Page ${StorecurrentPage} of ${StoreTotalPages}
+                            <button type="button" class="btn btn-warning" onclick="firstPage('${action}', ${area_id})" ${StorecurrentPage === 1 ? "disabled" : ""}>&laquo; First</button>
+                            <button type="button" class="btn btn-warning" onclick="backPage('${action}', ${area_id})" ${StorecurrentPage <= 1 ? "disabled" : ""}>&lsaquo; Prev</button>
+                            <button type="button" class="btn btn-warning" onclick="nextPage('${action}', ${area_id})" ${StorecurrentPage >= StoreTotalPages ? "disabled" : ""}>Next &rsaquo;</button>
+                            <button type="button" class="btn btn-warning" onclick="lastPage('${action}', ${area_id})" ${StorecurrentPage === StoreTotalPages ? "disabled" : ""}>Last &raquo;</button>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                html += `<tr><td colspan="3" class="center-align-format">${no_records}</td></tr>`;
             }
-        }
 
-        if(store_array.length > 10) {
-            html += `
-                                <tr>
-                                    <td colspan=3 align=right>
-                                        <button type="button" class="btn btn-warning" onclick="backPage('${action == "view" ? 'view' : ''}')" ${paginator == 0 ? "disabled" : ""}><</button>
-                                        <button type="button" class="btn btn-warning" onclick="nextPage('${action == "view" ? 'view' : ''}')" ${paginator + 10 > store_array.length ? "disabled" : ""}>></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `
-        }
+            html += `</tbody></table>`;
 
-
-        $('#stores').html(html);
-        $('#store').val("");
+            $('#stores').html(html);
+            $('#store').val("");
+        });
     }
 
-    function backPage(action = "") {
-        if(paginator >= 10) {
-            paginator -= 10;
-    
-            renderStores(action);
+    function backPage(action = "", area_id) {
+        if (StorecurrentPage > 1) {
+            StorecurrentPage--;
+            runStores(action, area_id);
         }
     }
 
-    function nextPage(action = "") {
-        
-        let store_array = Array.from(stores);
-        
-        if(store_array[paginator + 10] != null) {
-            paginator += 10;
-
-            renderStores(action);
+    function nextPage(action = "", area_id) {
+        if (StorecurrentPage < StoreTotalPages) {
+            StorecurrentPage++;
+            runStores(action, area_id);
         }
+    }
+
+    function firstPage(action = "", area_id) {
+        StorecurrentPage = 1;
+        runStores(action, area_id);
+    }
+
+    function lastPage(action = "", area_id) {
+        StorecurrentPage = StoreTotalPages;
+        runStores(action, area_id);
     }
 
     function remove_store(index) {
@@ -563,7 +681,7 @@
         if(store_array.length <= 10) {
             paginator = 0;
         }
-        renderStores();
+        runStores(action, area_id);
     }
 
     function remove_line(lineId) {
@@ -656,7 +774,9 @@
         var data = {
             event: "list", 
             select: "id, code, description, status",
-            query: query, 
+            query: query,
+            offset : 1,
+            limit : 1,
             table: "tbl_area"
         };
         let store_area = new Set();
@@ -664,18 +784,19 @@
         aJax.post(url, data, function(result) {
             var obj = is_json(result);
             if (obj) {
+                console.log(obj, inp_id, 'inp_id');
                 var totalRequests = 0; // Count the total number of AJAX requests
                 var completedRequests = 0; // Track completed requests
 
-                $.each(obj, function(index, d) {
-                    $('#id').val(d.id);
-                    $('#code').val(d.code);
-                    $('#description').val(d.description);
-                    // $('#store').val(d.store);
+                // $.each(obj, function(index, d) {
+                //     $('#id').val(d.id);
+                //     $('#code').val(d.code);
+                //     $('#description').val(d.description);
+                //     // $('#store').val(d.store);
 
-                    var line = 0;
-                    var readonly = '';
-                    var disabled = '';
+                //     var line = 0;
+                //     var readonly = '';
+                //     var disabled = '';
                     // let $store_list = $('#store_list');
 
                     let html = `
@@ -697,47 +818,49 @@
                         $(this).autocomplete("search", "");
                     });
 
-                    get_store('', `store`);
+                     get_store('', `store`);
 
-                    // let line = get_max_number();
+                //     // let line = get_max_number();
 
                     
-                    $.each(get_area_stores(d.id), (x, y) => {
-                        if (actions === 'view') {
-                            disabled = 'disabled';
-                            readonly = 'readonly';
-                        } else {
-                            readonly = '';
-                            disabled = '';
-                        }
+                //     $.each(get_area_stores(d.id), (x, y) => {
+                //         if (actions === 'view') {
+                //             disabled = 'disabled';
+                //             readonly = 'readonly';
+                //         } else {
+                //             readonly = '';
+                //             disabled = '';
+                //         }
 
-                        totalRequests++;
-                        // Pass the callback to the get_field_values function
-                        get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
-                            for (let key in res) {
-                                get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
-                                    if (actions === 'edit') {
-                                        readonly = (line == 0) ? 'readonly' : '';
-                                        disabled = (line == 0) ? 'disabled' : '';
-                                    }
+                //         totalRequests++;
+                //         // Pass the callback to the get_field_values function
+                //         get_field_values('tbl_store', 'description', 'id', [y.store_id], (res) => {
+                //             for (let key in res) {
+                //                 get_field_values('tbl_store', 'code', 'id', [key], (res1) => {
+                //                     if (actions === 'edit') {
+                //                         readonly = (line == 0) ? 'readonly' : '';
+                //                         disabled = (line == 0) ? 'disabled' : '';
+                //                     }
 
-                                    stores.add(key + ' - ' + res[key]);
-                                });
-                            }
-                        });
-                    });
+                //                     stores.add(key + ' - ' + res[key]);
+                //                 });
+                //             }
+                //         });
+                //     });
                     
-                    renderStores('view');
-                    modal.loading(false);
+                //    // runStores('view');
+                //     modal.loading(false);
 
-                    if (d.status == 1) {
-                        $('#status').prop('checked', true);
-                    } else {
-                        $('#status').prop('checked', false);
-                    }
-                });
+                //     if (d.status == 1) {
+                //         $('#status').prop('checked', true);
+                //     } else {
+                //         $('#status').prop('checked', false);
+                //     }
+                // });
             }
-    
+            modal.loading(false);
+        runStores('view', inp_id);
+        //area_id, StoreOffset, StoreLimit, actio
         });
     }
 
@@ -824,7 +947,7 @@
 
     function processInChunks(data, chunkSize, callback) {
         let index = 0;
-        let totalRecords = data.length;
+        let StoreTotalRecords = data.length;
         let totalProcessed = 0;
 
         function nextChunk() {
@@ -839,7 +962,7 @@
             totalProcessed += chunk.length; 
             index += chunkSize;
 
-            let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
+            let progress = Math.min(100, Math.round((totalProcessed / StoreTotalRecords) * 100));
             updateSwalProgress("Preview Data", progress);
             requestAnimationFrame(nextChunk);
         }
@@ -1376,7 +1499,7 @@
             search_input = $('#search_query').val();
             offset = 1;
             new_query = query;
-            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+            new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\'';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -1388,7 +1511,7 @@
         search_input = $('#search_query').val();
         offset = 1;
         new_query = query;
-        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+        new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\'';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -1424,7 +1547,7 @@
     $('#clear_f').on('click', function(event) {
         order_filter = '';
         column_filter = '';
-        query = "status >= 0";
+        query = "a.status >= 0";
         get_data(query);
         get_pagination(query);
         
@@ -1439,18 +1562,31 @@
         $('#filter_modal').modal('hide');
     })
 
-    function get_pagination(query, field = "updated_date", order = "desc") {
+    function get_pagination(query, field = "a.updated_date", order = "desc") {
         var data = {
         event : "pagination",
-            select : "id",
+            select : "a.id",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_area",
+            table : "tbl_area a",
             order : {
                 field : field,
                 order : order 
-            }
+            },
+            join : [
+                {
+                    table: "tbl_store_group sg",
+                    query: "sg.area_id = a.id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = sg.store_id",
+                    type: "left"
+                }
+            ],
+            group: "a.code" 
 
         }
 
@@ -1832,26 +1968,40 @@
 
     function get_data(query, field = "code, updated_date", order = "asc, desc") {
         var data = {
-            event : "list",
-            select : "id, code, description, status, created_date, updated_date",
+            event : "list_pagination",
+            select : "a.id, a.code, a.description, a.status, a.created_date, a.updated_date, s.description as store_name",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_area",
+            table : "tbl_area a",
             order : {
                 field : field,
                 order : order
-            }
+            },
+            join : [
+                {
+                    table: "tbl_store_group sg",
+                    query: "sg.area_id = a.id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_store s",
+                    query: "s.id = sg.store_id",
+                    type: "left"
+                }
+            ],
+            group: "a.code"  
 
         }
 
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
+            obj_data = result.list;
             var html = '';
 
-            if(result) {
-                if (result.length > 0) {
-                    $.each(result, function(x,y) {
+            if(obj_data) {
+                if (obj_data.length > 0) {
+                    $.each(obj_data, function(x,y) {
                         var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 

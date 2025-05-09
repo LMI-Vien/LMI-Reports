@@ -253,6 +253,26 @@ class Global_model extends Model
         return $q->getResult();
     }
 
+    public function count_data_list($table, $where = null, $join = null, $group = null)
+    {
+        $builder = $this->db->table($table);
+
+        if($join != null){
+            foreach ($join as $key => $vl) {
+                $builder->join($vl['table'],$vl['query'],$vl['type']);
+            };
+        }
+        if ($where) {
+            $builder->where($where);
+        }
+        if ($group) {
+            $builder->groupBy($group);
+            return count($builder->get()->getResult());
+        } else {
+            return $builder->countAllResults();
+        }
+    }
+
     public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
     {
         $sql = "
