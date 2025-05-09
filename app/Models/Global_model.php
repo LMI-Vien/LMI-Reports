@@ -964,17 +964,17 @@ class Global_model extends Model
 
     function get_valid_records_tracc_data($table, $column_name, $where = null) {
         $builder = $this->db->table($table)
-            ->select(['recid', $column_name, 'itmcde']);
+            ->select(['recid', $column_name, 'itmcde'])
+            ->where('cusitmcde !=', '');
 
         if ($where) {
-            $builder->where('untmea', $where);
+            $builder->groupBy($where);
         }
 
-        $builder->where('cusitmcde !=', '');
-        
         $query = $builder->get();
         return $query->getResultArray();
     }
+
 
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
     // ----------------------------------------------------------- Agency -----------------------------------------------------------

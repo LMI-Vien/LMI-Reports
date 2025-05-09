@@ -971,10 +971,10 @@ class GlobalController extends BaseController
 
 	    //target per account
 	    if (!empty($request['customer_sku_code_lmi_per_account'])) {
-	        $responseData['customer_sku_code_lmi_per_account'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_lmi", 'itmcde', 'PCS');
+	        $responseData['customer_sku_code_lmi_per_account'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_lmi", 'itmcde', 'itmcde');
 	    }
 	    if (!empty($request['customer_sku_code_rgdi_per_account'])) {
-	        $responseData['customer_sku_code_rgdi_per_account'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_rgdi", 'itmcde', 'PCS');
+	        $responseData['customer_sku_code_rgdi_per_account'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_rgdi", 'itmcde', 'itmcde');
 	    }
 
 	    if (!empty($request['store_area'])) {
