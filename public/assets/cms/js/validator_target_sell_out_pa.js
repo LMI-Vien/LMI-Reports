@@ -138,13 +138,17 @@ self.onmessage = async function (e) {
                         err_counter++;
                     }
                 });
+                if(srp){
+                    srp = validateFloatField(srp, "SRP", tr_count) ?? srp;    
+                }
 
-                srp = validateFloatField(srp, "SRP", tr_count) ?? srp;
-                if(!customer_cost){
+                if(customer_cost){
                     customer_cost = validateFloatField(customer_cost, "Customer Cost", tr_count) ?? customer_cost;
                 }
-                customer_cost_nov = validateFloatField(customer_cost_nov, "Customer Cost Net Of Vat", tr_count) ?? customer_cost_nov;
-
+                if(customer_cost_nov){
+                    customer_cost_nov = validateFloatField(customer_cost_nov, "Customer Cost Net Of Vat", tr_count) ?? customer_cost_nov;
+                }
+                
                 Object.entries(monthlyTq).forEach(([k, v]) => {
                     if (v) monthlyTq[k] = validateFloatField(v, `TQ ${k.replace("_tq", "")}`, tr_count);
                 });
@@ -157,16 +161,16 @@ self.onmessage = async function (e) {
                 const brand = normalizeLookupSingle(brand_lookup, getVal("Brand"), "Brand", tr_count);
                 
                 if(lmi_code && !rgdi_code){
-                        lmi_code = customer_sku_code_lmi_per_account_lookup[lmi_code.toLowerCase()] || addErrorLog("Invalid LMI Code");
+                        lmi_code = customer_sku_code_lmi_per_account_lookup[lmi_code.toLowerCase()] || addErrorLog("Item Code does not exist on Customer Pricelist.");
                         payment_group = payment_group_lmi_look_up[payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group");
                 }else if(rgdi_code && !lmi_code){
-                        rgdi_code = customer_sku_code_rgdi_per_account_lookup[rgdi_code.toLowerCase()] || addErrorLog("Invalid RGDI Code");
+                        rgdi_code = customer_sku_code_rgdi_per_account_lookup[rgdi_code.toLowerCase()] || addErrorLog("Item Code does not exist on Customer Pricelist.");
                         payment_group = payment_group_rgdi_look_up[payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group");
                 }else if(rgdi_code && lmi_code){
                     if(rgdi_code !== lmi_code){
                         addErrorLog("RGDI/LMI Code doesn't matched");
                     }else{
-                        lmi_code = customer_sku_code_lmi_per_account_lookup[lmi_code.toLowerCase()] || addErrorLog("Invalid LMI Code");
+                        lmi_code = customer_sku_code_lmi_per_account_lookup[lmi_code.toLowerCase()] || addErrorLog("Item Code does not exist on Customer Pricelist.");
                         payment_group = payment_group_lmi_look_up[payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group");
                     }
                 }
