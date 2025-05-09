@@ -744,6 +744,18 @@
                 });
             }
 
+            if (entry.module === 'ba-brand-group-module') {
+                [newArr, oldArr].forEach(arr => {
+                    arr.forEach(obj => {
+                        if (obj.brand_ambassador_id !== undefined) {
+                            const id = parseInt(obj.brand_ambassador_id, 10);
+                            obj.brand_ambassador_label = id === -5 ? 'Vacant' : 'Non-BA';
+                        }
+                    });
+                });
+            }
+
+
             // 3) Module‐specific lookups via switch‐case
             let moduleKey = entry.module.split('/')[0];
             let configsToMap;

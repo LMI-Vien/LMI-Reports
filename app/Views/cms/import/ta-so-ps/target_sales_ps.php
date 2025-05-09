@@ -1180,6 +1180,7 @@
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_target_sales_per_store';
+        const start_time = new Date();
 
         let selected_fields = [
             'id', 'ba_code', 'location', 'january', 'february', 'march', 'april',
@@ -1227,6 +1228,7 @@
                         modal.alert("Some records encountered errors. Check the log.", 'info');
                     } else {
                         modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                        setTimeout(finishImport, 500);
                     }
                     return;
                 }
@@ -1279,6 +1281,41 @@
                         newRecords.push(row);
                     }
                 });
+
+                function finishImport() {
+                    let yearArr = <?= json_encode($yearMap); ?>;
+
+                    const yearLookup = Object.fromEntries(
+                        yearArr.map(item => [ item.id, item.year ])
+                    );
+                    
+                    const dataWithNames = valid_data.map(row => ({
+                        ba_code:  row.ba_code,
+                        location: row.location,
+                        year: yearLookup[row.year]
+                    }));
+
+                    const headers = ['ba_code', 'location', 'year']; 
+                    const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+
+                    saveImportDetailsToServer(dataWithNames, headers, 'target_sales_per_store', url, function(filePath) {
+                        console.log("valid data: ", valid_data);
+                        const end_time = new Date();
+                        const duration = formatDuration(start_time, end_time);
+
+                        let remarks = `
+                            Import Completed Successfully!
+                            <br>Total Records: ${dataWithNames.length}
+                            <br>Start Time: ${formatReadableDate(start_time)}
+                            <br>End Time: ${formatReadableDate(end_time)}
+                            <br>Duration: ${duration}`;
+
+                        let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
+
+                        logActivity('Import Target Sales Per Store', 'Import Data', remarks, link, null, null);
+                        // location.reload();
+                    });
+                }
 
                 function processUpdates() {
                     return new Promise((resolve) => {

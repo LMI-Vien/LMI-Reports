@@ -1334,6 +1334,7 @@
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_accounts_target_sellout_pa';
+        const start_time = new Date();
 
         let selected_fields = [
             'id', 'payment_group', 'vendor', 'overall', 'kam_kas_kaa', 'sales_group',
@@ -1393,6 +1394,7 @@
                         modal.alert("Some records encountered errors. Check the log.", 'info');
                     } else {
                         modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                        setTimeout(finishImport, 500);
                     }
                     return;
                 }
@@ -1441,6 +1443,30 @@
                         newRecords.push(row);
                     }
                 });
+
+                function finishImport() {
+                    const headers = ['brand', 'channel', 'kam_kas_kaa', 'payment_group']; 
+                    const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+
+                    saveImportDetailsToServer(valid_data, headers, 'import_target_sell_out_per_account', url, function(filePath) {
+                        console.log(valid_data);
+                        const end_time = new Date();
+                        const duration = formatDuration(start_time, end_time);
+
+                        let remarks = `
+                            Import Completed Successfully!
+                            <br>Total Records: ${valid_data.length}
+                            <br>Start Time: ${formatReadableDate(start_time)}
+                            <br>End Time: ${formatReadableDate(end_time)}
+                            <br>Duration: ${duration}`;
+
+                        let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
+
+                        logActivity('Target Sell out Per Account', 'Import Data', remarks, link, null, null);
+                        // location.reload();
+                    });
+                }
+                // processNextBatch();
 
                 function processUpdates() {
                     return new Promise((resolve) => {

@@ -816,13 +816,13 @@
 
 
     function saveValidatedData(valid_data) {
-        //console.log(valid_data);
         let batch_size = 5000; // Process 1000 records at a time
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_ba_sales_report';
+        const start_time = new Date();
 
         let selected_fields = [
             'id', 'area_id', 'ba_id', 'brand', 'date'
@@ -855,6 +855,7 @@
                         modal.alert("Some records encountered errors. Check the log.", 'info');
                     } else {
                         modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                        setTimeout(finishImport, 500);
                     }
                     return;
                 }
@@ -898,6 +899,49 @@
                         newRecords.push(row);
                     }
                 });
+
+                function finishImport() {
+                    let areaArr = <?= json_encode($areaMap) ?>;
+                    let ascArr  = <?= json_encode($ascMap) ?>;
+                    let baArr   = <?= json_encode($baMap) ?>;
+
+                    const areaLookup = Object.fromEntries(
+                        areaArr.map(item => [ item.id, item.description ])
+                    );
+                    const ascLookup = Object.fromEntries(
+                        ascArr.map(item => [ item.id, item.description ])
+                    );
+                    const baLookup = Object.fromEntries(
+                        baArr.map(item => [ item.id, item.name ])
+                    );
+
+                    const dataWithNames = valid_data.map(row => ({
+                        area_name: areaLookup[row.area_id],
+                        asc_name:  ascLookup[row.asc_id],
+                        ba_name:   baLookup[row.ba_id]
+                    }));
+
+                    const headers = ['area_name', 'asc_name', 'ba_name']; 
+                    const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+
+                    saveImportDetailsToServer(dataWithNames, headers, 'import_ba_sales_report', url, function(filePath) {
+                        console.log("valid data: ", valid_data);
+                        const end_time = new Date();
+                        const duration = formatDuration(start_time, end_time);
+
+                        let remarks = `
+                            Import Completed Successfully!
+                            <br>Total Records: ${dataWithNames.length}
+                            <br>Start Time: ${formatReadableDate(start_time)}
+                            <br>End Time: ${formatReadableDate(end_time)}
+                            <br>Duration: ${duration}`;
+
+                        let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
+
+                        logActivity('Import BA Sales Report', 'Import Data', remarks, link, null, null);
+                        // location.reload();
+                    });
+                }
 
                 function processUpdates() {
                     return new Promise((resolve) => {

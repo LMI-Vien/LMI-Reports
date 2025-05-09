@@ -87,14 +87,16 @@
         $("#year").val(paramlist[1]);
         $("#week").val(decodeURIComponent(paramlist[2]));
 
+        modal.loading(true); 
         get_data(query);
         get_pagination(query);
+        modal.loading(false); 
     })
 
     function get_data(new_query) {
         var data = {
             event: "list",
-            select: "v.id, s.code AS store, s.description AS store_name, v.item, v.item_name, "+
+            select: "v.id, s.code AS store, a.code AS area_code, v.item, v.item_name, "+
             "v.status, v.item_class, v.supplier, v.c_group, v.dept, v.c_class, v.sub_class, v.on_hand, v.in_transit, "+
             "(v.on_hand + v.in_transit) AS total_qty, v.average_sales_unit, v.vmi_status, v.created_date, v.updated_date, "+
             "c.name AS company",
@@ -106,6 +108,11 @@
                 {
                     table: "tbl_store s",
                     query: "s.id = v.store",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area a",
+                    query: "a.id = v.area_id",
                     type: "left"
                 },
                 {
@@ -144,7 +151,7 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td scope=\"col\">" + (y.store) + "</td>";
-                        html += "<td scope=\"col\">" + (y.store_name) + "</td>";
+                        html += "<td scope=\"col\">" + (y.area_code) + "</td>";
                         html += "<td scope=\"col\">" + (y.item) + "</td>";
                         html += "<td scope=\"col\">" + y.item_name + "</td>";
                         html += "<td scope=\"col\">" + (y.vmi_status) + "</td>";
@@ -176,7 +183,7 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-          select: "v.id, s.code AS store, s.description AS store_name, v.item, v.item_name, "+
+          select: "v.id, s.code AS store, a.code AS area_code, v.item, v.item_name, "+
             "v.status, v.item_class, v.supplier, v.c_group, v.dept, v.c_class, v.sub_class, v.on_hand, v.in_transit, "+
             "(v.on_hand + v.in_transit) AS total_qty, v.average_sales_unit, v.vmi_status, v.created_date, v.updated_date, "+
             "c.name AS company",
@@ -185,9 +192,14 @@
           limit: limit,
           table: "tbl_vmi v",
           join: [
-            {
+                {
                     table: "tbl_store s",
                     query: "s.id = v.store",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area a",
+                    query: "a.id = v.area_id",
                     type: "left"
                 },
                 {
