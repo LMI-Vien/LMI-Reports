@@ -34,10 +34,7 @@ self.onmessage = async function (e) {
             area_lookup[area.code.toLowerCase()] = area.id;
         });
 
-        let ba_lookup = {
-            "vacant": -5,
-            "non ba": -6
-        };
+        let ba_lookup = {};
         ba_data.ba.forEach(ba => {
             ba_lookup[ba.code.toLowerCase()] = ba.id;
         });

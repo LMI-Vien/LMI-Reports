@@ -1579,7 +1579,7 @@ function total_delete(url, delete_table, conditions) {
     }
     aJax.post(url,data,function(result){
         if(result){
-        	//location.reload();
+        	location.reload();
         }
     })
 }

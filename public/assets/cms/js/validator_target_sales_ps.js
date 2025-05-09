@@ -15,7 +15,10 @@ self.onmessage = async function(e) {
         let store_lookup = createLookup(fetch_data.stores, "code", "code");
 
         ba_records = fetch_data.ba;
-        let ba_lookup = {};
+        let ba_lookup = {
+            "vacant": -5,
+            "non ba": -6
+        };
         ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
 
         let ba_checklist = {};
@@ -152,14 +155,23 @@ self.onmessage = async function(e) {
                     normalized_ba_lookup[key.toLowerCase()] = ba_lookup[key];
                 }
 
-                let ba_lower = ba_code.toLowerCase();
-                if (ba_lower in normalized_ba_lookup) {
-                    //ba_code = normalized_ba_lookup[ba_lower];
-                }else {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
-                    err_counter++;
+                if (ba_code) {
+                    let ba_lower = ba_code.toLowerCase();
+                    ba = ba_lookup[ba_lower] || null;
+                    if (!ba && ba !== 0) {
+                        invalid = true;
+                        errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
+                        err_counter++;
+                    }
                 }
+
+                // let ba_lower = ba_code.toLowerCase();
+                // if (ba_lower in normalized_ba_lookup) {
+                // }else {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
 
                 // let matched = ba_checklist[location.toLowerCase()];
                 // if (!matched?.location) addErrorLog("Invalid BA not tagged to any store");
@@ -168,26 +180,17 @@ self.onmessage = async function(e) {
                 const storeKey = row["Location"].trim().toLowerCase();
                 const thisBaId = ba_lookup[ row["BA Code"].trim().toLowerCase() ];
 
-                // look up the checklist entry
                 const matched = ba_checklist[storeKey];
+                let ba_trimmed = ba_code.trim().toLowerCase();
 
-                if (!matched) {
-                    addErrorLog("Store not in BA area store mapping");
-                } else {
-                // split the CSV of allowed BA IDs into an array
-                const allowedBaIds = (matched.ba_id || "")
-                    .split(",")
-                    .map(id => id.trim());
-                
-                // test whether thisBaId is in that array
-                    if (!allowedBaIds.includes(String(thisBaId))) {
-                        addErrorLog("Invalid BA not tagged to any store");
-                    }
+                if (ba_trimmed === "vacant") {
+                    ba_code = -5;
+                } else if (ba_trimmed === "non ba") {
+                    ba_code = -6;
                 }
-    
                 if (!invalid) {
                     valid_data.push({
-                        ba_code,
+                        ba_code: ba_code,
                         location: matched?.store_code || null,
                         ...monthlyValues,
                         status: 2,
@@ -195,8 +198,7 @@ self.onmessage = async function(e) {
                         created_date: date_of_creation,
                         area_id: matched?.area_id || null,
                         asc_id: matched?.asc_id || null,
-                        brand_ids: matched?.brand_ids || [],
-                        brand_ambassador_ids: matched?.ba_id || null
+                        brand_ids: matched?.brand_ids || []
                     });
                 }
             }

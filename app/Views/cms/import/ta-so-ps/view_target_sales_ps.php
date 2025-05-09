@@ -186,7 +186,7 @@
     function get_data(new_query) {
         var data = {
             event: "list",
-            select: "a.id, a.january, a.february, a.march, a.april, a.may, a.june, "+
+            select: "a.id, a.ba_code as custom_code, a.january, a.february, a.march, a.april, a.may, a.june, "+
             "a.july, a.august, a.september, a.october, a.november, a.december, "+
             "s1.code AS location, s1.description AS location_desc, a.updated_date, a.created_date, a.status, ba.name as ba_name",
             // select: "a.created_date, u.name imported_by, b.year, a.updated_date",
@@ -235,7 +235,16 @@
                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
                     var storeCode = y.location || 'N/A';
                     var storeDesc = y.location_desc || 'N/A';
-                    var BAName = y.ba_name || 'N/A';
+                    var BAName = 'N/A';
+                    console.log(y.custom_code);
+                    if (y.ba_name) {
+                        BAName = y.ba_name;
+                    } else if (y.custom_code === '-5') {
+                        BAName = 'Vacant';
+                    } else if (y.custom_code === '-6') {
+                        BAName = 'Non Ba';
+                    }
+                    console
                     html += "<tr class='" + rowClass + "'>";
                     // html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
                     html += "<td scope=\"col\">" + trimText(BAName) + "</td>";
