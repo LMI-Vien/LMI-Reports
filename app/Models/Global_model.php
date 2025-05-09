@@ -1111,7 +1111,6 @@ class Global_model extends Model
         $results = $this->db->table('tbl_store_group sg')
             ->select('sg.id, sg.area_id, sg.store_id, a.code as area_code')
             ->join('tbl_area a', 'a.id = sg.area_id', 'left')
-            ->where('a.status', 1)
             ->get()
             ->getResultArray();
 
@@ -1122,7 +1121,16 @@ class Global_model extends Model
         $results = $this->db->table('tbl_brand_ambassador_group bag')
             ->select('bag.id, bag.store_id, bag.brand_ambassador_id as ba_id, ba.code as ba_code')
             ->join('tbl_brand_ambassador ba', 'ba.id = bag.brand_ambassador_id', 'left')
-            ->where('ba.status', 1)
+            ->get()
+            ->getResultArray();
+
+            return $results;
+    }
+
+    function get_valid_records_area_asc_group() {
+        $results = $this->db->table('tbl_area a')
+            ->select('a.id, a.code, a.description, asc.code as asc_code, asc.id as asc_id, asc.description as asc_description')
+            ->join('tbl_area_sales_coordinator asc', 'a.id = asc.area_id', 'left')
             ->get()
             ->getResultArray();
 

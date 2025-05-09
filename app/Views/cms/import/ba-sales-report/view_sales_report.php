@@ -196,7 +196,7 @@
     function get_data(new_query) {
         var data = {
             event : "list",
-            select : "basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status",
+            select : "basr.id, basr.ba_id as custom_name, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name, basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status",
             query : new_query,
             offset : offset,
             limit : limit,
@@ -247,8 +247,14 @@
                         var areaDescription = y.area || 'N/A';
                         var storeDescription = y.store_name || 'N/A';
                         var brandDescription = y.brand || 'NA';
-                        var brandAmbassadorName = y.ba_name || 'NA';
-
+                        var brandAmbassadorName = 'N/A';
+                        if (y.ba_name) {
+                            brandAmbassadorName = y.ba_name;
+                        } else if (y.custom_name == '-5') {
+                            brandAmbassadorName = 'Vacant';
+                        } else if (y.custom_name == '-6') {
+                            brandAmbassadorName = 'Non Ba';
+                        }
                         html += "<tr class='" + rowClass + "'>";
                         // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         // html += "<td scope=\"col\">" + trimText(brandAmbassadorName) + "</td>"

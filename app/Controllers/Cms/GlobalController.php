@@ -945,6 +945,10 @@ class GlobalController extends BaseController
 	        $responseData['areas'] = $this->Global_model->get_valid_records("tbl_area", 'code');
 	    }
 
+	    if (!empty($request['area_asc'])) {
+	        $responseData['area_asc'] = $this->Global_model->get_valid_records_area_asc_group();
+	    }
+
 	    if (!empty($request['store_ba'])) {
 	        $responseData['store_ba'] = $this->Global_model->get_valid_records_store_ba_group();
 	    }

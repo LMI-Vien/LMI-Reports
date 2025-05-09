@@ -15,7 +15,7 @@ self.onmessage = async function (e) {
     }
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brands=1&ba_area_store_brand=1`);
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brands=1&ba_area_store_brand=1&stores=1&areas=1&ba=1&area_asc=1`);
         let ba_data = await get_ba_valid_response.json();
 
         // Brand lookup normalization
@@ -24,50 +24,33 @@ self.onmessage = async function (e) {
             brand_lookup[brand.brand_description.toLowerCase()] = brand.id;
         });
 
-        // Prepare BA checklist and store-area map
-        let ba_checklist = [];
-        let storeAreaMap = {}; // NEW
-
-        ba_data.ba_area_store_brand.forEach(entry => {
-            let ba_codes = entry.brand_ambassador_code
-                ? entry.brand_ambassador_code.split(',').map(b => b.trim())
-                : [null];
-            let ba_ids = entry.brand_ambassador_id
-                ? entry.brand_ambassador_id.split(',').map(id => id.trim())
-                : [null];
-            let store_codes = entry.store_code
-                ? entry.store_code.split(',').map(s => s.trim())
-                : [];
-            let store_ids = entry.store_id
-                ? entry.store_id.split(',').map(id => id.trim())
-                : [];
-
-            store_codes.forEach(code => {
-                storeAreaMap[code] = entry.area_code; // NEW
-            });
-
-            ba_codes.forEach((ba_code, ba_idx) => {
-                store_codes.forEach((store_code, store_idx) => {
-                    ba_checklist.push({
-                        area_code: entry.area_code,
-                        store_code: store_code,
-                        ba_code: ba_code || "",
-
-                        area_id: entry.area_id,
-                        asc_id: entry.asc_id || null,
-                        store_id: store_ids[store_idx] || null,
-                        ba_id: ba_ids[ba_idx] || null,
-
-                        brand_ids: entry.brand_id
-                            ? entry.brand_id.split(',').map(id => id.trim())
-                            : [],
-                        brand_names: entry.brand_name
-                            ? entry.brand_name.split(',').map(name => name.trim().toLowerCase())
-                            : []
-                    });
-                });
-            });
+        let store_lookup = {};
+        ba_data.stores.forEach(store => {
+            store_lookup[store.code.toLowerCase()] = store.id;
         });
+
+        let area_lookup = {};
+        ba_data.areas.forEach(area => {
+            area_lookup[area.code.toLowerCase()] = area.id;
+        });
+
+        let ba_lookup = {
+            "vacant": -5,
+            "non ba": -6
+        };
+        ba_data.ba.forEach(ba => {
+            ba_lookup[ba.code.toLowerCase()] = ba.id;
+        });
+
+        let area_asc_lookup = {};
+        ba_data.area_asc.forEach(area_asc => {
+            if (area_asc.code && area_asc.asc_id) {
+                area_asc_lookup[area_asc.code.trim().toLowerCase()] = area_asc.asc_id;
+            }
+        });
+
+
+        let ba_checklist = [];
 
         function findMatch(area_code, store_code, ba_code) {
             return ba_checklist.find(entry =>
@@ -110,34 +93,52 @@ self.onmessage = async function (e) {
                 }
 
                 // 🆕 Validate store-area tagging
-                let expected_area = storeAreaMap[store_code];
-                if (!expected_area) {
-                    addErrorLog(`Store "${store_code}" not found in area-store mapping`);
-                    continue;
-                }
-                if (expected_area !== area_code) {
-                    addErrorLog(`Store "${store_code}" is not tagged to Area "${area_code}"`);
-                    continue;
-                }
+            
 
                 let match = findMatch(area_code, store_code, ba_code);
-                if (!match) {
-                    addErrorLog(`No match for Area "${area_code}", Store "${store_code}", BA "${ba_code}"`);
-                    continue;
-                }
 
                 if (brand) {
                     let brand_lower = brand.toLowerCase();
-                    if (!match.brand_names.includes(brand_lower)) {
-                        addErrorLog(`Brand "${brand}" not valid for Area "${area_code}", Store "${store_code}", BA "${ba_code}"`);
-                        continue;
-                    }
+
                     brand = brand_lookup[brand_lower] || null;
                     if (!brand) {
                         addErrorLog(`Brand "${brand}" not recognized`);
                         continue;
                     }
                 }
+
+                if (store_code) {
+                    let store_lower = store_code.toLowerCase();
+                    console.log(store_lower,'store_lower');
+                    console.log(store_lookup, 'store_lookup');
+                    store = store_lookup[store_lower] || null;
+                    if (!store) {
+                        addErrorLog(`Store Code "${store_code}" not recognized`);
+                        continue;
+                    }
+                }
+
+                let asc_id = null;
+                if (area_code) {
+                    let area_lower = area_code.toLowerCase();
+                    area = area_lookup[area_lower] || null;
+                    if (!area) {
+                        addErrorLog(`Area Code "${area_code}" not recognized`);
+                        continue;
+                    }
+
+                    asc_id = area_asc_lookup[area_lower] || null;
+                }
+
+                if (ba_code) {
+                    let ba_lower = ba_code.toLowerCase();
+                    ba = ba_lookup[ba_lower] || null;
+                    if (!ba && ba !== 0) {
+                        addErrorLog(`Brand Ambassador Code "${ba_code}" not recognized`);
+                        continue;
+                    }
+                }
+
 
                 let dateObj = new Date(date);
                 if (isNaN(dateObj.getTime())) {
@@ -157,11 +158,11 @@ self.onmessage = async function (e) {
 
                 if (!invalid) {
                     valid_data.push({
-                        area_id: match.area_id,
-                        store_id: match.store_id,
-                        ba_id: match.ba_id,
+                        area_id: area,
+                        store_id: store,
+                        ba_id: ba || 0,
                         brand: brand,
-                        asc_id: match.asc_id || null,
+                        asc_id: asc_id || 0,
                         date: date,
                         amount: amount,
                         status: 1,
