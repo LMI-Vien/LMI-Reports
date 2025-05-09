@@ -961,12 +961,22 @@ class GlobalController extends BaseController
 	        $responseData['payment_group_rgdi'] = $this->Global_model->get_valid_records("tbl_cus_payment_group_rgdi", 'customer_group_code');
 	    }
 
+	    //for sell out
 	    if (!empty($request['customer_sku_code_lmi'])) {
 	        $responseData['customer_sku_code_lmi'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_lmi", 'cusitmcde');
 	    }
 	    if (!empty($request['customer_sku_code_rgdi'])) {
 	        $responseData['customer_sku_code_rgdi'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_rgdi", 'cusitmcde');
 	    }
+
+	    //target per account
+	    if (!empty($request['customer_sku_code_lmi_per_account'])) {
+	        $responseData['customer_sku_code_lmi_per_account'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_lmi", 'itmcde', 'PCS');
+	    }
+	    if (!empty($request['customer_sku_code_rgdi_per_account'])) {
+	        $responseData['customer_sku_code_rgdi_per_account'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_rgdi", 'itmcde', 'PCS');
+	    }
+
 	    if (!empty($request['store_area'])) {
 	        $responseData['store_area'] = $this->Global_model->get_valid_records_store_group();
 	    }

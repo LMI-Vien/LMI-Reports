@@ -8,7 +8,7 @@ self.onmessage = async function (e) {
     const ERROR_LOG_LIMIT = 1000;
 
     try {
-        const get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brandssopa=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1&payment_group_lmi=1&payment_group_rgdi=1`);
+        const get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brandssopa=1&customer_sku_code_lmi_per_account=1&customer_sku_code_rgdi_per_account=1&payment_group_lmi=1&payment_group_rgdi=1`);
         const ba_data = await get_ba_valid_response.json();
 
         const createLookup = (records, key1, key2) => {
@@ -27,11 +27,11 @@ self.onmessage = async function (e) {
         ba_data.payment_group_rgdi.forEach(payment_group_rgdi => payment_group_rgdi_look_up[payment_group_rgdi.customer_group_code.toLowerCase()] = payment_group_rgdi.id);
 
 
-        let customer_sku_code_lmi_lookup = {};
-        ba_data.customer_sku_code_lmi.forEach(customer_sku_code_lmi => customer_sku_code_lmi_lookup[customer_sku_code_lmi.itmcde.toLowerCase()] = customer_sku_code_lmi.recid);
+        let customer_sku_code_lmi_per_account_lookup = {};
+        ba_data.customer_sku_code_lmi_per_account.forEach(customer_sku_code_lmi_per_account => customer_sku_code_lmi_per_account_lookup[customer_sku_code_lmi_per_account.itmcde.toLowerCase()] = customer_sku_code_lmi_per_account.recid);
 
-        let customer_sku_code_rgdi_lookup = {};
-        ba_data.customer_sku_code_rgdi.forEach(customer_sku_code_rgdi => customer_sku_code_rgdi_lookup[customer_sku_code_rgdi.itmcde.toLowerCase()] = customer_sku_code_rgdi.recid);
+        let customer_sku_code_rgdi_per_account_lookup = {};
+        ba_data.customer_sku_code_rgdi_per_account.forEach(customer_sku_code_rgdi_per_account => customer_sku_code_rgdi_per_account_lookup[customer_sku_code_rgdi_per_account.itmcde.toLowerCase()] = customer_sku_code_rgdi_per_account.recid);
  
         const brand_lookup = createLookup(ba_data.brandssopa, "brand_code", "brand_code");
         const isValidFloat = value => value !== "" && !isNaN(value) && !isNaN(parseFloat(value));
@@ -157,16 +157,16 @@ self.onmessage = async function (e) {
                 const brand = normalizeLookupSingle(brand_lookup, getVal("Brand"), "Brand", tr_count);
                 
                 if(lmi_code && !rgdi_code){
-                        lmi_code = customer_sku_code_lmi_lookup[lmi_code.toLowerCase()] || addErrorLog("Invalid LMI Code");
+                        lmi_code = customer_sku_code_lmi_per_account_lookup[lmi_code.toLowerCase()] || addErrorLog("Invalid LMI Code");
                         payment_group = payment_group_lmi_look_up[payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group");
                 }else if(rgdi_code && !lmi_code){
-                        rgdi_code = customer_sku_code_rgdi_lookup[rgdi_code.toLowerCase()] || addErrorLog("Invalid RGDI Code");
+                        rgdi_code = customer_sku_code_rgdi_per_account_lookup[rgdi_code.toLowerCase()] || addErrorLog("Invalid RGDI Code");
                         payment_group = payment_group_rgdi_look_up[payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group");
                 }else if(rgdi_code && lmi_code){
                     if(rgdi_code !== lmi_code){
                         addErrorLog("RGDI/LMI Code doesn't matched");
                     }else{
-                        lmi_code = customer_sku_code_lmi_lookup[lmi_code.toLowerCase()] || addErrorLog("Invalid LMI Code");
+                        lmi_code = customer_sku_code_lmi_per_account_lookup[lmi_code.toLowerCase()] || addErrorLog("Invalid LMI Code");
                         payment_group = payment_group_lmi_look_up[payment_group.toLowerCase()] || addErrorLog("Invalid Payment Group");
                     }
                 }

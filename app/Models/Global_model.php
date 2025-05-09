@@ -962,10 +962,16 @@ class Global_model extends Model
         }, $results);
     }
 
-    function get_valid_records_tracc_data($table, $column_name) {
+    function get_valid_records_tracc_data($table, $column_name, $where = null) {
         $builder = $this->db->table($table)
-            ->select(['recid', $column_name, 'itmcde'])
-            ->where('cusitmcde !=', '');
+            ->select(['recid', $column_name, 'itmcde']);
+
+        if ($where) {
+            $builder->where('untmea', $where);
+        }
+
+        $builder->where('cusitmcde !=', '');
+        
         $query = $builder->get();
         return $query->getResultArray();
     }
