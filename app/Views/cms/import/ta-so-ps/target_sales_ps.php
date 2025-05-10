@@ -1299,7 +1299,6 @@
                     const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
 
                     saveImportDetailsToServer(dataWithNames, headers, 'target_sales_per_store', url, function(filePath) {
-                        console.log("valid data: ", valid_data);
                         const end_time = new Date();
                         const duration = formatDuration(start_time, end_time);
 

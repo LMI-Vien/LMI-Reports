@@ -2,6 +2,7 @@ self.onmessage = async function(e) {
     let data = e.data.data;
     let BASE_URL = e.data.base_url;
     let invalid = false;
+    let unique_code = new Set();
     let errorLogs = [];
     let valid_data = [];
     let err_counter = 0;
@@ -118,16 +119,23 @@ self.onmessage = async function(e) {
                         errorLogs.push(`⚠️ ${message} at line #: ${tr_count}`);
                     }
                 }
-    
-                if (location.length > 25 || location === "") {
+
+                if (unique_code.has(location)) {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Location at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Duplicated Store Code/Location at line #: ${tr_count}`);
                     err_counter++;
+                } else if (location.length > 25 || location === "") {
+                    invalid = true;
+                    errorLogs.push(`⚠️ Invalid Store Code/Location at line #: ${tr_count}`);
+                    err_counter++;
+                } else {
+                    unique_code.add(location);
                 }
+
 
                 if (ba_code.length > 25 || ba_code === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid BA Code at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -146,7 +154,7 @@ self.onmessage = async function(e) {
                     location = normalized_store_lookup[area_lower];
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Location/Store Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
