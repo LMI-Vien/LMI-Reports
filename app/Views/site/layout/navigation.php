@@ -46,7 +46,7 @@
 
         <script>
 
-        $(document).ready(function () {
+          $(document).ready(function () {
             $('body').removeClass('sidebar-mini');
             $('body').addClass('sidebar-mini-no-expand');
             updateDateTime();
@@ -89,7 +89,7 @@
                     $("#navButton").append(response); 
                 });
             }
-
+            user_role_editor()
         });
 
         function updateSidebarIcon() {
@@ -112,4 +112,64 @@
             document.getElementById('currentDateTime').textContent = formattedDate;
         }
 
+        var menu_url = '<?=$combine_url = ltrim($_SERVER['REQUEST_URI'], '/');?>';
+        var session_role = '<?= $session->sess_role?>';
+
+        function user_role_editor() {
+          var query = "site_menu.status >= 0 AND menu_url = '"+menu_url+"' AND role_id = '"+session_role+"'"; 
+          var url = "<?= base_url("cms/global_controller");?>";
+          var data = {
+              event : "list",
+              select : `site_menu.id as menu_id, 
+                        menu_url, menu_parent_id, menu_level ,status, role_id,
+                        cms_site_menu_roles.menu_id as menu_roles_id,
+                        menu_role_view,menu_role_generate,menu_role_export, menu_role_filter`,
+              query : query,
+              offset : offset,
+              limit : 1,
+              table : "site_menu",
+              join : [
+                  {
+                      table: "cms_site_menu_roles",
+                      query: "cms_site_menu_roles.menu_id = site_menu.id",
+                      type: "left"
+                  }
+              ]            
+              
+            }   
+          aJax.post(url,data, function(result){
+              obj = is_json(result);
+              if(obj.length > 0){
+                $.each(obj,function(x,y){
+                      var role_view = y.menu_role_view;
+                      var role_generate = y.menu_role_generate;
+                      var role_export = y.menu_role_export;
+                      var role_filter = y.menu_role_filter;
+
+                      if(role_view == 0 && role_generate == 0 && role_export == 0 && role_filter == 0){
+                          location.href = "<?= base_url();?>";
+                      }
+
+                      if (role_view == 0) {
+                        location.href = "<?= base_url();?>";
+                      }
+
+                      if (role_generate == 0) {
+                        $('#refreshButton').remove();
+                        $('#clearButton').remove();
+                      }
+
+                      if (role_export == 0) {
+                        $('#ExportPDF').remove();
+                        $('#exportButton').remove();
+                      }
+
+                      if (role_filter == 0) {
+                        $('body').addClass('sidebar-collapse');
+                        $('a.nav-link.bg-primary[data-widget="pushmenu"]').remove();
+                      }
+                });
+              }
+          });
+        }
     </script>

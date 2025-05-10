@@ -63,6 +63,7 @@ class Dashboard extends BaseController
 		];
 		
 		$data['content'] = "site/dashboard/dashboard";
+		$data['session'] = session();
 		$data['js'] = array(
                     );
         $data['css'] = array(

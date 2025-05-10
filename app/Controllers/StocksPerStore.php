@@ -39,6 +39,7 @@ class StocksPerStore extends BaseController
 		$data["source"] = "VMI";
 		$data["source_date"] = 'Calendar week 1';
 		$data['content'] = "site/stocks/per-store/data_per_store";
+		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js"
                     );
