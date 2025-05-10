@@ -19,10 +19,8 @@
     }
 
     #list-data {
-        overflow: visible !important;
+        overflow: auto !important;
         max-height: none !important;
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
     }
 
     @media (min-width: 1200px) {
@@ -54,7 +52,6 @@
                         <table class= "table table-bordered listdata">
                             <thead>
                                 <tr>
-                                    <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                     <!-- <th class='center-content'>ID</th> -->
                                     <th class='center-content'>Month</th>
                                     <th class='center-content'>Year</th>
@@ -325,7 +322,7 @@
     function get_data(query) {
         var data = {
             event : "list",
-            select : "so.id, m.month, so.year, so.customer_payment_group, so.template_id, so.created_date, so.created_by, so.file_type, so.remarks",
+            select : "so.id, m.month, m.id as month_id, so.year, so.customer_payment_group, so.template_id, so.created_date, so.created_by, so.file_type, so.remarks",
             query : query,
             offset : offset,
             limit : limit,
@@ -353,7 +350,7 @@
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                        //html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + y.month + "</td>";
                         html += "<td scope=\"col\">" + y.year + "</td>";
                         html += "<td scope=\"col\">" + (y.customer_payment_group) + "</td>";
@@ -369,13 +366,13 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' style='width: 25%'>";
-                          html+="<a class='btn-sm btn view' href='"+ href +"' data-status='"+y.status+
-                          "' target='_blank' id='"+y.id+
+                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year+"','"+y.month_id+"','"+y.id+"')\" id='"+y.id+
+                            "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                          html+="<a class='btn-sm btn view' href='"+ href +"' target='_blank' id='"+y.id+
                           "' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
 
                           html+="<a class='btn-sm btn view' onclick=\"view_stores('"
-                          +y.id+"', 1, 10, 'view')\" data-status='"
-                          +y.status+"' id='"
+                          +y.id+"', 1, 10, 'view')\" id='"
                           +y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>View Stores</span>";
 
                           html+="<a class='btn-sm btn save' onclick=\"export_sellout('"
@@ -1446,4 +1443,29 @@
         });
     }
 
+
+    function delete_data(year, month, data_header_id) 
+    {
+        modal.confirm(confirm_delete_message,function(result){
+            if(result){
+                const details_conditions = [
+                    { field: "year", values: [year] },
+                    { field: "month", values: [month] },
+                    { field: "data_header_id", values: [data_header_id] }
+                ];
+                const header_conditions = [
+                    { field: "year", values: [year] },
+                    { field: "month", values: [month] },
+                    { field: "id", values: [data_header_id] }
+                ];
+
+                batch_delete_with_conditions(url, "tbl_sell_out_data_details", details_conditions, function(resp) {
+                    // modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
+                    batch_delete_with_conditions(url, "tbl_sell_out_data_header", header_conditions, function(resp) {
+                        modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
+                    });
+                });
+            }
+        });
+    }
 </script>

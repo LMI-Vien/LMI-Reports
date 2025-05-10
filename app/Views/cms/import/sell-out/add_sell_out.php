@@ -277,7 +277,6 @@
         let tr_counter = (currentPage - 1) * rowsPerPage;
 
         paginatedData.forEach(row => {
-            console.log(row)
             let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
             html += `<tr class="${rowClass}">`;
             html += `<td>${tr_counter + 1}</td>`;
@@ -368,13 +367,11 @@
 
                 data: { page, limit: 5000, file_name}, // Fetch in larger chunks
                 success: function(response) {
-                    console.log(response.data, 'response.data')
                     allData = allData.concat(response.data);
                     if (response.data.length === 5000) {
                         fetchAllPages(page + 1);
                     } 
                     else {
-                        console.log(allData.length, 'allData.length')
                         validate_temp_data(allData)
                     }
                 },
@@ -388,12 +385,22 @@
         fetchAllPages()
     }
 
-    function validate_temp_data(data) {
+    function validate_temp_data(data) 
+    {
+        modal.loading(true, "Validating data...");
+
         let worker = new Worker(base_url + "assets/cms/js/validator_sell_out.js");
         worker.postMessage({ data, base_url, companyString });
 
         worker.onmessage = function(e) {
-            const { invalid, errorLogs, valid_data, err_counter } = e.data;
+            const { invalid, errorLogs, valid_data, err_counter, progress } = e.data;
+
+            if (progress !== undefined) {
+                modal.loading_progress(true, `Processing... ${progress}%`);
+                return;
+            }
+
+            modal.loading_progress(false);
 
             if (invalid) {
                 let errorMsg = err_counter > 1000
@@ -414,11 +421,14 @@
                     saveValidatedData(valid_data, header_id, headers);
                 });
             } else {
-                setTimeout(() => {
-                    modal.alert("No valid data found. Please check the file.", "error");
-                }, 2000)
+                modal.alert("No valid data found. Please check the file.", "error");
             }
-        }
+        };
+
+        worker.onerror = function(event) {
+            modal.loading_progress(false);
+            modal.alert("Error processing data. Please try again.", "error");
+        };
     }
 
     function createErrorLogFile(errorLogs, filename) {
@@ -499,7 +509,6 @@
                 if (batch_index >= total_batches) {
                     modal.loading_progress(false);
                     if (errorLogs.length > 0) {
-                        console.log(errorLogs);
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
                         modal.alert("Some records encountered errors. Check the log.", 'info');
                     } else {
@@ -553,7 +562,6 @@
                 function processUpdates() {
                     return new Promise((resolve) => {
                         if (updateRecords.length > 0) {
-                            console.log(updateRecords);
                             batch_update(url, updateRecords, table, "id", false, (response) => {
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
@@ -570,7 +578,6 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
-                            console.log(newRecords, "newRecords");
                             newRecords = batch.map(record => ({
                                 ...record,
                                 data_header_id: data_header_id,
