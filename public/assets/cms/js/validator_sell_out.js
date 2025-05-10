@@ -102,8 +102,8 @@ self.onmessage = async function(e) {
 
                 valid_data.push({
                     data_header_id, month, year, customer_payment_group, template_id, file_name,
-                    line_number, store_description, sku_code, sku_description, quantity, net_sales, gross_sales,
-                    store_code: matched?.store_code || null,
+                    line_number, store_description, sku_code, sku_description, quantity, net_sales, gross_sales, store_code,
+                    // store_code: matched?.store_code || null,
                     area_id: matched?.area_id || null,
                     asc_id: matched?.asc_id || null,
                     brand_ids: matched?.brand_ids || [],

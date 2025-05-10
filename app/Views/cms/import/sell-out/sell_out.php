@@ -98,7 +98,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">
-                    <b></b>
+                    <b>V I E W&nbsp;&nbsp;S T O R E S</b>
                 </h1>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span>&times;</span>
@@ -131,7 +131,7 @@
             </div>
 
             <div class="modal-body">
-                <form id="form-modal">
+                <form id="template-form-modal">
                     <div class="card">
                         <div class="px-3 my-3">
                             <div class="row">
@@ -154,19 +154,19 @@
 
                                 <div class="col-md-6">
                                     <label for="col_count" class="form-label">Template Column Count</label>
-                                    <input type="text" class="form-control required" id="col_count" >
+                                    <input type="text" class="form-control required numbersonly" id="col_count" >
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6">
                                     <label for="line_head" class="form-label">First Line is header</label>
-                                    <input type="text" class="form-control required" id="line_head" >
+                                    <input type="text" class="form-control required numbersonly" id="line_head" >
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="end_line_read" class="form-label">Exclude bottom lines</label>
-                                    <input type="text" class="form-control required" id="end_line_read" >
+                                    <input type="text" class="form-control required numbersonly" id="end_line_read" >
                                 </div>
                             </div>
 
@@ -310,7 +310,6 @@
     var url = "<?= base_url('cms/global_controller');?>";
 
     $(document).ready(function() {
-        console.log(modal)
         get_data(query);
         get_pagination(query);
 
@@ -355,7 +354,6 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        // html += "<td scope=\"col\">" + y.id + "</td>";
                         html += "<td scope=\"col\">" + y.month + "</td>";
                         html += "<td scope=\"col\">" + y.year + "</td>";
                         html += "<td scope=\"col\">" + (y.customer_payment_group) + "</td>";
@@ -371,13 +369,12 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' style='width: 25%'>";
-                          //   html+="<td class='center-content' style='width: 25%'>";
                           html+="<a class='btn-sm btn view' href='"+ href +"' data-status='"+y.status+
                           "' target='_blank' id='"+y.id+
                           "' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
 
                           html+="<a class='btn-sm btn view' onclick=\"view_stores('"
-                          +y.id+"')\" data-status='"
+                          +y.id+"', 1, 10, 'view')\" data-status='"
                           +y.status+"' id='"
                           +y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>View Stores</span>";
 
@@ -434,7 +431,6 @@
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
             offset = 1;
-            // query = "( code like '%" + keyword + "%' ) OR team_description like '%" + keyword + "%' AND status >= 1";
             var new_query = "("+query+" AND so.customer_payment_group like '%" + keyword + "%') OR "+
             "("+query+" AND so.template_id like '%" + keyword + "%') OR "+
             "("+query+" AND so.created_by like '%" + keyword + "%') OR "+
@@ -459,49 +455,93 @@
         modal.loading(false);
     });
 
-    function view_stores(id) {
-        $("#view_store_modal").modal('show');
+    let StorecurrentPage = 1;
+    const BASE_PAGE_SIZE = 10; // stays constant
+    let StoreLimit = BASE_PAGE_SIZE;
+    let StoreTotalRecords = 0;
+    let StoreTotalPages = 1;
+    
+    function view_stores(area_id, StoreOffset, StoreLimit, action) {
+        query = "data_header_id = " + area_id;
 
         var data = {
-            event : "list",
-            select : "data_header_id, file_name, store_description, store_code",
-            query : " data_header_id = " + id,
-            offset : offset,
-            limit : limit,
-            table : "tbl_sell_out_data_details",
-            order : {
-                field : "store_code",
-                order : "asc" 
-            },
-            group : "tbl_sell_out_data_details.store_code"
+            event: "list_pagination",
+            select: "store_code, store_description, file_name",
+            query: query,
+            offset: StoreOffset,
+            limit: StoreLimit,
+            table: "tbl_sell_out_data_details",
+            group: "store_code"
+        };
 
-        }
-
-        aJax.post(url,data,function(result){
+        aJax.post(url, data, function(result) {
             var result = JSON.parse(result);
-            console.log(result, 'result');
-
+            var obj_list = result.list;
             var html = '';
 
-            if(result) {
-                if (result.length > 0) {
-                    $.each(result, function(x,y) {
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+            if (result && result.list) {
+                $.each(obj_list, function(x, y) {
+                    var status = parseInt(y.status) === 1 ? "Active" : "Inactive";
+                    var rowClass = x % 2 === 0 ? "even-row" : "odd-row";
 
-                        html += "<tr class='" + rowClass + "'>";
-                        html += "<td scope=\"col\">" + y.store_code + "</td>";
-                        html += "<td scope=\"col\">" + y.store_description + "</td>";
-                        html += "<td scope=\"col\">" + y.file_name + "</td>";
-                        
-                        html += "</tr>";   
-                    });
-                } else {
-                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-                }
+                    html += "<tr class='" + rowClass + "'>";
+                    html += "<td scope=\"col\">" + trimText(y.store_code, 10) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(y.store_description, 25) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(y.file_name, 50) + "</td>";
+                    html += "</tr>";
+                });
+
+                StoreTotalRecords = result.total_data;
+                StoreTotalPages = Math.ceil(StoreTotalRecords / BASE_PAGE_SIZE);
+
+                html += `
+                    <tr>
+                        <td colspan="${action === 'view' ? 2 : 3}" align="right">
+                            Page ${StorecurrentPage} of ${StoreTotalPages}
+                            <button type="button" class="btn btn-warning" onclick="firstPage('${action}', ${area_id})" ${StorecurrentPage === 1 ? "disabled" : ""}>&laquo; First</button>
+                            <button type="button" class="btn btn-warning" onclick="backPage('${action}', ${area_id})" ${StorecurrentPage <= 1 ? "disabled" : ""}>&lsaquo; Prev</button>
+                            <button type="button" class="btn btn-warning" onclick="nextPage('${action}', ${area_id})" ${StorecurrentPage >= StoreTotalPages ? "disabled" : ""}>Next &rsaquo;</button>
+                            <button type="button" class="btn btn-warning" onclick="lastPage('${action}', ${area_id})" ${StorecurrentPage === StoreTotalPages ? "disabled" : ""}>Last &raquo;</button>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                html += `<tr><td colspan="3" class="center-align-format">${no_records}</td></tr>`;
             }
+
+            html += `</tbody></table>`;
+
             $('.view_store_table').html(html);
-        })
+            $("#view_store_modal").modal('show');
+        });
+    }
+
+    function backPage(action = "", area_id) {
+        if (StorecurrentPage > 1) {
+            StorecurrentPage--;
+            const StoreOffset = StorecurrentPage;
+            view_stores(area_id, StoreOffset, StoreLimit, action)
+        }
+    }
+
+    function nextPage(action = "", area_id) {
+        if (StorecurrentPage < StoreTotalPages) {
+            StorecurrentPage++;
+            const StoreOffset = StorecurrentPage;
+            view_stores(area_id, StoreOffset, StoreLimit, action)
+        }
+    }
+
+    function firstPage(action = "", area_id) {
+        StorecurrentPage = 1;
+        const StoreOffset = StorecurrentPage;
+        view_stores(area_id, StoreOffset, StoreLimit, action)
+    }
+
+    function lastPage(action = "", area_id) {
+        StorecurrentPage = StoreTotalPages;
+        const StoreOffset = StorecurrentPage;
+        view_stores(area_id, StoreOffset, StoreLimit, action)
     }
 
     $(document).on('click', '#btn_export ', function() {
@@ -541,6 +581,7 @@
                         "Store Description": "",
                         "SKU Code": "",
                         "SKU Description": "",
+                        "Gross Sales": "",
                         "Quantity": "",
                         "Net Sales": "",
                     }
@@ -549,7 +590,8 @@
                         "Store Code": item.year,
                         "Store Description": item.customer_payment_group,
                         "SKU Code": item.created_date,
-                        "SKU Description": item.created_by,
+                        "SKU Description": item.username,
+                        "Gross Sales": "",
                         "Quantity": item.file_type,
                         "Net Sales": item.remarks,
                     }
@@ -569,7 +611,7 @@
                                 for (let index = 0; index < total_records; index += 100000) {
                                     table = 'tbl_sell_out_data_details';
                                     join = '';
-                                    fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
+                                    fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, gross_sales, quantity, net_sales';
                                     limit = 100000;
                                     offset = index;
                                     filter = `data_header_id:EQ=${item.id}`;
@@ -584,6 +626,7 @@
                                                     "Store Description": item.store_description,
                                                     "SKU Code": item.sku_code,
                                                     "SKU Description": item.sku_description,
+                                                    "Gross Sales": item.gross_sales,
                                                     "Quantity": item.quantity,
                                                     "Net Sales": item.net_sales,
                                                 }
@@ -603,8 +646,8 @@
             ids.length > 0 
                 ? dynamic_search(
                     "'tbl_sell_out_data_header a'", 
-                    "'left join tbl_month b on a.month = b.id'", 
-                    "'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks'", 
+                    "'left join tbl_month b on a.month = b.id left join cms_users c on a.created_by = c.id'", 
+                    "'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, c.username, a.file_type, a.remarks'", 
                     0, 
                     0, 
                     `'a.id:IN=${ids.join('|')}'`,  
@@ -630,8 +673,8 @@
                         let total_records = res[0].total_records;
                         for (let index = 0; index < total_records; index += 100000) {
                             table = 'tbl_sell_out_data_header a';
-                            join = 'left join tbl_month b on a.month = b.id';
-                            fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
+                            join = 'left join tbl_month b on a.month = b.id left join cms_users c on a.created_by = c.id';
+                            fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, c.username, a.file_type, a.remarks';
                             limit = 100000;
                             offset = index;
                             filter = '';
@@ -646,6 +689,7 @@
                                             "Store Description": "",
                                             "SKU Code": "",
                                             "SKU Description": "",
+                                            "Gross Sales": "",
                                             "Quantity": "",
                                             "Net Sales": "",
                                         }
@@ -654,7 +698,8 @@
                                             "Store Code": item.year,
                                             "Store Description": item.customer_payment_group,
                                             "SKU Code": item.created_date,
-                                            "SKU Description": item.created_by,
+                                            "SKU Description": item.username,
+                                            "Gross Sales": "",
                                             "Quantity": item.file_type,
                                             "Net Sales": item.remarks,
                                         }
@@ -709,8 +754,6 @@
                     }
                 }
             )
-
-            console.log(formattedData, 'formattedData')
         };
 
         fetchStores();
@@ -862,9 +905,7 @@
     }
 
     function list_templates() {
-        // dynamic_search(tbl_name, join, table_fields, limit, offset, conditions, order, group, callback)
         dynamic_search(
-            // "'tbl_sell_out_template_header'",
             "'tbl_sell_out_template_header'", 
             "''", 
             "'id, import_file_code, file_type, line_header'", 
@@ -940,7 +981,7 @@
                 </td>`
 
                 html+=`<td class='center-content' style='width: 5%;' hidden>`;
-                html+=`<input type="text" id="id_${count}" class="form-control required" value="${item.id}">`
+                html+=`<input type="text" id="id_${count}" class="form-control required numbersonly" value="${item.id}">`
                 html+=`</td>`
 
                 html+='</tr>';
@@ -963,7 +1004,6 @@
         }
         dynamic_search(
             "'tbl_sell_out_template_details'", 
-            // "'tbl_sell_out_template_details'", 
             "''", 
             "'template_header_id, id, column_header, column_number, file_header'", 
             0, 0, 
@@ -977,11 +1017,11 @@
             let head = data[0];
 
             if (view === 'view') {
-                $("#file_code, #file_type, #pay_grp, #remarks, #line_head, #col_count")
+                $("#file_code, #file_type, #pay_grp, #remarks, #line_head, #col_count, #end_line_read")
                     .prop('disabled', true)   // Disables the fields
                     .prop('readonly', true);  // Makes them read-only
             } else {
-                $("#file_code, #file_type, #pay_grp, #remarks, #line_head, #col_count")
+                $("#file_code, #file_type, #pay_grp, #remarks, #line_head, #col_count, #end_line_read")
                     .prop('disabled', false)   // Disables the fields
                     .prop('readonly', false);  // Makes them read-only
             }
@@ -992,12 +1032,12 @@
             $("#remarks").val(head.remarks)
             $("#line_head").val(head.line_header)
             $("#col_count").val(head.template_column_count)
+            $("#end_line_read").val(head.end_line_read)
         }
         dynamic_search(
             "'tbl_sell_out_template_header'", 
-            // "'tbl_sell_out_template_header'", 
             "''", 
-            "'id, import_file_code, file_type, template_column_count, line_header, customer_payment_group, remarks'", 
+            "'id, import_file_code, file_type, template_column_count, line_header, customer_payment_group, remarks, end_line_read'", 
             1, 0, 
             "'id:EQ="+id+"'", 
             "''", 
@@ -1105,56 +1145,59 @@
             template_column_count: $("#col_count").val(),
         };
 
-        let data = {
-            event: "update",
-            table: "tbl_sell_out_template_header",
-            field: "id",
-            where: id,
-            data: headerarr,
-        };
-
-        aJax.post(url,data,function(result) {
-            data = {
-                conditions : "'id:EQ="+id+"'",
-                event : "dynamic_search",
-                group : "''",
-                join: "''",
-                limit: 1,
-                offset: 0,
-                order: "''",
-                table_fields: "'id, import_file_code, file_type, template_column_count, line_header, end_line_read, customer_payment_group, remarks'",
-                tbl_name: "'tbl_sell_out_template_header'"
-            }
-
-            aJax.post(url,data,function(result){
-                var obj = is_json(result);
-
-                let detailarr = []
-                let data = [1,2,3,4,5,6,7];
-                data.forEach(item => {
-                    detailarr.push({
-                        "id" : $(`#id_${item}`).val(),
-                        "template_header_id" : obj[0].id,
-                        "column_number" : $(`#col_no_${item}`).val(),
-                        "column_header" : $(`#headers_${item}`).val(),
-                        "file_header" : $(`#caption_${item}`).val(),
+        if (validate.standard("template-form-modal")) {
+            let data = {
+                event: "update",
+                table: "tbl_sell_out_template_header",
+                field: "id",
+                where: id,
+                data: headerarr,
+            };
+    
+            aJax.post(url,data,function(result) {
+                data = {
+                    conditions : "'id:EQ="+id+"'",
+                    event : "dynamic_search",
+                    group : "''",
+                    join: "''",
+                    limit: 1,
+                    offset: 0,
+                    order: "''",
+                    table_fields: "'id, import_file_code, file_type, template_column_count, line_header, end_line_read, customer_payment_group, remarks'",
+                    tbl_name: "'tbl_sell_out_template_header'"
+                }
+    
+                aJax.post(url,data,function(result){
+                    var obj = is_json(result);
+    
+                    let detailarr = []
+                    let data = [1,2,3,4,5,6,7];
+                    data.forEach(item => {
+                        detailarr.push({
+                            "id" : $(`#id_${item}`).val(),
+                            "template_header_id" : obj[0].id,
+                            "column_number" : $(`#col_no_${item}`).val(),
+                            "column_header" : $(`#headers_${item}`).val(),
+                            "file_header" : $(`#caption_${item}`).val(),
+                        })
                     })
-                })
-
-                batch_update(url, detailarr, "tbl_sell_out_template_details", "id", false, (response) => {
-                    modal.alert(success_update_message, 'success', function() {
-                        $('#template_modal').modal('hide');
+    
+                    batch_update(url, detailarr, "tbl_sell_out_template_details", "id", false, (response) => {
+                        modal.alert(success_update_message, 'success', function() {
+                            $('#template_modal').modal('hide');
+                        })
                     })
-                })
-            });
-        })
+                });
+            })
+        } else {
+            modal.alert_custom("Warning.", "Please properly fill up all of the fields", "error");
+        }
     }
 
     function delete_template(id) {
         modal.confirm(confirm_delete_message, function(result){
             if (result) {
                 let callback = (res) => {
-                    console.log(res, 'delete template header')
                     let callback2 = (res) => {
                         modal.alert(success_delete_message, 'success', function () {
                             $("#template_list_modal").modal('hide')
@@ -1168,7 +1211,6 @@
     }
 
     $("#btn_add").click(() => {
-        // alert('add');
         $("#add_scan_data").modal('show')
         get_year("year")
         get_month("month")
@@ -1301,11 +1343,9 @@
             null,
             false, 
             function(exists, duplicateFields) {
-                console.log(exists, duplicateFields, 'exists, duplicateFields')
                 if (!exists) {
                     modal.confirm(confirm_add_message, function(result){
                         if(result){ 
-                            console.log(result, "result")
                             let href = "<?= base_url() ?>" + "cms/import-sell-out/add/";
 
                             let company = $("#company").val();
@@ -1320,7 +1360,6 @@
 
                             href += `${encodeURIComponent(company)}-${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
 
-                            // window.open(href, '_blank');
                             window.location.href = href;
                         }
                     });

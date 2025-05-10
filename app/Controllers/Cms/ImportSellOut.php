@@ -217,13 +217,13 @@ class ImportSellOut extends BaseController
 									'template_id' => $template_id,
 									'file_name' => $fileName,
 									'line_number' => $line_number,
-									'store_code' => trim($row[1] ?? ''),
-									'store_description' => trim($row[2] ?? ''),
-									'sku_code' => trim($row[3] ?? ''),
-									'sku_description' => trim($row[4] ?? ''),
-									'gross_sales' => trim($row[5] ?? ''),
-									'quantity' => trim($row[6] ?? ''),
-									'net_sales' => trim($row[7] ?? '')
+									'store_code' => trim($row[$placeholder['store_code'] - 1] ?? 'Empty - '.$row[$placeholder['store_code'] - 1]), // look here
+									'store_description' => trim($row[$placeholder['store_description'] - 1] ?? ''), // look here
+									'sku_code' => trim($row[$placeholder['sku_code'] - 1] ?? ''), // look here
+									'sku_description' => trim($row[$placeholder['sku_description'] - 1] ?? ''), // look here
+									'gross_sales' => trim($row[$placeholder['gross_sales'] - 1] ?? '0'), // look here
+									'quantity' => trim($row[$placeholder['quantity'] - 1] ?? '0'), // look here
+									'net_sales' => trim($row[$placeholder['net_sales'] - 1] ?? '0'), // look here
 								];
 							}
 				
@@ -272,13 +272,13 @@ class ImportSellOut extends BaseController
 								'template_id' => $template_id,
 								'file_name' => $fileName,
 								'line_number' => $line_number,
-								'store_code' => trim($row[$placeholder['store_code'] - 1] ?? ''), // look here
+								'store_code' => trim($row[$placeholder['store_code'] - 1] ?? 'Empty - '.$row[$placeholder['store_code'] - 1]), // look here
 								'store_description' => trim($row[$placeholder['store_description'] - 1] ?? ''), // look here
 								'sku_code' => trim($row[$placeholder['sku_code'] - 1] ?? ''), // look here
 								'sku_description' => trim($row[$placeholder['sku_description'] - 1] ?? ''), // look here
-								'gross_sales' => trim($row[$placeholder['gross_sales'] - 1] ?? ''), // look here
-								'quantity' => trim($row[$placeholder['quantity'] - 1] ?? ''), // look here
-								'net_sales' => trim($row[$placeholder['net_sales'] - 1] ?? ''), // look here
+								'gross_sales' => trim($row[$placeholder['gross_sales'] - 1] ?? '0'), // look here
+								'quantity' => trim($row[$placeholder['quantity'] - 1] ?? '0'), // look here
+								'net_sales' => trim($row[$placeholder['net_sales'] - 1] ?? '0'), // look here
 							];
 						}
 

@@ -414,7 +414,9 @@
                     saveValidatedData(valid_data, header_id, headers);
                 });
             } else {
-                modal.alert("No valid data found. Please check the file.", "error");
+                setTimeout(() => {
+                    modal.alert("No valid data found. Please check the file.", "error");
+                }, 2000)
             }
         }
     }
@@ -507,8 +509,8 @@
                             modal.alert("All records saved/updated successfully!", 'success', () => {
                                 // location.reload()
                                 logAll(start_time, valid_data)
-                                let href = "<?= base_url() ?>" + "cms/import-sell-out/";
-                                window.location.href = href;
+                                // let href = "<?= base_url() ?>" + "cms/import-sell-out/";
+                                // window.location.href = href;
                             });
                         }, 1000);
                     }
@@ -641,6 +643,7 @@
             let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
 
             logActivity('Add Sell Out Module', 'Import Data', remarks, link, null, null);
+            window.location.href = "<?=base_url('cms/import-sell-out/');?>";
         });
     }
 
