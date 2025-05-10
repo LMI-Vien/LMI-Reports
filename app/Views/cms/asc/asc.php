@@ -695,8 +695,8 @@
         if(validate.standard("form-save-modal")){
 
             var id = $('#id').val() || 0;
-            var code = $('#code').val()
-            var description = $('#description').val()
+            var code = $('#code').val().trim()
+            var description = $('#description').val().trim()
             var status = $('#status').prop('checked')
             var deployment_date = $('#deployment_date').val()
             var area_id = $('#popup_modal #area').val();
@@ -1525,7 +1525,7 @@
                 "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
                 0, 
                 0, 
-                `'a.id:IN=${ids.join('|')}'`,  
+                `'a.id:IN=${ids.join('|')} and a.status:IN=0|1'`,  
                 `''`, 
                 `''`, 
                 processResponse
@@ -1544,7 +1544,7 @@
                 "'COUNT(id) as total_records'", 
                 0, 
                 0, 
-                `''`,  
+                `'status:IN=0|1'`,  
                 `''`, 
                 `''`, 
                 (res) => {
@@ -1561,7 +1561,7 @@
                                 "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
                                 100000, 
                                 index, 
-                                `''`,  
+                                `'a.status:IN=0|1'`,  
                                 `''`, 
                                 `''`, 
                                 (res) => {

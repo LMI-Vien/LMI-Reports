@@ -2108,7 +2108,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     "'id, code, name as description, deployment_date as deployed_date, type, status, agency, team'",
                     0, 
                     0, 
-                    `'id:IN=${ids.join('|')}'`,  
+                    `'id:IN=${ids.join('|')} and status:IN=0|1'`,  
                     `''`, 
                     `''`, 
                     processResponse
@@ -2123,7 +2123,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
                 "'COUNT(id) as total_records'",
                 0, 
                 0, 
-                `''`, 
+                `'status:IN=0|1'`, 
                 `''`, 
                 `''`, 
                 (res) => {
@@ -2147,7 +2147,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
                                 // "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
                                 100000, 
                                 index, 
-                                `''`, 
+                                `'status:IN=0|1'`, 
                                 `''`, 
                                 `''`, 
                                 (res) => {

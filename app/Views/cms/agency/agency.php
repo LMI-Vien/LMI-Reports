@@ -480,8 +480,8 @@
     }
 
     function save_data(action, id) {
-        var code = $('#code').val();
-        var agency = $('#agency').val();
+        var code = $('#code').val().trim();
+        var agency = $('#agency').val().trim();
         var chk_status = $('#status').prop('checked');
         if (chk_status) {
             status_val = 1;
@@ -1287,7 +1287,7 @@
                     "'code, agency, status'", 
                     0, 
                     0, 
-                    `'id:IN=${ids.join('|')}'`,  
+                    `'id:IN=${ids.join('|')} and status:IN=0|1'`,  
                     `''`, 
                     `''`,
                     processResponse
@@ -1296,13 +1296,13 @@
         };
 
         const batch_export = () => {
-            dynamic_search("'tbl_agency'", "''", "'COUNT(id) as total_records'", 0, 0, `''`,  `''`, `''`, (res) => {
+            dynamic_search("'tbl_agency'", "''", "'COUNT(id) as total_records'", 0, 0, `'status:IN=0|1'`,  `''`, `''`, (res) => {
                 if (res && res.length > 0) {
                     let total_records = res[0].total_records;
                     console.log(total_records, 'total records');
 
                     for (let index = 0; index < total_records; index += 100000) {
-                        dynamic_search("'tbl_agency'", "''", "'code, agency, status'", 100000, index, `''`,  `''`, `''`, (res) => {
+                        dynamic_search("'tbl_agency'", "''", "'code, agency, status'", 100000, index, `'status:IN=0|1'`,  `''`, `''`, (res) => {
                             console.log(res, 'look here')
                             let newData = res.map(({ 
                                 code, agency, status
