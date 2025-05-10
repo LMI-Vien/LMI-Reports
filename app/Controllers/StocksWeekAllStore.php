@@ -38,6 +38,7 @@ class StocksWeekAllStore extends BaseController
 		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
 		$data['month'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
+		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js"
                     );

@@ -70,6 +70,7 @@ class StocksAllStore extends BaseController
 		$data['brandAmbassador'] = $this->Global_model->getBrandAmbassador(0);
 		$data['company'] = $this->Global_model->getCompanies(0);
 		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
+		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js"
                     );

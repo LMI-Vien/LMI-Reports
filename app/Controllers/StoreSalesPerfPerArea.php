@@ -39,6 +39,7 @@ class StoreSalesPerfPerArea extends BaseController
 		$data["source"] = "Actual Sales Report / Scan Data";
 		$data["source_date"] = 'Monthly(temp)';	
 		$data['content'] = "site/store/perf-per-area/sales_performance_per_area";
+		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js"
                     );

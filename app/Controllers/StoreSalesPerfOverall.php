@@ -36,6 +36,7 @@ class StoreSalesPerfOverall extends BaseController
 		$data["source"] = "Scan Data";
 		$data["source_date"] = 'Monthly(temp)';	
 		$data['content'] = "site/store/perf-overall/sales_overall_performance";
+		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js"
                     );

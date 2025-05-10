@@ -43,6 +43,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		$data['brand'] = $this->Global_model->getBrandData("ASC", 99999, 0);
 		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
 		$data['brand_ambassador'] = $this->Global_model->getBrandAmbassador(0);
+		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",
 			"assets/site/js/chart.min.js"
