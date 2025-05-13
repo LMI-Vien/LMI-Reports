@@ -1479,8 +1479,8 @@ class Dashboard_model extends Model
 			    CASE WHEN h.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
 			    blt.id AS brand_type_id,
 	            CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
-	            ROUND(COALESCE(ty.ty_scanned_data, 0), 2) AS ty_scanned_data,
-		        ROUND(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data,
+	            FORMAT(COALESCE(ty.ty_scanned_data, 0), 2) AS ty_scanned_data,
+				FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data,
 				CASE 
 				    WHEN ly.ly_scanned_data IS NULL OR ty.ty_scanned_data IS NULL THEN ''
 				    WHEN COALESCE(ly.ly_scanned_data, 0) = 0 THEN ''
