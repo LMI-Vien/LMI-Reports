@@ -1337,7 +1337,7 @@
             dynamic_search(
                 "'tbl_vmi'", 
                 "''", 
-                "'store, item, item_name, item_class, supplier, `c_group`, dept, `c_class` as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'", 
+                "'store, item, item_name, item_class, supplier, `c_group`, dept, `c_class` as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.week'", 
                 0, 
                 0, 
                 `'${filter}'`,  

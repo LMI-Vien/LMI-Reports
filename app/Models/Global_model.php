@@ -290,7 +290,7 @@ class Global_model extends Model
                     v.company as filter_company,
                     u.name AS imported_by,
                     ROW_NUMBER() OVER (
-                        PARTITION BY v.year, v.month, v.week, c.name
+                        PARTITION BY v.year, v.week, c.name
                         ORDER BY v.updated_date DESC
                     ) AS row_num
                 FROM tbl_vmi v
