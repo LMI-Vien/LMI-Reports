@@ -527,11 +527,13 @@ var modal = {
 			allowOutsideClick: false,
 			draggable: true
 		}).then((result) => {
-		    if (result.isConfirmed) {
-		      cb(true); // Execute the callback with `true`
-		    } else {
-		      cb(false); // Execute the callback with `false` if "No" or close is clicked
-		    }
+	        if (typeof cb === 'function') {
+	            if (result.isConfirmed) {
+	                cb(true);
+	            } else {
+	                cb(false);
+	            }
+	        }
 		  });
 	},
 	show: function(message, size, cb) {

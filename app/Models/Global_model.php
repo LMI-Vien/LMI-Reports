@@ -1047,7 +1047,7 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     function getStoreBranch($storeBranchOffset) {
-        $query = $this->db->query("CALL get_store_branch($storeBranchOffset)");
+        $query = $this->db->query("CALL SearchDynamic('tbl_store', null, 'code AS id, description', 9999, 0, 'status:EQ=1', 'description', null)");
         return $query->getResultArray(); // Return data as an array
     }
     function get_store_branch_masterfile_count() {

@@ -674,6 +674,7 @@ class Sync_model extends Model
                         '" . $this->esc($row['recid']) . "',
                         '" . $this->esc($row['brncde']) . "',
                         '" . $this->esc($row['brndsc']) . "',
+                        '" . $this->esc($row['category_id']) . "',
                         1, 
                         NULL,
                         NULL,
@@ -683,11 +684,12 @@ class Sync_model extends Model
                 }
 
                 if (!empty($values)) {
-                    $sql = "INSERT INTO tbl_brand (id, brand_code, brand_description, status, created_date, updated_date, created_by, updated_by) 
+                    $sql = "INSERT INTO tbl_brand (id, brand_code, brand_description, category_id, status, created_date, updated_date, created_by, updated_by) 
                             VALUES " . implode(',', $values) . "
                             ON DUPLICATE KEY UPDATE 
                               brand_code = VALUES(brand_code), 
                               brand_description = VALUES(brand_description),
+                              category_id = VALUES(category_id),
                               status = 1,
                               created_date = created_date,
                               updated_date = updated_date,

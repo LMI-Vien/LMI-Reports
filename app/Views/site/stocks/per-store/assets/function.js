@@ -1,6 +1,4 @@
     $(document).ready(function () {
-        console.log(url);
-       // fetchData();
         $('#inventoryStatus').select2({ placeholder: 'Select inventory statuses' });
         $(document).on('click', '#clearButton', function () {
             $('input[type="text"], input[type="number"], input[type="date"]').val('');
