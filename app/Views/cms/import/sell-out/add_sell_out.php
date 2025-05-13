@@ -514,13 +514,22 @@
                     } else {
                         modal.loading_progress(true, "Finishing data...");
                         delete_temp_data();
+                        // setTimeout(function(){
+                        //     modal.alert("All records saved/updated successfully!", 'success', () => {
+                        //         // location.reload()
+                        //         logAll(start_time, valid_data)
+                        //         // let href = "<?= base_url() ?>" + "cms/import-sell-out/";
+                        //         // window.location.href = href;
+                        //     });
+                        // }, 1000);
+                        // try lang muna kase sa production hindi gumagana yung reload ng data nagkakaron ng 8030 sa url
+                        // gumagana sa local pero testing, tignan nga ni
                         setTimeout(function(){
-                            modal.alert("All records saved/updated successfully!", 'success', () => {
-                                // location.reload()
-                                logAll(start_time, valid_data)
-                                // let href = "<?= base_url() ?>" + "cms/import-sell-out/";
-                                // window.location.href = href;
-                            });
+                            modal.alert("All records saved/updated successfully!", 'success', function() {
+                                    logAll(start_time, valid_data);
+                                    window.location.href = "<?= base_url('cms/import-sell-out') ?>";
+                                }
+                            );
                         }, 1000);
                     }
                     return;
