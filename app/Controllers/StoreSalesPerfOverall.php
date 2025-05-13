@@ -39,7 +39,7 @@ class StoreSalesPerfOverall extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-overall-performance'),'Overall Stores Sales Performance' => '');
-		$data["source"] = "Scan Data";
+		$data["source"] = "Scan Data(LMI/RGDI)";
 		$data["source_date"] = '<span id="sourceDate">N / A</span>';	
 		$data['content'] = "site/store/perf-overall/sales_overall_performance";
 		$data['session'] = session();
@@ -67,7 +67,7 @@ class StoreSalesPerfOverall extends BaseController
 		$storeCode = $storeCode === '' ? null : $storeCode;
         $brandCategoriesIds = $this->request->getPost('brandCategories') ?? [];
         $brandIds = $this->request->getPost('brands') ?? [];
-	    $yearId = $this->request->getPost('year')?? 2024;            
+	    $yearId = $this->request->getPost('year')?? 0;            
 	    $monthId = $this->request->getVar('month_start') ?? 1;
 	    $monthEndId = $this->request->getVar('month_end') ?? 12;
 		$limit = (int) $this->request->getVar('limit') ?? 10;

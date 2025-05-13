@@ -1029,7 +1029,9 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     function getBrandAmbassador($brandAmbassadorOffset) {
-        $query = $this->db->query("CALL SearchDynamic('tbl_brand_ambassador', null, 'id, name', 9999, 0, 'status:EQ=1', 'name', null)");
+        $select = 'id, CONCAT(code, " - ", name) AS name';
+        $query = $this->db->query("CALL SearchDynamic('tbl_brand_ambassador', null, '$select', 9999, 0, 'status:EQ=1', 'name', null)");
+
         return $query->getResultArray(); // Return data as an array
     }
     function get_brand_ambassador_masterfile_count() {

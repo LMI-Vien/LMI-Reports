@@ -193,38 +193,6 @@
         autocomplete_field($("#storeName"), $("#storeNameId"), store_branch, "description", "id");
     });
 
-    $('#itemLabel').on('change', function () {
-        let selectedValues = $(this).val(); 
-        $('#brands').empty();
-
-        if (selectedValues && selectedValues.length > 0) {
-            let inQuery = selectedValues.map(id => `'${id}'`).join(',');
-
-            let data = {
-                event: "list",
-                select: "b.id, b.brand_description",
-                query: "b.category_id IN (" + inQuery + ")",
-                table: "tbl_brand b"
-            };
-
-            aJax.post(base_url + "cms/global_controller", data, function (res) {
-                let result = JSON.parse(res);
-
-                if (result && result.length > 0) {
-                    result.forEach(function (item) {
-                        let newOption = new Option(item.brand_description, item.id, true, true);
-                        $('#brands').append(newOption);
-                    });
-                    $('#brands').trigger('change');
-                } else {
-                    $('#brands').trigger('change');
-                }
-            });
-        } else {
-            $('#brands').trigger('change');
-        }
-    });
-
     $(document).on('click', '#refreshButton', function () {
         const fields = [
             { input: '#area', target: '#areaId' },

@@ -829,6 +829,130 @@ class Dashboard_model extends Model
 
 	public function asc_dashboard_table_data($year, $month, $asc, $area, $minWeeks, $maxWeeks, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $withba = false)
 	{
+	    // $year = intval($year);
+	    // $month = intval($month);
+	    
+	    // // Get previous month and year
+	    // $prevMonth = ($month == 1) ? 12 : $month - 1;
+	    // $pprevMonth = ($month == 1) ? 12 : $month - 2;
+	    // $prevYear = ($month == 1) ? $year - 1 : $year;
+
+	    // $sql = "
+	    // WITH ranked_weeks AS (
+	    //     SELECT 
+	    //         vmi.item, 
+	    //         vmi.week, 
+	    //         vmi.year, 
+	    //         vmi.month,
+	    //         SUM(vmi.on_hand + vmi.in_transit) AS total_week_qty,
+	    //         ROW_NUMBER() OVER (PARTITION BY vmi.item ORDER BY vmi.year DESC, vmi.month DESC, vmi.week DESC) AS week_rank
+	    //     FROM tbl_vmi vmi
+	    //     WHERE vmi.status = 1
+	    //       AND ((vmi.year = ? AND vmi.month = ?) OR (vmi.year = ? AND vmi.month = ?) OR (vmi.year = ? AND vmi.month = ?))
+	    //     GROUP BY vmi.item, vmi.week, vmi.year, vmi.month
+	    // ),
+	    // selected_weeks AS (
+	    //     SELECT 
+	    //         item, 
+	    //         week, 
+	    //         year, 
+	    //         month, 
+	    //         total_week_qty,
+	    //         CASE 
+	    //             WHEN month = ? AND year = ? THEN 'current'
+	    //             ELSE 'previous'
+	    //         END AS week_type
+	    //     FROM ranked_weeks
+	    //     WHERE week_rank <= 3
+	    // ),
+	    // aggregated_vmi AS (
+	    //     SELECT 
+	    //         item,
+	    //         item_name,
+	    //         SUM(on_hand) AS total_on_hand,
+	    //         SUM(in_transit) AS total_in_transit,
+	    //         SUM(on_hand + in_transit) AS sum_total_qty,
+	    //         SUM(average_sales_unit) AS sum_ave_sales,
+	    //         ROUND(
+	    //             CASE 
+	    //                 WHEN SUM(average_sales_unit) > 0 
+	    //                 THEN SUM(on_hand + in_transit) / SUM(average_sales_unit) 
+	    //                 ELSE 0 
+	    //             END, 2
+	    //         ) AS weeks
+	    //     FROM tbl_vmi
+	    //     WHERE status = 1
+	    //     AND month = ? AND year = ?  -- Ensure year filter is applied here
+	    //     GROUP BY item, item_name
+	    // ),
+	    // item_brands AS (
+	    //     SELECT DISTINCT 
+	    //         tv.item,
+	    //         GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
+	    //         GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands,
+	    //         GROUP_CONCAT(DISTINCT s.description ORDER BY s.description SEPARATOR ', ') AS store_names
+	    //     FROM tbl_vmi tv
+	    //     LEFT JOIN tbl_brand_ambassador ba ON tv.store = ba.store
+	    //     LEFT JOIN tbl_store s ON ba.store = s.id
+	    //     LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+	    //     LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+	    //     GROUP BY tv.item
+	    // )
+	    // SELECT 
+	    //     vmi.item,
+	    //     vmi.item_name,
+	    //     vmi.total_on_hand,
+	    //     vmi.total_in_transit,
+	    //     vmi.sum_total_qty,
+	    //     vmi.sum_ave_sales,
+	    //     vmi.weeks,
+	    //     ib.ambassador_names,
+	    //     ib.brands,
+	    //     ib.store_names,
+	    //     CONCAT(
+	    //         '[', GROUP_CONCAT(
+	    //             DISTINCT 
+	    //             CASE 
+	    //                 WHEN sw.week_type = 'current' 
+	    //                 THEN CONCAT('{\"week\":', sw.week, ',\"qty\":', sw.total_week_qty, '}')
+	    //                 ELSE CONCAT('{\"old_week\":', sw.week, ',\"qty\":', sw.total_week_qty, '}')
+	    //             END
+	    //             ORDER BY sw.year DESC, sw.month DESC, sw.week DESC SEPARATOR ', '
+	    //         ), ']'
+	    //     ) AS last_3_weeks_total,
+	    //     COUNT(*) OVER() AS total_records
+	    // FROM aggregated_vmi vmi
+	    // LEFT JOIN selected_weeks sw ON vmi.item = sw.item
+	    // LEFT JOIN item_brands ib ON vmi.item = ib.item
+	    // WHERE (? IS NULL OR ib.brands LIKE ?)
+	    //   AND (? IS NULL OR ib.ambassador_names LIKE ?)
+	    //   AND (? IS NULL OR ib.store_names LIKE ?)
+	    //   " . ($withba ? " AND ib.ambassador_names IS NOT NULL AND ib.ambassador_names <> ''" : " AND (ib.ambassador_names IS NULL OR ib.ambassador_names = '')") . "
+	    // GROUP BY vmi.item, vmi.item_name, ib.ambassador_names, ib.brands, ib.store_names
+	    // HAVING weeks > ?
+	    //    AND (? IS NULL OR weeks < ?)
+	    // LIMIT ? OFFSET ?";
+
+	    // $params = [
+	    //     $year, $month, $year, $pprevMonth, $prevYear, $prevMonth,
+	    //     $month, $year, 
+	    //     $month, $year, 
+	    //     $brand ? "%$brand%" : NULL, $brand ? "%$brand%" : NULL, 
+	    //     $brand_ambassador ? "%$brand_ambassador%" : NULL, $brand_ambassador ? "%$brand_ambassador%" : NULL, 
+	    //     $store_name ? "%$store_name%" : NULL, $store_name ? "%$store_name%" : NULL, 
+	    //     $minWeeks, $maxWeeks, $maxWeeks, 
+	    //     $page_limit, $page_offset
+	    // ];
+
+	    // $query = $this->db->query($sql, $params);
+		// $data = $query->getResult();
+		// $totalRecords = count($data);
+
+		// return [
+		//     'total_records' => $totalRecords,
+		//     'data' => $data
+		// ];
+
 	    $year = intval($year);
 	    $month = intval($month);
 
@@ -915,6 +1039,127 @@ class Dashboard_model extends Model
 	}
 
 	public function asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $type, $item_class_filter, $withba = false) {
+
+	    // $year = intval($year);
+	    // $month = intval($month);
+	    
+	    // // Get previous month and year
+	    // $prevMonth = ($month == 1) ? 12 : $month - 1;
+	    // $pprevMonth = ($month == 1) ? 12 : $month - 2;
+	    // $prevYear = ($month == 1) ? $year - 1 : $year;
+	    // // Determine the item_class condition based on type
+	    // $itemClassCondition = ($type == 'npd') 
+	    //     ? "AND item_class LIKE 'N-New Item%'" 
+	    //     : "AND (item_class LIKE 'A-%' OR item_class LIKE 'AU-%' OR item_class LIKE 'B-%' OR item_class LIKE 'BU-%')";
+	    
+	    // $sql = "
+	    // WITH ranked_weeks AS (
+	    //     SELECT 
+	    //         vmi.item, 
+	    //         vmi.week, 
+	    //         vmi.year, 
+	    //         vmi.month,
+	    //         SUM(vmi.on_hand + vmi.in_transit) AS total_week_qty,
+	    //         ROW_NUMBER() OVER (PARTITION BY vmi.item ORDER BY vmi.year DESC, vmi.month DESC, vmi.week DESC) AS week_rank
+	    //     FROM tbl_vmi vmi
+	    //     WHERE vmi.status = 1
+	    //       $itemClassCondition
+	    //       AND ((vmi.year = ? AND vmi.month = ?) OR (vmi.year = ? AND vmi.month = ?) OR (vmi.year = ? AND vmi.month = ?))
+	    //     GROUP BY vmi.item, vmi.week, vmi.year, vmi.month
+	    // ),
+	    // selected_weeks AS (
+	    //     SELECT 
+	    //         item, 
+	    //         week, 
+	    //         year, 
+	    //         month, 
+	    //         total_week_qty,
+	    //         CASE 
+	    //             WHEN month = ? AND year = ? THEN 'current'
+	    //             ELSE 'previous'
+	    //         END AS week_type
+	    //     FROM ranked_weeks
+	    //     WHERE week_rank <= 3
+	    // ),
+	    // aggregated_vmi AS (
+	    //     SELECT 
+	    //         item,
+	    //         item_name,
+	    //         item_class,
+	    //         SUM(on_hand) AS total_on_hand,
+	    //         SUM(in_transit) AS total_in_transit,
+	    //         SUM(on_hand + in_transit) AS sum_total_qty,
+	    //         SUM(average_sales_unit) AS sum_ave_sales
+	    //     FROM tbl_vmi
+	    //     WHERE status = 1
+	    //     AND month = ? AND year = ?
+	    //     $itemClassCondition
+		//     GROUP BY item, item_name, item_class
+	    // ),
+	    // item_brands AS (
+	    //     SELECT DISTINCT 
+	    //         tv.item,
+	    //         GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
+	    //         GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands,
+	    //         GROUP_CONCAT(DISTINCT s.description ORDER BY s.description SEPARATOR ', ') AS store_names
+	    //     FROM tbl_vmi tv
+	    //     LEFT JOIN tbl_brand_ambassador ba ON tv.store = ba.store
+	    //     LEFT JOIN tbl_store s ON ba.store = s.id
+	    //     LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+	    //     LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+	    //     GROUP BY tv.item
+	    // )
+	    // SELECT 
+	    //     vmi.item,
+	    //     vmi.item_name,
+	    //     vmi.total_on_hand,
+	    //     vmi.total_in_transit,
+	    //     vmi.sum_total_qty,
+	    //     vmi.sum_ave_sales,
+	    //     ib.ambassador_names,
+	    //     ib.brands,
+	    //     ib.store_names,
+	    //     CONCAT(
+	    //         '[', GROUP_CONCAT(
+	    //             DISTINCT 
+	    //             CASE 
+	    //                 WHEN sw.week_type = 'current' 
+	    //                 THEN CONCAT('{\"week\":', sw.week, ',\"qty\":', sw.total_week_qty, '}')
+	    //                 ELSE CONCAT('{\"old_week\":', sw.week, ',\"qty\":', sw.total_week_qty, '}')
+	    //             END
+	    //             ORDER BY sw.year DESC, sw.month DESC, sw.week DESC SEPARATOR ', '
+	    //         ), ']'
+	    //     ) AS last_3_weeks_total,
+	    //     GROUP_CONCAT(DISTINCT vmi.item_class ORDER BY vmi.item_class SEPARATOR ', ') AS item_classes,
+	    //     COUNT(*) OVER() AS total_records
+	    // FROM aggregated_vmi vmi
+	    // LEFT JOIN selected_weeks sw ON vmi.item = sw.item
+	    // LEFT JOIN item_brands ib ON vmi.item = ib.item
+	    // WHERE (? IS NULL OR ib.brands LIKE ?)
+	    //   AND (? IS NULL OR ib.ambassador_names LIKE ?)
+	    //   AND (? IS NULL OR ib.store_names LIKE ?)
+	    //   " . ($withba ? " AND ib.ambassador_names IS NOT NULL AND ib.ambassador_names <> ''" : " AND (ib.ambassador_names IS NULL OR ib.ambassador_names = '')") . "
+	    // GROUP BY vmi.item, vmi.item_name, ib.ambassador_names, ib.brands, ib.store_names, vmi.item_class
+	    // LIMIT ? OFFSET ?";
+
+	    // $params = [
+	    //     $year, $month, $year, $pprevMonth, $prevYear, $prevMonth,
+	    //     $month, $year, 
+	    //     $month, $year, 
+	    //     $brand ? "%$brand%" : NULL, $brand ? "%$brand%" : NULL, 
+	    //     $brand_ambassador ? "%$brand_ambassador%" : NULL, $brand_ambassador ? "%$brand_ambassador%" : NULL, 
+	    //     $store_name ? "%$store_name%" : NULL, $store_name ? "%$store_name%" : NULL, 
+	    //     $page_limit, $page_offset
+	    // ];
+
+	    // $query = $this->db->query($sql, $params);
+		// $data = $query->getResult();
+		// $totalRecords = count($data);
+
+		// return [
+		//     'total_records' => $totalRecords,
+		//     'data' => $data
+		// ];
 
 	    $year = intval($year);
 	    $month = intval($month);
@@ -1315,6 +1560,492 @@ class Dashboard_model extends Model
 	    ];
 	}
 
+
+// public function getStorePerformance($month_start, $month_end, $year, $area_id, $asc_id, $limit, $offset, $brand_ambassador_ids = null)
+// {
+//     $last_year = $year - 1;
+
+//     // Normalize BA input
+//     $brand_ambassador_ids = is_array($brand_ambassador_ids)
+//         ? array_map('trim', $brand_ambassador_ids)
+//         : array_map('trim', explode(',', (string)$brand_ambassador_ids));
+
+//     // Build dynamic brand ambassador filters per alias
+//     $ba_params = [];
+//     $ba_condition_ly = '';
+//     $ba_condition_ty = '';
+//     $ba_condition_so = '';
+
+//     if (!empty($brand_ambassador_ids)) {
+//         $conditions_ly = [];
+//         $conditions_ty = [];
+//         $conditions_so = [];
+
+//         foreach ($brand_ambassador_ids as $id) {
+//             $conditions_ly[] = "FIND_IN_SET(?, ly_so.brand_ambassador_ids)";
+//             $conditions_ty[] = "FIND_IN_SET(?, ty_so.brand_ambassador_ids)";
+//             $conditions_so[] = "FIND_IN_SET(?, so.brand_ambassador_ids)";
+//             $ba_params[] = $id;
+//         }
+
+//         $ba_condition_ly = ' AND (' . implode(' OR ', $conditions_ly) . ')';
+//         $ba_condition_ty = ' AND (' . implode(' OR ', $conditions_ty) . ')';
+//         $ba_condition_so = ' AND (' . implode(' OR ', $conditions_so) . ')';
+//     }
+
+//     $sql = "
+//         WITH ly_scanned AS (
+//             SELECT 
+//                 ly_so.store_code,
+//                 SUM(COALESCE(ly_so.net_sales, 0)) AS ly_scanned_data
+//             FROM tbl_sell_out_data_details ly_so
+//             WHERE (? IS NULL OR ly_so.year = ?) 
+//               AND (? IS NULL OR ly_so.month BETWEEN ? AND ?)
+//               AND (? IS NULL OR ly_so.area_id = ?)
+//               AND (? IS NULL OR ly_so.asc_id = ?)
+//               {$ba_condition_ly}
+//             GROUP BY ly_so.store_code
+//         ),
+//         ty_scanned AS (
+//             SELECT 
+//                 ty_so.store_code,
+//                 SUM(COALESCE(ty_so.net_sales, 0)) AS ty_scanned_data
+//             FROM tbl_sell_out_data_details ty_so
+//             WHERE (? IS NULL OR ty_so.year = ?) 
+//               AND (? IS NULL OR ty_so.month BETWEEN ? AND ?)
+//               AND (? IS NULL OR ty_so.area_id = ?)
+//               AND (? IS NULL OR ty_so.asc_id = ?)
+//               {$ba_condition_ty}
+//             GROUP BY ty_so.store_code
+//         ),
+//         total_ty AS (
+//             SELECT SUM(COALESCE(ty.ty_scanned_data, 0)) AS total_ty_sales
+//             FROM ty_scanned ty
+//         ),
+//         distinct_store_count AS (
+//             SELECT COUNT(DISTINCT store_code) AS total_unique_store_codes
+//             FROM tbl_sell_out_data_details
+//         )
+//         SELECT 
+//             ROW_NUMBER() OVER (ORDER BY (COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0)) DESC) AS rank,
+//             so.store_code,
+//             so.brand_ambassador_ids,
+//             MAX(s.description) AS store_name,
+//             COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data,
+//             COALESCE(ty.ty_scanned_data, 0) AS ty_scanned_data,
+//             ROUND(COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0) * 100, 2) AS growth,
+//             COUNT(*) OVER() AS total_records
+//         FROM tbl_sell_out_data_details so
+//         LEFT JOIN ly_scanned ly ON so.store_code = ly.store_code
+//         LEFT JOIN ty_scanned ty ON so.store_code = ty.store_code
+//         LEFT JOIN tbl_store s ON so.store_code = s.code
+//         CROSS JOIN total_ty tt
+//         CROSS JOIN distinct_store_count dsc
+//         WHERE (? IS NULL OR so.year = ?)
+//           AND (? IS NULL OR so.month BETWEEN ? AND ?)
+//           AND (? IS NULL OR so.area_id = ?)
+//           AND (? IS NULL OR so.asc_id = ?)
+//           {$ba_condition_so}
+//         GROUP BY so.store_code, ly.ly_scanned_data, ty.ty_scanned_data, tt.total_ty_sales, dsc.total_unique_store_codes
+//         ORDER BY rank ASC
+//         LIMIT ? OFFSET ?;
+//     ";
+
+//     // Merge all parameters in the correct order
+//     $params = array_merge(
+//         // ly_scanned
+//         [$last_year, $last_year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id],
+//         $ba_params, // ly_so
+
+//         // ty_scanned
+//         [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id],
+//         $ba_params, // ty_so
+
+//         // main SELECT
+//         [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id],
+//         $ba_params, // so
+
+//         // pagination
+//         [$limit, $offset]
+//     );
+
+//     $query = $this->db->query($sql, $params);
+//     $data = $query->getResult();
+//     $totalRecords = $data ? $data[0]->total_records : 0;
+
+//     return [
+//         'total_records' => $totalRecords,
+//         'data' => $data
+//     ];
+// }
+// public function getStorePerformance($month_start, $month_end, $year, $area_id, $asc_id, $limit, $offset, $brand_ambassador_ids = null, $ba_type = null, $brand_and$brands = null)
+// {
+//     $last_year = $year - 1;
+
+//     // Normalize BA input
+//     $brand_ambassador_ids = is_array($brand_ambassador_ids)
+//         ? array_map('trim', $brand_ambassador_ids)
+//         : array_filter(array_map('trim', explode(',', (string)$brand_ambassador_ids)));
+
+//     // Filter valid BAs from tbl_brand_ambassador
+//     $valid_ba_ids = [];
+//     if (!empty($brand_ambassador_ids)) {
+//         $builder = $this->db->table('tbl_brand_ambassador');
+//         $builder->select('id');
+//         $builder->whereIn('id', $brand_ambassador_ids);
+        
+//         // Apply filter for ba_type if it's not null and not 3
+//         if ($ba_type !== null && $ba_type != 3) {
+//             $builder->where('type', $ba_type);
+//         }
+//         $query = $builder->get();
+//         foreach ($query->getResult() as $row) {
+//             $valid_ba_ids[] = (string)$row->id;
+//         }
+//     } elseif ($ba_type == 3) {
+//         // If ba_type = 3, don't filter, get all brand ambassadors
+//         $builder = $this->db->table('tbl_brand_ambassador');
+//         $builder->select('id');
+//         $query = $builder->get();
+//         foreach ($query->getResult() as $row) {
+//             $valid_ba_ids[] = (string)$row->id;
+//         }
+//     }
+
+//     if (empty($valid_ba_ids)) {
+//         return [
+//             'total_records' => 0,
+//             'data' => []
+//         ];
+//     }
+
+//     // Build dynamic BA conditions
+//     $ba_params = [];
+//     $ba_condition_ly = '';
+//     $ba_condition_ty = '';
+//     $ba_condition_so = '';
+
+//     if (!empty($valid_ba_ids)) {
+//         $conditions_ly = [];
+//         $conditions_ty = [];
+//         $conditions_so = [];
+
+//         foreach ($valid_ba_ids as $id) {
+//             $conditions_ly[] = "FIND_IN_SET(?, ly_so.brand_ambassador_ids)";
+//             $conditions_ty[] = "FIND_IN_SET(?, ty_so.brand_ambassador_ids)";
+//             $conditions_so[] = "FIND_IN_SET(?, so.brand_ambassador_ids)";
+//             $ba_params[] = $id;
+//         }
+
+//         $ba_condition_ly = ' AND (' . implode(' OR ', $conditions_ly) . ')';
+//         $ba_condition_ty = ' AND (' . implode(' OR ', $conditions_ty) . ')';
+//         $ba_condition_so = ' AND (' . implode(' OR ', $conditions_so) . ')';
+//     }
+
+//     $sql = "
+//         WITH ly_scanned AS (
+//             SELECT 
+//                 ly_so.store_code,
+//                 SUM(COALESCE(ly_so.net_sales, 0)) AS ly_scanned_data
+//             FROM tbl_sell_out_data_details ly_so
+//             WHERE (? IS NULL OR ly_so.year = ?) 
+//               AND (? IS NULL OR ly_so.month BETWEEN ? AND ?)
+//               AND (? IS NULL OR ly_so.area_id = ?)
+//               AND (? IS NULL OR ly_so.asc_id = ?)
+//               {$ba_condition_ly}
+//             GROUP BY ly_so.store_code
+//         ),
+//         ty_scanned AS (
+//             SELECT 
+//                 ty_so.store_code,
+//                 SUM(COALESCE(ty_so.net_sales, 0)) AS ty_scanned_data
+//             FROM tbl_sell_out_data_details ty_so
+//             WHERE (? IS NULL OR ty_so.year = ?) 
+//               AND (? IS NULL OR ty_so.month BETWEEN ? AND ?)
+//               AND (? IS NULL OR ty_so.area_id = ?)
+//               AND (? IS NULL OR ty_so.asc_id = ?)
+//               {$ba_condition_ty}
+//             GROUP BY ty_so.store_code
+//         ),
+//         total_ty AS (
+//             SELECT SUM(COALESCE(ty.ty_scanned_data, 0)) AS total_ty_sales
+//             FROM ty_scanned ty
+//         ),
+//         distinct_store_count AS (
+//             SELECT COUNT(DISTINCT store_code) AS total_unique_store_codes
+//             FROM tbl_sell_out_data_details
+//         )
+//         SELECT 
+//             ROW_NUMBER() OVER (ORDER BY (COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0)) DESC) AS rank,
+//             so.store_code,
+//             so.brand_ambassador_ids,
+//             MAX(s.description) AS store_name,
+//             COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data,
+//             COALESCE(ty.ty_scanned_data, 0) AS ty_scanned_data,
+//             ROUND(COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0) * 100, 2) AS growth,
+//             COUNT(*) OVER() AS total_records
+//         FROM tbl_sell_out_data_details so
+//         LEFT JOIN ly_scanned ly ON so.store_code = ly.store_code
+//         LEFT JOIN ty_scanned ty ON so.store_code = ty.store_code
+//         LEFT JOIN tbl_store s ON so.store_code = s.code
+//         CROSS JOIN total_ty tt
+//         CROSS JOIN distinct_store_count dsc
+//         WHERE (? IS NULL OR so.year = ?)
+//           AND (? IS NULL OR so.month BETWEEN ? AND ?)
+//           AND (? IS NULL OR so.area_id = ?)
+//           AND (? IS NULL OR so.asc_id = ?)
+//           {$ba_condition_so}
+//         GROUP BY so.store_code, ly.ly_scanned_data, ty.ty_scanned_data, tt.total_ty_sales, dsc.total_unique_store_codes
+//         ORDER BY rank ASC
+//         LIMIT ? OFFSET ?;
+//     ";
+
+//     $params = array_merge(
+//         // ly_scanned
+//         [$last_year, $last_year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id],
+//         $ba_params, // ly_so
+
+//         // ty_scanned
+//         [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id],
+//         $ba_params, // ty_so
+
+//         // main select
+//         [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id],
+//         $ba_params, // so
+
+//         // pagination
+//         [$limit, $offset]
+//     );
+
+//     $query = $this->db->query($sql, $params);
+//     $data = $query->getResult();
+//     $totalRecords = $data ? $data[0]->total_records : 0;
+
+//     return [
+//         'total_records' => $totalRecords,
+//         'data' => $data
+//     ];
+// }
+
+	// public function getStorePerformance($month_start, $month_end, $year, $limit, $offset, $area_id = null, $asc_id = null, $store_code = null, $brand_ambassador_ids = null, $ba_type = null, $brand_category = null, $brands = null)
+	// {
+	//     $last_year = $year - 1;
+
+	//     $brand_ambassador_ids = is_array($brand_ambassador_ids)
+	//         ? array_map('trim', $brand_ambassador_ids)
+	//         : array_filter(array_map('trim', explode(',', (string)$brand_ambassador_ids)));
+
+	//     $brand_category = is_array($brand_category) ? array_map('trim', $brand_category) : array_filter(array_map('trim', explode(',', (string)$brand_category)));
+	//     $brands = is_array($brands) ? array_map('trim', $brands) : array_filter(array_map('trim', explode(',', (string)$brands)));
+
+	//     $valid_ba_ids = [];
+	//     $includeSpecialBa = [];
+	// 	if (!empty($brand_ambassador_ids)) {
+	// 	    $filtered_ba_ids = [];
+		    
+	// 	    foreach ($brand_ambassador_ids as $id) {
+	// 	        $id = trim((string)$id);
+	// 	        if (in_array($id, ['-5', '-6'])) {
+	// 	            $includeSpecialBa[] = $id;
+	// 	        } else {
+	// 	            $filtered_ba_ids[] = $id;
+	// 	        }
+	// 	    }
+
+	// 	    if (!empty($filtered_ba_ids)) {
+	// 	        $builder = $this->db->table('tbl_brand_ambassador');
+	// 	        $builder->select('id');
+	// 	        $builder->whereIn('id', $filtered_ba_ids);
+
+	// 	        if ($ba_type !== null && $ba_type != 3) {
+	// 	            $builder->where('ba_type', $ba_type);
+	// 	        }
+
+	// 	        $query = $builder->get();
+	// 	        foreach ($query->getResult() as $row) {
+	// 	            $valid_ba_ids[] = (string)$row->id;
+	// 	        }
+	// 	    }
+
+	// 	    // Add -5 and -6 back for filtering only (not validation)
+	// 	    $valid_ba_ids = array_merge($valid_ba_ids, $includeSpecialBa);
+	// 	} elseif ($ba_type == 3) {
+
+	//         $builder = $this->db->table('tbl_brand_ambassador');
+	//         $builder->select('id');
+	//         $query = $builder->get();
+	//         foreach ($query->getResult() as $row) {
+	//             $valid_ba_ids[] = (string)$row->id;
+	//         }
+	//     }
+
+	// 	$valid_brand_ids = [];
+	// 	$builder = $this->db->table('tbl_brand');
+	// 	$builder->select('id');
+
+	// 	if (!empty($brands)) {
+	// 	    $builder->whereIn('id', $brands);
+	// 	}
+
+	// 	if (!empty($brand_category)) {
+	// 	    $builder->whereIn('category_id', $brand_category);
+	// 	}
+
+	// 	$query = $builder->get();
+	// 	foreach ($query->getResult() as $row) {
+	// 	    $valid_brand_ids[] = (string)$row->id;
+	// 	}
+
+	// 	if (!empty($brand_category) && !empty($brands) && empty($valid_brand_ids)) {
+	// 	    return [
+	// 	        'total_records' => 0,
+	// 	        'data' => [],
+	// 	        'message' => 'No brands found for the selected categories.'
+	// 	    ];
+	// 	}
+
+	//     $ba_params = [];
+	//     $ba_condition_ly = '';
+	//     $ba_condition_ty = '';
+	//     $ba_condition_so = '';
+
+	//     $brand_params = [];
+	//     $brand_condition_ly = '';
+	//     $brand_condition_ty = '';
+	//     $brand_condition_so = '';
+
+	//     if (!empty($valid_ba_ids)) {
+	//         $conditions_ly = [];
+	//         $conditions_ty = [];
+	//         $conditions_so = [];
+
+	//         foreach ($valid_ba_ids as $id) {
+	//             $conditions_ly[] = "FIND_IN_SET(?, ly_so.brand_ambassador_ids)";
+	//             $conditions_ty[] = "FIND_IN_SET(?, ty_so.brand_ambassador_ids)";
+	//             $conditions_so[] = "FIND_IN_SET(?, so.brand_ambassador_ids)";
+	//             $ba_params[] = $id;
+	//         }
+
+	//         $ba_condition_ly = ' AND (' . implode(' OR ', $conditions_ly) . ')';
+	//         $ba_condition_ty = ' AND (' . implode(' OR ', $conditions_ty) . ')';
+	//         $ba_condition_so = ' AND (' . implode(' OR ', $conditions_so) . ')';
+	//     }
+
+	//     if (!empty($valid_brand_ids)) {
+	//         $brand_conditions_ly = [];
+	//         $brand_conditions_ty = [];
+	//         $brand_conditions_so = [];
+
+	//         foreach ($valid_brand_ids as $id) {
+	//             $brand_conditions_ly[] = "FIND_IN_SET(?, ly_so.brand_ids)";
+	//             $brand_conditions_ty[] = "FIND_IN_SET(?, ty_so.brand_ids)";
+	//             $brand_conditions_so[] = "FIND_IN_SET(?, so.brand_ids)";
+	//             $brand_params[] = $id;
+	//         }
+
+	//         $brand_condition_ly = ' AND (' . implode(' OR ', $brand_conditions_ly) . ')';
+	//         $brand_condition_ty = ' AND (' . implode(' OR ', $brand_conditions_ty) . ')';
+	//         $brand_condition_so = ' AND (' . implode(' OR ', $brand_conditions_so) . ')';
+	//     }
+
+	//     $sql = "
+	//         WITH ly_scanned AS (
+	//             SELECT 
+	//                 ly_so.store_code,
+	//                 SUM(COALESCE(ly_so.net_sales, 0)) AS ly_scanned_data
+	//             FROM tbl_sell_out_data_details ly_so
+	//             WHERE (? IS NULL OR ly_so.year = ?) 
+	//               AND (? IS NULL OR ly_so.month BETWEEN ? AND ?)
+	//               AND (? IS NULL OR ly_so.area_id = ?)
+	//               AND (? IS NULL OR ly_so.asc_id = ?)
+	//               AND (? IS NULL OR ly_so.store_code = ?)
+	//               {$ba_condition_ly}
+	//               {$brand_condition_ly}
+	//             GROUP BY ly_so.store_code
+	//         ),
+	//         ty_scanned AS (
+	//             SELECT 
+	//                 ty_so.store_code,
+	//                 SUM(COALESCE(ty_so.net_sales, 0)) AS ty_scanned_data
+	//             FROM tbl_sell_out_data_details ty_so
+	//             WHERE (? IS NULL OR ty_so.year = ?) 
+	//               AND (? IS NULL OR ty_so.month BETWEEN ? AND ?)
+	//               AND (? IS NULL OR ty_so.area_id = ?)
+	//               AND (? IS NULL OR ty_so.asc_id = ?)
+	//               AND (? IS NULL OR ty_so.store_code = ?)
+	//               {$ba_condition_ty}
+	//               {$brand_condition_ty}
+	//             GROUP BY ty_so.store_code
+	//         ),
+	//         total_ty AS (
+	//             SELECT SUM(COALESCE(ty.ty_scanned_data, 0)) AS total_ty_sales
+	//             FROM ty_scanned ty
+	//         ),
+	//         distinct_store_count AS (
+	//             SELECT COUNT(DISTINCT store_code) AS total_unique_store_codes
+	//             FROM tbl_sell_out_data_details
+	//         )
+	//         SELECT 
+	//             ROW_NUMBER() OVER (ORDER BY (COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0)) DESC) AS rank,
+	//             so.store_code,
+	//             so.brand_ambassador_ids,
+	//             so.brand_ids,
+	//             so.area_id,
+	//             so.asc_id,
+	//             CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
+	//             COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data,
+	// 	        COALESCE(ty.ty_scanned_data, 0) AS ty_scanned_data,
+	// 			CASE 
+	// 			    WHEN ly.ly_scanned_data IS NULL OR ty.ty_scanned_data IS NULL THEN ''
+	// 			    WHEN COALESCE(ly.ly_scanned_data, 0) = 0 THEN ''
+	// 			    ELSE ROUND((ty.ty_scanned_data - ly.ly_scanned_data) / NULLIF(ly.ly_scanned_data, 0) * 100, 2)
+	// 			END AS growth,
+	//             ROUND(COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0) * 100, 2) AS sob,
+	//             COUNT(*) OVER() AS total_records
+	//         FROM tbl_sell_out_data_details so
+	//         LEFT JOIN ly_scanned ly ON so.store_code = ly.store_code
+	//         LEFT JOIN ty_scanned ty ON so.store_code = ty.store_code
+	//         LEFT JOIN tbl_store s ON so.store_code = s.code
+	//         CROSS JOIN total_ty tt
+	//         CROSS JOIN distinct_store_count dsc
+	//         WHERE (? IS NULL OR so.year = ?)
+	//           AND (? IS NULL OR so.month BETWEEN ? AND ?)
+	//           AND (? IS NULL OR so.area_id = ?)
+	//           AND (? IS NULL OR so.asc_id = ?)
+	//           AND (? IS NULL OR so.store_code = ?)
+	//           {$ba_condition_so}
+	//           {$brand_condition_so}
+	//         GROUP BY so.store_code, ly.ly_scanned_data, ty.ty_scanned_data, tt.total_ty_sales, dsc.total_unique_store_codes
+	//         ORDER BY rank ASC
+	//         LIMIT ? OFFSET ?;
+	//     ";
+
+	//     $params = array_merge(
+	//         // ly_scanned
+	//         [$last_year, $last_year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id, $store_code, $store_code],
+	//         $ba_params, $brand_params,
+
+	//         // ty_scanned
+	//         [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id, $store_code, $store_code],
+	//         $ba_params, $brand_params,
+
+	//         // main select
+	//         [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id, $store_code, $store_code],
+	//         $ba_params, $brand_params,
+
+	//         [$limit, $offset]
+	//     );
+
+	//     $query = $this->db->query($sql, $params);
+	//     $data = $query->getResult();
+	//     $totalRecords = $data ? $data[0]->total_records : 0;
+
+	//     return [
+	//         'total_records' => $totalRecords,
+	//         'data' => $data
+	//     ];
+	// }
+
 	public function getStorePerformance($month_start, $month_end, $year, $limit, $offset, $area_id = null, $asc_id = null, $store_code = null, $brand_ambassador_ids = null, $ba_type = null, $brand_category = null, $brands = null)
 	{
 	    $last_year = $year - 1;
@@ -1323,15 +2054,7 @@ class Dashboard_model extends Model
 	        ? array_map('trim', $brand_ambassador_ids)
 	        : array_filter(array_map('trim', explode(',', (string)$brand_ambassador_ids)));
 
-		$brand_category_condition = '';
-		$brand_category_params = [];
-
-		if (!empty($brand_category)) {
-		    $placeholders = implode(',', array_fill(0, count($brand_category), '?'));
-		    $brand_category_condition = " AND blt.id IN ($placeholders)";
-		    $brand_category_params = $brand_category;
-		}
-
+	    $brand_category = is_array($brand_category) ? array_map('trim', $brand_category) : array_filter(array_map('trim', explode(',', (string)$brand_category)));
 	    $brands = is_array($brands) ? array_map('trim', $brands) : array_filter(array_map('trim', explode(',', (string)$brands)));
 
 	    $valid_ba_ids = [];
@@ -1383,12 +2106,16 @@ class Dashboard_model extends Model
 		    $builder->whereIn('id', $brands);
 		}
 
+		if (!empty($brand_category)) {
+		    $builder->whereIn('category_id', $brand_category);
+		}
+
 		$query = $builder->get();
 		foreach ($query->getResult() as $row) {
 		    $valid_brand_ids[] = (string)$row->id;
 		}
 
-		if (!empty($brands) && empty($valid_brand_ids)) {
+		if (!empty($brand_category) && !empty($brands) && empty($valid_brand_ids)) {
 		    return [
 		        'total_records' => 0,
 		        'data' => [],
@@ -1444,7 +2171,7 @@ class Dashboard_model extends Model
 	        WITH ly_scanned AS (
 	            SELECT 
 	                ly_so.store_code,
-	                SUM(COALESCE(ly_so.gross_sales, 0)) AS ly_scanned_data
+	                SUM(COALESCE(ly_so.net_sales, 0)) AS ly_scanned_data
 	            FROM tbl_sell_out_data_details ly_so
 	            WHERE (? IS NULL OR ly_so.year = ?) 
 	              AND (? IS NULL OR ly_so.month BETWEEN ? AND ?)
@@ -1453,7 +2180,7 @@ class Dashboard_model extends Model
 	        ty_scanned AS (
 	            SELECT 
 	                ty_so.store_code,
-	                SUM(COALESCE(ty_so.gross_sales, 0)) AS ty_scanned_data
+	                SUM(COALESCE(ty_so.net_sales, 0)) AS ty_scanned_data
 	            FROM tbl_sell_out_data_details ty_so
 	            WHERE (? IS NULL OR ty_so.year = ?) 
 	              AND (? IS NULL OR ty_so.month BETWEEN ? AND ?)
@@ -1474,13 +2201,9 @@ class Dashboard_model extends Model
 	            so.brand_ids,
 	            so.area_id,
 	            so.asc_id,
-	            h.company,
-			    CASE WHEN h.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END AS itmcde,
-			    CASE WHEN h.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
-			    blt.id AS brand_type_id,
 	            CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
-	            ROUND(COALESCE(ty.ty_scanned_data, 0), 2) AS ty_scanned_data,
-		        ROUND(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data,
+	            COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data,
+		        COALESCE(ty.ty_scanned_data, 0) AS ty_scanned_data,
 				CASE 
 				    WHEN ly.ly_scanned_data IS NULL OR ty.ty_scanned_data IS NULL THEN ''
 				    WHEN COALESCE(ly.ly_scanned_data, 0) = 0 THEN ''
@@ -1489,25 +2212,9 @@ class Dashboard_model extends Model
 	            ROUND(COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0) * 100, 2) AS sob,
 	            COUNT(*) OVER() AS total_records
 	        FROM tbl_sell_out_data_details so
-	        INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
 	        LEFT JOIN ly_scanned ly ON so.store_code = ly.store_code
 	        LEFT JOIN ty_scanned ty ON so.store_code = ty.store_code
 	        LEFT JOIN tbl_store s ON so.store_code = s.code
-			LEFT JOIN tbl_price_code_file_2_lmi pclmi 
-			  ON so.sku_code = pclmi.cusitmcde AND h.company = '2'
-
-			LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi 
-			  ON so.sku_code = pcrgdi.cusitmcde AND h.company != '2'
-
-			LEFT JOIN tbl_itemfile_lmi pitmlmi 
-			  ON pclmi.itmcde = pitmlmi.itmcde AND h.company = '2'
-
-			LEFT JOIN tbl_itemfile_rgdi itmrgdi 
-			  ON pcrgdi.itmcde = itmrgdi.itmcde AND h.company != '2'
-			LEFT JOIN tbl_brand b ON 
-			    (h.company = '2' AND pitmlmi.brncde = b.brand_code) OR
-			    (h.company != '2' AND itmrgdi.brncde = b.brand_code)
-			LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
 	        CROSS JOIN total_ty tt
 	        CROSS JOIN distinct_store_count dsc
 	        WHERE (? IS NULL OR so.year = ?)
@@ -1517,7 +2224,6 @@ class Dashboard_model extends Model
 	          AND (? IS NULL OR so.store_code = ?)
 	          {$ba_condition_so}
 	          {$brand_condition_so}
-	          {$brand_category_condition}
 	        GROUP BY so.store_code, ly.ly_scanned_data, ty.ty_scanned_data, tt.total_ty_sales, dsc.total_unique_store_codes
 	        ORDER BY rank ASC
 	        LIMIT ? OFFSET ?;
@@ -1532,7 +2238,7 @@ class Dashboard_model extends Model
 
 		    // main select
 		    [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id, $store_code, $store_code],
-		    $ba_params, $brand_params, $brand_category_params,
+		    $ba_params, $brand_params,
 
 		    [$limit, $offset]
 		);
