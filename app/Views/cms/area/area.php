@@ -1750,8 +1750,8 @@
     })
 
     function save_data(actions, id) {
-        var code = $('#code').val();
-        var description = $('#description').val();
+        var code = $('#code').val().trim();
+        var description = $('#description').val().trim();
         var chk_status = $('#status').prop('checked');
         var linenum = 0;
         var store = '';
@@ -2254,7 +2254,7 @@
                     "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
                     0, 
                     0, 
-                    `'a.id:IN=${ids.join('|')}'`,  
+                    `'a.id:IN=${ids.join('|')} a.status:IN=0|1'`,  
                     `''`, 
                     `'a.id'`,
                     processResponse
@@ -2270,7 +2270,7 @@
                 "'COUNT(id) AS total_records'", 
                 0, 
                 0, 
-                `''`,  
+                `'status:IN=0|1'`,  
                 `''`, 
                 `''`,
                 (res) => {
@@ -2284,7 +2284,7 @@
                                 "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT a.description ORDER BY a.description ASC SEPARATOR \", \") AS store_description'", 
                                 100000, 
                                 index, 
-                                `''`,  
+                                `'a.status:IN=0|1'`,  
                                 `''`, 
                                 `'a.id'`, 
                                 (res) => {

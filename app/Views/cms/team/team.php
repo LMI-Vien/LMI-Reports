@@ -1238,7 +1238,7 @@
 
         const batch_export = () => {
             dynamic_search(
-                "'tbl_team'", "''", "'COUNT(id) as total_records'", 0, 0, `''`, `''`, `''`, 
+                "'tbl_team'", "''", "'COUNT(id) as total_records'", 0, 0, `'status:IN=0|1'`, `''`, `''`, 
                 (res) => {
                     if (res && res.length > 0) {
                         let total_records = res[0].total_records;
@@ -1246,7 +1246,7 @@
 
                         for (let index = 0; index < total_records; index += 100000) {
                             dynamic_search(
-                                "'tbl_team'", "''", "'code, team_description, status'", 100000, index, `''`, `''`, `''`, 
+                                "'tbl_team'", "''", "'code, team_description, status'", 100000, index, `'status:IN=0|1'`, `''`, `''`, 
                                 (res) => {
                                     let newData = res.map(({ 
                                         code, team_description, status

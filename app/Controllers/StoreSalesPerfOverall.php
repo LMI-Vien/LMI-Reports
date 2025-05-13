@@ -27,14 +27,20 @@ class StoreSalesPerfOverall extends BaseController
 			"keyword"       =>  ""
 		);
 
-		$data['month'] = $this->Global_model->getMonths();
+		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
+		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
+		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
+		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
+		$data['asc'] = $this->Global_model->getAsc(0);
+		$data['areas'] = $this->Global_model->getArea(0);
+		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-overall-performance'),'Overall Stores Sales Performance' => '');
 		$data["source"] = "Scan Data";
-		$data["source_date"] = 'Monthly(temp)';	
+		$data["source_date"] = '<span id="sourceDate">N / A</span>';	
 		$data['content'] = "site/store/perf-overall/sales_overall_performance";
 		$data['session'] = session();
 		$data['js'] = array(
@@ -49,46 +55,32 @@ class StoreSalesPerfOverall extends BaseController
 
 	public function getPerfPerOverall()
 	{	
+		$areaId = trim($this->request->getPost('area'));
+		$areaId = $areaId === '' ? null : $areaId;
+		$ascId = trim($this->request->getPost('asc'));
+		$ascId = $ascId === '' ? null : $ascId;
+		$baTypeId = trim($this->request->getPost('baType'));
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
+		$baId = trim($this->request->getPost('ba'));
+		$baId = $baId === '' ? null : $baId;
+		$storeCode = trim($this->request->getPost('store'));
+		$storeCode = $storeCode === '' ? null : $storeCode;
+        $brandCategoriesIds = $this->request->getPost('brandCategories') ?? [];
+        $brandIds = $this->request->getPost('brands') ?? [];
+	    $yearId = $this->request->getPost('year')?? 2024;            
+	    $monthId = $this->request->getVar('month_start') ?? 1;
+	    $monthEndId = $this->request->getVar('month_end') ?? 12;
+		$limit = (int) $this->request->getVar('limit') ?? 10;
+		$offset = (int) $this->request->getVar('offset') ?? 0;
 
-	    $month_start = $this->request->getVar('month_start');
-	    $month_end = $this->request->getVar('month_end');
-	    $year = $this->request->getPost('year');
-		$limit = (int) $this->request->getVar('limit');
-		$offset = (int) $this->request->getVar('offset');
+	    $data = $this->Dashboard_model->getStorePerformance($monthId, $monthEndId, $yearId, $limit, $offset, $areaId, $ascId, $storeCode, $baId, $baTypeId, $brandCategoriesIds, $brandIds);
 
-	    if(empty($month_start)){
-	    	$month_start = 1;
-	    }
-	    if(empty($month_end)){
-	    	$month_end = 12;
-	    }
-	    if(!empty($year)){
-	    	$actual_year = $this->Dashboard_model->getYear($year);
-	    	$selected_year = $actual_year[0]['year'];
-	    }else{
-	    	$selected_year = 2025;
-	    }
-		if(empty($limit)) {
-			$limit = 10;
-		}
-		if(empty($offset)) {
-			$offset = 0;
-		}
-
-	    $data = $this->Dashboard_model->getStorePerformance($month_start, $month_end, $selected_year, $limit, $offset);
-
-	    // return $this->response->setJSON([
-	    //     'draw' => intval($this->request->getVar('draw')),
-	    //     'recordsTotal' => $data['total_records'],
-	    //     'recordsFiltered' => $data['total_records'],
-	    //     'data' => $data['data']
-	    // ]);	
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
-	        'recordsTotal' => 0,
-	        'recordsFiltered' => 0,
-	        'data' => []
-	    ]);	
+	        'recordsTotal' => $data['total_records'],
+	        'recordsFiltered' => $data['total_records'],
+	        'data' => $data['data']
+	    ]);
 	}
 
 	public function generatePdf()

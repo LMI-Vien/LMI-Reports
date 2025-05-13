@@ -413,6 +413,14 @@
                     status: status_val
                 }
             };
+
+            aJax.post(url,data,function(result){
+                var obj = is_json(result);
+                modal.loading(false);
+                modal.alert(modal_alert_success, 'success', function() {
+                    location.reload();
+                });
+            }); 
         } else {
             get_last_sort_order(function(new_sort_order) {
                 modal_alert_success = success_save_message;

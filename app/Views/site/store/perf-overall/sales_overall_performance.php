@@ -60,7 +60,7 @@
                             <thead>
                                 <tr>
                                     <th 
-                                        colspan="7"
+                                        colspan="6"
                                         style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                         class="tbl-title-header"
                                     >
@@ -70,7 +70,6 @@
                                 <tr>
                                     <th class="tbl-title-field">Rank</th>
                                     <th class="tbl-title-field">Store Code / Store Name</th>
-                                    <th class="tbl-title-field">Location Description</th>
                                     <th class="tbl-title-field">LY Sell Out</th>
                                     <th class="tbl-title-field">TY Sell Out</th>
                                     <th class="tbl-title-field">% Growth</th>
@@ -79,16 +78,16 @@
                             </thead>
                               <tbody>
                                   <tr>
-                                      <td colspan="7" class="text-center py-4 text-muted">
+                                      <td colspan="6" class="text-center py-4 text-muted">
                                       </td>
                                   </tr>
                                   <tr>
-                                      <td colspan="7" class="text-center py-4 text-muted">
+                                      <td colspan="6" class="text-center py-4 text-muted">
                                           No data available
                                       </td>
                                   </tr>
                                   <tr>
-                                      <td colspan="7" class="text-center py-4 text-muted">
+                                      <td colspan="6" class="text-center py-4 text-muted">
                                       </td>
                                   </tr>
                               </tbody>
@@ -117,20 +116,122 @@
 </div>
 
 <script>
-    let months = <?= json_encode($month); ?>;
+    let brand_ambassadors = <?= json_encode($brand_ambassadors) ?>;
+    let store_branch = <?= json_encode($store_branches) ?>;
+    let brands = <?= json_encode($brands) ?>;
+    let area = <?= json_encode($areas) ?>;
+    let asc = <?= json_encode($asc) ?>;
+    let brandLabel = <?= json_encode($brandLabel); ?>;
+    let year = <?= json_encode($year); ?>;
+    let months = <?= json_encode($months); ?>;
+    brand_ambassadors.unshift(
+        { id: "-6", name: "Non Ba" },
+        { id: "-5", name: "Vacant" }
+    )
 
     $(document).ready(function() {
-        //fetchData();
+        let highestYear = $("#year option:not(:first)").map(function () {
+            return parseInt($(this).val());
+        }).get().sort((a, b) => b - a)[0];
 
+        if (highestYear) {
+            $("#year").val(highestYear);
+        }
+        $('#itemLabel').select2({ placeholder: 'Select Brand Label Types' });
+        $('#brands').select2({ placeholder: 'Select Brands' });
+        autocomplete_field($("#area"), $("#areaId"), area, "description", "id", function(result) {
+            //let url = url;
+            let data = {
+                event: "list",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                query: "a.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_area a",
+                join: [
+                    {
+                        table: "tbl_area_sales_coordinator asc",
+                        query: "a.id = asc.area_id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let data = JSON.parse(result);
+                $("#ascName").val(data[0].asc_description);
+                $("#ascNameId").val(data[0].asc_id);
+            })
+        });
+
+        autocomplete_field($("#ascName"), $("#ascNameId"), asc, "description");
+
+        autocomplete_field($("#brandAmbassador"), $("#brandAmbassadorId"), brand_ambassadors, "name", "id", function(result) {
+            let data = {
+                event: "list",
+                select: "s.id, s.code, s.description",
+                query: "sg.brand_ambassador_id = " + result.id,
+                table: "tbl_brand_ambassador_group sg",
+                join: [
+                    {
+                        table: "tbl_store s",
+                        query: "s.id = sg.store_id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let data = JSON.parse(res)[0];
+                if(data){
+                    $("#storeName").val(data.description);
+                    $("#storeNameId").val(data.code);
+                }
+            })
+        });
+
+        autocomplete_field($("#storeName"), $("#storeNameId"), store_branch, "description", "id");
+    });
+
+    $('#itemLabel').on('change', function () {
+        let selectedValues = $(this).val(); 
+        $('#brands').empty();
+
+        if (selectedValues && selectedValues.length > 0) {
+            let inQuery = selectedValues.map(id => `'${id}'`).join(',');
+
+            let data = {
+                event: "list",
+                select: "b.id, b.brand_description",
+                query: "b.category_id IN (" + inQuery + ")",
+                table: "tbl_brand b"
+            };
+
+            aJax.post(base_url + "cms/global_controller", data, function (res) {
+                let result = JSON.parse(res);
+
+                if (result && result.length > 0) {
+                    result.forEach(function (item) {
+                        let newOption = new Option(item.brand_description, item.id, true, true);
+                        $('#brands').append(newOption);
+                    });
+                    $('#brands').trigger('change');
+                } else {
+                    $('#brands').trigger('change');
+                }
+            });
+        } else {
+            $('#brands').trigger('change');
+        }
     });
 
     $(document).on('click', '#refreshButton', function () {
         const fields = [
-            { input: '#area', target: '#area_id' },
-            { input: '#brand', target: '#brand_id' },
-            { input: '#store', target: '#store_id' },
-            { input: '#item_classi', target: '#item_classi_id' },
-            { input: '#qtyscp', target: '#qtyscp' }
+            { input: '#area', target: '#areaId' },
+            { input: '#ascName', target: '#ascNameId' },
+            { input: '#brandAmbassador', target: '#brandAmbassadorId' },
+            { input: '#storeName', target: '#storeNameId' },
+            { input: '#year', target: '#year' }
         ];
 
         let counter = 0;
@@ -144,6 +245,15 @@
                 counter++;
             }
         });
+
+        const monthFrom = $('#month').val();
+        const monthTo = $('#monthTo').val();
+
+        if (!monthFrom || !monthTo) {
+            modal.alert('Please select both "Month From" and "Month To" before filtering.', "warning");
+            return;
+        }
+
         if (counter >= 1) {
             fetchData();
             $('.table-empty').hide();
@@ -151,31 +261,37 @@
         }
     });  
 
-        $(document).on('click', '#clearButton', function () {
-            $('input[type="text"], input[type="number"]').val('');
-            $('select').not('#year').prop('selectedIndex', 0);
-            //reset the year dd
-            let highestYear = $("#year option:not(:first)").map(function () {
-                return parseInt($(this).val());
-            }).get().sort((a, b) => b - a)[0];
+    $(document).on('click', '#clearButton', function () {
+        $('input[type="text"], input[type="number"]').val('');
+        $('.btn-outline-light').removeClass('active');
+        $('.main_all').addClass('active');
+        $('select').val('').trigger('change');
 
-            if (highestYear) {
-                $("#year").val(highestYear);
-            }
-            $('.table-empty').show();
-            $('.hide-div').hide();
-            $('.data-graph').hide();
-            $("#refreshButton").click();
-        });
+        let highestYear = $("#year option:not(:first)").map(function () {
+            return parseInt($(this).val());
+        }).get().sort((a, b) => b - a)[0];
+
+        if (highestYear) {
+            $("#year").val(highestYear).trigger('change');
+        }
+
+        $('.table-empty').show();
+        $('.hide-div').hide();
+        $('.data-graph').hide();
+    });
 
     function fetchData() {
-        let selectedMonthStart = $('#month_start').val();
-        let selectedMonthEnd = $('#month_end').val();
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#brandAmbassadorId').val();
+        let selectedStore = $('#storeNameId').val();
+        let selectedBrandCategories = $('#itemLabel').val();
+        let selectedBrands = $('#brands').val();   
         let selectedYear = $('#year').val();
-        initializeTable(selectedMonthStart, selectedMonthEnd, selectedYear);
-    }
+        let selectedMonthStart = $('#month').val();
+        let selectedMonthEnd = $('#monthTo').val();
 
-    function initializeTable(selectedMonthStart = null, selectedMonthEnd = null, selectedYear = null) {
         if ($.fn.DataTable.isDataTable('#top_performing_stores')) {
             let existingTable = $('#top_performing_stores').DataTable();
             existingTable.clear().destroy();
@@ -192,6 +308,13 @@
                 url: base_url + 'store/get-sales-overall-performance',
                 type: 'POST',
                 data: function(d) {
+                    d.area = selectedArea === "" ? null : selectedArea;
+                    d.asc = selectedAsc === "" ? null : selectedAsc;
+                    d.baType = selectedBaType === "" ? null : selectedBaType;
+                    d.ba = selectedBa === "" ? null : selectedBa;
+                    d.store = selectedStore === "" ? null : selectedStore;
+                    d.brandCategories = selectedBrandCategories === [] ? null : selectedBrandCategories;
+                    d.brands = selectedBrands === [] ? null : selectedBrands;
                     d.year = selectedYear === "0" ? null : selectedYear;
                     d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
                     d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
@@ -204,12 +327,11 @@
             },
             columns: [
                 { data: 'rank' },
-                { data: 'store_code' },
                 { data: 'store_name' },
                 { data: 'ly_scanned_data' },
                 { data: 'ty_scanned_data' },
-                { data: 'sell_through' },
-                { data: 'contribution' }
+                { data: 'growth' },
+                { data: 'sob' }
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
@@ -220,9 +342,9 @@
         });
     }
 
-    $("#month_start").on("change", function() {
-        let selected = $("#month_end").val();
-        let start = $("#month_start").val();
+    $("#month").on("change", function() {
+        let selected = $("#monthTo").val();
+        let start = $("#month").val();
         let html = "<option value=''>Please select..</option>";
 
         months.forEach(month => {
@@ -231,12 +353,12 @@
             }
         });
 
-        $("#month_end").html(html);
+        $("#monthTo").html(html);
     });
 
-    $("#month_end").on("change", function() {
-        let selected = $("#month_start").val();
-        let end = $("#month_end").val();
+    $("#monthTo").on("change", function() {
+        let selected = $("#month").val();
+        let end = $("#monthTo").val();
         let html = "<option value=''>Please select..</option>";
 
         months.forEach(month => {
@@ -244,8 +366,7 @@
                 html += `<option value="${month.id}">${month.month}</option>`;
             }
         });
-
-       // $("#month_start").html(html);
+        $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
     });
 
 </script>
