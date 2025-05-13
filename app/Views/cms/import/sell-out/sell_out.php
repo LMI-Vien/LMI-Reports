@@ -323,7 +323,7 @@
     function get_data(query) {
         var data = {
             event : "list",
-            select : "so.id, m.month, m.id as month_id, so.year, c.name as company_name, so.customer_payment_group, so.template_id, so.created_date, so.created_by, so.file_type, so.remarks",
+            select : "so.id, m.month, m.id as month_id, so.year, c.name as company_name, so.customer_payment_group, so.template_id, so.created_date, cu.name as created_by, so.file_type, so.remarks",
             query : query,
             offset : offset,
             limit : limit,
@@ -336,6 +336,11 @@
             {
                 table : "tbl_company as c",
                 query : "c.id = so.company",
+                type : "left"
+            },
+            {
+                table : "cms_users as cu",
+                query : "cu.id = so.created_by",
                 type : "left"
             }],
             order : {
