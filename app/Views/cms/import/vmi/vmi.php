@@ -320,7 +320,7 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-          select: "c.name AS company, y.year as year, m.month, w.name week",
+          select: "c.name AS company, y.year as year, w.name week",
           query: new_query,
           offset: offset,
           limit: limit,
@@ -337,11 +337,6 @@
                   type: "left"
               },
               {
-                  table: "tbl_month m",
-                  query: "m.id = v.month",
-                  type: "left"
-              },
-              {
                   table: "tbl_week w",
                   query: "w.id = v.week",
                   type: "left"
@@ -351,7 +346,7 @@
               field: "v.year",
               order: "asc"
           },
-          group : "v.year, v.month, v.week, c.name"
+          group : "v.year, v.week, c.name"
         }
 
         aJax.post(url,data,function(result){
@@ -377,7 +372,6 @@
             var search_conditions = [
                 "c.name LIKE '%" + keyword + "%'",
                 "y.year LIKE '%" + keyword + "%'",
-                "m.month LIKE '%" + keyword + "%'",
                 "w.name LIKE '%" + keyword + "%'"
             ];
 
@@ -419,7 +413,6 @@
         $("#import_modal").find('.modal-title').find('b').html(title)
         $('#import_modal').modal('show');
         get_year('yearSelect');
-        // get_month('monthSelect');
         get_company('companySelect');
         // get_week('weekSelect');
     });
@@ -564,7 +557,6 @@
 
     function fetchPaginatedData() {
         inp_year = $('#yearSelect').val()?.trim();
-        inp_month = $('#monthSelect').val()?.trim();
         inp_week = $('#weekSelect').val()?.trim();
         inp_company = $('#companySelect').val()?.trim();
 
@@ -576,7 +568,6 @@
                 page: currentPage,
                 limit: rowsPerPage,
                 inp_year: inp_year,
-                inp_month: inp_month,
                 inp_week: inp_week,
                 inp_company: inp_company
             },
@@ -1427,7 +1418,7 @@
                             (
                                 previousRecord.rec_company !== det.company || 
                                 previousRecord.rec_year !== det.year || 
-                                previousRecord.rec_month !== det.month || 
+                                //previousRecord.rec_month !== det.month || 
                                 previousRecord.rec_week !== det.week
                             )
                         ) {
@@ -1482,7 +1473,7 @@
                                 dynamic_search(
                                     "'tbl_vmi'", 
                                     "''", 
-                                    `'store, item, item_name, item_class, supplier, \`c_group\`, dept, c_class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'`, 
+                                    `'store, item, item_name, item_class, supplier, \`c_group\`, dept, c_class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.week'`, 
                                     100000, 
                                     index, 
                                     `''`,  
@@ -1537,9 +1528,8 @@
                                         res.forEach(det => {
                                             let rec_company = det.company;
                                             let rec_year = det.year;
-                                            let rec_month = det.month;
                                             let rec_week = det.week;
-                                            let currentRecord = { rec_company, rec_year, rec_month, rec_week };
+                                            let currentRecord = { rec_company, rec_year, rec_week };
                                             count+=1;
 
                                             let newData = {
@@ -1562,7 +1552,6 @@
                                                 (
                                                     previousRecord.rec_company !== det.company || 
                                                     previousRecord.rec_year !== det.year || 
-                                                    previousRecord.rec_month !== det.month || 
                                                     previousRecord.rec_week !== det.week
                                                 )
                                             ) {
@@ -1633,7 +1622,7 @@
                                 "left join tbl_week w on v.week = w.id'", 
 
                                 "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
-                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.month, v.week'", 
+                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.week'", 
 
                                 100000, 
                                 index, 
