@@ -55,6 +55,7 @@
                                     <!-- <th class='center-content'>ID</th> -->
                                     <th class='center-content'>Month</th>
                                     <th class='center-content'>Year</th>
+                                    <th class='center-content'>Company</th>
                                     <th class='center-content'>Customer Payment Group</th>
                                     <th class='center-content'>Template ID</th>
                                     <th class='center-content'>Created Date</th>
@@ -322,7 +323,7 @@
     function get_data(query) {
         var data = {
             event : "list",
-            select : "so.id, m.month, m.id as month_id, so.year, so.customer_payment_group, so.template_id, so.created_date, so.created_by, so.file_type, so.remarks",
+            select : "so.id, m.month, m.id as month_id, so.year, c.name as company_name, so.customer_payment_group, so.template_id, so.created_date, so.created_by, so.file_type, so.remarks",
             query : query,
             offset : offset,
             limit : limit,
@@ -330,6 +331,11 @@
             join : [{
                 table : "tbl_month as m",
                 query : "m.id = so.month",
+                type : "left"
+            },
+            {
+                table : "tbl_company as c",
+                query : "c.id = so.company",
                 type : "left"
             }],
             order : {
@@ -353,6 +359,7 @@
                         //html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + y.month + "</td>";
                         html += "<td scope=\"col\">" + y.year + "</td>";
+                        html += "<td scope=\"col\">" + y.company_name + "</td>";
                         html += "<td scope=\"col\">" + (y.customer_payment_group) + "</td>";
                         html += "<td scope=\"col\">" + y.template_id + "</td>";
                         html += "<td scope=\"col\">" + y.created_date + "</td>";
