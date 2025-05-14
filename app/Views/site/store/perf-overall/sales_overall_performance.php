@@ -72,8 +72,20 @@
                                     <th class="tbl-title-field">Store Code / Store Name</th>
                                     <th class="tbl-title-field">LY Sell Out</th>
                                     <th class="tbl-title-field">TY Sell Out</th>
-                                    <th class="tbl-title-field">% Growth</th>
-                                    <th class="tbl-title-field">Share of Business</th>
+                                    <th class="tbl-title-field">% Growth 
+                                        <span class="tooltip-text">
+                                            FORMULA:
+                                            <br>
+                                            (TY total gross sales - LY total gross sale) / LY total gross sales * 100
+                                        </span>
+                                    </th>
+                                    <th class="tbl-title-field">Share of Business
+                                        <span class="tooltip-text">
+                                            FORMULA:
+                                            <br>
+                                            (Store TY Sell Out / Sum of Total TY Sell Out) * 100 %
+                                        </span>
+                                    </th>
                                 </tr>
                             </thead>
                               <tbody>
