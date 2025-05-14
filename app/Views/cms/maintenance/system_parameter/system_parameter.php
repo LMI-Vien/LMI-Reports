@@ -70,7 +70,7 @@
         margin-bottom: 5px; 
     }
 
-    .sku-label {
+    .syspar-label {
         color: brown;
     }
 
@@ -140,10 +140,10 @@
         </div>
         <div class="card-body">
             <form id="system-parameter-form" class="centered-form">
-            <h4 class="form-title">System Parameters - SKU Settings</h4>
+                <h4 class="form-title">System Parameters - SKU Settings</h4>
                 <div class="box">
                     <div class="container">
-                        <h5 class="sku-label">Slow Moving SKUs</h5>
+                        <h5 class="syspar-label">Slow Moving SKUs</h5>
                         <div class="row mb-3">
                       
                             <div class="col-md-6">
@@ -166,7 +166,7 @@
 
                 <div class="box">
                     <div class="container">
-                        <h5 class="sku-label">Overstock SKUs</h5>
+                        <h5 class="syspar-label">Overstock SKUs</h5>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -180,7 +180,7 @@
 
                 <div class="box">
                     <div class="container">
-                        <h5 class="sku-label">New Item SKUs</h5>
+                        <h5 class="syspar-label">New Item SKUs</h5>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -197,7 +197,7 @@
 
                 <div class="box">
                     <div class="container">
-                        <h5 class="sku-label">Hero SKUs</h5>
+                        <h5 class="syspar-label">Hero SKUs</h5>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -213,10 +213,9 @@
                 </div>
 
                 <h4 class="form-title-two">System Parameters - Sales Settings</h4>
-
                 <div class="box">
                     <div class="container">
-                        <h5 class="sku-label">Sales Incentive</h5>
+                        <h5 class="syspar-label">Sales Incentive</h5>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -229,10 +228,9 @@
                 </div>
 
                 <h4 class="form-title-two">System Parameters - Others</h4>
-
                 <div class="box">
                     <div class="container">
-                        <h5 class="sku-label">Payment Group / Price Code File</h5>
+                        <h5 class="syspar-label">Payment Group / Price Code File</h5>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -258,10 +256,9 @@
                 </div>
 
                 <h4 class="form-title-two">System Parameters - Item File</h4>
-
                 <div class="box">
                     <div class="container">
-                        <h5 class="sku-label">Brand Code</h5>
+                        <h5 class="syspar-label">Brand Code</h5>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -283,6 +280,47 @@
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="form-title-two">System Parameters - Scanned Data</h4>
+                <div class="box">
+                    <div class="container">
+                        <h5 class="syspar-label">Brand Level Type</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="brandLabelType" class="col-form-label">Select Label Type (Brand Label Type Masterfile)</label>
+                                    <textarea id="brandLabelType" name="brandLabelType" class="form-control expandable-textbox" placeholder="e.g. Exclusive"></textarea>
+                                    <input type="hidden" id="brandLabelTypeId">
+                                    <input type="hidden" id="brandLabelTypeJson" name="brandLabelTypeJson">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="form-title-two">System Parameters - Brand Ambassador (Consign)</h4>
+                <div class="box">
+                    <div class="container">
+                        <h5 class="syspar-label">Target per Brand Ambassador</h5>
+                        <div class="row mb-3">
+                      
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="amountPerBa" class="col-form-label">Amount per Brand Ambassador</label>
+                                    <input type="text" id="amountPerBa" name="amountPerBa" class="form-control numbersdecimalonly" placeholder="e.g. 8,000">
+                                </div>
+                            </div>
+
+                        
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="numOfDays" class="col-form-label">No. of Days</label>
+                                    <input type="text" id="numOfDays" name="numOfDays" class="form-control numbersonly" placeholder="e.g. 26">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -310,6 +348,7 @@
     let selectedNewItems = [];
     let selectedBrandExcluded = [];
     let selectedBrandIncluded = [];
+    let selectedBrandLabelType = [];
     // let selectedLMI = [];
     // let selectedRGDI = [];
     
@@ -320,6 +359,7 @@
         let newItem = <?= json_encode($newItem); ?>;
         let brandExcluded = <?= json_encode($brandExcluded); ?>;
         let brandIncluded = <?= json_encode($brandIncluded); ?>;
+        let brandLabelTypeOptions = <?= json_encode($brandLabelTypeOptions); ?>;
         
         autocomplete_field_multi($("#newItem"), $("#newItem_id"), newItem, "item_class_description", "id", function(result) {
             let data = {
@@ -482,6 +522,45 @@
             }
         );
         
+        autocomplete_field_multi($("#brandLabelType"),$("#brandLabelTypeId"),brandLabelTypeOptions,"label","id",function(result) {
+            let data = {
+                event: "list",
+                query: "id = " + result.id,
+                select: "id, label",
+                offset: offset,
+                limit: 0,
+                table: "tbl_brand_label_type",
+            };
+
+            aJax.post(base_url + "cms/global_controller", data, function(res) {
+                let brandLabelType = JSON.parse(res);
+                let brandCodeObj = brandLabelType[0];
+
+                addBrandLabelType(brandCodeObj);
+
+                $("#brandLabelType").val(selectedBrandLabelType.map(item => item.label).join(", ") + (selectedBrandLabelType.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#brandLabelType")[0]);
+                $("#brandLabelTypeJson").val(JSON.stringify(selectedBrandLabelType));
+            });
+        }, {
+            focus: function() {
+                return false;
+            },
+            select: function(event, ui) {
+                let item = {
+                    id: ui.item.info.id,
+                    label: ui.item.info.label
+                };
+
+                addBrandLabelType(item);
+
+                $("#brandLabelType").val(selectedBrandLabelType.map(item => item.label).join(", ") + (selectedBrandLabelType.length > 0 ? ", " : ""));
+                adjustTextareaHeight($("#brandLabelType")[0]);
+                $("#brandLabelTypeJson").val(JSON.stringify(selectedBrandLabelType));
+
+                return false;
+            }
+        });
     });
 
     function addNewItem(item) {
@@ -505,6 +584,12 @@
     function addBrandIncluded(item) {
         if (!selectedBrandIncluded.some(i => i.id === item.id)) {
             selectedBrandIncluded.push(item);
+        }
+    }
+
+    function addBrandLabelType(item) {
+        if (!selectedBrandLabelType.some(i => i.id === item.id)) {
+            selectedBrandLabelType.push(item);
         }
     }
 
@@ -532,7 +617,9 @@
         var url = "<?= base_url("cms/global_controller");?>";
             var data = {
                 event : "list",
-                select : "id, sm_sku_min, sm_sku_max, overstock_sku, new_item_sku, hero_sku, sales_incentives, cus_grp_code_lmi, cus_grp_code_rgdi, brand_code_included, brand_code_excluded, status, created_by, updated_by, created_date, updated_date",
+                select : `id, sm_sku_min, sm_sku_max, overstock_sku, new_item_sku, hero_sku, sales_incentives, cus_grp_code_lmi, 
+                cus_grp_code_rgdi, brand_code_included, brand_code_excluded, brand_label_type, tba_amount_per_ba, tba_num_days,
+                status, created_by, updated_by, created_date, updated_date`,
                 query : query,
                 offset : offset,
                 limit : limit,
@@ -555,6 +642,9 @@
                 // $('#payment_grp_rgdi').val(row.cus_grp_code_rgdi);
                 $('#brand_included').val(row.brand_code_included);
                 $('#brand_excluded').val(row.brand_code_excluded);
+                $('#brandLabelType').val(row.brand_label_type);
+                $('#amountPerBa').val(row.tba_amount_per_ba);
+                $('#numOfDays').val(row.tba_num_days);
 
                 // Parse the JSON strings
                 let lmi_data = JSON.parse(row.cus_grp_code_lmi || "[]");
@@ -651,6 +741,25 @@
                     }
                 }
 
+                if (row.brand_label_type) {
+                    try {
+                        let brandLabelType_items = JSON.parse(row.brand_label_type);
+                        if (Array.isArray(brandLabelType_items)) {
+                            selectedBrandLabelType = brandLabelType_items;
+                            let brandLabelType_code = brandLabelType_items.map(item => item.label).join(", ");
+                            $('#brandLabelType').val(brandLabelType_code);
+                            $('#brandLabelTypeJson').val(row.brand_label_type); 
+                        } else {
+                            selectedBrandLabelType = [brandLabelType_items];
+                            $('#brandLabelType').val(brandLabelType_items.label + ", ");
+                            $('#brandLabelTypeId').val(brandLabelType_items.id);
+                            $('#brandLabelTypeJson').val(JSON.stringify(brandLabelType_items));
+                        }
+                    } catch (err) {
+                        console.warn("Invalid brand_label_type JSON:", row.brand_label_type);
+                    }
+                }
+
             }
         });
     }
@@ -669,6 +778,9 @@
         // var rgdi_json = $('#payment_grp_rgdi').val();
         var brand_excluded_json = $('#brand_excluded_json').val();
         var brand_included_json = $('#brand_included_json').val();
+        var brandLabelTypeJson = $('#brandLabelTypeJson').val();
+        var amountPerBa = $('#amountPerBa').val();
+        var numOfDays = $('#numOfDays').val();
 
         // for user input payment groups / price code file (LMI & RGDI)
         let lmi_input = $('#payment_grp_lmi').val();
@@ -691,24 +803,24 @@
 
         if(validate.standard("system-parameter-form")){
             if (id !== undefined && id !== null && id !== '') {
-                check_current_db("tbl_system_parameter", ["sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded"], [minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json], "status" , "id", id, true, function(exists, duplicateFields) {
+                check_current_db("tbl_system_parameter", ["sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded", "brand_label_type", "tba_amount_per_ba", "tba_num_days"], [minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays], "status" , "id", id, true, function(exists, duplicateFields) {
                     if (!exists) {
                         modal.confirm(confirm_update_message, function(result){
                             if(result){ 
                                     modal.loading(true);
-                                save_to_db(minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json,  brand_included_json, brand_excluded_json, id)
+                                save_to_db(minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json,  brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays, id)
                             }
                         });
     
                     }             
                 });
             }else{
-                check_current_db("tbl_system_parameter", ["sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded"], [minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json], "status", null, null, true, function(exists, duplicateFields) {
+                check_current_db("tbl_system_parameter", ["sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded", "brand_label_type", "tba_amount_per_ba", "tba_num_days"], [minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays], "status", null, null, true, function(exists, duplicateFields) {
                     if (!exists) {
                         modal.confirm(confirm_add_message, function(result){
                             if(result){ 
                                     modal.loading(true);
-                                save_to_db(minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, null)
+                                save_to_db(minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays, null)
                             }
                         });
     
@@ -718,7 +830,7 @@
         }
     }
 
-    function save_to_db(inp_min, inp_max, inp_os, inp_nI_json, inp_hero_json, inp_sI, inp_lmi_json, inp_rgdi_json, inp_bi_json, inp_be_json, id) {
+    function save_to_db(inp_min, inp_max, inp_os, inp_nI_json, inp_hero_json, inp_sI, inp_lmi_json, inp_rgdi_json, inp_bi_json, inp_be_json, inp_blt_json, inp_amnt_ba, inp_numdays, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -741,6 +853,9 @@
                     cus_grp_code_rgdi: inp_rgdi_json,
                     brand_code_included: inp_bi_json,
                     brand_code_excluded: inp_be_json,
+                    brand_label_type: inp_blt_json,
+                    tba_amount_per_ba: inp_amnt_ba,
+                    tba_num_days: inp_numdays,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                     status: '1'
@@ -762,6 +877,9 @@
                     cus_grp_code_rgdi: inp_rgdi_json,
                     brand_code_included: inp_bi_json,
                     brand_code_excluded: inp_be_json,
+                    brand_label_type: inp_blt_json,
+                    tba_amount_per_ba: inp_amnt_ba,
+                    tba_num_days: inp_numdays,
                     created_date: formatDate(new Date()),
                     created_by: user_id,
                     status: '1'
@@ -778,6 +896,7 @@
         });
     }
 
+    // add ka lang rito kapag may bago na json
     const multiAutocompleteConfigs = {
         brand_included: {
             array: () => selectedBrandIncluded,
@@ -802,6 +921,12 @@
             updateArray: (val) => selectedNewItems = val,
             hiddenField: '#newItem_json',
             displayKey: 'item_class_description'
+        },
+        brandLabelType: {
+            array: () => selectedBrandLabelType,
+            updateArray: (val) => selectedBrandLabelType = val,
+            hiddenField: '#brandLabelTypeJson',
+            displayKey: 'label'
         },
         // payment_grp_lmi: {
         //     array: () => selectedLMI,
