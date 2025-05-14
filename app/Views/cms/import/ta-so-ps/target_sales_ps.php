@@ -1183,16 +1183,12 @@
         const start_time = new Date();
 
         let selected_fields = [
-            'id', 'ba_code', 'location', 'january', 'february', 'march', 'april',
-            'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
-            'year', 'status'
+            'id', 'ba_code', 'location', 'year', 'status'
 
         ];
 
         const matchFields = [
-            'ba_code', 'location', 'january', 'february', 'march', 'april',
-            'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
-            'year'
+            'ba_code', 'location', 'year'
         ]; 
 
         const floatFields = [

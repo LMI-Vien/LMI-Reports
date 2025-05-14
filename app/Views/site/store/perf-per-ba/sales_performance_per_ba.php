@@ -131,144 +131,135 @@
 </div>
 
 <script>
-    var base_url = "<?= base_url(); ?>";
-    let store_branch = <?= json_encode($store_branch) ?>;
-    // let store_branch = [];
-    let area = <?= json_encode($area) ?>;
+    let brand_ambassadors = <?= json_encode($brand_ambassadors) ?>;
+    let store_branch = <?= json_encode($store_branches) ?>;
+    let brands = <?= json_encode($brands) ?>;
+    let area = <?= json_encode($areas) ?>;
+    let asc = <?= json_encode($asc) ?>;
+    let year = <?= json_encode($year); ?>;
+    let months = <?= json_encode($months); ?>;
+    brand_ambassadors.unshift(
+        { id: "-6", name: "Non Ba" },
+        { id: "-5", name: "Vacant" }
+    )
 
     $(document).ready(function() {
         $( ".sortable" ).sortable({
             revert: true
         });
-        //initializeTable();
 
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+        $('#brands').select2({ placeholder: 'Select Brands' });
+        autocomplete_field($("#area"), $("#areaId"), area, "description", "id", function(result) {
+            //let url = url;
             let data = {
                 event: "list",
-                select: "",
-                query: "tbl_store_group.area_id = " + result.id,
-                table: "tbl_store_group",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                query: "a.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_area a",
                 join: [
                     {
-                        table: "tbl_store",
-                        query: "tbl_store_group.store_id = tbl_store.id",
+                        table: "tbl_area_sales_coordinator asc",
+                        query: "a.id = asc.area_id",
+                        type: "left"
+                    }
+                ]
+            }
+
+            aJax.post(url, data, function(result) {
+                let data = JSON.parse(result);
+                $("#ascName").val(data[0].asc_description);
+                $("#ascNameId").val(data[0].asc_id);
+            })
+        });
+
+        autocomplete_field($("#ascName"), $("#ascNameId"), asc, "description");
+
+        autocomplete_field($("#brandAmbassador"), $("#brandAmbassadorId"), brand_ambassadors, "name", "id", function(result) {
+            let data = {
+                event: "list",
+                select: "s.id, s.code, s.description",
+                query: "sg.brand_ambassador_id = " + result.id,
+                table: "tbl_brand_ambassador_group sg",
+                join: [
+                    {
+                        table: "tbl_store s",
+                        query: "s.id = sg.store_id",
                         type: "left"
                     }
                 ]
             }
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let store = JSON.parse(res);
-                store_branch = store;
-
-                $("#store").val("");
-                $("#store_id").val("");
-
-                autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(result) {
-                    let data = {
-                        event: "list",
-                        select: "tbl_store_group.store_id, tbl_area.description",
-                        query: "tbl_store_group.store_id = " + result.id,
-                        table: "tbl_store_group",
-                        offset: offset,
-                        limit: 0,
-                        join: [
-                            {
-                                table: "tbl_area",
-                                query: "tbl_area.id = tbl_store_group.area_id",
-                                type: "left"
-                            }
-                        ]
-                    }
-
-                    aJax.post(base_url + "cms/global_controller", data, function(result) {
-                        let store_description = JSON.parse(result);
-
-                        $("#store_id").val(store_description[0].store_id);
-                    })
-                })
+                let data = JSON.parse(res)[0];
+                if(data){
+                    $("#storeName").val(data.description);
+                    $("#storeNameId").val(data.code);
+                }
             })
         });
 
-        autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(result) {
-
-            let data = {
-                event: "list",
-                select: "tbl_area.id, tbl_area.description",
-                query: "tbl_store_group.store_id = " + result.id,
-                table: "tbl_store_group",
-                offset: offset,
-                limit: 0,
-                join: [
-                    {
-                        table: "tbl_area",
-                        query: "tbl_area.id = tbl_store_group.area_id",
-                        type: "left"
-                    }
-                ]
-            }
-
-            aJax.post(base_url + "cms/global_controller", data, function(result) {
-                let area_description = JSON.parse(result);
-
-                $("#area").val(area_description[0].description);
-                $("#area_id").val(area_description[0].id);
-
-            })
-        });
+        autocomplete_field($("#storeName"), $("#storeNameId"), store_branch, "description", "id");
 
         $('#columnToggleContainer').toggle();
         $(document).on('click', '#toggleColumnsButton', function() {
             $('#columnToggleContainer').toggle();
         });
+    });
 
-        // $(document).on('click', '#refreshButton', function () {
-        //     if($('#area').val() == ""){
-        //         $('#area_id').val('');
-        //     }
-        //     if($('#store').val() == ""){
-        //         $('#store_id').val('');
-        //     }
-        //     fetchData();
-        // });
+    $(document).on('click', '#refreshButton', function () {
+        const fields = [
+            { input: '#area', target: '#areaId' },
+            { input: '#ascName', target: '#ascNameId' },
+            { input: '#brandAmbassador', target: '#brandAmbassadorId' },
+            { input: '#storeName', target: '#storeNameId' },
+            { input: '#year', target: '#year' }
+        ];
 
-        $(document).on('click', '#refreshButton', function () {
-            const fields = [
-                { input: '#area', target: '#area_id' },
-                { input: '#brand', target: '#brand_id' },
-                { input: '#store', target: '#store_id' },
-                { input: '#item_classi', target: '#item_classi_id' },
-                { input: '#qtyscp', target: '#qtyscp' }
-            ];
+        let counter = 0;
 
-            let counter = 0;
-
-            fields.forEach(({ input, target }) => {
-                const val = $(input).val();
-                const hasValue = Array.isArray(val) ? val.length > 0 : val;
-                if (!hasValue || val === undefined) {
-                    $(target).val('');
-                } else {
-                    counter++;
-                }
-            });
-            if (counter >= 1) {
-                fetchData();
-                $('.table-empty').hide();
-                $('.hide-div').show();
+        fields.forEach(({ input, target }) => {
+            const val = $(input).val();
+            const hasValue = Array.isArray(val) ? val.length > 0 : val;
+            if (!hasValue || val === undefined) {
+                $(target).val('');
+            } else {
+                counter++;
             }
-        });       
-
-        $(document).on('click', '#clearButton', function () {
-            $('input[type="text"], input[type="number"], input[type="date"]').val('');
-            $('input[name="sortOrder"][value="ASC"]').prop('checked', true);
-            $('input[name="sortOrder"][value="DESC"]').prop('checked', false);
-            $('.main_all').addClass('active');
-            $('select').prop('selectedIndex', 0);
-            $('.table-empty').show();
-            $('.hide-div').hide();
-            $('#refreshButton').click();
         });
+
+        const monthFrom = $('#month').val();
+        const monthTo = $('#monthTo').val();
+
+        if (!monthFrom || !monthTo) {
+            modal.alert('Please select both "Month From" and "Month To" before filtering.', "warning");
+            return;
+        }
+
+        if (counter >= 1) {
+            fetchData();
+            $('.table-empty').hide();
+            $('.hide-div').show();
+        }
+    });  
+
+    $(document).on('click', '#clearButton', function () {
+        $('input[type="text"], input[type="number"]').val('');
+        $('.btn-outline-light').removeClass('active');
+        $('.main_all').addClass('active');
+        $('select').val('').trigger('change');
+
+        let highestYear = $("#year option:not(:first)").map(function () {
+            return parseInt($(this).val());
+        }).get().sort((a, b) => b - a)[0];
+
+        if (highestYear) {
+            $("#year").val(highestYear).trigger('change');
+        }
+
+        $('.table-empty').show();
+        $('.hide-div').hide();
     });
 
     function fetchData() {
@@ -409,4 +400,31 @@
             modal.loading(false);
         }, 5000);
     }
+
+    $("#month").on("change", function() {
+        let selected = $("#monthTo").val();
+        let start = $("#month").val();
+        let html = "<option value=''>Please select..</option>";
+
+        months.forEach(month => {
+            if (parseInt(month.id) >= start) {
+                html += `<option value="${month.id}">${month.month}</option>`;
+            }
+        });
+
+        $("#monthTo").html(html);
+    });
+
+    $("#monthTo").on("change", function() {
+        let selected = $("#month").val();
+        let end = $("#monthTo").val();
+        let html = "<option value=''>Please select..</option>";
+
+        months.forEach(month => {
+            if (parseInt(month.id) < end) {
+                html += `<option value="${month.id}">${month.month}</option>`;
+            }
+        });
+        $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
+    });
 </script>

@@ -107,7 +107,11 @@ self.onmessage = async function(e) {
             for (let i = 0; i < BATCH_SIZE && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let ba_code = row["BA Code"] ? row["BA Code"].trim() : "";
+                let ba_code_raw = row["BA Code"] ? row["BA Code"].trim() : "";
+                let ba_codes = ba_code_raw.split(',').map(c => c.trim().toLowerCase()).filter(c => c);
+                let resolved_ba_ids = [];
+                let resolved_ba_code_str = [];
+                let has_invalid_ba = false;
                 let location = row["Location"] ? row["Location"].trim() : "";
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
@@ -132,11 +136,24 @@ self.onmessage = async function(e) {
                     unique_code.add(location);
                 }
 
+                ba_codes.forEach(code => {
+                    if (code === "vacant") {
+                        resolved_ba_ids.push(-5);
+                        resolved_ba_code_str.push("-5");
+                    } else if (code === "non ba") {
+                        resolved_ba_ids.push(-6);
+                        resolved_ba_code_str.push("-6");
+                    } else if (ba_lookup.hasOwnProperty(code)) {
+                        resolved_ba_ids.push(ba_lookup[code]);
+                        resolved_ba_code_str.push(code);
+                    } else {
+                        has_invalid_ba = true;
+                        addErrorLog(`Invalid Brand Ambassador Code: ${code}`);
+                    }
+                });
 
-                if (ba_code.length > 25 || ba_code === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
-                    err_counter++;
+                if (ba_code_raw.length > 250 || ba_codes.length === 0) {
+                    addErrorLog("Invalid Brand Ambassador Code");
                 }
 
                 let monthlyValues = getMonthlyValues(row);
@@ -162,43 +179,13 @@ self.onmessage = async function(e) {
                 for (let key in ba_lookup) {
                     normalized_ba_lookup[key.toLowerCase()] = ba_lookup[key];
                 }
-
-                if (ba_code) {
-                    let ba_lower = ba_code.toLowerCase();
-                    ba = ba_lookup[ba_lower] || null;
-                    if (!ba && ba !== 0) {
-                        invalid = true;
-                        errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
-                        err_counter++;
-                    }
-                }
-
-                // let ba_lower = ba_code.toLowerCase();
-                // if (ba_lower in normalized_ba_lookup) {
-                // }else {
-                //     invalid = true;
-                //     errorLogs.push(`⚠️ Invalid Brand Ambassador Code at line #: ${tr_count}`);
-                //     err_counter++;
-                // }
-
-                // let matched = ba_checklist[location.toLowerCase()];
-                // if (!matched?.location) addErrorLog("Invalid BA not tagged to any store");
-
-                // get the normalized store code & BA ID
+                
                 const storeKey = row["Location"].trim().toLowerCase();
-                const thisBaId = ba_lookup[ row["BA Code"].trim().toLowerCase() ];
-
                 const matched = ba_checklist[storeKey];
-                let ba_trimmed = ba_code.trim().toLowerCase();
 
-                if (ba_trimmed === "vacant") {
-                    ba_code = -5;
-                } else if (ba_trimmed === "non ba") {
-                    ba_code = -6;
-                }
                 if (!invalid) {
                     valid_data.push({
-                        ba_code: ba_code,
+                        ba_code: resolved_ba_code_str.join(','),
                         location: matched?.store_code || null,
                         ...monthlyValues,
                         status: 2,

@@ -173,16 +173,46 @@
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
-
+    var ba_lookup = {};
     let yearMap = <?= json_encode ($yearMap) ?>;
 
     $(document).ready(function() {
         $("#sell_out_title").html(addNbsp("VIEW TARGET SALES PER STORE"));
         $("#year").val(params)
 
-        get_data(query);
-        get_pagination(query);
+        get_brand_ambassadors();
     })
+
+    function get_brand_ambassadors() {
+        modal.loading(true);
+        var data = {
+            event: "list",
+            select: "code, name",
+            query: "id > 0",
+            offset: 1,
+            limit: 99999,
+            table: "tbl_brand_ambassador",
+            order : {
+                field : "name",
+                order : "asc" 
+            }
+        };
+
+        aJax.post(url, data, function(result) {
+
+            var result = JSON.parse(result);
+            var html = '';
+            if (result && result.length > 0) {
+                $.each(result, function(x, y) {
+                    if (y.code && y.name) {
+                        ba_lookup[y.code.trim()] = y.name.trim();
+                    }
+                });
+            }
+            get_data(query);
+            get_pagination(query);
+        });
+    }
 
     function get_data(new_query) {
         var data = {
@@ -190,7 +220,6 @@
             select: "a.id, a.ba_code as custom_code, a.january, a.february, a.march, a.april, a.may, a.june, "+
             "a.july, a.august, a.september, a.october, a.november, a.december, "+
             "a.location, s1.description AS location_desc, a.updated_date, a.created_date, a.status, ba.name as ba_name, b.year as year",
-            // select: "a.created_date, u.name imported_by, b.year, a.updated_date",
             query: new_query,
             offset: offset,
             limit: limit,
@@ -227,7 +256,7 @@
 
             var result = JSON.parse(result);
             var html = '';
-
+            modal.loading(false);
             if (result && result.length > 0) {
                 let yearValue = result[0].year;
                 var count = 1;
@@ -238,15 +267,16 @@
                     var storeCode = y.location || 'N/A';
                     var storeDesc = y.location_desc || 'N/A';
                     var BAName = 'N/A';
-                    if (y.ba_name) {
-                        BAName = y.ba_name;
-                    } else if (y.custom_code === '-5') {
-                        BAName = 'Vacant';
-                    } else if (y.custom_code === '-6') {
-                        BAName = 'Non Ba';
+                    if (y.custom_code) {
+                        let codes = y.custom_code.split(',').map(c => c.trim());
+                        let names = codes.map(code => {
+                            if (code == '-5') return 'Vacant';
+                            if (code == '-6') return 'Non Ba';
+                            return ba_lookup[code] || `Unknown (${code})`;
+                        });
+                        BAName = names.join(', ');
                     }
                     html += "<tr class='" + rowClass + "'>";
-                    // html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
                     html += "<td scope=\"col\">" + trimText(BAName) + "</td>";
                     html += "<td scope=\"col\">" + trimText(storeCode) + "</td>";
                     html += "<td scope=\"col\">" + trimText(storeDesc) + "</td>";
@@ -258,11 +288,6 @@
                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                     } else {
                         html+="<td class='center-content'>";
-                        
-                        // html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+
-                        // "')\" data-status='"+y.status+"' id='"+y.id+
-                        // "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                        
                         html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+
                         "')\" data-status='"+y.status+"' id='"+y.id+
                         "' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -331,7 +356,7 @@
             text: btn_txt,
             id: btn_id,
             class: btn_class,
-            click: onclick_event // Attach the onclick event
+            click: onclick_event
         });
         return new_btn;
     }
