@@ -185,7 +185,6 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="newItem" class="col-form-label">Select Item Class to be display in New Item SKU's</label>
-                                    <!-- <input type="text" id="newItem" name="newItem" class="form-control" placeholder="-- Select Class --"> -->
                                     <textarea id="newItem" name="newItem" class="form-control expandable-textbox" placeholder="-- Select Class --"></textarea>
                                     <input type="hidden" id="newItem_id">
                                     <input type="hidden" id="newItem_json" name="newItem_json">
@@ -202,7 +201,6 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="hero" class="col-form-label">Select Item Class to be display in Hero SKU's</label>
-                                    <!-- <input type="text" id="hero" name="hero" class="form-control" placeholder="-- Select Class --"> -->
                                     <textarea id="hero" name="hero" class="form-control expandable-textbox" placeholder="-- Select Class --"></textarea>
                                     <input type="hidden" id="hero_id">
                                     <input type="hidden" id="hero_json" name="hero_json">
@@ -235,7 +233,6 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="payment_grp_lmi" class="col-form-label">Customer Group Code / Price Code (LMI)</label>
-                                    <!-- <input type="text" id="payment_grp_lmi" name="payment_grp_lmi" class="form-control" placeholder="e.g. LMI"> -->
                                     <textarea id="payment_grp_lmi" name="payment_grp_lmi" class="form-control expandable-textbox" placeholder="e.g. LMI"></textarea>
                                     <input type="hidden" id="payment_grp_lmi_id">
                                     <input type="hidden" id="payment_grp_lmi_json" name="payment_grp_lmi_json">
@@ -245,7 +242,6 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="payment_grp_rgdi" class="col-form-label">Customer Group Code / Price Code (RGDI)</label>
-                                    <!-- <input type="text" id="payment_grp_rgdi" name="payment_grp_rgdi" class="form-control" placeholder="e.g. RGDI"> -->
                                     <textarea id="payment_grp_rgdi" name="payment_grp_rgdi" class="form-control expandable-textbox" placeholder="e.g. RGDI"></textarea>
                                     <input type="hidden" id="payment_grp_rgdi_id">
                                     <input type="hidden" id="payment_grp_rgdi_json" name="payment_grp_rgdi_json">
@@ -263,7 +259,6 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="brand_included" class="col-form-label">Included</label>
-                                    <!-- <input type="text" id="brand_included" name="brand_included" class="form-control" placeholder="Inventory"> -->
                                     <textarea id="brand_included" name="brand_included" class="form-control expandable-textbox" placeholder="Inventory"></textarea>
                                     <input type="hidden" id="brand_included_id">
                                     <input type="hidden" id="brand_included_json" name="brand_included_json">
@@ -273,7 +268,6 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="brand_excluded" class="col-form-label">Excluded</label>
-                                    <!-- <input type="text" id="brand_excluded" name="brand_excluded" class="form-control" placeholder="Inventory"> -->
                                     <textarea id="brand_excluded" name="brand_excluded" class="form-control expandable-textbox" placeholder="Inventory"></textarea>
                                     <input type="hidden" id="brand_excluded_id">
                                     <input type="hidden" id="brand_excluded_json" name="brand_excluded_json">
@@ -349,8 +343,6 @@
     let selectedBrandExcluded = [];
     let selectedBrandIncluded = [];
     let selectedBrandLabelType = [];
-    // let selectedLMI = [];
-    // let selectedRGDI = [];
     
     $(document).ready(function() {
         get_data(query);
@@ -599,21 +591,8 @@
         el.style.height = el.scrollHeight + 'px';
     }
 
-        
-    // function addUniqueItem(arraySelected, item) {
-    //     if (!arraySelected.some(i => i.id === item.id)) {
-    //         arraySelected.push(item);
-    //     }
-    // }
-
-    // addUniqueItem(selectedHeroItems, item);
-    // addUniqueItem(selectedNewItems, item);
-    // addUniqueItem(selectedBrandIncluded, item);
-    // addUniqueItem(selectedBrandExcluded, item);
-
-
-
     function get_data(query) {
+        modal.loading(true);
         var url = "<?= base_url("cms/global_controller");?>";
             var data = {
                 event : "list",
@@ -627,141 +606,139 @@
             }
 
             aJax.post(url, data, function(result) {
-            let obj = is_json(result);
-            if (obj && obj.length > 0) {
-                let row = obj[0];
+                let obj = is_json(result);
+                modal.loading(false);
+                if (obj && obj.length > 0) {
+                    let row = obj[0];
 
-                $('#id').val(row.id);
-                $('#minimum').val(row.sm_sku_min);
-                $('#maximum').val(row.sm_sku_max);
-                $('#overstock').val(row.overstock_sku);
-                $('#newItem').val(row.new_item_sku);
-                $('#hero').val(row.hero_sku);
-                $('#sales_incentives').val(row.sales_incentives);
-                // $('#payment_grp_lmi').val(row.cus_grp_code_lmi);
-                // $('#payment_grp_rgdi').val(row.cus_grp_code_rgdi);
-                $('#brand_included').val(row.brand_code_included);
-                $('#brand_excluded').val(row.brand_code_excluded);
-                $('#brandLabelType').val(row.brand_label_type);
-                $('#amountPerBa').val(row.tba_amount_per_ba);
-                $('#numOfDays').val(row.tba_num_days);
+                    $('#id').val(row.id);
+                    $('#minimum').val(row.sm_sku_min);
+                    $('#maximum').val(row.sm_sku_max);
+                    $('#overstock').val(row.overstock_sku);
+                    $('#newItem').val(row.new_item_sku);
+                    $('#hero').val(row.hero_sku);
+                    $('#sales_incentives').val(row.sales_incentives);
+                    $('#brand_included').val(row.brand_code_included);
+                    $('#brand_excluded').val(row.brand_code_excluded);
+                    $('#brandLabelType').val(row.brand_label_type);
+                    $('#amountPerBa').val(row.tba_amount_per_ba);
+                    $('#numOfDays').val(row.tba_num_days);
 
-                // Parse the JSON strings
-                let lmi_data = JSON.parse(row.cus_grp_code_lmi || "[]");
-                let rgdi_data = JSON.parse(row.cus_grp_code_rgdi || "[]");
+                    // Parse the JSON strings
+                    let lmi_data = JSON.parse(row.cus_grp_code_lmi || "[]");
+                    let rgdi_data = JSON.parse(row.cus_grp_code_rgdi || "[]");
 
-                // Extract only the labels
-                let lmi_labels = lmi_data.map(item => item.code).join(", ");
-                let rgdi_labels = rgdi_data.map(item => item.code).join(", ");
+                    // Extract only the labels
+                    let lmi_labels = lmi_data.map(item => item.code).join(", ");
+                    let rgdi_labels = rgdi_data.map(item => item.code).join(", ");
 
-                // Set them into the input fields
-                // enable kapag madami na 
-                $('#payment_grp_lmi').val(lmi_labels);
-                // adjustTextareaHeight($('#payment_grp_lmi')[0]);
+                    // Set them into the input fields
+                    // enable kapag madami na 
+                    $('#payment_grp_lmi').val(lmi_labels);
+                    // adjustTextareaHeight($('#payment_grp_lmi')[0]);
 
-                $('#payment_grp_rgdi').val(rgdi_labels);
-                // adjustTextareaHeight($('#payment_grp_rgdi')[0]); 
-               
+                    $('#payment_grp_rgdi').val(rgdi_labels);
+                    // adjustTextareaHeight($('#payment_grp_rgdi')[0]); 
+                
 
-                if (row.hero_sku) {
-                    try {
-                        let hero_items = JSON.parse(row.hero_sku);
-                        if (Array.isArray(hero_items)) {
-                            selectedHeroItems = hero_items;
-                            // Handle multiple hero items
-                            let hero_desc = hero_items.map(item => item.item_class_description).join(", ");
-                            $('#hero').val(hero_desc);
-                            $('#hero_json').val(row.hero_sku); // Store the whole JSON in the hidden field
-                        } else {
-                            // Handle single hero item
-                            selectedHeroItems = [hero_items];
-                            $('#hero').val(hero_items.item_class_description + ", ");
-                            $('#hero_id').val(hero_items.id);
-                            $('#hero_json').val(JSON.stringify(hero_items));
+                    if (row.hero_sku) {
+                        try {
+                            let hero_items = JSON.parse(row.hero_sku);
+                            if (Array.isArray(hero_items)) {
+                                selectedHeroItems = hero_items;
+                                // Handle multiple hero items
+                                let hero_desc = hero_items.map(item => item.item_class_description).join(", ");
+                                $('#hero').val(hero_desc);
+                                $('#hero_json').val(row.hero_sku); // Store the whole JSON in the hidden field
+                            } else {
+                                // Handle single hero item
+                                selectedHeroItems = [hero_items];
+                                $('#hero').val(hero_items.item_class_description + ", ");
+                                $('#hero_id').val(hero_items.id);
+                                $('#hero_json').val(JSON.stringify(hero_items));
+                            }
+                        } catch (err) {
+                            console.warn("Invalid hero_sku JSON:", row.hero_sku);
                         }
-                    } catch (err) {
-                        console.warn("Invalid hero_sku JSON:", row.hero_sku);
+                    }
+
+                    if (row.new_item_sku) {
+                        try {
+                            let newItem_items = JSON.parse(row.new_item_sku);
+                            if (Array.isArray(newItem_items)) {
+                                selectedNewItems = newItem_items;
+                                let newItem_desc = newItem_items.map(item => item.item_class_description).join(", ");
+                                $('#newItem').val(newItem_desc);
+                                $('#newItem_json').val(row.new_item_sku); 
+                            } else {
+                                selectedNewItems = [newItem_items];
+                                $('#newItem').val(newItem_items.item_class_description + ", ");
+                                $('#newItem_id').val(newItem_items.id);
+                                $('#newItem_json').val(JSON.stringify(newItem_items));
+                            }
+                        } catch (err) {
+                            console.warn("Invalid new_item_sku JSON:", row.new_item_sku);
+                        }
+                    }
+
+                    if (row.brand_code_included) {
+                        try {
+                            let brandIncluded_items = JSON.parse(row.brand_code_included);
+                            if (Array.isArray(brandIncluded_items)) {
+                                selectedBrandIncluded = brandIncluded_items;
+                                let brandIncluded_code = brandIncluded_items.map(item => item.brand_code).join(", ");
+                                $('#brand_included').val(brandIncluded_code);
+                                $('#brand_included_json').val(row.brand_code_included); 
+                            } else {
+                                selectedBrandIncluded = [brandIncluded_items];
+                                $('#brand_included').val(brandIncluded_items.brand_code + ", ");
+                                $('#brand_included_id').val(brandIncluded_items.id);
+                                $('#brand_included_json').val(JSON.stringify(brandIncluded_items));
+                            }
+                        } catch (err) {
+                            console.warn("Invalid brand_code_included JSON:", row.brand_code_included);
+                        }
+                    }
+
+                    if (row.brand_code_excluded) {
+                        try {
+                            let brandExcluded_items = JSON.parse(row.brand_code_excluded);
+                            if (Array.isArray(brandExcluded_items)) {
+                                selectedBrandExcluded = brandExcluded_items;
+                                let brandExcluded_code = brandExcluded_items.map(item => item.brand_code).join(", ");
+                                $('#brand_excluded').val(brandExcluded_code);
+                                $('#brand_excluded_json').val(row.brand_code_excluded);
+                            } else {
+                                selectedBrandExcluded = [brandExcluded_items];
+                                $('#brand_excluded').val(brandExcluded_items.brand_code + ", ");
+                                $('#brand_excluded_id').val(brandExcluded_items.id);
+                                $('#brand_excluded_json').val(JSON.stringify(brandExcluded_items));
+                            }
+                        } catch (err) {
+                            console.warn("Invalid brand_code_excluded JSON:", row.brand_code_excluded);
+                        }
+                    }
+
+                    if (row.brand_label_type) {
+                        try {
+                            let brandLabelType_items = JSON.parse(row.brand_label_type);
+                            if (Array.isArray(brandLabelType_items)) {
+                                selectedBrandLabelType = brandLabelType_items;
+                                let brandLabelType_code = brandLabelType_items.map(item => item.label).join(", ");
+                                $('#brandLabelType').val(brandLabelType_code);
+                                $('#brandLabelTypeJson').val(row.brand_label_type); 
+                            } else {
+                                selectedBrandLabelType = [brandLabelType_items];
+                                $('#brandLabelType').val(brandLabelType_items.label + ", ");
+                                $('#brandLabelTypeId').val(brandLabelType_items.id);
+                                $('#brandLabelTypeJson').val(JSON.stringify(brandLabelType_items));
+                            }
+                        } catch (err) {
+                            console.warn("Invalid brand_label_type JSON:", row.brand_label_type);
+                        }
                     }
                 }
-
-                if (row.new_item_sku) {
-                    try {
-                        let newItem_items = JSON.parse(row.new_item_sku);
-                        if (Array.isArray(newItem_items)) {
-                            selectedNewItems = newItem_items;
-                            let newItem_desc = newItem_items.map(item => item.item_class_description).join(", ");
-                            $('#newItem').val(newItem_desc);
-                            $('#newItem_json').val(row.new_item_sku); 
-                        } else {
-                            selectedNewItems = [newItem_items];
-                            $('#newItem').val(newItem_items.item_class_description + ", ");
-                            $('#newItem_id').val(newItem_items.id);
-                            $('#newItem_json').val(JSON.stringify(newItem_items));
-                        }
-                    } catch (err) {
-                        console.warn("Invalid new_item_sku JSON:", row.new_item_sku);
-                    }
-                }
-
-                if (row.brand_code_included) {
-                    try {
-                        let brandIncluded_items = JSON.parse(row.brand_code_included);
-                        if (Array.isArray(brandIncluded_items)) {
-                            selectedBrandIncluded = brandIncluded_items;
-                            let brandIncluded_code = brandIncluded_items.map(item => item.brand_code).join(", ");
-                            $('#brand_included').val(brandIncluded_code);
-                            $('#brand_included_json').val(row.brand_code_included); 
-                        } else {
-                            selectedBrandIncluded = [brandIncluded_items];
-                            $('#brand_included').val(brandIncluded_items.brand_code + ", ");
-                            $('#brand_included_id').val(brandIncluded_items.id);
-                            $('#brand_included_json').val(JSON.stringify(brandIncluded_items));
-                        }
-                    } catch (err) {
-                        console.warn("Invalid brand_code_included JSON:", row.brand_code_included);
-                    }
-                }
-
-                if (row.brand_code_excluded) {
-                    try {
-                        let brandExcluded_items = JSON.parse(row.brand_code_excluded);
-                        if (Array.isArray(brandExcluded_items)) {
-                            selectedBrandExcluded = brandExcluded_items;
-                            let brandExcluded_code = brandExcluded_items.map(item => item.brand_code).join(", ");
-                            $('#brand_excluded').val(brandExcluded_code);
-                            $('#brand_excluded_json').val(row.brand_code_excluded);
-                        } else {
-                            selectedBrandExcluded = [brandExcluded_items];
-                            $('#brand_excluded').val(brandExcluded_items.brand_code + ", ");
-                            $('#brand_excluded_id').val(brandExcluded_items.id);
-                            $('#brand_excluded_json').val(JSON.stringify(brandExcluded_items));
-                        }
-                    } catch (err) {
-                        console.warn("Invalid brand_code_excluded JSON:", row.brand_code_excluded);
-                    }
-                }
-
-                if (row.brand_label_type) {
-                    try {
-                        let brandLabelType_items = JSON.parse(row.brand_label_type);
-                        if (Array.isArray(brandLabelType_items)) {
-                            selectedBrandLabelType = brandLabelType_items;
-                            let brandLabelType_code = brandLabelType_items.map(item => item.label).join(", ");
-                            $('#brandLabelType').val(brandLabelType_code);
-                            $('#brandLabelTypeJson').val(row.brand_label_type); 
-                        } else {
-                            selectedBrandLabelType = [brandLabelType_items];
-                            $('#brandLabelType').val(brandLabelType_items.label + ", ");
-                            $('#brandLabelTypeId').val(brandLabelType_items.id);
-                            $('#brandLabelTypeJson').val(JSON.stringify(brandLabelType_items));
-                        }
-                    } catch (err) {
-                        console.warn("Invalid brand_label_type JSON:", row.brand_label_type);
-                    }
-                }
-
-            }
-        });
+            });
     }
 
 
@@ -928,19 +905,6 @@
             hiddenField: '#brandLabelTypeJson',
             displayKey: 'label'
         },
-        // payment_grp_lmi: {
-        //     array: () => selectedLMI,
-        //     updateArray: (val) => selectedLMI = val,
-        //     hiddenField: '#payment_grp_lmi_json',
-        //     displayKey: 'code'
-        // },
-        // payment_grp_rgdi: {
-        //     array: () => selectedRGDI,
-        //     updateArray: (val) => selectedRGDI = val,
-        //     hiddenField: '#payment_grp_rgdi_json',
-        //     displayKey: 'code'
-        // }
-
     };
 
     Object.keys(multiAutocompleteConfigs).forEach(fieldId => {
@@ -1026,11 +990,6 @@
     //         }
     //     }
     // });
-
-    // function split(val) {
-    //     return val.split(/,\s*/);
-    // }
-
 
 </script>
 
