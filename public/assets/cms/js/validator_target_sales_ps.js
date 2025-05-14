@@ -12,16 +12,6 @@ self.onmessage = async function(e) {
     try {
         let get_tsp_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&ba=1&ba_area_store_brand=1`);
         let fetch_data = await get_tsp_valid_response.json();
-
-        let store_lookup = createLookup(fetch_data.stores, "code", "code");
-
-        ba_records = fetch_data.ba;
-        let ba_lookup = {
-            "vacant": -5,
-            "non ba": -6
-        };
-        ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
-
         let ba_checklist = {};
 
         fetch_data.ba_area_store_brand.forEach(entry => {
@@ -46,6 +36,15 @@ self.onmessage = async function(e) {
                 }
             });
         });
+
+        let store_lookup = createLookup(fetch_data.stores, "code", "code");
+
+        ba_records = fetch_data.ba;
+        let ba_lookup = {
+            "vacant": -5,
+            "non ba": -6
+        };
+        ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
 
         function createLookup(records, key1, key2) {
             let lookup = {};
@@ -105,6 +104,10 @@ self.onmessage = async function(e) {
             // self.postMessage({ progress });
     
             for (let i = 0; i < BATCH_SIZE && index < data.length; i++, index++) {
+                let normalized_store_lookup = {};
+                for (let key in store_lookup) {
+                    normalized_store_lookup[key.toLowerCase()] = store_lookup[key];
+                }
                 let row = data[index];
                 let tr_count = index + 1;
                 let ba_code_raw = row["BA Code"] ? row["BA Code"].trim() : "";
@@ -112,7 +115,9 @@ self.onmessage = async function(e) {
                 let resolved_ba_ids = [];
                 let resolved_ba_code_str = [];
                 let has_invalid_ba = false;
-                let location = row["Location"] ? row["Location"].trim() : "";
+                let store_code_raw = row["Location"] ? row["Location"].trim() : "";
+                let store_code_lower = store_code_raw.toLowerCase();
+                let store_code_id = normalized_store_lookup[store_code_lower];
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
     
@@ -124,16 +129,16 @@ self.onmessage = async function(e) {
                     }
                 }
 
-                if (unique_code.has(location)) {
+                if (unique_code.has(store_code_lower)) {
                     invalid = true;
                     errorLogs.push(`⚠️ Duplicated Store Code/Location at line #: ${tr_count}`);
                     err_counter++;
-                } else if (location.length > 25 || location === "") {
+                } else if (store_code_lower.length > 25 || store_code_lower === "") {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Store Code/Location at line #: ${tr_count}`);
                     err_counter++;
                 } else {
-                    unique_code.add(location);
+                    unique_code.add(store_code_lower);
                 }
 
                 ba_codes.forEach(code => {
@@ -161,39 +166,25 @@ self.onmessage = async function(e) {
                     if (value) monthlyValues[key] = validateFloatField(value, key, tr_count);
                 });
     
-                let normalized_store_lookup = {};
-                for (let key in store_lookup) {
-                    normalized_store_lookup[key.toLowerCase()] = store_lookup[key];
-                }
-    
-                let area_lower = location.toLowerCase();
-                if (area_lower in normalized_store_lookup) {
-                    location = normalized_store_lookup[area_lower];
-                } else {
+                if (!store_code_id) {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Location/Store Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
-                let normalized_ba_lookup = {};
-                for (let key in ba_lookup) {
-                    normalized_ba_lookup[key.toLowerCase()] = ba_lookup[key];
-                }
-                
-                let matched = ba_checklist[store?.toLowerCase()] || {};
+                let matched = ba_checklist[store_code_lower] || {};
 
                 if (!invalid) {
                     valid_data.push({
                         ba_code: resolved_ba_code_str.join(','),
-                        location: matched?.store_code || null,
+                        location: matched?.store_code || 0,
                         ...monthlyValues,
                         status: 2,
                         created_by: user_id,
                         created_date: date_of_creation,
                         area_id: matched?.area_id || 0,
                         asc_id: matched?.asc_id || 0,
-                        brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : '',
-                        brand_ambassador_ids: (matched.ba_ids && matched.ba_ids.length) ? matched.ba_ids.join(',') : '',
+                        brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : ''
                     });
                 }
             }
