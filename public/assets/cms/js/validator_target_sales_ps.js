@@ -23,25 +23,25 @@ self.onmessage = async function(e) {
         ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
 
         let ba_checklist = {};
+
         fetch_data.ba_area_store_brand.forEach(entry => {
-            let ba_codes = entry.brand_ambassador_code ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
-            let ba_ids = entry.brand_ambassador_id ? entry.brand_ambassador_id.split(',').map(id => id.trim()) : [null];
-            let store_codes = entry.store_code ? entry.store_code.split(',').map(s => s.trim()) : [];
-            let store_ids = entry.store_id ? entry.store_id.split(',').map(id => id.trim()) : [];
-            let brand_ids = entry.brand_id ? entry.brand_id.split(',').map(id => id.trim()) : [];
+            let ba_codes = entry.brand_ambassador_code?.split(',').map(b => b.trim()) || [];
+            let ba_ids = entry.brand_ambassador_id?.split(',').map(id => id.trim()) || [];
+            let store_codes = entry.store_code?.split(',').map(s => s.trim()) || [];
+            let store_ids = entry.store_id?.split(',').map(id => id.trim()) || [];
+            let brand_ids = entry.brand_id?.split(',').map(id => id.trim()) || [];
 
             store_codes.forEach((store_code, store_idx) => {
                 if (!ba_checklist[store_code.toLowerCase()]) {
                     ba_checklist[store_code.toLowerCase()] = {
-                        area_code: entry.area_code,
+                        area_code: entry.area_code || "0",
                         store_code: store_code,
-                        ba_code: ba_codes[0] || "",
-                        area_id: entry.area_id,
+                        ba_codes,
+                        ba_ids,
+                        area_id: entry.area_id || "0",
                         asc_id: entry.asc_id || null,
                         store_id: store_ids[store_idx] || null,
-                        ba_id: ba_ids.join(',') || null,
-                        brand_ids: brand_ids.join(','),
-                        brand_names: entry.brand_name ? entry.brand_name.split(',').map(name => name.trim().toLowerCase()) : []
+                        brand_ids
                     };
                 }
             });
@@ -180,8 +180,7 @@ self.onmessage = async function(e) {
                     normalized_ba_lookup[key.toLowerCase()] = ba_lookup[key];
                 }
                 
-                const storeKey = row["Location"].trim().toLowerCase();
-                const matched = ba_checklist[storeKey];
+                let matched = ba_checklist[store?.toLowerCase()] || {};
 
                 if (!invalid) {
                     valid_data.push({
@@ -191,9 +190,10 @@ self.onmessage = async function(e) {
                         status: 2,
                         created_by: user_id,
                         created_date: date_of_creation,
-                        area_id: matched?.area_id || null,
-                        asc_id: matched?.asc_id || null,
-                        brand_ids: matched?.brand_ids || []
+                        area_id: matched?.area_id || 0,
+                        asc_id: matched?.asc_id || 0,
+                        brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : '',
+                        brand_ambassador_ids: (matched.ba_ids && matched.ba_ids.length) ? matched.ba_ids.join(',') : '',
                     });
                 }
             }

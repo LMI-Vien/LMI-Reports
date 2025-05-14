@@ -41,7 +41,7 @@ self.onmessage = async function(e) {
 
         let store_lookup = {};
         ba_data.stores.forEach(store => store_lookup[store.code.toLowerCase()] = store.id);
-        console.log(store_lookup);
+
         let item_class_lookup = {};
         ba_data.item_classification.forEach(item_class => item_class_lookup[item_class.item_class_code.toLowerCase()] = item_class.id);
 
