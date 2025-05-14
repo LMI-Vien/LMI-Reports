@@ -1315,10 +1315,21 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getStorePerformance($month_start, $month_end, $year, $limit, $offset, $area_id = null, $asc_id = null, $store_code = null, $brand_ambassador_ids = null, $ba_type = null, $brand_category = null, $brands = null)
+	public function getStorePerformance($month_start, $month_end, $year, $limit, $offset, $area_id = null, $asc_id = null, $store_code = null, $brand_ambassador_ids = null, $ba_type = null, $brand_category = null, $brands = null, $orderByColumn, $orderDirection)
 	{
 	    $last_year = $year - 1;
+		$allowedOrderColumns = [
+		    'rank', 'store_code', 'ty_scanned_data', 'ly_scanned_data', 'growth', 'sob'
+		];
+		$allowedOrderDirections = ['ASC', 'DESC'];
 
+		if (!in_array($orderByColumn, $allowedOrderColumns)) {
+		    $orderByColumn = 'rank';
+		}
+
+		if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
+		    $orderDirection = 'ASC';
+		}
 	    $brand_ambassador_ids = is_array($brand_ambassador_ids)
 	        ? array_map('trim', $brand_ambassador_ids)
 	        : array_filter(array_map('trim', explode(',', (string)$brand_ambassador_ids)));
@@ -1519,7 +1530,7 @@ class Dashboard_model extends Model
 	          {$brand_condition_so}
 	          {$brand_category_condition}
 	        GROUP BY so.store_code, ly.ly_scanned_data, ty.ty_scanned_data, tt.total_ty_sales, dsc.total_unique_store_codes
-	        ORDER BY rank ASC
+	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?;
 	    ";
 

@@ -70,10 +70,17 @@ class StoreSalesPerfOverall extends BaseController
 	    $yearId = $this->request->getPost('year')?? 0;            
 	    $monthId = $this->request->getVar('month_start') ?? 1;
 	    $monthEndId = $this->request->getVar('month_end') ?? 12;
-		$limit = (int) $this->request->getVar('limit') ?? 10;
-		$offset = (int) $this->request->getVar('offset') ?? 0;
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit = is_numeric($limit) ? (int)$limit : 10;
+		$offset = is_numeric($offset) ? (int)$offset : 0;
 
-	    $data = $this->Dashboard_model->getStorePerformance($monthId, $monthEndId, $yearId, $limit, $offset, $areaId, $ascId, $storeCode, $baId, $baTypeId, $brandCategoriesIds, $brandIds);
+	    $orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
+	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
+	    $columns = $this->request->getVar('columns');
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
+            
+	    $data = $this->Dashboard_model->getStorePerformance($monthId, $monthEndId, $yearId, $limit, $offset, $areaId, $ascId, $storeCode, $baId, $baTypeId, $brandCategoriesIds, $brandIds, $orderByColumn, $orderDirection);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
