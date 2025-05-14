@@ -34,6 +34,7 @@ class SystemParameter extends BaseController
 		$data['newItem'] = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'*'", 0, 0, "''", "''", "''");
 		$data['brandExcluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "''", "''", "''");
 		$data['brandIncluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "''", "''", "''");
+		$data['brandLabelTypeOptions'] = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'*'", 0, 0, "''", "''", "''");
 
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
