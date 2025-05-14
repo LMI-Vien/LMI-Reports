@@ -997,7 +997,8 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     function getArea($areaOffset) {
-        $query = $this->db->query("CALL SearchDynamic('tbl_area', null, 'id, description', 9999, 0, 'status:EQ=1', 'description', null)");
+        $select = 'id, CONCAT(code, " - ", description) AS description';
+        $query = $this->db->query("CALL SearchDynamic('tbl_area', null, '$select', 9999, 0, 'status:EQ=1', 'description', null)");
         return $query->getResultArray(); // Return data as an array
     }
     function get_area_masterfile_count() {
@@ -1015,7 +1016,8 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     function getAsc($ascOffset) {
-        $query = $this->db->query("CALL SearchDynamic('tbl_area_sales_coordinator', null, 'id, description', 9999, 0, 'status:EQ=1', 'description', null)");
+        $select = 'id, CONCAT(code, " - ", description) AS description';
+        $query = $this->db->query("CALL SearchDynamic('tbl_area_sales_coordinator', null, '$select', 9999, 0, 'status:EQ=1', 'description', null)");
         return $query->getResultArray(); // Return data as an array
     }
     function get_asc_masterfile_count() {
@@ -1049,7 +1051,8 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     function getStoreBranch($storeBranchOffset) {
-        $query = $this->db->query("CALL SearchDynamic('tbl_store', null, 'code AS id, description', 9999, 0, 'status:EQ=1', 'description', null)");
+        $select = 'id, CONCAT(code, " - ", description) AS description';
+        $query = $this->db->query("CALL SearchDynamic('tbl_store', null, '$select', 9999, 0, 'status:EQ=1', 'description', null)");
         return $query->getResultArray(); // Return data as an array
     }
     function get_store_branch_masterfile_count() {
@@ -1296,6 +1299,75 @@ class Global_model extends Model
 
         return $builder->get()->getResultArray();
     }
+
+function get_valid_records_store_area_asc_ba_brand() {
+    $builder = $this->db->table('tbl_store s');
+
+    $builder->select("
+        sg.area_id AS sg_area_id,
+        sg.store_id AS sg_store_id,
+
+        s.id AS store_id,
+        s.code AS store_code,
+        s.description AS store_name,
+
+        a.id AS area_id,
+        a.code AS area_code,
+        a.description AS area_name,
+
+        GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.id ELSE NULL END SEPARATOR ', ') AS asc_id,
+        GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.code ELSE NULL END SEPARATOR ', ') AS asc_code,
+        GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.description ELSE NULL END SEPARATOR ', ') AS asc_name,
+
+        GROUP_CONCAT(DISTINCT
+            CASE
+                WHEN bag.brand_ambassador_id = -5 THEN '-5'
+                WHEN bag.brand_ambassador_id = -6 THEN '-6'
+                WHEN ba.status = 1 THEN ba.code
+                ELSE NULL
+            END
+            ORDER BY ba.code SEPARATOR ', '
+        ) AS brand_ambassador_code,
+
+        GROUP_CONCAT(DISTINCT
+            CASE
+                WHEN bag.brand_ambassador_id = -5 THEN 'Vacant'
+                WHEN bag.brand_ambassador_id = -6 THEN 'Non BA'
+                WHEN ba.status = 1 THEN ba.name
+                ELSE NULL
+            END
+            ORDER BY ba.name SEPARATOR ', '
+        ) AS brand_ambassador_name,
+
+        GROUP_CONCAT(DISTINCT
+            CASE
+                WHEN bag.brand_ambassador_id = -5 THEN '-5'
+                WHEN bag.brand_ambassador_id = -6 THEN '-6'
+                WHEN ba.status = 1 THEN ba.id
+                ELSE NULL
+            END
+            ORDER BY ba.id SEPARATOR ', '
+        ) AS brand_ambassador_id,
+
+        GROUP_CONCAT(DISTINCT b.id ORDER BY b.id SEPARATOR ', ') AS brand_id,
+        GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brand_name
+    ");
+
+    $builder->join('tbl_store_group sg', 'sg.store_id = s.id', 'left');
+    $builder->join('tbl_area a', 'a.id = sg.area_id', 'left');
+    $builder->join('tbl_area_sales_coordinator asc', 'asc.area_id = a.id', 'left');
+    $builder->join('tbl_brand_ambassador_group bag', 'bag.store_id = s.id', 'left');
+    $builder->join('tbl_brand_ambassador ba', 'ba.id = bag.brand_ambassador_id', 'left');
+    $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
+    $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
+
+    $builder->where('s.status', 1); // include only active stores
+    $builder->groupBy('s.id');
+
+    return $builder->get()->getResultArray();
+}
+
+
 
     function getWeeks() {
         $query = $this->db->query("CALL get_weeks()");

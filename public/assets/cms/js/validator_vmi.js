@@ -15,26 +15,24 @@ self.onmessage = async function(e) {
         let ba_data = await get_ba_valid_response.json();
 
         let ba_checklist = {};
-
         ba_data.ba_area_store_brand.forEach(entry => {
-            let ba_codes = entry.brand_ambassador_code ? entry.brand_ambassador_code.split(',').map(b => b.trim()) : [null];
-            let ba_ids = entry.brand_ambassador_id ? entry.brand_ambassador_id.split(',').map(id => id.trim()) : [null];
-            let store_codes = entry.store_code ? entry.store_code.split(',').map(s => s.trim()) : [];
-            let store_ids = entry.store_id ? entry.store_id.split(',').map(id => id.trim()) : [];
-            let brand_ids = entry.brand_id ? entry.brand_id.split(',').map(id => id.trim()) : [];
+            let ba_codes = entry.brand_ambassador_code?.split(',').map(b => b.trim()) || [];
+            let ba_ids = entry.brand_ambassador_id?.split(',').map(id => id.trim()) || [];
+            let store_codes = entry.store_code?.split(',').map(s => s.trim()) || [];
+            let store_ids = entry.store_id?.split(',').map(id => id.trim()) || [];
+            let brand_ids = entry.brand_id?.split(',').map(id => id.trim()) || [];
 
             store_codes.forEach((store_code, store_idx) => {
                 if (!ba_checklist[store_code.toLowerCase()]) {
                     ba_checklist[store_code.toLowerCase()] = {
-                        area_code: entry.area_code,
+                        area_code: entry.area_code || "0",
                         store_code: store_code,
-                        ba_code: ba_codes[0] || "",
-                        area_id: entry.area_id,
+                        ba_codes,
+                        ba_ids,
+                        area_id: entry.area_id || "0",
                         asc_id: entry.asc_id || null,
                         store_id: store_ids[store_idx] || null,
-                        ba_id: ba_ids.join(',') || null,
-                        brand_ids: brand_ids.join(','),
-                        brand_names: entry.brand_name ? entry.brand_name.split(',').map(name => name.trim().toLowerCase()) : []
+                        brand_ids
                     };
                 }
             });
@@ -43,7 +41,7 @@ self.onmessage = async function(e) {
 
         let store_lookup = {};
         ba_data.stores.forEach(store => store_lookup[store.code.toLowerCase()] = store.id);
-
+        console.log(store_lookup);
         let item_class_lookup = {};
         ba_data.item_classification.forEach(item_class => item_class_lookup[item_class.item_class_code.toLowerCase()] = item_class.id);
 
@@ -60,7 +58,7 @@ self.onmessage = async function(e) {
             for (let i = 0; i < BATCH_SIZE && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let store = row["store"]?.trim() || "";
+                let store_code = row["store"]?.trim() || "";
                 let item = row["item"]?.trim() || "";
                 let item_name = row["item_name"]?.trim() || "";
                 let vmi_status = row["vmi_status"]?.toLowerCase() || "";
@@ -129,24 +127,17 @@ self.onmessage = async function(e) {
                     addErrorLog("Invalid In Transit");
                 }
 
-                let store_id = store_lookup[store.toLowerCase()];
-                if (!store_id) addErrorLog("Invalid Store");
+                let store = store_lookup[store_code.toLowerCase()];
+                if (!store) addErrorLog("Invalid Store");
 
                 let item_classi = item_class_lookup[item_class.toLowerCase()];
                 if (!item_classi) addErrorLog("Invalid item Class");
 
-                let matched = ba_checklist[store.toLowerCase()];
+                let matched = ba_checklist[store?.toLowerCase()] || {};
                 //if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
-
-                const rawStoreCode = row.store.trim().toLowerCase();
-
-                const storeId = matched?.store_id || store_lookup[rawStoreCode] || null;
-
                 if (!invalid) {
                     valid_data.push({
-                        store: storeId,
-                        // store code ang inilalagay neto
-                        // store: matched?.store_code || null, 
+                        store_code: matched?.store_code || 0,
                         item,
                         item_name,
                         item_class,
@@ -162,10 +153,10 @@ self.onmessage = async function(e) {
                         status,
                         created_by: user_id,
                         created_date: date_of_creation,
-                        area_id: matched?.area_id || null,
-                        asc_id: matched?.asc_id || null,
-                        brand_ids: matched?.brand_ids || [],
-                        brand_ambassador_ids: matched?.ba_id || null
+                        area_id: matched?.area_id || 0,
+                        asc_id: matched?.asc_id || 0,
+                        brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : '',
+                        brand_ambassador_ids: (matched.ba_ids && matched.ba_ids.length) ? matched.ba_ids.join(',') : '',
                     });
                 }
             }

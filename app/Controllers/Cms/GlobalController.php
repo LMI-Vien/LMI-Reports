@@ -954,7 +954,9 @@ class GlobalController extends BaseController
 	    }
 
 	    if (!empty($request['ba_area_store_brand'])) {
-	        $responseData['ba_area_store_brand'] = $this->Global_model->get_valid_records_ba_area_store_brand();
+	    	//get_valid_records_store_area_asc_ba_brand
+	       // $responseData['ba_area_store_brand'] = $this->Global_model->get_valid_records_ba_area_store_brand();
+	        $responseData['ba_area_store_brand'] = $this->Global_model->get_valid_records_store_area_asc_ba_brand();
 	    }
 
 	    if (!empty($request['payment_group_lmi'])) {
