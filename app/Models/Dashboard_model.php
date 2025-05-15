@@ -1365,7 +1365,7 @@ class Dashboard_model extends Model
 		        $builder->whereIn('id', $filtered_ba_ids);
 
 		        if ($ba_type !== null && $ba_type != 3) {
-		            $builder->where('ba_type', $ba_type);
+		            $builder->where('type', $ba_type);
 		        }
 
 		        $query = $builder->get();

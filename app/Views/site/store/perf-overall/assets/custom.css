@@ -105,8 +105,16 @@
         opacity: 1;
     }
 
-    .mb-3, #top_performing_stores{
+    #top_performing_stores{
         overflow: visible !important;
+    }
+
+    .tbl-title-header .dt-column-order {
+        display: none !important;
+    }
+    .tbl-title-header {
+        pointer-events: none;
+        cursor: default !important;
     }
 
     .table {
