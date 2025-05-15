@@ -62,7 +62,7 @@
                                     <th 
                                         colspan="6"
                                         style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                        class="tbl-title-header"
+                                        class="static-header"
                                     >
                                         OVERALL STORES SALES PERFORMANCE
                                     </th>
@@ -196,6 +196,7 @@
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res)[0];
                 if(data){
+                    alert(data.code);
                     $("#storeName").val(data.description);
                     $("#storeNameId").val(data.code);
                 }
@@ -257,7 +258,6 @@
 
         $('.table-empty').show();
         $('.hide-div').hide();
-        $('.data-graph').hide();
     });
 
     function fetchData() {

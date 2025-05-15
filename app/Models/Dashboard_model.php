@@ -273,34 +273,175 @@ class Dashboard_model extends Model
             return $results;
     }
 
-	public function tradeOverallBaData($limit, $offset, $month = null, $targetYear = null, $lyYear = null, $storeid = null, $areaid = null, $sortField = 'percent_ach', $sortOrder = 'ASC', $remainingDays = null, $salesDate = null) {
+	// public function tradeOverallBaData($limit, $offset, $month = null, $targetYear = null, $lyYear = null, $storeid = null, $areaid = null, $sortField = 'percent_ach', $sortOrder = 'ASC', $remainingDays = null, $salesDate = null) {
 
-	    $allowedSortFields = ['rank', 'asc_names', 'area', 'store_name', 'actual_sales', 'target_sales', 'percent_ach', 'balance_to_target', 'possible_incentives', 'target_per_remaining_days', 'ly_scanned_data', 'growth'];
+	//     $allowedSortFields = ['rank', 'asc_names', 'area', 'store_name', 'actual_sales', 'target_sales', 'percent_ach', 'balance_to_target', 'possible_incentives', 'target_per_remaining_days', 'ly_scanned_data', 'growth'];
+	//     if (!in_array($sortField, $allowedSortFields)) {
+	//         $sortField = 'rank';
+	//     }
+
+	//     $sql = "
+	//     WITH sales AS (
+	//         SELECT 
+	//             s.area_id,  
+	//             s.store_id,
+	//             COALESCE(SUM(s.amount), 0) AS actual_sales,
+	//             GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands,
+	//             GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS brand_ambassadors,
+	//             GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS asc_names,
+	//             GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates
+	//         FROM tbl_ba_sales_report s
+	//         LEFT JOIN tbl_brand_ambassador ba ON ba.area = s.area_id AND ba.store = s.store_id
+    //         LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+    //         LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+	//         LEFT JOIN tbl_area_sales_coordinator a_asc ON a_asc.area_id = s.area_id
+	//         WHERE (? IS NULL OR s.date LIKE CONCAT(?, '%'))
+	//         GROUP BY s.area_id, s.store_id
+	//     ),
+	//     targets AS (
+	//         SELECT 
+	//              TRIM(t.location) AS store_id,
+	//             SUM(COALESCE(
+	//                 CASE 
+	//                     WHEN ? = 1 THEN t.january
+	//                     WHEN ? = 2 THEN t.february
+	//                     WHEN ? = 3 THEN t.march
+	//                     WHEN ? = 4 THEN t.april
+	//                     WHEN ? = 5 THEN t.may
+	//                     WHEN ? = 6 THEN t.june
+	//                     WHEN ? = 7 THEN t.july
+	//                     WHEN ? = 8 THEN t.august
+	//                     WHEN ? = 9 THEN t.september
+	//                     WHEN ? = 10 THEN t.october
+	//                     WHEN ? = 11 THEN t.november
+	//                     WHEN ? = 12 THEN t.december
+	//                 END, 0)
+	//             ) AS target_sales
+	//         FROM tbl_target_sales_per_store t
+	//         WHERE (? IS NULL OR t.year = ?)
+	//         GROUP BY t.location
+	//     ),
+	//     ly_scanned AS (
+	//         SELECT 
+	//             so.store_code,
+	//             SUM(COALESCE(so.net_sales, 0)) AS ly_scanned_data
+	//         FROM tbl_sell_out_data_details so
+	//         WHERE (? IS NULL OR so.year = ?) 
+	//           AND (? IS NULL OR so.month = ?)
+	//         GROUP BY so.store_code
+	//     ),
+	//     store_mapping AS (
+	//         SELECT 
+	//             a.id AS area_id,
+	//             a.description AS area,
+	//             s.id AS store_id,
+	//             s.description AS store_name,
+	//             s.code AS store_code
+	//         FROM tbl_store s
+	//         JOIN tbl_store_group sg ON s.id = sg.store_id
+	//         JOIN tbl_area a ON sg.area_id = a.id
+	//         WHERE (? IS NULL OR s.id = ?) 
+	//           AND (? IS NULL OR a.id = ?)
+	//     )
+	//     SELECT 
+	//         ROW_NUMBER() OVER (ORDER BY percent_ach DESC) AS rank,
+	//         sm.store_id,
+	//         sm.store_code,
+	//         sm.area,
+	//         sm.store_name,
+	//         COALESCE(s.actual_sales, 0) AS actual_sales,
+	//         COALESCE(t.target_sales, 0) AS target_sales,
+	//         ROUND((COALESCE(s.actual_sales, 0) / NULLIF(t.target_sales, 0)) * 100, 2) AS percent_ach,
+	//         COALESCE(t.target_sales, 0) - COALESCE(s.actual_sales, 0) AS balance_to_target,
+	//         (COALESCE(s.actual_sales, 0) * 0.01) AS possible_incentives,
+	//         CASE 
+	//             WHEN ? > 0 THEN CEIL((COALESCE(t.target_sales, 0) - COALESCE(s.actual_sales, 0)) / ?)
+	//             ELSE NULL
+	//         END AS target_per_remaining_days,
+	//         s.store_id,
+	//         s.brand_ambassadors,
+	//         s.asc_names,
+	//         s.ba_deployment_dates,
+	//         s.brands,
+	//         COUNT(s.store_id) OVER() AS total_records,
+	//         COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data,
+	//         ROUND((COALESCE(s.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)), 2) AS growth
+	//     FROM store_mapping sm
+	//     INNER JOIN sales s ON sm.area_id = s.area_id AND sm.store_id = s.store_id
+	//     LEFT JOIN targets t ON TRIM(sm.store_id) = TRIM(t.store_id)
+	//     LEFT JOIN ly_scanned ly ON sm.store_code = ly.store_code
+	//     ORDER BY $sortField $sortOrder
+	//     LIMIT ? OFFSET ?
+	//     ";
+
+	//     $params = [
+	//         $salesDate, $salesDate,  
+	//         $month, $month, $month, $month, $month, $month, 
+	//         $month, $month, $month, $month, $month, $month, 
+	//         $targetYear, $targetYear,  
+	//         $lyYear, $lyYear, $month, $month,  
+	//         $storeid, $storeid, $areaid, $areaid,  
+	//         $remainingDays, $remainingDays,  
+	//         (int) $limit, (int) $offset  
+	//     ];
+
+
+	//     $query = $this->db->query($sql, $params);
+	// 	$data = $query->getResult();
+	// 	$totalRecords = count($data);
+
+	// 	return [
+	// 	    'total_records' => $totalRecords,
+	// 	    'data' => $data
+	// 	];
+
+	// }
+
+	public function tradeOverallBaData($limit, $offset, $incentiveRate, $month = null, $targetYear = null, $lyYear = null, $storeid = null, $areaid = null, $sortField = 'percent_ach', $sortOrder = 'ASC', $remainingDays = null, $salesDate = null, $brand_category = null)
+	{
+		$isFilteringBrandCategory = !empty($brand_category) && is_array($brand_category);
+
+		$brandCategorySQL = '';
+		if ($isFilteringBrandCategory) {
+		    $brandCategoryPlaceholders = implode(',', array_fill(0, count($brand_category), '?'));
+		    $brandCategorySQL = "AND ly.brand_type_id IN ($brandCategoryPlaceholders)";
+		}
+
+	    $allowedSortFields = ['rank', 'store_id', 'store_code', 'actual_sales', 'target_sales', 'percent_ach', 'balance_to_target', 'possible_incentives', 'target_per_remaining_days', 'ly_scanned_data', 'growth'];
 	    if (!in_array($sortField, $allowedSortFields)) {
-	        $sortField = 'rank';
+	        $sortField = 'store_code';
 	    }
 
 	    $sql = "
-	    WITH sales AS (
+	    WITH ly_scanned AS (
 	        SELECT 
-	            s.area_id,  
-	            s.store_id,
-	            COALESCE(SUM(s.amount), 0) AS actual_sales,
-	            GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands,
-	            GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS brand_ambassadors,
-	            GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS asc_names,
-	            GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates
-	        FROM tbl_ba_sales_report s
-	        LEFT JOIN tbl_brand_ambassador ba ON ba.area = s.area_id AND ba.store = s.store_id
-            LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-            LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-	        LEFT JOIN tbl_area_sales_coordinator a_asc ON a_asc.area_id = s.area_id
-	        WHERE (? IS NULL OR s.date LIKE CONCAT(?, '%'))
-	        GROUP BY s.area_id, s.store_id
+	            so.store_code,
+	            h.company,
+	            CASE WHEN h.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END AS itmcde,
+	            CASE WHEN h.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
+	            blt.id AS brand_type_id,
+	            SUM(COALESCE(so.gross_sales, 0)) AS ly_scanned_data
+	        FROM tbl_sell_out_data_details so
+	        INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
+	        LEFT JOIN tbl_price_code_file_2_lmi pclmi 
+	            ON so.sku_code = pclmi.cusitmcde AND h.company = '2'
+	        LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi 
+	            ON so.sku_code = pcrgdi.cusitmcde AND h.company != '2'
+	        LEFT JOIN tbl_itemfile_lmi pitmlmi 
+	            ON pclmi.itmcde = pitmlmi.itmcde AND h.company = '2'
+	        LEFT JOIN tbl_itemfile_rgdi itmrgdi 
+	            ON pcrgdi.itmcde = itmrgdi.itmcde AND h.company != '2'
+	        LEFT JOIN tbl_brand b ON 
+	            (h.company = '2' AND pitmlmi.brncde = b.brand_code) OR
+	            (h.company != '2' AND itmrgdi.brncde = b.brand_code)
+	        LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
+	        WHERE (? IS NULL OR so.year = ?) 
+	          AND (? IS NULL OR so.month = ?)
+	        GROUP BY so.store_code
 	    ),
 	    targets AS (
 	        SELECT 
-	             TRIM(t.location) AS store_id,
+	            t.location AS location,
 	            SUM(COALESCE(
 	                CASE 
 	                    WHEN ? = 1 THEN t.january
@@ -318,83 +459,62 @@ class Dashboard_model extends Model
 	                END, 0)
 	            ) AS target_sales
 	        FROM tbl_target_sales_per_store t
-	        WHERE (? IS NULL OR t.year = ?)
+	        WHERE (? IS NULL OR t.year = 6)
 	        GROUP BY t.location
-	    ),
-	    ly_scanned AS (
-	        SELECT 
-	            so.store_code,
-	            SUM(COALESCE(so.net_sales, 0)) AS ly_scanned_data
-	        FROM tbl_sell_out_data_details so
-	        WHERE (? IS NULL OR so.year = ?) 
-	          AND (? IS NULL OR so.month = ?)
-	        GROUP BY so.store_code
-	    ),
-	    store_mapping AS (
-	        SELECT 
-	            a.id AS area_id,
-	            a.description AS area,
-	            s.id AS store_id,
-	            s.description AS store_name,
-	            s.code AS store_code
-	        FROM tbl_store s
-	        JOIN tbl_store_group sg ON s.id = sg.store_id
-	        JOIN tbl_area a ON sg.area_id = a.id
-	        WHERE (? IS NULL OR s.id = ?) 
-	          AND (? IS NULL OR a.id = ?)
 	    )
-	    SELECT 
-	        ROW_NUMBER() OVER (ORDER BY percent_ach DESC) AS rank,
-	        sm.store_id,
-	        sm.store_code,
-	        sm.area,
-	        sm.store_name,
-	        COALESCE(s.actual_sales, 0) AS actual_sales,
-	        COALESCE(t.target_sales, 0) AS target_sales,
-	        ROUND((COALESCE(s.actual_sales, 0) / NULLIF(t.target_sales, 0)) * 100, 2) AS percent_ach,
-	        COALESCE(t.target_sales, 0) - COALESCE(s.actual_sales, 0) AS balance_to_target,
-	        (COALESCE(s.actual_sales, 0) * 0.01) AS possible_incentives,
-	        CASE 
-	            WHEN ? > 0 THEN CEIL((COALESCE(t.target_sales, 0) - COALESCE(s.actual_sales, 0)) / ?)
-	            ELSE NULL
-	        END AS target_per_remaining_days,
+	    SELECT
+	        ly.company,
+	        ly.brand_type_id,
 	        s.store_id,
-	        s.brand_ambassadors,
-	        s.asc_names,
-	        s.ba_deployment_dates,
-	        s.brands,
-	        COUNT(s.store_id) OVER() AS total_records,
-	        COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data,
-	        ROUND((COALESCE(s.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)), 2) AS growth
-	    FROM store_mapping sm
-	    INNER JOIN sales s ON sm.area_id = s.area_id AND sm.store_id = s.store_id
-	    LEFT JOIN targets t ON TRIM(sm.store_id) = TRIM(t.store_id)
-	    LEFT JOIN ly_scanned ly ON sm.store_code = ly.store_code
-	    ORDER BY $sortField $sortOrder
+	        st.code AS store_code,
+	        st.description AS store_name,
+	        a.description AS area_name,
+	        ba.name AS ba_name,
+	        ba.deployment_date AS ba_deployment_date,
+	        COALESCE(SUM(s.amount), 0) AS actual_sales,
+	        COALESCE(t.target_sales, 0) AS target_sales,
+	        ROUND(COALESCE(SUM(s.amount), 0) * ?, 2) AS possible_incentives,
+	        COALESCE(t.target_sales, 0) - COALESCE(SUM(s.amount), 0) AS balance_to_target,
+	        ROUND((COALESCE(s.amount, 0) / NULLIF(t.target_sales, 0)) * 100, 2) AS percent_ach,
+	        COALESCE(ly.ly_scanned_data, 0) AS ly_scanned_data
+	    FROM tbl_ba_sales_report s
+	    LEFT JOIN tbl_store st ON st.id = s.store_id
+	    LEFT JOIN tbl_area a ON a.id = s.area_id
+	    LEFT JOIN tbl_brand_ambassador ba ON ba.id = s.ba_id
+	    LEFT JOIN ly_scanned ly ON s.store_code = ly.store_code
+	    LEFT JOIN targets t ON s.store_code = t.location
+		WHERE (? IS NULL OR s.date LIKE CONCAT(?, '%'))
+		    $brandCategorySQL
+	    GROUP BY s.area_id, s.store_id, s.ba_id
 	    LIMIT ? OFFSET ?
 	    ";
 
+	    // Build params array in the same order as the placeholders
 	    $params = [
-	        $salesDate, $salesDate,  
-	        $month, $month, $month, $month, $month, $month, 
-	        $month, $month, $month, $month, $month, $month, 
-	        $targetYear, $targetYear,  
-	        $lyYear, $lyYear, $month, $month,  
-	        $storeid, $storeid, $areaid, $areaid,  
-	        $remainingDays, $remainingDays,  
-	        (int) $limit, (int) $offset  
+	        $lyYear, $lyYear,   // ly_scanned.year
+	        $month, $month,     // ly_scanned.month
+
+	        $month, $month, $month, $month, $month, $month,
+	        $month, $month, $month, $month, $month, $month,  // target_sales months (12 lines)
+
+	        $targetYear,  // target_sales.year
+	        $incentiveRate,
+			$salesDate, $salesDate,
+	        (int) $limit, (int) $offset
 	    ];
 
+		if ($isFilteringBrandCategory) {
+		    $params = array_merge($params, $brand_category);
+		}
 
 	    $query = $this->db->query($sql, $params);
-		$data = $query->getResult();
-		$totalRecords = count($data);
+	    $data = $query->getResult();
+	    $totalRecords = count($data);
 
-		return [
-		    'total_records' => $totalRecords,
-		    'data' => $data
-		];
-
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $data
+	    ];
 	}
 
 	public function tradeOverallBaDataASC($filters = []) {
@@ -1315,210 +1435,99 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getStorePerformance($month_start, $month_end, $year, $limit, $offset, $area_id = null, $asc_id = null, $store_code = null, $brand_ambassador_ids = null, $ba_type = null, $brand_category = null, $brands = null, $orderByColumn, $orderDirection)
-	{
+	public function getStorePerformance2(
+	    $month_start, $month_end, $year, $limit, $offset,
+	    $area_id = null, $asc_id = null, $store_code = null,
+	    $ba_id = null, $ba_type = null,
+	    $brand_category = null, $brands = null,
+	    $orderByColumn, $orderDirection
+	) {
 	    $last_year = $year - 1;
-		$allowedOrderColumns = [
-		    'rank', 'store_code', 'ty_scanned_data', 'ly_scanned_data', 'growth', 'sob'
-		];
-		$allowedOrderDirections = ['ASC', 'DESC'];
+	    $allowedOrderColumns = ['rank', 'store_code', 'ty_scanned_data', 'ly_scanned_data', 'growth', 'sob'];
+	    $allowedOrderDirections = ['ASC', 'DESC'];
 
-		if (!in_array($orderByColumn, $allowedOrderColumns)) {
-		    $orderByColumn = 'rank';
-		}
-
-		if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
-		    $orderDirection = 'ASC';
-		}
-	    $brand_ambassador_ids = is_array($brand_ambassador_ids)
-	        ? array_map('trim', $brand_ambassador_ids)
-	        : array_filter(array_map('trim', explode(',', (string)$brand_ambassador_ids)));
-
-		$brand_category_condition = '';
-		$brand_category_params = [];
-
-		if (!empty($brand_category)) {
-		    $placeholders = implode(',', array_fill(0, count($brand_category), '?'));
-		    $brand_category_condition = " AND blt.id IN ($placeholders)";
-		    $brand_category_params = $brand_category;
-		}
-
-	    $brands = is_array($brands) ? array_map('trim', $brands) : array_filter(array_map('trim', explode(',', (string)$brands)));
-
-	    $valid_ba_ids = [];
-	    $includeSpecialBa = [];
-		if (!empty($brand_ambassador_ids)) {
-		    $filtered_ba_ids = [];
-		    
-		    foreach ($brand_ambassador_ids as $id) {
-		        $id = trim((string)$id);
-		        if (in_array($id, ['-5', '-6'])) {
-		            $includeSpecialBa[] = $id;
-		        } else {
-		            $filtered_ba_ids[] = $id;
-		        }
-		    }
-
-		    if (!empty($filtered_ba_ids)) {
-		        $builder = $this->db->table('tbl_brand_ambassador');
-		        $builder->select('id');
-		        $builder->whereIn('id', $filtered_ba_ids);
-
-		        if ($ba_type !== null && $ba_type != 3) {
-		            $builder->where('type', $ba_type);
-		        }
-
-		        $query = $builder->get();
-		        foreach ($query->getResult() as $row) {
-		            $valid_ba_ids[] = (string)$row->id;
-		        }
-		    }
-
-		    // Add -5 and -6 back for filtering only (not validation)
-		    $valid_ba_ids = array_merge($valid_ba_ids, $includeSpecialBa);
-		} elseif ($ba_type == 3) {
-
-	        $builder = $this->db->table('tbl_brand_ambassador');
-	        $builder->select('id');
-	        $query = $builder->get();
-	        foreach ($query->getResult() as $row) {
-	            $valid_ba_ids[] = (string)$row->id;
-	        }
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
+	        $orderByColumn = 'rank';
 	    }
 
-		$valid_brand_ids = [];
-		$builder = $this->db->table('tbl_brand');
-		$builder->select('id');
+	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
+	        $orderDirection = 'ASC';
+	    }
+
+	    $additionalWhere = [];
+		if ($ba_id !== null) {
+		    $baIds = array_map('intval', preg_split('/\s*or\s*/i', $ba_id));
+
+		    $baConditions = array_map(fn($id) => "FIND_IN_SET($id, so.ba_ids)", $baIds);
+
+		    $additionalWhere[] = '(' . implode(' OR ', $baConditions) . ')';
+		}
+
+		if ($ba_type !== null && $ba_type != 3) {
+		    $additionalWhere[] = 'so.ba_types IN (' . intval($ba_type) . ')';
+		}
+
+	    if (!empty($brand_category)) {
+	        $catConditions = array_map(fn($id) => "FIND_IN_SET($id, so.brand_type_id)", $brand_category);
+	        $additionalWhere[] = '(' . implode(' OR ', $catConditions) . ')';
+	    }
 
 		if (!empty($brands)) {
-		    $builder->whereIn('id', $brands);
+		    $brandConditions = array_map(fn($id) => "FIND_IN_SET($id, so.brand_ids)", $brands);
+		    $additionalWhere[] = '(' . implode(' OR ', $brandConditions) . ')';
 		}
 
-		$query = $builder->get();
-		foreach ($query->getResult() as $row) {
-		    $valid_brand_ids[] = (string)$row->id;
-		}
-
-		if (!empty($brands) && empty($valid_brand_ids)) {
-		    return [
-		        'total_records' => 0,
-		        'data' => [],
-		        'message' => 'No brands found for the selected categories.'
-		    ];
-		}
-
-	    $ba_params = [];
-	    $ba_condition_ly = '';
-	    $ba_condition_ty = '';
-	    $ba_condition_so = '';
-
-	    $brand_params = [];
-	    $brand_condition_ly = '';
-	    $brand_condition_ty = '';
-	    $brand_condition_so = '';
-
-	    if (!empty($valid_ba_ids)) {
-	        $conditions_ly = [];
-	        $conditions_ty = [];
-	        $conditions_so = [];
-
-	        foreach ($valid_ba_ids as $id) {
-	            $conditions_ly[] = "FIND_IN_SET(?, ly_so.brand_ambassador_ids)";
-	            $conditions_ty[] = "FIND_IN_SET(?, ty_so.brand_ambassador_ids)";
-	            $conditions_so[] = "FIND_IN_SET(?, so.brand_ambassador_ids)";
-	            $ba_params[] = $id;
-	        }
-
-	        $ba_condition_ly = ' AND (' . implode(' OR ', $conditions_ly) . ')';
-	        $ba_condition_ty = ' AND (' . implode(' OR ', $conditions_ty) . ')';
-	        $ba_condition_so = ' AND (' . implode(' OR ', $conditions_so) . ')';
-	    }
-
-	    if (!empty($valid_brand_ids)) {
-	        $brand_conditions_ly = [];
-	        $brand_conditions_ty = [];
-	        $brand_conditions_so = [];
-
-	        foreach ($valid_brand_ids as $id) {
-	            $brand_conditions_ly[] = "FIND_IN_SET(?, ly_so.brand_ids)";
-	            $brand_conditions_ty[] = "FIND_IN_SET(?, ty_so.brand_ids)";
-	            $brand_conditions_so[] = "FIND_IN_SET(?, so.brand_ids)";
-	            $brand_params[] = $id;
-	        }
-
-	        $brand_condition_ly = ' AND (' . implode(' OR ', $brand_conditions_ly) . ')';
-	        $brand_condition_ty = ' AND (' . implode(' OR ', $brand_conditions_ty) . ')';
-	        $brand_condition_so = ' AND (' . implode(' OR ', $brand_conditions_so) . ')';
-	    }
+	    $additionalWhereSQL = !empty($additionalWhere) ? ' AND ' . implode(' AND ', $additionalWhere) : '';
 
 	    $sql = "
 	        WITH ly_scanned AS (
-	            SELECT 
-	                ly_so.store_code,
-	                SUM(COALESCE(ly_so.gross_sales, 0)) AS ly_scanned_data
-	            FROM tbl_sell_out_data_details ly_so
-	            WHERE (? IS NULL OR ly_so.year = ?) 
-	              AND (? IS NULL OR ly_so.month BETWEEN ? AND ?)
-	            GROUP BY ly_so.store_code
+	            SELECT store_code, SUM(COALESCE(gross_sales, 0)) AS ly_scanned_data
+	            FROM tbl_sell_out_pre_aggregated_data
+	            WHERE (? IS NULL OR year = ?)
+	              AND (? IS NULL OR month BETWEEN ? AND ?)
+	            GROUP BY store_code
 	        ),
 	        ty_scanned AS (
-	            SELECT 
-	                ty_so.store_code,
-	                SUM(COALESCE(ty_so.gross_sales, 0)) AS ty_scanned_data
-	            FROM tbl_sell_out_data_details ty_so
-	            WHERE (? IS NULL OR ty_so.year = ?) 
-	              AND (? IS NULL OR ty_so.month BETWEEN ? AND ?)
-	            GROUP BY ty_so.store_code
+	            SELECT store_code, SUM(COALESCE(gross_sales, 0)) AS ty_scanned_data
+	            FROM tbl_sell_out_pre_aggregated_data
+	            WHERE (? IS NULL OR year = ?)
+	              AND (? IS NULL OR month BETWEEN ? AND ?)
+	            GROUP BY store_code
 	        ),
 	        total_ty AS (
-	            SELECT SUM(COALESCE(ty.ty_scanned_data, 0)) AS total_ty_sales
-	            FROM ty_scanned ty
+	            SELECT SUM(COALESCE(ty_scanned_data, 0)) AS total_ty_sales FROM ty_scanned
 	        ),
 	        distinct_store_count AS (
 	            SELECT COUNT(DISTINCT store_code) AS total_unique_store_codes
-	            FROM tbl_sell_out_data_details
+	            FROM tbl_sell_out_pre_aggregated_data
 	        )
 	        SELECT 
 	            ROW_NUMBER() OVER (ORDER BY (COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0)) DESC) AS rank,
+	            so.id,
+	            so.year,
+	            so.month,
 	            so.store_code,
-	            so.brand_ambassador_ids,
+	            so.ba_ids,
+	            so.ba_types,
 	            so.brand_ids,
 	            so.area_id,
 	            so.asc_id,
-	            h.company,
-			    CASE WHEN h.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END AS itmcde,
-			    CASE WHEN h.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
-			    blt.id AS brand_type_id,
+	            so.company,
+	            so.brand_type_id,
 	            CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
 	            FORMAT(COALESCE(ty.ty_scanned_data, 0), 2) AS ty_scanned_data,
-				FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data,
-				CASE 
-				    WHEN ly.ly_scanned_data IS NULL OR ty.ty_scanned_data IS NULL THEN ''
-				    WHEN COALESCE(ly.ly_scanned_data, 0) = 0 THEN ''
-				    ELSE ROUND((ty.ty_scanned_data - ly.ly_scanned_data) / NULLIF(ly.ly_scanned_data, 0) * 100, 2)
-				END AS growth,
+	            FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data,
+	            CASE 
+	                WHEN ly.ly_scanned_data IS NULL OR ty.ty_scanned_data IS NULL THEN ''
+	                WHEN COALESCE(ly.ly_scanned_data, 0) = 0 THEN ''
+	                ELSE ROUND((ty.ty_scanned_data - ly.ly_scanned_data) / NULLIF(ly.ly_scanned_data, 0) * 100, 2)
+	            END AS growth,
 	            ROUND(COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0) * 100, 2) AS sob,
 	            COUNT(*) OVER() AS total_records
-	        FROM tbl_sell_out_data_details so
-	        INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
+	        FROM tbl_sell_out_pre_aggregated_data so
 	        LEFT JOIN ly_scanned ly ON so.store_code = ly.store_code
 	        LEFT JOIN ty_scanned ty ON so.store_code = ty.store_code
 	        LEFT JOIN tbl_store s ON so.store_code = s.code
-			LEFT JOIN tbl_price_code_file_2_lmi pclmi 
-			  ON so.sku_code = pclmi.cusitmcde AND h.company = '2'
-
-			LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi 
-			  ON so.sku_code = pcrgdi.cusitmcde AND h.company != '2'
-
-			LEFT JOIN tbl_itemfile_lmi pitmlmi 
-			  ON pclmi.itmcde = pitmlmi.itmcde AND h.company = '2'
-
-			LEFT JOIN tbl_itemfile_rgdi itmrgdi 
-			  ON pcrgdi.itmcde = itmrgdi.itmcde AND h.company != '2'
-			LEFT JOIN tbl_brand b ON 
-			    (h.company = '2' AND pitmlmi.brncde = b.brand_code) OR
-			    (h.company != '2' AND itmrgdi.brncde = b.brand_code)
-			LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
 	        CROSS JOIN total_ty tt
 	        CROSS JOIN distinct_store_count dsc
 	        WHERE (? IS NULL OR so.year = ?)
@@ -1526,27 +1535,27 @@ class Dashboard_model extends Model
 	          AND (? IS NULL OR so.area_id = ?)
 	          AND (? IS NULL OR so.asc_id = ?)
 	          AND (? IS NULL OR so.store_code = ?)
-	          {$ba_condition_so}
-	          {$brand_condition_so}
-	          {$brand_category_condition}
+	          $additionalWhereSQL
 	        GROUP BY so.store_code, ly.ly_scanned_data, ty.ty_scanned_data, tt.total_ty_sales, dsc.total_unique_store_codes
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?;
 	    ";
 
-		$params = array_merge(
-		    // ly_scanned
-		    [$last_year, $last_year, $month_start, $month_start, $month_end],
+	    $params = array_merge(
+	        [$last_year, $last_year, $month_start, $month_start, $month_end],
 
-		    // ty_scanned
-		    [$year, $year, $month_start, $month_start, $month_end],
+	        [$year, $year, $month_start, $month_start, $month_end],
 
-		    // main select
-		    [$year, $year, $month_start, $month_start, $month_end, $area_id, $area_id, $asc_id, $asc_id, $store_code, $store_code],
-		    $ba_params, $brand_params, $brand_category_params,
+	        [
+	            $year, $year,
+	            $month_start, $month_start, $month_end,
+	            $area_id, $area_id,
+	            $asc_id, $asc_id,
+	            $store_code, $store_code
+	        ],
 
-		    [$limit, $offset]
-		);
+	        [$limit, $offset]
+	    );
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
@@ -1558,8 +1567,73 @@ class Dashboard_model extends Model
 	    ];
 	}
 
+	public function refreshPreAggregatedDataScanData()
+	{
+	    $sql = "
+	        WITH distinct_store_count AS (
+	            SELECT COUNT(DISTINCT store_code) AS total_unique_store_codes
+	            FROM tbl_sell_out_data_details
+	        )
+	        SELECT
+	            so.year,
+	            so.month,
+	            so.store_code,
+	            GROUP_CONCAT(DISTINCT so.brand_ambassador_ids) AS ba_ids,
+	            so.brand_ids,
+	            so.area_id,
+	            so.asc_id,
+	            h.company,
+	            ROUND(SUM(COALESCE(so.gross_sales, 0)), 2) AS gross_sales,
+	            ROUND(SUM(COALESCE(so.net_sales, 0)), 2) AS net_sales,
+	            ROUND(SUM(COALESCE(so.quantity, 0)), 2) AS quantity,
+	            GROUP_CONCAT(DISTINCT CASE WHEN h.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
+	            GROUP_CONCAT(DISTINCT CASE WHEN h.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END) AS brncde,
+	            CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
+	            GROUP_CONCAT(DISTINCT blt.id) AS brand_type_id,
+	            GROUP_CONCAT(DISTINCT ba.type) AS ba_types,
+	            GROUP_CONCAT(DISTINCT so.sku_code) AS sku_codes
+	        FROM tbl_sell_out_data_details so
+	        INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
+	        LEFT JOIN tbl_store s ON so.store_code = s.code
+	        LEFT JOIN tbl_price_code_file_2_lmi pclmi 
+	            ON so.sku_code = pclmi.cusitmcde AND h.company = '2'
+	        LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi 
+	            ON so.sku_code = pcrgdi.cusitmcde AND h.company != '2'
+	        LEFT JOIN tbl_itemfile_lmi pitmlmi 
+	            ON pclmi.itmcde = pitmlmi.itmcde AND h.company = '2'
+	        LEFT JOIN tbl_itemfile_rgdi itmrgdi 
+	            ON pcrgdi.itmcde = itmrgdi.itmcde AND h.company != '2'
+	        LEFT JOIN tbl_brand b ON 
+	            (h.company = '2' AND pitmlmi.brncde = b.brand_code) OR
+	            (h.company != '2' AND itmrgdi.brncde = b.brand_code)
+	        LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
+	        LEFT JOIN tbl_brand_ambassador ba 
+	            ON FIND_IN_SET(ba.id, so.brand_ambassador_ids)
+	        GROUP BY so.store_code, so.year, so.month
+	    ";
 
+	    $query = $this->db->query($sql);
+	    $allData = $query->getResultArray();
 
+	    $inserted = 0;
+	    foreach ($allData as $row) {
+	        $existing = $this->db->table('tbl_sell_out_pre_aggregated_data')
+	            ->where('year', $row['year'])
+	            ->where('month', $row['month'])
+	            ->where('store_code', $row['store_code'])
+	            ->get()
+	            ->getRow();
+
+	        if (!$existing) {
+	            $this->db->table('tbl_sell_out_pre_aggregated_data')->insert($row);
+	            $inserted++;
+	        }
+	    }
+
+	    return [
+	        'total_inserted' => $inserted
+	    ];
+	}
 
 	public function refreshPreAggregatedData()
 	{

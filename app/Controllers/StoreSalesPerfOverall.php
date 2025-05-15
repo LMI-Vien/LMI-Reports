@@ -65,8 +65,10 @@ class StoreSalesPerfOverall extends BaseController
 		$baId = $baId === '' ? null : $baId;
 		$storeCode = trim($this->request->getPost('store'));
 		$storeCode = $storeCode === '' ? null : $storeCode;
-        $brandCategoriesIds = $this->request->getPost('brandCategories') ?? [];
-        $brandIds = $this->request->getPost('brands') ?? [];
+        $brandCategoriesIds = $this->request->getPost('brandCategories');
+        $brandCategoriesIds = $brandCategoriesIds === '' ? null : $brandCategoriesIds;
+        $brandIds = $this->request->getPost('brands');
+        $brandIds = $brandIds === '' ? null : $brandIds;
 	    $yearId = $this->request->getPost('year')?? 0;            
 	    $monthId = $this->request->getVar('month_start') ?? 1;
 	    $monthEndId = $this->request->getVar('month_end') ?? 12;
@@ -75,11 +77,12 @@ class StoreSalesPerfOverall extends BaseController
 		$limit = is_numeric($limit) ? (int)$limit : 10;
 		$offset = is_numeric($offset) ? (int)$offset : 0;
 
-	    $orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
+		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
 	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
 	    $columns = $this->request->getVar('columns');
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
-            
+
+	    //$this->Dashboard_model->refreshPreAggregatedDataScanData();
 	    $data = $this->Dashboard_model->getStorePerformance($monthId, $monthEndId, $yearId, $limit, $offset, $areaId, $ascId, $storeCode, $baId, $baTypeId, $brandCategoriesIds, $brandIds, $orderByColumn, $orderDirection);
 
 	    return $this->response->setJSON([

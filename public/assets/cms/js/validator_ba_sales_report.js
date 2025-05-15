@@ -106,8 +106,6 @@ self.onmessage = async function (e) {
 
                 if (store_code) {
                     let store_lower = store_code.toLowerCase();
-                    console.log(store_lower,'store_lower');
-                    console.log(store_lookup, 'store_lookup');
                     store = store_lookup[store_lower] || null;
                     if (!store) {
                         addErrorLog(`Store Code "${store_code}" not recognized`);
@@ -157,6 +155,7 @@ self.onmessage = async function (e) {
                     valid_data.push({
                         area_id: area,
                         store_id: store,
+                        store_code: store_code,
                         ba_id: ba || 0,
                         brand: brand,
                         asc_id: asc_id || 0,

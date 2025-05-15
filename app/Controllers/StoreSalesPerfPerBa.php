@@ -27,17 +27,21 @@ class StoreSalesPerfPerBa extends BaseController
 			"keyword"       =>  ""
 		);
 
-		$data['area'] = $this->Global_model->getArea(0);
-		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
-		$data['month'] = $this->Global_model->getMonths();
+		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
+		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
+		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
+		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
+		$data['asc'] = $this->Global_model->getAsc(0);
+		$data['areas'] = $this->Global_model->getArea(0);
+		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-performance-per-ba'),'Store Sales Performance per Brand Ambassador' => '');
-		$data["source"] = "Actual Sales Report / Scan Data";
-		$data["source_date"] = 'Monthly(temp)';	
+		$data["source"] = "Actual Sales Report, Scan Data and Target Sales Per Store (LMI/RGDI)";
+		$data["source_date"] = '<span id="sourceDate">N / A</span>';	
 		$data['content'] = "site/store/perf-per-ba/sales_performance_per_ba";
 		$data['session'] = session();
 		$data['js'] = array(
@@ -97,19 +101,29 @@ class StoreSalesPerfPerBa extends BaseController
 	    if(empty($store)){
 	    	$store = null;
 	    }
-	     $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $tpr, $date);
-	    // return $this->response->setJSON([
-	    //     'draw' => intval($this->request->getVar('draw')),
-	    //     'recordsTotal' => $data['total_records'],
-	    //     'recordsFiltered' => $data['total_records'],
-	    //     'data' => $data['data'],
-	    // ]);
+	    $lyYear = 2020;
+	    $targetYear = 2020;
+	    $month = 1;
+	    // print_r($store);
+	    // print_r($area);
+	    // die();
+	    //dito param para sa category brand
+	    $date = "2025-03";
+
+
+
+	    //get these values from syspar
+	    //$brand_category = [9];
+	    $brand_category = null;
+	    $incentiveRate = 0.015;
+	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $incentiveRate, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $tpr, $date, $brand_category);
+
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
-	        'recordsTotal' => 0,
-	        'recordsFiltered' => 0,
-	        'data' => []
-	    ]);	
+	        'recordsTotal' => $data['total_records'],
+	        'recordsFiltered' => $data['total_records'],
+	        'data' => $data['data']
+	    ]);
 	}
 
 	private function getDaysInMonth($month, $year) {

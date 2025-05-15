@@ -1108,7 +1108,8 @@ class Global_model extends Model
 
     //additional temp
     function getBrandData($order, $limit, $offset) {
-        $query = $this->db->query("CALL get_brands('$order', $limit, $offset)");
+        $select = 'id, brand_code, brand_description';
+        $query = $this->db->query("CALL SearchDynamic('tbl_brand', null, '$select', 9999, 0, 'status:EQ=1', 'brand_description', null)");
         return $query->getResultArray(); // Return data as an array
     }
 
