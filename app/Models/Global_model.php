@@ -1051,7 +1051,7 @@ class Global_model extends Model
         return $query->getResultArray(); // Return data as an array
     }
     function getStoreBranch($storeBranchOffset) {
-        $select = 'id, CONCAT(code, " - ", description) AS description';
+        $select = 'code AS id, CONCAT(code, " - ", description) AS description';
         $query = $this->db->query("CALL SearchDynamic('tbl_store', null, '$select', 9999, 0, 'status:EQ=1', 'description', null)");
         return $query->getResultArray(); // Return data as an array
     }
