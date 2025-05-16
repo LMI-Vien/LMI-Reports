@@ -123,140 +123,118 @@
 
 <script>
     var base_url = "<?= base_url(); ?>";
-    let store_branch = <?= json_encode($store_branch) ?>;
-    let area = <?= json_encode($area) ?>;
+    let store_branch = <?= json_encode($store_branches) ?>;
+    let brands = <?= json_encode($brands) ?>;
+    let area = <?= json_encode($areas) ?>;
+    let asc = <?= json_encode($asc) ?>;
+    let year = <?= json_encode($year); ?>;
+    let months = <?= json_encode($months); ?>;
 
     $(document).ready(function() {
 
-        initializeTable();
-        autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(result) {
+        let highestYear = $("#year option:not(:first)").map(function () {
+            return parseInt($(this).val());
+        }).get().sort((a, b) => b - a)[0];
+
+        if (highestYear) {
+            $("#year").val(highestYear);
+        }
+
+        $('#brands').select2({ placeholder: 'Select Brands' });
+        autocomplete_field($("#area"), $("#areaId"), area, "description", "id", function(result) {
+            //let url = url;
             let data = {
                 event: "list",
-                select: "",
-                query: "tbl_store_group.store_id = " + result.id,
-                table: "tbl_store_group",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                query: "a.id = " + result.id,
+                offset: offset,
+                limit: 0,
+                table: "tbl_area a",
                 join: [
                     {
-                        table: "tbl_area",
-                        query: "tbl_store_group.area_id = tbl_area.id",
+                        table: "tbl_area_sales_coordinator asc",
+                        query: "a.id = asc.area_id",
                         type: "left"
                     }
                 ]
             }
 
-            aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let area_description = JSON.parse(res);
-  
-                $("#area").val(area_description[0].description);
-                $("#area_id").val(area_description[0].id)
+            aJax.post(url, data, function(result) {
+                let data = JSON.parse(result);
+                $("#ascName").val(data[0].asc_description);
+                $("#ascNameId").val(data[0].asc_id);
             })
         });
 
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
-            let data = {
-                event: "list",
-                select: "",
-                query: "area_id = " + result.id,
-                table: "tbl_store_group",
-                join: [
-                    {
-                        table: "tbl_store",
-                        query: "tbl_store_group.store_id = tbl_store.id",
-                        type: "left"
-                    }
-                ]
-            }
-
-            aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let store_description = JSON.parse(res);
-
-                $("#store").val("");
-                $("#store_id").val("");
-
-                store_branch = store_description;
-
-                autocomplete_field($("#store"), $("#store_id"), store_branch, "description", "id", function(res) {
-                    let data = {
-                        event: "list",
-                        select: "",
-                        query: "id = " + res.store_id,
-                        table: "tbl_store"
-                    }
-
-                    aJax.post(base_url + "cms/global_controller", data, function(res) {
-                        let store_description = JSON.parse(res);
-                        $("#store_id").val(store_description[0].id);
-                    })
-                })
-            })
-        });
-
-
-
+        autocomplete_field($("#ascName"), $("#ascNameId"), asc, "description");
     });
 
-        $(document).on('click', '#clearButton', function () {
-            $('input[type="text"]').val('');
-            $('input[type="checkbox"]').prop('checked', false);
-            $('input[name="sortOrder"][value="ASC"]').prop('checked', true);
-            $('input[name="sortOrder"][value="DESC"]').prop('checked', false);
-            $('select').prop('selectedIndex', 0);
-            $('.table-empty').show();
-            $('.hide-div').hide();
-            $('#refreshButton').click();
+    $(document).on('click', '#clearButton', function () {
+        $('input[type="text"], input[type="number"]').val('');
+        $('.btn-outline-light').removeClass('active');
+        $('.main_all').addClass('active');
+        $('select').val('').trigger('change');
+
+        let highestYear = $("#year option:not(:first)").map(function () {
+            return parseInt($(this).val());
+        }).get().sort((a, b) => b - a)[0];
+
+        if (highestYear) {
+            $("#year").val(highestYear).trigger('change');
+        }
+    });
+
+    $(document).on('click', '#refreshButton', function () {
+        const fields = [
+            { input: '#year', target: '#year' },
+            { input: '#area', target: '#area_id' },
+            { input: '#brand', target: '#brand_id' },
+            { input: '#store', target: '#store_id' },
+            { input: '#item_classi', target: '#item_classi_id' },
+            { input: '#qtyscp', target: '#qtyscp' }
+        ];
+
+        let counter = 0;
+
+        fields.forEach(({ input, target }) => {
+            const val = $(input).val();
+            const hasValue = Array.isArray(val) ? val.length > 0 : val;
+            if (!hasValue || val === undefined) {
+                $(target).val('');
+            } else {
+                counter++;
+            }
         });
 
-        // $(document).on('click', '#refreshButton', function () {
-        //     if($('#area').val() == ""){
-        //         $('#area_id').val('');
-        //     }
-        //     if($('#store').val() == ""){
-        //         $('#store_id').val('');
-        //     }
-        //     $('.table-empty').hide();
-        //     $('.hide-div').show();
-        //     fetchData();
-        // });
+        const monthFrom = $('#month').val();
+        const monthTo = $('#monthTo').val();
 
-        $(document).on('click', '#refreshButton', function () {
-            const fields = [
-                { input: '#area', target: '#area_id' },
-                { input: '#brand', target: '#brand_id' },
-                { input: '#store', target: '#store_id' },
-                { input: '#item_classi', target: '#item_classi_id' },
-                { input: '#qtyscp', target: '#qtyscp' }
-            ];
+        if (!monthFrom || !monthTo) {
+            modal.alert('Please select both "Month From" and "Month To" before filtering.', "warning");
+            return;
+        }
 
-            let counter = 0;
-
-            fields.forEach(({ input, target }) => {
-                const val = $(input).val();
-                const hasValue = Array.isArray(val) ? val.length > 0 : val;
-                if (!hasValue || val === undefined) {
-                    $(target).val('');
-                } else {
-                    counter++;
-                }
-            });
-            if (counter >= 1) {
-                fetchData();
-                $('.table-empty').hide();
-                $('.hide-div').show();
-            }
-        }); 
+        if (counter >= 1) {
+            fetchData();
+            $('.table-empty').hide();
+            $('.hide-div').show();
+        }
+    }); 
 
     function fetchData() {
-        let selectedStore = $('#store_id').val();
-        let selectedArea = $('#area_id').val();
-        let selectedMonth = $('#month').val();
-        let selectedYear = $('#year').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
-        initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBrands = $('#brands').val();   
+        let selectedYear = $('#year').val();
+        let selectedMonthStart = $('#month').val();
+        let selectedMonthEnd = $('#monthTo').val();
+         console.log(selectedYear);
+        initializeTable(selectedArea, selectedAsc, selectedBaType, selectedBrands, selectedYear, selectedMonthStart, selectedMonthEnd);
     }
 
-    function initializeTable(selectedStore = null, selectedArea = null, selectedMonth = null, selectedYear = null, selectedSortField = null, selectedSortOrder = null) {
+    function initializeTable(selectedArea = null, selectedAsc = null, selectedBaType = null, selectedBrands = null, selectedYear = null, selectedMonthStart = null, selectedMonthEnd = null) {
         
         if ($.fn.DataTable.isDataTable('#info_for_asc')) {
             let existingTable = $('#info_for_asc').DataTable();
@@ -272,31 +250,31 @@
             colReorder: true, 
             ajax: {
                 url: base_url + 'store/get-sales-performance-per-area',
-                type: 'GET',
+                type: 'POST',
                 data: function(d) {
-                    d.sort_field = selectedSortField;
-                    d.sort = selectedSortOrder;
+                    d.area = selectedArea === "" ? null : selectedArea;
+                    d.asc = selectedAsc === "" ? null : selectedAsc;
+                    d.baType = selectedBaType === "" ? null : selectedBaType;
+                    d.brands = selectedBrands === [] ? null : selectedBrands;
                     d.year = selectedYear === "0" ? null : selectedYear;
-                    d.month = selectedMonth === "0" ? null : selectedMonth;
-                    d.area = selectedArea === "0" ? null : selectedArea;
-                    d.store = selectedStore === "0" ? null : selectedStore;
+                    d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
+                    d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log(json);
                     return json.data.length ? json.data : [];
                 }
             },
             columns: [
                 { data: 'rank' },
-                { data: 'area' },
-                { data: 'asc_names' },
-                { data: 'actual_sales', render: formatTwoDecimals },
+                { data: 'area_name' },
+                { data: 'asc_name' },
+                { data: 'ly_scanned_data', render: formatTwoDecimals },
                 { data: 'actual_sales', render: formatTwoDecimals },
                 { data: 'target_sales' },
                 { data: 'percent_ach' },
-                { data: 'percent_ach' },
+                { data: 'growth' },
                 { data: 'balance_to_target', render: formatTwoDecimals },
                 { data: 'target_per_remaining_days', render: formatNoDecimals }
             ].filter(Boolean),
@@ -308,6 +286,33 @@
             lengthChange: false
         });
     }
+
+    $("#month").on("change", function() {
+        let selected = $("#monthTo").val();
+        let start = $("#month").val();
+        let html = "<option value=''>Please select..</option>";
+
+        months.forEach(month => {
+            if (parseInt(month.id) >= start) {
+                html += `<option value="${month.id}">${month.month}</option>`;
+            }
+        });
+
+        $("#monthTo").html(html);
+    });
+
+    $("#monthTo").on("change", function() {
+        let selected = $("#month").val();
+        let end = $("#monthTo").val();
+        let html = "<option value=''>Please select..</option>";
+
+        months.forEach(month => {
+            if (parseInt(month.id) < end) {
+                html += `<option value="${month.id}">${month.month}</option>`;
+            }
+        });
+        $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
+    });
 
     function formatNoDecimals(data) {
         return data ? Number(data).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0';

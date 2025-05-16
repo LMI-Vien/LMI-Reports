@@ -329,7 +329,7 @@
                 { data: 'percent_ach' },
                 { data: 'growth' },
                 { data: 'balance_to_target', render: formatTwoDecimals },
-                { data: 'possible_incentives', render: formatFourDecimals  },
+                { data: 'possible_incentives', render: formatTwoDecimals  },
                 { data: 'target_per_remaining_days', render: formatNoDecimals }
             ].filter(Boolean),
             pagingType: "full_numbers",

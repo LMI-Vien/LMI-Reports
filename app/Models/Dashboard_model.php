@@ -348,6 +348,8 @@ class Dashboard_model extends Model
 			s.brand,
 			s.area_id,
 			s.asc_id,
+			d_asc.description AS asc_name,
+			a.description AS area_name,
 		    s.ba_id,
 		    t.ba_code,
 		    t.target_ba_types,  -- 1 consign, 0 Outright
@@ -429,6 +431,7 @@ class Dashboard_model extends Model
 		LEFT JOIN ly_scanned ly ON s.store_code = ly.store_code
 		LEFT JOIN targets t ON s.store_code = t.location
 		LEFT JOIN tbl_brand b ON s.brand = b.id
+		LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
 		WHERE (? IS NULL OR s.date LIKE CONCAT(?, '%'))
 			AND (? IS NULL OR s.area_id = ?)
 			AND (? IS NULL OR s.store_id = ?)

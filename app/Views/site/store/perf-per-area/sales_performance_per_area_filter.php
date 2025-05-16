@@ -1,3 +1,4 @@
+
 <aside class="main-sidebar sidebar-dark-yellow elevation-4">
     <!-- Brand -->
     <a href="<?= base_url() ?>" class="brand-link d-flex align-items-center" style="height: 56px; text-decoration: none !important;">
@@ -23,19 +24,19 @@
                             <div class="form-group card-dark mb-3 p-2">
                                 <label for="area" class="mb-2"><i class="fas fa-map-marker-alt mr-1"></i> Area</label>
                                 <input type="text" class="form-control" id="area" placeholder="Please select...">
-                                <input type="hidden" id="area_id">
+                                <input type="hidden" id="areaId">
                             </div>
                             <div class="form-group card-dark mb-3 p-2">
-                                <label for="asc_name" class="mb-2"><i class="fas fa-user-tie mr-1"></i> Area Sales Coordinator</label>
-                                <input type="text" class="form-control" id="asc_name" placeholder="Please select...">
-                                <input type="hidden" id="asc_name_id">
+                                <label for="ascName" class="mb-2"><i class="fas fa-user-tie mr-1"></i> Area Sales Coordinator</label>
+                                <input type="text" class="form-control" id="ascName" placeholder="Please select...">
+                                <input type="hidden" id="ascNameId">
                             </div>
                             <!-- Filter by Type -->
                             <div class="form-group card-dark mb-3 p-2">
                                 <label class="mb-2"><i class="fas fa-tags mr-1"></i> BA Type</label>
                                 <!-- <div class="btn-group btn-group-toggle d-flex flex-wrap" data-toggle="buttons"> -->
                                 <div class="btn-group btn-group-toggle d-flex flex-wrap gap-2" data-toggle="buttons">
-                                    <label class="btn btn-outline-light btn-sm active">
+                                    <label class="btn btn-outline-light btn-sm active main_all">
                                         <input type="radio" name="filterType" value="3" checked> All
                                     </label>
                                     <label class="btn btn-outline-light btn-sm">
@@ -49,23 +50,49 @@
                             <!-- Brand -->
                             <div class="form-group card-dark mb-3 p-2">
                                 <label for="brand" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Item Brand</label>
-                                <input type="text" class="form-control" id="brand" placeholder="Please select...">
-                                <input type="hidden" id="brand_id">
+                                <select id="brands" name="brands[]" class="form-control select2" multiple>
+                                    <?php foreach ($brands as $key => $value) {
+                                        echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
+                                    } ?>
+                                </select>
                             </div>
                             <div class="form-group card-dark mb-3 p-2">
                                 <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Year</label>
-                                <input type="text" class="form-control" id="brand" placeholder="Please select">
-                                <input type="hidden" id="brand_id">
+                                <select class="form-control" id="year">
+                                    <?php
+                                        if($year){
+                                            foreach ($year as $value) {
+                                                echo "<option value=".$value['year'].">".$value['year']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                             <div class="form-group card-dark mb-3 p-2">
-                                <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Month From</label>
-                                <input type="text" class="form-control" id="brand" placeholder="Please select...">
-                                <input type="hidden" id="brand_id">
+                                <label for="month" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Month From</label>
+                                <select class="form-control" id="month">
+                                    <option value="">Please select..</option>
+                                    <?php
+                                        if($months){
+                                            foreach ($months as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
                             <div class="form-group card-dark mb-3 p-2">
-                                <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Month To</label>
-                                <input type="text" class="form-control" id="brand" placeholder="Please select...">
-                                <input type="hidden" id="brand_id">
+                                <label for="monthTo" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Month To</label>
+                                <select class="form-control" id="monthTo">
+                                    <option value="">Please select..</option>
+                                    <?php
+                                        if($months){
+                                            foreach ($months as $value) {
+                                                echo "<option value=".$value['id'].">".$value['month']."</option>";
+                                            }                                                
+                                        }
+                                    ?>
+                                </select>
                             </div>
 
                             <!-- Buttons -->

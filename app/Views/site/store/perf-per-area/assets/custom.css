@@ -99,6 +99,13 @@
       display: none;
     }
 
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #ffc107 !important; /* Bootstrap's bg-warning */
+        border-color: #ffc107 !important;
+        color: #000 !important; /* Ensure text is readable */
+        font-weight: 500;
+    }
+
     th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
     th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
     th:nth-child(3), td:nth-child(3) { width: 10%; } /* Area */
