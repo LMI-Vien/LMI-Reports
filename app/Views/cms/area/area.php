@@ -574,6 +574,7 @@
                         class="form-control"
                         placeholder="Select store"
                         value="${storeName}"
+                        readonly disabled
                     >
                 </td>
                 <td class="text-center">
