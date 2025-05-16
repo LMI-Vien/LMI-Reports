@@ -335,13 +335,13 @@ class Dashboard_model extends Model
 		    SELECT 
 		        t.location AS location,
 		        t.ba_code,
-		        GROUP_CONCAT(DISTINCT ba.type) AS target_ba_types,
+		        (SELECT GROUP_CONCAT(DISTINCT ba2.type)
+		         FROM tbl_brand_ambassador ba2 
+		         WHERE FIND_IN_SET(ba2.code, t.ba_code)) AS target_ba_types,
 		        SUM($targetSalesSQL) AS target_sales
 		    FROM tbl_target_sales_per_store t
-		    LEFT JOIN tbl_brand_ambassador ba 
-		        ON FIND_IN_SET(ba.code, t.ba_code)
 		    WHERE (? IS NULL OR t.year = ?)
-		    GROUP BY t.location
+		    GROUP BY t.location, t.ba_code, t.year
 		)
 		SELECT
 			ROW_NUMBER() OVER (ORDER BY percent_ach DESC) AS rank,
@@ -379,7 +379,6 @@ class Dashboard_model extends Model
 		        WHEN t.target_ba_types = 0 THEN ?
 		        ELSE COALESCE(t.target_sales, 0)
 		    END AS target_sales,
-
 		    ROUND(COALESCE(SUM(s.amount), 0) * ?, 2) AS possible_incentives,
 
 			ROUND(

@@ -138,7 +138,10 @@ class StoreSalesPerfPerBa extends BaseController
 		    
 		}
 		$target_sales = $amountPerDay * $noOfDays;
-
+		// $yearId = 6;
+		// $monthId = 3;
+		// $monthEndId = 3;
+		// $date = "2025-03";
 	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $date, $brand_category, $brandIds, $orderByColumn, $orderDirection);
 
 	    return $this->response->setJSON([
