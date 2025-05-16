@@ -1323,7 +1323,7 @@
                                         // Final iteration: push total and spacing
                                         if (index === res.length - 1) {
                                             formattedData.push({
-                                                "BA Code": 
+                                                "BA Code": "",
                                                 "Area Code": "",
                                                 "Store Code": "",
                                                 "Brand": "",
