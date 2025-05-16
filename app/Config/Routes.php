@@ -56,7 +56,7 @@ $routes->group('store/', static function ($routes) {
     $routes->post('get-sales-overall-performance', 'StoreSalesPerfOverall::getPerfPerOverall');
     $routes->get('get-sales-overall-performance', 'StoreSalesPerfOverall::getPerfPerOverall');
     $routes->get('overall-performance-generate-pdf', 'StoreSalesPerfOverall::generatePdf');
-    $routes->get('overall-performance-generate-excel-ba', 'StoreSalesPerfOverall::generateExcel');
+    $routes->get('overall-performance-generate-excel', 'StoreSalesPerfOverall::generateExcel');
 });
 
 //sample API 

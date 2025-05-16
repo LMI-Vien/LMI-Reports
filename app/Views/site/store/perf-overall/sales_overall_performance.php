@@ -109,14 +109,14 @@
                         <button 
                             class="btn btn-primary mr-2" 
                             id="ExportPDF"
-                            onclick="handleAction('export_pdf')"
+                            onclick="handleAction('exportPdf')"
                         >
                             <i class="fas fa-file-export"></i> PDF
                         </button>
                         <button 
                             class="btn btn-success" 
-                            id="exportButton"
-                            onclick="handleAction('export_excel')"
+                            id="exportExcel"
+                            onclick="handleAction('exportExcel')"
                         >
                             <i class="fas fa-file-export"></i> Excel
                         </button>
@@ -300,8 +300,10 @@
                     d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
                     d.limit = d.length;
                     d.offset = d.start;
+                    console.log('Filter :', d);
                 },
                 dataSrc: function(json) {
+                    console.log('Server responded with:', json);
                     return json.data.length ? json.data : [];
                 }
             },
@@ -348,5 +350,46 @@
         });
         $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
     });
+
+    function handleAction(action) {
+        modal.loading(true);
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#brandAmbassadorId').val();
+        let selectedStore = $('#storeNameId').val();
+        let selectedBrandCategories = $('#itemLabel').val();
+        let selectedBrands = $('#brands').val();   
+        let selectedYear = $('#year').val();
+        let selectedMonthStart = $('#month').val();
+        let selectedMonthEnd = $('#monthTo').val();
+
+        let qs = [
+            'area='             + encodeURIComponent(selectedArea),
+            'asc='              + encodeURIComponent(selectedAsc),
+            'baType='           + encodeURIComponent(selectedBaType),
+            'ba='               + encodeURIComponent(selectedBa),
+            'store='            + encodeURIComponent(selectedStore),
+            'brandCategories='  + encodeURIComponent(selectedBrandCategories),
+            'brands='           + encodeURIComponent(selectedBrands),
+            'year='             + encodeURIComponent(selectedYear),
+            'monthStart='       + encodeURIComponent(selectedMonthStart),
+            'monthEnd='         + encodeURIComponent(selectedMonthEnd)
+        ].join('&');
+
+        let endpoint = action === 'exportPdf' ? 'overall-performance-generate-pdf' : 'overall-performance-generate-excel';
+
+        let url = `${base_url}store/${endpoint}?${qs}`;
+
+        let iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        setTimeout(function() {
+            modal.loading(false);
+        }, 5000);
+
+    }
 
 </script>
