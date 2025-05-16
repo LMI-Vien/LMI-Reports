@@ -788,6 +788,7 @@
                     "Store Description": "",
                     "SKU Code": "",
                     "SKU Description": "",
+                    "Gross Sales": "",
                     "Quantity": "",
                     "Net Sales": "",
                 }
@@ -796,9 +797,10 @@
                     "Store Code": item.year,
                     "Store Description": item.customer_payment_group,
                     "SKU Code": item.created_date,
-                    "SKU Description": item.created_by,
-                    "Quantity": item.file_type,
-                    "Net Sales": item.remarks,
+                    "SKU Description": item.username,
+                    "Gross Sales": item.file_type,
+                    "Quantity": item.remarks,
+                    "Net Sales": "",
                 }
                 formattedData.push(newData); // Append new data to formattedData array
                 table = 'tbl_sell_out_data_details';
@@ -816,7 +818,7 @@
                             for (let index = 0; index < total_records; index += 100000) {
                                 table = 'tbl_sell_out_data_details a';
                                 join = '';
-                                fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales';
+                                fields = 'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales, gross_sales';
                                 limit = 100000;
                                 offset = index;
                                 filter = `data_header_id:EQ=${item.id}`;
@@ -831,6 +833,7 @@
                                                 "Store Description": item.store_description,
                                                 "SKU Code": item.sku_code,
                                                 "SKU Description": item.sku_description,
+                                                "Gross Sales": item.gross_sales,
                                                 "Quantity": item.quantity,
                                                 "Net Sales": item.net_sales,
                                             }
@@ -857,8 +860,8 @@
         }
 
         table = 'tbl_sell_out_data_header a';
-        join = 'left join tbl_month b on a.month = b.id';
-        fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, a.created_by, a.file_type, a.remarks';
+        join = 'left join tbl_month b on a.month = b.id left join cms_users c on a.created_by = c.id';
+        fields = 'a.id, b.month, a.year, a.customer_payment_group, a.template_id, a.created_date, c.username, a.file_type, a.remarks';
         limit = 0;
         offset = 0;
         filter = `a.id:EQ=${id}`;
