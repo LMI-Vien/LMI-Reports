@@ -1268,9 +1268,10 @@
                                             temp_baArr[item.id] = item.name.trim();
                                         });
                                     });
-                            
-                                    let previousDate = null; // To track the last processed date
-                                    
+
+                                    let previousDate = null;
+                                    let totalAmount = 0;
+
                                     let spacing = {
                                         "BA Code": "",
                                         "Area Code": "",
@@ -1281,13 +1282,31 @@
                                         "Status": "",
                                     };
 
-                                    res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }) => {
-                                        // Check if the date has changed
+                                    res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }, index) => {
+                                        // Convert amount to number safely
+                                        const numericAmount = parseFloat(amount) || 0;
+
+                                        // If date changes and not the first row, push total and spacing
                                         if (previousDate !== null && previousDate !== date) {
-                                            formattedData.push({ ...spacing }); // Push spacing object
+                                            // Push total row
+                                            formattedData.push({
+                                                "BA Code": "",
+                                                "Area Code": "",
+                                                "Store Code": "",
+                                                "Brand": "",
+                                                "Date": previousDate,
+                                                "Amount": totalAmount,
+                                                "Status": "Total",
+                                            });
+
+                                            // Push spacing row
+                                            formattedData.push({ ...spacing });
+
+                                            // Reset total
+                                            totalAmount = 0;
                                         }
 
-                                        // Format and push the current data
+                                        // Push the current row
                                         formattedData.push({
                                             "BA Code": temp_baArr[ba_id],
                                             "Area Code": temp_area[area_id],
@@ -1298,8 +1317,56 @@
                                             "Status": parseInt(status) === 1 ? "Active" : "Inactive",
                                         });
 
-                                        previousDate = date; // Update previousDate for the next iteration
+                                        totalAmount += numericAmount;
+                                        previousDate = date;
+
+                                        // Final iteration: push total and spacing
+                                        if (index === res.length - 1) {
+                                            formattedData.push({
+                                                "BA Code": 
+                                                "Area Code": "",
+                                                "Store Code": "",
+                                                "Brand": "",
+                                                "Date": date,
+                                                "Amount": totalAmount,
+                                                "Status": "Total",
+                                            });
+
+                                            formattedData.push({ ...spacing });
+                                        }
                                     });
+                            
+                                    // let previousDate = null; // To track the last processed date
+                                    
+                                    // let spacing = {
+                                    //     "BA Code": "",
+                                    //     "Area Code": "",
+                                    //     "Store Code": "",
+                                    //     "Brand": "",
+                                    //     "Date": "",
+                                    //     "Amount": "",
+                                    //     "Status": "",
+                                    // };
+
+                                    // res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }) => {
+                                    //     // Check if the date has changed
+                                    //     if (previousDate !== null && previousDate !== date) {
+                                    //         formattedData.push({ ...spacing }); // Push spacing object
+                                    //     }
+
+                                    //     // Format and push the current data
+                                    //     formattedData.push({
+                                    //         "BA Code": temp_baArr[ba_id],
+                                    //         "Area Code": temp_area[area_id],
+                                    //         "Store Code": temp_store[store_id],
+                                    //         "Brand": temp_brand[brand],
+                                    //         "Date": date,
+                                    //         "Amount": amount,
+                                    //         "Status": parseInt(status) === 1 ? "Active" : "Inactive",
+                                    //     });
+
+                                    //     previousDate = date; // Update previousDate for the next iteration
+                                    // });
                                 }
                             );
                         }
@@ -1424,7 +1491,8 @@
                                             });
                                         });
 
-                                        let previousDate = null; // To track the last processed date
+                                        let previousDate = null;
+                                        let totalAmount = 0;
 
                                         let spacing = {
                                             "BA Code": "",
@@ -1436,13 +1504,31 @@
                                             "Status": "",
                                         };
 
-                                        res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }) => {
-                                            // Check if the date has changed
+                                        res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }, index) => {
+                                            // Convert amount to number safely
+                                            const numericAmount = parseFloat(amount) || 0;
+
+                                            // If date changes and not the first row, push total and spacing
                                             if (previousDate !== null && previousDate !== date) {
-                                                formattedData.push({ ...spacing }); // Push spacing object
+                                                // Push total row
+                                                formattedData.push({
+                                                    "BA Code": "",
+                                                    "Area Code": "",
+                                                    "Store Code": "",
+                                                    "Brand": "",
+                                                    "Date": previousDate,
+                                                    "Amount": totalAmount,
+                                                    "Status": "Total",
+                                                });
+
+                                                // Push spacing row
+                                                formattedData.push({ ...spacing });
+
+                                                // Reset total
+                                                totalAmount = 0;
                                             }
 
-                                            // Format and push the current data
+                                            // Push the current row
                                             formattedData.push({
                                                 "BA Code": temp_baArr[ba_id],
                                                 "Area Code": temp_area[area_id],
@@ -1453,7 +1539,23 @@
                                                 "Status": parseInt(status) === 1 ? "Active" : "Inactive",
                                             });
 
-                                            previousDate = date; // Update previousDate for the next iteration
+                                            totalAmount += numericAmount;
+                                            previousDate = date;
+
+                                            // Final iteration: push total and spacing
+                                            if (index === res.length - 1) {
+                                                formattedData.push({
+                                                    "BA Code": "",
+                                                    "Area Code": "",
+                                                    "Store Code": "",
+                                                    "Brand": "",
+                                                    "Date": date,
+                                                    "Amount": totalAmount,
+                                                    "Status": "Total",
+                                                });
+
+                                                formattedData.push({ ...spacing });
+                                            }
                                         });
                                     }
                                 )
@@ -1511,9 +1613,30 @@
                     "Amount":amount,
                     "Status": parseInt(status) === 1 ? "Active" : "Inactive",
                 }));
+
+                const totalAmountPerDate = res.reduce((acc, row) => {
+                    const date = row.date;
+                    const amount = parseFloat(row.amount) || 0;
+                    if (!acc[date]) {
+                        acc[date] = 0;
+                    }
+                    acc[date] += amount;
+                    return acc;
+                }, {});
     
+                Object.entries(totalAmountPerDate).forEach(([date, amount]) => {
+                    newData.push({
+                        "BA Code": "",
+                        "Area Code": "",
+                        "Store Code": "",
+                        "Brand": "",
+                        "Date": date,
+                        "Amount": amount,
+                        "Status": "Total"
+                    });
+                });
+
                 formattedData.push(...newData); 
-                console.log(formattedData)
             }
         );
 
