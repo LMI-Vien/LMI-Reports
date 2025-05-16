@@ -140,6 +140,7 @@
         { id: "-6", name: "Non Ba" },
         { id: "-5", name: "Vacant" }
     )
+    const start_time = new Date();  
 
     $(document).ready(function() {
         let highestYear = $("#year option:not(:first)").map(function () {
@@ -380,6 +381,17 @@
         let endpoint = action === 'exportPdf' ? 'overall-performance-generate-pdf' : 'overall-performance-generate-excel';
 
         let url = `${base_url}store/${endpoint}?${qs}`;
+
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
+
+        const remarks = `
+            Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Store Sales Performance', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
 
         let iframe = document.createElement('iframe');
         iframe.style.display = 'none';

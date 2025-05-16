@@ -90,7 +90,8 @@
                         html += '<tr>';
                     
                         html += '<td>' + (y.user ?? '-') + '</td>';
-                        html += '<td>' + (y.module ?? '-') + '</td>';
+                        // html += '<td>' + (y.module ?? '-') + '</td>';
+                        html += '<td>' + cleanUpModule(y.module) + '</td>';
                         html += '<td>' + (y.action ?? '-') + '</td>';
                         html += '<td class="center-align-format">' + (y.created_at ? formatReadableDate(y.created_at, true) : '-') + '</td>';
                         html += '<td>' + (y.ip_address ?? '-') + '</td>';
