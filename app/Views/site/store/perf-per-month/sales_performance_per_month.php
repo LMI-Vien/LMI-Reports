@@ -225,10 +225,11 @@
 
 <script>
 
-    let asc = <?= json_encode($asc); ?>;
-    let area = <?= json_encode($area); ?>;
-    let brand = <?= json_encode($brand); ?>;
-    let store_branch = <?= json_encode($store_branch); ?>;
-    let brand_ambassador = <?= json_encode($brand_ambassador); ?>;
+    let brand_ambassadors = <?= json_encode($brand_ambassadors) ?>;
+    let store_branch = <?= json_encode($store_branches) ?>;
+    let brands = <?= json_encode($brands) ?>;
+    let area = <?= json_encode($areas) ?>;
+    let asc = <?= json_encode($asc) ?>;
+    let brandLabel = <?= json_encode($brandLabel); ?>;
 
 </script>

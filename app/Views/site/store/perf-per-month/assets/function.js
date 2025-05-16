@@ -1,73 +1,43 @@
     $(document).ready(function () {
-        
-        $('#inventoryStatus').select2({ placeholder: 'Select inventory statuses' });
-        autocomplete_field($("#ascName"), $("#asc_id"), asc, "asc_description", "asc_id", function(result) {            
+        $('#itemLabel').select2({ placeholder: 'Select Brand Label Types' });
+        $('#brands').select2({ placeholder: 'Select Brands' });
+        autocomplete_field($("#area"), $("#areaId"), area, "description", "id", function(result) {
+            //let url = url;
             let data = {
                 event: "list",
-                query: "id = " + result.area_id,
-                select: "id, description",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                query: "a.id = " + result.id,
                 offset: offset,
                 limit: 0,
-                table: "tbl_area",
+                table: "tbl_area a",
+                join: [
+                    {
+                        table: "tbl_area_sales_coordinator asc",
+                        query: "a.id = asc.area_id",
+                        type: "left"
+                    }
+                ]
             }
 
-            aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let area_description = JSON.parse(res);
-                $("#area").val(area_description[0].description);
-                $("#area_id").val(area_description[0].id);
+            aJax.post(url, data, function(result) {
+                let data = JSON.parse(result);
+                $("#ascName").val(data[0].asc_description);
+                $("#ascNameId").val(data[0].asc_id);
             })
         });
 
-        autocomplete_field($("#area"), $("#area_id"), area, "area_description", "id", function(result) {
+        autocomplete_field($("#ascName"), $("#ascNameId"), asc, "description");
 
+        autocomplete_field($("#brandAmbassador"), $("#brandAmbassadorId"), brand_ambassadors, "name", "id", function(result) {
             let data = {
                 event: "list",
-                query: "area_id = " + result.id,
-                select: "id, description",
-                offset: offset,
-                limit: 0,
-                table: "tbl_area_sales_coordinator",
-            }
-
-            aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let asc_description = JSON.parse(res);
-                $("#ascName").val(asc_description[0].description);
-                $("#asc_id").val(asc_description[0].id);
-            })
-        });
-        autocomplete_field($("#brand"), $("#brand_id"), brand, "brand_description");
-        autocomplete_field($("#storeName"), $("#store_id"), store_branch, "description", "id", function(result) {
-
-            let data = {
-                event: "list",
-                query: "store = " + result.id,
-                select: "",
-                offset: offset,
-                limit: 0,
-                table: "tbl_brand_ambassador",
-            }
-
-            aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let data = JSON.parse(res)[0];
-                
-                if(data) {
-                    $("#ba").val(data.name);
-                    $("#ba_id").val(data.id);
-                } else {
-                    $("#ba").val("No Brand Ambassador");
-                }
-            })
-        });
-        autocomplete_field($("#ba"), $("#ba_id"), brand_ambassador, "description", "id", function(result) {
-            let data = {
-                event: "list",
-                select: "s.id AS store, s.description, ba.id AS ba, ba.name",
-                query: "ba.id = " + result.id,
-                table: "tbl_brand_ambassador ba",
+                select: "s.id, s.code, s.description",
+                query: "sg.brand_ambassador_id = " + result.id,
+                table: "tbl_brand_ambassador_group sg",
                 join: [
                     {
                         table: "tbl_store s",
-                        query: "ba.store = s.id",
+                        query: "s.id = sg.store_id",
                         type: "left"
                     }
                 ]
@@ -75,64 +45,15 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res)[0];
-
-                $("#storeName").val(data.description);
-                $("#store_id").val(data.store);
+                if(data){
+                    alert(data.code);
+                    $("#storeName").val(data.description);
+                    $("#storeNameId").val(data.code);
+                }
             })
         });
 
-        $(document).on('click', '#clearButton', function () {
-            $('input[type="text"], input[type="number"], input[type="date"]').val('');
-            $('input[type="radio"], input[type="checkbox"]').prop('checked', false);
-
-            $('select').not('#year').prop('selectedIndex', 0);
-            //reset the year dd
-            let highestYear = $("#year option:not(:first)").map(function () {
-                return parseInt($(this).val());
-            }).get().sort((a, b) => b - a)[0];
-
-            if (highestYear) {
-                $("#year").val(highestYear);
-            }
-            $('.table-empty').show();
-            $('.hide-div').hide();
-            $('#refreshButton').click();
-        });
-
-        // $(document).on('click', '#refreshButton', function () {
-        //     let selectedCoveredASC = $('input[name="coveredASC"]:checked').val();
-        //     if($('#ascName').val() == ""){
-        //         $('#asc_id').val('');
-        //     }
-        //     if($('#area').val() == ""){
-        //         $('#area_id').val('');
-        //     }
-        //     if($('#brand').val() == ""){
-        //         $('#brand_id').val('');
-        //     }
-        //     if($('#storeName').val() == ""){
-        //         $('#store_id').val('');
-        //     }
-        //     if($('#ba').val() == ""){
-        //         $('#ba_id').val('');
-        //     }
-
-        //     // if(selectedCoveredASC){
-        //     //     $('#data-graph').hide();
-        //     //     $('#table-skus').show();
-        //     //         fetchDataTable();
-        //     // }else{
-        //         $('#data-graph').show();
-        //         $('#table-skus').hide();
-        //         fetchData();
-        //     //}
-
-
-        // });
-        // $('#data-graph').show();
-        // $('#table-skus').hide();
-
-        fetchData();
+        autocomplete_field($("#storeName"), $("#storeNameId"), store_branch, "description", "id");
     });
 
     $(document).on('click', '#refreshButton', function () {
@@ -319,7 +240,7 @@
         }
         aJax.post(url, data, function (result) {
             var html = '';
-            if (result) {
+            if (result.data.length > 0) {
                 let salesData = result.data[0];
 
                 dataValues.salesReport = [
@@ -351,6 +272,12 @@
                     html += '<tr><td style="background-color: #339933;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Achieved</td><td>'+formatTwoDecimals(y.achieved_january || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_february || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_march || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_april || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_may || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_june || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_july || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_august || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_september || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_october || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_november || "0.00")+'</td><td>'+formatTwoDecimals(y.achieved_december || "0.00")+'</td></tr>';
 
                 });formatTwoDecimals
+            }else{
+                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>';
+                    html += '<tr><td style="background-color: #ffc107;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>';
+                    html += '<tr><td style="background-color: #990000;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Target Sales</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>';
+                    html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Growth</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>';
+                    html += '<tr><td style="background-color: #339933;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">% Achieved</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>';
             }
             $('.asc-dashboard-body').html(html);
             renderCharts();

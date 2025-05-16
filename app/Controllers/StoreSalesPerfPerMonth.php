@@ -38,11 +38,12 @@ class StoreSalesPerfPerMonth extends BaseController
 		$data["foot_note"] = 'With BA = Actual Sales, Without BA = Scanned Data';	
 
 		$data['content'] = "site/store/perf-per-month/sales_performance_per_month";
+		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
+		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
+		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
 		$data['asc'] = $this->Global_model->getAsc(0);
-		$data['area'] = $this->Global_model->getArea(0);
-		$data['brand'] = $this->Global_model->getBrandData("ASC", 99999, 0);
-		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
-		$data['brand_ambassador'] = $this->Global_model->getBrandAmbassador(0);
+		$data['areas'] = $this->Global_model->getArea(0);
+		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",
@@ -92,26 +93,26 @@ class StoreSalesPerfPerMonth extends BaseController
 		    'brand_id' => $brand,
 		    'year_val' => $targetYear
 		];
-	    $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
-	    return $this->response->setJSON([
-	        'data' => $data['data'],
-			'area' => $area,
-			'asc' => $asc,
-			'brand' => $brand,
-			'ba' => $ba,
-			'store' => $store,
-			'year' => $year,
-	    ]);
-
+	   // $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
 	    // return $this->response->setJSON([
-	    //     'data' => [],
-		// 	'area' => [],
-		// 	'asc' => [],
-		// 	'brand' => [],
-		// 	'ba' => [],
-		// 	'store' => [],
-		// 	'year' => [],
+	    //     'data' => $data['data'],
+		// 	'area' => $area,
+		// 	'asc' => $asc,
+		// 	'brand' => $brand,
+		// 	'ba' => $ba,
+		// 	'store' => $store,
+		// 	'year' => $year,
 	    // ]);
+
+	    return $this->response->setJSON([
+	        'data' => [],
+			'area' => [],
+			'asc' => [],
+			'brand' => [],
+			'ba' => [],
+			'store' => [],
+			'year' => [],
+	    ]);
 	}
 
 	public function getPerfPerTable()
@@ -172,30 +173,30 @@ class StoreSalesPerfPerMonth extends BaseController
 		if(empty($month)){
 	    	$month = null;
 	    }
-	    switch ($type) {
-	        case 'slowMoving':
-	           $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 20, 30, $brand, $ba, $store, $limit, $offset, $withba);
-	            break;
-	        case 'overStock':
-	            $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 30, null, $brand, $ba, $store, $limit, $offset, $withba);
-	            break;
-	        case 'npd':
-	        	$item_class_filter = ['N-New Item'];
-	           $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'npd', $item_class_filter, $withba);
-	            break;
-	        case 'hero':
-	                $item_class_filter = [
-						'A-Top 500 Pharma/Beauty',
-						//'AU-Top', to follow
-						'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty',
-						'B-Remaining Class B net of BU Pharma/Beauty'
+	    // switch ($type) {
+	    //     case 'slowMoving':
+	    //        $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 20, 30, $brand, $ba, $store, $limit, $offset, $withba);
+	    //         break;
+	    //     case 'overStock':
+	    //         $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 30, null, $brand, $ba, $store, $limit, $offset, $withba);
+	    //         break;
+	    //     case 'npd':
+	    //     	$item_class_filter = ['N-New Item'];
+	    //        $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'npd', $item_class_filter, $withba);
+	    //         break;
+	    //     case 'hero':
+	    //             $item_class_filter = [
+		// 				'A-Top 500 Pharma/Beauty',
+		// 				//'AU-Top', to follow
+		// 				'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty',
+		// 				'B-Remaining Class B net of BU Pharma/Beauty'
 
-					];
-	            $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'hero', $item_class_filter, $withba);
-	            break;
-	        default:
-	        	$data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 20, 30, $brand, $ba, $store, $limit, $offset);
-	    }
+		// 			];
+	    //         $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'hero', $item_class_filter, $withba);
+	    //         break;
+	    //     default:
+	    //     	$data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 20, 30, $brand, $ba, $store, $limit, $offset);
+	    // }
 	    // return $this->response->setJSON([
 	    //     'draw' => intval($this->request->getVar('draw')),
 	    //     'recordsTotal' => $data['total_records'],
