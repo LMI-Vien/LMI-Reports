@@ -57,12 +57,11 @@
                         <button class="btn btn-secondary" id="toggleColumnsButton"><i class="fas fa-columns"></i> Toggle Columns</button>
                     </div>
 
-                    <div class="sortable row text-center p-2" id="columnToggleContainer" class="mb-3">
+                    <div class="sortable row text-center p-2" id="columnToggleContainer" class="mb-3" style="color: black;background-color: rgb(108 117 125);border-radius: 10px;margin: 10px;">
                         <strong class="col">Select Columns:</strong>
                     </div>
-                    <div style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;">Store Sales Performance per Brand Ambassador</div>
                     <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
-                        <table id="overall_ba_sales_tbl" class="table table-bordered table-responsive">
+                        <table id="overall_ba_sales_tbl" class="table table-bordered ">
                             <thead>
                                 <tr>
                                     <th colspan="14"
@@ -144,6 +143,14 @@
     )
 
     $(document).ready(function() {
+        let highestYear = $("#year option:not(:first)").map(function () {
+            return parseInt($(this).val());
+        }).get().sort((a, b) => b - a)[0];
+
+        if (highestYear) {
+            $("#year").val(highestYear);
+        }
+
         $( ".sortable" ).sortable({
             revert: true
         });
@@ -263,16 +270,19 @@
     });
 
     function fetchData() {
-        let selectedStore = $('#store_id').val();
-        let selectedArea = $('#area_id').val();
-        let selectedMonth = $('#month').val();
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#brandAmbassadorId').val();
+        let selectedStore = $('#storeNameId').val();
+        let selectedBrands = $('#brands').val();   
         let selectedYear = $('#year').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-        initializeTable(selectedStore, selectedArea, selectedMonth, selectedYear, selectedSortField, selectedSortOrder);
+        let selectedMonthStart = $('#month').val();
+        let selectedMonthEnd = $('#monthTo').val();
+        initializeTable(selectedArea, selectedAsc, selectedBaType, selectedBa, selectedStore, selectedBrands, selectedYear, selectedMonthStart, selectedMonthEnd);
     }
 
-    function initializeTable(selectedStore = null, selectedArea = null, selectedMonth = null, selectedYear = null, selectedSortField = null, selectedSortOrder = null) {
+    function initializeTable(selectedArea = null, selectedAsc = null, selectedBaType = null, selectedBa = null, selectedStore = null, selectedBrands = null, selectedYear = null, selectedMonthStart = null, selectedMonthEnd = null) {
 
         if ($.fn.DataTable.isDataTable('#overall_ba_sales_tbl')) {
             let existingTable = $('#overall_ba_sales_tbl').DataTable();
@@ -288,14 +298,17 @@
             colReorder: true, 
             ajax: {
                 url: base_url + 'store/get-sales-performance-per-ba',
-                type: 'GET',
+                type: 'POST',
                 data: function(d) {
-                    d.sort_field = selectedSortField;
-                    d.sort = selectedSortOrder;
+                    d.area = selectedArea === "" ? null : selectedArea;
+                    d.asc = selectedAsc === "" ? null : selectedAsc;
+                    d.baType = selectedBaType === "" ? null : selectedBaType;
+                    d.ba = selectedBa === "" ? null : selectedBa;
+                    d.store = selectedStore === "" ? null : selectedStore;
+                    d.brands = selectedBrands === [] ? null : selectedBrands;
                     d.year = selectedYear === "0" ? null : selectedYear;
-                    d.month = selectedMonth === "0" ? null : selectedMonth;
-                    d.area = selectedArea === "0" ? null : selectedArea;
-                    d.store = selectedStore === "0" ? null : selectedStore;
+                    d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
+                    d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
@@ -305,11 +318,11 @@
             },
             columns: [
                 { data: 'rank' },
-                { data: 'area' },
-                { data: 'store_code' },
-                { data: 'brand_ambassadors' },
-                { data: 'ba_deployment_dates' },
-                { data: 'brands' },
+                { data: 'area_name' },
+                { data: 'store_name' },
+                { data: 'ba_name' },
+                { data: 'ba_deployment_date' },
+                { data: 'brand_name' },
                 { data: 'ly_scanned_data' },
                 { data: 'actual_sales', render: formatTwoDecimals },
                 { data: 'target_sales' },

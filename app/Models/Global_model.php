@@ -1050,11 +1050,19 @@ class Global_model extends Model
         $query = $this->db->query("CALL get_store_branch_where_in($storeBranchCode)");
         return $query->getResultArray(); // Return data as an array
     }
+
     function getStoreBranch($storeBranchOffset) {
         $select = 'code AS id, CONCAT(code, " - ", description) AS description';
         $query = $this->db->query("CALL SearchDynamic('tbl_store', null, '$select', 9999, 0, 'status:EQ=1', 'description', null)");
         return $query->getResultArray(); // Return data as an array
     }
+
+    function getStoreBranchById($storeBranchOffset) {
+        $select = 'id, CONCAT(code, " - ", description) AS description';
+        $query = $this->db->query("CALL SearchDynamic('tbl_store', null, '$select', 9999, 0, 'status:EQ=1', 'description', null)");
+        return $query->getResultArray(); // Return data as an array
+    }
+
     function get_store_branch_masterfile_count() {
         $query = $this->db->query("CALL get_store_branch_masterfile_count()");
         return $query->getResultArray(); // Return data as an array
@@ -1377,6 +1385,11 @@ function get_valid_records_store_area_asc_ba_brand() {
 
     function getMonths() {
         $query = $this->db->query("CALL get_months()");
+        return $query->getResultArray(); // Return data as an array
+    }
+
+    function getSysPar() {
+        $query = $this->db->query("CALL SearchDynamic('tbl_system_parameter', null, 'id, sm_sku_min, sm_sku_max, overstock_sku, new_item_sku, hero_sku, sales_incentives, cus_grp_code_lmi, cus_grp_code_rgdi, brand_code_included, brand_code_excluded, brand_label_type, tba_amount_per_ba, tba_num_days', 1, 0, 'status:EQ=1', 'id', null)");
         return $query->getResultArray(); // Return data as an array
     }
 

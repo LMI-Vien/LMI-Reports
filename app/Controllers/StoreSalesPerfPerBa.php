@@ -30,7 +30,7 @@ class StoreSalesPerfPerBa extends BaseController
 		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
 		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
-		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
+		$data['store_branches'] = $this->Global_model->getStoreBranchById(0);
 		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
 		$data['asc'] = $this->Global_model->getAsc(0);
 		$data['areas'] = $this->Global_model->getArea(0);
@@ -60,37 +60,50 @@ class StoreSalesPerfPerBa extends BaseController
 		$day = date('d');
 		$tpr = $days - $day; 
 		
-	    $limit = $this->request->getVar('limit') ?? 10;
-	    $offset = $this->request->getVar('offset') ?? 0;
-	    $month = $this->request->getVar('month');
-	    $year = $this->request->getVar('year');
-	    $area = $this->request->getVar('area');
-	    $store = $this->request->getVar('store');
-	    $sort = $this->request->getVar('sort') ?? 'ASC';
-	    $sort_field = $this->request->getVar('sort_field');
-	    $formatted_month = str_pad($month, 2, '0', STR_PAD_LEFT);
+
+		$sysPar = $this->Global_model->getSysPar();
+		$areaId = trim($this->request->getPost('area'));
+		$areaId = $areaId === '' ? null : $areaId;
+		$ascId = trim($this->request->getPost('asc'));
+		$ascId = $ascId === '' ? null : $ascId;
+		$baTypeId = trim($this->request->getPost('baType'));
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
+		$baId = trim($this->request->getPost('ba'));
+		$baId = $baId === '' ? null : $baId;
+		$storeId= trim($this->request->getPost('store')); //change this to store_id
+		$storeId = $storeId === '' ? null : $storeId;
+        $brandIds = $this->request->getPost('brands');
+        $brandIds = $brandIds === '' ? null : $brandIds;
+	    $year = $this->request->getPost('year')?? 0;            
+	    $monthId = $this->request->getVar('month_start') ?? 1;
+	    $monthEndId = $this->request->getVar('month_end') ?? 12;
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit = is_numeric($limit) ? (int)$limit : 10;
+		$offset = is_numeric($offset) ? (int)$offset : 0;
+
+	    $formatted_month = str_pad($monthId, 2, '0', STR_PAD_LEFT);
 	    $date = null; 
 	    $lookup_month = null;
 	    $lyYear = 0;
 	    $selected_year = null;
 	    $lyMonth = null;
-	    $targetYear = null;
 	    $date = null;
 
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
-	    	$selected_year = $actual_year[0]['year'];
+	    	$yearId = $actual_year[0]['id'];
 	    	$lyYear = $selected_year - 1;
 	    	$date = $actual_year[0]['year'];
-	    	$targetYear = $actual_year[0]['id'];
+	    	$targetYear = $actual_year[0]['year'];
 	    }
 
-	    if($month){
+	    if($monthEndId){
 	    	$date = $formatted_month;
 	    	$lyMonth = $month;
 	    }
 
-		if($year && $month){
+		if($year && $monthId){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
 	    }
@@ -101,22 +114,32 @@ class StoreSalesPerfPerBa extends BaseController
 	    if(empty($store)){
 	    	$store = null;
 	    }
-	    $lyYear = 2020;
-	    $targetYear = 2020;
-	    $month = 1;
-	    // print_r($store);
-	    // print_r($area);
-	    // die();
-	    //dito param para sa category brand
-	    $date = "2025-03";
+	    $brandIds = $this->request->getPost('brands');
+        $brandIds = $brandIds === '' ? null : $brandIds;
 
+		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
+	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
+	    $columns = $this->request->getVar('columns');
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
 
+		if($sysPar){
+			$jsonString = $sysPar[0]['brand_label_type'];
+			$data = json_decode($jsonString, true);
+			$brand_category = array_map(fn($item) => (int) $item['id'], $data);
+		    $incentiveRate = $sysPar[0]['sales_incentives'];
+		    $amountPerDay = $sysPar[0]['tba_amount_per_ba'];
+		    $noOfDays = $sysPar[0]['tba_num_days'];
+		    $target_sales = $amountPerDay * $noOfDays;
+		}else{
+			$brand_category = null;
+		    $incentiveRate = 0.015;
+		    $amountPerDay = 8000;
+		    $noOfDays = 0;
+		    
+		}
+		$target_sales = $amountPerDay * $noOfDays;
 
-	    //get these values from syspar
-	    //$brand_category = [9];
-	    $brand_category = null;
-	    $incentiveRate = 0.015;
-	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $incentiveRate, $month, $targetYear, $lyYear, $store, $area, $sort_field, $sort, $tpr, $date, $brand_category);
+	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $date, $brand_category, $brandIds, $orderByColumn, $orderDirection);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),

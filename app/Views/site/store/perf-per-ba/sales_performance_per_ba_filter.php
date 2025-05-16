@@ -63,7 +63,7 @@
                                 <label for="brands" class="mb-2"><i class="fas fa-boxes mr-1"></i> Brand Handle</label>
                                 <select id="brands" name="brands[]" class="form-control select2" multiple>
                                         <?php foreach ($brands as $key => $value) {
-                                            echo '<option value="' . htmlspecialchars($value['brand_code']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
+                                            echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
                                         } ?>
                                     </select>
                             </div>
