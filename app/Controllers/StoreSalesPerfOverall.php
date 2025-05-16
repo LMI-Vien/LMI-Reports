@@ -82,7 +82,7 @@ class StoreSalesPerfOverall extends BaseController
 	    $columns = $this->request->getVar('columns');
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
 
-	    //$this->Dashboard_model->refreshPreAggregatedDataScanData();
+	    //$this->Dashboard_model->refreshPreAggregatedDataScanData();	
 	    $data = $this->Dashboard_model->getStorePerformance($monthId, $monthEndId, $yearId, $limit, $offset, $areaId, $ascId, $storeCode, $baId, $baTypeId, $brandCategoriesIds, $brandIds, $orderByColumn, $orderDirection);
 
 	    return $this->response->setJSON([

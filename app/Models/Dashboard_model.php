@@ -1435,7 +1435,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getStorePerformance2(
+	public function getStorePerformance(
 	    $month_start, $month_end, $year, $limit, $offset,
 	    $area_id = null, $asc_id = null, $store_code = null,
 	    $ba_id = null, $ba_type = null,
