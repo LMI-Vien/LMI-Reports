@@ -1217,7 +1217,7 @@
                         for (let index = 0; index < total_records; index += 100000) {
                             dynamic_search(
                                 "'tbl_ba_sales_report'", "''", "'id, area_id, store_id, brand, ba_id, date, amount, status'", 100000, index, 
-                                `'${filterArr.join(',')}'`,`''`, `''`,
+                                `'${filterArr.join(',')}'`,`'date asc, id asc'`, `''`,
                                 (res) => {
                                     var areaArr = [];
                                     var storeArr = [];
@@ -1335,38 +1335,6 @@
                                             formattedData.push({ ...spacing });
                                         }
                                     });
-                            
-                                    // let previousDate = null; // To track the last processed date
-                                    
-                                    // let spacing = {
-                                    //     "BA Code": "",
-                                    //     "Area Code": "",
-                                    //     "Store Code": "",
-                                    //     "Brand": "",
-                                    //     "Date": "",
-                                    //     "Amount": "",
-                                    //     "Status": "",
-                                    // };
-
-                                    // res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }) => {
-                                    //     // Check if the date has changed
-                                    //     if (previousDate !== null && previousDate !== date) {
-                                    //         formattedData.push({ ...spacing }); // Push spacing object
-                                    //     }
-
-                                    //     // Format and push the current data
-                                    //     formattedData.push({
-                                    //         "BA Code": temp_baArr[ba_id],
-                                    //         "Area Code": temp_area[area_id],
-                                    //         "Store Code": temp_store[store_id],
-                                    //         "Brand": temp_brand[brand],
-                                    //         "Date": date,
-                                    //         "Amount": amount,
-                                    //         "Status": parseInt(status) === 1 ? "Active" : "Inactive",
-                                    //     });
-
-                                    //     previousDate = date; // Update previousDate for the next iteration
-                                    // });
                                 }
                             );
                         }
@@ -1436,7 +1404,7 @@
                                     100000,
                                     index,
                                     `''`, 
-                                    `''`, 
+                                    `'date asc, id asc'`, 
                                     `''`,
                                     (res) => {
                                         var areaArr = [];
