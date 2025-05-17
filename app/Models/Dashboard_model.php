@@ -1439,8 +1439,6 @@ class Dashboard_model extends Model
 	        $catConditions = array_map(fn($id) => "FIND_IN_SET($id, so.brand_type_id)", $brand_category);
 	        $additionalWhere[] = '(' . implode(' OR ', $catConditions) . ')';
 	    }
-	    print_r($brands);
-	    die();
 		if (!empty($brands)) {
 		    $brandConditions = array_map(fn($id) => "FIND_IN_SET($id, so.brand_ids)", $brands);
 		    $additionalWhere[] = '(' . implode(' OR ', $brandConditions) . ')';
