@@ -42,7 +42,7 @@ $routes->group('store/', static function ($routes) {
     $routes->get('get-sales-performance-per-area', 'StoreSalesPerfPerArea::getPerfPerArea');
     $routes->post('get-sales-performance-per-area', 'StoreSalesPerfPerArea::getPerfPerArea');
     $routes->get('per-area-generate-pdf', 'StoreSalesPerfPerArea::generatePdf');
-    $routes->get('per-area-generate-excel-ba', 'StoreSalesPerfPerArea::generateExcel');
+    $routes->get('per-area-generate-excel', 'StoreSalesPerfPerArea::generateExcel');
 
     //per month
     $routes->get('sales-performance-per-month', 'StoreSalesPerfPerMonth::perfPerMonth');

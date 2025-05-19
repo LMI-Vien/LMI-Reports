@@ -101,14 +101,14 @@
                             <button 
                                 class="btn btn-primary mr-2" 
                                 id="ExportPDF"
-                                onclick="handleAction('export_pdf')"
+                                onclick="handleAction('exportPdf')"
                             >
                                 <i class="fas fa-file-export"></i> PDF
                             </button>
                             <button 
                                 class="btn btn-success" 
                                 id="exportButton"
-                                onclick="handleAction('export_excel')"
+                                onclick="handleAction('exportExcel')"
                             >
                                 <i class="fas fa-file-export"></i> Excel
                             </button>
@@ -129,6 +129,7 @@
     let asc = <?= json_encode($asc) ?>;
     let year = <?= json_encode($year); ?>;
     let months = <?= json_encode($months); ?>;
+    const start_time = new Date();  
 
     $(document).ready(function() {
 
@@ -230,7 +231,6 @@
         let selectedYear = $('#year').val();
         let selectedMonthStart = $('#month').val();
         let selectedMonthEnd = $('#monthTo').val();
-         console.log(selectedYear);
         initializeTable(selectedArea, selectedAsc, selectedBaType, selectedBrands, selectedYear, selectedMonthStart, selectedMonthEnd);
     }
 
@@ -261,8 +261,10 @@
                     d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
                     d.limit = d.length;
                     d.offset = d.start;
+                    console.log('Filter :', d);
                 },
                 dataSrc: function(json) {
+                    console.log('Server responded with:', json);
                     return json.data.length ? json.data : [];
                 }
             },
@@ -323,214 +325,50 @@
     }
 
     function handleAction(action) {
-        let selectedStore = $('#store_id').val() || "0";
-        let selectedArea = $('#area_id').val() || "0";
-        let selectedMonth = $('#month').val() || "0";
-        let selectedYear = $('#year').val() || "0";
-        let selectedStoreName = $('#store_id').val() || "0";
-        let selectedAreaName = $('#area_id').val() || "0";
-        let selectedMonthName = $("#month option:selected").text() || "0";
-        let selectedYearName = $("#year option:selected").text() || "0";
-        let selectedSortField = $('#sortBy').val() || "0";
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val() || "0";
+        modal.loading(true);
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBrands = $('#brands').val();   
+        let selectedYear = $('#year').val();
+        let selectedMonthStart = $('#month').val();
+        let selectedMonthEnd = $('#monthTo').val();
 
+        let qs = [
+            `area=`         + encodeURIComponent(selectedArea),
+            `asc=`          + encodeURIComponent(selectedAsc),
+            `baType=`       + encodeURIComponent(selectedBaType),
+            `brands=`       + encodeURIComponent(selectedBrands),
+            `year=`         + encodeURIComponent(selectedYear),
+            `monthStart=`   + encodeURIComponent(selectedMonthStart),
+            `monthEnd=`     + encodeURIComponent(selectedMonthEnd),
+        ].join('&');
 
-        if(selectedMonthName == "Please month.."){
-            selectedMonthName = "0";
-        }
+        let endpoint = action === 'exportPdf' ? 'per-area-generate-pdf' : 'per-area-generate-excel';
 
-        if(selectedYearName == "Please year.."){
-            selectedYearName = "0";    
-        }
+        let url = `${base_url}store/${endpoint}?${qs}`;
 
-        let url = base_url + 'store/per-area-generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '?'
-            + 'sort_field=' + encodeURIComponent(selectedSortField)
-            + '&sort=' + encodeURIComponent(selectedSortOrder)
-            + '&store=' + encodeURIComponent(selectedStoreName || '')
-            + '&area=' + encodeURIComponent(selectedAreaName || '')
-            + '&month=' + encodeURIComponent(selectedMonthName || '')
-            + '&year=' + encodeURIComponent(selectedYearName || '');
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
 
-        console.log(url);
+        const remarks = `
+            Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Store Sales Performance per Area', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
 
         let iframe = document.createElement('iframe');
-        iframe.style.display = "none";
+        iframe.style.display = 'none';
         iframe.src = url;
         document.body.appendChild(iframe);
-        
-        // if (action === 'export_pdf') {
-        //     var url = "<?= base_url("trade-dashboard/set-asc-preview-session");?>";
-        //     var data = {
-        //         store : selectedStore,
-        //         area : selectedArea,
-        //         month : selectedMonth,
-        //         year : selectedYear,
-        //         storename : selectedStoreName,
-        //         areaname : selectedAreaName,
-        //         monthname : selectedMonthName,
-        //         yearname : selectedYearName,
-        //         sortfield : selectedSortField,
-        //         sortorder : selectedSortOrder
 
-        //     }
-
-        //     console.log(url);
-
-        //     aJax.post(url,data,function(result){
-        //         if(result.status == "success"){
-        //             // window.location.href = "<?= base_url('trade-dashboard/asc-view') ?>";
-        //             console.log(url);
-        //         }
-                
-        //     });
-        // } else if (action === 'export') {
-        //     prepareExport();
-        // } else {
-            
-        // }
-    }
-
-    function prepareExport() {
-        let selectedStore = $('#store_id').val();
-        let selectedArea = $('#area_id').val();
-        let selectedMonth = $('#month').val();
-        let selectedYear = $('#year').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-
-        let fetchPromise = new Promise((resolve, reject) => {
-        fetchTradeDashboardData({
-            selectedStore, 
-            selectedArea, 
-            selectedMonth, 
-            selectedYear, 
-            selectedSortField, 
-            selectedSortOrder,
-            length: 1000,
-            start: 0,
-            onSuccess: function(data) {
-                let newData = data.map(
-                    ({ rank, area, asc_names, actual_sales, target_sales, percent_ach, balance_to_target, 
-                        target_per_remaining_days
-                    }) => ({
-                        "Rank": rank,
-                        "Area": area,
-                        "Area Sales Coordinator": asc_names,
-                        "Actual Sales": actual_sales,
-                        "Target": target_sales,
-                        "% Ach": percent_ach,
-                        "Balance To Target": balance_to_target,
-                        "Target per Remaining days": target_per_remaining_days,
+        setTimeout(function() {
+            modal.loading(false);
+        }, 5000);
 
 
-                        // "Store Code": store_code,
-                        // "Store Name": store_name,
-                        // "Actual Sales": actual_sales,
-                        // "Possible Incentives": possible_incentives,
-                        // "LY Scanned Data": ly_scanned_data,
-                        // "Brand Ambassador": brand_ambassadors,
-                        // "Deployed Date": deployment_date,
-                        // "Brand": brands,
-                        // "Growth": growth
-                    })
-                )
-                resolve(newData);
-            },
-            onError: function(error) {
-                reject(error);
-            }
-        });
-    });
-
-    fetchPromise
-        .then(results => {
-            const headerData = [
-                ["LIFESTRONG MARKETING INC."],
-                ["Report: Information for Area Sales Coordinator"],
-                ["Date Generated: " + formatDate(new Date())],
-                ["Store Name: " + $('#store').val()],
-                ["Area: " + $('#area').val()],
-                ["Month: " + ($('#month option:selected').text() === "Select Month..." ? "All" : $('#month option:selected').text())],
-                ["Year: " + ($('#year option:selected').text() === "Select Year..." ? "All" : $('#year option:selected').text())],
-                [""]
-            ];
-    
-            exportArrayToCSV(results, `Report: ASC Dashboard - ${formatDate(new Date())}`, headerData);
-        })
-        .catch(error => {
-            console.log(error, 'error');
-        });
-
-    }
-
-    function fetchTradeDashboardData({ 
-        baseUrl, 
-        selectedStore = null, 
-        selectedArea = null, 
-        selectedMonth = null, 
-        selectedYear = null, 
-        selectedSortField = null, 
-        selectedSortOrder = null,
-        length, 
-        start, 
-        onSuccess, 
-        onError 
-    }) {
-        let allData = [];
-
-        function fetchData(offset) {
-            $.ajax({
-                url: base_url + 'trade-dashboard/trade-info-asc',
-                type: 'GET',
-                data: {
-                    store : selectedStore === "0" ? null : selectedStore,
-                    area : selectedArea === "0" ? null : selectedArea,
-                    month : selectedMonth === "0" ? null : selectedMonth,
-                    year : selectedYear === "0" ? null : selectedYear,
-                    sort_field : selectedSortField,
-                    sort : selectedSortOrder,
-                    limit: length,
-                    offset: offset
-                },
-                success: function(response) {
-
-                    if (response.data && response.data.length) {
-                        allData = allData.concat(response.data);
-
-                        if (response.data.length === length) {
-                            fetchData(offset + length);
-                        } else {
-                            if (onSuccess) onSuccess(allData);
-                        }
-                    } else {
-                        if (onSuccess) onSuccess(allData);
-                    }
-                },
-                error: function(error) {
-                    if (onError) onError(error);
-                }
-            });
-        }
-
-        fetchData(start);
-    }
-
-
-    function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
-        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
-        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
-        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        // Trigger file download
-        saveAs(blob, filename + ".csv");
     }
 
 </script>

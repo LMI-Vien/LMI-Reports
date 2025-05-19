@@ -166,3 +166,12 @@
         color: #fff;
         font-size: .9rem;
       }
+
+    .tbl-title-header .dt-column-order {
+        display: none !important;
+    }
+
+    .tbl-title-header {
+        pointer-events: none !important;
+        cursor: default !important;
+    }
