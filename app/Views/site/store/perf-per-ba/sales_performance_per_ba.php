@@ -384,35 +384,60 @@
         });
     }
 
+    const start_time = new Date();  
     function handleAction(action) {
         modal.loading(true);
-    
-        let selectedStore = $('#store').val();
-        let selectedArea = $('#area').val();
-        let selectedMonth = $('#month').val();
-        let selectedYear = $('#year').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
 
-        let url = base_url + 'store/per-ba-generate-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '?'
-            + 'sort_field=' + encodeURIComponent(selectedSortField)
-            + '&sort=' + encodeURIComponent(selectedSortOrder)
-            + '&store=' + encodeURIComponent(selectedStore)
-            + '&area=' + encodeURIComponent(selectedArea)
-            + '&month=' + encodeURIComponent(selectedMonth)
-            + '&year=' + encodeURIComponent(selectedYear)
-            + '&limit=' + encodeURIComponent(length)
-            + '&offset=' + encodeURIComponent(offset);
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#brandAmbassadorId').val();
+        let selectedStore = $('#storeNameId').val();
+        let selectedBrands = $('#brands').val();   
+        let selectedYear = $('#year').val();
+        let selectedMonthStart = $('#month').val();
+        let selectedMonthEnd = $('#monthTo').val();
+
+        let qs = [
+            'area='             + encodeURIComponent(selectedArea),
+            'asc='              + encodeURIComponent(selectedAsc),
+            'baType='           + encodeURIComponent(selectedBaType),
+            'ba='               + encodeURIComponent(selectedBa),
+            'store='            + encodeURIComponent(selectedStore),
+            'brands='           + encodeURIComponent(selectedBrands),
+            'year='             + encodeURIComponent(selectedYear),
+            'month_start='      + encodeURIComponent(selectedMonthStart),
+            'month_end='        + encodeURIComponent(selectedMonthEnd),
+            'limit='            + encodeURIComponent(99999),
+            'offset='           + encodeURIComponent(0),
+        ].join('&');
+
+        let endpoint = action === 'export_pdf' ? 'per-ba-generate-pdf' : 'per-ba-generate-excel-ba';
+
+        let url = `${base_url}store/${endpoint}?${qs}`;
+
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
+
+        const remarks = `
+            Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Store Sales Performance per Brand Ambassador', action === 'export_pdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
 
         let iframe = document.createElement('iframe');
-        iframe.style.display = "none";
+        iframe.style.display = 'none';
         iframe.src = url;
         document.body.appendChild(iframe);
 
-        setTimeout(() => {
+        setTimeout(function() {
             modal.loading(false);
-        }, 5000);
+        }, 500);
     }
+
+    
 
     $("#month").on("change", function() {
         let selected = $("#monthTo").val();

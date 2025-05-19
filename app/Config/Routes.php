@@ -34,8 +34,8 @@ $routes->group('store/', static function ($routes) {
     $routes->get('sales-performance-per-ba', 'StoreSalesPerfPerBa::perfPerBa');
     $routes->post('get-sales-performance-per-ba', 'StoreSalesPerfPerBa::getPerfPerBa');
     $routes->get('get-sales-performance-per-ba', 'StoreSalesPerfPerBa::getPerfPerBa');
-    $routes->get('per-ba-generate-pdf', 'StoreSalesPerfPerBa::generatePdf');
-    $routes->get('per-ba-generate-excel-ba', 'StoreSalesPerfPerBa::generateExcel');
+    $routes->match(['GET', 'POST'], 'per-ba-generate-pdf', 'StoreSalesPerfPerBa::generatePdf');
+    $routes->match(['GET', 'POST'], 'per-ba-generate-excel-ba', 'StoreSalesPerfPerBa::generateExcel');
 
     //per area
     $routes->get('sales-performance-per-area', 'StoreSalesPerfPerArea::perfPerArea');
