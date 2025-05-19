@@ -93,27 +93,24 @@ class StoreSalesPerfOverall extends BaseController
 	    ]);
 	}
 
-	public function generatePdf()
-	{	
-		//to be added
-		$brandAmbassador = $this->request->getGet('brandAmbassador');
-		$storeBranch = $this->request->getGet('storeBranch');
-		$brands = $this->request->getGet('brands');
-		$area = $this->request->getGet('area');
-		$asc = $this->request->getGet('asc');
-		$year = $this->request->getGet('year');
-		$monthStart = $this->request->getGet('monthStart');
-		$monthEnd = $this->request->getGet('monthEnd');
-		$baType = $this->request->getGet('baType');
-		$brandCat = $this->request->getGet('brandCat');
+	public function generatePdf() {	
+		$area              = $this->getParam('area');
+		$asc               = $this->getParam('asc');
+		$baType            = $this->getParam('baType');
+		$brandAmbassador   = $this->getParam('ba');
+		$store             = $this->getParam('store');
+		$rawBrandCat 	   = $this->getParam('brandCategories');
+		$rawBrands         = $this->getParam('brands');
+		$brandCategories   = $this->parseCsvParam($rawBrandCat);
+	   	$brands            = $this->parseCsvParam($rawBrands);
+
+		$year              = $this->getParam('year');
+		$monthStart        = $this->getParam('monthStart');
+		$monthEnd          = $this->getParam('monthEnd');
 
 		$order = $this->request->getVar('order')[0] ?? [];
-		$orderColumnIndex = isset($order['column']) 
-			? (int) $order['column'] 
-			: 0;
-		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc'])
-			? strtolower($order['dir'])
-			: 'asc';
+		$orderColumnIndex = isset($order['column']) ? (int) $order['column'] : 0;
+		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc']) ? strtolower($order['dir']) : 'asc';
 
 		// helper closure to turn empty values into “None”
 		$dv = function($value, $default = 'None') {
@@ -124,16 +121,59 @@ class StoreSalesPerfOverall extends BaseController
 			return $value === '' ? $default : $value;
 		};
 
+		$baTypeString = '';
+		switch ($baType) {
+			case '3':
+				$baTypeString = 'ALL';
+				break;
+			
+			case '1':
+				$baTypeString = "Outright";
+				break;
+			
+			case '0':
+				$baTypeString = "Consignment";
+				break;
+			
+			default:
+				$baTypeString = 'NONE';
+				break;
+		}
+
+		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$area'", "''", "''");
+		$areaMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$asc'", "''", "''");
+		$ascMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$brandAmbassador'", "''", "''");
+		$baMap = !empty($result) ? $result[0]['name'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'id:EQ=$store'", "''", "''");
+		$storeMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ=$rawBrandCat'", "''", "''");
+		$brandLabelMap = !empty($result) ? $result[0]['label'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$rawBrands'", "''", "''");
+		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthStart'", "''", "''");
+		$monthStartMap = !empty($result) ? $result[0]['month'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthEnd'", "''", "''");
+		$monthEndMap = !empty($result) ? $result[0]['month'] : '';
+
 		$filterData = [
-			'Area'             => $dv($area),
-			'ASC'              => $dv($asc),
-			'BA Type'          => $dv($baType),
-			'Brand Ambassador' => $dv($brandAmbassador),
-			'Store Name'       => $dv($storeBranch),
-			'Brand Label Type' => $dv($brandCat),
-			'Brand Handle'	   => $dv($brands),
+			'Area'             => $dv($areaMap),
+			'ASC'              => $dv($ascMap),
+			'BA Type'          => $dv($baTypeString),
+			'Brand Ambassador' => $dv($baMap),
+			'Store Name'       => $dv($storeMap),
+			'Brand Label Type' => $dv($brandLabelMap),
+			'Brand Handle'	   => $dv($brandMap),
 			'Year'             => $dv($year),
-			'Month Range'      => ($monthStart && $monthEnd) ? sprintf('%02d – %02d', $monthStart, $monthEnd) : 'None',
+			'Month Range'      => ($monthStartMap && $monthEndMap) ? "$monthStartMap - $monthEndMap" : 'None',
 		];
 
 		$title = "Store Sales Performance Overall";
@@ -150,7 +190,7 @@ class StoreSalesPerfOverall extends BaseController
 
 		$pdf->SetFont('helvetica', '', 9);
 
-		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $year, 9999, 0, $area, $asc, $storeBranch, $brandAmbassador, null, [], [], $orderColumnIndex, $orderDirection);
+		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $year, 9999, 0, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands, $orderColumnIndex, $orderDirection);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();
@@ -178,13 +218,14 @@ class StoreSalesPerfOverall extends BaseController
 		foreach ($rows as $row) {
 			$numNameLines = $pdf->getNumLines($row->store_name, $colWidth);
 			$numLines = max(1, $numNameLines);
-			$rowH = $numLines * $lineH;
+			// $rowH = $numLines * $lineH;
+			$rowH = 8;
 			
 			$pdf->Cell($colWidth, $rowH, $row->rank,             1, 0, 'C');
 			// $pdf->Cell($colWidth, 8, $row->store_name,       1, 0, 'C');
 			$pdf->MultiCell(
 				$colWidth,   
-				$lineH,       
+				$rowH,       
 				$row->store_name,
 				1,            // border
 				'C',          // align center
@@ -237,34 +278,74 @@ class StoreSalesPerfOverall extends BaseController
 	}
 
 
-	public function generateExcel()
-	{
-		//to be added
-		$brandAmbassador = $this->request->getGet('brandAmbassador');
-		$storeBranch     = $this->request->getGet('storeBranch');
-		$brands          = $this->request->getGet('brands');
-		$area            = $this->request->getGet('area');
-		$asc             = $this->request->getGet('asc');
-		$year            = $this->request->getGet('year');
-		$monthStart      = $this->request->getGet('monthStart');
-		$monthEnd        = $this->request->getGet('monthEnd');
-		$baType          = $this->request->getGet('baType');
-		$brandCat        = $this->request->getGet('brandCat');
+	public function generateExcel() {
+		$area              = $this->getParam('area');
+		$asc               = $this->getParam('asc');
+		$baType            = $this->getParam('baType');
+		$brandAmbassador   = $this->getParam('ba');
+		$store             = $this->getParam('store');
+		$rawBrandCat 	   = $this->getParam('brandCategories');
+		$rawBrands         = $this->getParam('brands');
+		$brandCategories   = $this->parseCsvParam($rawBrandCat);
+	   	$brands            = $this->parseCsvParam($rawBrands);
+
+		$year              = $this->getParam('year');
+		$monthStart        = $this->getParam('monthStart');
+		$monthEnd          = $this->getParam('monthEnd');
+
 		$limit           = 99999;
 		$offset          = 0;
 
 		$order = $this->request->getVar('order')[0] ?? [];
-		$orderColumnIndex = isset($order['column']) 
-			? (int) $order['column'] 
-			: 0;
-		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc'])
-			? strtolower($order['dir'])
-			: 'asc';
+		$orderColumnIndex = isset($order['column']) ? (int) $order['column'] : 0;
+		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc']) ? strtolower($order['dir']) : 'asc';
 
 		$title = "Store Sales Performance Overall";
-		$result = $this->Dashboard_model
-					->getStorePerformance($monthStart, $monthEnd, $year, $limit, $offset, $area, $asc, $storeBranch, $brandAmbassador, null, [], [], $orderColumnIndex, $orderDirection);
-		$rows   = $result['data'];
+		$data = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $year, $limit, $offset, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands, $orderColumnIndex, $orderDirection);
+		$rows   = $data['data'];
+
+		$baTypeString = '';
+		switch ($baType) {
+			case '3':
+				$baTypeString = 'ALL';
+				break;
+			
+			case '1':
+				$baTypeString = "Outright";
+				break;
+			
+			case '0':
+				$baTypeString = "Consignment";
+				break;
+			
+			default:
+				$baTypeString = 'NONE';
+				break;
+		}
+
+		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$area'", "''", "''");
+		$areaMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$asc'", "''", "''");
+		$ascMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$brandAmbassador'", "''", "''");
+		$baMap = !empty($result) ? $result[0]['name'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'id:EQ=$store'", "''", "''");
+		$storeMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ=$rawBrandCat'", "''", "''");
+		$brandLabelMap = !empty($result) ? $result[0]['label'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$rawBrands'", "''", "''");
+		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthStart'", "''", "''");
+		$monthStartMap = !empty($result) ? $result[0]['month'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthEnd'", "''", "''");
+		$monthEndMap = !empty($result) ? $result[0]['month'] : '';
 
 		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
@@ -274,20 +355,19 @@ class StoreSalesPerfOverall extends BaseController
 		$sheet->mergeCells('A1:E1');
 		$sheet->mergeCells('A2:E2');
 
-		$sheet->setCellValue('A4', 'Store: '  . ($storeBranch ?: 'NONE'));
-		$sheet->setCellValue('B4', 'Area: '   . ($area       ?: 'NONE'));
-		$sheet->setCellValue('C4', 'Sort By: '. ($asc        ?: 'NONE'));
-		$sheet->setCellValue('D4', 'BA Type: '. ($baType     ?: 'NONE'));
-		$sheet->setCellValue('E4', 'Brand: ' . ($brands     ?: 'NONE'));
-		$sheet->setCellValue('F4', 'Brand Ambassador: ' . ($brandAmbassador ?: 'NONE'));
-		$sheet->setCellValue('A5', 'Brand Category: ' . ($brandCat ?: 'NONE'));
-		$sheet->setCellValue('B5', 'ASC: ' . ($asc ?: 'NONE'));
-		$sheet->setCellValue('C5', 'BA: ' . ($baType ?: 'NONE'));
+		$sheet->setCellValue('A4', 'Store: '  . ($storeMap ?: 'NONE'));
+		$sheet->setCellValue('B4', 'Area: '   . ($areaMap       ?: 'NONE'));
+		$sheet->setCellValue('C4', 'Sort By: '. ($ascMap        ?: 'NONE'));
+		$sheet->setCellValue('D4', 'BA Type: '. ($baTypeString     ?: 'NONE'));
+		$sheet->setCellValue('E4', 'Brand: ' . ($brandMap     ?: 'NONE'));
+		$sheet->setCellValue('F4', 'Brand Ambassador: ' . ($baMap ?: 'NONE'));
+		$sheet->setCellValue('A5', 'Brand Category: ' . ($brandLabelMap ?: 'NONE'));
+		$sheet->setCellValue('B5', 'ASC: ' . ($ascMap ?: 'NONE'));
 
-		$sheet->setCellValue('D5', 'Month Start: ' . ($monthStart ?: 'NONE'));
-		$sheet->setCellValue('E5', 'Month End: '   . ($monthEnd   ?: 'NONE'));
-		$sheet->setCellValue('F5', 'Year: '        . ($year       ?: 'NONE'));
-		$sheet->setCellValue('A6', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		$sheet->setCellValue('C5', 'Month Start: ' . ($monthStartMap ?: 'NONE'));
+		$sheet->setCellValue('D5', 'Month End: '   . ($monthEndMap   ?: 'NONE'));
+		$sheet->setCellValue('E5', 'Year: '        . ($year       ?: 'NONE'));
+		$sheet->setCellValue('F5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 		$headers = [
 			"Rank",
@@ -325,4 +405,22 @@ class StoreSalesPerfOverall extends BaseController
 		$writer->save('php://output');
 		exit;
 	}
+
+	private function getParam(string $key) {
+		$v = $this->request->getVar($key);       // accepts GET or POST
+		if (is_null($v)) return null;
+		$v = trim((string)$v);
+		return $v === '' ? null : $v;
+	}
+
+	private function parseCsvParam(?string $csv): array {
+		if ($csv === null || trim($csv) === '') {
+			return [];
+		}
+		return array_filter(
+			array_map('intval', explode(',', $csv)),
+			fn($i) => $i > 0
+		);
+	}
+
 }
