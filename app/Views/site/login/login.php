@@ -25,11 +25,11 @@
             </div> -->
             <div class="form-group">
                 <hr>
-                <div class="google-sign-container">
+                <!-- <div class="google-sign-container">
                     <a href="">
                         <img src="<?= base_url('/assets/img/google-sign.webp'); ?>" class="google-sign-img" alt="Sign in with Google">
                     </a>
-                </div>
+                </div> -->
             </div>
         </form>
     </div>
