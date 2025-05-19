@@ -150,3 +150,12 @@
         background-color: #0056b3;
         border-color: #0056b3;
       }
+
+    .static-header .dt-column-order {
+        display: none !important;
+    }
+
+    .static-header {
+        pointer-events: none !important;
+        cursor: default !important;
+    }

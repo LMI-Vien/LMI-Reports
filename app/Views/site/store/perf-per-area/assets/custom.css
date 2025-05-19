@@ -175,3 +175,12 @@
         pointer-events: none !important;
         cursor: default !important;
     }
+
+    .static-header .dt-column-order {
+        display: none !important;
+    }
+
+    .static-header {
+        pointer-events: none !important;
+        cursor: default !important;
+    }

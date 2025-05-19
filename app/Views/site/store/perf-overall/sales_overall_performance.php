@@ -156,7 +156,7 @@
             //let url = url;
             let data = {
                 event: "list",
-                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id, asc.code",
                 query: "a.id = " + result.id,
                 offset: offset,
                 limit: 0,
@@ -172,7 +172,7 @@
 
             aJax.post(url, data, function(result) {
                 let data = JSON.parse(result);
-                $("#ascName").val(data[0].asc_description);
+                $("#ascName").val(data[0].code+' - '+data[0].asc_description);
                 $("#ascNameId").val(data[0].asc_id);
             })
         });
@@ -198,8 +198,8 @@
                 let data = JSON.parse(res)[0];
                 if(data){
                     alert(data.code);
-                    $("#storeName").val(data.description);
-                    $("#storeNameId").val(data.code);
+                    $("#storeName").val(data.code+' - '+data.description);
+                    $("#storeNameId").val(data.id);
                 }
             })
         });

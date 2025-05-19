@@ -141,3 +141,12 @@
     .select2-selection__choice__display {
       margin-left: 0.5rem;
     }
+
+    .static-header .dt-column-order {
+        display: none !important;
+    }
+
+    .static-header {
+        pointer-events: none !important;
+        cursor: default !important;
+    }
