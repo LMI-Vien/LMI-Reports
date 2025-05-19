@@ -173,7 +173,6 @@ class StoreSalesPerfOverall extends BaseController
 			'Brand Label Type' => $dv($brandLabelMap),
 			'Brand Handle'	   => $dv($brandMap),
 			'Year'             => $dv($year),
-			'Month Range'      => ($monthStartMap && $monthEndMap) ? sprintf('%02d – %02d', $monthStartMap, $monthEndMap) : 'None',
 			'Month Range'      => ($monthStartMap && $monthEndMap) ? "$monthStartMap - $monthEndMap" : 'None',
 		];
 
