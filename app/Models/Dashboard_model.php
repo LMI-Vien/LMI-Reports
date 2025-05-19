@@ -430,12 +430,14 @@ class Dashboard_model extends Model
 		        ), 0) * 100, 2
 		    ) AS percent_ach,
 
-		    CASE 
-		        WHEN t.ba_code IS NOT NULL AND t.ba_code != '' 
-		        THEN ROUND(COALESCE(ly.ly_scanned_data, 0) / 
-		             (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
-		        ELSE COALESCE(ly.ly_scanned_data, 0)
-		    END AS ly_scanned_data,
+		    FORMAT(
+		        CASE 
+		            WHEN t.ba_code IS NOT NULL AND t.ba_code != '' 
+		            THEN ROUND(COALESCE(ly.ly_scanned_data, 0) / 
+		                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
+		            ELSE COALESCE(ly.ly_scanned_data, 0)
+		        END, 2
+		    ) AS ly_scanned_data,
 
 		    CASE 
 		      WHEN ? > 0 THEN CEIL((

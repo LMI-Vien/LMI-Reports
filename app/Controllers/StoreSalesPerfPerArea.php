@@ -80,6 +80,7 @@ class StoreSalesPerfPerArea extends BaseController
 	    $date = null; 
 	    $lookup_month = null;
 	    $lyYear = 0;
+	    $tyYear = 0;
 	    $selected_year = null;
 	    $lyMonth = null;
 	    $date = null;
@@ -87,7 +88,9 @@ class StoreSalesPerfPerArea extends BaseController
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$yearId = $actual_year[0]['id'];
+	    	$selected_year = $actual_year[0]['year'];
 	    	$lyYear = $selected_year - 1;
+	    	$tyYear = $selected_year;
 	    	$date = $actual_year[0]['year'];
 	    	$targetYear = $actual_year[0]['year'];
 	    }
@@ -140,7 +143,7 @@ class StoreSalesPerfPerArea extends BaseController
 		// die();
 		$storeId = null;
 		$baId = null;
-	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $date, $brand_category, $brandIds, $orderByColumn, $orderDirection);
+	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
@@ -257,6 +260,7 @@ class StoreSalesPerfPerArea extends BaseController
 	    $date = null; 
 	    $lookup_month = null;
 	    $lyYear = 0;
+	    $tyYear = 0;
 	    $selected_year = null;
 	    $lyMonth = null;
 	    $date = null;
@@ -330,6 +334,10 @@ class StoreSalesPerfPerArea extends BaseController
 
 		$pdf->SetFont('helvetica', '', 9);
 		$result = $this->Dashboard_model->tradeOverallBaData(9999, 0, $target_sales, $incentiveRate, $monthStart, $monthEnd, $lyYear, $year, $storeId, $area, $asc, $baId, $baType, $tpr, $date, $brand_category, $brands, $orderColumnIndex, $orderDirection);
+
+	public function tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null)
+
+		$result = $this->Dashboard_model->tradeOverallBaData(9999, 0, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();

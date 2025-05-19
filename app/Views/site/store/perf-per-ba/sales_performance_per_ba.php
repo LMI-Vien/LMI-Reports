@@ -200,8 +200,12 @@
 
             aJax.post(url, data, function(result) {
                 let data = JSON.parse(result);
-                $("#ascName").val(data[0].code+' - '+data[0].asc_description);
-                $("#ascNameId").val(data[0].asc_id);
+                if(data.length > 0){
+                    if(data[0].code){ 
+                        $("#ascName").val(data[0].code+' - '+data[0].asc_description);
+                        $("#ascNameId").val(data[0].asc_id);       
+                    }             
+                }
             })
         });
 
@@ -224,9 +228,11 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res)[0];
-                if(data){
-                    $("#storeName").val(data.code+' - '+data.description);
-                    $("#storeNameId").val(data.id);
+                if(data.length > 0){
+                    if(data[0].code){ 
+                        $("#storeName").val(data.code+' - '+data.description);
+                        $("#storeNameId").val(data.id);      
+                    }             
                 }
             })
         });

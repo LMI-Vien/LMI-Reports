@@ -162,8 +162,12 @@
 
             aJax.post(url, data, function(result) {
                 let data = JSON.parse(result);
-                $("#ascName").val(data[0].code+' - '+data[0].asc_description);
-                $("#ascNameId").val(data[0].asc_id);
+                if(data.length > 0){
+                    if(data[0].code){ 
+                        $("#ascName").val(data[0].code+' - '+data[0].asc_description);
+                        $("#ascNameId").val(data[0].asc_id);       
+                    }             
+                }
             })
         });
 
