@@ -345,7 +345,12 @@
                 { data: 'area_name' },
                 { data: 'store_name' },
                 { data: 'ba_name' },
-                { data: 'ba_deployment_date' },
+                {
+                    data: 'ba_deployment_date',
+                    render: function(data, type, row) {
+                        return formatDateToMMDDYYYY(data);
+                    }
+                },
                 { data: 'brand_name' },
                 { data: 'ly_scanned_data' },
                 { data: 'actual_sales', render: formatTwoDecimals },
@@ -364,6 +369,16 @@
             lengthChange: false
         });
         addColumnToggle(table);
+    }
+
+    function formatDateToMMDDYYYY(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date)) return ''; // Handle invalid dates
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
     }
 
     function formatNoDecimals(data) {

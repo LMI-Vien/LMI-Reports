@@ -83,7 +83,7 @@ class StoreSalesPerfOverall extends BaseController
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
 
 	    //$this->Dashboard_model->refreshPreAggregatedDataScanData();	
-	    $data = $this->Dashboard_model->getStorePerformance($monthId, $monthEndId, $yearId, $limit, $offset, $areaId, $ascId, $storeCode, $baId, $baTypeId, $brandCategoriesIds, $brandIds, $orderByColumn, $orderDirection);
+	    $data = $this->Dashboard_model->getStorePerformance($monthId, $monthEndId, $orderByColumn, $orderDirection, $yearId, $limit, $offset, $areaId, $ascId, $storeCode, $baId, $baTypeId, $brandCategoriesIds, $brandIds);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
@@ -190,7 +190,7 @@ class StoreSalesPerfOverall extends BaseController
 
 		$pdf->SetFont('helvetica', '', 9);
 
-		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $year, 9999, 0, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands, $orderColumnIndex, $orderDirection);
+		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, 9999, 0, $area, $asc, $storeBranch, $brandAmbassador, null, [], []);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();

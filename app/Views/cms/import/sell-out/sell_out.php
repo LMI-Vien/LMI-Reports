@@ -323,7 +323,7 @@
     function get_data(query) {
         var data = {
             event : "list",
-            select : "so.id, m.month, m.id as month_id, so.year, c.name as company_name, so.customer_payment_group, so.template_id, so.created_date, cu.name as created_by, so.file_type, so.remarks",
+            select : "so.id, m.month, m.id as month_id, so.year, c.name as company_name, so.customer_payment_group, so.template_id, so.created_date, cu.name as created_by, so.file_type, so.remarks, so.company as company_id",
             query : query,
             offset : offset,
             limit : limit,
@@ -378,7 +378,7 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' style='width: 25%'>";
-                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year+"','"+y.month_id+"','"+y.id+"')\" id='"+y.id+
+                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year+"','"+y.month_id+"','"+y.id+"','"+y.company_id+"')\" id='"+y.id+
                             "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                           html+="<a class='btn-sm btn view' href='"+ href +"' target='_blank' id='"+y.id+
                           "' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -1459,10 +1459,11 @@
     }
 
 
-    function delete_data(year, month, data_header_id) 
+    function delete_data(year, month, data_header_id, company_id) 
     {
         modal.confirm(confirm_delete_message,function(result){
             if(result){
+                modal.loading(true);
                 const details_conditions = [
                     { field: "year", values: [year] },
                     { field: "month", values: [month] },
@@ -1473,10 +1474,18 @@
                     { field: "month", values: [month] },
                     { field: "id", values: [data_header_id] }
                 ];
+                const aggregated_conditions = [
+                    { field: "year", values: [year] },
+                    { field: "month", values: [month] },
+                    { field: "company", values: [company_id] }
+                ];
 
+                batch_delete_with_conditions(url, "tbl_sell_out_pre_aggregated_data", aggregated_conditions, function(resp) {
+
+                });
                 batch_delete_with_conditions(url, "tbl_sell_out_data_details", details_conditions, function(resp) {
-                    // modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                     batch_delete_with_conditions(url, "tbl_sell_out_data_header", header_conditions, function(resp) {
+                        modal.loading(false);
                         modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                     });
                 });

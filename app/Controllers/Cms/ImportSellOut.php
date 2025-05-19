@@ -4,6 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Models\Sync_model;
 
 class ImportSellOut extends BaseController
 {
@@ -334,5 +335,16 @@ class ImportSellOut extends BaseController
 		$file_name = $this->request->getPost('file_name');
 		$result = $this->Global_model->delete_temp_scan($this->session->get('sess_uid'), $file_name);
 		echo $result;
+	}
+
+	public function update_aggregated_scan_data(){
+        $refresher = new Sync_model();
+        $result = $refresher->refreshScanData();
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Refresh completed',
+            'results' => $result
+        ]);
 	}
 }

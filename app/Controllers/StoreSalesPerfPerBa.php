@@ -55,11 +55,6 @@ class StoreSalesPerfPerBa extends BaseController
 
 	public function getPerfPerBa()
 	{	
-		$month = date('m');
-		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		$day = date('d');
-		$tpr = $days - $day; 
-		
 
 		$sysPar = $this->Global_model->getSysPar();
 		$areaId = trim($this->request->getPost('area'));
@@ -86,6 +81,7 @@ class StoreSalesPerfPerBa extends BaseController
 	    $date = null; 
 	    $lookup_month = null;
 	    $lyYear = 0;
+	    $tyYear = 0;
 	    $selected_year = null;
 	    $lyMonth = null;
 	    $date = null;
@@ -93,19 +89,33 @@ class StoreSalesPerfPerBa extends BaseController
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$yearId = $actual_year[0]['id'];
+	    	$selected_year = $actual_year[0]['year'];
 	    	$lyYear = $selected_year - 1;
+	    	$tyYear = $selected_year;
 	    	$date = $actual_year[0]['year'];
 	    	$targetYear = $actual_year[0]['year'];
 	    }
 
 	    if($monthEndId){
 	    	$date = $formatted_month;
-	    	$lyMonth = $month;
+	    	$lyMonth = $monthId;
 	    }
+	    
+	    $days = null;
+	    $tpr = 0;
+	    $month = date('m');
 
 		if($year && $monthId){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+		    if(intval($monthId) === intval($month)){
+				$days = $this->getDaysInMonth($monthId, $this->getCurrentYear());
+			}
+	    }
+
+	    if($days){
+			$day = date('d');
+			$tpr = $days - $day; 
 	    }
 
 	    if(empty($area)){
@@ -142,7 +152,9 @@ class StoreSalesPerfPerBa extends BaseController
 		// $monthId = 3;
 		// $monthEndId = 3;
 		// $date = "2025-03";
-	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $date, $brand_category, $brandIds, $orderByColumn, $orderDirection);
+		// 		print_r($brand_category);
+		// die();
+	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
@@ -202,6 +214,7 @@ class StoreSalesPerfPerBa extends BaseController
 	    $date = null; 
 	    $lookup_month = null;
 	    $lyYear = 0;
+	    $tyYear = 0;
 	    $selected_year = null;
 	    $lyMonth = null;
 	    $date = null;
@@ -209,7 +222,9 @@ class StoreSalesPerfPerBa extends BaseController
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$yearId = $actual_year[0]['id'];
+	    	$selected_year = $actual_year[0]['year'];
 	    	$lyYear = $selected_year - 1;
+	    	$tyYear = $selected_year;
 	    	$date = $actual_year[0]['year'];
 	    	$targetYear = $actual_year[0]['year'];
 	    }
@@ -338,8 +353,8 @@ class StoreSalesPerfPerBa extends BaseController
 		$pdf->SetFont('helvetica', '', 9);
 
 		$result = $this->Dashboard_model->
-		tradeOverallBaData($limit, $offset, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $yearId, $storeId, 
-		$areaId, $ascId, $baId, $baTypeId, $tpr, $date, $brand_category, $brandIds, $orderByColumn, $orderDirection);
+		tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, 
+		$areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 
 		$rows = $result['data'];
 
@@ -510,6 +525,7 @@ class StoreSalesPerfPerBa extends BaseController
 	    $date = null; 
 	    $lookup_month = null;
 	    $lyYear = 0;
+	    $tyYear = 0;
 	    $selected_year = null;
 	    $lyMonth = null;
 	    $date = null;
@@ -517,7 +533,9 @@ class StoreSalesPerfPerBa extends BaseController
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$yearId = $actual_year[0]['id'];
+	    	$selected_year = $actual_year[0]['year'];
 	    	$lyYear = $selected_year - 1;
+	    	$tyYear = $selected_year;
 	    	$date = $actual_year[0]['year'];
 	    	$targetYear = $actual_year[0]['year'];
 	    }
@@ -563,7 +581,7 @@ class StoreSalesPerfPerBa extends BaseController
 		}
 		$target_sales = $amountPerDay * $noOfDays;
 
-	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $date, $brand_category, $brandIds, $orderByColumn, $orderDirection);
+	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 		
 		$title = "Store Sales Performance per BA";
 		$rows = $data['data'];
