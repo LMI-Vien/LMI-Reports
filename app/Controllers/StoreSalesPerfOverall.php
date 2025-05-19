@@ -190,7 +190,7 @@ class StoreSalesPerfOverall extends BaseController
 
 		$pdf->SetFont('helvetica', '', 9);
 
-		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, 9999, 0, $area, $asc, $storeBranch, $brandAmbassador, null, [], []);
+		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, 9999, 0, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();
@@ -301,7 +301,7 @@ class StoreSalesPerfOverall extends BaseController
 		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc']) ? strtolower($order['dir']) : 'asc';
 
 		$title = "Store Sales Performance Overall";
-		$data = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $year, $limit, $offset, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands, $orderColumnIndex, $orderDirection);
+		$data = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, $limit, $offset, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands);
 		$rows   = $data['data'];
 
 		$baTypeString = '';
