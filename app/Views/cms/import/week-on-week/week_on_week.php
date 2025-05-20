@@ -929,7 +929,7 @@
                         modal.loading_progress(true, "Finishing data...");
                         delete_temp_data();
                         setTimeout(function(){
-                            modal.alert("All records saved/updated successfully!", 'success', () => {
+                            modal.alert("All records saved/updated successfully!", 'success', function() {
                                 let logData = [];
                                 logData = valid_data.map(record => ({
                                     ...record,
@@ -940,8 +940,9 @@
                                     year: $("#year").val()
                                 }));
                                 logAll(start_time, logData)
-                                let href = "<?= base_url() ?>" + "cms/import-week-on-week/";
-                                window.location.href = href;
+                                // let href = "<?= base_url() ?>" + "cms/import-week-on-week/";
+                                // window.location.href = href;
+                                window.location.href = "<?= base_url('cms/import-week-on-week') ?>";
                             });
                         }, 1000);
                     }

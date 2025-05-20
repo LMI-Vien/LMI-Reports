@@ -82,7 +82,7 @@ th {
     position: absolute;
     z-index: 1;
     bottom: 100%;
-    left: 0;
+    right: 0;
     opacity: 0;
     transition: opacity 0.3s;
     font-size: 12px;
@@ -194,4 +194,13 @@ label {
 .btn-group-toggle .btn:hover {
     background-color: #0056b3;
     border-color: #0056b3;
+}
+
+.static-header .dt-column-order {
+    display: none !important;
+}
+
+.static-header {
+    pointer-events: none !important;
+    cursor: default !important;
 }

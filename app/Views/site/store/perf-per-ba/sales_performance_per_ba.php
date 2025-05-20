@@ -184,7 +184,7 @@
             //let url = url;
             let data = {
                 event: "list",
-                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id, asc.code",
                 query: "a.id = " + result.id,
                 offset: offset,
                 limit: 0,
@@ -200,8 +200,12 @@
 
             aJax.post(url, data, function(result) {
                 let data = JSON.parse(result);
-                $("#ascName").val(data[0].asc_description);
-                $("#ascNameId").val(data[0].asc_id);
+                if(data.length > 0){
+                    if(data[0].code){ 
+                        $("#ascName").val(data[0].code+' - '+data[0].asc_description);
+                        $("#ascNameId").val(data[0].asc_id);       
+                    }             
+                }
             })
         });
 
@@ -224,9 +228,11 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res)[0];
-                if(data){
-                    $("#storeName").val(data.description);
-                    $("#storeNameId").val(data.code);
+                if(data.length > 0){
+                    if(data[0].code){ 
+                        $("#storeName").val(data.code+' - '+data.description);
+                        $("#storeNameId").val(data.id);      
+                    }             
                 }
             })
         });
@@ -345,7 +351,12 @@
                 { data: 'area_name' },
                 { data: 'store_name' },
                 { data: 'ba_name' },
-                { data: 'ba_deployment_date' },
+                {
+                    data: 'ba_deployment_date',
+                    render: function(data, type, row) {
+                        return formatDateToMMDDYYYY(data);
+                    }
+                },
                 { data: 'brand_name' },
                 { data: 'ly_scanned_data' },
                 { data: 'actual_sales', render: formatTwoDecimals },
@@ -364,6 +375,16 @@
             lengthChange: false
         });
         addColumnToggle(table);
+    }
+
+    function formatDateToMMDDYYYY(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date)) return ''; // Handle invalid dates
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
     }
 
     function formatNoDecimals(data) {

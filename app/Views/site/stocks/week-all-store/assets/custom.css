@@ -123,3 +123,12 @@
       box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
       outline: none;
     }
+    
+    .static-header .dt-column-order {
+        display: none !important;
+    }
+
+    .static-header {
+        pointer-events: none !important;
+        cursor: default !important;
+    }
