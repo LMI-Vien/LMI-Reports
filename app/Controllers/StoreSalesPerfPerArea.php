@@ -371,7 +371,7 @@ class StoreSalesPerfPerArea extends BaseController
 			'Month Range'      => ($monthStartMap && $monthEndMap) ? "$monthStartMap - $monthEndMap" : 'None',
 		];
 
-		$title = "Store Sales Performance Overall";
+		$title = "Store Sales Performance Per Area";
 		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
@@ -435,9 +435,9 @@ class StoreSalesPerfPerArea extends BaseController
 			// rank 
 			$pdf->Cell($colWidth, $rowH, $row->rank, 1, 0, 'C');
 			// area
-			$pdf->Cell($colWidth, $rowH, $row->area_name, 1, 0, 'C');
+			$pdf->MultiCell($colWidth, $rowH, $row->area_name, 1, 'C', 0, 0, '', '', true);
 			// area sales coordinator 
-			$pdf->Cell($colWidth, $rowH, $row->asc_name, 1, 0, 'C');
+			$pdf->MultiCell($colWidth, $rowH, $row->asc_name, 1, 'C', 0, 0, '', '', true);
 			// ly scan data
 			$pdf->Cell($colWidth, $rowH, $row->ly_scanned_data, 1, 0, 'C');
 			// actual sales report
