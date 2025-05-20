@@ -143,7 +143,7 @@ class StoreSalesPerfPerArea extends BaseController
 		// die();
 		$storeId = null;
 		$baId = null;
-	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+	    $data = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
@@ -333,11 +333,8 @@ class StoreSalesPerfPerArea extends BaseController
 		$this->printFilter($pdf, $filterData);
 
 		$pdf->SetFont('helvetica', '', 9);
-		$result = $this->Dashboard_model->tradeOverallBaData(9999, 0, $target_sales, $incentiveRate, $monthStart, $monthEnd, $lyYear, $year, $storeId, $area, $asc, $baId, $baType, $tpr, $date, $brand_category, $brands, $orderColumnIndex, $orderDirection);
 
-	public function tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null)
-
-		$result = $this->Dashboard_model->tradeOverallBaData(9999, 0, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+		$result = $this->Dashboard_model->salesPerformancePerArea(9999, 0, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();
@@ -462,7 +459,7 @@ class StoreSalesPerfPerArea extends BaseController
 		$offset = 0;
 
 		$title = "Store Sales Performance Per Area";
-		$data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $target_sales, $incentiveRate, $monthStart, $monthEnd, $lyYear, $year, $storeId, $area, $asc, $baId, $baType, $tpr, $date, $brand_category, $brands, $orderColumnIndex, $orderDirection);
+		$data = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $target_sales, $incentiveRate, $monthStart, $monthEnd, $lyYear, $year, $storeId, $area, $asc, $baId, $baType, $tpr, $date, $brand_category, $brands, $orderColumnIndex, $orderDirection);
 		$rows   = $data['data'];
 
 		$baTypeString = '';

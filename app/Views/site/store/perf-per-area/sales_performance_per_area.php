@@ -276,7 +276,7 @@
                 { data: 'rank' },
                 { data: 'area_name' },
                 { data: 'asc_name' },
-                { data: 'ly_scanned_data', render: formatTwoDecimals },
+                { data: 'ly_scanned_data' },
                 { data: 'actual_sales', render: formatTwoDecimals },
                 { data: 'target_sales' },
                 { data: 'percent_ach' },
