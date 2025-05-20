@@ -368,16 +368,6 @@ class Dashboard_model extends Model
 		    ba.name AS ba_name,
 		    ba.deployment_date AS ba_deployment_date, 
 		    COALESCE(SUM(s.amount), 0) AS actual_sales,
-
-		    CASE 
-		        WHEN t.ba_code IS NOT NULL AND t.ba_code != '' 
-		        THEN ROUND(
-		            COALESCE(s.amount, 0) / 
-		            NULLIF(ROUND(COALESCE(ly.ly_scanned_data, 0) / 
-		            (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2), 0), 
-		        2)
-		        ELSE ROUND(COALESCE(s.amount, 0) / NULLIF(ly.ly_scanned_data, 0), 2)
-		    END AS growth,
 		    CASE 
 		        WHEN t.target_ba_types = 1 AND 
 		             (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
@@ -438,7 +428,22 @@ class Dashboard_model extends Model
 		            ELSE COALESCE(ly.ly_scanned_data, 0)
 		        END, 2
 		    ) AS ly_scanned_data,
-
+			CASE 
+			    WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN
+			        ROUND(
+			            (
+			                COALESCE(SUM(s.amount), 0) /
+			                NULLIF(
+			                    COALESCE(ly.ly_scanned_data, 0) / 
+			                    (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 
+			                0)
+			            ) * 100, 
+			        2)
+			    ELSE
+			        ROUND(
+			            (COALESCE(SUM(s.amount), 0) / NULLIF(ly.ly_scanned_data, 0)) * 100, 
+			        2)
+			END AS growth,
 		    CASE 
 		      WHEN ? > 0 THEN CEIL((
 		        CASE 
@@ -455,7 +460,8 @@ class Dashboard_model extends Model
 		        END - COALESCE(SUM(s.amount), 0)
 		      ) / ?)
 		      ELSE NULL
-		    END AS target_per_remaining_days
+		    END AS target_per_remaining_days,
+		    COUNT(*) OVER() AS total_records
 		FROM tbl_ba_sales_report s
 		LEFT JOIN tbl_store st ON st.id = s.store_id
 		LEFT JOIN tbl_area a ON a.id = s.area_id
@@ -471,7 +477,7 @@ class Dashboard_model extends Model
 			AND (? IS NULL OR s.ba_id = ?)
 			$baTypeCondition
 			AND (" . (empty($brandIds) ? "1=1" : "s.brand IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
-		GROUP BY s.area_id, s.store_id, s.ba_id, s.ba_id
+		GROUP BY s.id
 		ORDER BY {$orderByColumn} {$orderDirection}
 		LIMIT ? OFFSET ?
 
@@ -508,7 +514,7 @@ class Dashboard_model extends Model
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
-	    $totalRecords = count($data);
+	    $totalRecords = $data ? $data[0]->total_records : 0;
 
 	    return [
 	        'total_records' => $totalRecords,
