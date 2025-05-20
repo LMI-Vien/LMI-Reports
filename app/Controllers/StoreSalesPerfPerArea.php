@@ -97,12 +97,24 @@ class StoreSalesPerfPerArea extends BaseController
 
 	    if($monthEndId){
 	    	$date = $formatted_month;
-	    	$lyMonth = $month;
+	    	$lyMonth = $monthId;
 	    }
+	    
+	    $days = null;
+	    $tpr = 0;
+	    $month = date('m');
 
 		if($year && $monthId){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+		    if(intval($monthId) === intval($month)){
+				$days = $this->getDaysInMonth($monthId, $this->getCurrentYear());
+			}
+	    }
+
+	    if($days){
+			$day = date('d');
+			$tpr = $days - $day; 
 	    }
 
 	    if(empty($area)){
@@ -210,10 +222,6 @@ class StoreSalesPerfPerArea extends BaseController
 	}
 
 	public function generatePdf() {	
-		$month = date('m');
-		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		$day = date('d');
-		$tpr = $days - $day; 
 
 		$sysPar = $this->Global_model->getSysPar();
 		$lyYear = 0;
@@ -247,6 +255,24 @@ class StoreSalesPerfPerArea extends BaseController
 		    $noOfDays = 0;
 		    
 		}
+
+	    $days = null;
+	    $tpr = 0;
+	    $month = date('m');
+
+		if($year && $monthId){
+	    	$actual_year = $this->Dashboard_model->getYear($year);
+	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+		    if(intval($monthId) === intval($month)){
+				$days = $this->getDaysInMonth($monthId, $this->getCurrentYear());
+			}
+	    }
+
+	    if($days){
+			$day = date('d');
+			$tpr = $days - $day; 
+	    }
+
 		$target_sales = $amountPerDay * $noOfDays;
 
 		if(empty($area)){
