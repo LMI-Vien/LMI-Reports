@@ -199,11 +199,12 @@
             }
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let data = JSON.parse(res)[0];
-                if(data){
-                    alert(data.code);
-                    $("#storeName").val(data.code+' - '+data.description);
-                    $("#storeNameId").val(data.id);
+                let data = JSON.parse(res);
+                if(data.length > 0){
+                    if(data[0].code){ 
+                        $("#storeName").val(data.code+' - '+data.description);
+                        $("#storeNameId").val(data.id);      
+                    }             
                 }
             })
         });

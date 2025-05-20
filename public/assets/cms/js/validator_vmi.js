@@ -137,7 +137,7 @@ self.onmessage = async function(e) {
                 //if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
                 if (!invalid) {
                     valid_data.push({
-                        store_code: matched?.store_code || 0,
+                        store: matched?.store_code || 0,
                         item,
                         item_name,
                         item_class,

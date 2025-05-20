@@ -273,7 +273,7 @@ class Dashboard_model extends Model
             return $results;
     }
 
-	public function tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null)
+	public function salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null)
 	{
 
 		$startDate = $tyYear .'-'. $monthFrom . '-01';
@@ -361,7 +361,7 @@ class Dashboard_model extends Model
 		    ly.company,
 		    ly.brand_type_id,
 		    s.store_id,
-		    b.brand_description AS brand_name,
+		    GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brand_name,
 		    st.code AS store_code,
 		    CONCAT(MAX(st.code), ' - ', st.description) AS store_name,
 		    a.description AS area_name,
@@ -468,7 +468,8 @@ class Dashboard_model extends Model
 		LEFT JOIN tbl_brand_ambassador ba ON ba.id = s.ba_id
 		LEFT JOIN ly_scanned ly ON s.store_code = ly.store_code
 		LEFT JOIN targets t ON s.store_code = t.location
-		LEFT JOIN tbl_brand b ON s.brand = b.id
+		LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+		LEFT JOIN tbl_brand b ON b.id = bb.brand_id
 		LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
 		WHERE (? IS NULL OR s.date BETWEEN ? AND ?)
 			AND (? IS NULL OR s.area_id = ?)
@@ -477,7 +478,7 @@ class Dashboard_model extends Model
 			AND (? IS NULL OR s.ba_id = ?)
 			$baTypeCondition
 			AND (" . (empty($brandIds) ? "1=1" : "s.brand IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
-		GROUP BY s.id
+		GROUP BY s.store_id, s.ba_id
 		ORDER BY {$orderByColumn} {$orderDirection}
 		LIMIT ? OFFSET ?
 
