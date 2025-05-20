@@ -91,7 +91,19 @@
                     </div>
                     <div class="mb-3">
                         <label for="desc_1" class="form-label">Description 1</label>
-                        <textarea class="form-control required" id="desc_1" aria-describedby="desc_1"></textarea>
+                        <!-- <textarea class="form-control required" id="desc_1" aria-describedby="desc_1"></textarea> -->
+                         <select class="form-control required" name="desc_1" id="desc_1">
+                            <option value="System Update">System Update</option>
+                            <option value="Event Notification">Event Notification</option>
+                            <option value="Policy Update">Policy Update</option>
+                            <option value="Downtime Alert">Downtime Alert</option>
+                            <option value="Holiday Advisory">Holiday Advisory</option>
+                            <option value="Security Notice">Security Notice</option>
+                            <option value="Promotion or Offer">Promotion or Offer</option>
+                            <option value="Personnel Update">Personnel Update</option>
+                            <option value="User Reminder">User Reminder</option>
+                            <option value="Others">Others</option>
+                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="desc_2" class="form-label">Description 2</label>
