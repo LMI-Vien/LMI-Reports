@@ -1,3 +1,13 @@
+    th:nth-child(1), td:nth-child(1) { width: 5%; } /* Rank */
+    th:nth-child(2), td:nth-child(2) { width: 10%; } /* Area */
+    th:nth-child(3), td:nth-child(3) { width: 10%; } /* ASC */
+    th:nth-child(4), td:nth-child(4) { width: 15%; } /* LY Scan Data */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Actual Sales */
+    th:nth-child(6), td:nth-child(6) { width: 10%; } /* Target */
+    th:nth-child(7), td:nth-child(7) { width: 10%; } /* % Ach */
+    th:nth-child(8), td:nth-child(8) { width: 10%; } /* % Growth */
+    th:nth-child(9), td:nth-child(9) { width: 10%; } /* Balance to Target */
+    th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days */
 
     .content-wrapper, .content {
         margin-top: 0 !important;
@@ -105,18 +115,6 @@
         color: #000 !important; /* Ensure text is readable */
         font-weight: 500;
     }
-
-    th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
-    th:nth-child(2), td:nth-child(2) { width: 10%; } /* Store Code */
-    th:nth-child(3), td:nth-child(3) { width: 10%; } /* Area */
-    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Store Name */
-    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Actual Sales */
-    th:nth-child(6), td:nth-child(6) { width: 10%; } /* Target */
-    th:nth-child(7), td:nth-child(7) { width: 10%; } /* % Ach */
-    th:nth-child(8), td:nth-child(8) { width: 10%; } /* Balance To Target */
-    th:nth-child(9), td:nth-child(9) { width: 10%; } /* Possible Incentives */
-    th:nth-child(10), td:nth-child(10) { width: 15%; } /* Target per Remaining days */
-
     
     .select2-selection__choice__display {
         margin-left: 0.5rem;
@@ -183,4 +181,35 @@
     .static-header {
         pointer-events: none !important;
         cursor: default !important;
+    }
+
+    .tooltip-text {
+        visibility: hidden;
+        width: 220px;
+        background-color: #E6F7FF;
+        color: #004E92;
+        text-align: left;
+        border-radius: 5px;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 100%;
+        right: 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 12px;
+        white-space: normal;
+    }
+
+    .tbl-title-field:hover {
+        background: linear-gradient(to right, #001f4d, #0056b3);
+    }
+
+    .tbl-title-field:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    #info_for_asc {
+        overflow: visible !important;
     }

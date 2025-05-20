@@ -73,10 +73,35 @@
                                         <th class="tbl-title-field">LY Scan Data</th>
                                         <th class="tbl-title-field">Actual Sales Report</th>
                                         <th class="tbl-title-field">Target</th>
-                                        <th class="tbl-title-field">% Achieved</th>
-                                        <th class="tbl-title-field">% Growth</th>
-                                        <th class="tbl-title-field">Balance To Target</th>
-                                        <th class="tbl-title-field">Target Per Remaining Days</th>
+                                        <th class="tbl-title-field">% Achieved 
+                                            <span class="tooltip-text">
+                                                FORMULA:
+                                                <br>
+                                                Actual Sales Report / Target * 100 
+                                            </span>
+                                        </th>
+                                        </th>
+                                        <th class="tbl-title-field">% Growth
+                                            <span class="tooltip-text">
+                                                FORMULA:
+                                                <br>
+                                                Actual Sales Report / LY Scan Data * 100
+                                            </span>
+                                        </th>
+                                        <th class="tbl-title-field">Balance To Target
+                                            <span class="tooltip-text">
+                                                FORMULA:
+                                                <br>
+                                                Target - Actual Sales Report
+                                            </span>
+                                        </th>
+                                        <th class="tbl-title-field">Target Per Remaining Days
+                                            <span class="tooltip-text">
+                                                FORMULA:
+                                                <br>
+                                                Balance to Target / remaining days in a month
+                                            </span>
+                                        </th>
 
                                     </tr>
                                 </thead>
