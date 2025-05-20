@@ -154,7 +154,7 @@ class StoreSalesPerfPerBa extends BaseController
 		// $date = "2025-03";
 		// 		print_r($brand_category);
 		// die();
-	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),
@@ -353,7 +353,7 @@ class StoreSalesPerfPerBa extends BaseController
 		$pdf->SetFont('helvetica', '', 9);
 
 		$result = $this->Dashboard_model->
-		tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, 
+		salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, 
 		$areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 
 		$rows = $result['data'];
@@ -581,7 +581,7 @@ class StoreSalesPerfPerBa extends BaseController
 		}
 		$target_sales = $amountPerDay * $noOfDays;
 
-	    $data = $this->Dashboard_model->tradeOverallBaData($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 		
 		$title = "Store Sales Performance per BA";
 		$rows = $data['data'];
