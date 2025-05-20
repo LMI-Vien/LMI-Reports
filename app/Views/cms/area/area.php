@@ -2019,7 +2019,7 @@
                 ? dynamic_search(
                     "'tbl_area a'", 
                     "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
-                    "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
+                    "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.code, c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
                     0, 
                     0, 
                     `'a.id:IN=${ids.join('|')} a.status:IN=0|1'`,  
@@ -2049,7 +2049,7 @@
                             dynamic_search(
                                 "'tbl_area a'", 
                                 "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
-                                "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT a.description ORDER BY a.description ASC SEPARATOR \", \") AS store_description'", 
+                                "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.code, c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
                                 100000, 
                                 index, 
                                 `'a.status:IN=0|1'`,  
