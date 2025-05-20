@@ -62,10 +62,10 @@
                             <div class="form-group card-dark mb-3 p-2">
                                 <label for="brands" class="mb-2"><i class="fas fa-boxes mr-1"></i> Brand Handle</label>
                                 <select id="brands" name="brands[]" class="form-control select2" multiple>
-                                        <?php foreach ($brands as $key => $value) {
-                                            echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
-                                        } ?>
-                                    </select>
+                                    <?php foreach ($brands as $key => $value) {
+                                        echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
+                                    } ?>
+                                </select>
                             </div>
                             <div class="form-group card-dark mb-3 p-2">
                                 <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Year</label>

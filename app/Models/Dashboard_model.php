@@ -571,7 +571,8 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	    WITH ly_scanned AS (
-	        SELECT 
+	        SELECT
+	        	area_id,
 	            store_code,
 	            company,
 	            itmcde,
@@ -582,10 +583,11 @@ class Dashboard_model extends Model
 	        WHERE (? IS NULL OR year = ?) 
 	          AND (? IS NULL OR month BETWEEN ? AND ?)
 	          $brandTypeCondition
-	        GROUP BY store_code
+	        GROUP BY area_id
 	    ),
 		targets AS (
 		    SELECT 
+		        t.area_id,
 		        t.location AS location,
 		        t.ba_code,
 		        (SELECT GROUP_CONCAT(DISTINCT ba2.type)
@@ -594,7 +596,7 @@ class Dashboard_model extends Model
 		        SUM($targetSalesSQL) AS target_sales
 		    FROM tbl_target_sales_per_store t
 		    WHERE (? IS NULL OR t.year = ?)
-		    GROUP BY t.location, t.ba_code, t.year
+		    GROUP BY t.area_id
 		)
 		SELECT
 		    ROW_NUMBER() OVER (ORDER BY percent_ach DESC) AS rank,
@@ -715,8 +717,8 @@ class Dashboard_model extends Model
 		LEFT JOIN tbl_store st ON st.id = s.store_id
 		LEFT JOIN tbl_area a ON a.id = s.area_id
 		LEFT JOIN tbl_brand_ambassador ba ON ba.id = s.ba_id
-		LEFT JOIN ly_scanned ly ON s.store_code = ly.store_code
-		LEFT JOIN targets t ON s.store_code = t.location
+		LEFT JOIN ly_scanned ly ON s.area_id = ly.area_id
+		LEFT JOIN targets t ON s.area_id = t.area_id
 		LEFT JOIN tbl_brand b ON s.brand = b.id
 		LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
 		WHERE (? IS NULL OR s.date BETWEEN ? AND ?)

@@ -36,8 +36,8 @@ class StocksPerStore extends BaseController
 		$data['page_name'] = 'Trade Dashboard';
 		$data['page_url'] = 'Trade Dashboard';
 		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-per-store'),'Stock Data per Store' => '');
-		$data["source"] = "VMI";
-		$data["source_date"] = 'Calendar week 1';
+		$data["source"] = "VMI (LMI/RGDI)";
+		$data["source_date"] = '<span id="sourceDate">N / A</span>';	
 		$data['content'] = "site/stocks/per-store/data_per_store";
 		$data['session'] = session();
 		$data['js'] = array(
