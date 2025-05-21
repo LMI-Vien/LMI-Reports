@@ -64,9 +64,10 @@
                 <table class="table table-bordered listdata">
                     <thead>
                         <tr>
-                            <!-- <th class='center-content'><input class="selectall" type="checkbox"></th> -->
                             <th class='center-content'>BA Name</th>
+                            <!-- Store Code -->
                             <th class='center-content'>Location</th>
+                            <!-- Store Description -->
                             <th class='center-content'>Location Description</th>
                             <th class='center-content'>Date Created</th>
                             <th class='center-content'>Date Modified</th>
@@ -102,20 +103,25 @@
             <div class="modal-body">
                 <form id="form-modal">
                     <div class="d-flex flex-column text-left" style="font-size: 14px;">
-                        <div class="d-flex flex-row">
-                            <div hidden>
-                                <input type="text" class="form-control" id="id" aria-describedby="id">
+                        <div class="row gx-2 gy-3">
+                            <div class="col-md-4">
+                                <label for="ba_name" class="form-label">BA Name</label>
+                                <textarea class="form-control required" id="ba_name" rows="2"></textarea>
                             </div>
-                            <label for="ba_name" class="form-label p-2 col-2">BA Name</label>
-                            <input type="text" class="form-control required p-2 col" id="ba_name" aria-describedby="ba_name">
-                            <label for="location" class="form-label p-2 col-2">Location</label>
-                            <input type="text" class="form-control required p-2 col" id="location" aria-describedby="location">
-                            <label for="location_desc" class="form-label p-2 col-2">Location Description</label>
-                            <input type="text" class="form-control required p-2 col" id="location_desc" aria-describedby="location_desc">
+
+                            <div class="col-md-4">
+                                <label for="location" class="form-label">Location</label>
+                                <textarea class="form-control required" id="location" rows="2"></textarea>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="location_desc" class="form-label">Location Description</label>
+                                <textarea class="form-control required" id="location_desc" rows="2"></textarea>
+                            </div>
                         </div>
 
-                        <div class="mb-3 mt-3 text-center">
-                            <label for="code" class="form-label">Target per Month</label>
+                        <div class="mb-3 mt-4 text-center">
+                            <label for="target_per_month" class="form-label" style="font-size: 20px">Target per Month</label>
                         </div>
 
                         <div class="d-flex flex-row" style="margin-left:20px; margin-right: 20px;">
@@ -366,13 +372,13 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "pr.id, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description, ba.name AS ba_code",
+            select : "pr.id, pr.ba_code as code_ire, pr.january, pr.february, pr.march, pr.april, pr.may, pr.june, pr.july, pr.august, pr.september, pr.october, pr.november, pr.december, s1.code as location, s1.description as location_description, ba.name AS ba_name",
             query : query, 
             table : "tbl_target_sales_per_store pr",
             join: [
                 {
                     table: "tbl_store s1",
-                    query: "s1.id = pr.location AND s1.id = pr.location",
+                    query: "s1.code = pr.location",
                     type: "left"
                 },
                 {
@@ -380,13 +386,25 @@
                     query: "ba.code = pr.ba_code",
                     type: "left"
                 },
-            ]
+            ],
+            // group: "pr.id"
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,d) {
-                    $('#ba_name').val(d.ba_code);
+                    var BAName = 'N/A';
+                    if (d.code_ire) {
+                        let codes = d.code_ire.split(',').map(c => c.trim());
+                        let names = codes.map(code => {
+                            if (code == '-5') return 'Vacant';
+                            if (code == '-6') return 'Non Ba';
+                            return ba_lookup[code] || `Unknown (${code})`;
+                        });
+                        BAName = names.join(', ');
+                    }
+
+                    $('#ba_name').val(BAName);
                     $('#location').val(d.location);
                     $('#location_desc').val(d.location_description);
                     $('#jan').val(Math.round(d.january).toLocaleString());
