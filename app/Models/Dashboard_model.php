@@ -350,7 +350,7 @@ class Dashboard_model extends Model
 		        SUM($targetSalesSQL) AS target_sales
 		    FROM tbl_target_sales_per_store t
 		    WHERE (? IS NULL OR t.year = ?)
-		    		AND t.status = 2
+		    		AND t.status = 1
 			$baTypeCondition
 		    GROUP BY t.location, t.ba_code, t.year
 		)
@@ -640,7 +640,7 @@ class Dashboard_model extends Model
 	            ) AS target_sales
 	        FROM tbl_target_sales_per_store t
 	        WHERE (? IS NULL OR t.year = ?)
-	          AND t.status = 2
+	          AND t.status = 1
 	          $baTypeCondition
 	        GROUP BY t.area_id, t.status
 	    )
