@@ -1272,6 +1272,7 @@ class Sync_model extends Model
                     aso.month,
                     aso.store_code,
                     blt.id AS brand_type_id,
+                    bbt.sfa_filter AS brand_term_id,
                     GROUP_CONCAT(DISTINCT aso.brand_ambassador_ids) AS ba_ids,
                     aso.brand_ids,
                     aso.area_id,
@@ -1298,7 +1299,8 @@ class Sync_model extends Model
                     (aso.company = '2' AND pitmlmi.brncde = b.brand_code) OR
                     (aso.company != '2' AND itmrgdi.brncde = b.brand_code)
                 LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
-                GROUP BY aso.store_code, aso.year, aso.month, blt.id
+                LEFT JOIN tbl_brand_terms bbt ON b.terms_id = bbt.id
+                GROUP BY aso.store_code, aso.year, aso.company, aso.month, blt.id, bbt.sfa_filter
             )
             SELECT * FROM final_data
         ";
@@ -1322,10 +1324,14 @@ class Sync_model extends Model
                 }
             }
 
-            $row['ba_types'] = implode(',', array_unique($baTypes));
+            $baTypes = array_unique($baTypes);
+
+            // Assign ba_type: get the firs ba type
+            $row['ba_type'] = count($baTypes) === 1 ? (int)$baTypes[0] : (isset($baTypes[0]) ? (int)$baTypes[0] : null);
         }
 
-        $batchSize = 1000;
+        // Batch insert
+        $batchSize = 2000;
         $batch = [];
         $inserted = 0;
 

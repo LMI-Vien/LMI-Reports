@@ -306,9 +306,13 @@
             }
 
             aJax.post(url, data, function(result) {
-                let store_name = JSON.parse(result);
-                $("#store_branch").val(store_name[0].description);
-                $("#store_id").val(store_name[0].id);
+                let data = JSON.parse(res);
+                if(data.length > 0){
+                    if(data[0].code){
+                        $("#storeName").val(data[0].code+' - '+data[0].description);
+                        $("#storeNameId").val(data[0].id);      
+                    }             
+                }
             })
         });
 

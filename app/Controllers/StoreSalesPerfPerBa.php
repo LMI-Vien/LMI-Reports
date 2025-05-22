@@ -148,11 +148,16 @@ class StoreSalesPerfPerBa extends BaseController
 		    
 		}
 		$target_sales = $amountPerDay * $noOfDays;
+		// $lyYear = 2024;
+		// $tyYear = 2025;
+		// $baId = 78;
 		// $yearId = 6;
-		// $monthId = 3;
-		// $monthEndId = 3;
-		// $date = "2025-03";
-		// 		print_r($brand_category);
+		// $monthId = 4;
+		// $monthEndId = 4;
+		// $brandIds = [37];
+		// $date = "2025-04";
+		// $baTypeId = 3;
+		// 		print_r($target_sales);
 		// die();
 	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 

@@ -923,7 +923,7 @@ class GlobalController extends BaseController
 	    $responseData = [];
 
 	    if (!empty($request['ba'])) {
-	        $responseData['ba'] = $this->Global_model->get_valid_records("tbl_brand_ambassador", 'code');
+	        $responseData['ba'] = $this->Global_model->get_valid_records("tbl_brand_ambassador", ['code','type']);
 	    }
 	    if (!empty($request['brands'])) {
 	        $responseData['brands'] = $this->Global_model->get_valid_records("tbl_brand", 'brand_description');

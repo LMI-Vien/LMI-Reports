@@ -148,11 +148,15 @@ class StoreSalesPerfPerArea extends BaseController
 		}
 		$target_sales = $amountPerDay * $noOfDays;
 		// $yearId = 6;
-		// $monthId = 3;
-		// $monthEndId = 3;
-		// $date = "2025-03";
+		// $monthId = 4;
+		// $monthEndId = 4;
+		// $lyYear = 2024;
+		// $tyYear = 2025;
+		// $date = "2025-04";
 		// echo $year.'sdfsd';
 		// die();
+		//$areaId = 5;
+		//$baTypeId = 3;
 		$storeId = null;
 		$baId = null;
 	    $data = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);

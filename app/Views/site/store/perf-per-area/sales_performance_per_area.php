@@ -204,7 +204,7 @@
         $('.btn-outline-light').removeClass('active');
         $('.main_all').addClass('active');
         $('select').val('').trigger('change');
-
+        $('input[name="filterType"][value="3"]').prop('checked', true);
         let highestYear = $("#year option:not(:first)").map(function () {
             return parseInt($(this).val());
         }).get().sort((a, b) => b - a)[0];
@@ -217,11 +217,8 @@
     $(document).on('click', '#refreshButton', function () {
         const fields = [
             { input: '#year', target: '#year' },
-            { input: '#area', target: '#area_id' },
-            { input: '#brand', target: '#brand_id' },
-            { input: '#store', target: '#store_id' },
-            { input: '#item_classi', target: '#item_classi_id' },
-            { input: '#qtyscp', target: '#qtyscp' }
+            { input: '#area', target: '#areaId' },
+            { input: '#ascName', target: '#ascNameId' }
         ];
 
         let counter = 0;
@@ -290,10 +287,8 @@
                     d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
                     d.limit = d.length;
                     d.offset = d.start;
-                    console.log('Filter :', d);
                 },
                 dataSrc: function(json) {
-                    console.log('Server responded with:', json);
                     return json.data.length ? json.data : [];
                 }
             },

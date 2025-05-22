@@ -44,7 +44,10 @@ self.onmessage = async function(e) {
             "vacant": -5,
             "non ba": -6
         };
-        ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
+        //ba_records.forEach(ba => ba_lookup[ba.code] = ba.id);
+        ba_records.forEach(ba => {
+            ba_lookup[ba.code.toLowerCase()] = { id: ba.id, type: ba.type }; // assuming 'type' is the ba_types field
+        });
 
         function createLookup(records, key1, key2) {
             let lookup = {};
@@ -114,6 +117,7 @@ self.onmessage = async function(e) {
                 let ba_codes = ba_code_raw.split(',').map(c => c.trim().toLowerCase()).filter(c => c);
                 let resolved_ba_ids = [];
                 let resolved_ba_code_str = [];
+                let ba_types_found = new Set();
                 let has_invalid_ba = false;
                 let store_code_raw = row["Location"] ? row["Location"].trim() : "";
                 let store_code_lower = store_code_raw.toLowerCase();
@@ -141,21 +145,56 @@ self.onmessage = async function(e) {
                     unique_code.add(store_code_lower);
                 }
 
+                // ba_codes.forEach(code => {
+                //     if (code === "vacant") {
+                //         resolved_ba_ids.push(-5);
+                //         resolved_ba_code_str.push("-5");
+                //     } else if (code === "non ba") {
+                //         resolved_ba_ids.push(-6);
+                //         resolved_ba_code_str.push("-6");
+                //     } else if (ba_lookup.hasOwnProperty(code)) {
+                //         resolved_ba_ids.push(ba_lookup[code]);
+                //         resolved_ba_code_str.push(code);
+                //     } else {
+                //         has_invalid_ba = true;
+                //         addErrorLog(`Invalid Brand Ambassador Code: ${code}`);
+                //     }
+                // });
+
                 ba_codes.forEach(code => {
                     if (code === "vacant") {
                         resolved_ba_ids.push(-5);
                         resolved_ba_code_str.push("-5");
+                        ba_types_found.add(3);
                     } else if (code === "non ba") {
                         resolved_ba_ids.push(-6);
                         resolved_ba_code_str.push("-6");
+                        ba_types_found.add(3);
                     } else if (ba_lookup.hasOwnProperty(code)) {
-                        resolved_ba_ids.push(ba_lookup[code]);
+                        let ba_id = ba_lookup[code];
+                        resolved_ba_ids.push(ba_id);
                         resolved_ba_code_str.push(code);
+                        // Extract type from ba_lookup_data
+                        let ba_record = fetch_data.ba.find(ba => ba.code === code);
+                        if (ba_record && ba_record.type !== undefined) {
+                            ba_types_found.add(parseInt(ba_record.type));
+                        } else {
+                            has_invalid_ba = true;
+                            addErrorLog(`Missing BA type for code: ${code}`);
+                        }
                     } else {
                         has_invalid_ba = true;
                         addErrorLog(`Invalid Brand Ambassador Code: ${code}`);
                     }
                 });
+
+                // Check that all BA types are the same
+                let ba_type_final = null;
+                if (ba_types_found.size > 1) {
+                    addErrorLog(`Mismatched BA types for codes: ${ba_code_raw}`);
+                } else if (ba_types_found.size === 1) {
+                    ba_type_final = [...ba_types_found][0];
+                }
 
                 if (ba_code_raw.length > 250 || ba_codes.length === 0) {
                     addErrorLog("Invalid Brand Ambassador Code");
@@ -184,7 +223,8 @@ self.onmessage = async function(e) {
                         created_date: date_of_creation,
                         area_id: matched?.area_id || 0,
                         asc_id: matched?.asc_id || 0,
-                        brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : ''
+                        brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : '',
+                        ba_types: ba_type_final
                     });
                 }
             }

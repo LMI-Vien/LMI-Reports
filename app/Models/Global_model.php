@@ -1324,6 +1324,7 @@ function get_valid_records_store_area_asc_ba_brand() {
         a.code AS area_code,
         a.description AS area_name,
 
+        ba.type AS ba_types,
         GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.id ELSE NULL END SEPARATOR ', ') AS asc_id,
         GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.code ELSE NULL END SEPARATOR ', ') AS asc_code,
         GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.description ELSE NULL END SEPARATOR ', ') AS asc_name,

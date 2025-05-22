@@ -36,7 +36,7 @@ self.onmessage = async function (e) {
 
         let ba_lookup = {};
         ba_data.ba.forEach(ba => {
-            ba_lookup[ba.code.toLowerCase()] = ba.id;
+            ba_lookup[ba.code.toLowerCase()] = { id: ba.id, type: ba.type }; // assuming 'type' is the ba_types field
         });
 
         let area_asc_lookup = {};
@@ -125,15 +125,32 @@ self.onmessage = async function (e) {
                     asc_id = area_asc_lookup[area_lower] || null;
                 }
 
-                if (ba_code) {
-                    let ba_lower = ba_code.toLowerCase();
-                    ba = ba_lookup[ba_lower] || null;
-                    if (!ba && ba !== 0) {
-                        addErrorLog(`Brand Ambassador Code "${ba_code}" not recognized`);
-                        continue;
-                    }
+                if (!ba_code) {
+                    addErrorLog("BA Code is required");
+                    continue;
                 }
 
+                let ba_lower = ba_code.toLowerCase();
+                let ba_entry = ba_lookup[ba_lower] || null;
+
+                if (!ba_entry) {
+                    addErrorLog(`Brand Ambassador Code "${ba_code}" not recognized`);
+                    continue;
+                }
+
+                let ba = ba_entry.id;
+                let ba_type = ba_entry.type;
+
+                // 🔍 Validate ba_type is not null or 3
+                if (ba_type === null || ba_type === undefined) {
+                    addErrorLog(`BA Type is missing for BA Code "${ba_code}"`);
+                    continue;
+                }
+
+                if (ba_type === 3) {
+                    addErrorLog(`Invalid BA Type (3) for BA Code "${ba_code}" – 'vacant' or 'non BA' not allowed in this module`);
+                    continue;
+                }
 
                 let dateObj = new Date(date);
                 if (isNaN(dateObj.getTime())) {
@@ -157,6 +174,7 @@ self.onmessage = async function (e) {
                         store_id: store,
                         store_code: store_code,
                         ba_id: ba || 0,
+                        ba_type: ba_type,
                         brand: brand,
                         asc_id: asc_id || 0,
                         date: date,

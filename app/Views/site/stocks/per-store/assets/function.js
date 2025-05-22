@@ -126,11 +126,11 @@
             }
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let data = JSON.parse(res)[0];
+                let data = JSON.parse(res);
                 if(data.length > 0){
-                    if(data[0].code){ 
-                        $("#storeName").val(data.code+' - '+data.description);
-                        $("#storeNameId").val(data.id);      
+                    if(data[0].code){
+                        $("#storeName").val(data[0].code+' - '+data[0].description);
+                        $("#storeNameId").val(data[0].id);      
                     }             
                 }
             })
@@ -231,7 +231,6 @@
 
     function initializeTable(tableId, type, selectedType, selectedBa, selectedStore, selectedBrand, selectedSortField, selectedSortOrder) {
         $(tableId).closest('.table-responsive').show(); 
-        console.log(tableId);
         $(tableId).DataTable({
             destroy: true,
             ajax: {

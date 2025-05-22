@@ -284,7 +284,8 @@ class Dashboard_model extends Model
 		$brandTypeCondition = '';
 		if (!empty($brand_category)) {
 		    $escapedCats = array_map('intval', $brand_category);
-		    $brandTypeCondition = ' AND brand_type_id IN (' . implode(',', $escapedCats) . ')';
+		    $brandTypeCondition .= ' AND brand_type_id IN (' . implode(',', $escapedCats) . ')';
+		    
 		}
 
 
@@ -300,8 +301,12 @@ class Dashboard_model extends Model
 	    }
 
 		$baTypeCondition = '';
+		$baTypeConditionASR = '';
 		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
-		    $baTypeCondition = 'AND t.target_ba_types = ?';
+		    $baTypeCondition = 'AND t.ba_types = ?';
+		    $baTypeConditionASR = 'AND ba.type = ?';
+		    $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
+        	$brandTypeCondition .= " AND CAST(ba_type AS UNSIGNED) = ? ";
 		}
 
 		$monthColumns = [
@@ -345,6 +350,8 @@ class Dashboard_model extends Model
 		        SUM($targetSalesSQL) AS target_sales
 		    FROM tbl_target_sales_per_store t
 		    WHERE (? IS NULL OR t.year = ?)
+		    		AND t.status = 2
+			$baTypeCondition
 		    GROUP BY t.location, t.ba_code, t.year
 		)
 		SELECT
@@ -476,67 +483,86 @@ class Dashboard_model extends Model
 			AND (? IS NULL OR s.store_id = ?)
 			AND (? IS NULL OR s.asc_id = ?)
 			AND (? IS NULL OR s.ba_id = ?)
-			$baTypeCondition
-			AND (" . (empty($brandIds) ? "1=1" : "s.brand IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
-		GROUP BY s.store_id, s.ba_id
+			$baTypeConditionASR
+			AND (" . (empty($brandIds) ? "1=1" : "b.id IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
+		GROUP BY s.store_id, s.ba_id, s.area_id
 		ORDER BY {$orderByColumn} {$orderDirection}
 		LIMIT ? OFFSET ?
 
 	    ";
 
-	    $params = [
-	        $lyYear, $lyYear,   
-	        $monthFrom, $monthFrom, $monthTo,
-	        $yearId, $yearId, 
-		    $target_sales,   
-		    $incentiveRate,   
-		    $target_sales,    
-		    $target_sales,  
-		    $remainingDays,   
-		    $target_sales,   
-		    $remainingDays, 
-		    $startDate, $startDate, $endDate,    
-		    $areaid, $areaid,
-		    $storeid, $storeid,
-		    $ascid, $ascid,
-		    $baid, $baid,
-	    ];
-		// Append brand IDs
-		if (!empty($brandIds)) {
-		    $params = array_merge($params, $brandIds);
+		$params = [
+		    $lyYear, $lyYear, 
+		    $monthFrom, $monthFrom, $monthTo,
+		];
+
+		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+		    $params[] = $baTypeId;
+		    $params[] = $baTypeId;
 		}
+
+	    $params[] = $yearId;
+	    $params[] = $yearId;
 
 		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
 		    $params[] = $baTypeId;
 		}
-		// Finally, add pagination
+
+	    $params[] = $target_sales;
+	    $params[] = $incentiveRate ;  
+	    $params[] = $target_sales ; 
+	    $params[] = $target_sales ;
+	    $params[] = $remainingDays ; 
+	    $params[] = $target_sales;  
+	    $params[] = $remainingDays;
+	    $params[] = $startDate;
+	    $params[] = $startDate;
+	    $params[] = $endDate; 
+	    $params[] = $areaid;
+	    $params[] = $areaid;
+	    $params[] = $storeid;
+	    $params[] = $storeid;
+	    $params[] = $ascid;
+	    $params[] = $ascid;
+	    $params[] = $baid;
+	    $params[] = $baid;
+
+		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+		    $params[] = $baTypeId;
+		}
+
+		if (!empty($brandIds)) {
+		    $params = array_merge($params, $brandIds);
+		}
+
 		$params[] = (int) $limit;
 		$params[] = (int) $offset;
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
-
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data
 	    ];
 	}
 
-	public function salesPerformancePerArea($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null)
-	{
+	public function salesPerformancePerArea(
+	    $limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, 
+	    $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, 
+	    $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, 
+	    $remainingDays = null, $brand_category = null, $brandIds = null
+	) {
+	    $startDate = $tyYear . '-' . $monthFrom . '-01';
+	    $endDate = $tyYear . '-' . $monthTo . '-31';
+	    $brandIds = is_array($brandIds) ? $brandIds : [];
 
-		$startDate = $tyYear .'-'. $monthFrom . '-01';
-		$endDate = $tyYear .'-'. $monthTo . '-31';
-		$brandIds = is_array($brandIds) ? $brandIds : [];
-
-		$additionalWhere = [];
-		$brandTypeCondition = '';
-		if (!empty($brand_category)) {
-		    $escapedCats = array_map('intval', $brand_category);
-		    $brandTypeCondition = ' AND brand_type_id IN (' . implode(',', $escapedCats) . ')';
-		}
-
+	    $additionalWhere = [];
+	    $brandTypeCondition = '';
+	    if (!empty($brand_category)) {
+	        $escapedCats = array_map('intval', $brand_category);
+	        $brandTypeCondition .= ' AND brand_type_id IN (' . implode(',', $escapedCats) . ')';
+	    }
 
 	    $allowedOrderColumns = ['rank', 'store_id', 'store_code', 'actual_sales', 'target_sales', 'percent_ach', 'balance_to_target', 'possible_incentives', 'target_per_remaining_days', 'ly_scanned_data', 'growth'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
@@ -544,36 +570,36 @@ class Dashboard_model extends Model
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
 	        $orderByColumn = 'rank';
 	    }
-
 	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
 	        $orderDirection = 'ASC';
 	    }
 
-		$baTypeCondition = '';
-		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
-		    $baTypeCondition = 'AND t.target_ba_types = ?';
-		}
+	    $baTypeCondition = '';
+	    $baTypeConditionASR = '';
+	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+	        $baTypeCondition = 'AND t.ba_types = ?';
+	        $baTypeConditionASR = 'AND ba.type = ?';
+	        $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
+	    }
 
-		$monthColumns = [
-		    1 => 'january', 2 => 'february', 3 => 'march', 4 => 'april',
-		    5 => 'may', 6 => 'june', 7 => 'july', 8 => 'august',
-		    9 => 'september', 10 => 'october', 11 => 'november', 12 => 'december'
-		];
+	    $monthColumns = [
+	        1 => 'january', 2 => 'february', 3 => 'march', 4 => 'april',
+	        5 => 'may', 6 => 'june', 7 => 'july', 8 => 'august',
+	        9 => 'september', 10 => 'october', 11 => 'november', 12 => 'december'
+	    ];
 
-		$targetSalesSum = [];
-		$params = [];
-
-		for ($m = $monthFrom; $m <= $monthTo; $m++) {
-		    if (isset($monthColumns[$m])) {
-		        $targetSalesSum[] = "COALESCE(t." . $monthColumns[$m] . ", 0)";
-		    }
-		}
-		$targetSalesSQL = implode(' + ', $targetSalesSum);
+	    $targetSalesSum = [];
+	    for ($m = $monthFrom; $m <= $monthTo; $m++) {
+	        if (isset($monthColumns[$m])) {
+	            $targetSalesSum[] = "COALESCE(t." . $monthColumns[$m] . ", 0)";
+	        }
+	    }
+	    $targetSalesSQL = implode(' + ', $targetSalesSum);
 
 	    $sql = "
 	    WITH ly_scanned AS (
 	        SELECT
-	        	area_id,
+	            area_id,
 	            store_code,
 	            company,
 	            itmcde,
@@ -586,194 +612,170 @@ class Dashboard_model extends Model
 	          $brandTypeCondition
 	        GROUP BY area_id
 	    ),
-		targets AS (
-		    SELECT 
-		        t.area_id,
-		        t.location AS location,
-		        t.ba_code,
-		        (SELECT GROUP_CONCAT(DISTINCT ba2.type)
-		         FROM tbl_brand_ambassador ba2 
-		         WHERE FIND_IN_SET(ba2.code, t.ba_code)) AS target_ba_types,
-		        SUM($targetSalesSQL) AS target_sales
-		    FROM tbl_target_sales_per_store t
-		    WHERE (? IS NULL OR t.year = ?)
-		    GROUP BY t.area_id
-		)
-		SELECT
-		    ROW_NUMBER() OVER (ORDER BY percent_ach DESC) AS rank,
-		    s.brand,
-		    s.area_id,
-		    s.asc_id,
-		    d_asc.description AS asc_name,
-		    a.description AS area_name,
-		    s.ba_id,
-		    t.ba_code,
-		    t.target_ba_types,
-		    (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) AS ba_count,
-		    ly.company,
-		    ly.brand_type_id,
-		    s.store_id,
-		    b.brand_description AS brand_name,
-		    st.code AS store_code,
-		    CONCAT(MAX(st.code), ' - ', st.description) AS store_name,
-		    a.description AS area_name,
-		    ba.name AS ba_name,
-		    ba.deployment_date AS ba_deployment_date, 
-		    COALESCE(SUM(s.amount), 0) AS actual_sales,
-		    CASE 
-		        WHEN t.target_ba_types = 1 AND 
-		             (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
-		            FORMAT(
-		                ROUND(
-		                    (COALESCE(t.target_sales, 0) * 1.3) / 
-		                    NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0), 
-		                2), 2
-		            )
-		        WHEN t.target_ba_types = 1 THEN 
-		            FORMAT(COALESCE(t.target_sales, 0), 2)
-		        WHEN t.target_ba_types = 0 THEN 
-		            FORMAT(?, 2)
-		        ELSE 
-		            FORMAT(COALESCE(t.target_sales, 0), 2)
-		    END AS target_sales,
-
-		    ROUND(COALESCE(SUM(s.amount), 0) * ?, 2) AS possible_incentives,
-
-		    ROUND(
-		        CASE 
-		            WHEN t.target_ba_types = 1 AND 
-		                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
-		                (COALESCE(t.target_sales, 0) * 1.3) / 
-		                NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
-		            WHEN t.target_ba_types = 1 THEN 
-		                COALESCE(t.target_sales, 0)
-		            WHEN t.target_ba_types = 0 THEN 
-		                ?
-		            ELSE 
-		                COALESCE(t.target_sales, 0)
-		        END - COALESCE(SUM(s.amount), 0), 2
-		    ) AS balance_to_target,
-
-		    ROUND(
-		        COALESCE(SUM(s.amount), 0) / 
-		        NULLIF((
-		            CASE 
-		                WHEN t.target_ba_types = 1 AND 
-		                     (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
-		                    (COALESCE(t.target_sales, 0) * 1.3) / 
-		                    NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
-		                WHEN t.target_ba_types = 1 THEN 
-		                    COALESCE(t.target_sales, 0)
-		                WHEN t.target_ba_types = 0 THEN 
-		                    ?
-		                ELSE 
-		                    COALESCE(t.target_sales, 0)
-		            END
-		        ), 0) * 100, 2
-		    ) AS percent_ach,
-
-		    FORMAT(
-		        CASE 
-		            WHEN t.ba_code IS NOT NULL AND t.ba_code != '' 
-		            THEN ROUND(COALESCE(ly.ly_scanned_data, 0) / 
-		                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
-		            ELSE COALESCE(ly.ly_scanned_data, 0)
-		        END, 2
-		    ) AS ly_scanned_data,
-			CASE 
-			    WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN
-			        ROUND(
-			            (
-			                COALESCE(SUM(s.amount), 0) /
-			                NULLIF(
-			                    COALESCE(ly.ly_scanned_data, 0) / 
-			                    (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 
-			                0)
-			            ) * 100, 
-			        2)
-			    ELSE
-			        ROUND(
-			            (COALESCE(SUM(s.amount), 0) / NULLIF(ly.ly_scanned_data, 0)) * 100, 
-			        2)
-			END AS growth,
-		    CASE 
-		      WHEN ? > 0 THEN CEIL((
-		        CASE 
-		            WHEN t.target_ba_types = 1 AND 
-		                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
-		                (COALESCE(t.target_sales, 0) * 1.3) / 
-		                NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
-		            WHEN t.target_ba_types = 1 THEN 
-		                COALESCE(t.target_sales, 0)
-		            WHEN t.target_ba_types = 0 THEN 
-		                ?
-		            ELSE 
-		                COALESCE(t.target_sales, 0)
-		        END - COALESCE(SUM(s.amount), 0)
-		      ) / ?)
-		      ELSE NULL
-		    END AS target_per_remaining_days,
-		    COUNT(*) OVER() AS total_records
-		FROM tbl_ba_sales_report s
-		LEFT JOIN tbl_store st ON st.id = s.store_id
-		LEFT JOIN tbl_area a ON a.id = s.area_id
-		LEFT JOIN tbl_brand_ambassador ba ON ba.id = s.ba_id
-		LEFT JOIN ly_scanned ly ON s.area_id = ly.area_id
-		LEFT JOIN targets t ON s.area_id = t.area_id
-		LEFT JOIN tbl_brand b ON s.brand = b.id
-		LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
-		WHERE (? IS NULL OR s.date BETWEEN ? AND ?)
-			AND (? IS NULL OR s.area_id = ?)
-			AND (? IS NULL OR s.store_id = ?)
-			AND (? IS NULL OR s.asc_id = ?)
-			AND (? IS NULL OR s.ba_id = ?)
-			$baTypeCondition
-			AND (" . (empty($brandIds) ? "1=1" : "s.brand IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
-		GROUP BY s.area_id
-		ORDER BY {$orderByColumn} {$orderDirection}
-		LIMIT ? OFFSET ?
-
+	    targets AS (
+	        SELECT 
+	            t.area_id,
+	            t.ba_types,
+	            t.ba_code,
+	            (SELECT GROUP_CONCAT(DISTINCT ba2.type)
+	             FROM tbl_brand_ambassador ba2 
+	             WHERE FIND_IN_SET(ba2.code, t.ba_code)) AS target_ba_types,
+	            SUM(
+	                CASE 
+	                    WHEN ? = 3 THEN
+	                        CASE 
+	                            WHEN t.ba_types = 0 AND (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN ? * 2
+	                            WHEN t.ba_types = 0 THEN ?
+	                            WHEN t.ba_types = 1 AND (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN $targetSalesSQL * 1.3
+	                            WHEN t.ba_types = 1 THEN $targetSalesSQL
+	                            WHEN t.ba_types = 3 THEN $targetSalesSQL
+	                            ELSE 0
+	                        END
+	                    WHEN ? = 1 AND t.ba_types = 1 AND (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN $targetSalesSQL * 1.3
+	                    WHEN ? = 1 AND t.ba_types = 1 THEN $targetSalesSQL
+	                    WHEN ? = 0 AND t.ba_types = 0 AND (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN ? * 2
+	                    WHEN ? = 0 AND t.ba_types = 0 THEN ?
+	                    ELSE 0
+	                END
+	            ) AS target_sales
+	        FROM tbl_target_sales_per_store t
+	        WHERE (? IS NULL OR t.year = ?)
+	          AND t.status = 2
+	          $baTypeCondition
+	        GROUP BY t.area_id, t.status
+	    )
+	    SELECT
+	        ROW_NUMBER() OVER (ORDER BY percent_ach DESC) AS rank,
+	        s.brand,
+	        s.area_id,
+	        s.asc_id,
+	        d_asc.description AS asc_name,
+	        a.description AS area_name,
+	        s.ba_id,
+	        t.ba_code,
+	        t.target_ba_types,
+	        (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) AS ba_count,
+	        ly.company,
+	        ly.brand_type_id,
+	        s.store_id,
+	        GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brand_name,
+	        st.code AS store_code,
+	        CONCAT(MAX(st.code), ' - ', st.description) AS store_name,
+	        a.description AS area_name,
+	        ba.name AS ba_name,
+	        ba.deployment_date AS ba_deployment_date, 
+	        COALESCE(SUM(s.amount), 0) AS actual_sales,
+	        FORMAT(t.target_sales, 2) AS target_sales, 
+	        ROUND(COALESCE(SUM(s.amount), 0) * ?, 2) AS possible_incentives,
+	        ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(s.amount), 0), 2) AS balance_to_target,
+	        ROUND(
+	            COALESCE(SUM(s.amount), 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
+	        ) AS percent_ach,
+	        FORMAT(COALESCE(ly.ly_scanned_data, 0),2) AS ly_scanned_data,
+	        ROUND(
+	            (COALESCE(SUM(s.amount), 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
+	            2
+	        ) AS growth,
+	        CASE 
+	          WHEN ? > 0 THEN CEIL((
+				ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(s.amount), 0), 2)
+	          ) / ?)
+	          ELSE NULL
+	        END AS target_per_remaining_days,
+	        COUNT(*) OVER() AS total_records
+	    FROM tbl_ba_sales_report s
+	    LEFT JOIN tbl_store st ON st.id = s.store_id
+	    LEFT JOIN tbl_area a ON a.id = s.area_id
+	    LEFT JOIN tbl_brand_ambassador ba ON ba.id = s.ba_id
+	    LEFT JOIN ly_scanned ly ON s.area_id = ly.area_id
+	    LEFT JOIN targets t ON s.area_id = t.area_id
+	    LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
+	    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
+	    LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
+	    WHERE (? IS NULL OR s.date BETWEEN ? AND ?)
+	        AND (? IS NULL OR s.area_id = ?)
+	        AND (? IS NULL OR s.store_id = ?)
+	        AND (? IS NULL OR s.asc_id = ?)
+	        AND (? IS NULL OR s.ba_id = ?)
+	        $baTypeConditionASR
+	        AND (" . (empty($brandIds) ? "1=1" : "b.id IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
+	    GROUP BY s.area_id
+	    ORDER BY {$orderByColumn} {$orderDirection}
+	    LIMIT ? OFFSET ?
 	    ";
 
 	    $params = [
-	        $lyYear, $lyYear,   
+	        $lyYear, $lyYear, 
 	        $monthFrom, $monthFrom, $monthTo,
-	        $yearId, $yearId, 
-		    $target_sales,   
-		    $incentiveRate,   
-		    $target_sales,    
-		    $target_sales,  
-		    $remainingDays,   
-		    $target_sales,   
-		    $remainingDays, 
-		    $startDate, $startDate, $endDate,    
-		    $areaid, $areaid,
-		    $storeid, $storeid,
-		    $ascid, $ascid,
-		    $baid, $baid,
 	    ];
-		// Append brand IDs
-		if (!empty($brandIds)) {
-		    $params = array_merge($params, $brandIds);
-		}
 
-		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
-		    $params[] = $baTypeId;
-		}
-		// Finally, add pagination
-		$params[] = (int) $limit;
-		$params[] = (int) $offset;
+	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+	        $params[] = $baTypeId;
+	    }
+
+	    $params[] = $baTypeId;
+	    $params[] = $target_sales;
+	    $params[] = $target_sales;
+	    $params[] = $baTypeId;
+	    $params[] = $baTypeId;
+	    $params[] = $baTypeId;
+	    $params[] = $target_sales;
+	    $params[] = $baTypeId;
+	    $params[] = $target_sales;
+	    $params[] = $yearId;
+	    $params[] = $yearId;
+
+	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+	        $params[] = $baTypeId;
+	    }
+
+	    $params[] = $incentiveRate;
+	    $params[] = $remainingDays;
+	    $params[] = $remainingDays;
+	    $params[] = $startDate;
+	    $params[] = $startDate;
+	    $params[] = $endDate;
+	    $params[] = $areaid;
+	    $params[] = $areaid;
+	    $params[] = $storeid;
+	    $params[] = $storeid;
+	    $params[] = $ascid;
+	    $params[] = $ascid;
+	    $params[] = $baid;
+	    $params[] = $baid;
+
+	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+	        $params[] = $baTypeId;
+	    }
+
+	    if (!empty($brandIds)) {
+	        foreach ($brandIds as $bid) {
+	            $params[] = $bid;
+	        }
+	    }
+
+	    $params[] = $limit;
+	    $params[] = $offset;
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
-
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data
 	    ];
 	}
 
+	function interpolateQuery($query, $params) {
+	    $escaped = array_map(function ($param) {
+	        return is_numeric($param) ? $param : "'" . addslashes($param) . "'";
+	    }, $params);
+	    
+	    foreach ($escaped as $param) {
+	        $query = preg_replace('/\?/', $param, $query, 1);
+	    }
+	    return $query;
+	}
 
 	public function tradeOverallBaDataASC($filters = []) {
 

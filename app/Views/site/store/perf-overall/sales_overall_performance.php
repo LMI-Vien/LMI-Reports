@@ -201,9 +201,9 @@
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res);
                 if(data.length > 0){
-                    if(data[0].code){ 
-                        $("#storeName").val(data.code+' - '+data.description);
-                        $("#storeNameId").val(data.id);      
+                    if(data[0].code){
+                        $("#storeName").val(data[0].code+' - '+data[0].description);
+                        $("#storeNameId").val(data[0].id);      
                     }             
                 }
             })
@@ -253,7 +253,7 @@
         $('.btn-outline-light').removeClass('active');
         $('.main_all').addClass('active');
         $('select').val('').trigger('change');
-
+        $('input[name="filterType"][value="3"]').prop('checked', true);
         let highestYear = $("#year option:not(:first)").map(function () {
             return parseInt($(this).val());
         }).get().sort((a, b) => b - a)[0];
@@ -306,10 +306,8 @@
                     d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
                     d.limit = d.length;
                     d.offset = d.start;
-                    console.log('Filter :', d);
                 },
                 dataSrc: function(json) {
-                    console.log('Server responded with:', json);
                     return json.data.length ? json.data : [];
                 }
             },
