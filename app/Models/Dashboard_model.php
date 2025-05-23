@@ -306,7 +306,7 @@ class Dashboard_model extends Model
 		    $baTypeCondition = 'AND t.ba_types = ?';
 		    $baTypeConditionASR = 'AND ba.type = ?';
 		    $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
-        	$brandTypeCondition .= " AND CAST(ba_type AS UNSIGNED) = ? ";
+        	//$brandTypeCondition .= " AND CAST(ba_type AS UNSIGNED) = ? ";
 		}
 
 		$monthColumns = [
@@ -498,7 +498,7 @@ class Dashboard_model extends Model
 
 		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
 		    $params[] = $baTypeId;
-		    $params[] = $baTypeId;
+		   // $params[] = $baTypeId;
 		}
 
 	    $params[] = $yearId;

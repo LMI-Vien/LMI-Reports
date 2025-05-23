@@ -21,7 +21,7 @@ self.onmessage = async function(e) {
             let store_codes = entry.store_code?.split(',').map(s => s.trim()) || [];
             let store_ids = entry.store_id?.split(',').map(id => id.trim()) || [];
             let brand_ids = entry.brand_id?.split(',').map(id => id.trim()) || [];
-
+            //add ba_type here
             store_codes.forEach((store_code, store_idx) => {
                 if (!ba_checklist[store_code.toLowerCase()]) {
                     ba_checklist[store_code.toLowerCase()] = {

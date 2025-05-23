@@ -90,15 +90,13 @@ self.onmessage = async function (e) {
                 }
 
                 // 🆕 Validate store-area tagging
-            
-
                 let match = findMatch(area_code, store_code, ba_code);
 
                 if (brand) {
                     let brand_lower = brand.toLowerCase();
 
-                    brand = brand_lookup[brand_lower] || null;
-                    if (!brand) {
+                    brand2 = brand_lookup[brand_lower] || null;
+                    if (!brand2) {
                         addErrorLog(`Brand "${brand}" not recognized`);
                         continue;
                     }

@@ -1297,7 +1297,7 @@ class Sync_model extends Model
     //     ];
     // }
 
-    public function refreshScanData()
+    public function refreshScanDatabk()
     {
         $sql = "
             WITH aggregated_so AS (
@@ -1307,6 +1307,7 @@ class Sync_model extends Model
                     so.store_code,
                     so.brand_ambassador_ids,
                     so.brand_ids,
+                    so.ba_types,
                     so.area_id,
                     so.asc_id,
                     h.company,
@@ -1316,7 +1317,7 @@ class Sync_model extends Model
                     ROUND(SUM(COALESCE(so.quantity, 0)), 2) AS quantity
                 FROM tbl_sell_out_data_details so
                 INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
-                GROUP BY so.year, so.month, so.store_code, so.brand_ambassador_ids, so.brand_ids, so.area_id, so.asc_id, so.data_header_id, so.sku_code
+                GROUP BY so.year, so.month, so.store_code, so.brand_ambassador_ids, so.brand_ids, so.area_id, so.asc_id, so.data_header_id, so.sku_code, so.ba_types
             ),
             final_data AS (
                 SELECT
@@ -1326,7 +1327,8 @@ class Sync_model extends Model
                     blt.id AS brand_type_id,
                     bbt.sfa_filter AS brand_term_id,
                     GROUP_CONCAT(DISTINCT aso.brand_ambassador_ids) AS ba_ids,
-                    aso.brand_ids,
+                    GROUP_CONCAT(DISTINCT aso.brand_ids) AS brand_ids,
+                    GROUP_CONCAT(DISTINCT aso.ba_types) AS ba_types,
                     aso.area_id,
                     aso.asc_id,
                     aso.company,
@@ -1355,38 +1357,17 @@ class Sync_model extends Model
                 GROUP BY    aso.year,
                             aso.month,
                             aso.store_code,
-                            aso.brand_ids,
                             aso.area_id,
                             aso.asc_id,
-                            aso.company
+                            aso.company,
+                            blt.id,
+                            bbt.sfa_filter
             )
             SELECT * FROM final_data
         ";
 
         $query = $this->sfaDB->query($sql);
         $allData = $query->getResultArray();
-
-        $baMap = [];
-        $baResult = $this->sfaDB->table('tbl_brand_ambassador')->select('id, type')->get()->getResult();
-        foreach ($baResult as $ba) {
-            $baMap[$ba->id] = $ba->type;
-        }
-
-        foreach ($allData as &$row) {
-            $baIds = array_filter(array_map('trim', explode(',', $row['ba_ids'] ?? '')));
-            $baTypes = [];
-
-            foreach ($baIds as $id) {
-                if (isset($baMap[$id])) {
-                    $baTypes[] = $baMap[$id];
-                }
-            }
-
-            $baTypes = array_unique($baTypes);
-
-            // Assign ba_type: get the firs ba type
-            $row['ba_type'] = count($baTypes) === 1 ? (int)$baTypes[0] : (isset($baTypes[0]) ? (int)$baTypes[0] : null);
-        }
 
         // Batch insert
         $batchSize = 2000;
@@ -1420,6 +1401,172 @@ class Sync_model extends Model
             'total_inserted' => $inserted
         ];
     }
+
+    public function refreshScanData()
+    {
+        $sql = "
+            WITH aggregated_so AS (
+                SELECT
+                    so.year,
+                    so.month,
+                    so.store_code,
+
+                    -- collect the raw ambassador IDs
+                    GROUP_CONCAT(DISTINCT so.brand_ambassador_ids)   AS ba_ids,
+                    so.brand_ids,
+
+                    -- derive all ambassador TYPES here
+                    GROUP_CONCAT(DISTINCT ba.type)                  AS ba_types,
+
+                    so.area_id,
+                    so.asc_id,
+                    h.company,
+                    so.sku_code,
+
+                    ROUND(SUM(COALESCE(so.gross_sales, 0)), 2) AS gross_sales,
+                    ROUND(SUM(COALESCE(so.net_sales,   0)), 2) AS net_sales,
+                    ROUND(SUM(COALESCE(so.quantity,     0)), 2) AS quantity
+
+                FROM tbl_sell_out_data_details so
+                INNER JOIN tbl_sell_out_data_header h
+                    ON so.data_header_id = h.id
+                LEFT JOIN tbl_brand_ambassador ba
+                    ON FIND_IN_SET(CAST(ba.id AS CHAR), so.brand_ambassador_ids)
+
+                GROUP BY
+                    so.year,
+                    so.month,
+                    so.store_code,
+                    so.brand_ambassador_ids,
+                    so.brand_ids,
+                    so.area_id,
+                    so.asc_id,
+                    h.company,
+                    so.sku_code
+            ),
+
+            final_data AS (
+                SELECT
+                    aso.year,
+                    aso.month,
+                    aso.store_code,
+
+                    blt.id            AS brand_type_id,
+                    bbt.sfa_filter    AS brand_term_id,
+
+                    aso.ba_ids,
+                    aso.brand_ids,
+                    aso.ba_types,          -- now comes through intact
+
+                    aso.area_id,
+                    aso.asc_id,
+                    aso.company,
+
+                    SUM(aso.gross_sales)  AS gross_sales,
+                    SUM(aso.net_sales)    AS net_sales,
+                    SUM(aso.quantity)     AS quantity,
+
+                    GROUP_CONCAT(DISTINCT
+                      CASE WHEN aso.company = '2'
+                           THEN pclmi.itmcde
+                           ELSE pcrgdi.itmcde
+                      END
+                    ) AS itmcde,
+
+                    GROUP_CONCAT(DISTINCT
+                      CASE WHEN aso.company = '2'
+                           THEN pitmlmi.brncde
+                           ELSE itmrgdi.brncde
+                      END
+                    ) AS brncde,
+
+                    CONCAT(
+                      MAX(aso.store_code),
+                      ' - ',
+                      MAX(s.description)
+                    ) AS store_name,
+
+                    GROUP_CONCAT(DISTINCT aso.sku_code) AS sku_codes
+
+                FROM aggregated_so aso
+
+                LEFT JOIN tbl_store s
+                  ON aso.store_code = s.code
+
+                LEFT JOIN tbl_price_code_file_2_lmi pclmi
+                  ON aso.sku_code = pclmi.cusitmcde
+                 AND aso.company = '2'
+
+                LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi
+                  ON aso.sku_code = pcrgdi.cusitmcde
+                 AND aso.company != '2'
+
+                LEFT JOIN tbl_itemfile_lmi  pitmlmi
+                  ON pclmi.itmcde = pitmlmi.itmcde
+                 AND aso.company = '2'
+
+                LEFT JOIN tbl_itemfile_rgdi itmrgdi
+                  ON pcrgdi.itmcde = itmrgdi.itmcde
+                 AND aso.company != '2'
+
+                LEFT JOIN tbl_brand b
+                  ON ( aso.company = '2'  AND pitmlmi.brncde = b.brand_code )
+                  OR ( aso.company != '2' AND itmrgdi.brncde = b.brand_code )
+
+                LEFT JOIN tbl_brand_label_type blt
+                  ON b.category_id = blt.id
+
+                LEFT JOIN tbl_brand_terms bbt
+                  ON b.terms_id = bbt.id
+
+                GROUP BY
+                    aso.year,
+                    aso.month,
+                    aso.store_code,
+                    aso.ba_ids,
+                    aso.brand_ids,
+                    aso.ba_types,
+                    aso.area_id,
+                    aso.asc_id,
+                    aso.company,
+                    blt.id,
+                    bbt.sfa_filter
+            )
+
+            SELECT * FROM final_data;
+        ";
+
+        // run the SQL and fetch everything
+        $allData = $this->sfaDB
+                        ->query($sql)
+                        ->getResultArray();
+
+        // clear out the old pre-agg rows
+        $this->sfaDB
+             ->table('tbl_sell_out_pre_aggregated_data')
+             ->truncate();
+
+        // bulk-insert in 2k‐row chunks
+        $batchSize = 2000;
+        $inserted  = 0;
+
+        $this->sfaDB->transStart();
+
+        foreach (array_chunk($allData, $batchSize) as $batch) {
+            $this->sfaDB
+                 ->table('tbl_sell_out_pre_aggregated_data')
+                 ->insertBatch($batch);
+
+            $inserted += count($batch);
+        }
+
+        $this->sfaDB->transComplete();
+
+        return [
+            'total_inserted' => $inserted
+        ];
+    }
+
 
     public function refreshVmiData(){
         

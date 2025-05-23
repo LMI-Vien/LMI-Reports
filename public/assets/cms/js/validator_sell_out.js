@@ -37,6 +37,7 @@ self.onmessage = async function(e) {
             let store_codes = entry.store_code?.split(',').map(s => s.trim()) || [];
             let store_ids = entry.store_id?.split(',').map(id => id.trim()) || [];
             let brand_ids = entry.brand_id?.split(',').map(id => id.trim()) || [];
+            let ba_types = entry.ba_types?.split(',').map(id => id.trim()) || [];
 
             store_codes.forEach((store_code, store_idx) => {
                 if (!ba_checklist[store_code.toLowerCase()]) {
@@ -48,7 +49,8 @@ self.onmessage = async function(e) {
                         area_id: entry.area_id || "0",
                         asc_id: entry.asc_id || null,
                         store_id: store_ids[store_idx] || null,
-                        brand_ids
+                        brand_ids,
+                        ba_types
                     };
                 }
             });
@@ -104,6 +106,7 @@ self.onmessage = async function(e) {
                     asc_id: matched?.asc_id || 0,
                     brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : '',
                     brand_ambassador_ids: (matched.ba_ids && matched.ba_ids.length) ? matched.ba_ids.join(',') : '',
+                    ba_types: (matched.ba_types && matched.ba_types.length) ? matched.ba_types.join(',') : '',
                 });
             }
 
