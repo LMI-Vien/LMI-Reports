@@ -675,6 +675,7 @@ class Sync_model extends Model
                         '" . $this->esc($row['brncde']) . "',
                         '" . $this->esc($row['brndsc']) . "',
                         '" . $this->esc($row['category_id']) . "',
+                        '" . $this->esc($row['terms_id']) . "',
                         1, 
                         NULL,
                         NULL,
@@ -684,12 +685,13 @@ class Sync_model extends Model
                 }
 
                 if (!empty($values)) {
-                    $sql = "INSERT INTO tbl_brand (id, brand_code, brand_description, category_id, status, created_date, updated_date, created_by, updated_by) 
+                    $sql = "INSERT INTO tbl_brand (id, brand_code, brand_description, category_id, terms_id, status, created_date, updated_date, created_by, updated_by) 
                             VALUES " . implode(',', $values) . "
                             ON DUPLICATE KEY UPDATE 
                               brand_code = VALUES(brand_code), 
                               brand_description = VALUES(brand_description),
                               category_id = VALUES(category_id),
+                              terms_id = VALUES(terms_id),
                               status = 1,
                               created_date = created_date,
                               updated_date = updated_date,
@@ -755,7 +757,57 @@ class Sync_model extends Model
             $errorMessage = $e->getMessage();
         }    
         return $status === 'success' ? "Data sync completed for Brand Label with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
-    }    
+    }   
+
+    public function syncBrandTermData($batchSize = 5000)
+    {
+        $offset = 0;
+        $totalRecordsSynced = 0;
+        $errorMessage = null;
+        $status = 'success';
+        try {
+            while (true) {
+                $sourceData = $this->traccLmiDB->table('brand_terms')
+                                               ->limit($batchSize, $offset)
+                                               ->get()
+                                               ->getResultArray();
+
+                if (empty($sourceData)) {
+                    break;
+                }
+
+                $values = [];
+                foreach ($sourceData as $row) {
+                    $values[] = "(
+                        '" . $this->esc($row['id']) . "',
+                        '" . $this->esc($row['terms']) . "',
+                        '" . $this->esc($row['sfa_filter']) . "',
+                        '" . $this->esc($row['created_date']) . "',
+                        '" . $this->esc($row['modified_date']) . "'
+                    )";
+                }
+
+                if (!empty($values)) {
+                    $sql = "INSERT INTO tbl_brand_terms (id, terms, sfa_filter, created_date, modified_date) 
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                              terms = VALUES(terms),
+                              sfa_filter = VALUES(sfa_filter), 
+                              created_date = VALUES(created_date),
+                              modified_date = VALUES(modified_date);";
+
+                    $this->sfaDB->query($sql);
+                    $totalRecordsSynced += count($sourceData);
+                }
+
+                $offset += $batchSize;
+            }
+        } catch (\Exception $e) {
+            $status = 'error';
+            $errorMessage = $e->getMessage();
+        }    
+        return $status === 'success' ? "Data sync completed for Brand Term with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    }  
 
     public function syncClassificationData($batchSize = 5000)
     {
@@ -1264,7 +1316,7 @@ class Sync_model extends Model
                     ROUND(SUM(COALESCE(so.quantity, 0)), 2) AS quantity
                 FROM tbl_sell_out_data_details so
                 INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
-                GROUP BY so.year, so.month, so.store_code, so.brand_ambassador_ids, so.brand_ids, so.area_id, so.asc_id, h.company, so.sku_code
+                GROUP BY so.year, so.month, so.store_code, so.brand_ambassador_ids, so.brand_ids, so.area_id, so.asc_id, so.data_header_id, so.sku_code
             ),
             final_data AS (
                 SELECT
@@ -1300,7 +1352,13 @@ class Sync_model extends Model
                     (aso.company != '2' AND itmrgdi.brncde = b.brand_code)
                 LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
                 LEFT JOIN tbl_brand_terms bbt ON b.terms_id = bbt.id
-                GROUP BY aso.store_code, aso.year, aso.company, aso.month, blt.id, bbt.sfa_filter
+                GROUP BY    aso.year,
+                            aso.month,
+                            aso.store_code,
+                            aso.brand_ids,
+                            aso.area_id,
+                            aso.asc_id,
+                            aso.company
             )
             SELECT * FROM final_data
         ";
@@ -1334,7 +1392,7 @@ class Sync_model extends Model
         $batchSize = 2000;
         $batch = [];
         $inserted = 0;
-
+        $this->sfaDB->table('tbl_sell_out_pre_aggregated_data')->truncate();
         $this->sfaDB->transStart();
 
         foreach ($allData as $row) {
