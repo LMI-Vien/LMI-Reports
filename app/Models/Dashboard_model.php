@@ -275,7 +275,9 @@ class Dashboard_model extends Model
 
 	public function salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null)
 	{
-
+		// print_r($baTypeId);
+		// die();
+		$range = ($monthTo - $monthFrom) + 1;
 		$startDate = $tyYear .'-'. $monthFrom . '-01';
 		$endDate = $tyYear .'-'. $monthTo . '-31';
 		$brandIds = is_array($brandIds) ? $brandIds : [];
@@ -304,8 +306,9 @@ class Dashboard_model extends Model
 		$baTypeConditionASR = '';
 		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
 		    $baTypeCondition = 'AND t.ba_types = ?';
-		    $baTypeConditionASR = 'AND ba.type = ?';
+		    $baTypeConditionASR = 'AND s.ba_type = ?';
 		    $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
+	        $brandTypeCondition .= " AND CAST(ba_types AS UNSIGNED) = ? ";
         	//$brandTypeCondition .= " AND CAST(ba_type AS UNSIGNED) = ? ";
 		}
 
@@ -375,7 +378,9 @@ class Dashboard_model extends Model
 		    ba.name AS ba_name,
 		    ba.deployment_date AS ba_deployment_date, 
 		    COALESCE(SUM(s.amount), 0) AS actual_sales,
-		    CASE 
+		    CASE
+		    	WHEN s.ba_type = 0 THEN 
+		            FORMAT(? * ?, 2)
 		        WHEN t.target_ba_types = 1 AND 
 		             (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
 		            FORMAT(
@@ -498,7 +503,7 @@ class Dashboard_model extends Model
 
 		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
 		    $params[] = $baTypeId;
-		   // $params[] = $baTypeId;
+		    $params[] = $baTypeId;
 		}
 
 	    $params[] = $yearId;
@@ -508,11 +513,13 @@ class Dashboard_model extends Model
 		    $params[] = $baTypeId;
 		}
 
+		$params[] = $range;
+		$params[] = $target_sales; 
 	    $params[] = $target_sales;
-	    $params[] = $incentiveRate ;  
-	    $params[] = $target_sales ; 
-	    $params[] = $target_sales ;
-	    $params[] = $remainingDays ; 
+	    $params[] = $incentiveRate;  
+	    $params[] = $target_sales; 
+	    $params[] = $target_sales;
+	    $params[] = $remainingDays; 
 	    $params[] = $target_sales;  
 	    $params[] = $remainingDays;
 	    $params[] = $startDate;
@@ -541,6 +548,9 @@ class Dashboard_model extends Model
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
+
+		// $finalQuery = $this->interpolateQuery($sql, $params);
+		// echo $finalQuery; // Review it in your logs or browser
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data
@@ -711,6 +721,7 @@ class Dashboard_model extends Model
 
 	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
 	        $params[] = $baTypeId;
+
 	    }
 
 	    $params[] = $baTypeId;

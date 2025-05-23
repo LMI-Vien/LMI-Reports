@@ -159,6 +159,7 @@ class StoreSalesPerfPerBa extends BaseController
 		// $baTypeId = 3;
 		// 		print_r($target_sales);
 		// die();
+
 	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 
 	    return $this->response->setJSON([
