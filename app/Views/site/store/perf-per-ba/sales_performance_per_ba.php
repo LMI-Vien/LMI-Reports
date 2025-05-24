@@ -90,7 +90,7 @@
                                         </span>
                                     </th>
                                     <th class="tbl-title-field sort">% Growth 
-                                        <span class="tooltip-text">
+                                        <span class="tooltip-text togglegrowth">
                                             FORMULA:
                                             <br>
                                             Actual Sales Report / LY Scan Data * 100
@@ -242,6 +242,7 @@
 
         $('#columnToggleContainer').toggle();
         $(document).on('click', '#toggleColumnsButton', function() {
+            //$('.togglegrowth').hide()
             $('#columnToggleContainer').toggle();
         });
     });
@@ -413,8 +414,10 @@
         table.columns().every(function(index) {
             let column = this;
             let columnHeader = $(column.header());
+            //columnHeader.find('span.tooltip-text.togglegrowth').hide();
             if (columnHeader.hasClass('sort')) {
-                let columnTitle = columnHeader.text();
+                let columnTitle = columnHeader.clone().find('span.tooltip-text.togglegrowth').remove().end().text().trim();
+
 
                 let checkbox = $('<input>', {
                     type: 'checkbox',

@@ -118,12 +118,6 @@ class StoreSalesPerfPerBa extends BaseController
 			$tpr = $days - $day; 
 	    }
 
-	    if(empty($area)){
-	    	$area = null;
-	    }
-	    if(empty($store)){
-	    	$store = null;
-	    }
 	    $brandIds = $this->request->getPost('brands');
         $brandIds = $brandIds === '' ? null : $brandIds;
 
@@ -180,11 +174,10 @@ class StoreSalesPerfPerBa extends BaseController
 
 	public function generatePdf()
 	{	
-		// to follow
-		$month = date('m');
-		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		$day = date('d');
-		$tpr = $days - $day; 
+		// $month = date('m');
+		// $days = $this->getDaysInMonth($month, $this->getCurrentYear());
+		// $day = date('d');
+		// $tpr = $days - $day; 
 		
 
 		$sysPar = $this->Global_model->getSysPar();
@@ -237,20 +230,26 @@ class StoreSalesPerfPerBa extends BaseController
 
 	    if($monthEndId){
 	    	$date = $formatted_month;
-	    	$lyMonth = $month;
+	    	$lyMonth = $monthId;
 	    }
+	    
+	    $days = null;
+	    $tpr = 0;
+	    $month = date('m');
 
 		if($year && $monthId){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+		    if(intval($monthId) === intval($month)){
+				$days = $this->getDaysInMonth($monthId, $this->getCurrentYear());
+			}
 	    }
 
-	    if(empty($area)){
-	    	$area = null;
+	    if($days){
+			$day = date('d');
+			$tpr = $days - $day; 
 	    }
-	    if(empty($store)){
-	    	$store = null;
-	    }
+
 	    $brandIds = $this->request->getGet('brands');
         $brandIds = $brandIds === '' ? null : $brandIds;
 
@@ -491,13 +490,6 @@ class StoreSalesPerfPerBa extends BaseController
 
 	public function generateExcel()
 	{	
-		//to follow
-		$month = date('m');
-		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		$day = date('d');
-		$tpr = $days - $day; 
-		
-
 		$sysPar = $this->Global_model->getSysPar();
 		$areaId = trim($this->request->getGet('area'));
 		$areaId = $areaId === '' ? null : $areaId;
@@ -548,20 +540,26 @@ class StoreSalesPerfPerBa extends BaseController
 
 	    if($monthEndId){
 	    	$date = $formatted_month;
-	    	$lyMonth = $month;
+	    	$lyMonth = $monthId;
 	    }
+	    
+	    $days = null;
+	    $tpr = 0;
+	    $month = date('m');
 
 		if($year && $monthId){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
+		    if(intval($monthId) === intval($month)){
+				$days = $this->getDaysInMonth($monthId, $this->getCurrentYear());
+			}
 	    }
 
-	    if(empty($area)){
-	    	$area = null;
+	    if($days){
+			$day = date('d');
+			$tpr = $days - $day; 
 	    }
-	    if(empty($store)){
-	    	$store = null;
-	    }
+	    
 	    $brandIds = $this->request->getGet('brands');
         $brandIds = $brandIds === '' ? null : $brandIds;
 

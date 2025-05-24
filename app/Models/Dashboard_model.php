@@ -586,11 +586,18 @@ class Dashboard_model extends Model
 
 	    $baTypeCondition = '';
 	    $baTypeConditionASR = '';
-	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
-	        $baTypeCondition = 'AND t.ba_types = ?';
-	        $baTypeConditionASR = 'AND ba.type = ?';
-	        $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
-	    }
+	    // if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+	    //     $baTypeCondition = 'AND t.ba_types = ?';
+	    //     $baTypeConditionASR = 'AND ba.type = ?';
+	    //     $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
+	    // }
+
+		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
+		    $baTypeCondition = 'AND t.ba_types = ?';
+		    $baTypeConditionASR = 'AND s.ba_type = ?';
+		    $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
+	        $brandTypeCondition .= " AND CAST(ba_types AS UNSIGNED) = ? ";
+		}
 
 	    $monthColumns = [
 	        1 => 'january', 2 => 'february', 3 => 'march', 4 => 'april',
@@ -721,7 +728,7 @@ class Dashboard_model extends Model
 
 	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
 	        $params[] = $baTypeId;
-
+	        $params[] = $baTypeId;
 	    }
 
 	    $params[] = $baTypeId;
