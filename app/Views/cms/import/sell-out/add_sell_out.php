@@ -425,10 +425,10 @@
                 let new_data = valid_data.map(record => ({
                     ...record
                 }));
-
-                saveHeaderData(parts, function(header_id, headers) {
-                    saveValidatedData(valid_data, header_id, headers);
-                });
+                checkDataSalesPerStore(parts, valid_data);
+                // saveHeaderData(parts, function(header_id, headers) {
+                //     checkDataSalesPerStore(valid_data, header_id, headers);
+                // });
             } else {
                 modal.alert("No valid data found. Please check the file.", "error");
             }
@@ -439,6 +439,45 @@
             modal.alert("Error processing data. Please try again.", "error");
         };
     }
+    var counter = 0;
+    function checkDataSalesPerStore(parts, valid_data) {
+        counter++;
+        const month = getMonthIdByName($("#month").val());
+        const year = $("#year").val();
+        const company = parts[0];
+
+        const new_query = `h.month = ${month} AND h.company = ${company} AND h.year = ${year}`;
+        
+        const data = {
+            event: "list",
+            select: "h.created_date, h.year",
+            query: new_query,
+            offset: 1,
+            limit: 1,
+            table: "tbl_sell_out_data_header h",
+            order: {
+                field: "h.id",
+                order: "asc"
+            },
+            group: "h.year, h.month, h.company"
+        };
+
+        aJax.post(url, data, function (result) {
+            result = is_json(result);
+
+            if(counter ===  1){
+                if (result && result.length > 0) {
+                    modal.alert("Sellout Data Already Exist!", "error");
+                    return;
+                }
+                saveHeaderData(parts, function (new_header_id, new_headers) {
+                    saveValidatedData(valid_data, new_header_id, new_headers);
+                });
+            }
+
+        });
+    }
+
 
     function createErrorLogFile(errorLogs, filename) {
         let errorText = errorLogs.join("\n");
@@ -480,6 +519,8 @@
         const url = "<?= base_url('cms/global_controller');?>";
         const table = 'tbl_sell_out_data_details';
         const start_time = new Date();
+        const month = getMonthIdByName($("#month").val());
+        const year = $("#year").val();
 
         modal.loading_progress(true, "Saving data...");
 
@@ -499,8 +540,9 @@
                         modal.alert(
                             "All records inserted successfully!", 'success',
                             () => {
+                                refreshAggregatedScanData(data_header_id, month, year);
                                 logAll(start_time, valid_data);
-                                window.location.href = "<?= base_url('cms/import-sell-out') ?>";
+                                //window.location.href = "<?= base_url('cms/import-sell-out') ?>";
                             }
                         );
                     }, 1000);
@@ -514,8 +556,8 @@
                 .map(record => ({
                     ...record,
                     data_header_id: data_header_id,
-                    month: getMonthIdByName($("#month").val()),
-                    year: $("#year").val(),
+                    month: month,
+                    year: year,
                     customer_payment_group: header[0].customer_payment_group,
                     template_id: header[0].import_file_code,
                 }));
@@ -538,159 +580,18 @@
         setTimeout(processNextBatch, 1000);
     }
 
+    function refreshAggregatedScanData(data_header_id, month, year){
+        const update_url = "<?= base_url('cms/import-sell-out/update-aggregated-scan-data');?>";
+        const data = {
+            data_header_id: data_header_id,
+            month: month,
+            year: year,
+        };
 
-    // function saveValidatedData(valid_data, data_header_id, header) {
-    //     let batch_size = 5000;
-    //     let total_batches = Math.ceil(valid_data.length / batch_size);
-    //     let batch_index = 0;
-    //     let errorLogs = [];
-    //     let url = "<?= base_url('cms/global_controller');?>";
-    //     let table = 'tbl_sell_out_data_details';
-    //     const start_time = new Date();
-
-    //     let selected_fields = [
-    //         'id', 'data_header_id', 'month', 'year', 'customer_payment_group', 'template_id',
-    //         'file_name', 'line_number', 'store_code', 'store_description', 'sku_code', 'sku_description', 
-    //         'quantity', 'net_sales', 'gross_sales'
-    //     ];
-
-    //     const matchFields = [
-    //         'month', 'year', 'customer_payment_group', 'template_id',
-    //         'file_name', 'line_number', 'store_code', 'store_description', 'sku_code', 'sku_description', 
-    //         'quantity', 'net_sales', 'gross_sales'
-    //     ];  
-
-    //     const filters = [
-    //         $("#year").val(),
-    //         $("#month").val()
-    //     ];  
-
-    //     const matchType = "AND";  // Use "AND" or "OR" for matching logic
-
-    //     modal.loading_progress(true, "Validating and Saving data...");
-    //     let existingMap = new Map();
-    //     //aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields}, function(response) {
-    //     aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters:filters}, function(response) {
-    //         let result = JSON.parse(response);
-    //         let existingMap = new Map();
-
-    //         if (result.existing) {
-    //             result.existing.forEach(record => {
-    //                 let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
-    //                 existingMap.set(key, record.id);
-    //             });
-    //         }
-
-    //         function processNextBatch() {
-    //             if (batch_index >= total_batches) {
-    //                 modal.loading_progress(false);
-    //                 if (errorLogs.length > 0) {
-    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-    //                     modal.alert("Some records encountered errors. Check the log.", 'info');
-    //                 } else {
-    //                     modal.loading_progress(true, "Finishing data...");
-    //                     delete_temp_data();
-    //                     setTimeout(function(){
-    //                         modal.alert("All records saved/updated successfully!", 'success', function() {
-    //                                 logAll(start_time, valid_data);
-    //                                 //update_aggregated_data();
-    //                                 window.location.href = "<?= base_url('cms/import-sell-out') ?>";
-    //                             }
-    //                         );
-    //                     }, 1000);
-    //                 }
-    //                 return;
-    //             }
-
-    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-    //             let newRecords = [];
-    //             let updateRecords = [];
-
-    //             batch.forEach(row => {
-    //                 let matchedId = null;
-
-    //                 if (matchType === "AND") {
-    //                     let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
-    //                     if (existingMap.has(key)) {
-    //                         matchedId = existingMap.get(key);
-    //                     }
-    //                 } else if (matchType === "OR") {
-    //                     for (let [key, id] of existingMap.entries()) {
-    //                         let keyParts = key.split("|");
-    //                         for (let field of matchFields) {
-    //                             if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
-    //                                 matchedId = id;
-    //                                 break; 
-    //                             }
-    //                         }
-    //                         if (matchedId) break;
-    //                     }
-    //                 }
-
-    //                 if (matchedId) {
-    //                     row.id = matchedId;
-    //                     updateRecords.push(row);
-    //                 } else {
-    //                     newRecords.push(row);
-    //                 }
-    //             });
-
-    //             function processUpdates() {
-    //                 return new Promise((resolve) => {
-    //                     if (updateRecords.length > 0) {
-    //                         batch_update(url, updateRecords, table, "id", false, (response) => {
-    //                             if (response.message !== 'success') {
-    //                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             function processInserts() {
-    //                 return new Promise((resolve) => {
-    //                     if (newRecords.length > 0) {
-    //                         newRecords = batch.map(record => ({
-    //                             ...record,
-    //                             data_header_id: data_header_id,
-    //                             month: getMonthIdByName($("#month").val()),
-    //                             year: $("#year").val(),
-    //                             customer_payment_group: header[0].customer_payment_group,
-    //                             template_id: header[0].import_file_code,
-    //                         }));
-    //                         batch_insert(url, newRecords, table, false, (response) => {
-    //                             if (response.message === 'success') {
-    //                                 updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
-    //                             } else {
-    //                                 errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             processUpdates()
-    //                 .then(processInserts)
-    //                 .then(() => {
-    //                     batch_index++;
-    //                     setTimeout(processNextBatch, 300);
-    //                 })
-    //                 .catch(error => {
-    //                     errorLogs.push(`Unexpected error: ${error}`);
-    //                     processNextBatch();
-    //                 });
-    //         }
-
-    //         setTimeout(processNextBatch, 1000);
-    //     });
-    // }
+        aJax.post(update_url, data, function (result) {
+            
+        });
+    }
 
     function logAll(start_time, valid_data) {
         const headers = 
@@ -726,7 +627,7 @@
             let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
 
             logActivity('Add Sell Out Module', 'Import Data', remarks, link, null, null);
-            window.location.href = "<?=base_url('cms/import-sell-out/');?>";
+            //window.location.href = "<?=base_url('cms/import-sell-out/');?>";
         });
     }
 

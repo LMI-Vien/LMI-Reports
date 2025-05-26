@@ -337,14 +337,29 @@ class ImportSellOut extends BaseController
 		echo $result;
 	}
 
-	public function update_aggregated_scan_data(){
-        $refresher = new Sync_model();
-        $result = $refresher->refreshScanData();
+	public function update_aggregated_scan_data()
+	{
+	    $data_header_id = $this->request->getPost('data_header_id');
+	    $month = $this->request->getPost('month');
+	    $year = $this->request->getPost('year');
 
-        return $this->response->setJSON([
-            'status' => 'success',
-            'message' => 'Refresh completed',
-            'results' => $result
-        ]);
+	    $refresher = new Sync_model();
+
+	    if (!empty($data_header_id) && !empty($month) && !empty($year)) {
+	        $result = $refresher->refreshScanData($data_header_id, $month, $year);
+
+	        return $this->response->setJSON([
+	            'status' => 'success',
+	            'message' => 'Refresh completed',
+	            'results' => $result
+	        ]);
+	    }
+
+	    return $this->response->setJSON([
+	        'status' => 'error',
+	        'message' => 'Missing parameters: data_header_id, month, or year',
+	        'results' => []
+	    ]);
 	}
+
 }

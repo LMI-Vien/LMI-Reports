@@ -619,6 +619,7 @@ class Dashboard_model extends Model
 	        WHERE (? IS NULL OR year = ?) 
 	          AND (? IS NULL OR month BETWEEN ? AND ?)
 	          $brandTypeCondition
+	          AND (" . (empty($brandIds) ? "1=1" : "brand_id IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
 	        GROUP BY area_id
 	    ),
 	    targets AS (
@@ -705,6 +706,7 @@ class Dashboard_model extends Model
 		      AND (? IS NULL OR asc_id = ?)
 		      AND (? IS NULL OR ba_id = ?)
 		      $baTypeConditionASR
+		      AND (" . (empty($brandIds) ? "1=1" : "brand IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
 		    GROUP BY area_id
 		) AS sd
 		LEFT JOIN tbl_ba_sales_report s ON s.store_id = sd.store_id AND s.ba_id = sd.ba_id AND s.area_id = sd.area_id
@@ -716,8 +718,6 @@ class Dashboard_model extends Model
 	    LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
 	    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
 	    LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
-	    
-	    WHERE (" . (empty($brandIds) ? "1=1" : "b.id IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
 	    GROUP BY s.area_id
 	    ORDER BY {$orderByColumn} {$orderDirection}
 	    LIMIT ? OFFSET ?
@@ -731,6 +731,12 @@ class Dashboard_model extends Model
 	    if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
 	        $params[] = $baTypeId;
 	        $params[] = $baTypeId;
+	    }
+
+	    if (!empty($brandIds)) {
+	        foreach ($brandIds as $bid) {
+	            $params[] = $bid;
+	        }
 	    }
 
 	    $params[] = $baTypeId;

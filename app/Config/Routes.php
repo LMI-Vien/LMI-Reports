@@ -102,7 +102,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('/', 'Cms\ImportSellOut::index');
         $routes->get('view/(:any)', 'Cms\ImportSellOut::view');
         $routes->get('add/(:any)', 'Cms\ImportSellOut::add');
-        $routes->get('update-aggregated-scan-data', 'Cms\ImportSellOut::update_aggregated_scan_data');
+        $routes->post('update-aggregated-scan-data', 'Cms\ImportSellOut::update_aggregated_scan_data');
         $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\ImportSellOut::import_temp_scan_data');
         $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\ImportSellOut::fetch_temp_scan_data');
         $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\ImportSellOut::delete_temp_scan_data');
