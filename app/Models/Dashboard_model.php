@@ -587,8 +587,8 @@ class Dashboard_model extends Model
 	    $baTypeCondition = '';
 	    $baTypeConditionASR = '';
 		if (!is_null($baTypeId) && intval($baTypeId) !== 3) {
-		    $baTypeCondition = 'AND t.ba_types = ?';
-		    $baTypeConditionASR = 'AND s.ba_type = ?';
+			$baTypeCondition = 'AND t.ba_types = ?';
+		    $baTypeConditionASR = 'AND ba_type = ?';
 		    $brandTypeCondition .= " AND CAST(brand_term_id AS UNSIGNED) = ? ";
 	        $brandTypeCondition .= " AND CAST(ba_types AS UNSIGNED) = ? ";
 		}
@@ -613,8 +613,6 @@ class Dashboard_model extends Model
 	            area_id,
 	            store_code,
 	            company,
-	            itmcde,
-	            brncde,
 	            brand_type_id,
 	            SUM(COALESCE(gross_sales, 0)) AS ly_scanned_data
 	        FROM tbl_sell_out_pre_aggregated_data
@@ -675,26 +673,41 @@ class Dashboard_model extends Model
 	        a.description AS area_name,
 	        ba.name AS ba_name,
 	        ba.deployment_date AS ba_deployment_date, 
-	        COALESCE(SUM(s.amount), 0) AS actual_sales,
+	        sd.actual_sales,
 	        FORMAT(t.target_sales, 2) AS target_sales, 
-	        ROUND(COALESCE(SUM(s.amount), 0) * ?, 2) AS possible_incentives,
-	        ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(s.amount), 0), 2) AS balance_to_target,
+	        ROUND(COALESCE(SUM(sd.actual_sales), 0) * ?, 2) AS possible_incentives,
+	        ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(sd.actual_sales), 0), 2) AS balance_to_target,
 	        ROUND(
-	            COALESCE(SUM(s.amount), 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
+	            COALESCE(SUM(sd.actual_sales), 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
 	        ) AS percent_ach,
 	        FORMAT(COALESCE(ly.ly_scanned_data, 0),2) AS ly_scanned_data,
 	        ROUND(
-	            (COALESCE(SUM(s.amount), 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
+	            (COALESCE(SUM(sd.actual_sales), 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
 	            2
 	        ) AS growth,
 	        CASE 
 	          WHEN ? > 0 THEN CEIL((
-				ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(s.amount), 0), 2)
+				ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(sd.actual_sales), 0), 2)
 	          ) / ?)
 	          ELSE NULL
 	        END AS target_per_remaining_days,
 	        COUNT(*) OVER() AS total_records
-	    FROM tbl_ba_sales_report s
+		FROM (
+		    SELECT 
+		        store_id,
+		        ba_id,
+		        area_id,
+		        SUM(COALESCE(amount, 0)) AS actual_sales
+		    FROM tbl_ba_sales_report
+		    WHERE (? IS NULL OR date BETWEEN ? AND ?)
+		      AND (? IS NULL OR area_id = ?)
+		      AND (? IS NULL OR store_id = ?)
+		      AND (? IS NULL OR asc_id = ?)
+		      AND (? IS NULL OR ba_id = ?)
+		      $baTypeConditionASR
+		    GROUP BY area_id
+		) AS sd
+		LEFT JOIN tbl_ba_sales_report s ON s.store_id = sd.store_id AND s.ba_id = sd.ba_id AND s.area_id = sd.area_id
 	    LEFT JOIN tbl_store st ON st.id = s.store_id
 	    LEFT JOIN tbl_area a ON a.id = s.area_id
 	    LEFT JOIN tbl_brand_ambassador ba ON ba.id = s.ba_id
@@ -703,13 +716,8 @@ class Dashboard_model extends Model
 	    LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
 	    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
 	    LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
-	    WHERE (? IS NULL OR s.date BETWEEN ? AND ?)
-	        AND (? IS NULL OR s.area_id = ?)
-	        AND (? IS NULL OR s.store_id = ?)
-	        AND (? IS NULL OR s.asc_id = ?)
-	        AND (? IS NULL OR s.ba_id = ?)
-	        $baTypeConditionASR
-	        AND (" . (empty($brandIds) ? "1=1" : "b.id IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
+	    
+	    WHERE (" . (empty($brandIds) ? "1=1" : "b.id IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
 	    GROUP BY s.area_id
 	    ORDER BY {$orderByColumn} {$orderDirection}
 	    LIMIT ? OFFSET ?
@@ -772,6 +780,9 @@ class Dashboard_model extends Model
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
+		// $finalQuery = $this->interpolateQuery($sql, $params);
+		// echo $finalQuery; // Review it in your logs or browser
+
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data
