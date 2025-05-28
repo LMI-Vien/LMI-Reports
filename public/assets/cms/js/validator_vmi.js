@@ -2,6 +2,7 @@ self.onmessage = async function(e) {
     let data = e.data.data;
     let BASE_URL = e.data.base_url;
     let company = e.data.company;
+
     let invalid = false;
     let errorLogs = [];
     let valid_data = [];
@@ -21,7 +22,8 @@ self.onmessage = async function(e) {
             let store_codes = entry.store_code?.split(',').map(s => s.trim()) || [];
             let store_ids = entry.store_id?.split(',').map(id => id.trim()) || [];
             let brand_ids = entry.brand_id?.split(',').map(id => id.trim()) || [];
-            //add ba_type here
+            let ba_types = entry.ba_types?.split(',').map(id => id.trim()) || [];
+
             store_codes.forEach((store_code, store_idx) => {
                 if (!ba_checklist[store_code.toLowerCase()]) {
                     ba_checklist[store_code.toLowerCase()] = {
@@ -32,7 +34,8 @@ self.onmessage = async function(e) {
                         area_id: entry.area_id || "0",
                         asc_id: entry.asc_id || null,
                         store_id: store_ids[store_idx] || null,
-                        brand_ids
+                        brand_ids,
+                        ba_types
                     };
                 }
             });
@@ -133,11 +136,12 @@ self.onmessage = async function(e) {
                 let item_classi = item_class_lookup[item_class.toLowerCase()];
                 if (!item_classi) addErrorLog("Invalid item Class");
 
-                let matched = ba_checklist[store?.toLowerCase()] || {};
+                let matched = ba_checklist[store_code?.toLowerCase()] || {};
+
                 //if (!matched?.store_id) addErrorLog("Invalid store not tagged to any area");
                 if (!invalid) {
                     valid_data.push({
-                        store: matched?.store_code || 0,
+                        store: matched?.store_id || 0,
                         item,
                         item_name,
                         item_class,
@@ -157,6 +161,7 @@ self.onmessage = async function(e) {
                         asc_id: matched?.asc_id || 0,
                         brand_ids: (matched.brand_ids && matched.brand_ids.length) ? matched.brand_ids.join(',') : '',
                         brand_ambassador_ids: (matched.ba_ids && matched.ba_ids.length) ? matched.ba_ids.join(',') : '',
+                        ba_types: (matched.ba_types && matched.ba_types.length) ? matched.ba_types.join(',') : '',
                     });
                 }
             }

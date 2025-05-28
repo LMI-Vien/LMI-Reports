@@ -1147,156 +1147,6 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Customer RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
-    // public function refreshScanData()
-    // {
-    //     $sql = "
-    //         WITH distinct_store_count AS (
-    //             SELECT COUNT(DISTINCT store_code) AS total_unique_store_codes
-    //             FROM tbl_sell_out_data_details
-    //         )
-    //         SELECT
-    //             so.year,
-    //             so.month,
-    //             so.store_code,
-    //             blt.id AS brand_type_id,
-    //             GROUP_CONCAT(DISTINCT so.brand_ambassador_ids) AS ba_ids,
-    //             so.brand_ids,
-    //             so.area_id,
-    //             so.asc_id,
-    //             h.company,
-    //             ROUND(SUM(COALESCE(so.gross_sales, 0)), 2) AS gross_sales,
-    //             ROUND(SUM(COALESCE(so.net_sales, 0)), 2) AS net_sales,
-    //             ROUND(SUM(COALESCE(so.quantity, 0)), 2) AS quantity,
-    //             GROUP_CONCAT(DISTINCT CASE WHEN h.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
-    //             GROUP_CONCAT(DISTINCT CASE WHEN h.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END) AS brncde,
-    //             CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
-    //             GROUP_CONCAT(DISTINCT ba.type) AS ba_types,
-    //             GROUP_CONCAT(DISTINCT so.sku_code) AS sku_codes
-    //         FROM tbl_sell_out_data_details so
-    //         INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
-    //         LEFT JOIN tbl_store s ON so.store_code = s.code
-    //         LEFT JOIN tbl_price_code_file_2_lmi pclmi 
-    //             ON so.sku_code = pclmi.cusitmcde AND h.company = '2'
-    //         LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi 
-    //             ON so.sku_code = pcrgdi.cusitmcde AND h.company != '2'
-    //         LEFT JOIN tbl_itemfile_lmi pitmlmi 
-    //             ON pclmi.itmcde = pitmlmi.itmcde AND h.company = '2'
-    //         LEFT JOIN tbl_itemfile_rgdi itmrgdi 
-    //             ON pcrgdi.itmcde = itmrgdi.itmcde AND h.company != '2'
-    //         LEFT JOIN tbl_brand b ON 
-    //             (h.company = '2' AND pitmlmi.brncde = b.brand_code) OR
-    //             (h.company != '2' AND itmrgdi.brncde = b.brand_code)
-    //         LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
-    //         LEFT JOIN tbl_brand_ambassador ba 
-    //             ON FIND_IN_SET(ba.id, so.brand_ambassador_ids)
-    //         GROUP BY so.store_code, so.year, so.month, blt.id
-    //     ";
-
-    //     $query = $this->sfaDB->query($sql);
-    //     $allData = $query->getResultArray();
-
-    //     $inserted = 0;
-    //     foreach ($allData as $row) {
-    //         $existing = $this->sfaDB->table('tbl_sell_out_pre_aggregated_data')
-    //             ->where('year', $row['year'])
-    //             ->where('month', $row['month'])
-    //             ->where('store_code', $row['store_code'])
-    //             ->where('brand_type_id', $row['brand_type_id'])
-    //             ->get()
-    //             ->getRow();
-
-    //         if (!$existing) {
-    //             $this->sfaDB->table('tbl_sell_out_pre_aggregated_data')->insert($row);
-    //             $inserted++;
-    //         }
-    //     }
-
-    //     return [
-    //         'total_inserted' => $inserted
-    //     ];
-    // }
-
-    // public function refreshScanData()
-    // {
-    //     $sql = "
-    //         WITH distinct_store_count AS (
-    //             SELECT COUNT(DISTINCT store_code) AS total_unique_store_codes
-    //             FROM tbl_sell_out_data_details
-    //         )
-    //         SELECT
-    //             so.year,
-    //             so.month,
-    //             so.store_code,
-    //             blt.id AS brand_type_id,
-    //             GROUP_CONCAT(DISTINCT so.brand_ambassador_ids) AS ba_ids,
-    //             so.brand_ids,
-    //             so.area_id,
-    //             so.asc_id,
-    //             h.company,
-    //             ROUND(SUM(COALESCE(so.gross_sales, 0)), 2) AS gross_sales,
-    //             ROUND(SUM(COALESCE(so.net_sales, 0)), 2) AS net_sales,
-    //             ROUND(SUM(COALESCE(so.quantity, 0)), 2) AS quantity,
-    //             GROUP_CONCAT(DISTINCT CASE WHEN h.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
-    //             GROUP_CONCAT(DISTINCT CASE WHEN h.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END) AS brncde,
-    //             CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
-    //             GROUP_CONCAT(DISTINCT ba.type) AS ba_types,
-    //             GROUP_CONCAT(DISTINCT so.sku_code) AS sku_codes
-    //         FROM tbl_sell_out_data_details so
-    //         INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
-    //         LEFT JOIN tbl_store s ON so.store_code = s.code
-    //         LEFT JOIN tbl_price_code_file_2_lmi pclmi 
-    //             ON so.sku_code = pclmi.cusitmcde AND h.company = '2'
-    //         LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi 
-    //             ON so.sku_code = pcrgdi.cusitmcde AND h.company != '2'
-    //         LEFT JOIN tbl_itemfile_lmi pitmlmi 
-    //             ON pclmi.itmcde = pitmlmi.itmcde AND h.company = '2'
-    //         LEFT JOIN tbl_itemfile_rgdi itmrgdi 
-    //             ON pcrgdi.itmcde = itmrgdi.itmcde AND h.company != '2'
-    //         LEFT JOIN tbl_brand b ON 
-    //             (h.company = '2' AND pitmlmi.brncde = b.brand_code) OR
-    //             (h.company != '2' AND itmrgdi.brncde = b.brand_code)
-    //         LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
-    //         LEFT JOIN tbl_brand_ambassador ba 
-    //             ON FIND_IN_SET(ba.id, so.brand_ambassador_ids)
-    //         GROUP BY so.store_code, so.year, so.month, blt.id
-    //     ";
-
-    //     $query = $this->sfaDB->query($sql);
-    //     $allData = $query->getResultArray();
-
-    //     $batchSize = 1000;
-    //     $batch = [];
-    //     $inserted = 0;
-
-    //     $this->sfaDB->transStart(); 
-
-    //     foreach ($allData as $row) {
-    //         $batch[] = $row;
-
-    //         if (count($batch) === $batchSize) {
-    //             $this->sfaDB->table('tbl_sell_out_pre_aggregated_data')
-    //                 ->ignore(true) // Skip duplicates based on unique keys
-    //                 ->insertBatch($batch);
-    //             $inserted += count($batch);
-    //             $batch = [];
-    //         }
-    //     }
-
-    //     // Insert remaining
-    //     if (!empty($batch)) {
-    //         $this->sfaDB->table('tbl_sell_out_pre_aggregated_data')
-    //             ->ignore(true)
-    //             ->insertBatch($batch);
-    //         $inserted += count($batch);
-    //     }
-
-    //     $this->sfaDB->transComplete();
-
-    //     return [
-    //         'total_inserted' => $inserted
-    //     ];
-    // }
-
     public function refreshScanDatabk()
     {
         $sql = "
@@ -1428,171 +1278,6 @@ class Sync_model extends Model
         ];
     }
 
-    // public function refreshScanData()
-    // {
-    //     $sql = "
-    //         WITH aggregated_so AS (
-    //             SELECT
-    //                 so.year,
-    //                 so.month,
-    //                 so.store_code,
-    //                 so.brand_ambassador_ids,
-    //                 so.brand_ids,
-    //                 so.area_id,
-    //                 so.asc_id,
-    //                 so.ba_types,
-    //                 h.company,
-    //                 so.sku_code,
-
-    //                 ROUND(SUM(COALESCE(so.gross_sales, 0)), 2) AS gross_sales,
-    //                 ROUND(SUM(COALESCE(so.net_sales,   0)), 2) AS net_sales,
-    //                 ROUND(SUM(COALESCE(so.quantity,     0)), 2) AS quantity
-
-    //             FROM tbl_sell_out_data_details so
-    //             INNER JOIN tbl_sell_out_data_header h
-    //                 ON so.data_header_id = h.id
-    //             LEFT JOIN tbl_brand_ambassador ba
-    //                 ON FIND_IN_SET(CAST(ba.id AS CHAR), so.brand_ambassador_ids)
-
-    //             GROUP BY
-    //                 so.year,
-    //                 so.month,
-    //                 so.store_code,
-    //                 so.brand_ambassador_ids,
-    //                 so.ba_types,
-    //                 so.brand_ids,
-    //                 so.data_header_id,
-    //                 so.area_id,
-    //                 so.asc_id,
-    //                 h.company,
-    //                 so.sku_code
-    //         ),
-
-    //         final_data AS (
-    //             SELECT
-    //                 aso.year,
-    //                 aso.month,
-    //                 aso.store_code,
-
-    //                 blt.id            AS brand_type_id,
-    //                 bbt.sfa_filter    AS brand_term_id,
-    //                 aso.brand_ambassador_ids AS ba_ids,
-    //                 aso.brand_ids,
-    //                 aso.ba_types,
-
-    //                 aso.area_id,
-    //                 aso.asc_id,
-    //                 aso.company,
-
-    //                 SUM(aso.gross_sales)  AS gross_sales,
-    //                 SUM(aso.net_sales)    AS net_sales,
-    //                 SUM(aso.quantity)     AS quantity,
-
-    //                 CASE WHEN aso.company = '2'
-    //                      THEN pclmi.itmcde
-    //                      ELSE pcrgdi.itmcde
-    //                 END AS itmcde,
-
-    //                 CASE WHEN aso.company = '2'
-    //                      THEN pitmlmi.brncde
-    //                      ELSE itmrgdi.brncde
-    //                 END AS brncde,
-
-    //                 CONCAT(
-    //                   MAX(aso.store_code),
-    //                   ' - ',
-    //                   MAX(s.description)
-    //                 ) AS store_name,
-
-    //                 aso.sku_code AS sku_codes
-
-    //             FROM aggregated_so aso
-
-    //             LEFT JOIN tbl_store s
-    //               ON aso.store_code = s.code
-
-    //             LEFT JOIN tbl_price_code_file_2_lmi pclmi
-    //               ON aso.sku_code = pclmi.cusitmcde
-    //              AND aso.company = '2'
-
-    //             LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi
-    //               ON aso.sku_code = pcrgdi.cusitmcde
-    //              AND aso.company != '2'
-
-    //             LEFT JOIN tbl_itemfile_lmi  pitmlmi
-    //               ON pclmi.itmcde = pitmlmi.itmcde
-    //              AND aso.company = '2'
-
-    //             LEFT JOIN tbl_itemfile_rgdi itmrgdi
-    //               ON pcrgdi.itmcde = itmrgdi.itmcde
-    //              AND aso.company != '2'
-
-    //             LEFT JOIN tbl_brand b
-    //               ON ( aso.company = '2'  AND pitmlmi.brncde = b.brand_code )
-    //               OR ( aso.company != '2' AND itmrgdi.brncde = b.brand_code )
-
-    //             LEFT JOIN tbl_brand_label_type blt
-    //               ON b.category_id = blt.id
-
-    //             LEFT JOIN tbl_brand_terms bbt
-    //               ON b.terms_id = bbt.id
-
-    //             GROUP BY
-    //                 aso.year,
-    //                 aso.month,
-    //                 aso.store_code,
-    //                 aso.brand_ambassador_ids,
-    //                 aso.brand_ids,
-    //                 aso.ba_types,
-    //                 aso.area_id,
-    //                 aso.asc_id,
-    //                 aso.company,
-    //                 blt.id,
-    //                 bbt.sfa_filter,
-    //                 aso.sku_code
-    //         )
-
-    //         SELECT * FROM final_data;
-    //     ";
-
-    //     // run the SQL and fetch everything
-    //     $allData = $this->sfaDB
-    //                     ->query($sql)
-    //                     ->getResultArray();
-
-    //     // clear out the old pre-agg rows
-    //     $this->sfaDB
-    //          ->table('tbl_sell_out_pre_aggregated_data')
-    //          ->truncate();
-
-    //     // bulk-insert in 2k‐row chunks
-    //     $batchSize = 2000;
-    //     $inserted  = 0;
-
-    //     $this->sfaDB->transStart();
-
-    //     foreach (array_chunk($allData, $batchSize) as $batch) {
-    //         $this->sfaDB
-    //              ->table('tbl_sell_out_pre_aggregated_data')
-    //              ->insertBatch($batch);
-
-    //         $inserted += count($batch);
-    //     }
-
-    //     $this->sfaDB->transComplete();
-
-    //     if ($this->sfaDB->transStatus() === false) {
-    //         // Something went wrong; rollback happened
-    //         log_message('error', 'Transaction failed during scan data insert');
-    //         return [
-    //             'error' => 'Transaction failed. Data was not saved.'
-    //         ];
-    //     }
-    //     return [
-    //         'total_inserted' => $inserted
-    //     ];
-    // }
-
     public function refreshScanData($data_header_id = null, $month = null, $year = null)
     {
         $whereClause = '';
@@ -1653,7 +1338,7 @@ class Sync_model extends Model
                     b.id AS brand_id,
                     GROUP_CONCAT(DISTINCT aso.brand_ambassador_ids) AS ba_ids,
                     GROUP_CONCAT(DISTINCT aso.brand_ids) AS brand_ids,
-                    GROUP_CONCAT(DISTINCT aso.ba_types) AS ba_types,
+                    aso.ba_types,
                     aso.area_id,
                     aso.asc_id,
                     aso.company,
@@ -1726,8 +1411,148 @@ class Sync_model extends Model
         return ['total_inserted' => $inserted];
     }
 
-    public function refreshVmiData(){
-        
+    public function refreshVmiData($week = null, $year = null, $company = null)
+    {
+
+        $whereClause = '';
+
+        if ($week && $year && $company) {
+            $whereClause = "WHERE tv.week = {$week} AND tv.year = {$year} AND tv.company = {$company}";
+        }
+        $sql = "
+
+            WITH
+            dedup_pclmi AS (
+                SELECT cusitmcde, MIN(itmcde) AS itmcde
+                FROM tbl_price_code_file_2_lmi
+                GROUP BY cusitmcde
+            ),
+            dedup_pcrgdi AS (
+                SELECT cusitmcde, MIN(itmcde) AS itmcde
+                FROM tbl_price_code_file_2_rgdi
+                GROUP BY cusitmcde
+            ),
+            dedup_pitmlmi AS (
+                SELECT itmcde, MIN(brncde) AS brncde
+                FROM tbl_itemfile_lmi
+                GROUP BY itmcde
+            ),
+            dedup_itmrgdi AS (
+                SELECT itmcde, MIN(brncde) AS brncde
+                FROM tbl_itemfile_rgdi
+                GROUP BY itmcde
+            ),
+            aggregated_vmi AS (
+                SELECT
+                    tv.id,
+                    tv.store AS store_id,
+                    tv.area_id,
+                    tv.asc_id,
+                    tv.brand_ids,
+                    tv.brand_ambassador_ids AS ba_ids,
+                    tv.ba_types,
+                    tv.item,
+                    tv.item_name,
+                    tv.vmi_status,
+                    tv.item_class,
+                    tv.supplier,
+                    tv.c_group,
+                    tv.dept,
+                    tv.c_class,
+                    tv.sub_class,
+                    ROUND(SUM(COALESCE(tv.on_hand, 0)), 2) AS on_hand,
+                    ROUND(SUM(COALESCE(tv.in_transit, 0)), 2) AS in_transit,
+                    ROUND(SUM(COALESCE(tv.average_sales_unit, 0)), 2) AS average_sales_unit,
+                    tv.year,
+                    tv.week,
+                    tv.company,
+                    tv.status
+                FROM tbl_vmi tv
+                {$whereClause}
+                GROUP BY tv.year, tv.week, tv.store, tv.brand_ambassador_ids, tv.brand_ids, tv.area_id, tv.asc_id, tv.company, tv.item, tv.ba_types
+            ),
+            final_data AS (
+                SELECT
+                    avmi.year,
+                    avmi.week,
+                    avmi.store_id,
+                    blt.id AS brand_type_id,
+                    bbt.sfa_filter AS brand_term_id,
+                    b.id AS tracc_brand_id,
+                    avmi.vmi_status,
+                    avmi.supplier,
+                    GROUP_CONCAT(DISTINCT avmi.ba_ids) AS ba_ids,
+                    GROUP_CONCAT(DISTINCT avmi.brand_ids) AS brand_ids,
+                    avmi.area_id,
+                    avmi.asc_id,
+                    avmi.ba_types,
+                    avmi.c_group,
+                    avmi.dept,
+                    avmi.c_class,
+                    avmi.sub_class,
+                    avmi.company,
+                    s.code AS store_code,
+                    SUM(avmi.on_hand) AS on_hand,
+                    SUM(avmi.in_transit) AS in_transit,
+                    SUM(avmi.average_sales_unit) AS average_sales_unit,
+                    SUM(avmi.on_hand) + SUM(avmi.in_transit) AS total_qty,
+                    GROUP_CONCAT(DISTINCT CASE WHEN avmi.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
+                    CASE WHEN avmi.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
+                    CONCAT(MAX(s.code), ' - ', s.description) AS store_name,
+                    avmi.item AS item,
+                    avmi.item_name AS item_name,
+                    avmi.item_class
+                FROM aggregated_vmi avmi
+                LEFT JOIN tbl_store s ON avmi.store_id = s.id
+                -- to check if sku_Code = item
+                LEFT JOIN dedup_pclmi pclmi ON avmi.item = pclmi.cusitmcde AND avmi.company = '2'
+                LEFT JOIN dedup_pcrgdi pcrgdi ON avmi.item = pcrgdi.cusitmcde AND avmi.company != '2'
+
+                LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde AND avmi.company = '2'
+                LEFT JOIN dedup_itmrgdi itmrgdi ON pcrgdi.itmcde = itmrgdi.itmcde AND avmi.company != '2'
+
+                LEFT JOIN tbl_brand b ON 
+                    (avmi.company = '2' AND pitmlmi.brncde = b.brand_code) OR
+                    (avmi.company != '2' AND itmrgdi.brncde = b.brand_code)
+
+                LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
+                LEFT JOIN tbl_brand_terms bbt ON b.terms_id = bbt.id
+
+                GROUP BY
+                    avmi.year,
+                    avmi.week,
+                    avmi.store_id,
+                    avmi.area_id,
+                    avmi.asc_id,
+                    avmi.company,
+                    avmi.item,
+                    avmi.item_class,
+                    blt.id,
+                    bbt.sfa_filter,
+                    brncde,
+                    b.id
+            )
+            SELECT * FROM final_data
+        ";
+
+        $query = $this->sfaDB->query($sql);
+        $allData = $query->getResultArray();
+
+        if (!$company || !$week || !$year) {
+            $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->truncate();
+        }
+        //$this->db->query("TRUNCATE TABLE tbl_vmi_pre_aggregated_data");
+
+        $batchSize = 10000;
+        $chunks = array_chunk($allData, $batchSize);
+
+        foreach ($chunks as $chunk) {
+            $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->insertBatch($chunk);
+        }
+
+        return [
+            'total_inserted' => count($allData)
+        ];
     }
 
     public function refreshAll()

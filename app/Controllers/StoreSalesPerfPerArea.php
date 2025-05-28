@@ -53,12 +53,6 @@ class StoreSalesPerfPerArea extends BaseController
 
 	public function getPerfPerArea()
 	{	
-		$month = date('m');
-		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		$day = date('d');
-		$tpr = $days - $day; 
-		
-
 		$sysPar = $this->Global_model->getSysPar();
 		$areaId = trim($this->request->getPost('area'));
 		$areaId = $areaId === '' ? null : $areaId;
@@ -226,10 +220,6 @@ class StoreSalesPerfPerArea extends BaseController
 	}
 
 	public function generatePdf() {	
-		$month = date('m');
-		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		$day = date('d');
-		$tpr = $days - $day; 
 
 		$sysPar = $this->Global_model->getSysPar();
 		$areaId = $this->getParam('area');
@@ -463,11 +453,6 @@ class StoreSalesPerfPerArea extends BaseController
 	}
 
 	public function generateExcel() {
-	    $month = date('m');
-		$days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		$day = date('d');
-		$tpr = $days - $day; 
-
 		$sysPar = $this->Global_model->getSysPar();
 		$areaId = $this->getParam('area');
 		$areaId = $areaId === '' ? null : $areaId;
@@ -560,7 +545,6 @@ class StoreSalesPerfPerArea extends BaseController
 		$baId = null;
 
 		$title = "Store Sales Performance Per Area";
-		// $data = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $target_sales, $incentiveRate, $monthStart, $monthEnd, $lyYear, $year, $storeId, $area, $asc, $baId, $baType, $tpr, $date, $brand_category, $brands, $orderColumnIndex, $orderDirection);
 		$data = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $orderColumnIndex, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
 		$rows   = $data['data'];
 

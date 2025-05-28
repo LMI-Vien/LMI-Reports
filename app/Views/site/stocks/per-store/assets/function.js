@@ -1,5 +1,4 @@
     $(document).ready(function () {
-
         if (localStorage.getItem("TutorialMessage") === "true") {
             $('#popup_modal').modal('show');
         } else {
@@ -171,9 +170,13 @@
 
 
     $(document).on('click', '#refreshButton', function () {
-
+        
         const fields = [
-            { input: '#inventoryStatus', target: '#ba_id' }
+            { input: '#inventoryStatus', target: '#inventoryStatus' },
+            { input: '#area', target: '#areaId' },
+            { input: '#ascName', target: '#ascNameId' },
+            { input: '#brandAmbassador', target: '#brandAmbassadorId' },
+            { input: '#storeName', target: '#storeNameId' }
         ];
 
         let counter = 0;
@@ -190,59 +193,85 @@
             }
         });
 
-        const storeFilter = $('#storeName').val();
+        const storeFilter = $('#area').val();
         const invStatusFilter = $('#inventoryStatus').val();
 
         if (!storeFilter || !invStatusFilter) {
-            modal.alert('Please select both "Store Name" and "Inventory Status" before filtering.', "warning");
+            modal.alert('Please select both "Area" and "Inventory Status" before filtering.', "warning");
             return;
         }
-
+        $('#sourceDate').text(calendarWeek);
         if (counter >= 1) {
             fetchData();
             $('.table-empty').hide();
-            $('.hide-div').show();
             }
     });
 
-    function fetchData() {
-        let selectedType = $('input[name="filterType"]:checked').val();
-        let selectedBa = $('#brand_ambassadors').val();
-        let selectedStore = $('#store_branch').val();
-        let selectedBrand = $('#brand').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-        let selectedInventoryStatus = $('#inventoryStatus').val(); // returns an array
-        if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) return;
-       // table-empty
-        $('.table-empty').hide(); 
-        let tables = [
-            { id: "#table_slowMoving", type: "slowMoving" },
-            { id: "#table_overStock", type: "overStock" },
-            { id: "#table_npd", type: "npd" },
-            { id: "#table_hero", type: "hero" }
-        ];
-        console.log('asd');
-        let filteredTables = tables.filter(table => selectedInventoryStatus.includes(table.type));
-        filteredTables.forEach(table => {
-            initializeTable(table.id, table.type, selectedType, selectedBa, selectedStore, selectedBrand, selectedSortField, selectedSortOrder);
-        });
+function fetchData() {
+    let selectedArea = $('#areaId').val();
+    let selectedAsc = $('#ascNameId').val();
+    let selectedBaType = $('input[name="filterType"]:checked').val();
+    let selectedBa = $('#brandAmbassadorId').val();
+    let selectedStore = $('#storeNameId').val();
+    let selectedBrands = $('#brands').val();
+    let selectedInventoryStatus = $('#inventoryStatus').val(); // returns array
+
+    // Show or hide "Please select filter" message
+    if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) {
+        $('.table-empty').show();
+        $('.hide-div.card').hide(); // Hide each card
+        return;
     }
 
-    function initializeTable(tableId, type, selectedType, selectedBa, selectedStore, selectedBrand, selectedSortField, selectedSortOrder) {
+    $('.table-empty').hide(); // Hide empty message
+
+    // Always show the parent wrapper (outer hide-div)
+    $('.hide-div').first().show();
+
+    let tables = [
+        { id: "#table_slowMoving", type: "slowMoving" },
+        { id: "#table_overStock", type: "overStock" },
+        { id: "#table_npd", type: "npd" },
+        { id: "#table_hero", type: "hero" }
+    ];
+
+    // Hide all individual cards
+    $('.hide-div.card').hide();
+
+    // Show only matching cards
+    tables.forEach(table => {
+        if (selectedInventoryStatus.includes(table.type)) {
+            $(table.id).closest('.hide-div.card').show();
+            initializeTable(
+                table.id,
+                table.type,
+                selectedArea,
+                selectedAsc,
+                selectedBaType,
+                selectedBa,
+                selectedStore,
+                selectedBrands
+            );
+        }
+    });
+}
+
+
+
+    function initializeTable(tableId, type, selectedArea, selectedAsc, selectedBaType, selectedBa, selectedStore, selectedBrands) {
         $(tableId).closest('.table-responsive').show(); 
         $(tableId).DataTable({
             destroy: true,
             ajax: {
                 url: base_url + 'stocks/get-data-per-store',
-                type: 'GET',
+                type: 'POST',
                 data: function (d) {
-                    d.sort_field = selectedSortField;
-                    d.sort = selectedSortOrder;
-                    d.brand = selectedBrand === "" ? null : selectedBrand;
-                    d.brand_ambassador = selectedBa === "" ? null : selectedBa;
-                    d.store_name = selectedStore === "" ? null : selectedStore;
-                    d.ba_type = selectedType;
+                    d.area = selectedArea === "" ? null : selectedArea;
+                    d.asc = selectedAsc === "" ? null : selectedAsc;
+                    d.baType = selectedBaType === "" ? null : selectedBaType;
+                    d.ba = selectedBa === "" ? null : selectedBa;
+                    d.store = selectedStore === "" ? null : selectedStore;
+                    d.brands = selectedBrands === [] ? null : selectedBrands;
                     d.type = type;
                     d.limit = d.length;
                     d.offset = d.start;
@@ -252,7 +281,7 @@
                 }
             },
             columns: [
-                { data: 'item_name' },
+                { data: 'itmcde' },
                 { data: 'item_name' },
                 type !== 'hero' ? { data: 'sum_total_qty' } : null
             ].filter(Boolean),

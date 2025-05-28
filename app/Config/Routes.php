@@ -12,6 +12,7 @@ $routes->get('/dashboard/get-counts', 'Dashboard::getCounts');
 $routes->group('stocks/', static function ($routes) {
     //per store
     $routes->get('data-per-store', 'StocksPerStore::dataPerStore');
+    $routes->post('get-data-per-store', 'StocksPerStore::getDataPerStore');
     $routes->get('get-data-per-store', 'StocksPerStore::getDataPerStore');
     $routes->get('per-store-generate-pdf', 'StocksPerStore::generatePdf');
     $routes->get('per-store-generate-excel-ba', 'StocksPerStore::generateExcel');
@@ -125,8 +126,9 @@ $routes->group('cms/', static function ($routes) {
     $routes->group('import-vmi', static function ($routes) {
         $routes->get('/', 'Cms\ImportVmi::index');
         $routes->get('view/(:any)', 'Cms\ImportVmi::view');
-        $routes->post('import-temp-vmi-data', 'Cms\ImportVmi::import_temp_vmi_data');
         $routes->get('fetch-temp-vmi-data', 'Cms\ImportVmi::fetch_temp_vmi_data');
+        $routes->post('import-temp-vmi-data', 'Cms\ImportVmi::import_temp_vmi_data');
+        $routes->post('update-aggregated-vmi-data', 'Cms\ImportVmi::update_aggregated_vmi_data');
         $routes->post('delete-temp-vmi-data', 'Cms\ImportVmi::delete_temp_vmi_data');
         
     });

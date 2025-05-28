@@ -58,7 +58,7 @@
                           <i class="fas fa-filter mr-2"></i> Please select a filter
                       </div>
                         <div class="hide-div">
-                        <div class="hide-div">
+                        <div class="hide-div card">
                             <table id="table_slowMoving" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -94,7 +94,7 @@
                             </table>
                         </div>
 
-                        <div class="hide-div">
+                        <div class="hide-div card">
                             <table id="table_overStock" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -130,7 +130,7 @@
                             </table>
                         </div>
 
-                        <div class="hide-div">
+                        <div class="hide-div card">
                             <table id="table_npd" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -166,7 +166,7 @@
                             </table>
                         </div>
 
-                        <div class="hide-div">
+                        <div class="hide-div card">
                             <table id="table_hero" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -259,6 +259,6 @@
     let brands = <?= json_encode($brands) ?>;
     let area = <?= json_encode($areas) ?>;
     let asc = <?= json_encode($asc) ?>;
-   // let url = <?= base_url('cms/controller')?>;
+    let calendarWeek = '<?= $date; ?>';
 
 </script>

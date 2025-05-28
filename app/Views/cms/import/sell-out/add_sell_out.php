@@ -540,7 +540,7 @@
                         modal.alert(
                             "All records inserted successfully!", 'success',
                             () => {
-                                refreshAggregatedScanData(data_header_id, month, year);
+                                updateAggregatedScanData(data_header_id, month, year);
                                 logAll(start_time, valid_data);
                                 //window.location.href = "<?= base_url('cms/import-sell-out') ?>";
                             }
@@ -580,7 +580,7 @@
         setTimeout(processNextBatch, 1000);
     }
 
-    function refreshAggregatedScanData(data_header_id, month, year){
+    function updateAggregatedScanData(data_header_id, month, year){
         const update_url = "<?= base_url('cms/import-sell-out/update-aggregated-scan-data');?>";
         const data = {
             data_header_id: data_header_id,

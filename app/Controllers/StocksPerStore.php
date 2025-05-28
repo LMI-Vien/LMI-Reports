@@ -26,6 +26,17 @@ class StocksPerStore extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+
+	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
+	    $latest_week = '';
+	    $latest_year = '';
+	    $source_date = 'N / A';
+	    if($latest_vmi_data){
+	    	$latest_year = $latest_vmi_data['year'];
+	    	$latest_week = $latest_vmi_data['week_id'];
+	    	$source_date = $latest_vmi_data['year'] . ' Calendar Week '. $latest_week;
+		}
+
 		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
 		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
 		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
@@ -37,7 +48,8 @@ class StocksPerStore extends BaseController
 		$data['page_url'] = 'Trade Dashboard';
 		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-per-store'),'Stock Data per Store' => '');
 		$data["source"] = "VMI (LMI/RGDI)";
-		$data["source_date"] = '<span id="sourceDate">N / A</span>';	
+		$data["source_date"] = '<span id="sourceDate">N / A</span>';
+		$data["date"] = $source_date;	
 		$data['content'] = "site/stocks/per-store/data_per_store";
 		$data['session'] = session();
 		$data['js'] = array(
@@ -52,78 +64,82 @@ class StocksPerStore extends BaseController
 
 	public function getDataPerStore()
 	{
-	    $limit = $this->request->getVar('limit') ?? 10;
-	    $offset = $this->request->getVar('offset') ?? 0;
-	    $type = $this->request->getVar('type');
-	    $brand = $this->request->getVar('brand');
-	    $ba_type = $this->request->getVar('ba_type');
-	    $brand_ambassador = $this->request->getVar('brand_ambassador');
-	    $store_name = $this->request->getVar('store_name');
-	    $sort = $this->request->getVar('sort') ?? 'ASC';
-	    $sort_field = $this->request->getVar('sort_field');
+		$areaId = trim($this->request->getPost('area'));
+		$areaId = $areaId === '' ? null : $areaId;
+		$ascId = trim($this->request->getPost('asc'));
+		$ascId = $ascId === '' ? null : $ascId;
+		$baTypeId = trim($this->request->getPost('baType'));
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
+		$baId = trim($this->request->getPost('ba'));
+		$baId = $baId === '' ? null : $baId;
+		$storeId= trim($this->request->getPost('store'));
+		$storeId = $storeId === '' ? null : $storeId;
+        $brandIds = $this->request->getPost('brands');
+        $brandIds = $brandIds === '' ? null : $brandIds;
+        $type = $this->request->getPost('type');
+        $type = $type === '' ? null : $type;
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit = is_numeric($limit) ? (int)$limit : 10;
+		$offset = is_numeric($offset) ? (int)$offset : 0;
 
-	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
+		$latest_vmi_data = $this->Dashboard_model->getLatestVmi();
+		$sysPar = $this->Global_model->getSysPar();
+		$npd_sku = [];
+		$hero_sku = [];
+		$skuMin = 20;
+		$skuMin = 30;
+		if($sysPar){
+			$jsonStringHero = $sysPar[0]['hero_sku'];
+			$dataHero = json_decode($jsonStringHero, true);
+			$hero_sku = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$jsonStringNpd = $sysPar[0]['new_item_sku'];
+			$dataNpd = json_decode($jsonStringNpd, true);
+			$npd_sku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+		    $skuMin = $sysPar[0]['sm_sku_min'];
+		    $skuMax = $sysPar[0]['sm_sku_max'];
+		}
+
 	    if($latest_vmi_data){
 	    	$latest_year = $latest_vmi_data['year_id'];
-	    	$latest_month = $latest_vmi_data['month_id'];
 	    	$latest_week = $latest_vmi_data['week_id'];
-
-		    if($brand_ambassador){
-		    	$brand_ambassador = $brand_ambassador;
-		    }else{
-		    	$brand_ambassador = null;
-		    }
-			if($brand){
-		    	$brand = $brand;
-		    }else{
-		    	$brand = null;
-		    }
-			if($store_name){
-		    	$store_name = $store_name;
-		    }else{
-		    	$store_name = null;
-		    }
-
+	    	//temp
+		    // $type = 'npd';
+		    // $areaId = null;
+		    // $ascId = null;
+		    // $baTypeId = 3;
+		    // $baId = null;
+		    // $storeId = '1001';
+		    // $brandIds = null;
+		    // $limit = 10;
+		    // $offset = 0;
+		    // echo $offset;
 		    switch ($type) {
 		        case 'slowMoving':
-		            $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId);
 		            break;
 		        case 'overStock':
-		            $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 30, null, $latest_week, $latest_month, $latest_year);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMax, null, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId);
 		            break;
 		        case 'npd':
-					$item_class_filter = [
-						'N-New Item'
-					];
-		           $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, $latest_week, $latest_month, $latest_year,$item_class_filter);
+					$itemClassFilter = $npd_sku;
+		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter);
 		            break;
 		        case 'hero':
-        			$item_class_filter = [
-						'A-Top 500 Pharma/Beauty',
-						//'AU-Top', to follow
-						'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty',
-						'B-Remaining Class B net of BU Pharma/Beauty'
-
-					];
-		            $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, $latest_week, $latest_month, $latest_year, $item_class_filter);
+        			$itemClassFilter = $hero_sku;
+		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter);
 		            break;
 		        default:
-		        	$data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
+		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId);
 		    }
 
-		    // return $this->response->setJSON([
-		    //     'draw' => intval($this->request->getVar('draw')),
-		    //     'recordsTotal' => $data['total_records'],
-		    //     'recordsFiltered' => $data['total_records'],
-		    //     'data' => $data['data'],
-		    // ]);	
-			return $this->response->setJSON([
+		    return $this->response->setJSON([
 		        'draw' => intval($this->request->getVar('draw')),
-		        'recordsTotal' => 0,
-		        'recordsFiltered' => 0,
-		        'data' => []
+		        'recordsTotal' => $data['total_records'],
+		        'recordsFiltered' => $data['total_records'],
+		        'data' => $data['data'],
 		    ]);	
-		    
+			
 	    }else{
 			return $this->response->setJSON([
 		        'draw' => intval($this->request->getVar('draw')),

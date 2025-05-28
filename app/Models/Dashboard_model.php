@@ -6,101 +6,88 @@ use CodeIgniter\Model;
 
 class Dashboard_model extends Model
 {
-	//backup
-	// public function tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $page_limit, $page_offset, $minWeeks, $maxWeeks, $week, $month, $year){
-	// 	$builder = $this->db->query('CALL get_ba_dashboard(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-	//    		$brand,
-	// 	    $brand_ambassador, 
-	// 	    $store_name,
-	// 	    $ba_type,
-	// 	    $sort_field,
-	// 	    $sort,
-	// 	    $page_limit,
-	// 	    $page_offset,
-	// 	    $minWeeks,
-	// 	    $maxWeeks,
-	// 	    $week,
-	// 	    $month,
-	// 	    $year
-	// 	]);
-	// 	$data = $builder->getResultArray();
-	//     $total_records = isset($data[0]['total_records']) ? $data[0]['total_records'] : 0;
 
-	//     return [
-	//         'total_records' => $total_records,
-	//         'data' => $data
-	//     ];
-	// }
+	public function dataPerStore($page_limit, $page_offset, $minWeeks, $maxWeeks, $week, $year, $brandIds = null, $ba_id = null, $ba_type = null, $area_id = null, $asc_id = null, $store_id = null)
+	{
+		$ba_type = ($ba_type !== null) ? strval($ba_type) : null;
+	    $storeFilterConditions = [];
 
-	// public function getItemClassData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, $week, $month, $year) {
-	//     $query = $this->db->query('CALL get_ba_dashboard_npd(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-	//         $brand, 
-	//         $brand_ambassador, 
-	//         $store_name, 
-	//         $ba_type,
-	//         $sort_field,
-	//         $sort, 
-	//         $limit, 
-	//         $offset,
-	//         $week,
-	// 	    $month,
-	// 	    $year
-	//     ]);
-
-	//     $data = $query->getResultArray();
-	//     $totalRecords = count($data) > 0 ? $data[0]['total_records'] : 0;
-
-	//     return [
-	//         'total_records' => $totalRecords,
-	//         'data' => $data
-	//     ];
-	// }
-
-	// public function getHeroItemsData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $limit, $offset, $week, $month, $year) {
-	//     $query = $this->db->query('CALL get_ba_dashboard_hero(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-	//         $brand, 
-	//         $brand_ambassador, 
-	//         $store_name, 
-	//         $ba_type,
-	//         $sort_field,
-	//         $sort, 
-	//         $limit, 
-	//         $offset,
-	// 	    $week,
-	// 	    $month,
-	// 	    $year
-	//     ]);
-
-	//     $data = $query->getResultArray();
-	//     $totalRecords = count($data) > 0 ? $data[0]['total_records'] : 0;
-
-	//     return [
-	//         'total_records' => $totalRecords,
-	//         'data' => $data
-	//     ];
-	// }
-
-	//working na to need to update the passed filters
-	public function tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $page_limit, $page_offset, $minWeeks, $maxWeeks, $week, $month, $year){
-
-	    $valid_sort_fields = ['item_name', 'sum_total_qty'];
-
-	    if (!in_array($sort_field, $valid_sort_fields)) {
-	        $sort_field = 'item_name'; 
+	    if (!empty($ba_id)) {
+	        $baIds = array_map('intval', preg_split('/\s*or\s*/i', $ba_id));
+	        $baConds = array_map(fn($id) => "FIND_IN_SET($id, v.ba_ids)", $baIds);
+	        $storeFilterConditions[] = '(' . implode(' OR ', $baConds) . ')';
 	    }
 
-	    if ($sort !== 'ASC' && $sort !== 'DESC') {
-	        $sort = 'ASC'; 
-	    }
+		if (!empty($brandIds)) {
+		    $brandIds = array_map('intval', $brandIds);
+		    $brandConds = array_map(fn($id) => "FIND_IN_SET($id, v.brand_ids)", $brandIds);
+		    $storeFilterConditions[] = '(' . implode(' OR ', $brandConds) . ')';
+		}
+
+
+	    $storeFilterSQL = !empty($storeFilterConditions)
+	        ? 'WHERE ' . implode(' AND ', $storeFilterConditions)
+	        : '';
+
+	    $sort_field = 'sum_total_qty';
+	    $sort = 'DESC';
+
+	    $baTypeFilter = ($ba_type !== null && $ba_type != 3) ? ' AND v.ba_types = ?' : '';
+	    $baTypeParams = ($ba_type !== null && $ba_type != 3) ? [$ba_type] : [];
+
+	    $storeFilter = ($store_id !== null) ? ' AND v.store_id = ?' : '';
+	    $storeParams = ($store_id !== null) ? [$store_id] : [];
+
+	    // Same filters for main query (alias vmi instead of v)
+	    $baTypeFilterVmi = str_replace('v.', 'vmi.', $baTypeFilter);
+	    $storeFilterVmi = str_replace('v.', 'vmi.', $storeFilter);
+
+		$ascIdFilter = '';
+		$ascIdFilterVmi = '';
+		$ascIdParams = [];
+
+		if ($asc_id !== null) {
+		    $ascIdFilter = ' AND v.asc_id = ?';
+		    $ascIdFilterVmi = ' AND vmi.asc_id = ?';
+		    $ascIdParams = [$asc_id];
+		}
+
+		$areaIdFilter = '';
+		$areaIdFilterVmi = '';
+		$areaIdParams = [];
+
+		if ($area_id !== null) {
+		    $areaIdFilter = ' AND v.area_id = ?';
+		    $areaIdFilterVmi = ' AND vmi.area_id = ?';
+		    $areaIdParams = [$area_id];
+		}
+
 	    $sql = "
+	        WITH filtered_stores AS (
+	            SELECT DISTINCT v.store_id
+	            FROM tbl_vmi_pre_aggregated_data v
+	            WHERE v.week = ?
+	              AND v.year = ?
+	              {$ascIdFilter}
+	              {$areaIdFilter}
+	              $baTypeFilter
+	              $storeFilter
+	        ),
+	        store_matches AS (
+	            SELECT fs.store_id
+	            FROM filtered_stores fs
+	            JOIN tbl_vmi_pre_aggregated_data v ON fs.store_id = v.store_id
+	            $storeFilterSQL
+	            GROUP BY fs.store_id
+	        )
 	        SELECT 
-	            vmi.id,
 	            vmi.item,
 	            vmi.item_name,
-	            vmi.lmi_itmcde,
-	            vmi.rgdi_itmcde,
+	            vmi.area_id,
+	            vmi.itmcde,
+	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
 	            SUM(vmi.total_qty) AS sum_total_qty,
-                SUM(vmi.average_sales_unit) AS sum_ave_sales,
+	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
 	            ROUND(
 	                CASE 
 	                    WHEN SUM(vmi.average_sales_unit) > 0 
@@ -108,76 +95,148 @@ class Dashboard_model extends Model
 	                    ELSE 0 
 	                END, 2
 	            ) AS weeks,
-	            vmi.ambassador_names,
-	            vmi.ba_types,
-	            vmi.brands,
-	            vmi.asc_name,
-	            vmi.store_name,
+				GROUP_CONCAT(DISTINCT vmi.ba_ids) AS ba_ids,
+				GROUP_CONCAT(DISTINCT CASE WHEN vmi.ba_types IS NOT NULL AND vmi.ba_types != '' THEN vmi.ba_types END) AS ba_types,
+				GROUP_CONCAT(DISTINCT vmi.brand_ids) AS brand_ids,
+				GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
+				GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids,
 	            COUNT(*) OVER() AS total_records
 	        FROM tbl_vmi_pre_aggregated_data vmi
-		      WHERE (? IS NULL OR FIND_IN_SET(?, brands) > 0)
-		        AND (? IS NULL OR FIND_IN_SET(?, ambassador_names) > 0)
-		        AND (? IS NULL OR store_name = ?)
-				AND (
-				    (? = 3 AND ba_types IN (0,1))
-				    OR (? = 0 AND ba_types IN (0))
-				    OR (? = 1 AND ba_types IN (1))
-				)
-		        AND vmi.status = 1
-		        AND vmi.week = ?
-		        AND vmi.month = ?
-		        AND vmi.year = ?
-		        GROUP BY vmi.item
+	        JOIN store_matches sm ON vmi.store_id = sm.store_id
+	        WHERE vmi.week = ?
+	          AND vmi.year = ?
+	          {$ascIdFilterVmi}
+	          {$areaIdFilterVmi}
+	          $baTypeFilterVmi
+	          $storeFilterVmi
+	        GROUP BY vmi.item
 	        HAVING weeks > ?
-	        AND (? IS NULL OR weeks < ?)
+	           AND (? IS NULL OR weeks < ?)
 	        ORDER BY $sort_field $sort
 	        LIMIT ? OFFSET ?
 	    ";
 
-		$params = [
-		    $brand ?: NULL, $brand ?: NULL,  
-		    $brand_ambassador ?: NULL, $brand_ambassador ?: NULL, 
-		    $store_name ?: NULL, $store_name ?: NULL, 
-		    $ba_type ?: 0, $ba_type ?: 0, $ba_type ?: 0, 
-		    $week ?: NULL, 
-		    $month ?: NULL, 
-		    $year ?: NULL, 
-		    $minWeeks ?: NULL,  
-		    $maxWeeks ?: NULL, $maxWeeks ?: NULL,
-		    (int) $page_limit, (int)  $page_offset
-		];
+		$params = [];
+
+		$params[] = $week;
+		$params[] = $year;
+		if ($asc_id !== null) $params[] = $asc_id;
+		if ($area_id !== null) $params[] = $area_id;
+		$params = array_merge($params, $baTypeParams, $storeParams);
+
+		# Params for main SELECT
+		$params[] = $week;
+		$params[] = $year;
+		if ($asc_id !== null) $params[] = $asc_id;
+		if ($area_id !== null) $params[] = $area_id;
+		$params = array_merge($params, $baTypeParams, $storeParams);
+
+
+	    $params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$page_limit, (int)$page_offset]);
 
 	    $query = $this->db->query($sql, $params);
-		$data = $query->getResult();
-		$totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
+	    $data = $query->getResult();
+	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
 
-		return [
-		    'total_records' => $totalRecords,
-		    'data' => $data
-		];
-
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $data
+	    ];
 	}
 
-	public function getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $page_limit, $page_offset, $week, $month, $year, $item_class_filter) {
+	public function getItemClassNPDHEROData(
+	    $page_limit, $page_offset, $week, $year, $brandIds = null,
+	    $ba_id = null, $ba_type = null, $area_id = null, $asc_id = null, $store_id = null, $item_class_filter = null
+	) {
+		$ba_type = ($ba_type !== null) ? strval($ba_type) : null;
+	    $storeFilterConditions = [];
 
-	    $valid_sort_fields = ['item_name', 'sum_total_qty'];
-
-	    if (!in_array($sort_field, $valid_sort_fields)) {
-	        $sort_field = 'item_name';
+	    if (!empty($ba_id)) {
+	        $baIds = array_map('intval', preg_split('/\s*or\s*/i', $ba_id));
+	        $baConds = array_map(fn($id) => "FIND_IN_SET($id, v.ba_ids)", $baIds);
+	        $storeFilterConditions[] = '(' . implode(' OR ', $baConds) . ')';
 	    }
 
-	    if ($sort !== 'ASC' && $sort !== 'DESC') {
-	        $sort = 'ASC';
+	    if (!empty($brandIds)) {
+	        $brandIds = array_map('intval', $brandIds);
+	        $brandConds = array_map(fn($id) => "FIND_IN_SET($id, v.brand_ids)", $brandIds);
+	        $storeFilterConditions[] = '(' . implode(' OR ', $brandConds) . ')';
 	    }
+
+	    $storeFilterSQL = !empty($storeFilterConditions)
+	        ? 'WHERE ' . implode(' AND ', $storeFilterConditions)
+	        : '';
+
+	    $sort_field = 'sum_total_qty';
+	    $sort = 'DESC';
+
+	    // Build dynamic WHERE components and parameter list
+	    $itemClassPlaceholder = '';
+	    $itemClassParams = [];
+	    if (!empty($item_class_filter)) {
+	        $itemClassPlaceholder = ' AND v.item_class IN (' . implode(',', array_fill(0, count($item_class_filter), '?')) . ')';
+	        $itemClassParams = $item_class_filter;
+	    }
+
+	    $baTypeFilter = ($ba_type !== null && $ba_type != 3) ? ' AND v.ba_types = ?' : '';
+	    $baTypeParams = ($ba_type !== null && $ba_type != 3) ? [$ba_type] : [];
+
+	    $storeFilter = ($store_id !== null) ? ' AND v.store_id = ?' : '';
+	    $storeParams = ($store_id !== null) ? [$store_id] : [];
+
+	    // Same filters for main query (alias vmi instead of v)
+	    $itemClassPlaceholderVmi = str_replace('v.', 'vmi.', $itemClassPlaceholder);
+	    $baTypeFilterVmi = str_replace('v.', 'vmi.', $baTypeFilter);
+	    $storeFilterVmi = str_replace('v.', 'vmi.', $storeFilter);
+
+		$ascIdFilter = '';
+		$ascIdFilterVmi = '';
+		$ascIdParams = [];
+
+		if ($asc_id !== null) {
+		    $ascIdFilter = ' AND v.asc_id = ?';
+		    $ascIdFilterVmi = ' AND vmi.asc_id = ?';
+		    $ascIdParams = [$asc_id];
+		}
+
+		$areaIdFilter = '';
+		$areaIdFilterVmi = '';
+		$areaIdParams = [];
+
+		if ($area_id !== null) {
+		    $areaIdFilter = ' AND v.area_id = ?';
+		    $areaIdFilterVmi = ' AND vmi.area_id = ?';
+		    $areaIdParams = [$area_id];
+		}
+
 	    $sql = "
+	        WITH filtered_stores AS (
+	            SELECT DISTINCT v.store_id
+	            FROM tbl_vmi_pre_aggregated_data v
+	            WHERE v.week = ?
+	              AND v.year = ?
+	              {$ascIdFilter}
+	              {$areaIdFilter}
+	              $itemClassPlaceholder
+	              $baTypeFilter
+	              $storeFilter
+	        ),
+	        store_matches AS (
+	            SELECT fs.store_id
+	            FROM filtered_stores fs
+	            JOIN tbl_vmi_pre_aggregated_data v ON fs.store_id = v.store_id
+	            $storeFilterSQL
+	            GROUP BY fs.store_id
+	        )
 	        SELECT 
-	            vmi.id,
 	            vmi.item,
 	            vmi.item_name,
-	            vmi.lmi_itmcde,
-	            vmi.rgdi_itmcde,
+	            vmi.item_class,
+	            vmi.area_id,
+	            vmi.itmcde,
+	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
 	            SUM(vmi.total_qty) AS sum_total_qty,
-                SUM(vmi.average_sales_unit) AS sum_ave_sales,
+	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
 	            ROUND(
 	                CASE 
 	                    WHEN SUM(vmi.average_sales_unit) > 0 
@@ -185,64 +244,141 @@ class Dashboard_model extends Model
 	                    ELSE 0 
 	                END, 2
 	            ) AS weeks,
-	            vmi.ambassador_names,
-	            vmi.ba_types,
-	            vmi.brands,
-	            vmi.asc_name,
-	            vmi.store_name,
+				GROUP_CONCAT(DISTINCT vmi.ba_ids) AS ba_ids,
+				GROUP_CONCAT(DISTINCT CASE WHEN vmi.ba_types IS NOT NULL AND vmi.ba_types != '' THEN vmi.ba_types END) AS ba_types,
+				GROUP_CONCAT(DISTINCT vmi.brand_ids) AS brand_ids,
+				GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
+				GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids,
 	            COUNT(*) OVER() AS total_records
 	        FROM tbl_vmi_pre_aggregated_data vmi
-		      WHERE (? IS NULL OR FIND_IN_SET(?, brands) > 0)
-		        AND (? IS NULL OR FIND_IN_SET(?, ambassador_names) > 0)
-		        AND (? IS NULL OR store_name = ?)
-		        AND vmi.item_class IN (" . implode(",", array_fill(0, count($item_class_filter), "?")) . ")
-				AND (
-				    (? = 3 AND ba_types IN (0,1))
-				    OR (? = 0 AND ba_types IN (0))
-				    OR (? = 1 AND ba_types IN (1))
-				)
-		        AND vmi.status = 1
-		        AND vmi.week = ?
-		        AND vmi.month = ?
-		        AND vmi.year = ?
-		        GROUP BY vmi.item
-		   	  ORDER BY $sort_field $sort
+	        JOIN store_matches sm ON vmi.store_id = sm.store_id
+	        WHERE vmi.week = ?
+	          AND vmi.year = ?
+	          {$ascIdFilterVmi}
+	          {$areaIdFilterVmi}
+	          $itemClassPlaceholderVmi
+	          $baTypeFilterVmi
+	          $storeFilterVmi
+	        GROUP BY vmi.item
+	        ORDER BY $sort_field $sort
 	        LIMIT ? OFFSET ?
 	    ";
 
-	    $params = array_merge([
-	        $brand ?: NULL, $brand ?: NULL,  
-	        $brand_ambassador ?: NULL, $brand_ambassador ?: NULL, 
-	        $store_name ?: NULL, $store_name ?: NULL, 
-	    ], $item_class_filter, [ 
-	        $ba_type ?: 0, $ba_type ?: 0, $ba_type ?: 0, 
-	        $week ?: NULL, 
-	        $month ?: NULL, 
-	        $year ?: NULL, 
-	        (int) $page_limit, (int)  $page_offset
-	    ]);
+		$params = [];
+
+		$params[] = $week;
+		$params[] = $year;
+		if ($asc_id !== null) $params[] = $asc_id;
+		if ($area_id !== null) $params[] = $area_id;
+		$params = array_merge($params, $itemClassParams, $baTypeParams, $storeParams);
+
+		# Params for main SELECT
+		$params[] = $week;
+		$params[] = $year;
+		if ($asc_id !== null) $params[] = $asc_id;
+		if ($area_id !== null) $params[] = $area_id;
+		$params = array_merge($params, $itemClassParams, $baTypeParams, $storeParams);
+
+		# Pagination
+		$params[] = (int)$page_limit;
+		$params[] = (int)$page_offset;
 
 	    $query = $this->db->query($sql, $params);
-		$data = $query->getResult();
-		$totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
+	    $data = $query->getResult();
+	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
 
-		return [
-		    'total_records' => $totalRecords,
-		    'data' => $data
-		];
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $data
+	    ];
 	}
+
+
+
+	// public function getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $page_limit, $page_offset, $week, $month, $year, $item_class_filter) {
+
+	//     $valid_sort_fields = ['item_name', 'sum_total_qty'];
+
+	//     if (!in_array($sort_field, $valid_sort_fields)) {
+	//         $sort_field = 'item_name';
+	//     }
+
+	//     if ($sort !== 'ASC' && $sort !== 'DESC') {
+	//         $sort = 'ASC';
+	//     }
+	//     $sql = "
+	//         SELECT 
+	//             vmi.id,
+	//             vmi.item,
+	//             vmi.item_name,
+	//             vmi.lmi_itmcde,
+	//             vmi.rgdi_itmcde,
+	//             SUM(vmi.total_qty) AS sum_total_qty,
+    //             SUM(vmi.average_sales_unit) AS sum_ave_sales,
+	//             ROUND(
+	//                 CASE 
+	//                     WHEN SUM(vmi.average_sales_unit) > 0 
+	//                     THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
+	//                     ELSE 0 
+	//                 END, 2
+	//             ) AS weeks,
+	//             vmi.ambassador_names,
+	//             vmi.ba_types,
+	//             vmi.brands,
+	//             vmi.asc_name,
+	//             vmi.store_name,
+	//             COUNT(*) OVER() AS total_records
+	//         FROM tbl_vmi_pre_aggregated_data vmi
+	// 	      WHERE (? IS NULL OR FIND_IN_SET(?, brands) > 0)
+	// 	        AND (? IS NULL OR FIND_IN_SET(?, ambassador_names) > 0)
+	// 	        AND (? IS NULL OR store_name = ?)
+	// 	        AND vmi.item_class IN (" . implode(",", array_fill(0, count($item_class_filter), "?")) . ")
+	// 			AND (
+	// 			    (? = 3 AND ba_types IN (0,1))
+	// 			    OR (? = 0 AND ba_types IN (0))
+	// 			    OR (? = 1 AND ba_types IN (1))
+	// 			)
+	// 	        AND vmi.status = 1
+	// 	        AND vmi.week = ?
+	// 	        AND vmi.month = ?
+	// 	        AND vmi.year = ?
+	// 	        GROUP BY vmi.item
+	// 	   	  ORDER BY $sort_field $sort
+	//         LIMIT ? OFFSET ?
+	//     ";
+
+	//     $params = array_merge([
+	//         $brand ?: NULL, $brand ?: NULL,  
+	//         $brand_ambassador ?: NULL, $brand_ambassador ?: NULL, 
+	//         $store_name ?: NULL, $store_name ?: NULL, 
+	//     ], $item_class_filter, [ 
+	//         $ba_type ?: 0, $ba_type ?: 0, $ba_type ?: 0, 
+	//         $week ?: NULL, 
+	//         $month ?: NULL, 
+	//         $year ?: NULL, 
+	//         (int) $page_limit, (int)  $page_offset
+	//     ]);
+
+	//     $query = $this->db->query($sql, $params);
+	// 	$data = $query->getResult();
+	// 	$totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
+
+	// 	return [
+	// 	    'total_records' => $totalRecords,
+	// 	    'data' => $data
+	// 	];
+	// }
 
 	public function getLatestVmi($year = null) {
 	    $builder = $this->db->table('tbl_vmi v')
 	        // ->select('y.id as year_id, m.id as month_id, w.id as week_id')
-			->select('y.id as year_id, y.year, m.id as month_id, m.month, w.id as week_id, w.name as week_name')
+			->select('y.id as year_id, y.year, c.id as company_id, c.name as company_name, v.week AS week_id')
 	        ->where('v.status', 1)
-	        ->join('tbl_week w', 'v.week = w.id')
-	        ->join('tbl_month m', 'v.month = m.id')
+	        ->join('tbl_company c', 'v.company = c.id')
 	        ->join('tbl_year y', 'v.year = y.id')
 	        ->orderBy('y.year', 'DESC')
-	        ->orderBy('m.month', 'DESC')
-	        ->orderBy('w.name', 'DESC')
+	        ->orderBy('v.week', 'DESC')
+	        ->orderBy('c.name', 'DESC')
 	        ->limit(1);
 
 	    if (!empty($year)) {
@@ -1857,330 +1993,6 @@ class Dashboard_model extends Model
 	        'data' => $data
 	    ];
 	}
-
-	public function refreshPreAggregatedData()
-	{
-
-		//old
-	        // WITH brand_data AS (
-	        //     SELECT 
-	        //         ba.store AS store_id,
-	        //         a_asc.description AS asc_name,
-	        //         a.description as area_name,
-	        //         GROUP_CONCAT(DISTINCT ba.type ORDER BY ba.type SEPARATOR ', ') AS ba_types,
-	        //         GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates,
-	        //         GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
-	        //         GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
-	        //     FROM tbl_brand_ambassador ba
-	        //     LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-	        //     LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-	        //     LEFT JOIN tbl_area a ON ba.area = a.id
-	        //     LEFT JOIN tbl_area_sales_coordinator a_asc ON a.id = a_asc.area_id
-	        //     WHERE ba.status >= 0
-	        //     GROUP BY ba.store
-	        // )
-	    $sql = "
-			WITH brand_data AS (
-			    SELECT 
-			        s.id AS store_id,
-			        s.description AS store_name,
-			        asc.description AS asc_name,
-			        a.description AS area_name,
-			        GROUP_CONCAT(DISTINCT ba.type ORDER BY ba.type SEPARATOR ', ') AS ba_types,
-			        GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates,
-			        GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
-			        GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
-			    FROM tbl_store s
-			    LEFT JOIN tbl_brand_ambassador_group bag ON s.id = bag.store_id
-			    LEFT JOIN tbl_brand_ambassador ba ON bag.ba_id = ba.id AND ba.status >= 0
-			    LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-			    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-			    LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
-			    LEFT JOIN tbl_area a ON sg.area_id = a.id
-			    LEFT JOIN tbl_area_sales_coordinator asc ON a.id = asc.area_id
-			    GROUP BY s.id, s.description, asc.description, a.description
-			), item_brands AS (
-	            SELECT
-	                tv.id,
-	                tv.item,
-	                tv.item_name,
-	                tv.vmi_status,
-	                tv.supplier,
-	                tv.average_sales_unit,
-	                tv.on_hand,
-	                tv.in_transit,
-	                tv.item_class,
-	                tv.store as store_id,
-	                tv.year,
-	                tv.week,
-	                tv.company,
-	                tv.status,
-	                bd.ambassador_names,
-	                bd.ba_types,
-	                bd.ba_deployment_dates,
-	                bd.brands,
-	                s.description AS store_name,
-	                bd.asc_name,
-	                bd.area_name,
-	                pclmi.itmcde AS lmi_itmcde,
-	                pcrgdi.itmcde AS rgdi_itmcde,
-	                iflmi.itmclacde AS lmi_itmclass,
-	                ifrgdi.itmclacde AS rgdi_itmclass
-	            FROM tbl_vmi tv
-	            LEFT JOIN tbl_store s ON tv.store = s.id
-	            LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
-	            LEFT JOIN brand_data bd ON s.id = bd.store_id
-				LEFT JOIN tbl_price_code_file_2_lmi pclmi ON tv.item = pclmi.cusitmcde AND tv.company = 2
-    			LEFT JOIN tbl_price_code_file_2_rgdi pcrgdi ON tv.item = pcrgdi.cusitmcde AND tv.company = 1
-   				LEFT JOIN tbl_itemfile_lmi iflmi ON pclmi.itmcde = iflmi.itmcde AND tv.company = 2
-    			LEFT JOIN tbl_itemfile_rgdi ifrgdi ON pcrgdi.itmcde = ifrgdi.itmcde AND tv.company = 1
-	            GROUP BY tv.id
-	        )
-	        SELECT 
-	            ib.id,
-	            ib.item,
-	            ib.item_name,
-	            ib.vmi_status,
-	            ib.supplier,
-	            ib.average_sales_unit,
-	            ib.item_class,
-	            ib.store_id,
-	            ib.on_hand + ib.in_transit AS total_qty,
-	            ib.ambassador_names,
-	            ib.ba_types,
-	            ib.ba_deployment_dates,
-	            ib.lmi_itmcde,
-	            ib.rgdi_itmcde,
-	            ib.lmi_itmclass,
-	            ib.rgdi_itmclass,
-	            ib.brands,
-	            ib.store_name,
-	            ib.asc_name,
-	            ib.area_name,
-	            ib.year,
-	            ib.week,
-	            ib.company,
-	            ib.status
-	        FROM item_brands ib
-	    ";
-
-	    $query = $this->db->query($sql);
-	    $allData = $query->getResultArray();
-
-	    $this->db->query("TRUNCATE TABLE tbl_vmi_pre_aggregated_data");
-
-	    $batchSize = 10000;
-	    $chunks = array_chunk($allData, $batchSize);
-
-	    foreach ($chunks as $chunk) {
-	        $this->db->table('tbl_vmi_pre_aggregated_data')->insertBatch($chunk);
-	    }
-
-	    return [
-	        'total_inserted' => count($allData)
-	    ];
-	}
-
-	public function refreshPreAggregatedData_forchecking()
-	{
-	    $sql = "
-			WITH brand_data AS (
-			    SELECT 
-			        s.id AS store_id,
-			        s.description AS store_name,
-			        asc.description AS asc_name,
-			        a.description AS area_name,
-			        GROUP_CONCAT(DISTINCT ba.type ORDER BY ba.type SEPARATOR ', ') AS ba_types,
-			        GROUP_CONCAT(DISTINCT ba.deployment_date ORDER BY ba.deployment_date SEPARATOR ', ') AS ba_deployment_dates,
-			        GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
-			        GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
-			    FROM tbl_store s
-			    LEFT JOIN tbl_brand_ambassador_group bag ON s.id = bag.store_id
-			    LEFT JOIN tbl_brand_ambassador ba ON bag.ba_id = ba.id AND ba.status >= 0
-			    LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-			    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-			    LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
-			    LEFT JOIN tbl_area a ON sg.area_id = a.id
-			    LEFT JOIN tbl_area_sales_coordinator asc ON a.id = asc.area_id
-			    GROUP BY s.id, s.description, asc.description, a.description
-			), item_brands AS (
-	        SELECT 
-	            ib.id,
-	            ib.item,
-	            ib.item_name,
-	            ib.vmi_status,
-	            ib.supplier,
-	            ib.average_sales_unit,
-	            ib.item_class,
-	            ib.store_id,
-	            ib.on_hand + ib.in_transit AS total_qty,
-	            ib.ambassador_names,
-	            ib.ba_types,
-	            ib.ba_deployment_dates,
-	            ib.lmi_itmcde,
-	            ib.rgdi_itmcde,
-	            ib.lmi_itmclass,
-	            ib.rgdi_itmclass,
-	            ib.brands,
-	            ib.store_name,
-	            ib.asc_name,
-	            ib.area_name,
-	            ib.year,
-	            ib.week,
-	            ib.company,
-	            ib.status
-	        FROM item_brands ib
-	    ";
-	    $query    = $this->db->query($sql);
-	    $allData  = $query->getResultArray();
-	    if (empty($allData)) {
-	        return ['total_inserted' => 0];
-	    }
-
-	    $existingRows = $this->db
-	        ->table('tbl_vmi_pre_aggregated_data')
-	        ->select('item, store_id, week, year, company, item_class, supplier')
-	        ->get()
-	        ->getResult();
-
-	    // build a quick lookup
-	    $exists = [];
-	    foreach ($existingRows as $r) {
-	        $exists[ implode('|', [
-	            $r->item,
-	            $r->item_name,
-	            $r->vmi_status,
-	            $r->item_class,
-	            $r->company,
-	            $r->supplier,
-	            $r->item_class,
-	            $r->store_id,
-	            $r->store_code,
-	            $r->total_qty,
-	            $r->average_sales_unit,
-	            $r->ambassador_names,
-	            $r->ba_deployment_dates,
-	            $r->lmi_itmcde,
-	            $r->rgdi_itmcde,
-	            $r->lmi_itmclass,
-	            $r->rgdi_itmclass,
-	            $r->brands,
-	            $r->store_name,
-	            $r->asc_name,
-	            $r->area_name,
-	            $r->year,
-	            $r->week,
-	            $r->company,
-	            $r->status
-	        ]) ] = true;
-	    }
-
-	    $toInsert = [];
-	    foreach ($allData as $row) {
-	        $key = implode('|', [
-	            $row['item'],
-	            $row['item_name'],
-	            $row['vmi_status'],
-	            $row['item_class'],
-	            $row['supplier'],
-	            $row['item_class'],
-	            $row['store_id'],
-	            $row['store_code'],
-	            $row['total_qty'],
-	            $row['average_sales_unit'],
-	            $row['ambassador_names'],
-	            $row['ba_deployment_dates'],
-	            $row['lmi_itmcde'],
-	            $row['rgdi_itmcde'],
-	            $row['lmi_itmclass'],
-	            $row['rgdi_itmclass'],
-	            $row['brands'],
-	            $row['store_name'],
-	            $row['asc_name'],
-	            $row['area_name'],
-	            $row['year'],
-	            $row['week'],
-	            $row['company'],
-	            $row['status'],
-	        ]);
-	        if (! isset($exists[$key])) {
-	            $toInsert[] = $row;
-	        }
-	    }
-
-	    $totalNew = count($toInsert);
-	    if ($totalNew > 0) {
-	        $batchSize = 10000;
-	        foreach (array_chunk($toInsert, $batchSize) as $chunk) {
-	            $this->db
-	                 ->table('tbl_vmi_pre_aggregated_data')
-	                 ->insertBatch($chunk);
-	        }
-	    }
-
-	    return [
-	        'total_inserted' => $totalNew
-	    ];
-	}
-
-
-    public function updateConsolidatedData()
-    {
-        $this->db->query("TRUNCATE TABLE tbl_trade_db_overall_ba");
-
-        $insertQuery = "
-            INSERT INTO tbl_trade_db_overall_ba (
-                area_id, area, store_code, store_name, actual_sales, date, brands, target, arch,
-                balance_to_target, possible_incentives, target_per_rem_days, ly_scanned_data,
-                brand_ambassador_name, ba_deployment_date, rank, growth
-            )
-            SELECT 
-                aggregated_sps.area_id,
-                tbl_area.description as area,
-                tbl_store.code as store_code,
-                tbl_store.description as store_name,
-                aggregated_sps.actual_sales,
-                aggregated_sps.date,
-                GROUP_CONCAT(DISTINCT tbl_brand.brand_description ORDER BY tbl_brand.brand_description SEPARATOR ', ') AS brands,
-                COALESCE(SUM(tbl_target_sales_per_store.january), 0) AS target,
-                ROUND((aggregated_sps.actual_sales / NULLIF(COALESCE(SUM(tbl_target_sales_per_store.january), 0), 0)) * 100, 2) AS arch,
-                COALESCE(SUM(tbl_target_sales_per_store.january), 0) - aggregated_sps.actual_sales AS balance_to_target,
-                COALESCE(aggregated_sps.actual_sales, 0) * 0.01 AS possible_incentives,
-                CEIL((COALESCE(SUM(tbl_target_sales_per_store.january), 0) - aggregated_sps.actual_sales) / NULLIF(25, 0)) AS target_per_rem_days,
-                ROUND(COALESCE(SUM(tbl_sell_out_data_details.net_sales), 0), 2) AS ly_scanned_data,
-                tbl_brand_ambassador.name AS brand_ambassador_name,
-                tbl_brand_ambassador.deployment_date AS ba_deployment_date,
-                ROW_NUMBER() OVER (
-                    ORDER BY 
-                        CASE 
-                            WHEN aggregated_sps.actual_sales IS NULL OR aggregated_sps.actual_sales = 0 
-                            THEN NULL
-                            ELSE ROUND((aggregated_sps.actual_sales / NULLIF(COALESCE(SUM(tbl_target_sales_per_store.january), 0), 0)) * 100, 2)
-                        END DESC
-                ) AS rank,
-                ROUND(COALESCE(aggregated_sps.actual_sales, 0) / NULLIF(SUM(tbl_sell_out_data_details.net_sales), 0), 2) AS growth
-            FROM (
-                SELECT area_id, SUM(amount) AS actual_sales, date
-                FROM tbl_ba_sales_report
-                WHERE status = 1
-                GROUP BY area_id
-            ) AS aggregated_sps
-            LEFT JOIN tbl_ba_sales_report ON aggregated_sps.area_id = tbl_ba_sales_report.area_id
-            INNER JOIN tbl_store ON tbl_ba_sales_report.store_id = tbl_store.id
-            INNER JOIN tbl_area ON tbl_ba_sales_report.area_id = tbl_area.id
-            LEFT JOIN tbl_brand ON tbl_ba_sales_report.brand = tbl_brand.id
-            LEFT JOIN tbl_target_sales_per_store ON tbl_ba_sales_report.store_id = tbl_target_sales_per_store.location
-            INNER JOIN tbl_brand_ambassador ON tbl_ba_sales_report.ba_id = tbl_brand_ambassador.id
-            LEFT JOIN tbl_sell_out_data_details ON tbl_ba_sales_report.store_id = tbl_sell_out_data_details.store_code
-            GROUP BY aggregated_sps.area_id
-        ";
-
-        $db->query($insertQuery);
-
-        session()->setFlashdata('success', 'Sales data has been updated successfully.');
-        $message = "success";
-    	return $message;
-    }
 
     public function getCounts()
     {

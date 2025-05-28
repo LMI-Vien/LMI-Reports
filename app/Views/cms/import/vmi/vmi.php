@@ -506,7 +506,6 @@
         // var inp_month = $('#monthSelect').val()?.trim();
         var inp_week = $('#weekSelect').val()?.trim();
         var inp_company = $('#companySelect').val()?.trim();
-
         // const fields = { inp_year, inp_month, inp_week, inp_company };
         const fields = { inp_year, inp_week, inp_company };
         for (const [key, value] of Object.entries(fields)) {
@@ -514,6 +513,9 @@
                 return modal.alert(`Please select a ${key.replace("inp_", "")}.`, 'error', () => {});
             }
         }
+
+        const vmiCheck = await checkDataVmi();
+        if (vmiCheck !== 1) return;
 
         modal.loading_progress(true, "Preparing Data");
         const chunkSize = 512 * 1024; // 512 KB
@@ -679,12 +681,9 @@
                 let new_data = valid_data.map(record => ({
                     ...record,
                     year: inp_year,
-                    // month: inp_month,
                     week: inp_week,
                     company: inp_company
                 }));
-                // console.log(new_data);
-                // return;
                 saveValidatedData(new_data);
             } else {
                 modal.alert("No valid data found. Please check the file.", "error");
@@ -754,6 +753,40 @@
         updatePaginationControls();
     }
 
+    function checkDataVmi() {
+        return new Promise((resolve, reject) => {
+            const week = $("#weekSelect").val();
+            const year = $("#yearSelect").val();
+            const company = $("#companySelect").val();
+
+            const new_query = `v.week = ${week} AND v.year = ${year} AND v.company = ${company}`;
+
+            var data = {
+                event: "list",
+                select: "v.created_date , v.year",
+                query: new_query,
+                offset: 1,
+                limit: 1,
+                table: "tbl_vmi v",
+                order: {
+                    field: "v.id",
+                    order: "asc"
+                },
+                group: "v.year, v.company, v.week"
+            };
+
+            aJax.post(url, data, function(result) {
+                result = is_json(result);
+                if (result.length > 0) {
+                    modal.alert(`VMI Already Exist!`, 'error');
+                    resolve(0);
+                } else {
+                    resolve(1);
+                }
+            });
+        });
+    }
+
     function saveValidatedData(valid_data) {
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
@@ -763,124 +796,216 @@
         let table = 'tbl_vmi';
         const start_time = new Date();
 
-        const selected_fields = [
-            'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
-            'supplier', 'c_group', 'dept', 'c_class', 'sub_class', 'on_hand',
-            'in_transit', 'year', 'week', 'company'
-        ];
+        modal.loading_progress(true, "Saving data...");
 
-        const matchFields = [
-            'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier',
-            'c_group', 'dept', 'c_class', 'sub_class', 'on_hand',
-            'in_transit', 'year', 'week', 'company'
-        ];
-
-        const matchType = "AND";
-
-        let inp_year = $('#yearSelect').val()?.trim();
-        let inp_week = $('#weekSelect').val()?.trim();
-        let inp_company = $('#companySelect').val()?.trim();
-        const filters = [inp_year, inp_week, inp_company];
-
-        modal.loading_progress(true, "Validating and Saving data...");
-
-        aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters: filters }, function(response) {
-            let result = JSON.parse(response);
-            let existingMap = new Map();
-
-            if (result.existing) {
-                result.existing.forEach(record => {
-                    let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
-                    existingMap.set(key, record.id);
-                });
-            }
-
-            async function processNextBatch() {
-                if (batch_index >= total_batches) {
-                    modal.loading_progress(false);
-                    if (errorLogs.length > 0) {
-                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                        modal.alert("Some records encountered errors. Check the log.", 'info');
-                    } else {
-                        modal.loading_progress(true, "Finishing data...");
-                        setTimeout(finishImport, 500);
-                    }
-                    return;
+        async function processNextBatch() {
+            if (batch_index >= total_batches) {
+                modal.loading_progress(false);
+                if (errorLogs.length > 0) {
+                    createErrorLogFile(errorLogs, "Insert_Error_Log_" + formatReadableDate(new Date(), true));
+                    modal.alert("Some records encountered errors. Check the log.", 'info');
+                } else {
+                    modal.loading_progress(true, "Finishing data...");
+                    setTimeout(finishImport, 500);
                 }
+                return;
+            }
 
-                const batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-                const newRecords = [];
-                const updateRecords = [];
+            const batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+            const newRecords = [];
 
-                batch.forEach(row => {
-                    let matchedId = null;
-                    if (matchType === "AND") {
-                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
-                        if (existingMap.has(key)) {
-                            matchedId = existingMap.get(key);
-                        }
-                    }
+            batch.forEach(row => {
+                row.created_by = user_id;
+                row.created_date = formatDate(new Date());
+                delete row.updated_by;
+                delete row.updated_date;
+                newRecords.push(row);
+            });
 
-                    if (matchedId) {
-                        row.id = matchedId;
-                        row.updated_by = user_id;
-                        row.updated_date = formatDate(new Date());
-                        delete row.created_by;
-                        delete row.created_date;
-                        updateRecords.push(row);
-                    } else {
-                        row.created_by = user_id;
-                        row.created_date = formatDate(new Date());
-                        newRecords.push(row);
-                    }
-                });
-
-                try {
-                    if (updateRecords.length > 0) {
-                        await batchUpdateAsync(url, updateRecords, table, "id");
-                    }
-                    if (newRecords.length > 0) {
-                        await batchInsertAsync(url, newRecords, table);
-                    }
-                } catch (error) {
-                    errorLogs.push(`Batch ${batch_index}: ${error}`);
+            try {
+                if (newRecords.length > 0) {
+                    await batchInsertAsync(url, newRecords, table);
                 }
-
-                batch_index++;
-
-                // Update overall progress
-                const progress = Math.round((batch_index / total_batches) * 100);
-
-                updateSwalProgress(`Saving Data...`, progress);
-
-                // No artificial delay! Continue immediately
-                processNextBatch();
+            } catch (error) {
+                errorLogs.push(`Batch ${batch_index}: ${error}`);
             }
 
-            function finishImport() {
-                const headers = ['store', 'item', 'item_name']; 
-                const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
-
-                saveImportDetailsToServer(valid_data, headers, 'import_vmi', url, function(filePath) {
-                    const end_time = new Date();
-                    const duration = formatDuration(start_time, end_time);
-
-                    let remarks = `
-                        Import Completed Successfully!
-                        <br>Total Records: ${valid_data.length}
-                        <br>Start Time: ${formatReadableDate(start_time)}
-                        <br>End Time: ${formatReadableDate(end_time)}
-                        <br>Duration: ${duration}`;
-
-                    let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
-
-                    logActivity('VMI Module', 'Import Data', remarks, link, null, null);
-                    location.reload();
-                });
-            }
+            batch_index++;
+            const progress = Math.round((batch_index / total_batches) * 100);
+            updateSwalProgress(`Saving Data...`, progress);
             processNextBatch();
+        }
+
+        function finishImport() {
+            const headers = ['store', 'item', 'item_name']; 
+            const logUrl = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+            updateAggregatedVmiData();
+            saveImportDetailsToServer(valid_data, headers, 'import_vmi', logUrl, function(filePath) {
+                const end_time = new Date();
+                const duration = formatDuration(start_time, end_time);
+
+                let remarks = `
+                    Import Completed Successfully!
+                    <br>Total Records: ${valid_data.length}
+                    <br>Start Time: ${formatReadableDate(start_time)}
+                    <br>End Time: ${formatReadableDate(end_time)}
+                    <br>Duration: ${duration}`;
+
+                let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
+
+                logActivity('VMI Module', 'Import Data', remarks, link, null, null);
+                modal.loading(false);
+                location.reload();
+            });
+        }
+
+        processNextBatch();
+    }
+
+    function updateAggregatedVmiData(){
+        const week = $("#weekSelect").val();
+        const year = $("#yearSelect").val();
+        const company = $("#companySelect").val();
+
+        const update_url = "<?= base_url('cms/import-vmi/update-aggregated-vmi-data');?>";
+        const data = {
+            company: company,
+            week: week,
+            year: year,
+        };
+
+        aJax.post(update_url, data, function (result) { 
         });
     }
+
+
+    // function saveValidatedData(valid_data) {
+    //     let batch_size = 5000;
+    //     let total_batches = Math.ceil(valid_data.length / batch_size);
+    //     let batch_index = 0;
+    //     let errorLogs = [];
+    //     let url = "<?= base_url('cms/global_controller');?>";
+    //     let table = 'tbl_vmi';
+    //     const start_time = new Date();
+
+    //     const selected_fields = [
+    //         'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
+    //         'supplier', 'c_group', 'dept', 'c_class', 'sub_class', 'on_hand',
+    //         'in_transit', 'year', 'week', 'company'
+    //     ];
+
+    //     const matchFields = [
+    //         'store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier',
+    //         'c_group', 'dept', 'c_class', 'sub_class', 'on_hand',
+    //         'in_transit', 'year', 'week', 'company'
+    //     ];
+
+    //     const matchType = "AND";
+
+    //     let inp_year = $('#yearSelect').val()?.trim();
+    //     let inp_week = $('#weekSelect').val()?.trim();
+    //     let inp_company = $('#companySelect').val()?.trim();
+    //     const filters = [inp_year, inp_week, inp_company];
+
+    //     modal.loading_progress(true, "Validating and Saving data...");
+
+    //     aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters: filters }, function(response) {
+    //         let result = JSON.parse(response);
+    //         let existingMap = new Map();
+
+    //         if (result.existing) {
+    //             result.existing.forEach(record => {
+    //                 let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+    //                 existingMap.set(key, record.id);
+    //             });
+    //         }
+
+    //         async function processNextBatch() {
+    //             if (batch_index >= total_batches) {
+    //                 modal.loading_progress(false);
+    //                 if (errorLogs.length > 0) {
+    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+    //                     modal.alert("Some records encountered errors. Check the log.", 'info');
+    //                 } else {
+    //                     modal.loading_progress(true, "Finishing data...");
+    //                     setTimeout(finishImport, 500);
+    //                 }
+    //                 return;
+    //             }
+
+    //             const batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+    //             const newRecords = [];
+    //             const updateRecords = [];
+
+    //             batch.forEach(row => {
+    //                 let matchedId = null;
+    //                 if (matchType === "AND") {
+    //                     let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+    //                     if (existingMap.has(key)) {
+    //                         matchedId = existingMap.get(key);
+    //                     }
+    //                 }
+
+    //                 if (matchedId) {
+    //                     row.id = matchedId;
+    //                     row.updated_by = user_id;
+    //                     row.updated_date = formatDate(new Date());
+    //                     delete row.created_by;
+    //                     delete row.created_date;
+    //                     updateRecords.push(row);
+    //                 } else {
+    //                     row.created_by = user_id;
+    //                     row.created_date = formatDate(new Date());
+    //                     newRecords.push(row);
+    //                 }
+    //             });
+
+    //             try {
+    //                 if (updateRecords.length > 0) {
+    //                     await batchUpdateAsync(url, updateRecords, table, "id");
+    //                 }
+    //                 if (newRecords.length > 0) {
+    //                     await batchInsertAsync(url, newRecords, table);
+    //                 }
+    //             } catch (error) {
+    //                 errorLogs.push(`Batch ${batch_index}: ${error}`);
+    //             }
+
+    //             batch_index++;
+
+    //             // Update overall progress
+    //             const progress = Math.round((batch_index / total_batches) * 100);
+
+    //             updateSwalProgress(`Saving Data...`, progress);
+
+    //             // No artificial delay! Continue immediately
+    //             processNextBatch();
+    //         }
+
+    //         function finishImport() {
+    //             const headers = ['store', 'item', 'item_name']; 
+    //             const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
+
+    //             saveImportDetailsToServer(valid_data, headers, 'import_vmi', url, function(filePath) {
+    //                 const end_time = new Date();
+    //                 const duration = formatDuration(start_time, end_time);
+
+    //                 let remarks = `
+    //                     Import Completed Successfully!
+    //                     <br>Total Records: ${valid_data.length}
+    //                     <br>Start Time: ${formatReadableDate(start_time)}
+    //                     <br>End Time: ${formatReadableDate(end_time)}
+    //                     <br>Duration: ${duration}`;
+
+    //                 let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
+
+    //                 logActivity('VMI Module', 'Import Data', remarks, link, null, null);
+    //                 location.reload();
+    //             });
+    //         }
+    //         processNextBatch();
+    //     });
+    // }
 
     // Utilities
     async function batchUpdateAsync(url, records, table, key) {
@@ -1305,7 +1430,6 @@
 
         const company = $('#company_select').val()?.trim();
         const year = $('#year_select').val()?.trim();
-        // const month = $('#month_select').val()?.trim();
         const week = $('#week_select').val()?.trim();
 
         let filterArr = []
@@ -1694,49 +1818,24 @@
     }
 
     // function delete_data(company, year, month, week) 
-    function delete_data(company, year, week) 
-    {
+    function delete_data(company, year, week){   
         modal.confirm(confirm_delete_message,function(result){
             if(result){ 
+                modal.loading(true);
                 var url = "<?= base_url('cms/global_controller');?>";
-                var formattedData = [];
-                let filterArr = []
-                filterArr.push(`c.name:EQ=${company}`);
-                filterArr.push(`y.year:EQ=${year}`);
-                // filterArr.push(`m.month:EQ=${month}`);
-                filterArr.push(`w.name:EQ=${week}`);
 
-                let filter = filterArr.join(',')
+                const conditions = [
+                    { field: "year", values: [year] },
+                    { field: "company", values: [company] },
+                    { field: "week", values: [week] }
+                ];
 
-                dynamic_search(
-                    "'tbl_vmi v'", 
-    
-                    "'left join tbl_company c on v.company = c.id "+
-                    "left join tbl_year y on v.year = y.id "+
-                    // "left join tbl_month m on v.month = m.id "+
-                    "left join tbl_week w on v.week = w.id'", 
-    
-                    "'v.id'", 
-    
-                    0, 
-                    0, 
-                    `'${filter}'`,  
-                    `''`, 
-                    `''`,
-                    (res) => {
-                        const conditions = [
-                            { field: "year", values: [year] },
-                            { field: "company", values: [company] },
-                            // { field: "month", values: [month] },
-                            { field: "week", values: [week] }
-                        ];
-
-                        batch_delete_with_conditions(url, "tbl_vmi", conditions, function(resp) {
-                            modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
-                        });
-
-                    }
-                );
+                batch_delete_with_conditions(url, "tbl_vmi_pre_aggregated_data", conditions, function(resp) {
+                });
+                batch_delete_with_conditions(url, "tbl_vmi", conditions, function(resp) {
+                    modal.loading(false);    
+                    modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
+                });
             }
         });
     }

@@ -4,6 +4,7 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Models\Sync_model;
 
 class ImportVmi extends BaseController
 {
@@ -261,5 +262,29 @@ class ImportVmi extends BaseController
 		echo $result;
 	}
 
+	public function update_aggregated_vmi_data()
+	{
+	    $week = $this->request->getPost('week');
+	    $company = $this->request->getPost('company');
+	    $year = $this->request->getPost('year');
+
+	    $refresher = new Sync_model();
+
+	    if (!empty($week) && !empty($company) && !empty($year)) {
+	        $result = $refresher->refreshVmiData($week, $year, $company);
+
+	        return $this->response->setJSON([
+	            'status' => 'success',
+	            'message' => 'Refresh completed',
+	            'results' => $result
+	        ]);
+	    }
+
+	    return $this->response->setJSON([
+	        'status' => 'error',
+	        'message' => 'Missing parameters: week, company, or year',
+	        'results' => []
+	    ]);
+	}
 
 }
