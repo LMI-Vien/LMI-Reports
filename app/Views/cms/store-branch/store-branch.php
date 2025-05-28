@@ -496,111 +496,6 @@
         open_modal('View Store/Branch', 'view', id);
     };
 
-    // fully functional
-    // function open_modal(msg, actions, id) {
-    //     window.lastFocusedElement = document.activeElement;
-    //     $(".form-control").css('border-color','#ccc');
-    //     $(".validate_error_message").remove();
-    //     let $modal = $('#popup_modal');
-
-    //     let $baName_list = $('#baName_list');
-
-    //     let $footer = $modal.find('.modal-footer');
-    //     let $contentWrapper = $('.content-wrapper');
-
-    //     $modal.find('.modal-title b').html(addNbsp(msg));
-    //     reset_modal_fields();
-
-    //     let buttons = {
-    //         save: create_button('Save', 'save_data', 'btn save', function () {
-    //             if (validate.standard("form-modal")) {
-    //                 save_data('save', null);
-    //             }
-    //         }),
-    //         edit: create_button('Update', 'edit_data', 'btn update', function () {
-    //             if (validate.standard("form-modal")) {
-    //                 save_data('update', id);
-    //             }
-    //         }),
-    //         close: create_button('Close', 'close_data', 'btn caution', function () {
-    //             $modal.modal('hide');
-    //         })
-    //     };
-
-    //     // if (['edit', 'view'].includes(actions)) populate_modal(id);
-    //     if (['edit', 'view'].includes(actions)) {
-    //         populate_modal(id, actions, () => {
-    //             modal.loading(false); 
-    //         });
-    //     }
-        
-    //     let isReadOnly = actions === 'view';
-    //     set_field_state('#code, #description, #status', isReadOnly);
-
-    //     $baName_list.empty()        
-    //     $footer.empty();
-    //     if (actions === 'add') {
-            
-    //         let line = get_max_number();
-
-    //         let html = `
-    //         <div id="line_${line}" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-    //             <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador'>
-    //             <button type="button" class="rmv-btn" onclick="remove_line(${line})" disabled>
-    //                 <i class="fa fa-minus" aria-hidden="true"></i>
-    //             </button>
-    //         </div>
-    //         `;
-
-    //         $('#baName_list').append(html);
-
-    //         $(`#baName_${line}`).autocomplete({
-    //             source: function(request, response) {
-    //                 var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
-    //                 var uniqueResults = [...new Set(results)];
-    //                 response(uniqueResults.slice(0, 10));
-    //             },
-    //             minLength: 0,
-    //         }).focus(function () {
-    //             $(this).autocomplete("search", "");
-    //         });
-            
-    //         $('.add_line').attr('disabled', false)
-    //         $('.add_line').attr('readonly', false)
-    //         $footer.append(buttons.save)
-    //     };
-
-    //     // $footer.empty();
-    //     // if (actions === 'add') $footer.append(buttons.save);
-    //     // if (actions === 'edit') $footer.append(buttons.edit);
-    //     if (actions === 'edit') {
-    //         $footer.append(buttons.edit)
-    //         set_field_state('.add_line', false)
-    //     };
-    //     if (actions === 'view') {
-    //         set_field_state('.add_line', true)
-    //     }
-    //     $footer.append(buttons.close);
-
-    //     // Disable background content interaction
-    //     $contentWrapper.attr('inert', '');
-
-    //     // Move focus inside modal when opened
-    //     $modal.on('shown.bs.modal', function () {
-    //         $(this).find('input, textarea, button, select').filter(':visible:first').focus();
-    //     });
-
-    //     $modal.modal('show');
-
-    //     // Fix focus issue when modal is hidden
-    //     $modal.on('hidden.bs.modal', function () {
-    //         $contentWrapper.removeAttr('inert');  // Re-enable background interaction
-    //         if (window.lastFocusedElement) {
-    //             window.lastFocusedElement.focus();
-    //         }
-    //     });
-    // };
-
     function open_modal(msg, actions, id) {
         window.lastFocusedElement = document.activeElement;
         $(".form-control").css('border-color','#ccc');
@@ -700,6 +595,8 @@
 
         if (actions === 'edit') {
             $footer.append(buttons.edit);
+            $('.add_line').attr('disabled', false)
+            $('.add_line').attr('readonly', false)
             //set_field_state('.add_line', false);
         }
         if (actions === 'view') {

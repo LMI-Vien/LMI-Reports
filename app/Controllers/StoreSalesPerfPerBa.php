@@ -65,7 +65,7 @@ class StoreSalesPerfPerBa extends BaseController
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
 		$baId = trim($this->request->getPost('ba'));
 		$baId = $baId === '' ? null : $baId;
-		$storeId= trim($this->request->getPost('store')); //change this to store_id
+		$storeId= trim($this->request->getPost('store'));
 		$storeId = $storeId === '' ? null : $storeId;
         $brandIds = $this->request->getPost('brands');
         $brandIds = $brandIds === '' ? null : $brandIds;

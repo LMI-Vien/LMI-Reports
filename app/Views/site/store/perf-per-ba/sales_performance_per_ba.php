@@ -229,10 +229,15 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res);
+                if(parseInt($('#brandAmbassadorId').val()) === -5 || parseInt($('#brandAmbassadorId').val()) === -6){
+                    $("#storeName").val('');
+                    $("#storeNameId").val('');
+                    return;
+                }
                 if(data.length > 0){
                     if(data[0].code){
                         $("#storeName").val(data[0].code+' - '+data[0].description);
-                        $("#storeNameId").val(data[0].id);      
+                        $("#storeNameId").val(data[0].code);      
                     }             
                 }
             })
