@@ -1483,11 +1483,12 @@ function get_valid_records_store_area_asc_ba_brand() {
         ];
     }
 
-    public function delete_temp_scan($id, $filename)
+    public function delete_temp_scan($id, $month, $year)
     {
         $builder = $this->db->table('tbl_sell_out_temp_space');
         $builder->where('created_by', $id);
-        $builder->where('file_name', $filename);
+        $builder->where('year', $year);
+        $builder->where('month', $month);
         
         $deleted = $builder->delete();
 
@@ -1537,11 +1538,10 @@ function get_valid_records_store_area_asc_ba_brand() {
         ];
     }
 
-    public function delete_temp_wkonwk($id, $filename, $year, $week)
+    public function delete_temp_wkonwk($id, $year, $week)
     {
         $builder = $this->db->table('tbl_wkonwk_temp_space');
         $builder->where('created_by', $id);
-        $builder->where('file_name', $filename);
         $builder->where('year', $year);
         $builder->where('week', $week);
         

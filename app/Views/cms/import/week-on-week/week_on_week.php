@@ -5,12 +5,23 @@
         }
     }
 
+    .card {
+        margin-right: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
     .uniform-dropdown {
         height: 36px;
         font-size: 14px;
         border-radius: 5px;
         min-width: 120px; 
         flex-grow: 1; 
+    }
+    
+    .d-flex {
+        gap: 10px; 
+        margin: 5px;
     }
 
     th, td {
@@ -27,29 +38,43 @@
         </div>
 
         <div class="card-body text-center mx-3 my-3">
-            <?php
-                echo view("cms/layout/buttons",$buttons);
 
-                $optionSet = '';
-                foreach($pageOption as $pageOptionLoop) {
-                    $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
-                }
-            ?>
-
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th class='center-content'>Import Date</th>
-                        <th class='center-content'>Import File Name</th>
-                        <th class='center-content'>Imported By</th>
-                        <th class='center-content'>Year</th>
-                        <th class='center-content'>Week</th>
-                        <th class='center-content'>Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="table_body word_break">
-                </tbody>
-            </table>
+            <div class="card-body text-center">
+                <div class="box">
+                    <?php
+                        echo view("cms/layout/buttons",$buttons);
+                        $optionSet = '';
+                        foreach($pageOption as $pageOptionLoop) {
+                            $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
+                        }
+                    ?>
+                    <div class="box-body">
+                        <div class="col-md-12 list-data tbl-content" id="list-data">
+                            <table class="table table-bordered listdata">
+                                <thead>
+                                    <tr>
+                                        <th class='center-content'>Import Date</th>
+                                        <th class='center-content'>Import File Name</th>
+                                        <th class='center-content'>Imported By</th>
+                                        <th class='center-content'>Year</th>
+                                        <th class='center-content'>Week</th>
+                                        <th class='center-content'>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table_body word_break"></tbody>
+                            </table>
+                        </div>
+                        <div class="list_pagination"></div>
+                        <div class="form-group pull-right">
+                            <label>Show</label>
+                            <select class="record-entries">
+                                <?= $optionSet; ?>
+                            </select>
+                            <label>Entries</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -122,6 +147,9 @@
                                         <th>Item Class</th>
                                         <th>POG Store</th>
                                         <th>Quantity</th>
+                                        <th>SOH</th>
+                                        <th>Ave Weekly Sales</th>
+                                        <th>Weeks Cover</th>
                                     </tr>
                                 </thead>
                                 <tbody class="word_break import_table"></tbody>
@@ -166,7 +194,7 @@
     const get_data = (query) => {
         var data = {
             event : "list",
-            select : "a.id, b.year, c.username, a.created_date, a.week, a.file_name",
+            select : "a.id, b.year, c.username, a.created_date, a.week, a.year AS year_id, a.file_name",
             query : query,
             offset : offset,
             limit : limit,
@@ -222,8 +250,8 @@
                           +y.status+"' id='"
                           +y.id+"' title='Print Details'><span class='glyphicon glyphicon-pencil'>Print</span>";
 
-                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"
-                          +y.id+"')\" data-status='"
+                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"','"+y.year_id+"','"+y.week+
+                            "')\" data-status='"
                           +y.status+"' id='"
                           +y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
 
@@ -301,7 +329,6 @@
         if (output == 'xlsx') {
             let formattedData = [];
             const processResponse = (res) => {
-                console.log(res, res[0].id)
     
                 table = 'tbl_week_on_week_details';
                 join = '';
@@ -313,11 +340,10 @@
                 group = '';
                 dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
                     (res1) => {
-                        console.log(res1[0].checker)
                         for (let index = 0; index < res1[0].checker; index += 100000) {
                             table = 'tbl_week_on_week_details';
                             join = '';
-                            fields = 'item, item_class, label_type, status, item_class, pog_store, quantity';
+                            fields = 'item, item_class, label_type, status, item_class, pog_store, quantity, soh, ave_weekly_sales, weeks_cover';
                             limit = 100000;
                             offset = index;
                             filter = `header_id:EQ=${id}`;
@@ -325,7 +351,6 @@
                             group = '';
                             dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
                                 (res2) => {
-                                    console.log(res2)
                                     res2.forEach(item => {
                                         let newData = {
                                             "Item": item.item,
@@ -335,6 +360,9 @@
                                             "Item Class": item.item_class,
                                             "POG Store": item.pog_store,
                                             "Quantity": item.quantity,
+                                            "SOH": item.soh,
+                                            "Ave Weekly Sales": item.ave_weekly_sales,
+                                            "Weeks Cover": item.weeks_cover,
                                         }
                                         formattedData.push(newData);
                                     })
@@ -385,32 +413,67 @@
         })
     }
     
-    function delete_data(id) {
+    // function delete_data(id, year_id, week) {
+    //     modal.confirm(confirm_delete_message,function(result){
+    //         if (result) {
+    //             modal.loading_progress(true, "Reviewing Data...");
+    //             setTimeout(() => {
+    //                 var url = "<?= base_url('cms/global_controller');?>";
+    //                 var data = {
+    //                     event : "update",
+    //                     table : "tbl_week_on_week_header",
+    //                     field : "id",
+    //                     where : id, 
+    //                     data : {
+    //                             updated_date : formatDate(new Date()),
+    //                             updated_by : user_id,
+    //                             status : -2
+    //                     }  
+    //                 }
+    //                 aJax.post(url,data,function(result){
+    //                     var obj = is_json(result);
+    //                     modal.alert(success_delete_message, 'success', function() {
+    //                         location.reload();
+    //                     });
+    //                 });                     
+    //             }, 500);
+    //         }
+    //     })
+    // }
+
+    function delete_data(id, year_id, week){   
         modal.confirm(confirm_delete_message,function(result){
-            if (result) {
-                modal.loading_progress(true, "Reviewing Data...");
-                setTimeout(() => {
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var data = {
-                        event : "update",
-                        table : "tbl_week_on_week_header",
-                        field : "id",
-                        where : id, 
-                        data : {
-                                updated_date : formatDate(new Date()),
-                                updated_by : user_id,
-                                status : -2
-                        }  
-                    }
-                    aJax.post(url,data,function(result){
-                        var obj = is_json(result);
-                        modal.alert(success_delete_message, 'success', function() {
-                            location.reload();
-                        });
-                    });                     
-                }, 500);
+            if(result){ 
+                modal.loading(true);
+                var url = "<?= base_url('cms/global_controller');?>";
+
+                const header_conditions = [
+                    { field: "year", values: [year_id] },
+                    { field: "id", values: [id] },
+                    { field: "week", values: [week] }
+                ];
+
+                const details_conditions = [
+                    { field: "year", values: [year_id] },
+                    { field: "header_id", values: [id] },
+                    { field: "week", values: [week] }
+                ];
+
+                const conditions = [
+                    { field: "year", values: [year_id] },
+                    { field: "week", values: [week] }
+                ];
+
+                batch_delete_with_conditions(url, "tbl_week_on_week_vmi_pre_aggregated_data", conditions, function(resp) {
+                });
+                batch_delete_with_conditions(url, "tbl_week_on_week_header", header_conditions, function(resp) {
+                    batch_delete_with_conditions(url, "tbl_week_on_week_details", details_conditions, function(resp) {
+                        modal.loading(false);
+                        modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
+                    });
+                });
             }
-        })
+        });
     }
 
     function updateWeeks() {
@@ -482,7 +545,6 @@
             type: "POST",
             data: { 
                 action: "delete_temp_records",
-                file_name: file_name,
                 year : $("#year").val(),
                 week: $("#week").val(),
             },
@@ -529,7 +591,7 @@
             formData.append("fileName", file.name);
             formData.append("year", $("#year").val());
             formData.append("week", $("#week").val());
-
+            // return
             try {
                 let response = await fetch("<?= base_url('cms/import-week-on-week/import-temp-wkonwk-data'); ?>", {
                     method: "POST",
@@ -592,7 +654,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['line_number','item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'];
+            let td_validator = ['line_number','item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity', 'soh', 'ave_weekly_sales', 'weeks_cover'];
             td_validator.forEach(column => {
                 let value = "";
                 if (column == 'line_number') {
@@ -667,7 +729,10 @@
                 "ITEM CLASS":"", 
                 "HOLD REASON CODE":"", 
                 "POG STORES":"", 
-                "YYYYWW":"", 
+                "YYYYWW":"",
+                "SOH":"", 
+                "AVE WEEKLY SALES":"",
+                "WEEKS COVER":"",
                 "NOTE:": "For column header: YYYYWW"
             },
             {
@@ -679,6 +744,9 @@
                 "HOLD REASON CODE":"", 
                 "POG STORES":"", 
                 "YYYYWW":"", 
+                "SOH":"", 
+                "AVE WEEKLY SALES":"",
+                "WEEKS COVER":"",
                 "NOTE:": "Please remember to change the column header to reflect the year and the week (eg. 202401, 202402)."
             },
             {
@@ -690,6 +758,9 @@
                 "HOLD REASON CODE":"", 
                 "POG STORES":"", 
                 "YYYYWW":"", 
+                "SOH":"", 
+                "AVE WEEKLY SALES":"",
+                "WEEKS COVER":"",
                 "NOTE:": "Please remember to delete these notes before processing the data."
             },
             {
@@ -700,7 +771,10 @@
                 "ITEM CLASS":"", 
                 "HOLD REASON CODE":"", 
                 "POG STORES":"", 
-                "YYYYWW":"", 
+                "YYYYWW":"",
+                "SOH":"", 
+                "AVE WEEKLY SALES":"",
+                "WEEKS COVER":"", 
                 "NOTE:": "Thank you!"
             }
         ]
@@ -758,7 +832,6 @@
             null,
             false, 
             function(exists, duplicateFields) {
-                console.log(exists, duplicateFields)
                 if (!exists) {
                     modal.loading(true, "Fetching all data from temporary table...");
 
@@ -891,117 +964,22 @@
         let table = 'tbl_week_on_week_details';
         const start_time = new Date();
 
-        let selected_fields = [
-            'id', 'header_id', 'file_name', 'line_number', 'item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'
-        ];
+        modal.loading_progress(true, "Saving validated data...");
 
-        const matchFields = [
-            'header_id', 'file_name', 'line_number', 'item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'
-        ];  
+        function processNextBatch() {
+            if (batch_index >= total_batches) {
+                modal.loading_progress(false);
 
-        const filters = [
-            '2025',
-            '3'
-        ];  
-
-        const matchType = "AND";  // Use "AND" or "OR" for matching logic
-
-        modal.loading_progress(true, "Validating and Saving data...");
-        let existingMap = new Map();
-        aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters:filters}, function(response) {
-            let result = JSON.parse(response);
-            let existingMap = new Map();
-
-            if (result.existing) {
-                result.existing.forEach(record => {
-                    let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
-                    existingMap.set(key, record.id);
-                });
-            }
-
-            function processNextBatch() {
-                if (batch_index >= total_batches) {
-                    modal.loading_progress(false);
-                    if (errorLogs.length > 0) {
-                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                        modal.alert("Some records encountered errors. Check the log.", 'info');
-                    } else {
-                        modal.loading_progress(true, "Finishing data...");
-                        delete_temp_data();
-                        setTimeout(function(){
-                            modal.alert("All records saved/updated successfully!", 'success', function() {
-                                let logData = [];
-                                logData = valid_data.map(record => ({
-                                    ...record,
-                                    header_id: data_header_id,
-                                    created_date: formatDate(new Date()),
-                                    created_by: '<?=$session->sess_uid;?>',
-                                    week: $("#week").val(),
-                                    year: $("#year").val()
-                                }));
-                                logAll(start_time, logData)
-                                // let href = "<?= base_url() ?>" + "cms/import-week-on-week/";
-                                // window.location.href = href;
-                                window.location.href = "<?= base_url('cms/import-week-on-week') ?>";
-                            });
-                        }, 1000);
-                    }
-                    return;
-                }
-
-                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-                let newRecords = [];
-                let updateRecords = [];
-
-                batch.forEach(row => {
-                    let matchedId = null;
-
-                    if (matchType === "AND") {
-                        let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
-                        if (existingMap.has(key)) {
-                            matchedId = existingMap.get(key);
-                        }
-                    } else if (matchType === "OR") {
-                        for (let [key, id] of existingMap.entries()) {
-                            let keyParts = key.split("|");
-                            for (let field of matchFields) {
-                                if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
-                                    matchedId = id;
-                                    break; 
-                                }
-                            }
-                            if (matchedId) break;
-                        }
-                    }
-
-                    if (matchedId) {
-                        row.id = matchedId;
-                        updateRecords.push(row);
-                    } else {
-                        newRecords.push(row);
-                    }
-                });
-
-                function processUpdates() {
-                    return new Promise((resolve) => {
-                        if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, table, "id", false, (response) => {
-                                if (response.message !== 'success') {
-                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                                }
-                                updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function processInserts() {
-                    return new Promise((resolve) => {
-                        if (newRecords.length > 0) {
-                            newRecords = batch.map(record => ({
+                if (errorLogs.length > 0) {
+                    createErrorLogFile(errorLogs, "Insert_Error_Log_" + formatReadableDate(new Date(), true));
+                    modal.alert("Some records encountered errors. Check the log.", 'info');
+                } else {
+                    modal.loading_progress(true, "Finalizing data...");
+                    delete_temp_data();
+                    updateAggregatedVMIWbWData(data_header_id, $("#week").val(), $("#year").val());
+                    setTimeout(function() {
+                        modal.alert("All records inserted successfully!", 'success', function() {
+                            let logData = valid_data.map(record => ({
                                 ...record,
                                 header_id: data_header_id,
                                 created_date: formatDate(new Date()),
@@ -1009,35 +987,206 @@
                                 week: $("#week").val(),
                                 year: $("#year").val()
                             }));
-                            batch_insert(url, newRecords, table, false, (response) => {
-                                if (response.message === 'success') {
-                                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
-                                } else {
-                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
+                            logAll(start_time, logData);
+                            window.location.href = "<?= base_url('cms/import-week-on-week') ?>";
+                        });
+                    }, 1000);
                 }
-
-                processUpdates()
-                    .then(processInserts)
-                    .then(() => {
-                        batch_index++;
-                        setTimeout(processNextBatch, 300);
-                    })
-                    .catch(error => {
-                        errorLogs.push(`Unexpected error: ${error}`);
-                        processNextBatch();
-                    });
+                return;
             }
 
-            setTimeout(processNextBatch, 1000);
-        });
+            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+
+            let newRecords = batch.map(record => ({
+                ...record,
+                header_id: data_header_id,
+                created_date: formatDate(new Date()),
+                created_by: '<?=$session->sess_uid;?>',
+                week: $("#week").val(),
+                year: $("#year").val()
+            }));
+
+            batch_insert(url, newRecords, table, false, (response) => {
+                if (response.message === 'success') {
+                    updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+                } else {
+                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                }
+                batch_index++;
+                setTimeout(processNextBatch, 300);
+            });
+        }
+
+        setTimeout(processNextBatch, 1000);
+    };
+
+
+    function updateAggregatedVMIWbWData(data_header_id, week, year){
+        const update_url = "<?= base_url('cms/import-week-on-week/update-aggregated-week-vmi-data');?>";
+        const data = {
+            data_header_id: data_header_id,
+            week: week,
+            year: year,
+        };
+        aJax.post(update_url, data, function (result) {});
     }
+
+    // const saveValidatedData = (valid_data, data_header_id) => {
+    //     let batch_size = 5000;
+    //     let total_batches = Math.ceil(valid_data.length / batch_size);
+    //     let batch_index = 0;
+    //     let errorLogs = [];
+    //     let url = "<?= base_url('cms/global_controller');?>";
+    //     let table = 'tbl_week_on_week_details';
+    //     const start_time = new Date();
+
+    //     let selected_fields = [
+    //         'id', 'header_id', 'file_name', 'line_number', 'item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'
+    //     ];
+
+    //     const matchFields = [
+    //         'header_id', 'file_name', 'line_number', 'item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'
+    //     ];  
+
+    //     const filters = [
+    //         '2025',
+    //         '3'
+    //     ];  
+
+    //     const matchType = "AND";  // Use "AND" or "OR" for matching logic
+
+    //     modal.loading_progress(true, "Validating and Saving data...");
+    //     let existingMap = new Map();
+    //     aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters:filters}, function(response) {
+    //         let result = JSON.parse(response);
+    //         let existingMap = new Map();
+
+    //         if (result.existing) {
+    //             result.existing.forEach(record => {
+    //                 let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
+    //                 existingMap.set(key, record.id);
+    //             });
+    //         }
+
+    //         function processNextBatch() {
+    //             if (batch_index >= total_batches) {
+    //                 modal.loading_progress(false);
+    //                 if (errorLogs.length > 0) {
+    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+    //                     modal.alert("Some records encountered errors. Check the log.", 'info');
+    //                 } else {
+    //                     modal.loading_progress(true, "Finishing data...");
+    //                     delete_temp_data();
+    //                     setTimeout(function(){
+    //                         modal.alert("All records saved/updated successfully!", 'success', function() {
+    //                             let logData = [];
+    //                             logData = valid_data.map(record => ({
+    //                                 ...record,
+    //                                 header_id: data_header_id,
+    //                                 created_date: formatDate(new Date()),
+    //                                 created_by: '<?=$session->sess_uid;?>',
+    //                                 week: $("#week").val(),
+    //                                 year: $("#year").val()
+    //                             }));
+    //                             logAll(start_time, logData)
+    //                             // let href = "<?= base_url() ?>" + "cms/import-week-on-week/";
+    //                             // window.location.href = href;
+    //                             window.location.href = "<?= base_url('cms/import-week-on-week') ?>";
+    //                         });
+    //                     }, 1000);
+    //                 }
+    //                 return;
+    //             }
+
+    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+    //             let newRecords = [];
+    //             let updateRecords = [];
+
+    //             batch.forEach(row => {
+    //                 let matchedId = null;
+
+    //                 if (matchType === "AND") {
+    //                     let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
+    //                     if (existingMap.has(key)) {
+    //                         matchedId = existingMap.get(key);
+    //                     }
+    //                 } else if (matchType === "OR") {
+    //                     for (let [key, id] of existingMap.entries()) {
+    //                         let keyParts = key.split("|");
+    //                         for (let field of matchFields) {
+    //                             if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
+    //                                 matchedId = id;
+    //                                 break; 
+    //                             }
+    //                         }
+    //                         if (matchedId) break;
+    //                     }
+    //                 }
+
+    //                 if (matchedId) {
+    //                     row.id = matchedId;
+    //                     updateRecords.push(row);
+    //                 } else {
+    //                     newRecords.push(row);
+    //                 }
+    //             });
+
+    //             function processUpdates() {
+    //                 return new Promise((resolve) => {
+    //                     if (updateRecords.length > 0) {
+    //                         batch_update(url, updateRecords, table, "id", false, (response) => {
+    //                             if (response.message !== 'success') {
+    //                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+    //                             }
+    //                             updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
+    //                             resolve();
+    //                         });
+    //                     } else {
+    //                         resolve();
+    //                     }
+    //                 });
+    //             }
+
+    //             function processInserts() {
+    //                 return new Promise((resolve) => {
+    //                     if (newRecords.length > 0) {
+    //                         newRecords = batch.map(record => ({
+    //                             ...record,
+    //                             header_id: data_header_id,
+    //                             created_date: formatDate(new Date()),
+    //                             created_by: '<?=$session->sess_uid;?>',
+    //                             week: $("#week").val(),
+    //                             year: $("#year").val()
+    //                         }));
+    //                         batch_insert(url, newRecords, table, false, (response) => {
+    //                             if (response.message === 'success') {
+    //                                 updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
+    //                             } else {
+    //                                 errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+    //                             }
+    //                             resolve();
+    //                         });
+    //                     } else {
+    //                         resolve();
+    //                     }
+    //                 });
+    //             }
+
+    //             processUpdates()
+    //                 .then(processInserts)
+    //                 .then(() => {
+    //                     batch_index++;
+    //                     setTimeout(processNextBatch, 300);
+    //                 })
+    //                 .catch(error => {
+    //                     errorLogs.push(`Unexpected error: ${error}`);
+    //                     processNextBatch();
+    //                 });
+    //         }
+
+    //         setTimeout(processNextBatch, 1000);
+    //     });
+    // }
 
     function logAll(start_time, valid_data) {
         const headers = 
@@ -1055,11 +1204,13 @@
             `quantity`, 
             `header_id`, 
             `year`, 
-            `week`
+            `week`,
+            `soh`,
+            `ave_weekly_sales`,
+            `weeks_cover`
         ];
         const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
         saveImportDetailsToServer(valid_data, headers, 'import_sales_file', url, function(filePath) {
-            console.log(valid_data[0])
             const end_time = new Date();
             const duration = formatDuration(start_time, end_time);
 

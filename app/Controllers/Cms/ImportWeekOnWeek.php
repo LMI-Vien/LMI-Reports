@@ -5,6 +5,7 @@ namespace App\Controllers\Cms;
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Libraries\TCPDFLib;
+use App\Models\Sync_model;
 
 class ImportWeekOnWeek extends BaseController
 {
@@ -61,7 +62,8 @@ class ImportWeekOnWeek extends BaseController
 	        $fileName = $this->request->getPost('fileName');
 			$year = $this->request->getPost('year');
 			$week = $this->request->getPost('week');
-
+			// print_r($year);
+			// die();
 			if (!$file) {
 				return $this->response->setJSON(['message' => 'No file received.']);
 			}
@@ -71,7 +73,14 @@ class ImportWeekOnWeek extends BaseController
 			$tempDir = WRITEPATH . 'uploads/temp_chunks/';
 	        if (!is_dir($tempDir)) {
 	            mkdir($tempDir, 0777, true);
-	        }			
+	        }		
+
+	        foreach (glob($tempDir . '*') as $tempFile) {
+	            if (filemtime($tempFile) < time() - 86400) { // 86400 seconds = 1 day
+	                unlink($tempFile);
+	            }
+	        }
+
 			$tempFilePath = $tempDir . $fileName . "_part_" . $chunkIndex;
 			$file->move($tempDir, $fileName . "_part_" . $chunkIndex);
 
@@ -127,6 +136,9 @@ class ImportWeekOnWeek extends BaseController
 									'item_class' => trim($row[4] ?? ''),
 									'pog_store' => trim($row[6] ?? ''),
 									'quantity' => trim($row[7] ?? ''),
+									'soh' => trim($row[8] ?? ''),
+									'ave_weekly_sales' => trim($row[9] ?? ''),
+									'weeks_cover' => trim($row[10] ?? ''),
 								];
 							}
 				
@@ -168,6 +180,9 @@ class ImportWeekOnWeek extends BaseController
 								'item_class' => trim($row[4] ?? ''), // look here
 								'pog_store' => trim($row[6] ?? ''), // look here
 								'quantity' => trim($row[7] ?? ''), // look here
+								'soh' => trim($row[8] ?? ''), // look here
+								'ave_weekly_sales' => trim($row[9] ?? ''), // look here
+								'weeks_cover' => trim($row[10] ?? ''), // look here
 							];
 						}
 
@@ -222,11 +237,35 @@ class ImportWeekOnWeek extends BaseController
 	}
 
 	public function deleteTempWeekOnWeekData(){
-		$file_name = $this->request->getPost('file_name');
 		$year = $this->request->getPost('year');
 		$week = $this->request->getPost('week');
-		$result = $this->Global_model->delete_temp_wkonwk($this->session->get('sess_uid'), $file_name, $year, $week);
+		$result = $this->Global_model->delete_temp_wkonwk($this->session->get('sess_uid'), $year, $week);
 		echo $result;
+	}
+
+	public function updateAggregatedWoWData()
+	{
+	    $dataHeaderId = $this->request->getPost('data_header_id');
+	    $week = $this->request->getPost('week');
+	    $year = $this->request->getPost('year');
+
+	    $refresher = new Sync_model();
+
+	    if (!empty($dataHeaderId) && !empty($week) && !empty($year)) {
+	        $result = $refresher->refreshVmiWoWData($dataHeaderId, $week, $year);
+
+	        return $this->response->setJSON([
+	            'status' => 'success',
+	            'message' => 'Refresh completed',
+	            'results' => $result
+	        ]);
+	    }
+
+	    return $this->response->setJSON([
+	        'status' => 'error',
+	        'message' => 'Missing parameters: data_header_id, week, or year',
+	        'results' => []
+	    ]);
 	}
 
 	public function printWeekOnWeekData()
@@ -255,7 +294,7 @@ class ImportWeekOnWeek extends BaseController
 
 		$tbl_name = "'tbl_week_on_week_details'";
 		$join = "''";
-		$table_fields = "'item, item_name, label_type, status, item_class, pog_store, quantity'";
+		$table_fields = "'item, item_name, label_type, status, item_class, pog_store, quantity, soh, ave_weekly_sales, weeks_cover'";
 		$limit = 1000;
 		$offset = 0;
 		$conditions = "'header_id:EQ=$id'";
@@ -298,6 +337,9 @@ class ImportWeekOnWeek extends BaseController
 		$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 1, 10 + ($width * 4), 35);
 		$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 1, 10 + ($width * 5), 35);
 		$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 1, 10 + ($width * 6), 35);
+		$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 6), 35);
+		$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 6), 35);
+		$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 6), 35);
 
 		$h = 45;
 		$pdf->SetFont('helvetica', '', 9);
@@ -322,6 +364,9 @@ class ImportWeekOnWeek extends BaseController
 				$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 1, 10 + ($width * 4), 35);
 				$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 1, 10 + ($width * 5), 35);
 				$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 1, 10 + ($width * 6), 35);
+				$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 6), 35);
+				$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 6), 35);
+				$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 6), 35);
 
 				$h = 30;
 				$pdf->SetFont('helvetica', '', 9);
@@ -334,6 +379,9 @@ class ImportWeekOnWeek extends BaseController
 			$pdf->MultiCell($width, $rowHeight, ($value['item_class'] ?? ''), 0, '', false, 1, 10 + ($width * 4), $h);
 			$pdf->MultiCell($width, $rowHeight, ($value['pog_store'] ?? ''), 0, '', false, 1, 10 + ($width * 5), $h);
 			$pdf->MultiCell($width, $rowHeight, ($value['quantity'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['soh'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['ave_weekly_sales'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['weeks_cover'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
 
 			$h += $rowHeight * 2;
 		}

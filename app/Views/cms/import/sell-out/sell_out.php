@@ -1483,8 +1483,8 @@
                 batch_delete_with_conditions(url, "tbl_sell_out_pre_aggregated_data", aggregated_conditions, function(resp) {
 
                 });
-                batch_delete_with_conditions(url, "tbl_sell_out_data_details", details_conditions, function(resp) {
-                    batch_delete_with_conditions(url, "tbl_sell_out_data_header", header_conditions, function(resp) {
+                batch_delete_with_conditions(url, "tbl_sell_out_data_header", header_conditions, function(resp) {
+                    batch_delete_with_conditions(url, "tbl_sell_out_data_details", details_conditions, function(resp) {
                         modal.loading(false);
                         modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                     });

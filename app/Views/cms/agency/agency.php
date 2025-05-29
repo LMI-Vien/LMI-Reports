@@ -299,10 +299,14 @@
         });
     }
 
+
     pagination.onchange(function(){
         offset = $(this).val();
         get_data(query, column_filter, order_filter);
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
     });
+
 
     $(document).on('keydown', '#search_query', function(event) {
         $('.btn_status').hide();

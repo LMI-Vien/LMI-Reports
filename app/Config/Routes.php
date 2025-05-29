@@ -115,6 +115,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->match(['GET', 'POST'], 'import-temp-wkonwk-data', 'Cms\ImportWeekOnWeek::importTempWeekOnWeekData');
         $routes->match(['GET', 'POST'], 'fetch-temp-wkonwk-data', 'Cms\ImportWeekOnWeek::fetchTempWeekOnWeekData');
         $routes->match(['GET', 'POST'], 'delete-temp-wkonwk-data', 'Cms\ImportWeekOnWeek::deleteTempWeekOnWeekData');
+        $routes->post('update-aggregated-week-vmi-data', 'Cms\ImportWeekOnWeek::updateAggregatedWoWData');
         $routes->match(['GET', 'POST'], 'print-temp-wkonwk-data', 'Cms\ImportWeekOnWeek::printWeekOnWeekData');
         $routes->match(['GET', 'POST'], 'delete-wkonwk-data', 'Cms\ImportWeekOnWeek::deleteWeekOnWeekData');
     });

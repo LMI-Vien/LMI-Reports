@@ -1425,6 +1425,127 @@ class Sync_model extends Model
         ];
     }
 
+    public function refreshVmiWoWData($dataHeaderId = null, $week = null, $year = null)
+    {
+
+        $whereClause = '';
+
+        if ($dataHeaderId && $week && $year) {
+            $whereClause = "WHERE week_vmi.header_id = {$dataHeaderId} AND week_vmi.week = {$week} AND week_vmi.year = {$year}";
+        }
+        $sql = "
+
+            WITH
+                dedup_pclmi AS (
+                    SELECT cusitmcde, MIN(itmcde) AS itmcde
+                    FROM tbl_price_code_file_2_lmi
+                    GROUP BY cusitmcde
+                ),
+                dedup_pcrgdi AS (
+                    SELECT cusitmcde, MIN(itmcde) AS itmcde
+                    FROM tbl_price_code_file_2_rgdi
+                    GROUP BY cusitmcde
+                ),
+                dedup_pitmlmi AS (
+                    SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+                    FROM tbl_itemfile_lmi
+                    GROUP BY itmcde
+                ),
+                dedup_itmrgdi AS (
+                    SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+                    FROM tbl_itemfile_rgdi
+                    GROUP BY itmcde
+                ),
+                aggregated_week_vmi AS (
+                    SELECT
+                        week_vmi.id,
+                        week_vmi.item,
+                        week_vmi.item_name,
+                        week_vmi.label_type,
+                        week_vmi.item_class,
+                        week_vmi.pog_store,
+                        ROUND(SUM(COALESCE(week_vmi.quantity, 0)), 2) AS quantity,
+                        ROUND(SUM(COALESCE(week_vmi.soh, 0)), 2) AS soh,
+                        ROUND(SUM(COALESCE(week_vmi.ave_weekly_sales, 0)), 2) AS ave_weekly_sales,
+                        ROUND(SUM(COALESCE(week_vmi.weeks_cover, 0)), 2) AS weeks_cover,
+                        week_vmi.year,
+                        week_vmi.week,
+                        week_vmi.status
+                    FROM tbl_week_on_week_details week_vmi
+                    {$whereClause}
+                    GROUP BY week_vmi.year, week_vmi.week, week_vmi.item
+                ),
+                joined_data AS (
+                    SELECT
+                        avmi.*,
+                        COALESCE(pclmi.itmcde, pcrgdi.itmcde) AS itmcde,
+                        COALESCE(pitmlmi.brncde, itmrgdi.brncde) AS brncde,
+                        COALESCE(pitmlmi.itmclacde, itmrgdi.itmclacde) AS itmclacde,
+                        CASE 
+                            WHEN pclmi.itmcde IS NOT NULL THEN '2'  -- LMI
+                            ELSE '1'  -- RGDI
+                        END AS company
+                    FROM aggregated_week_vmi avmi
+                    LEFT JOIN dedup_pclmi pclmi ON avmi.item = pclmi.cusitmcde
+                    LEFT JOIN dedup_pcrgdi pcrgdi ON avmi.item = pcrgdi.cusitmcde
+                    LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde
+                    LEFT JOIN dedup_itmrgdi itmrgdi ON pcrgdi.itmcde = itmrgdi.itmcde
+                ),
+                final_data AS (
+                    SELECT
+                        jd.year,
+                        jd.week,
+                        jd.status,
+                        blt.id AS brand_type_id,
+                        bbt.sfa_filter AS brand_term_id,
+                        b.id AS tracc_brand_id,
+                        jd.label_type,
+                        jd.pog_store,
+                        SUM(jd.quantity) AS quantity,
+                        SUM(jd.soh) AS soh,
+                        SUM(jd.ave_weekly_sales) AS ave_weekly_sales,
+                        SUM(jd.weeks_cover) AS weeks_cover,
+                        jd.itmcde,
+                        jd.brncde,
+                        jd.itmclacde,
+                        jd.item,
+                        jd.item_name,
+                        jd.item_class
+                    FROM joined_data jd
+                    LEFT JOIN tbl_brand b ON jd.brncde = b.brand_code
+                    LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
+                    LEFT JOIN tbl_brand_terms bbt ON b.terms_id = bbt.id
+                    GROUP BY
+                        jd.year,
+                        jd.week,
+                        jd.item,
+                        jd.item_class,
+                        blt.id,
+                        bbt.sfa_filter,
+                        jd.brncde,
+                        b.id
+                )
+                SELECT * FROM final_data";
+
+        $query = $this->sfaDB->query($sql);
+        $allData = $query->getResultArray();
+
+        if (!$dataHeaderId || !$week || !$year) {
+            $this->sfaDB->table('tbl_week_on_week_vmi_pre_aggregated_data')->truncate();
+        }
+
+        $batchSize = 10000;
+        $chunks = array_chunk($allData, $batchSize);
+
+        foreach ($chunks as $chunk) {
+            $this->sfaDB->table('tbl_week_on_week_vmi_pre_aggregated_data')->insertBatch($chunk);
+        }
+
+        return [
+            'total_inserted' => count($allData)
+        ];
+    }
+
     public function refreshAll()
     {
         $scanResult = $this->refreshScanData();

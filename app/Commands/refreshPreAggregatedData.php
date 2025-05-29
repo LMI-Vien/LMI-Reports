@@ -26,7 +26,11 @@ class refreshPreAggregatedData extends BaseCommand
             CLI::write('Refreshing VMI Data...', 'yellow');
             $vmi = $refresher->refreshVmiData();
             CLI::write('VMI records inserted: ' . $vmi['total_inserted'], 'green');
-        } else {
+        } elseif($type === 'weekvmi'){
+            CLI::write('Refreshing Week on Week VMI Data...', 'yellow');
+            $vmi = $refresher->refreshVmiWoWData();
+            CLI::write('Week on Week VMI records inserted: ' . $vmi['total_inserted'], 'green');
+        }else {
             CLI::write('Refreshing All Data...', 'yellow');
             $all = $refresher->refreshAll();
             CLI::write('Scan records inserted: ' . $all['scan']['total_inserted'], 'green');

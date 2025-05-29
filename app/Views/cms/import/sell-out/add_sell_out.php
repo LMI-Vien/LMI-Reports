@@ -198,7 +198,7 @@
             formData.append("chunkIndex", chunkIndex);
             formData.append("totalChunks", totalChunks);
             formData.append("fileName", file.name);
-            formData.append("header_id", "1");
+           // formData.append("header_id", "1");
             formData.append("month", getMonthIdByName($("#month").val()));
             formData.append("year", $("#year").val());
             formData.append("customer_payment_group", $('#paygrp').val());
@@ -257,15 +257,16 @@
     }
 
     function delete_temp_data() {
-        const file = $("#file")[0].files[0];
-        let file_name = file.name;
+        const month = getMonthIdByName($("#month").val());
+        const year = $("#year").val();
 
         $.ajax({
             url: "<?= base_url('cms/import-sell-out/delete-temp-scan-data'); ?>",
             type: "POST",
             data: { 
                 action: "delete_temp_records",
-                file_name: file_name
+                month: month,
+                year: year
             },
             success: function (response) { },
             error: function (xhr, status, error) { }
@@ -536,13 +537,13 @@
                 } else {
                     modal.loading_progress(true, "Finishing data...");
                     delete_temp_data();
+                    updateAggregatedScanData(data_header_id, month, year);
+                    logAll(start_time, valid_data);
                     setTimeout(() => {
                         modal.alert(
                             "All records inserted successfully!", 'success',
                             () => {
-                                updateAggregatedScanData(data_header_id, month, year);
-                                logAll(start_time, valid_data);
-                                //window.location.href = "<?= base_url('cms/import-sell-out') ?>";
+                                window.location.href = "<?= base_url('cms/import-sell-out') ?>";
                             }
                         );
                     }, 1000);

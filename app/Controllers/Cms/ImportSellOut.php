@@ -126,7 +126,7 @@ class ImportSellOut extends BaseController
 			$chunkIndex = $this->request->getPost('chunkIndex');
 	        $totalChunks = $this->request->getPost('totalChunks');
 	        $fileName = $this->request->getPost('fileName');
-			$header_id = $this->request->getPost('header_id');
+			//$header_id = $this->request->getPost('header_id');
 			$month = $this->request->getPost('month');
 			$year = $this->request->getPost('year');
 			$customer_payment_group = $this->request->getPost('customer_payment_group');
@@ -211,7 +211,7 @@ class ImportSellOut extends BaseController
 									'created_date' => date('Y-m-d H:i:s'),
 									'created_by' => $this->session->get('sess_uid'),
 									'stuff' => $line_number.'_stuff',
-									'data_header_id' => $header_id,
+									//'data_header_id' => $header_id,
 									'month' => $month,
 									'year' => $year,
 									'customer_payment_group' => $customer_payment_group,
@@ -266,7 +266,7 @@ class ImportSellOut extends BaseController
 								'created_date' => date('Y-m-d H:i:s'),
 								'created_by' => $this->session->get('sess_uid'),
 								'stuff' => $line_number.'_stuff',
-								'data_header_id' => $header_id,
+								//'data_header_id' => $header_id,
 								'month' => $month,
 								'year' => $year,
 								'customer_payment_group' => $customer_payment_group,
@@ -332,8 +332,9 @@ class ImportSellOut extends BaseController
 	}
 
 	public function delete_temp_scan_data(){
-		$file_name = $this->request->getPost('file_name');
-		$result = $this->Global_model->delete_temp_scan($this->session->get('sess_uid'), $file_name);
+		$month = $this->request->getPost('month');
+		$year = $this->request->getPost('year');
+		$result = $this->Global_model->delete_temp_scan($this->session->get('sess_uid'), $month, $year);
 		echo $result;
 	}
 
