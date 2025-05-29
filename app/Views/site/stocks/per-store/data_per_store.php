@@ -73,7 +73,7 @@
                                     <tr>
                                         <th class="tbl-title-field">LMI/RGDI Code</th>
                                         <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Quantity</th>
+                                        <th class="tbl-title-field">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -109,7 +109,7 @@
                                     <tr>
                                         <th class="tbl-title-field">LMI/RGDI Code</th>
                                         <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Quantity</th>
+                                        <th class="tbl-title-field">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -145,7 +145,7 @@
                                     <tr>
                                         <th class="tbl-title-field">LMI/RGDI Code</th>
                                         <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Quantity</th>
+                                        <th class="tbl-title-field">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>

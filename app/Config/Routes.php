@@ -19,6 +19,7 @@ $routes->group('stocks/', static function ($routes) {
 
     //all store
     $routes->get('data-all-store', 'StocksAllStore::dataAllStore');
+    $routes->get('get-data-all-store', 'StocksAllStore::GetdataAllStore');
     $routes->post('get-data-all-store', 'StocksAllStore::GetdataAllStore');
     $routes->get('all-store-generate-pdf', 'StocksAllStore::generatePdf');
     $routes->get('all-store-generate-excel-ba', 'StocksAllStore::generateExcel');

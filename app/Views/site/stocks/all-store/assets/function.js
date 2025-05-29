@@ -2,7 +2,7 @@
         itemClassi.forEach(function (item) {
           $('#itemClass').append(
             $('<option>', {
-              value: item.id,
+              value: item.item_class_code,
               text: item.item_class_description
             })
           );
@@ -10,48 +10,24 @@
 
         $('#itemClass').select2({ placeholder: 'Please Select...' });
         $('#inventoryStatus').select2({ placeholder: 'Please Select...' });
-        autocomplete_field($("#itemLabel"), $("#itemLabelId"), brandLabel, "label");
+        autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), brandLabel, "label");
         autocomplete_field($("#vendorName"), $("#vendorNameId"), company, "name");
-
-        $(document).on('click', '#clearButton', function () {
-            $('input[type="text"], input[type="number"]').val('');
-            $('input[type="checkbox"]').prop('checked', false);
-            $('input[name="coveredASC"][value="with_ba"]').prop('checked', false);
-            $('input[name="coveredASC"][value="without_ba"]').prop('checked', false);
-            $('select').prop('selectedIndex', 0);
-            $('.select2').val(null).trigger('change');
-            $('.hide-div').hide();
-            $('.table-empty').show();
-            $('#refreshButton').click();
-        });
-        
-        var remarks = `Successfully Sync Tracc to Ginee Inventory!\nSaving Time:\nStart: 2025-01-09 03:38:08 PM\nEnd: 2025-01-09 03:38:09 PM\nDuration: 1 Second.\n\nDetails:\nSKU: CD020 - Cathy Doll Aqua Non Greasy Body Sun Serum SPF50 10ml`;
-        logActivity('Inventory', 'Sync', remarks);
     });
 
-    function logActivity(module, action, remarks) {
-        $.ajax({
-            url: base_url+"cms/global_controller/log", 
-            method: 'POST',
-            data: {
-                module: module,
-                action: action,
-                remarks: remarks
-            },
-            success: function(response) {
-                console.log(response.message); // success confirmation
-            },
-            error: function(xhr, status, error) {
-                console.error('Logging failed:', error);
-            }
-        });
-    }
+    $(document).on('click', '#clearButton', function () {
+        $('input[type="text"], input[type="number"]').val('');
+        $('input[type="checkbox"]').prop('checked', false);
+        $('select').prop('selectedIndex', 0);
+        $('.select2').val(null).trigger('change');
+        $('.hide-div').hide();
+        $('.table-empty').show();
+    });
 
     $(document).on('click', '#refreshButton', function () {
         const fields = [
-            { input: '#itemClass', target: '#itemClassId' },
-            { input: '#itemLabel', target: '#itemLabelId' },
             { input: '#inventoryStatus', target: '#inventoryStatus' },
+            { input: '#itemClass', target: '#itemClass' },
+            { input: '#ascName', target: '#ascNameId' },
             { input: '#vendorName', target: '#vendorNameId' }
         ];
 
@@ -59,21 +35,28 @@
 
         fields.forEach(({ input, target }) => {
             const val = $(input).val();
-            const hasValue = Array.isArray(val) ? val.length > 0 : val;
-            if (!hasValue || val === undefined) {
+            if (val === "" || val === undefined) {
                 $(target).val('');
             } else {
-                counter++;
-                if ($(input).is('select') && !$(input).hasClass("select2-hidden-accessible")) {
+                if ($(input).is('select')) {
                     $(input).select2();
                 }
+                counter++;
             }
         });
+
+        const vendorFilter = $('#vendorName').val();
+        const invStatusFilter = $('#inventoryStatus').val();
+
+        if (!vendorFilter || !invStatusFilter) {
+            modal.alert('Please select both "Vendor Name" and "Inventory Status" before filtering.', "warning");
+            return;
+        }
+        $('#sourceDate').text(calendarWeek);
         if (counter >= 1) {
             fetchData();
             $('.table-empty').hide();
-            $('.hide-div').show();
-        }
+            }
     });
 
 
@@ -85,47 +68,55 @@
     });
 
     function fetchData() {
-        let selectedBa = $('#brandAmbassador').val();
-        let selectedArea = $('#area').val();
-        let selectedBrand = $('#brand').val();
-        let selectedMonth = $('#month').val();
-        let selectedWeek = $('#week').val();
-        let selectedStore = $('#store').val();
-        let selectedItemCat = $('#item_classi').val();
-        let selectedQty = $('#qtyscp').val();
-        let selectedInventoryStatus = $('#inventoryStatus').val(); // returns an array
-        if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) return;
-       // table-empty
-        $('.table-empty').hide(); 
-        $('.table-responsive').show();        
-        initializeTable(selectedBa, selectedArea, selectedBrand, selectedMonth, selectedWeek, selectedStore, selectedItemCat, selectedQty);
-    }
+        let selectedItemClass = $('#itemClass').val();
+        let selectedItemCat = $('#itemLabelCatId').val();
+        let selectedInventoryStatus = $('#inventoryStatus').val();
+        let selectedVendor = $('#vendorNameId').val();
 
-    function initializeTable(selectedBa = null, selectedArea = null, selectedBrand = null, selectedMonth = null, selectedWeek = null, selectedStore = null, selectedItemCat = null, selectedQty = 0) {
-        if ($.fn.DataTable.isDataTable('#table_data_all_store')) {
-            let existingTable = $('#table_data_all_store').DataTable();
-            existingTable.clear().destroy();
+        if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) {
+            $('.table-empty').show();
+            $('.hide-div.card').hide();
+            return;
         }
 
-        let table = $('#table_data_all_store').DataTable({
-            paging: true,
-            searching: false,
-            ordering: true,
-            info: true,
-            lengthChange: false,
-            colReorder: true, 
+        $('.table-empty').hide();
+
+        $('.hide-div').first().show();
+
+        let tables = [
+            { id: "#table_slowMoving", type: "slowMoving" },
+            { id: "#table_overStock", type: "overStock" },
+            { id: "#table_npd", type: "npd" },
+            { id: "#table_hero", type: "hero" }
+        ];
+
+        $('.hide-div.card').hide();
+        tables.forEach(table => {
+            if (selectedInventoryStatus.includes(table.type)) {
+                $(table.id).closest('.hide-div.card').show();
+                initializeTable(
+                    table.id,
+                    table.type,
+                    selectedItemClass,
+                    selectedItemCat,
+                    selectedVendor
+                );
+            }
+        });
+    }
+
+    function initializeTable(tableId, type, selectedItemClass, selectedItemCat, selectedVendor) {
+        $(tableId).closest('.table-responsive').show(); 
+        $(tableId).DataTable({
+            destroy: true,
             ajax: {
                 url: base_url + 'stocks/get-data-all-store',
                 type: 'POST',
-                data: function(d) {
-                    d.ba = selectedBa;
-                    d.area = selectedArea;
-                    d.brand = selectedBrand;
-                    d.week = selectedWeek === "0" ? null : selectedWeek;
-                    d.month = selectedMonth === "0" ? null : selectedMonth;
-                    d.store = selectedStore === "0" ? null : selectedStore;
-                    d.itemcat = selectedItemCat === "0" ? null : selectedItemCat;
-                    d.qty = selectedQty === "0" ? null : selectedQty;
+                data: function (d) {
+                    d.itemClass = selectedItemClass === "" ? null : selectedItemClass;
+                    d.itemCategory = selectedItemCat === "" ? null : selectedItemCat;
+                    d.company = selectedVendor === "" ? null : selectedVendor;
+                    d.type = type;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
@@ -134,18 +125,19 @@
                 }
             },
             columns: [
-                { data: 'store_name'},
-                { data: 'asc_name'},
-                { data: 'ambassador_names'},
-                { data: 'item_name'},
-                { data: 'item'},
-                { data: 'item_class'}
+                { data: 'itmcde' },
+                { data: 'item_name' },
+                { data: 'item_class' },
+                type !== 'hero' ? { data: 'sum_total_qty' } : null,
+                { data: 'sum_ave_sales' },
+                { data: 'swc' }
             ].filter(Boolean),
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
             serverSide: true,
             searching: false,
+            colReorder: true,
             lengthChange: false
         });
     }
@@ -153,8 +145,10 @@
     function handleAction(action) {
         if (action === 'preview') {
         } else if (action === 'export') {
-            prepareExport();
+            //prepareExport();
+            modal.alert("Not yet available");
         } else {
+            modal.alert("Not yet available");
         }
     }
 

@@ -79,7 +79,6 @@
         $('#inventoryStatus').select2({ placeholder: 'Select inventory statuses' });
         $('#brands').select2({ placeholder: 'Select Brands' });
         autocomplete_field($("#area"), $("#areaId"), area, "description", "id", function(result) {
-            //let url = url;
             let data = {
                 event: "list",
                 select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id, asc.code",
@@ -170,7 +169,6 @@
 
 
     $(document).on('click', '#refreshButton', function () {
-        
         const fields = [
             { input: '#inventoryStatus', target: '#inventoryStatus' },
             { input: '#area', target: '#areaId' },
@@ -207,56 +205,49 @@
             }
     });
 
-function fetchData() {
-    let selectedArea = $('#areaId').val();
-    let selectedAsc = $('#ascNameId').val();
-    let selectedBaType = $('input[name="filterType"]:checked').val();
-    let selectedBa = $('#brandAmbassadorId').val();
-    let selectedStore = $('#storeNameId').val();
-    let selectedBrands = $('#brands').val();
-    let selectedInventoryStatus = $('#inventoryStatus').val(); // returns array
+    function fetchData() {
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#brandAmbassadorId').val();
+        let selectedStore = $('#storeNameId').val();
+        let selectedBrands = $('#brands').val();
+        let selectedInventoryStatus = $('#inventoryStatus').val();
 
-    // Show or hide "Please select filter" message
-    if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) {
-        $('.table-empty').show();
-        $('.hide-div.card').hide(); // Hide each card
-        return;
-    }
-
-    $('.table-empty').hide(); // Hide empty message
-
-    // Always show the parent wrapper (outer hide-div)
-    $('.hide-div').first().show();
-
-    let tables = [
-        { id: "#table_slowMoving", type: "slowMoving" },
-        { id: "#table_overStock", type: "overStock" },
-        { id: "#table_npd", type: "npd" },
-        { id: "#table_hero", type: "hero" }
-    ];
-
-    // Hide all individual cards
-    $('.hide-div.card').hide();
-
-    // Show only matching cards
-    tables.forEach(table => {
-        if (selectedInventoryStatus.includes(table.type)) {
-            $(table.id).closest('.hide-div.card').show();
-            initializeTable(
-                table.id,
-                table.type,
-                selectedArea,
-                selectedAsc,
-                selectedBaType,
-                selectedBa,
-                selectedStore,
-                selectedBrands
-            );
+        if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) {
+            $('.table-empty').show();
+            $('.hide-div.card').hide();
+            return;
         }
-    });
-}
 
+        $('.table-empty').hide();
 
+        $('.hide-div').first().show();
+
+        let tables = [
+            { id: "#table_slowMoving", type: "slowMoving" },
+            { id: "#table_overStock", type: "overStock" },
+            { id: "#table_npd", type: "npd" },
+            { id: "#table_hero", type: "hero" }
+        ];
+
+        $('.hide-div.card').hide();
+        tables.forEach(table => {
+            if (selectedInventoryStatus.includes(table.type)) {
+                $(table.id).closest('.hide-div.card').show();
+                initializeTable(
+                    table.id,
+                    table.type,
+                    selectedArea,
+                    selectedAsc,
+                    selectedBaType,
+                    selectedBa,
+                    selectedStore,
+                    selectedBrands
+                );
+            }
+        });
+    }
 
     function initializeTable(tableId, type, selectedArea, selectedAsc, selectedBaType, selectedBa, selectedStore, selectedBrands) {
         $(tableId).closest('.table-responsive').show(); 
@@ -296,37 +287,44 @@ function fetchData() {
     }
 
     function handleAction(action) {
-        modal.loading(true);
+        // modal.loading(true);
         
-        let selectedType = $('input[name="filterType"]:checked').val();
-        let selectedBa = $('#brand_ambassadors').val();
-        let selectedStore = $('#store_branch').val();
-        let selectedBrand = $('#brand').val();
-        let selectedSortField = $('#sortBy').val();
-        let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-        let ascName = $('#ar_asc_name').text().trim();
+        // let selectedType = $('input[name="filterType"]:checked').val();
+        // let selectedBa = $('#brand_ambassadors').val();
+        // let selectedStore = $('#store_branch').val();
+        // let selectedBrand = $('#brand').val();
+        // let selectedSortField = $('#sortBy').val();
+        // let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
+        // let ascName = $('#ar_asc_name').text().trim();
         
-        let type = 'slowMoving';
-        if(type){
-          let url = base_url + 'stocks/per-store-generate-pdf-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-ba?'
-              + 'sort_field=' + encodeURIComponent(selectedSortField)
-              + '&sort=' + encodeURIComponent(selectedSortOrder)
-              + '&brand=' + encodeURIComponent(selectedBrand || '')
-              + '&brand_ambassador=' + encodeURIComponent(selectedBa || '')
-              + '&store_name=' + encodeURIComponent(selectedStore || '')
-              + '&ba_type=' + encodeURIComponent(selectedType)
-              + '&asc_name=' + encodeURIComponent(ascName)
-              + '&type=' + encodeURIComponent(type)
-              + '&limit=' + encodeURIComponent(length)
-              + '&offset=' + encodeURIComponent(offset);
+        // let type = 'slowMoving';
+        // if(type){
+        //   let url = base_url + 'stocks/per-store-generate-pdf-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-ba?'
+        //       + 'sort_field=' + encodeURIComponent(selectedSortField)
+        //       + '&sort=' + encodeURIComponent(selectedSortOrder)
+        //       + '&brand=' + encodeURIComponent(selectedBrand || '')
+        //       + '&brand_ambassador=' + encodeURIComponent(selectedBa || '')
+        //       + '&store_name=' + encodeURIComponent(selectedStore || '')
+        //       + '&ba_type=' + encodeURIComponent(selectedType)
+        //       + '&asc_name=' + encodeURIComponent(ascName)
+        //       + '&type=' + encodeURIComponent(type)
+        //       + '&limit=' + encodeURIComponent(length)
+        //       + '&offset=' + encodeURIComponent(offset);
 
-          let iframe = document.createElement('iframe');
-          iframe.style.display = "none";
-          iframe.src = url;
-          document.body.appendChild(iframe);
+        //   let iframe = document.createElement('iframe');
+        //   iframe.style.display = "none";
+        //   iframe.src = url;
+        //   document.body.appendChild(iframe);
 
-          setTimeout(() => {
-              modal.loading(false);
-          }, 5000);
+        //   setTimeout(() => {
+        //       modal.loading(false);
+        //   }, 5000);
+        // }
+        if (action === 'preview') {
+        } else if (action === 'export') {
+            //prepareExport();
+            modal.alert("Not yet available");
+        } else {
+            modal.alert("Not yet available");
         }
     }

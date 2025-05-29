@@ -48,16 +48,14 @@
                         </div>
                     </div>
                 <?php endif; ?>
-                <!-- filter-->
-                <!-- DataTables Section -->
-                <div class="row mt-4"><!-- use mt-4 or define mt-12 in custom CSS -->
+                <div class="row mt-4">
                     <div class="col-md-12">
-                        <div class="card p-4 shadow-lg text-center text-muted table-empty">
+                      <div class="card p-4 shadow-lg text-center text-muted table-empty">
                           <i class="fas fa-filter mr-2"></i> Please select a filter
-                        </div>
-
-                        <div class="card mt-4 p-4 shadow-sm hide-div">
-                            <table id="table_data_all_store" class="table table-bordered table-responsive">
+                      </div>
+                        <div class="hide-div">
+                        <div class="hide-div card">
+                            <table id="table_slowMoving" class="table table-bordered">
                                 <thead>
                                     <tr>
                                         <th 
@@ -65,14 +63,14 @@
                                             style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                             class="tbl-title-header"
                                         >
-                                            <?= $pageName;?>
+                                            SLOW MOVING SKU'S
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th class="tbl-title-field">SKU</th>
+                                        <th class="tbl-title-field">LMI/RGDI Code</th>
                                         <th class="tbl-title-field">SKU Name</th>
                                         <th class="tbl-title-field">Item Class</th>
-                                        <th class="tbl-title-field">Total Qty</th>
+                                        <th class="tbl-title-field">Totay Qty</th>
                                         <th class="tbl-title-field">Ave Sales Unit</th>
                                         <th class="tbl-title-field">SWC</th>
                                     </tr>
@@ -93,23 +91,139 @@
                                       </tr>
                                   </tbody>
                             </table>
+                        </div>
 
-                            <div class="d-flex justify-content-end mt-3">
-                                <button 
-                                    class="btn btn-primary mr-2" 
-                                    id="ExportPDF"
-                                    onclick="handleAction('export_pdf')"
-                                >
-                                    <i class="fas fa-file-export"></i> PDF
-                                </button>
-                                <button 
-                                    class="btn btn-success" 
-                                    id="exportButton"
-                                    onclick="handleAction('export_excel')"
-                                >
-                                    <i class="fas fa-file-export"></i> Excel
-                                </button>
-                            </div>    
+                        <div class="hide-div card">
+                            <table id="table_overStock" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="6"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            class="tbl-title-header"
+                                        >
+                                            OVERSTOCK SKU'S
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field">Item Class</th>
+                                        <th class="tbl-title-field">Totay Qty</th>
+                                        <th class="tbl-title-field">Ave Sales Unit</th>
+                                        <th class="tbl-title-field">SWC</th>
+                                    </tr>
+                                </thead>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="6" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="6" class="text-center py-4 text-muted">
+                                              No data available
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="6" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                  </tbody>
+                            </table>
+                        </div>
+
+                        <div class="hide-div card">
+                            <table id="table_npd" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="6"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            class="tbl-title-header"
+                                        >
+                                            NPD SKU'S
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field">Item Class</th>
+                                        <th class="tbl-title-field">Totay Qty</th>
+                                        <th class="tbl-title-field">Ave Sales Unit</th>
+                                        <th class="tbl-title-field">SWC</th>
+                                    </tr>
+                                </thead>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="6" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="6" class="text-center py-4 text-muted">
+                                              No data available
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="6" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                  </tbody>
+                            </table>
+                        </div>
+
+                        <div class="hide-div card">
+                            <table id="table_hero" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th 
+                                            colspan="5"
+                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                            class="tbl-title-header"
+                                        >
+                                            HERO SKU'S
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field">Item Class</th>
+                                        <th class="tbl-title-field">Ave Sales Unit</th>
+                                        <th class="tbl-title-field">SWC</th>
+                                    </tr>
+                                </thead>
+                                  <tbody>
+                                      <tr>
+                                          <td colspan="5" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="5" class="text-center py-4 text-muted">
+                                              No data available
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="5" class="text-center py-4 text-muted">
+                                          </td>
+                                      </tr>
+                                  </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3" id="step7">
+                            <button 
+                                class="btn btn-primary mr-2" 
+                                id="ExportPDF"
+                                onclick="handleAction('export_pdf')"
+                            >
+                                <i class="fas fa-file-export"></i> PDF
+                            </button>
+                            <button 
+                                class="btn btn-success" 
+                                id="exportButton"
+                                onclick="handleAction('export_excel')"
+                            >
+                                <i class="fas fa-file-export"></i> Excel
+                            </button>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -127,5 +241,6 @@
     let itemClassi = <?= json_encode($itemClassi); ?>;
     let company = <?= json_encode($company); ?>;
     let brandLabel = <?= json_encode($brandLabel); ?>;
+    let calendarWeek = '<?= $date; ?>';
 
 </script>

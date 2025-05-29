@@ -25,15 +25,14 @@
                 </label>
                 <select id="itemClass" name="itemClass[]" class="form-control select2" multiple>
                 </select>
-                <input type="hidden" id="itemClassId">
               </div>
 
               <div class="form-group card-dark mb-3 p-2">
-                <label for="itemLabel" class="mb-2">
+                <label for="itemLabelCat" class="mb-2">
                   <i class="fas fa-tags mr-1"></i> Item Category
                 </label>
-                <input type="text" class="form-control" id="itemLabel" placeholder="Please select...">
-                <input type="hidden" id="itemLabelId">
+                <input type="text" class="form-control" id="itemLabelCat" placeholder="Please select...">
+                <input type="hidden" id="itemLabelCatId">
               </div>
 
               <div class="form-group card-dark mb-3 p-2">

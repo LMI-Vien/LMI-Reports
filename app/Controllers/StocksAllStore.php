@@ -21,27 +21,20 @@ class StocksAllStore extends BaseController
 
 	public function dataAllStore()
 	{	
-
-	// log_activity('Inventory', 'Sync', 'Successfully Sync Tracc to Ginee Inventory!
-	// Saving Time : 
-	// Start : 2025-01-09 03:38:08 PM
-	// End : 2025-01-09 03:38:09 PM
-	// Duration : 0 Hours, 0 Minutes, 1 Seconds.
-	// Process Items : 
-	// Date Encoded : 2025-01-09
-	// Date Modified : 2025-01-09
-
-	// Details
-	// SKU Code	Item Description	Warehouse Location	Tracc Inventory	Ginee Inventory	
-	// CD020	Cathy Doll Aqua Non Greasy Body Sun Serum SPF50 10ml	ONLINE	337	252	
-	// CD021	Cathy Doll Aura Whitening Serum Foam Cleanser 100ml	ONLINE	180	20
-	// ');
-
 		$data['meta'] = array(
 			"title"         =>  "LMI Portal",
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
+	    $latestVmiData = $this->Dashboard_model->getLatestVmi();
+	    $latestWeek = '';
+	    $latestYear = '';
+	    $sourceDate = 'N / A';
+	    if($latestVmiData){
+	    	$latestYear = $latestVmiData['year'];
+	    	$latestWeek = $latestVmiData['week_id'];
+	    	$sourceDate = $latestVmiData['year'] . ' Calendar Week '. $latestWeek;
+		}
 		$data['month'] = $this->Global_model->getMonths();
 		$data['week'] = $this->Global_model->getWeeks();
 		$data['itemClassi'] = $this->Global_model->getItemClassification();
@@ -50,15 +43,15 @@ class StocksAllStore extends BaseController
 		$siteMenuData = $this->Global_model->get_by_menu_url('stocks/data-all-store');
 		if($siteMenuData){
 			$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-all-store'), $siteMenuData[0]->menu_name => '');
-			//static
-			$data["source"] = "VMI";
-			//get recent week
-			$data["source_date"] = 'Calendar week 1';
+			$data["source"] = "VMI (LMI/RGDI)";
+			$data["source_date"] = '<span id="sourceDate">N / A</span>';
+			$data["date"] = $sourceDate;	
 			$data["pageName"] = $siteMenuData[0]->menu_name;			
 		}else{
 			$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-all-store'),'Overall Stock Data of all Stores' => '');
-			$data["source"] = "VMI";
-			$data["source_date"] = 'Calendar week 1';
+			$data["source"] = "VMI (LMI/RGDI)";
+			$data["source_date"] = '<span id="sourceDate">N / A</span>';
+			$data["date"] = $sourceDate;	
 			$data["pageName"] = '';			
 		}
 
@@ -82,71 +75,97 @@ class StocksAllStore extends BaseController
 
 	public function getDataAllStore()
 	{	
+		$areaId = null;
+		$ascId = null;
+		$baTypeId = null;
+		$baId = null;
+		$storeId = null;
+		$brandIds = null;
 
-	    $ba = $this->request->getVar('ba');
-	    $area = $this->request->getVar('area');
-	    $brand = $this->request->getVar('brand');
-	    $store = $this->request->getVar('store');
-	    $month = $this->request->getVar('month');
-	    $week = $this->request->getVar('week');
-	    $withba = $this->request->getVar('withba');
-	    $itemclassi = $this->request->getVar('itemcat');
-		$qty = $this->request->getVar('qty');
-		$limit = (int) $this->request->getVar('limit');
-		$offset = (int) $this->request->getVar('offset');
-		$latest_vmi_data = $this->Dashboard_model->getLatestVmi();
-		$latest_year = null;
-		if($latest_vmi_data){
-	    	$latest_year = $latest_vmi_data['year_id'];
-	    }
+		$ItemClassIds = $this->request->getPost('itemClass');
+		$ItemClassIds = $ItemClassIds === '' ? null : $ItemClassIds;
 
-	    if(empty($area)){
-	    	$area = null;
-	    }
-	    if(empty($store)){
-	    	$store = null;
-	    }
-	    if(empty($ba)){
-	    	$ba = null;
-	    }
-	    if(empty($brand)){
-	    	$brand = null;
-	    }
-	    if(empty($month)){
-	    	$month = null;
-	    }
-	    if(empty($week)){
-	    	$week = null;
-	    }
-	    if(empty($itemclassi)){
-	    	$itemclassi = null;
-	    }
-	    if($withba == 'with_ba'){
-	    	$withba  = true;
-	    }else if($withba == 'without_ba'){
-	    	$withba = true;
+		$itemCatId = trim($this->request->getPost('itemCategory') ?? '');
+		$itemCatId = $itemCatId === '' ? null : $itemCatId;
+
+		$companyId = trim($this->request->getPost('company') ?? '');
+		$companyId = $companyId === '' ? null : $companyId;
+
+		$type = $this->request->getPost('type');
+		$type = $type === '' ? null : $type;
+
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit = is_numeric($limit) ? (int)$limit : 10;
+		$offset = is_numeric($offset) ? (int)$offset : 0;
+
+		$latestVmiData = $this->Dashboard_model->getLatestVmi();
+		$sysPar = $this->Global_model->getSysPar();
+		$npdSku = [];
+		$heroSku = [];
+		$skuMin = 20;
+		$skuMin = 30;
+		if($sysPar){
+			$jsonStringHero = $sysPar[0]['hero_sku'];
+			$dataHero = json_decode($jsonStringHero, true);
+			$heroSku = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$jsonStringNpd = $sysPar[0]['new_item_sku'];
+			$dataNpd = json_decode($jsonStringNpd, true);
+			$npdSku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+		    $skuMin = $sysPar[0]['sm_sku_min'];
+		    $skuMax = $sysPar[0]['sm_sku_max'];
+		}
+
+	    if($latestVmiData){
+	    	$latestYear = $latestVmiData['year_id'];
+	    	$latestWeek = $latestVmiData['week_id'];
+	    	//temp
+		    //$type = 'npd';
+		    // $areaId = null;
+		    // $ascId = null;
+		    // $baTypeId = 3;
+		    // $baId = null;
+		    // $storeId = '1001';
+		    // $brandIds = null;
+		    // $limit = 10;
+		    // $offset = 0;
+		    //$companyId = 3;
+		    //$ItemClassIds = ['C-Class C - Others', 'N-New Item'];
+		    //$itemCatId = 9;
+		    switch ($type) {
+		        case 'slowMoving':
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClassIds, $itemCatId);
+		            break;
+		        case 'overStock':
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMax, null, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClassIds, $itemCatId);
+		            break;
+		        case 'npd':
+					$itemClassFilter = $npdSku;
+		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClassIds, $itemCatId);
+		            break;
+		        case 'hero':
+        			$itemClassFilter = $heroSku;
+		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClassIds, $itemCatId);
+		            break;
+		        default:
+		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClassIds, $itemCatId);
+		    }
+
+		    return $this->response->setJSON([
+		        'draw' => intval($this->request->getVar('draw')),
+		        'recordsTotal' => $data['total_records'],
+		        'recordsFiltered' => $data['total_records'],
+		        'data' => $data['data'],
+		    ]);	
+			
 	    }else{
-	    	$withba = null;
+			return $this->response->setJSON([
+		        'draw' => intval($this->request->getVar('draw')),
+		        'recordsTotal' => 0,
+		        'recordsFiltered' => 0,
+		        'data' => [],
+		    ]);	
 	    }
-	    if(empty($qty)){
-	    	$qty = null;
-	    }
-	    
-
-	    $data = $this->Dashboard_model->getFilteredKamOneData($latest_year, $month, $week, $brand, $area, $ba, $store, $itemclassi, $limit, $offset, $withba, $qty);
-	    
-	    // return $this->response->setJSON([
-	    //     'draw' => intval($this->request->getVar('draw')),
-	    //     'recordsTotal' => $data['total_records'],
-	    //     'recordsFiltered' => $data['total_records'],
-	    //     'data' => $data['data']
-	    // ]);	
-	    return $this->response->setJSON([
-	        'draw' => intval($this->request->getVar('draw')),
-	        'recordsTotal' => 0,
-	        'recordsFiltered' => 0,
-	        'data' => []
-	    ]);	
 	}
 
 }

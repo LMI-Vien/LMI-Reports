@@ -27,14 +27,14 @@ class StocksPerStore extends BaseController
 			"keyword"       =>  ""
 		);
 
-	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
-	    $latest_week = '';
-	    $latest_year = '';
-	    $source_date = 'N / A';
-	    if($latest_vmi_data){
-	    	$latest_year = $latest_vmi_data['year'];
-	    	$latest_week = $latest_vmi_data['week_id'];
-	    	$source_date = $latest_vmi_data['year'] . ' Calendar Week '. $latest_week;
+	    $latestVmiData = $this->Dashboard_model->getLatestVmi();
+	    $latestWeek = '';
+	    $latestYear = '';
+	    $sourceDate = 'N / A';
+	    if($latestVmiData){
+	    	$latestYear = $latestVmiData['year'];
+	    	$latestWeek = $latestVmiData['week_id'];
+	    	$sourceDate = $latestVmiData['year'] . ' Calendar Week '. $latestWeek;
 		}
 
 		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
@@ -49,7 +49,7 @@ class StocksPerStore extends BaseController
 		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-per-store'),'Stock Data per Store' => '');
 		$data["source"] = "VMI (LMI/RGDI)";
 		$data["source_date"] = '<span id="sourceDate">N / A</span>';
-		$data["date"] = $source_date;	
+		$data["date"] = $sourceDate;	
 		$data['content'] = "site/stocks/per-store/data_per_store";
 		$data['session'] = session();
 		$data['js'] = array(
@@ -64,45 +64,64 @@ class StocksPerStore extends BaseController
 
 	public function getDataPerStore()
 	{
-		$areaId = trim($this->request->getPost('area'));
+
+		$areaId = trim($this->request->getPost('area') ?? '');
 		$areaId = $areaId === '' ? null : $areaId;
-		$ascId = trim($this->request->getPost('asc'));
+
+		$ascId = trim($this->request->getPost('asc') ?? '');
 		$ascId = $ascId === '' ? null : $ascId;
-		$baTypeId = trim($this->request->getPost('baType'));
+
+		$baTypeId = trim($this->request->getPost('baType') ?? '');
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
-		$baId = trim($this->request->getPost('ba'));
+
+		$baId = trim($this->request->getPost('ba') ?? '');
 		$baId = $baId === '' ? null : $baId;
-		$storeId= trim($this->request->getPost('store'));
+
+		$storeId = trim($this->request->getPost('store') ?? '');
 		$storeId = $storeId === '' ? null : $storeId;
-        $brandIds = $this->request->getPost('brands');
-        $brandIds = $brandIds === '' ? null : $brandIds;
+
+		$brandIds = $this->request->getPost('brands');
+		$brandIds = $brandIds === '' ? null : $brandIds;
+
         $type = $this->request->getPost('type');
         $type = $type === '' ? null : $type;
+		$ItemClassIds = $this->request->getPost('itemClass');
+		$ItemClassIds = $ItemClassIds === '' ? null : $ItemClassIds;
+
+		$itemCatId = trim($this->request->getPost('itemCategory') ?? '');
+		$itemCatId = $itemCatId === '' ? null : $itemCatId;
+
+		$companyId = trim($this->request->getPost('company') ?? '');
+		$companyId = $companyId === '' ? null : $companyId;
+
 		$limit = $this->request->getVar('limit');
 		$offset = $this->request->getVar('offset');
 		$limit = is_numeric($limit) ? (int)$limit : 10;
 		$offset = is_numeric($offset) ? (int)$offset : 0;
 
-		$latest_vmi_data = $this->Dashboard_model->getLatestVmi();
+		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar = $this->Global_model->getSysPar();
-		$npd_sku = [];
-		$hero_sku = [];
+		$npdSku = [];
+		$heroSku = [];
 		$skuMin = 20;
 		$skuMin = 30;
+	    $companyId = null;
+	    $ItemClassIds = null;
+	    $itemCatId = null;
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];
 			$dataHero = json_decode($jsonStringHero, true);
-			$hero_sku = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$heroSku = array_map(fn($item) => $item['item_class_description'], $dataHero);
 			$jsonStringNpd = $sysPar[0]['new_item_sku'];
 			$dataNpd = json_decode($jsonStringNpd, true);
-			$npd_sku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+			$npdSku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
 		    $skuMin = $sysPar[0]['sm_sku_min'];
 		    $skuMax = $sysPar[0]['sm_sku_max'];
 		}
 
-	    if($latest_vmi_data){
-	    	$latest_year = $latest_vmi_data['year_id'];
-	    	$latest_week = $latest_vmi_data['week_id'];
+	    if($latestVmiData){
+	    	$latestYear = $latestVmiData['year_id'];
+	    	$latestWeek = $latestVmiData['week_id'];
 	    	//temp
 		    // $type = 'npd';
 		    // $areaId = null;
@@ -116,21 +135,21 @@ class StocksPerStore extends BaseController
 		    // echo $offset;
 		    switch ($type) {
 		        case 'slowMoving':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClassIds, $itemCatId);
 		            break;
 		        case 'overStock':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMax, null, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMax, null, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClassIds, $itemCatId);
 		            break;
 		        case 'npd':
-					$itemClassFilter = $npd_sku;
-		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter);
+					$itemClassFilter = $npdSku;
+		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClassIds, $itemCatId);
 		            break;
 		        case 'hero':
-        			$itemClassFilter = $hero_sku;
-		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter);
+        			$itemClassFilter = $heroSku;
+		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClassIds, $itemCatId);
 		            break;
 		        default:
-		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latest_week, $latest_year, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId);
+		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $skuMin, $skuMax, $latestWeek, $latestYear, $brandIds, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClassIds, $itemCatId);
 		    }
 
 		    return $this->response->setJSON([
@@ -163,12 +182,12 @@ class StocksPerStore extends BaseController
 	    $batchSize = 10000; //  10,000 data per batch
 	    $offset = 0;
 	    $out_con = 'ALL';
-	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
+	    $latestVmiData = $this->Dashboard_model->getLatestVmi();
 	    
-	    if ($latest_vmi_data) {
-	        $latest_year = $latest_vmi_data['year_id'];
-	        $latest_month = $latest_vmi_data['month_id'];
-	        $latest_week = $latest_vmi_data['week_id'];
+	    if ($latestVmiData) {
+	        $latestYear = $latestVmiData['year_id'];
+	        $latest_month = $latestVmiData['month_id'];
+	        $latestWeek = $latestVmiData['week_id'];
 
 	        $brand_ambassador = $brand_ambassador ?: null;
 	        $brand = $brand ?: null;
@@ -217,25 +236,25 @@ class StocksPerStore extends BaseController
 	        do {
 	            switch ($type) {
 	                case 'slowMoving':
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
+	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latestWeek, $latest_month, $latestYear);
 	                    $title = 'BA_Dashboard_Report_Slow_Moving';
 	                    break;
 	                case 'overStock':
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 30, null, $latest_week, $latest_month, $latest_year);
+	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 30, null, $latestWeek, $latest_month, $latestYear);
 	                    $title = 'BA_Dashboard_Report_Overstock';
 	                    break;
 	                case 'npd':
 	                    $item_class_filter = ['N-New Item'];
-	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latest_week, $latest_month, $latest_year, $item_class_filter);
+	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latestWeek, $latest_month, $latestYear, $item_class_filter);
 	                    $title = 'BA_Dashboard_Report_NPD';
 	                    break;
 	                case 'hero':
 	                    $item_class_filter = ['A-Top 500 Pharma/Beauty', 'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty', 'B-Remaining Class B net of BU Pharma/Beauty'];
-	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latest_week, $latest_month, $latest_year, $item_class_filter);
+	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latestWeek, $latest_month, $latestYear, $item_class_filter);
 	                    $title = 'BA_Dashboard_Report_HERO';
 	                    break;
 	                default:
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
+	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latestWeek, $latest_month, $latestYear);
 	                    $title = 'BA_Dashboard_Report_Slow_Moving';
 	            }
 
@@ -274,14 +293,14 @@ class StocksPerStore extends BaseController
 	    $asc_name = $this->request->getGet('asc_name');
 	    $out_con = $ba_type ? 'ALL' : 'ALL';
 
-	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
-	    if (!$latest_vmi_data) {
+	    $latestVmiData = $this->Dashboard_model->getLatestVmi();
+	    if (!$latestVmiData) {
 	        return;
 	    }
 
-	    $latest_year = $latest_vmi_data['year_id'];
-	    $latest_month = $latest_vmi_data['month_id'];
-	    $latest_week = $latest_vmi_data['week_id'];
+	    $latestYear = $latestVmiData['year_id'];
+	    $latest_month = $latestVmiData['month_id'];
+	    $latestWeek = $latestVmiData['week_id'];
 
 	    $asc_name = ($asc_name === 'Please Select Brand Ambassador') ? "" : $asc_name;
 
@@ -327,7 +346,7 @@ class StocksPerStore extends BaseController
 	    do {
 	        $data = $this->Dashboard_model->tradeInfoBa(
 	            $brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort,
-	            $batchSize, $offset, 20, 30, $latest_week, $latest_month, $latest_year
+	            $batchSize, $offset, 20, 30, $latestWeek, $latest_month, $latestYear
 	        );
 
 	        if (!$data || empty($data['data'])) {
