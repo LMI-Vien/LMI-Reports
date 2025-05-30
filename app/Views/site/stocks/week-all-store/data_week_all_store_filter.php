@@ -18,62 +18,56 @@
                   <h6 class="text-white mb-2"><i class="fas fa-filter mr-2" style="color: #ffc107;"></i>FILTERS</h6>
                 </div>
                 <div class="form-group card-dark mb-3 p-2">
-                  <label for="ItemClass" class="mb-2">
+                  <label for="itemClass" class="mb-2">
                     <i class="fas fa-cubes mr-1"></i> Item Class
                   </label>
-                  <select id="ItemClass" name="ItemClass[]" class="form-control select2" multiple>
-                    <option value="slowMoving">A</option>
-                    <option value="overStock">Au</option>
-                    <option value="npd">Bu</option>
-                    <option value="hero">C</option>
+                  <select id="itemClass" name="itemClass[]" class="form-control select2" multiple>
                   </select>
                 </div>
 
                 <div class="form-group card-dark mb-3 p-2">
-                  <label for="item_classi" class="mb-2">
+                  <label for="itemLabelCat" class="mb-2">
                     <i class="fas fa-tags mr-1"></i> Item Category
                   </label>
-                  <input type="text" class="form-control" id="item_classi" placeholder="Please select...">
-                  <input type="hidden" id="item_classi_id">
+                  <input type="text" class="form-control" id="itemLabelCat" placeholder="Please select...">
+                  <input type="hidden" id="itemLabelCatId">
                 </div>
 
                 <div class="form-group card-dark mb-3 p-2">
                   <label for="inventoryStatus" class="mb-2">
                     <i class="fas fa-warehouse mr-1"></i> Inventory Status
                   </label>
-                  <select id="inventoryStatus" name="InventoryStatus[]" class="form-control select2" multiple>
+                  <select id="inventoryStatus" name="inventoryStatus[]" class="form-control select2" multiple>
                     <option value="slowMoving">Slow Moving</option>
                     <option value="overStock">Overstocks</option>
                     <option value="npd">NPD</option>
                     <option value="hero">Hero</option>
                   </select>
                 </div>
-
                 <div class="form-group card-dark mb-3 p-2">
                   <label for="year" class="mb-2 form-label"><i class="fas fa-calendar-alt mr-1"></i> Year</label>
                   <select id="year" class="form-select">
                   </select>
-                  <input type="hidden" id="year">
                 </div>
 
                 <div class="form-group card-dark mb-3 p-2">
                   <label for="week_from" class="mb-2"><i class="fas fa-calendar-alt mr-1"></i> Week From</label>
                   <select id="week_from" class="form-select" onfocus="updateWeeks('week_from')">
                   </select>
-                  <input type="hidden" id="vendor_name_id">
                 </div>
 
                 <div class="form-group card-dark mb-3 p-2">
                 <label for="week_to" class="mb-2"><i class="fas fa-calendar-alt mr-1"></i> Week To</label>
                   <select id="week_to" class="form-select" onfocus="updateWeeks('week_to')">
                   </select>
-                  <input type="hidden" id="vendor_name_id">
                 </div>
 
                 <div class="form-group card-dark mb-3 p-2">
-                  <label for="data_source" class="mb-2"><i class="fas fa-database mr-1"></i> Data Source</label>
-                  <input type="text" class="form-control" id="vendor_name" placeholder="Please select...">
-                  <input type="hidden" id="vendor_name_id">
+                  <label for="dataSource" class="mb-2"><i class="fas fa-database mr-1"></i> Data Source</label>
+                  <select id="dataSource" class="form-select">
+                    <option value="2">VMI</option>
+                    <option value="3">WEEK on WEEK Sales</option>
+                  </select>
                 </div>
 
                 <!-- Buttons -->

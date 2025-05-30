@@ -233,14 +233,9 @@
 </div>
 
 <script>
-
-    let ba = <?= json_encode($brandAmbassador); ?>;
-    let area = <?= json_encode($area); ?>;
-    let brand = <?= json_encode($brand); ?>;
-    let store = <?= json_encode($store_branch); ?>;
+    let brandLabel = <?= json_encode($brandLabel); ?>;
     let itemClassi = <?= json_encode($itemClassi); ?>;
     let company = <?= json_encode($company); ?>;
-    let brandLabel = <?= json_encode($brandLabel); ?>;
     let calendarWeek = '<?= $date; ?>';
 
 </script>

@@ -299,7 +299,7 @@
                             "' title='View'><span class='glyphicon glyphicon-pencil'>View</span>";
 
                             // html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.company+"','"+y.year+"','"+y.month+"','"+y.week+
-                            html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.company+"','"+y.year+"','"+y.week+
+                            html+="<a class='btn-sm btn save' onclick=\"export_data('"+y.filter_company+"','"+y.filter_year+"','"+y.week+
                             "')\" data-status='"+y.status+"' id='"+y.id+
                             "' title='Export Batch'><span class='glyphicon glyphicon-pencil'>Export</span>";
 
@@ -1713,20 +1713,18 @@
     {
         var formattedData = [];
         let filterArr = []
-        filterArr.push(`c.name:EQ=${company}`);
-        filterArr.push(`y.year:EQ=${year}`);
+        filterArr.push(`v.company:EQ=${company}`);
+        filterArr.push(`v.year:EQ=${year}`);
         // filterArr.push(`m.month:EQ=${month}`);
-        filterArr.push(`w.name:EQ=${week}`);
+        filterArr.push(`v.week:EQ=${week}`);
 
         let filter = filterArr.join(',')
 
         dynamic_search(
                 "'tbl_vmi v'", 
                 "'left join tbl_company c on v.company = c.id "+
-                "left join tbl_year y on v.year = y.id "+
-                // "left join tbl_month m on v.month = m.id "+
-                "left join tbl_week w on v.week = w.id'", 
-                "'COUNT(v.id) as total_records'", 
+                "left join tbl_year y on v.year = y.id ",
+                "'COUNT(v.id) as total_records'",
                 0, 
                 0, 
                 `'${filter}'`,  
@@ -1741,9 +1739,9 @@
                                 "'tbl_vmi v'", 
 
                                 "'left join tbl_company c on v.company = c.id "+
-                                "left join tbl_year y on v.year = y.id "+
+                                "left join tbl_year y on v.year = y.id ",
                                 // "left join tbl_month m on v.month = m.id "+
-                                "left join tbl_week w on v.week = w.id'", 
+                               // "left join tbl_week w on v.week = w.id'", 
 
                                 "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
                                 "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.week'", 

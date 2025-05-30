@@ -31,12 +31,10 @@ class StocksWeekAllStore extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-week-all-store'),'Week by Week Stock Data of all Stores' => '');
-		$data["source"] = "VMI";
-		$data["source_date"] = '';
+		$data["source"] = '<span id="sourceDate">VMI/WEEK on Week Sales N / A</span>';
 		$data['content'] = "site/stocks/week-all-store/data_week_all_store";
-		$data['brand_ambassador'] = $this->Global_model->getBrandAmbassador(0);
-		$data['store_branch'] = $this->Global_model->getStoreBranch(0);
-		$data['month'] = $this->Global_model->getMonths();
+		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
+		$data['itemClassi'] = $this->Global_model->getItemClassification();
 		$data['year'] = $this->Global_model->getYears();
 		$data['session'] = session();
 		$data['js'] = array(
@@ -50,75 +48,104 @@ class StocksWeekAllStore extends BaseController
 
 	public function getDataWeekAllStore()
 	{	
+		$ItemClasses = $this->request->getPost('itemClass');
+		$ItemClasses = $ItemClasses === '' ? null : $ItemClasses;
 
-	    $brand_ambassador = $this->request->getVar('brand_ambassador');
-	    $store_name = $this->request->getVar('store');
-	    $month = $this->request->getVar('month');
-	    $year = $this->request->getVar('year');
-	    $sort = $this->request->getVar('sort') ?? 'ASC';
-	    $sort_field = $this->request->getVar('sort_field');
-		$page_limit = (int) $this->request->getVar('limit');
-		$page_offset = (int) $this->request->getVar('offset');
-		$type = $this->request->getPost('trade_type');
+		$itemCatId = trim($this->request->getPost('itemCategory') ?? '');
+		$itemCatId = $itemCatId === '' ? null : $itemCatId;
 
-	    if(empty($brand_ambassador)){
-	    	$brand_ambassador = null;
-	    }
-	    if(empty($store_name)){
-	    	$store_name = null;
-	    }
-	    if(empty($month)){
-	    	$month = null;
-	    }
+		$weekStart = trim($this->request->getPost('weekFrom') ?? '');
+		$weekStart = $weekStart === '' ? null : $weekStart;
 
-	    if(empty($year)){
-	    	$year = null;
-	    }
+		$weekEnd = trim($this->request->getPost('weekTo') ?? '');
+		$weekEnd = $weekEnd === '' ? null : $weekEnd;
 
-		if(empty($page_limit)) {
-			$page_limit = 10;
+		$latestYear = trim($this->request->getPost('year') ?? '');
+		$latestYear = $latestYear === '' ? null : $latestYear;
+
+		$source = trim($this->request->getPost('source') ?? '');
+		$source = $source === '' ? null : $source;
+
+		$type = $this->request->getPost('type');
+		$type = $type === '' ? null : $type;
+
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit = is_numeric($limit) ? (int)$limit : 10;
+		$offset = is_numeric($offset) ? (int)$offset : 0;
+
+		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
+	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'desc';
+	    $columns = $this->request->getVar('columns');
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'item_name';
+
+		$sysPar = $this->Global_model->getSysPar();
+		$npdSku = [];
+		$heroSku = [];
+		$skuMin = 20;
+		$skuMin = 30;
+	    $ItemClasses = null;
+	    $itemCatId = null;
+
+		if($sysPar){
+			$jsonStringHero = $sysPar[0]['hero_sku'];
+			$dataHero = json_decode($jsonStringHero, true);
+			$heroSku = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$jsonStringNpd = $sysPar[0]['new_item_sku'];
+			$dataNpd = json_decode($jsonStringNpd, true);
+			$npdSku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+		    $skuMin = $sysPar[0]['sm_sku_min'];
+		    $skuMax = $sysPar[0]['sm_sku_max'];
+		    $skuMin = 1;
 		}
-		if(empty($page_offset)) {
-			$page_offset = 0;
-		}
+			$orderDirection = strtoupper($orderDirection);
+			if(intval($source) === 3){
+			    switch ($type) {
+			        case 'slowMoving':
+			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            break;
+			        case 'overStock':
+			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            break;
+			        case 'npd':
+						$itemClassFilter = $npdSku;
+			           $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			            break;
+			        case 'hero':
+	        			$itemClassFilter = $heroSku;
+			            $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			            break;
+			        default:
+			        	$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			    }
+			}else{
+			    switch ($type) {
+			        case 'slowMoving':
+			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            break;
+			        case 'overStock':
+			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            break;
+			        case 'npd':
+						$itemClassFilter = $npdSku;
+			           $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			            break;
+			        case 'hero':
+	        			$itemClassFilter = $heroSku;
+			            $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			            break;
+			        default:
+			        	$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			    }
+			}
 
-	    switch ($type) {
-	        case 'slowMoving':
-	           $data = $this->Dashboard_model->getKamTwoData($brand_ambassador, $store_name, $sort_field, $sort, $page_limit, $page_offset, 20, 30, $month, $year);
-	            break;
-	        case 'overStock':
-	            $data = $this->Dashboard_model->getKamTwoData($brand_ambassador, $store_name, $sort_field, $sort, $page_limit, $page_offset, 30, null, $month, $year);
-	            break;
-	        case 'npd':
-	        	$item_class_filter = ['N-New Item'];
-	           $data = $this->Dashboard_model->getKamTwoHeroNPDData($brand_ambassador, $store_name, $sort_field, $sort, $page_limit, $page_offset, $month, $year, 'npd', $item_class_filter);
-	            break;
-	        case 'hero':
-	                $item_class_filter = [
-						'A-Top 500 Pharma/Beauty',
-						//'AU-Top', to follow
-						'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty',
-						'B-Remaining Class B net of BU Pharma/Beauty'
 
-					];
-	            $data = $this->Dashboard_model->getKamTwoHeroNPDData($brand_ambassador, $store_name, $sort_field, $sort, $page_limit, $page_offset, $month, $year, 'hero', $item_class_filter);
-	            break;
-	        default:
-	        	$data = $this->Dashboard_model->getKamTwoData($brand_ambassador, $store_name, $sort_field, $sort, $page_limit, $page_offset, 20, 30, $month, $year);
-	    }
-	    
-	    // return $this->response->setJSON([
-	    //     'draw' => intval($this->request->getVar('draw')),
-	    //     'recordsTotal' => $data['total_records'],
-	    //     'recordsFiltered' => $data['total_records'],
-	    //     'data' => $data['data']
-	    // ]);	
-	    return $this->response->setJSON([
-	        'draw' => intval($this->request->getVar('draw')),
-	        'recordsTotal' => 0,
-	        'recordsFiltered' => 0,
-	        'data' => []
-	    ]);	
+		    return $this->response->setJSON([
+		        'draw' => intval($this->request->getVar('draw')),
+		        'recordsTotal' => $data['total_records'],
+		        'recordsFiltered' => $data['total_records'],
+		        'data' => $data['data'],
+		    ]);	
 	}
 
 }

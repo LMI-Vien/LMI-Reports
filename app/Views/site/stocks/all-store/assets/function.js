@@ -107,6 +107,27 @@
 
     function initializeTable(tableId, type, selectedItemClass, selectedItemCat, selectedVendor) {
         $(tableId).closest('.table-responsive').show(); 
+
+        const columns = [
+            { data: 'itmcde' },
+            { data: 'item_name' },
+            { data: 'item_class' }
+        ];
+
+        if (type !== 'hero') {
+            columns.push({ data: 'sum_total_qty' });
+        }
+
+        columns.push(
+            { data: 'sum_ave_sales' },   
+            { data: 'swc' }        
+        );
+
+        let defaultSortColumn = 1;
+        if (type !== 'hero') {
+            defaultSortColumn = 3;
+        }
+
         $(tableId).DataTable({
             destroy: true,
             ajax: {
@@ -124,14 +145,8 @@
                     return json.data.length ? json.data : [];
                 }
             },
-            columns: [
-                { data: 'itmcde' },
-                { data: 'item_name' },
-                { data: 'item_class' },
-                type !== 'hero' ? { data: 'sum_total_qty' } : null,
-                { data: 'sum_ave_sales' },
-                { data: 'swc' }
-            ].filter(Boolean),
+            columns: columns,
+            order: [[defaultSortColumn, 'desc']],
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
@@ -141,6 +156,7 @@
             lengthChange: false
         });
     }
+
 
     function handleAction(action) {
         if (action === 'preview') {

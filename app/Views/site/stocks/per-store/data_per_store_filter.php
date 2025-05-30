@@ -25,7 +25,7 @@
                             <div class="form-group card-dark mb-3 p-2">
                                 <label for="area" class="mb-2"><i class="fas fa-map-marker-alt mr-1"></i> Area</label>
                                 <input type="text" class="form-control" id="area" placeholder="Please select...">
-                                <input type="hidden" id="area_id">
+                                <input type="hidden" id="areaId">
                             </div>
                             <div class="form-group card-dark mb-3 p-2">
                                 <label for="ascName" class="mb-2"><i class="fas fa-user-tie mr-1"></i> Area Sales Coordinator</label>
@@ -64,7 +64,7 @@
                                 <label for="brands" class="mb-2"><i class="fas fa-boxes mr-1"></i> Brand Handle</label>
                                 <select id="brands" name="brands[]" class="form-control select2" multiple>
                                     <?php foreach ($brands as $key => $value) {
-                                        echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
+                                        echo '<option value="' . htmlspecialchars($value['brand_code']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
                                     } ?>
                                 </select>
                             </div>

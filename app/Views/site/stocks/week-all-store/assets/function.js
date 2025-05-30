@@ -39,7 +39,7 @@ const getCalendarWeeks = (year) => {
 }
 
 const populateDropdown = (selected_class, result, textKey = 'name', valueKey = 'id') => {
-    let html = '<option id="default_val" value=" ">Select</option>';
+    let html = '<option id="default_val" value="">Select</option>';
     
     if (result && result.length > 0) {
         result.forEach((item) => {

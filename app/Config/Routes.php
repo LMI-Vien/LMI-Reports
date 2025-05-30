@@ -26,6 +26,7 @@ $routes->group('stocks/', static function ($routes) {
 
     //week all store
     $routes->get('data-week-all-store', 'StocksWeekAllStore::dataWeekAllStore');
+    $routes->get('get-data-week-all-store', 'StocksWeekAllStore::GetDataWeekAllStore');
     $routes->post('get-data-week-all-store', 'StocksWeekAllStore::GetDataWeekAllStore');
     $routes->get('all-store-generate-pdf', 'StocksWeekAllStore::generatePdf');
     $routes->get('all-store-generate-excel-ba', 'StocksWeekAllStore::generateExcel');

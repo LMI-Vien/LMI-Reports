@@ -145,9 +145,18 @@
     });
 
     $(document).on('click', '#clearButton', function () {
+        $('#area').val('');
+        $('#brandAmbassador').val('');
+        $('#ascName').val('');
+        $('#storeName').val('');    
+        $('#areaId').val('');
+        $('#brandAmbassadorId').val('');
+        $('#ascNameId').val('');
+        $('#storeNameId').val('');
         $('.btn-outline-light').removeClass('active');
         $('.main_all').addClass('active');
         $('select').prop('selectedIndex', 0);
+        $('select').val('').trigger('change');
         $('.hide-div').hide();
         $('.table-empty').show();
     });
@@ -191,13 +200,27 @@
             }
         });
 
-        const storeFilter = $('#area').val();
+        const areaFilter = $('#area').val();
         const invStatusFilter = $('#inventoryStatus').val();
 
-        if (!storeFilter || !invStatusFilter) {
-            modal.alert('Please select both "Area" and "Inventory Status" before filtering.', "warning");
+        if (!areaFilter && invStatusFilter.length === 0) {
+            modal.alert('Please select both "Area" and Inventory Status" before filtering.', "warning");
             return;
         }
+
+        if (!areaFilter || areaFilter.length === 0) {
+            modal.alert('Please select "Area" before filtering.', "warning");
+            return;
+        }
+
+        // Validate Inventory Status (multi-select)
+        if (!invStatusFilter || invStatusFilter.length === 0) {
+            modal.alert('Please select "Inventory Status" before filtering.', "warning");
+            return;
+        }
+
+
+
         $('#sourceDate').text(calendarWeek);
         if (counter >= 1) {
             fetchData();
@@ -249,8 +272,24 @@
         });
     }
 
+
     function initializeTable(tableId, type, selectedArea, selectedAsc, selectedBaType, selectedBa, selectedStore, selectedBrands) {
         $(tableId).closest('.table-responsive').show(); 
+
+        const columns = [
+            { data: 'itmcde' },
+            { data: 'item_name' }
+        ];
+
+        if (type !== 'hero') {
+            columns.push({ data: 'sum_total_qty' });
+        }
+
+        let defaultSortColumn = 1;
+        if (type !== 'hero') {
+            defaultSortColumn = 2;
+        }
+        console.log(defaultSortColumn);
         $(tableId).DataTable({
             destroy: true,
             ajax: {
@@ -271,11 +310,8 @@
                     return json.data.length ? json.data : [];
                 }
             },
-            columns: [
-                { data: 'itmcde' },
-                { data: 'item_name' },
-                type !== 'hero' ? { data: 'sum_total_qty' } : null
-            ].filter(Boolean),
+            columns: columns,
+            order: [[defaultSortColumn, 'desc']],
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
@@ -285,6 +321,43 @@
             lengthChange: false
         });
     }
+
+    // function initializeTable(tableId, type, selectedArea, selectedAsc, selectedBaType, selectedBa, selectedStore, selectedBrands) {
+    //     $(tableId).closest('.table-responsive').show(); 
+    //     $(tableId).DataTable({
+    //         destroy: true,
+    //         ajax: {
+    //             url: base_url + 'stocks/get-data-per-store',
+    //             type: 'POST',
+    //             data: function (d) {
+    //                 d.area = selectedArea === "" ? null : selectedArea;
+    //                 d.asc = selectedAsc === "" ? null : selectedAsc;
+    //                 d.baType = selectedBaType === "" ? null : selectedBaType;
+    //                 d.ba = selectedBa === "" ? null : selectedBa;
+    //                 d.store = selectedStore === "" ? null : selectedStore;
+    //                 d.brands = selectedBrands === [] ? null : selectedBrands;
+    //                 d.type = type;
+    //                 d.limit = d.length;
+    //                 d.offset = d.start;
+    //             },
+    //             dataSrc: function(json) {
+    //                 return json.data.length ? json.data : [];
+    //             }
+    //         },
+    //         columns: [
+    //             { data: 'itmcde' },
+    //             { data: 'item_name' },
+    //             type !== 'hero' ? { data: 'sum_total_qty' } : null
+    //         ].filter(Boolean),
+    //         pagingType: "full_numbers",
+    //         pageLength: 10,
+    //         processing: true,
+    //         serverSide: true,
+    //         searching: false,
+    //         colReorder: true,
+    //         lengthChange: false
+    //     });
+    // }
 
     function handleAction(action) {
         // modal.loading(true);

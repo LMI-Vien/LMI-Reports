@@ -38,7 +38,6 @@
     }
 
     .tbl-title-field {
-        /* background: linear-gradient(to right, #007bff, #143996); */
         background: linear-gradient(to right, #143996, #007bff);
         color: black !important;
         text-align: center;
@@ -51,12 +50,20 @@
         border-radius: 8px 8px 0px 0px !important;
     }
 
+    .tbl-title-header .dt-column-order {
+        display: none !important;
+    }
+
+    .tbl-title-header {
+        pointer-events: none !important;
+        cursor: default !important;
+    }
     .table {
         margin-bottom: 0;
-        border-collapse: separate; /* Required for border-radius */
-        border-spacing: 0; /* Ensures borders don't separate */
+        border-collapse: separate; 
+        border-spacing: 0;
         border-radius: 12px 12px 0px 0px;
-        overflow: hidden; /* Ensures inner content respects border-radius */
+        overflow: hidden; 
     }
 
     .table th {
@@ -94,6 +101,7 @@
         display: none !important;
     }
 
+
     .select2-container--default .select2-selection--multiple .select2-selection__choice {
       background-color: #ffc107 !important; /* Bootstrap's bg-warning */
       border-color: #ffc107 !important;
@@ -123,7 +131,32 @@
       box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
       outline: none;
     }
-    
+
+    .btn-group-toggle {
+      gap: 0.1rem; /* Adds spacing between buttons if using flex-wrap */
+    }
+          
+    .btn-group-toggle .btn {
+      color: #fff;
+      border-radius: 5px !important;
+      border-color: #666;
+      background-color: rgba(255, 255, 255, 0.05);
+      text-align: center;
+      white-space: nowrap;
+      transition: background-color 0.2s;
+    }
+          
+    .btn-group-toggle .btn.active {
+      background-color: #007bff;
+      color: #fff;
+      border-color: #007bff;
+    }
+          
+    .btn-group-toggle .btn:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+
     .static-header .dt-column-order {
         display: none !important;
     }
