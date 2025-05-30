@@ -38,7 +38,7 @@ class StocksPerStore extends BaseController
 		}
 
 		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
-		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
+		$data['store_branches'] = $this->Global_model->getStoreBranchById(0);
 		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
 		$data['asc'] = $this->Global_model->getAsc(0);
 		$data['areas'] = $this->Global_model->getArea(0);
