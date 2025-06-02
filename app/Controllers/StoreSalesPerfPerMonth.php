@@ -93,7 +93,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		    'brand_id' => $brand,
 		    'year_val' => $targetYear
 		];
-	    $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+	   // $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
 	    // return $this->response->setJSON([
 	    //     'data' => $data['data'],
 		// 	'area' => $area,
@@ -103,6 +103,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		// 	'store' => $store,
 		// 	'year' => $year,
 	    // ]);
+	    $data = [];
 
 	    return $this->response->setJSON([
 	        'data' => [],
