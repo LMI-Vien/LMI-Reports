@@ -315,7 +315,7 @@ class ImportWeekOnWeek extends BaseController
 		$pdf = new \App\Libraries\TCPDFLib();
 		$pageWidth = $pdf->getPageWidth();
 		$pageMargin = $pdf->getMargins();
-		$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / 7;
+		$width = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / 10;
 
 		$headerTitle = '';
 
@@ -337,9 +337,9 @@ class ImportWeekOnWeek extends BaseController
 		$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 1, 10 + ($width * 4), 35);
 		$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 1, 10 + ($width * 5), 35);
 		$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 1, 10 + ($width * 6), 35);
-		$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 6), 35);
-		$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 6), 35);
-		$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 6), 35);
+		$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 7), 35);
+		$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 8), 35);
+		$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 9), 35);
 
 		$h = 45;
 		$pdf->SetFont('helvetica', '', 9);
@@ -364,9 +364,9 @@ class ImportWeekOnWeek extends BaseController
 				$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 1, 10 + ($width * 4), 35);
 				$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 1, 10 + ($width * 5), 35);
 				$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 1, 10 + ($width * 6), 35);
-				$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 6), 35);
-				$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 6), 35);
-				$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 6), 35);
+				$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 7), 35);
+				$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 8), 35);
+				$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 9), 35);
 
 				$h = 30;
 				$pdf->SetFont('helvetica', '', 9);
@@ -379,9 +379,9 @@ class ImportWeekOnWeek extends BaseController
 			$pdf->MultiCell($width, $rowHeight, ($value['item_class'] ?? ''), 0, '', false, 1, 10 + ($width * 4), $h);
 			$pdf->MultiCell($width, $rowHeight, ($value['pog_store'] ?? ''), 0, '', false, 1, 10 + ($width * 5), $h);
 			$pdf->MultiCell($width, $rowHeight, ($value['quantity'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['soh'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['ave_weekly_sales'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['weeks_cover'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['soh'] ?? ''), 0, '', false, 1, 10 + ($width * 7), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['ave_weekly_sales'] ?? ''), 0, '', false, 1, 10 + ($width * 8), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['weeks_cover'] ?? ''), 0, '', false, 1, 10 + ($width * 9), $h);
 
 			$h += $rowHeight * 2;
 		}
