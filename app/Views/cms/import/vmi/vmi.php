@@ -320,7 +320,7 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-          select: "c.name AS company, y.year as year, w.name week",
+          select: "c.name AS company, y.year as year, w.name, week",
           query: new_query,
           offset: offset,
           limit: limit,
@@ -1437,7 +1437,7 @@
             filterArr.push(`company:EQ=${company}`);
         }
         if(year) {
-            filterArr.push(`year:EQ=${year}`);
+            filterArr.push(`a.year:EQ=${year}`);
         }
         // if(month) {
         //     filterArr.push(`month:EQ=${month}`);
@@ -1459,9 +1459,9 @@
 
         const startExport = () => {
             dynamic_search(
-                "'tbl_vmi'", 
-                "''", 
-                "'store, item, item_name, item_class, supplier, `c_group`, dept, `c_class` as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.week'", 
+                "'tbl_vmi a'", 
+                "'LEFT JOIN tbl_year as v on a.year = v.id'", 
+                "'store, item, item_name, item_class, supplier, `c_group`, dept, `c_class` as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, week'", 
                 0, 
                 0, 
                 `'${filter}'`,  
@@ -1595,9 +1595,9 @@
 
                             for (let index = 0; index < total_records; index += 100000) {
                                 dynamic_search(
-                                    "'tbl_vmi'", 
-                                    "''", 
-                                    `'store, item, item_name, item_class, supplier, \`c_group\`, dept, c_class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.week'`, 
+                                    "'tbl_vmi a'", 
+                                    "'LEFT JOIN tbl_year as v on a.year = v.id'", 
+                                    `'store, item, item_name, item_class, supplier, \`c_group\`, dept, c_class as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, week'`, 
                                     100000, 
                                     index, 
                                     `''`,  
@@ -1607,9 +1607,11 @@
                                         let store_ids = []
                                         let store_map = {}
 
+                                        const storeSet = new Set(store_ids); // convert existing array to a Set
                                         res.forEach(stores => {
-                                            store_ids.push(`${stores.store}`);
+                                            storeSet.add(`${stores.store}`);
                                         });
+                                        store_ids = Array.from(storeSet); // convert back to array
 
                                         dynamic_search(
                                             "'tbl_store'", 
@@ -1687,8 +1689,6 @@
                                     }
                                 )
                             }
-                        } else {
-
                         }
                     }
                 )
@@ -1716,14 +1716,14 @@
         filterArr.push(`v.company:EQ=${company}`);
         filterArr.push(`v.year:EQ=${year}`);
         // filterArr.push(`m.month:EQ=${month}`);
-        filterArr.push(`v.week:EQ=${week}`);
+        filterArr.push(`week:EQ=${week}`);
 
         let filter = filterArr.join(',')
 
         dynamic_search(
                 "'tbl_vmi v'", 
                 "'left join tbl_company c on v.company = c.id "+
-                "left join tbl_year y on v.year = y.id ",
+                "left join tbl_year y on v.year = y.id'",
                 "'COUNT(v.id) as total_records'",
                 0, 
                 0, 
@@ -1739,12 +1739,10 @@
                                 "'tbl_vmi v'", 
 
                                 "'left join tbl_company c on v.company = c.id "+
-                                "left join tbl_year y on v.year = y.id ",
-                                // "left join tbl_month m on v.month = m.id "+
-                               // "left join tbl_week w on v.week = w.id'", 
+                                "left join tbl_year y on v.year = y.id'",
 
                                 "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
-                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, v.week'", 
+                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, week'", 
 
                                 100000, 
                                 index, 
