@@ -322,82 +322,27 @@
         });
     }
 
-    // function initializeTable(tableId, type, selectedArea, selectedAsc, selectedBaType, selectedBa, selectedStore, selectedBrands) {
-    //     $(tableId).closest('.table-responsive').show(); 
-    //     $(tableId).DataTable({
-    //         destroy: true,
-    //         ajax: {
-    //             url: base_url + 'stocks/get-data-per-store',
-    //             type: 'POST',
-    //             data: function (d) {
-    //                 d.area = selectedArea === "" ? null : selectedArea;
-    //                 d.asc = selectedAsc === "" ? null : selectedAsc;
-    //                 d.baType = selectedBaType === "" ? null : selectedBaType;
-    //                 d.ba = selectedBa === "" ? null : selectedBa;
-    //                 d.store = selectedStore === "" ? null : selectedStore;
-    //                 d.brands = selectedBrands === [] ? null : selectedBrands;
-    //                 d.type = type;
-    //                 d.limit = d.length;
-    //                 d.offset = d.start;
-    //             },
-    //             dataSrc: function(json) {
-    //                 return json.data.length ? json.data : [];
-    //             }
-    //         },
-    //         columns: [
-    //             { data: 'itmcde' },
-    //             { data: 'item_name' },
-    //             type !== 'hero' ? { data: 'sum_total_qty' } : null
-    //         ].filter(Boolean),
-    //         pagingType: "full_numbers",
-    //         pageLength: 10,
-    //         processing: true,
-    //         serverSide: true,
-    //         searching: false,
-    //         colReorder: true,
-    //         lengthChange: false
-    //     });
-    // }
-
     function handleAction(action) {
-        // modal.loading(true);
-        
-        // let selectedType = $('input[name="filterType"]:checked').val();
-        // let selectedBa = $('#brand_ambassadors').val();
-        // let selectedStore = $('#store_branch').val();
-        // let selectedBrand = $('#brand').val();
-        // let selectedSortField = $('#sortBy').val();
-        // let selectedSortOrder = $('input[name="sortOrder"]:checked').val();
-        // let ascName = $('#ar_asc_name').text().trim();
-        
-        // let type = 'slowMoving';
-        // if(type){
-        //   let url = base_url + 'stocks/per-store-generate-pdf-' + (action === 'export_pdf' ? 'pdf' : 'excel') + '-ba?'
-        //       + 'sort_field=' + encodeURIComponent(selectedSortField)
-        //       + '&sort=' + encodeURIComponent(selectedSortOrder)
-        //       + '&brand=' + encodeURIComponent(selectedBrand || '')
-        //       + '&brand_ambassador=' + encodeURIComponent(selectedBa || '')
-        //       + '&store_name=' + encodeURIComponent(selectedStore || '')
-        //       + '&ba_type=' + encodeURIComponent(selectedType)
-        //       + '&asc_name=' + encodeURIComponent(ascName)
-        //       + '&type=' + encodeURIComponent(type)
-        //       + '&limit=' + encodeURIComponent(length)
-        //       + '&offset=' + encodeURIComponent(offset);
+        const selectedInventoryStatus = $('#inventoryStatus').val();
 
-        //   let iframe = document.createElement('iframe');
-        //   iframe.style.display = "none";
-        //   iframe.src = url;
-        //   document.body.appendChild(iframe);
+        const params = new URLSearchParams();
+        params.append('area', $('#areaId').val() || '');
+        params.append('asc', $('#ascNameId').val() || '');
+        params.append('baType', $('input[name="filterType"]:checked').val() || '');
+        params.append('ba', $('#brandAmbassadorId').val() || '');
+        params.append('store', $('#storeNameId').val() || '');
+        params.append('types', JSON.stringify(selectedInventoryStatus));
 
-        //   setTimeout(() => {
-        //       modal.loading(false);
-        //   }, 5000);
-        // }
-        if (action === 'preview') {
-        } else if (action === 'export') {
-            //prepareExport();
-            modal.alert("Not yet available");
+        const brands = $('#brands').val();
+        if (Array.isArray(brands)) {
+            brands.forEach(b => params.append('brands[]', b));
         } else {
-            modal.alert("Not yet available");
+            params.append('brands', brands || '');
         }
+
+        const linkto = action === 'export_pdf'
+            ? "stocks/per-store-generate-pdf?"
+            : "stocks/per-store-generate-excel-ba?";
+
+        window.open(base_url + linkto + params.toString(), '_blank');
     }
