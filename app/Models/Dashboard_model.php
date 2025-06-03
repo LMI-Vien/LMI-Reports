@@ -31,7 +31,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item_name', 'itmcde'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -211,7 +211,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item_name', 'itmcde'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -853,16 +853,16 @@ class Dashboard_model extends Model
 			    ELSE ROUND(COALESCE(t.target_sales, 0) - COALESCE(sd.actual_sales, 0), 2)
 			END AS balance_to_target,
 	        ROUND(
-	            COALESCE(SUM(sd.actual_sales), 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
+	            COALESCE(sd.actual_sales, 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
 	        ) AS percent_ach,
 	        FORMAT(COALESCE(ly.ly_scanned_data, 0),2) AS ly_scanned_data,
 	        ROUND(
-	            (COALESCE(SUM(sd.actual_sales), 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
+	            (COALESCE(sd.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
 	            2
 	        ) AS growth,
 	        CASE 
 	          WHEN ? > 0 THEN CEIL((
-				ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(sd.actual_sales), 0), 2)
+				ROUND(COALESCE(t.target_sales, 0) - COALESCE(sd.actual_sales, 0), 2)
 	          ) / ?)
 	          ELSE NULL
 	        END AS target_per_remaining_days,
@@ -1672,7 +1672,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item_name', 'itmcde', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -1760,7 +1760,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsWow[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {

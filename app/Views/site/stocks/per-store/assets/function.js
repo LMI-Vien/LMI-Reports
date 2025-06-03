@@ -278,6 +278,7 @@
 
         const columns = [
             { data: 'itmcde' },
+            { data: 'item' },
             { data: 'item_name' }
         ];
 
@@ -287,7 +288,7 @@
 
         let defaultSortColumn = 1;
         if (type !== 'hero') {
-            defaultSortColumn = 2;
+            defaultSortColumn = 3;
         }
         console.log(defaultSortColumn);
         $(tableId).DataTable({

@@ -63,7 +63,7 @@
                                 <thead>
                                     <tr>
                                         <th 
-                                            colspan="3"
+                                            colspan="4"
                                             style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                             class="tbl-title-header"
                                         >
@@ -72,22 +72,23 @@
                                     </tr>
                                     <tr>
                                         <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field">SKU</th>
                                         <th class="tbl-title-field">SKU Name</th>
                                         <th class="tbl-title-field">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                               No data available
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                   </tbody>
@@ -99,7 +100,7 @@
                                 <thead>
                                     <tr>
                                         <th 
-                                            colspan="3"
+                                            colspan="4"
                                             style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                             class="tbl-title-header"
                                         >
@@ -108,22 +109,23 @@
                                     </tr>
                                     <tr>
                                         <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field">SKU</th>
                                         <th class="tbl-title-field">SKU Name</th>
                                         <th class="tbl-title-field">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                               No data available
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                   </tbody>
@@ -135,7 +137,7 @@
                                 <thead>
                                     <tr>
                                         <th 
-                                            colspan="3"
+                                            colspan="4"
                                             style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                             class="tbl-title-header"
                                         >
@@ -144,22 +146,23 @@
                                     </tr>
                                     <tr>
                                         <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field">SKU</th>
                                         <th class="tbl-title-field">SKU Name</th>
                                         <th class="tbl-title-field">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                               No data available
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="3" class="text-center py-4 text-muted">
+                                          <td colspan="4" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                   </tbody>
@@ -171,7 +174,7 @@
                                 <thead>
                                     <tr>
                                         <th 
-                                            colspan="2"
+                                            colspan="3"
                                             style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                             class="tbl-title-header"
                                         >
@@ -180,21 +183,22 @@
                                     </tr>
                                     <tr>
                                         <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field">SKU</th>
                                         <th class="tbl-title-field">SKU Name</th>
                                     </tr>
                                 </thead>
                                   <tbody>
                                       <tr>
-                                          <td colspan="2" class="text-center py-4 text-muted">
+                                          <td colspan="3" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="2" class="text-center py-4 text-muted">
+                                          <td colspan="3" class="text-center py-4 text-muted">
                                               No data available
                                           </td>
                                       </tr>
                                       <tr>
-                                          <td colspan="2" class="text-center py-4 text-muted">
+                                          <td colspan="3" class="text-center py-4 text-muted">
                                           </td>
                                       </tr>
                                   </tbody>
