@@ -171,31 +171,110 @@ class StocksPerStore extends BaseController
 
 	public function generatePdf()
 	{	
-	    $sort_field = $this->request->getGet('sort_field');
-	    $sort = $this->request->getGet('sort');
-	    $brand = $this->request->getGet('brand');
-	    $brand_ambassador = $this->request->getGet('brand_ambassador');
-	    $store_name = $this->request->getGet('store_name');
-	    $ba_type = $this->request->getGet('ba_type');
-	    $type = $this->request->getGet('type');
-	    $asc_name = $this->request->getGet('asc_name');
-	    $batchSize = 10000; //  10,000 data per batch
-	    $offset = 0;
-	    $out_con = 'ALL';
-	    $latestVmiData = $this->Dashboard_model->getLatestVmi();
-	    
-	    if ($latestVmiData) {
-	        $latestYear = $latestVmiData['year_id'];
-	        $latest_month = $latestVmiData['month_id'];
-	        $latestWeek = $latestVmiData['week_id'];
+		$areaId = trim($this->request->getGet('area') ?? '');
+		$areaId = $areaId === '' ? null : $areaId;
 
-	        $brand_ambassador = $brand_ambassador ?: null;
-	        $brand = $brand ?: null;
-	        $store_name = $store_name ?: null;
-	        $out_con = $ba_type ?: "ALL";
-	        $asc_name = ($asc_name && $asc_name !== 'Please Select Brand Ambassador') ? $asc_name : "";
+		$ascId = trim($this->request->getGet('asc') ?? '');
+		$ascId = $ascId === '' ? null : $ascId;
 
-	        $title = 'BA_Dashboard_Report';
+		$baTypeId = trim($this->request->getGet('baType') ?? '');
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
+
+		$baId = trim($this->request->getGet('ba') ?? '');
+		$baId = $baId === '' ? null : $baId;
+
+		$storeId = trim($this->request->getGet('store') ?? '');
+		$storeId = $storeId === '' ? null : $storeId;
+
+		$brands = $this->request->getGet('brands');
+		$brands = $brands === '' ? null : $brands;
+
+		$types = json_decode($this->request->getGet('types'), true);
+		if (!$types || !is_array($types)) {
+			$types = ['hero']; // fallback
+		}
+
+		$limit = 99999; // use a really huge number to include everything
+		$offset = 0;
+
+		$orderColumnIndex = $this->request->getGet('orderIndex') ?? 0;
+	    $orderDirection = $this->request->getGet('orderDir') ?? 'desc';
+	    $columns = json_decode($this->request->getGet('columns'), true);
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'sum_total_qty';
+
+		$latestVmiData = $this->Dashboard_model->getLatestVmi();
+		$sysPar = $this->Global_model->getSysPar();
+		$npdSku = [];
+		$heroSku = [];
+		$skuMin = 20;
+		$skuMin = 30;
+	    $companyId = null;
+	    $ItemClasses = null;
+	    $itemCatId = null;
+		if($sysPar){
+			$jsonStringHero = $sysPar[0]['hero_sku'];
+			$dataHero = json_decode($jsonStringHero, true);
+			$heroSku = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$jsonStringNpd = $sysPar[0]['new_item_sku'];
+			$dataNpd = json_decode($jsonStringNpd, true);
+			$npdSku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+		    $skuMin = $sysPar[0]['sm_sku_min'];
+		    $skuMax = $sysPar[0]['sm_sku_max'];
+		}
+
+	    if($latestVmiData){
+	    	$latestYear = $latestVmiData['year_id'];
+	    	$latestWeek = $latestVmiData['week_id'];
+		    $orderDirection = strtoupper($orderDirection);
+
+			$allData = [];
+
+			foreach ($types as $type) {
+				$offset = 0;
+				$data = null;
+				$label = '';
+				$itemClassFilter = [];
+
+				switch ($type) {
+					case 'slowMoving':
+						$label = 'Slow Moving';
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					case 'overStock':
+						$label = 'Overstock';
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					case 'npd':
+						$label = 'NPD';
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					case 'hero':
+						$label = 'Hero SKUs';
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					default:
+						continue 2; // skip unknown type
+				}
+
+				if (!empty($data['data'])) {
+					$allData[] = [
+						'type' => $type,
+						'label' => $label,
+						'rows' => $data['data']
+					];
+				}
+
+				unset($data);
+				gc_collect_cycles();
+			}
+
+			$title = 'BA_Dashboard_Report_' . date('Ymd_His');
 	        
 	        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 	        $pdf->SetCreator('LMI SFA');
@@ -212,169 +291,201 @@ class StocksPerStore extends BaseController
 	        $pdf->Ln(5);
 
 	        $pdf->SetFont('helvetica', '', 9);
-	        $pdf->Cell(63, 6, 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'), 0, 0, 'L');
-	        $pdf->Cell(63, 6, 'Brand: ' . ($brand ?: 'ALL'), 0, 0, 'L');
-	        $pdf->Cell(63, 6, 'Outright/Consignment: ' . ($out_con ?: 'ALL'), 0, 1, 'L');
-	        
-	        $pdf->Cell(63, 6, 'Store Name: ' . ($store_name ?: 'ALL'), 0, 0, 'L');
-	        $pdf->Cell(63, 6, 'Area / ASC Name: ' . ($asc_name ?: ''), 0, 0, 'L');
+			$brand_ambassador_data = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 1, 0, "'id:EQ=$baId'", "''", "''");
+			$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] : null;
+			$pdf->Cell(63, 6, 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'), 0, 0, 'L');
+
+			$brand_data = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_code'", 1, 0, "'id:EQ=$brands'", "''", "''");
+			$brand = isset($brand_data[0]['brand_code']) ? $brand_data[0]['brand_code'] : null;
+			$pdf->Cell(63, 6, 'Brand: ' . ($brand ?: 'ALL'), 0, 0, 'L');
+
+			$pdf->Cell(63, 6, 'Outright/Consignment: ALL', 0, 1, 'L');
+
+			$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
+			$store = isset($store_data[0]['description']) ? $store_data[0]['description'] : null;
+			$pdf->Cell(63, 6, 'Store Name: ' . ($store ?: 'ALL'), 0, 0, 'L');
+
+			$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
+			$asc = isset($asc_data[0]['description']) ? $asc_data[0]['description'] : null;
+			$pdf->Cell(63, 6, 'Area / ASC Name: ' . ($asc ?: ''), 0, 0, 'L');
 	        $pdf->Cell(63, 6, 'Date Generated: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
 	        
 	        $pdf->Ln(2);
 	        $pdf->Cell(0, 0, '', 'T');
 	        $pdf->Ln(4);
 
-	        $pdf->SetFont('helvetica', 'B', 10);
-	        $pdf->Cell(110, 6, 'Item Name', 1, 0, 'C');
-	        $pdf->Cell(15, 6, 'Quantity', 1, 0, 'C');
-	        $pdf->Cell(20, 6, 'LMI Code', 1, 0, 'C');
-	        $pdf->Cell(20, 6, 'RGDI Code', 1, 0, 'C');
-	        $pdf->Cell(25, 6, 'Type of SKU', 1, 1, 'C');
-
 	        $pdf->SetFont('helvetica', '', 10);
 
-	        do {
-	            switch ($type) {
-	                case 'slowMoving':
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latestWeek, $latest_month, $latestYear);
-	                    $title = 'BA_Dashboard_Report_Slow_Moving';
-	                    break;
-	                case 'overStock':
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 30, null, $latestWeek, $latest_month, $latestYear);
-	                    $title = 'BA_Dashboard_Report_Overstock';
-	                    break;
-	                case 'npd':
-	                    $item_class_filter = ['N-New Item'];
-	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latestWeek, $latest_month, $latestYear, $item_class_filter);
-	                    $title = 'BA_Dashboard_Report_NPD';
-	                    break;
-	                case 'hero':
-	                    $item_class_filter = ['A-Top 500 Pharma/Beauty', 'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty', 'B-Remaining Class B net of BU Pharma/Beauty'];
-	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latestWeek, $latest_month, $latestYear, $item_class_filter);
-	                    $title = 'BA_Dashboard_Report_HERO';
-	                    break;
-	                default:
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latestWeek, $latest_month, $latestYear);
-	                    $title = 'BA_Dashboard_Report_Slow_Moving';
-	            }
+			foreach ($allData as $section) {
+				$pdf->SetFont('helvetica', 'B', 10);
+				$pdf->Cell(0, 6, $section['label'], 0, 1, 'L');
 
-	            if ($data) {
-	                foreach ($data['data'] as $row) {
-	                    $pdf->Cell(110, 6, $row->item_name, 1, 0, 'L');
-	                    $pdf->Cell(15, 6, $row->sum_total_qty, 1, 0, 'C');
-	                    $pdf->Cell(20, 6, $row->lmi_itmcde, 1, 0, 'C');
-	                    $pdf->Cell(20, 6, $row->rgdi_itmcde, 1, 0, 'C');
-	                    $pdf->Cell(25, 6, $type, 1, 1, 'C');
-	                }
-	            }
+				$pdf->SetFont('helvetica', 'B', 10);
+				$pdf->Cell(115, 6, 'Item Name', 1, 0, 'C');
+				$pdf->Cell(20, 6, 'Quantity', 1, 0, 'C');
+				$pdf->Cell(25, 6, 'LMI/RGDI Code', 1, 0, 'C');
+				$pdf->Cell(30, 6, 'Type of SKU', 1, 1, 'C');
 
-	            $offset += $batchSize;
-
-	            // Free memory
-	            unset($data);
-	            gc_collect_cycles(); 
-	        } while (!empty($data['data']));
+				foreach ($section['rows'] as $row) {
+					$pdf->SetFont('helvetica', '', 10);
+					$pdf->Cell(115, 6, $row->item_name, 1, 0, 'L');
+					$pdf->Cell(20, 6, intval($row->sum_total_qty), 1, 0, 'C');
+					$pdf->Cell(25, 6, $row->itmcde, 1, 0, 'C');
+					$pdf->Cell(30, 6, $section['label'], 1, 1, 'C');
+				}
+			}
 
 	        $pdf->Output($title . '.pdf', 'D');
 	        exit;
+			
+	    }else{
+			return $this->response->setJSON([
+		        'draw' => intval($this->request->getVar('draw')),
+		        'recordsTotal' => 0,
+		        'recordsFiltered' => 0,
+		        'data' => [],
+		    ]);	
 	    }
 	}
 
 
 	public function generateExcel()
 	{
-	    $sort_field = $this->request->getGet('sort_field');
-	    $sort = $this->request->getGet('sort');
-	    $brand = $this->request->getGet('brand') ?: null;
-	    $brand_ambassador = $this->request->getGet('brand_ambassador') ?: null;
-	    $store_name = $this->request->getGet('store_name') ?: null;
-	    $ba_type = $this->request->getGet('ba_type') ?: null;
-	    $type = $this->request->getGet('type');
-	    $asc_name = $this->request->getGet('asc_name');
-	    $out_con = $ba_type ? 'ALL' : 'ALL';
+		$areaId = trim($this->request->getGet('area') ?? '');
+		$areaId = $areaId === '' ? null : $areaId;
 
-	    $latestVmiData = $this->Dashboard_model->getLatestVmi();
-	    if (!$latestVmiData) {
-	        return;
+		$ascId = trim($this->request->getGet('asc') ?? '');
+		$ascId = $ascId === '' ? null : $ascId;
+
+		$baTypeId = trim($this->request->getGet('baType') ?? '');
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
+
+		$baId = trim($this->request->getGet('ba') ?? '');
+		$baId = $baId === '' ? null : $baId;
+
+		$storeId = trim($this->request->getGet('store') ?? '');
+		$storeId = $storeId === '' ? null : $storeId;
+
+		$brands = $this->request->getGet('brands');
+		$brands = $brands === '' ? null : $brands;
+
+		$types = json_decode($this->request->getGet('types'), true);
+		if (!$types || !is_array($types)) {
+			$types = ['hero']; // fallback
+		}
+
+		$limit = 99999; // use a really huge number to include everything
+		$offset = 0;
+
+		$orderColumnIndex = $this->request->getGet('orderIndex') ?? 0;
+	    $orderDirection = $this->request->getGet('orderDir') ?? 'desc';
+	    $columns = json_decode($this->request->getGet('columns'), true);
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'sum_total_qty';
+
+		$latestVmiData = $this->Dashboard_model->getLatestVmi();
+		$sysPar = $this->Global_model->getSysPar();
+		$npdSku = [];
+		$heroSku = [];
+		$skuMin = 20;
+		$skuMin = 30;
+	    $companyId = null;
+	    $ItemClasses = null;
+	    $itemCatId = null;
+		if($sysPar){
+			$jsonStringHero = $sysPar[0]['hero_sku'];
+			$dataHero = json_decode($jsonStringHero, true);
+			$heroSku = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$jsonStringNpd = $sysPar[0]['new_item_sku'];
+			$dataNpd = json_decode($jsonStringNpd, true);
+			$npdSku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+		    $skuMin = $sysPar[0]['sm_sku_min'];
+		    $skuMax = $sysPar[0]['sm_sku_max'];
+		}
+
+	    if($latestVmiData){
+	    	$latestYear = $latestVmiData['year_id'];
+	    	$latestWeek = $latestVmiData['week_id'];
+		    $orderDirection = strtoupper($orderDirection);
+
+			$allData = [];
+
+			foreach ($types as $type) {
+				$offset = 0;
+				$data = null;
+				$label = '';
+				$itemClassFilter = [];
+
+				switch ($type) {
+					case 'slowMoving':
+						$label = 'Slow Moving';
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					case 'overStock':
+						$label = 'Overstock';
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					case 'npd':
+						$label = 'NPD';
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					case 'hero':
+						$label = 'Hero SKUs';
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId);
+						break;
+
+					default:
+						continue 2; // skip unknown type
+				}
+
+				if (!empty($data['data'])) {
+					$allData[] = [
+						'type' => $type,
+						'label' => $label,
+						'rows' => $data['data']
+					];
+				}
+
+				unset($data);
+				gc_collect_cycles();
+			}
+
+			$spreadsheet = new Spreadsheet();
+			$sheet = $spreadsheet->getActiveSheet();
+
+			$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
+			$sheet->setCellValue('A2', 'Report: BA Dashboard');
+			$sheet->mergeCells('A1:E1');
+			$sheet->mergeCells('A2:E2');
+
+			$rowNum = 8;
+			foreach ($allData as $section) {
+				$headers = ['Item Name', 'Quantity', 'LMI/RGDI Code', 'Type of SKU'];
+				$sheet->fromArray($headers, null, 'A7');
+				$sheet->getStyle('A7:D7')->getFont()->setBold(true);
+
+				foreach ($section['rows'] as $row) {
+					$sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+					$sheet->setCellValueExplicit('B' . $rowNum, intval($row->sum_total_qty), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+					$sheet->setCellValueExplicit('C' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+					$sheet->setCellValueExplicit('D' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+					$rowNum+=1;
+				}
+			}
+
+			$title = 'BA_Dashboard_Report_' . date('Ymd_His');
+
+			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+			header('Cache-Control: max-age=0');
+
+			$writer = new Xlsx($spreadsheet);
+			$writer->save('php://output');
+			exit;
 	    }
-
-	    $latestYear = $latestVmiData['year_id'];
-	    $latest_month = $latestVmiData['month_id'];
-	    $latestWeek = $latestVmiData['week_id'];
-
-	    $asc_name = ($asc_name === 'Please Select Brand Ambassador') ? "" : $asc_name;
-
-	    $title = 'BA_Dashboard_Report';
-	    switch ($type) {
-	        case 'slowMoving':
-	            $title .= '_Slow_Moving';
-	            break;
-	        case 'overStock':
-	            $title .= '_Overstock';
-	            break;
-	        case 'npd':
-	            $title .= '_NPD';
-	            break;
-	        case 'hero':
-	            $title .= '_HERO';
-	            break;
-	    }
-
-	    $spreadsheet = new Spreadsheet();
-	    $sheet = $spreadsheet->getActiveSheet();
-
-	    $sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-	    $sheet->setCellValue('A2', 'Report: BA Dashboard');
-	    $sheet->mergeCells('A1:E1');
-	    $sheet->mergeCells('A2:E2');
-
-	    $sheet->setCellValue('A4', 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'));
-	    $sheet->setCellValue('B4', 'Brand: ' . ($brand ?: 'ALL'));
-	    $sheet->setCellValue('C4', 'Outright/Consignment: ' . ($out_con ?: 'ALL'));
-
-	    $sheet->setCellValue('A5', 'Store Name: ' . ($store_name ?: 'ALL'));
-	    $sheet->setCellValue('B5', 'Area / ASC Name: ' . ($asc_name ?: ''));
-	    $sheet->setCellValue('C5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
-
-	    $headers = ['Item Name', 'Quantity', 'LMI Code', 'RGDI Code', 'Type of SKU'];
-	    $sheet->fromArray($headers, null, 'A7');
-	    $sheet->getStyle('A7:E7')->getFont()->setBold(true);
-
-	    $rowNum = 8;
-	    $batchSize = 5000;
-	    $offset = 0;
-	    do {
-	        $data = $this->Dashboard_model->tradeInfoBa(
-	            $brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort,
-	            $batchSize, $offset, 20, 30, $latestWeek, $latest_month, $latestYear
-	        );
-
-	        if (!$data || empty($data['data'])) {
-	            break;
-	        }
-
-	        foreach ($data['data'] as $row) {
-	            $sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $sheet->setCellValueExplicit('B' . $rowNum, $row->sum_total_qty, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-	            $sheet->setCellValueExplicit('C' . $rowNum, $row->lmi_itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $sheet->setCellValueExplicit('D' . $rowNum, $row->rgdi_itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $sheet->setCellValueExplicit('E' . $rowNum, $type, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $rowNum++;
-	        }
-
-	        $offset += $batchSize;
-	    } while (count($data['data']) === $batchSize);
-
-	    foreach (range('A', 'E') as $columnID) {
-	        $sheet->getColumnDimension($columnID)->setAutoSize(true);
-	    }
-
-	    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-	    header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
-	    header('Cache-Control: max-age=0');
-
-	    $writer = new Xlsx($spreadsheet);
-	    $writer->save('php://output');
-	    exit;
 	}
 }

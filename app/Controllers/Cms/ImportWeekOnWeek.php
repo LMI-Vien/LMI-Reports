@@ -341,10 +341,10 @@ class ImportWeekOnWeek extends BaseController
 		$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 8), 35);
 		$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 9), 35);
 
-		$h = 45;
+		$h = 55;
 		$pdf->SetFont('helvetica', '', 9);
 		foreach ($result as $key => $value) {
-			$rowHeight = 10;
+			$rowHeight = 15;
 			
 			if ($h + $rowHeight * 7 > $pdf->getPageHeight() - $pdf->getMargins()['bottom']) {
 				$pdf->AddPage();
