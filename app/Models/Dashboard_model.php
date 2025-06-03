@@ -151,7 +151,7 @@ class Dashboard_model extends Model
 	          $storeFilterSQLVmi
 	        GROUP BY vmi.item
 	        HAVING weeks > ?
-	           AND (? IS NULL OR weeks < ?)
+	           AND (? IS NULL OR weeks <= ?)
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -540,32 +540,49 @@ class Dashboard_model extends Model
 
 		    ROUND(sd.actual_sales * ?, 2) AS possible_incentives,
 
-		    ROUND((
-		        CASE 
-		            WHEN t.target_ba_types = 1 AND 
-		                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
-		                (COALESCE(t.target_sales, 0) * 1.3) / 
-		                NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
-		            WHEN t.target_ba_types = 1 THEN COALESCE(t.target_sales, 0)
-		            WHEN t.target_ba_types = 0 THEN ?
-		            ELSE COALESCE(t.target_sales, 0)
-		        END - sd.actual_sales), 2
-		    ) AS balance_to_target,
+			CASE
+			    WHEN ROUND((
+			        CASE 
+			            WHEN ba.type = 0 THEN (? * ?)
+			            WHEN t.target_ba_types = 1 AND 
+			                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
+			                (COALESCE(t.target_sales, 0) * 1.3) / 
+			                NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
+			            WHEN t.target_ba_types = 1 THEN COALESCE(t.target_sales, 0)
+			            WHEN t.target_ba_types = 0 THEN ?
+			            ELSE COALESCE(t.target_sales, 0)
+			        END - sd.actual_sales), 2
+			    ) < 0 THEN 0
+			    ELSE ROUND((
+			        CASE 
+			            WHEN ba.type = 0 THEN (? * ?)
+			            WHEN t.target_ba_types = 1 AND 
+			                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
+			                (COALESCE(t.target_sales, 0) * 1.3) / 
+			                NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
+			            WHEN t.target_ba_types = 1 THEN COALESCE(t.target_sales, 0)
+			            WHEN t.target_ba_types = 0 THEN ?
+			            ELSE COALESCE(t.target_sales, 0)
+			        END - sd.actual_sales), 2
+			    )
+			END AS balance_to_target,
 
-		    ROUND(
-		        sd.actual_sales / 
-		        NULLIF((
-		            CASE 
-		                WHEN t.target_ba_types = 1 AND 
-		                     (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
-		                    (COALESCE(t.target_sales, 0) * 1.3) / 
-		                    NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
-		                WHEN t.target_ba_types = 1 THEN COALESCE(t.target_sales, 0)
-		                WHEN t.target_ba_types = 0 THEN ?
-		                ELSE COALESCE(t.target_sales, 0)
-		            END
-		        ), 0) * 100, 2
-		    ) AS percent_ach,
+
+			ROUND(
+			    sd.actual_sales / 
+			    NULLIF((
+			        CASE 
+			            WHEN ba.type = 0 THEN (? * ?)
+			            WHEN t.target_ba_types = 1 AND 
+			                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
+			                (COALESCE(t.target_sales, 0) * 1.3) / 
+			                NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
+			            WHEN t.target_ba_types = 1 THEN COALESCE(t.target_sales, 0)
+			            WHEN t.target_ba_types = 0 THEN ?
+			            ELSE COALESCE(t.target_sales, 0)
+			        END
+			    ), 0) * 100, 2
+			) AS percent_ach,
 
 		    FORMAT(
 		        CASE 
@@ -588,20 +605,21 @@ class Dashboard_model extends Model
 		            ROUND((sd.actual_sales / NULLIF(ly.ly_scanned_data, 0)) * 100, 2)
 		    END AS growth,
 
-		    CASE 
-		        WHEN ? > 0 THEN CEIL((
-		            CASE 
-		                WHEN t.target_ba_types = 1 AND 
-		                     (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
-		                    (COALESCE(t.target_sales, 0) * 1.3) / 
-		                    NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
-		                WHEN t.target_ba_types = 1 THEN COALESCE(t.target_sales, 0)
-		                WHEN t.target_ba_types = 0 THEN ?
-		                ELSE COALESCE(t.target_sales, 0)
-		            END - sd.actual_sales) / ?
-		        )
-		        ELSE NULL
-		    END AS target_per_remaining_days,
+			CASE 
+			    WHEN ? > 0 THEN CEIL((
+			        CASE 
+			            WHEN ba.type = 0 THEN (? * ?)
+			            WHEN t.target_ba_types = 1 AND 
+			                 (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
+			                (COALESCE(t.target_sales, 0) * 1.3) / 
+			                NULLIF((LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 0)
+			            WHEN t.target_ba_types = 1 THEN COALESCE(t.target_sales, 0)
+			            WHEN t.target_ba_types = 0 THEN ?
+			            ELSE COALESCE(t.target_sales, 0)
+			        END - sd.actual_sales) / ?
+			    )
+			    ELSE NULL
+			END AS target_per_remaining_days,
 
 		    COUNT(*) OVER() AS total_records
 
@@ -660,12 +678,21 @@ class Dashboard_model extends Model
 		$params[] = $range;
 		$params[] = $target_sales; 
 	    $params[] = $target_sales;
-	    $params[] = $incentiveRate;  
+	    $params[] = $incentiveRate;
+		$params[] = $range;
+		$params[] = $target_sales; 
 	    $params[] = $target_sales; 
+		$params[] = $range;
+		$params[] = $target_sales; 
+	    $params[] = $target_sales; 
+		$params[] = $range;
+		$params[] = $target_sales; 
 	    $params[] = $target_sales;
 	    $params[] = $remainingDays; 
 	    $params[] = $target_sales;  
 	    $params[] = $remainingDays;
+		$params[] = $range;
+		$params[] = $target_sales; 
 	    $params[] = $startDate;
 	    $params[] = $startDate;
 	    $params[] = $endDate; 
@@ -1442,7 +1469,7 @@ class Dashboard_model extends Model
 	          " . ($withba === true ? " AND vmi.ambassador_names IS NOT NULL AND vmi.ambassador_names <> ''" : ($withba === false ? " AND (vmi.ambassador_names IS NULL OR vmi.ambassador_names = '')" : "")) . "
 	        GROUP BY vmi.item
 	        HAVING weeks > ?
-	        AND (? IS NULL OR weeks < ?)
+	        AND (? IS NULL OR weeks <= ?)
 	        LIMIT ? OFFSET ?
 	    ";
 
@@ -1698,7 +1725,7 @@ class Dashboard_model extends Model
 	          $storeFilterSQLVmi
 	        GROUP BY vmi.item
 	        HAVING weeks > ?
-	           AND (? IS NULL OR weeks < ?)
+	           AND (? IS NULL OR weeks <= ?)
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -1785,7 +1812,7 @@ class Dashboard_model extends Model
 	          $storeFilterSQLWow
 	        GROUP BY wow.item
 	        HAVING weeks > ?
-	           AND (? IS NULL OR weeks < ?)
+	           AND (? IS NULL OR weeks <= ?)
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -2067,7 +2094,7 @@ class Dashboard_model extends Model
 	//           AND vmi.year = ?
 	//         GROUP BY vmi.item
 	//         HAVING weeks > ?
-	//           AND (? IS NULL OR weeks < ?)
+	//           AND (? IS NULL OR weeks <= ?)
 	//         ORDER BY $sort_field $sort
 	//         LIMIT ? OFFSET ?
 	//     ";
