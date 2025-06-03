@@ -55,8 +55,9 @@ class StocksAllStore extends BaseController
 
 		$data['content'] = "site/stocks/all-store/data_all_store";
 		$data['company'] = $this->Global_model->getCompanies(0);
-		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['itemClassi'] = $this->Global_model->getItemClassification();
+		$data['traccItemClassi'] = $this->Global_model->getTraccItemClassification();
+		
 		$data['month'] = $this->Global_model->getMonths();
 		$data['week'] = $this->Global_model->getWeeks();
 		$data['session'] = session();
@@ -81,8 +82,8 @@ class StocksAllStore extends BaseController
 		$ItemClasses = $this->request->getPost('itemClass');
 		$ItemClasses = $ItemClasses === '' ? null : $ItemClasses;
 
-		$itemCatId = trim($this->request->getPost('itemCategory') ?? '');
-		$itemCatId = $itemCatId === '' ? null : $itemCatId;
+		$itemCat = trim($this->request->getPost('itemCategory') ?? '');
+		$itemCat = $itemCat === '' ? null : $itemCat;
 
 		$companyId = trim($this->request->getPost('company') ?? '');
 		$companyId = $companyId === '' ? null : $companyId;
@@ -132,25 +133,25 @@ class StocksAllStore extends BaseController
 		    // $offset = 0;
 		    //$companyId = 3;
 		    //$ItemClasses = ['C-Class C - Others', 'N-New Item'];
-		    //$itemCatId = 9;
+		    //$itemCat = 9;
 		    $orderDirection = strtoupper($orderDirection);
 		    switch ($type) {
 		        case 'slowMoving':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat);
 		            break;
 		        case 'overStock':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat);
 		            break;
 		        case 'npd':
 					$itemClassFilter = $npdSku;
-		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId);
+		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCat);
 		            break;
 		        case 'hero':
         			$itemClassFilter = $heroSku;
-		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId);
+		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCat);
 		            break;
 		        default:
-		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId);
+		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat);
 		    }
 
 		    return $this->response->setJSON([

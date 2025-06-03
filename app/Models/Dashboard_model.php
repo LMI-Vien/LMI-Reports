@@ -7,7 +7,7 @@ use CodeIgniter\Model;
 class Dashboard_model extends Model
 {
 
-	public function dataPerStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCatId = null)
+	public function dataPerStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null)
 	{
 		$baType = ($baType !== null) ? strval($baType) : null;
 	    $storeFilterConditions = [];
@@ -73,14 +73,14 @@ class Dashboard_model extends Model
 		    $ascIdParams = [$ascId];
 		}
 
-		$itemCatIdFilter = '';
-		$itemCatIdFilterVmi = '';
-		$itemCatIdParams = [];
+		$itemCatFilter = '';
+		$itemCatFilterVmi = '';
+		$itemCatParams = [];
 
-		if ($itemCatId !== null) {
-		    $itemCatIdFilter = ' AND v.brand_type_id = ?';
-		    $itemCatIdFilterVmi = ' AND vmi.brand_type_id = ?';
-		    $itemCatIdParams = [$itemCatId];
+		if ($itemCat !== null) {
+		    $itemCatFilter = ' AND v.itmclacde = ?';
+		    $itemCatFilterVmi = ' AND vmi.itmclacde = ?';
+		    $itemCatParams = [$itemCat];
 		}
 
 		$areaIdFilter = '';
@@ -101,7 +101,7 @@ class Dashboard_model extends Model
 	              AND v.year = ?
 	              {$ascIdFilter}
 	              {$areaIdFilter}
-	              {$itemCatIdFilter}
+	              {$itemCatFilter}
 	              $baTypeFilter
 	              $companyIdFilter
 	              $storeFilter
@@ -144,7 +144,7 @@ class Dashboard_model extends Model
 	          AND vmi.year = ?
 	          {$ascIdFilterVmi}
 	          {$areaIdFilterVmi}
-	          {$itemCatIdFilterVmi}
+	          {$itemCatFilterVmi}
 	          $baTypeFilterVmi
 	          $companyIdFilterVmi
 	          $storeFilterVmi
@@ -162,14 +162,14 @@ class Dashboard_model extends Model
 		$params[] = $year;
 		if ($ascId !== null) $params[] = $ascId;
 		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCatId !== null) $params[] = $itemCatId;
+		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
 
 		$params[] = $week;
 		$params[] = $year;
 		if ($ascId !== null) $params[] = $ascId;
 		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCatId !== null) $params[] = $itemCatId;
+		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
 
 
@@ -186,7 +186,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getItemClassNPDHEROData($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCatId = null) {
+	public function getItemClassNPDHEROData($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null) {
 
 		$baType = ($baType !== null) ? strval($baType) : null;
 	    $storeFilterConditions = [];
@@ -264,14 +264,14 @@ class Dashboard_model extends Model
 		    $ascIdParams = [$ascId];
 		}
 
-		$itemCatIdFilter = '';
-		$itemCatIdFilterVmi = '';
-		$itemCatIdParams = [];
+		$itemCatFilter = '';
+		$itemCatFilterVmi = '';
+		$itemCatParams = [];
 
-		if ($itemCatId !== null) {
-		    $itemCatIdFilter = ' AND v.brand_type_id = ?';
-		    $itemCatIdFilterVmi = ' AND vmi.brand_type_id = ?';
-		    $itemCatIdParams = [$itemCatId];
+		if ($itemCat !== null) {
+		    $itemCatFilter = ' AND v.itmclacde = ?';
+		    $itemCatFilterVmi = ' AND vmi.itmclacde = ?';
+		    $itemCatParams = [$itemCat];
 		}
 
 
@@ -293,7 +293,7 @@ class Dashboard_model extends Model
 	              AND v.year = ?
 	              {$ascIdFilter}
 	              {$areaIdFilter}
-	              {$itemCatIdFilter}
+	              {$itemCatFilter}
 	              $ItemClassIdsPlaceholder
 	              $baTypeFilter
 	              $companyIdFilter
@@ -338,7 +338,7 @@ class Dashboard_model extends Model
 	          AND vmi.year = ?
 	          {$ascIdFilterVmi}
 	          {$areaIdFilterVmi}
-	          {$itemCatIdFilterVmi}
+	          {$itemCatFilterVmi}
 	          $ItemClassIdsPlaceholderVmi
 	          $baTypeFilterVmi
 	          $companyIdFilterVmi
@@ -355,7 +355,7 @@ class Dashboard_model extends Model
 		$params[] = $year;
 		if ($ascId !== null) $params[] = $ascId;
 		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCatId !== null) $params[] = $itemCatId;
+		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $ItemClassIdsParams, $baTypeParams, $companyIdParams, $storeParams);
 
 		# Params for main SELECT
@@ -363,7 +363,7 @@ class Dashboard_model extends Model
 		$params[] = $year;
 		if ($ascId !== null) $params[] = $ascId;
 		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCatId !== null) $params[] = $itemCatId;
+		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $ItemClassIdsParams, $baTypeParams, $companyIdParams, $storeParams);
 
 		# Pagination
@@ -524,7 +524,7 @@ class Dashboard_model extends Model
 		    sd.actual_sales,
 
 		    CASE
-		        WHEN ba.type = 0 THEN FORMAT(? * ?, 2)
+		    	WHEN ba.type = 0 THEN FORMAT(? * ?, 2)
 		        WHEN t.target_ba_types = 1 AND 
 		             (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1) >= 2 THEN 
 		            FORMAT(
@@ -820,8 +820,11 @@ class Dashboard_model extends Model
 	        ba.deployment_date AS ba_deployment_date, 
 	        sd.actual_sales,
 	        FORMAT(t.target_sales, 2) AS target_sales, 
-	        ROUND(COALESCE(SUM(sd.actual_sales), 0) * ?, 2) AS possible_incentives,
-	        ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(sd.actual_sales), 0), 2) AS balance_to_target,
+	        ROUND(COALESCE(sd.actual_sales, 0) * ?, 2) AS possible_incentives,
+	        CASE 
+			    WHEN COALESCE(t.target_sales, 0) - COALESCE(sd.actual_sales, 0) < 0 THEN 0
+			    ELSE ROUND(COALESCE(t.target_sales, 0) - COALESCE(sd.actual_sales, 0), 2)
+			END AS balance_to_target,
 	        ROUND(
 	            COALESCE(SUM(sd.actual_sales), 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
 	        ) AS percent_ach,
@@ -1632,7 +1635,7 @@ class Dashboard_model extends Model
 	}
 
 
-	public function getDataVmiAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCatId = null)
+	public function getDataVmiAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null)
 	{
 	    $storeFilterConditionsVmi = [];
 
@@ -1655,12 +1658,12 @@ class Dashboard_model extends Model
 
 	    $storeFilterSQLVmi = !empty($storeFilterConditionsVmi) ? ' AND ' . implode(' AND ', $storeFilterConditionsVmi) : '';
 
-	    $itemCatIdFilterVmi = '';
-	    $itemCatIdParams = [];
+	    $itemCatFilterVmi = '';
+	    $itemCatParams = [];
 
-	    if ($itemCatId !== null) {
-	        $itemCatIdFilterVmi = ' AND vmi.brand_type_id = ?';
-	        $itemCatIdParams = [$itemCatId];
+	    if ($itemCat !== null) {
+	        $itemCatFilterVmi = ' AND vmi.itmclacde = ?';
+	        $itemCatParams = [$itemCat];
 	    }
 
 	    $weekColumns = '';
@@ -1691,7 +1694,7 @@ class Dashboard_model extends Model
 	        FROM tbl_vmi_pre_aggregated_data vmi
 	        WHERE vmi.week BETWEEN ? AND ?
 	          AND vmi.year = ?
-	          {$itemCatIdFilterVmi}
+	          {$itemCatFilterVmi}
 	          $storeFilterSQLVmi
 	        GROUP BY vmi.item
 	        HAVING weeks > ?
@@ -1706,7 +1709,7 @@ class Dashboard_model extends Model
 	    $params[] = $weekStart;
 	    $params[] = $weekEnd;
 	    $params[] = $year;
-	    $params = array_merge($params, $itemCatIdParams);
+	    $params = array_merge($params, $itemCatParams);
 
 	    $params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
 
@@ -1720,7 +1723,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getDataWeekAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCatId = null)
+	public function getDataWeekAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null)
 	{
 	    $storeFilterConditionsWow = [];
 
@@ -1743,12 +1746,12 @@ class Dashboard_model extends Model
 
 	    $storeFilterSQLWow = !empty($storeFilterConditionsWow) ? ' AND ' . implode(' AND ', $storeFilterConditionsWow) : '';
 
-	    $itemCatIdFilterWow = '';
-	    $itemCatIdParams = [];
+	    $itemCatFilterWow = '';
+	    $itemCatParams = [];
 
-	    if ($itemCatId !== null) {
-	        $itemCatIdFilterWow = ' AND wow.brand_type_id = ?';
-	        $itemCatIdParams = [$itemCatId];
+	    if ($itemCat !== null) {
+	        $itemCatFilterWow = ' AND wow.itmclacde = ?';
+	        $itemCatParams = [$itemCat];
 	    }
 
 	    $weekColumns = '';
@@ -1778,7 +1781,7 @@ class Dashboard_model extends Model
 	        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
 	        WHERE wow.week BETWEEN ? AND ?
 	          AND wow.year = ?
-	          {$itemCatIdFilterWow}
+	          {$itemCatFilterWow}
 	          $storeFilterSQLWow
 	        GROUP BY wow.item
 	        HAVING weeks > ?
@@ -1793,7 +1796,7 @@ class Dashboard_model extends Model
 	    $params[] = $weekStart;
 	    $params[] = $weekEnd;
 	    $params[] = $year;
-	    $params = array_merge($params, $itemCatIdParams);
+	    $params = array_merge($params, $itemCatParams);
 
 	    $params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
 
@@ -1807,7 +1810,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getDataVmiNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCatId = null) {
+	public function getDataVmiNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCat = null) {
 
 		$storeFilterConditionsVmi = [];
 
@@ -1839,12 +1842,12 @@ class Dashboard_model extends Model
 	        $ItemClassIdsParams = $ItemClassIdsFilter;
 	    }
 
-		$itemCatIdFilterVmi = '';
-		$itemCatIdParams = [];
+		$itemCatFilterVmi = '';
+		$itemCatParams = [];
 
-		if ($itemCatId !== null) {
-		    $itemCatIdFilterVmi = ' AND vmi.brand_type_id = ?';
-		    $itemCatIdParams = [$itemCatId];
+		if ($itemCat !== null) {
+		    $itemCatFilterVmi = ' AND vmi.itmclacde = ?';
+		    $itemCatParams = [$itemCat];
 		}
 
 	    $weekColumns = '';
@@ -1875,7 +1878,7 @@ class Dashboard_model extends Model
 	        FROM tbl_vmi_pre_aggregated_data vmi
 	        WHERE vmi.week BETWEEN ? AND ?
 	          AND vmi.year = ?
-	          {$itemCatIdFilterVmi}
+	          {$itemCatFilterVmi}
 	          {$ItemClassIdsPlaceholder}
 	          {$storeFilterSQLVmi}
 	        GROUP BY vmi.item
@@ -1889,7 +1892,7 @@ class Dashboard_model extends Model
 	    $params[] = $weekEnd;
 		$params[] = $year;
 
-		if ($itemCatId !== null) $params[] = $itemCatId;
+		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $ItemClassIdsParams);
 		$params[] = (int)$pageLimit;
 		$params[] = (int)$pageOffset;
@@ -1904,7 +1907,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getDataWeekAllNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCatId = null) {
+	public function getDataWeekAllNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCat = null) {
 
 		$storeFilterConditionsVmi = [];
 
@@ -1936,12 +1939,12 @@ class Dashboard_model extends Model
 	        $ItemClassIdsParams = $ItemClassIdsFilter;
 	    }
 
-		$itemCatIdFilterVmi = '';
-		$itemCatIdParams = [];
+		$itemCatFilterVmi = '';
+		$itemCatParams = [];
 
-		if ($itemCatId !== null) {
-		    $itemCatIdFilterVmi = ' AND wow.brand_type_id = ?';
-		    $itemCatIdParams = [$itemCatId];
+		if ($itemCat !== null) {
+		    $itemCatFilterVmi = ' AND wow.itmclacde = ?';
+		    $itemCatParams = [$itemCat];
 		}
 
 	    $weekColumns = '';
@@ -1971,7 +1974,7 @@ class Dashboard_model extends Model
 	        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
 	        WHERE wow.week BETWEEN ? AND ?
 	          AND wow.year = ?
-	          {$itemCatIdFilterVmi}
+	          {$itemCatFilterVmi}
 	          {$ItemClassIdsPlaceholder}
 	          {$storeFilterSQLVmi}
 	        GROUP BY wow.item
@@ -1985,7 +1988,7 @@ class Dashboard_model extends Model
 	    $params[] = $weekEnd;
 		$params[] = $year;
 
-		if ($itemCatId !== null) $params[] = $itemCatId;
+		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $ItemClassIdsParams);
 		$params[] = (int)$pageLimit;
 		$params[] = (int)$pageOffset;

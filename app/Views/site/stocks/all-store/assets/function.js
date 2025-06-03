@@ -10,7 +10,7 @@
 
         $('#itemClass').select2({ placeholder: 'Please Select...' });
         $('#inventoryStatus').select2({ placeholder: 'Please Select...' });
-        autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), brandLabel, "label");
+        autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), traccItemClassi, "item_class_code");
         autocomplete_field($("#vendorName"), $("#vendorNameId"), company, "name");
     });
 
@@ -31,6 +31,9 @@
             { input: '#vendorName', target: '#vendorNameId' }
         ];
 
+        if($('#itemLabelCat').val() == ""){
+            $('#itemLabelCatId').val('');
+        }
         let counter = 0;
 
         fields.forEach(({ input, target }) => {
@@ -48,8 +51,18 @@
         const vendorFilter = $('#vendorName').val();
         const invStatusFilter = $('#inventoryStatus').val();
 
-        if (!vendorFilter || !invStatusFilter) {
+        if (!vendorFilter && invStatusFilter.length === 0) {
             modal.alert('Please select both "Vendor Name" and "Inventory Status" before filtering.', "warning");
+            return;
+        }
+
+        if (!vendorFilter) {
+            modal.alert('Please select "Vendor Name" before filtering.', "warning");
+            return;
+        }
+
+        if (invStatusFilter.length === 0) {
+            modal.alert('Please select "Inventory Status" before filtering.', "warning");
             return;
         }
         $('#sourceDate').text(calendarWeek);
@@ -72,7 +85,6 @@
         let selectedItemCat = $('#itemLabelCatId').val();
         let selectedInventoryStatus = $('#inventoryStatus').val();
         let selectedVendor = $('#vendorNameId').val();
-
         if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) {
             $('.table-empty').show();
             $('.hide-div.card').hide();

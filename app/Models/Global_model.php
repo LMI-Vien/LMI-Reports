@@ -1409,8 +1409,13 @@ function get_valid_records_store_area_asc_ba_brand() {
         return $query->getResultArray(); 
     }
 
+    function getTraccItemClassification() {
+        $query = $this->db->query("CALL SearchDynamic('tbl_classification', null, 'item_class_code, item_class_description', 9999, 0, 'status:EQ=1', 'item_class_code', null)");
+        return $query->getResultArray(); 
+    }
+
     function getItemClassification() {
-        $query = $this->db->query("CALL SearchDynamic('tbl_classification', null, 'id, item_class_code, item_class_description', 9999, 0, 'status:EQ=1', 'item_class_code', null)");
+        $query = $this->db->query("CALL SearchDynamic('tbl_item_class', null, 'id, item_class_code, item_class_description', 9999, 0, 'status:EQ=1', 'item_class_code', null)");
         return $query->getResultArray(); 
     }
 

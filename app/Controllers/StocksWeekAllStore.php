@@ -33,8 +33,8 @@ class StocksWeekAllStore extends BaseController
 		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-week-all-store'),'Week by Week Stock Data of all Stores' => '');
 		$data["source"] = '<span id="sourceDate">VMI/WEEK on Week Sales N / A</span>';
 		$data['content'] = "site/stocks/week-all-store/data_week_all_store";
-		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['itemClassi'] = $this->Global_model->getItemClassification();
+		$data['traccItemClassi'] = $this->Global_model->getTraccItemClassification();
 		$data['year'] = $this->Global_model->getYears();
 		$data['session'] = session();
 		$data['js'] = array(
@@ -51,8 +51,8 @@ class StocksWeekAllStore extends BaseController
 		$ItemClasses = $this->request->getPost('itemClass');
 		$ItemClasses = $ItemClasses === '' ? null : $ItemClasses;
 
-		$itemCatId = trim($this->request->getPost('itemCategory') ?? '');
-		$itemCatId = $itemCatId === '' ? null : $itemCatId;
+		$itemCat = trim($this->request->getPost('itemCategory') ?? '');
+		$itemCat = $itemCat === '' ? null : $itemCat;
 
 		$weekStart = trim($this->request->getPost('weekFrom') ?? '');
 		$weekStart = $weekStart === '' ? null : $weekStart;
@@ -84,8 +84,8 @@ class StocksWeekAllStore extends BaseController
 		$heroSku = [];
 		$skuMin = 20;
 		$skuMin = 30;
-	    $ItemClasses = null;
-	    $itemCatId = null;
+	    //$ItemClasses = null;
+	    //$itemCat = null;
 
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];
@@ -102,40 +102,40 @@ class StocksWeekAllStore extends BaseController
 			if(intval($source) === 3){
 			    switch ($type) {
 			        case 'slowMoving':
-			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCat);
 			            break;
 			        case 'overStock':
-			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCat);
 			            break;
 			        case 'npd':
 						$itemClassFilter = $npdSku;
-			           $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			           $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCat);
 			            break;
 			        case 'hero':
 	        			$itemClassFilter = $heroSku;
-			            $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			            $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCat);
 			            break;
 			        default:
-			        	$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			        	$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCat);
 			    }
 			}else{
 			    switch ($type) {
 			        case 'slowMoving':
-			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCat);
 			            break;
 			        case 'overStock':
-			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCat);
 			            break;
 			        case 'npd':
 						$itemClassFilter = $npdSku;
-			           $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			           $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCat);
 			            break;
 			        case 'hero':
 	        			$itemClassFilter = $heroSku;
-			            $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+			            $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCat);
 			            break;
 			        default:
-			        	$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+			        	$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCat);
 			    }
 			}
 

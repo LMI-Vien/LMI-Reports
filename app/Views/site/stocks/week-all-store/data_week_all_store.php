@@ -225,7 +225,7 @@
 </div>
 
 <script>
-    let brandLabel = <?= json_encode($brandLabel); ?>;
+    let traccItemClassi = <?= json_encode($traccItemClassi); ?>;
     let itemClassi = <?= json_encode($itemClassi); ?>;
 
     $(document).ready(function() {
@@ -239,14 +239,14 @@
         itemClassi.forEach(function (item) {
           $('#itemClass').append(
             $('<option>', {
-              value: item.item_class_code,
+              value: item.id,
               text: item.item_class_description
             })
           );
         });
 
         $('#itemClass').select2({ placeholder: 'Please Select...' });
-        autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), brandLabel, "label");
+        autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), traccItemClassi, "item_class_code");
         $('#inventoryStatus').select2({ placeholder: 'Please Select...' });
     });
 
@@ -255,7 +255,7 @@
         $('input[type="text"], input[type="number"], input[type="date"]').val('');
         $('input[type="checkbox"]').prop('checked', false);
         $('select').not('#year').prop('selectedIndex', 0);
-
+        $('#itemLabelCatId').val('');
         $('.select2').val(null).trigger('change');
         let highestYear = $("#year option:not(:first)").map(function () {
             return parseInt($(this).val());
@@ -275,6 +275,9 @@
             { input: '#inventoryStatus', target: '#inventoryStatus' }
         ];
 
+        if($('#itemLabelCat').val() == ""){
+            $('#itemLabelCatId').val('');
+        }
         let counter = 0;
 
         fields.forEach(({ input, target }) => {
@@ -303,6 +306,11 @@
 
         if (!yearFilter || yearFilter.length === 0) {
             modal.alert('Please select "Year" before filtering.', "warning");
+            return;
+        }
+
+        if (!weekFromFilter && !weekToFilter) {
+            modal.alert('Please select both "Week From" and "Week To" before filtering.', "warning");
             return;
         }
 

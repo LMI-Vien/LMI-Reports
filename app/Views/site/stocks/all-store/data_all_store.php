@@ -233,7 +233,7 @@
 </div>
 
 <script>
-    let brandLabel = <?= json_encode($brandLabel); ?>;
+    let traccItemClassi = <?= json_encode($traccItemClassi); ?>;
     let itemClassi = <?= json_encode($itemClassi); ?>;
     let company = <?= json_encode($company); ?>;
     let calendarWeek = '<?= $date; ?>';
