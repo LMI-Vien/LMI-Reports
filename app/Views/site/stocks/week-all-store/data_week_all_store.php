@@ -204,14 +204,14 @@
                             <button 
                                 class="btn btn-primary mr-2" 
                                 id="ExportPDF"
-                                onclick="handleAction('export_pdf')"
+                                onclick="handleAction('exportPdf')"
                             >
                                 <i class="fas fa-file-export"></i> PDF
                             </button>
                             <button 
                                 class="btn btn-success" 
                                 id="exportButton"
-                                onclick="handleAction('export_excel')"
+                                onclick="handleAction('exportExcel')"
                             >
                                 <i class="fas fa-file-export"></i> Excel
                             </button>
@@ -227,6 +227,7 @@
 <script>
     let traccItemClassi = <?= json_encode($traccItemClassi); ?>;
     let itemClassi = <?= json_encode($itemClassi); ?>;
+    const start_time = new Date();
 
     $(document).ready(function() {
         let highestYear = $("#year option:not(:first)").map(function () {
@@ -461,14 +462,90 @@
     }
 
 
-
     function handleAction(action) {
+        modal.loading(true);
+        let selectedItemClass     = $('#itemClass').val();
+        let selectedItemCategory  = $('#itemLabelCat').val();
+        let selectedType          = $('#inventoryStatus').val();
+        let selectedYear          = $('#year').val();
+        let selectedWeekFrom      = $('#week_from').val();
+        let selectedWeekTo        = $('#week_to').val();
+        let selectedDataSource    = $('#dataSource').val();
 
-        if (action === 'export') {
-            modal.alert("Not yet available");
-        } else {
-            modal.alert("Not yet available");
+        // 2) Determine which DataTable is visible and get its ordering/columns:
+        let dtInstance = null;
+        if ($('#table_slowMoving').is(':visible')) {
+            dtInstance = $('#table_slowMoving').DataTable();
         }
+        else if ($('#table_overStock').is(':visible')) {
+            dtInstance = $('#table_overStock').DataTable();
+        }
+        else if ($('#table_npd').is(':visible')) {
+            dtInstance = $('#table_npd').DataTable();
+        }
+        else if ($('#table_hero').is(':visible')) {
+            dtInstance = $('#table_hero').DataTable();
+        }
+
+        if (!dtInstance) {
+            modal.alert('No table is currently visible for export.', 'warning');
+            modal.loading(false);
+            return;
+        }
+
+        let pageInfo = dtInstance.page.info();   // { start, length, … }
+        let orderArr = dtInstance.order()[0];    // [ columnIndex, 'asc'/'desc' ]
+        let cols     = dtInstance.settings().init().columns;
+
+        // 3) Build URLSearchParams with both your filters and DataTables params:
+        let params = new URLSearchParams();
+
+        // ─── Filters ────────────────────────────────────────────────────────────────
+        params.append('itemClass',    selectedItemClass   || '');
+        params.append('itemCategory', selectedItemCategory|| '');
+        params.append('type',         selectedType       || '');
+        params.append('year',         selectedYear       || '');
+        params.append('weekFrom',     selectedWeekFrom   || '');
+        params.append('weekTo',       selectedWeekTo     || '');
+        params.append('source',       selectedDataSource || '');
+
+        // ─── DataTables paging ──────────────────────────────────────────────────────
+        params.append('limit',  pageInfo.length);  // e.g. 10
+        params.append('offset', pageInfo.start);   // e.g. 0
+
+        // ─── DataTables ordering ───────────────────────────────────────────────────
+        params.append('order[0][column]', orderArr[0]); // e.g. 2
+        params.append('order[0][dir]',    orderArr[1]); // e.g. 'desc'
+
+        // ─── DataTables “columns” array ──────────────────────────────────────────────
+        cols.forEach((colObj, i) => {
+            // colObj.data must match what PHP expects, e.g. 'item', 'item_name', 'sum_total_qty', etc.
+            params.append(`columns[${i}][data]`, colObj.data);
+        });
+
+        // 4) Pick endpoint based on action
+        let endpoint = action === 'exportPdf'? 'stocks-week-all-store-generate-pdf' : 'stocks-week-all-store-generate-excel';
+
+        let url = `${base_url}stocks/${endpoint}?${params.toString()}`;
+
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
+        const remarks = `
+            Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Week by Week Stock Data of all Stores', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
+
+        let iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        setTimeout(() => {
+            modal.loading(false);
+        }, 10000);
     }
 
 </script>
