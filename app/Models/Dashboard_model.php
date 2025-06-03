@@ -31,7 +31,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item_name', 'itmcde'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -211,7 +211,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item_name', 'itmcde'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -1672,7 +1672,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item_name', 'itmcde', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -1760,7 +1760,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsWow[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
