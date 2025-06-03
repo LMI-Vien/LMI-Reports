@@ -1434,7 +1434,7 @@
 
         let filterArr = []
         if(company) {
-            filterArr.push(`company:EQ=${company}`);
+            filterArr.push(`a.company:EQ=${company}`);
         }
         if(year) {
             filterArr.push(`a.year:EQ=${year}`);
@@ -1460,7 +1460,7 @@
         const startExport = () => {
             dynamic_search(
                 "'tbl_vmi a'", 
-                "'LEFT JOIN tbl_year as v on a.year = v.id'", 
+                "'LEFT JOIN tbl_year as v on a.year = v.id LEFT JOIN tbl_company as c ON c.id = a.company'", 
                 "'store, item, item_name, item_class, supplier, `c_group`, dept, `c_class` as classification, sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, week'", 
                 0, 
                 0, 
@@ -1471,9 +1471,11 @@
                     let store_ids = []
                     let store_map = {}
             
+                    const storeSet = new Set(store_ids); // convert existing array to a Set
                     res.forEach(stores => {
-                        store_ids.push(`${stores.store}`);
+                        storeSet.add(`${stores.store}`);
                     });
+                    store_ids = Array.from(storeSet); // convert back to array
             
                     dynamic_search(
                         "'tbl_store'", 
@@ -1753,9 +1755,11 @@
                                     let store_ids = []
                                     let store_map = {}
                             
+                                    const storeSet = new Set(store_ids); // convert existing array to a Set
                                     res.forEach(stores => {
-                                        store_ids.push(`${stores.store}`);
+                                        storeSet.add(`${stores.store}`);
                                     });
+                                    store_ids = Array.from(storeSet); // convert back to array
                             
                                     dynamic_search(
                                         "'tbl_store'", 
