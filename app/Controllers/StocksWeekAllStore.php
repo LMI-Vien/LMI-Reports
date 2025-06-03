@@ -238,17 +238,15 @@ class StocksWeekAllStore extends BaseController
 		$sysPar  = $this->Global_model->getSysPar();
 		$npdSku  = [];
 		$heroSku = [];
-		$skuMin  = 20;
+		$skuMin  = 1;
 		$skuMax  = null;
 
 		if ($sysPar) {
-			$jsonStringHero = $sysPar[0]['hero_sku'];
-			$dataHero       = json_decode($jsonStringHero, true);
-			$heroSku        = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$dataHero = json_decode($sysPar[0]['hero_sku'], true);
+			$heroSku  = array_map(fn($item) => $item['item_class_description'], $dataHero);
 
-			$jsonStringNpd = $sysPar[0]['new_item_sku'];
-			$dataNpd       = json_decode($jsonStringNpd, true);
-			$npdSku        = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+			$dataNpd = json_decode($sysPar[0]['new_item_sku'], true);
+			$npdSku  = array_map(fn($item) => $item['item_class_description'], $dataNpd);
 
 			$skuMin = $sysPar[0]['sm_sku_min'];
 			$skuMax = $sysPar[0]['sm_sku_max'];
@@ -263,51 +261,71 @@ class StocksWeekAllStore extends BaseController
 			if (intval($source) === 3) {
 				switch ($statusType) {
 					case 'slowMoving':
-			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $dir, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
 						break;
 					case 'overStock':
-			            $data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-			            break;
-					 case 'npd':
+						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $dir, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+						break;
+					case 'npd':
 						$itemClassFilter = $npdSku;
-			           $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
-			        case 'hero':
-	        			$itemClassFilter = $heroSku;
-			            $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
+						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $dir, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+						break;
+					case 'hero':
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $dir,$weekStart, $weekEnd, $latestYear,$itemClassFilter, $ItemClasses, $itemCatId);
+						break;
 					default:
 						continue 2;
 				}
 			} else {
 				switch ($statusType) {
 					case 'slowMoving':
-			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-			            break;
-			        case 'overStock':
-			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-			            break;
-			        case 'npd':
+						$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $dir, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+						break;
+					case 'overStock':
+						$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $dir, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
+						break;
+					case 'npd':
 						$itemClassFilter = $npdSku;
-			           $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
-			        case 'hero':
-	        			$itemClassFilter = $heroSku;
-			            $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
+						$data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $dir, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+						break;
+					case 'hero':
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $dir, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
+						break;
 					default:
 						continue 2;
 				}
 			}
 
-			$partialRows = $partial['data'] ?? [];
+			$partialRows = $data['data'] ?? [];
 			foreach ($partialRows as $r) {
 				$r->inventory_status = $statusType;
 				$allRows[]           = $r;
 			}
 		}
-
 		$rows = $allRows; 
+
+		// 6) Build dynamic "Week X" columns exactly like in generateExcel:
+		$weekCols = [];
+		$isHeroOnly = (count($typeList) === 1 && $typeList[0] === 'hero');
+		if (! $isHeroOnly && $weekStart !== null && $weekEnd !== null) {
+			$startNum = (int)$weekStart;
+			$endNum   = (int)$weekEnd;
+			for ($w = $startNum; $w <= $endNum; $w++) {
+				$weekCols[] = "Week $w";
+			}
+		}
+
+		if ($isHeroOnly) {
+			$headers = ['LMI/RGDI Code', 'SKU Name', 'Item Class', 'Inventory Status'];
+		} else {
+			$headers = array_merge(
+				['LMI/RGDI Code', 'SKU Name', 'Item Class'],
+				$weekCols,
+				['Inventory Status']
+			);
+		}
 
 		$title = "Week by Week Stock Data of all Stores";
 		$pdf   = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
@@ -320,6 +338,17 @@ class StocksWeekAllStore extends BaseController
 
 		$this->printHeader($pdf, $title);
 
+		$result  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "'id:EQ=$latestYear'", "''", "''");
+		$yearMap = !empty($result) ? $result[0]['year'] : '';
+
+		if ($source == 2) {
+			$sourceMap = "VMI";
+		} elseif ($source == 3) {
+			$sourceMap = "Week by Week";
+		} else {
+			$sourceMap = "No Source";
+		}
+
 		$statusLabel = empty($typeList) ? 'None' : implode(', ', $typeList);
 		$filterData  = [
 			'Item Classes'     => $ItemClasses   ?? 'None',
@@ -327,29 +356,10 @@ class StocksWeekAllStore extends BaseController
 			'Inventory Status' => $statusLabel,
 			'Week From'        => $weekStart     ?? 'None',
 			'Week To'          => $weekEnd       ?? 'None',
-			'Year'             => $latestYear    ?? 'None',
-			'Source'           => $source        ?? 'None',
+			'Year'             => $yearMap    	 ?? 'None',
+			'Source'           => $sourceMap,
 		];
 		$this->printFilter($pdf, $filterData);
-
-		$weekCols = [];
-		if ($weekStart !== null && $weekEnd !== null) {
-			$startNum = (int)$weekStart;
-			$endNum   = (int)$weekEnd;
-			for ($w = $startNum; $w <= $endNum; $w++) {
-				$weekCols[] = "Week $w";
-			}
-		}
-
-		if (count($typeList) === 1 && $typeList[0] === 'hero') {
-			$headers = ['LMI/RGDI Code', 'SKU Name', 'Item Class', 'Inventory Status'];
-		} else {
-			$headers = array_merge(
-				['LMI/RGDI Code', 'SKU Name', 'Item Class'],
-				$weekCols,
-				['Inventory Status']
-			);
-		}
 
 		$pageWidth    = $pdf->getPageWidth();
 		$margins      = $pdf->getMargins();
@@ -378,10 +388,11 @@ class StocksWeekAllStore extends BaseController
 		foreach ($rows as $row) {
 			$pdf->SetXY($startX, $pdf->GetY());
 
-			if ($row->inventory_status === 'hero' && count($weekCols) > 0) {
+			if ($row->inventory_status === 'hero') {
+				// 1) LMI/RGDI Code
 				$pdf->Cell($colWidth, $rowHeight, $row->item, 1, 0, 'C');
 
-				// 2) SKU Name (wrapped using MultiCell, then reposition)
+				// 2) SKU Name 
 				$x_after_col2 = $pdf->GetX();
 				$y_current    = $pdf->GetY();
 				$pdf->MultiCell(
@@ -408,12 +419,12 @@ class StocksWeekAllStore extends BaseController
 				// 3) Item Class
 				$pdf->Cell($colWidth, $rowHeight, $row->itmcde, 1, 0, 'C');
 
-				// 4 … (3 + N): print N blank week columns
+				// 4) If there are weekCols, “consume” those columns with blanks
 				foreach ($weekCols as $wc) {
 					$pdf->Cell($colWidth, $rowHeight, '', 1, 0, 'C');
 				}
 
-				// Last: Inventory Status
+				// Inventory Status
 				$pdf->Cell(
 					$colWidth,
 					$rowHeight,
@@ -425,50 +436,7 @@ class StocksWeekAllStore extends BaseController
 				continue;
 			}
 
-			// Case B: Pure "hero"-only export (no week columns at all)
-			if ($row->inventory_status === 'hero') {
-				// 1) LMI/RGDI Code
-				$pdf->Cell($colWidth, $rowHeight, $row->item, 1, 0, 'C');
-
-				// 2) SKU Name (wrapped using MultiCell, then reposition)
-				$x_after_col2 = $pdf->GetX();
-				$y_current    = $pdf->GetY();
-				$pdf->MultiCell(
-					$colWidth,
-					$lineHeight,
-					$row->item_name,
-					1,
-					'L',
-					0,
-					0,
-					'',
-					'',
-					true,
-					0,
-					false,
-					true,
-					$rowHeight,
-					'M',
-					true
-				);
-				$pdf->SetXY($x_after_col2 + $colWidth, $y_current);
-
-				// 3) Item Class
-				$pdf->Cell($colWidth, $rowHeight, $row->itmcde, 1, 0, 'C');
-
-				// 4) Inventory Status
-				$pdf->Cell(
-					$colWidth,
-					$rowHeight,
-					ucfirst($row->inventory_status),
-					1,
-					1,
-					'C'
-				);
-				continue;
-			}
-
-			// Case C: slowMoving / overStock / npd (these have week columns)
+			// For non-hero rows (slowMoving / overStock / npd), we render weeks + status
 			// 1) LMI/RGDI Code
 			$pdf->Cell($colWidth, $rowHeight, $row->item, 1, 0, 'C');
 
@@ -498,7 +466,7 @@ class StocksWeekAllStore extends BaseController
 			// 3) Item Class
 			$pdf->Cell($colWidth, $rowHeight, $row->itmcde, 1, 0, 'C');
 
-			// 4…(3+N): Week columns
+			// 4) Week columns (only if not hero-only)
 			foreach ($weekCols as $wc) {
 				$wkNum = (int) str_replace('Week ', '', $wc);
 				$field = "week_" . $wkNum;
