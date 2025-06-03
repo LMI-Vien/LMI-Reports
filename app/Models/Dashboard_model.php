@@ -853,16 +853,16 @@ class Dashboard_model extends Model
 			    ELSE ROUND(COALESCE(t.target_sales, 0) - COALESCE(sd.actual_sales, 0), 2)
 			END AS balance_to_target,
 	        ROUND(
-	            COALESCE(SUM(sd.actual_sales), 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
+	            COALESCE(sd.actual_sales, 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
 	        ) AS percent_ach,
 	        FORMAT(COALESCE(ly.ly_scanned_data, 0),2) AS ly_scanned_data,
 	        ROUND(
-	            (COALESCE(SUM(sd.actual_sales), 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
+	            (COALESCE(sd.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
 	            2
 	        ) AS growth,
 	        CASE 
 	          WHEN ? > 0 THEN CEIL((
-				ROUND(COALESCE(t.target_sales, 0) - COALESCE(SUM(sd.actual_sales), 0), 2)
+				ROUND(COALESCE(t.target_sales, 0) - COALESCE(sd.actual_sales, 0), 2)
 	          ) / ?)
 	          ELSE NULL
 	        END AS target_per_remaining_days,
