@@ -244,6 +244,17 @@ class Login extends BaseController
 
 	public function sign_out() {
 
+		//for VMI export only
+	    $filename = session()->get('pending_export_file');
+
+	    if ($filename) {
+	        $filePath = WRITEPATH . 'exports/' . basename($filename);
+	        if (file_exists($filePath)) {
+	            unlink($filePath); //
+	        }
+	        session()->remove('pending_export_file');
+	    }
+
 		$session = session();
 	    $data2['user_id'] = $session->get('sess_uid');
 	  	$data2['url'] ="";

@@ -245,6 +245,27 @@
     let dataset = [];
 
     $(document).ready(function() {
+
+    //const filename = "vmi_export.xlsx";
+        const checkInterval = 10000;
+
+        const pollInterval = setInterval(function () {
+            $.getJSON('/cms/import-vmi/pending/', function (response) {
+                if (response.ready) {
+                    const filename = response.filename;
+
+                    // Download file via hidden iframe
+                    $('<iframe>', {
+                        src: `/cms/import-vmi/download/${response.filename}`,
+                        style: 'display: none;'
+                    }).appendTo('body');
+
+                    clearInterval(pollInterval);
+                    modal.alert("Your export is ready. Downloading now.", "success");
+                }
+            });
+        }, checkInterval);
+
       get_data(query);
       get_pagination(query);
     });
@@ -1711,111 +1732,150 @@
     }
 
     // function export_data(company, year, month, week) 
+    // function export_data(company, year, week) 
+    // {
+    //     var formattedData = [];
+    //     let filterArr = []
+    //     filterArr.push(`v.company:EQ=${company}`);
+    //     filterArr.push(`v.year:EQ=${year}`);
+    //     // filterArr.push(`m.month:EQ=${month}`);
+    //     filterArr.push(`week:EQ=${week}`);
+
+    //     let filter = filterArr.join(',')
+
+    //     dynamic_search(
+    //             "'tbl_vmi v'", 
+    //             "'left join tbl_company c on v.company = c.id "+
+    //             "left join tbl_year y on v.year = y.id'",
+    //             "'COUNT(v.id) as total_records'",
+    //             0, 
+    //             0, 
+    //             `'${filter}'`,  
+    //             `''`, 
+    //             `''`,
+    //             (res) => {
+    //                 if (res && res.length > 0) {
+    //                     let total_records = res[0].total_records;
+
+    //                     for (let index = 0; index < total_records; index += 100000) {
+    //                         dynamic_search(
+    //                             "'tbl_vmi v'", 
+
+    //                             "'left join tbl_company c on v.company = c.id "+
+    //                             "left join tbl_year y on v.year = y.id'",
+
+    //                             "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
+    //                             "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, week'", 
+
+    //                             100000, 
+    //                             index, 
+    //                             `'${filter}'`,  
+    //                             `''`, 
+    //                             `''`,
+    //                             (res) => {
+    //                                 let store_ids = []
+    //                                 let store_map = {}
+                            
+    //                                 const storeSet = new Set(store_ids); // convert existing array to a Set
+    //                                 res.forEach(stores => {
+    //                                     storeSet.add(`${stores.store}`);
+    //                                 });
+    //                                 store_ids = Array.from(storeSet); // convert back to array
+                            
+    //                                 dynamic_search(
+    //                                     "'tbl_store'", 
+    //                                     "''", 
+    //                                     "'id, code, description'", 
+    //                                     0, 
+    //                                     0, 
+    //                                     `'id:IN=${store_ids.join('|')}'`,  
+    //                                     `''`, 
+    //                                     `''`,
+    //                                     (result) => {
+    //                                         result.forEach(store => {
+    //                                             if (!store_map[store.id]) {
+    //                                                 store_map[store.id] = {}; // Initialize as an object
+    //                                             }
+    //                                             store_map[store.id].description = store.description;
+    //                                             store_map[store.id].code = store.code;
+    //                                         });
+    //                                     }
+    //                                 );
+
+    //                                 res.forEach(det => {
+    //                                     let newData = {
+    //                                         "Store":store_map[`${det.store}`].code, 
+    //                                         "Item":det.item, 
+    //                                         "Item Name":det.item_name, 
+    //                                         "VMI Status":det.vmi_status, 
+    //                                         "Item Class":det.item_class, 
+    //                                         "Supplier":det.supplier, 
+    //                                         "Group":det.c_group, 
+    //                                         "Dept":det.dept, 
+    //                                         "Class":det.classification, 
+    //                                         "Sub Class":det.sub_class, 
+    //                                         "On Hand":det.on_hand, 
+    //                                         "In Transit":det.in_transit, 
+    //                                         "Ave Sales Unit":det.average_sales_unit, 
+    //                                     }
+
+    //                                     formattedData.push(newData)
+    //                                 })
+    //                             }
+    //                         )
+    //                     }
+    //                 }
+    //             }
+    //     )
+
+    //     const headerData = [
+    //         ["Company Name: Lifestrong Marketing Inc."],
+    //         ["VMI"],
+    //         ["Date Printed: " + formatDate(new Date())],
+    //         [""],
+    //     ];
+    
+    //     exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
+    // }
     function export_data(company, year, week) 
     {
-        var formattedData = [];
-        let filterArr = []
-        filterArr.push(`v.company:EQ=${company}`);
-        filterArr.push(`v.year:EQ=${year}`);
-        // filterArr.push(`m.month:EQ=${month}`);
-        filterArr.push(`week:EQ=${week}`);
+        modal.loading(true);
+        $.ajax({
+            url: '/cms/import-vmi/generate-excel',
+            method: 'POST',
+            data: {
+                company: company,
+                year: year,
+                week: week
+            },
+            success: function (res) {
+                if (res.status === 'started') {
+                    //console.log('Export started:', res.filename);
+                    modal.loading(false);
+                    modal.alert("Excel generation has started. Please wait 5–10 minutes for the VMI file to download automatically.", "success");
 
-        let filter = filterArr.join(',')
+                    let pollInterval = setInterval(function () {
+                        $.getJSON('/cms/import-vmi/pending/', function (response) {
+                            if (response.ready) {
+                                clearInterval(pollInterval);
 
-        dynamic_search(
-                "'tbl_vmi v'", 
-                "'left join tbl_company c on v.company = c.id "+
-                "left join tbl_year y on v.year = y.id'",
-                "'COUNT(v.id) as total_records'",
-                0, 
-                0, 
-                `'${filter}'`,  
-                `''`, 
-                `''`,
-                (res) => {
-                    if (res && res.length > 0) {
-                        let total_records = res[0].total_records;
-
-                        for (let index = 0; index < total_records; index += 100000) {
-                            dynamic_search(
-                                "'tbl_vmi v'", 
-
-                                "'left join tbl_company c on v.company = c.id "+
-                                "left join tbl_year y on v.year = y.id'",
-
-                                "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
-                                "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, week'", 
-
-                                100000, 
-                                index, 
-                                `'${filter}'`,  
-                                `''`, 
-                                `''`,
-                                (res) => {
-                                    let store_ids = []
-                                    let store_map = {}
-                            
-                                    const storeSet = new Set(store_ids); // convert existing array to a Set
-                                    res.forEach(stores => {
-                                        storeSet.add(`${stores.store}`);
-                                    });
-                                    store_ids = Array.from(storeSet); // convert back to array
-                            
-                                    dynamic_search(
-                                        "'tbl_store'", 
-                                        "''", 
-                                        "'id, code, description'", 
-                                        0, 
-                                        0, 
-                                        `'id:IN=${store_ids.join('|')}'`,  
-                                        `''`, 
-                                        `''`,
-                                        (result) => {
-                                            result.forEach(store => {
-                                                if (!store_map[store.id]) {
-                                                    store_map[store.id] = {}; // Initialize as an object
-                                                }
-                                                store_map[store.id].description = store.description;
-                                                store_map[store.id].code = store.code;
-                                            });
-                                        }
-                                    );
-
-                                    res.forEach(det => {
-                                        let newData = {
-                                            "Store":store_map[`${det.store}`].code, 
-                                            "Item":det.item, 
-                                            "Item Name":det.item_name, 
-                                            "VMI Status":det.vmi_status, 
-                                            "Item Class":det.item_class, 
-                                            "Supplier":det.supplier, 
-                                            "Group":det.c_group, 
-                                            "Dept":det.dept, 
-                                            "Class":det.classification, 
-                                            "Sub Class":det.sub_class, 
-                                            "On Hand":det.on_hand, 
-                                            "In Transit":det.in_transit, 
-                                            "Ave Sales Unit":det.average_sales_unit, 
-                                        }
-
-                                        formattedData.push(newData)
-                                    })
-                                }
-                            )
-                        }
-                    }
+                                // Trigger download via iframe
+                                $('<iframe>', {
+                                    src: `/cms/import-vmi/download/${response.filename}`,
+                                    style: 'display: none;'
+                                }).appendTo('body');
+                            }
+                        });
+                    }, 20000);
                 }
-        )
-
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["VMI"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
-    
-        exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
+            },
+            error: function (xhr) {
+                modal.alert("Failed to start export.", "error");
+                console.error(xhr.responseText);
+            }
+        });
     }
+
 
     // function delete_data(company, year, month, week) 
     function delete_data(company, year, week){   

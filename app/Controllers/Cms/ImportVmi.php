@@ -5,6 +5,11 @@ namespace App\Controllers\Cms;
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Models\Sync_model;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ImportVmi extends BaseController
 {
@@ -31,7 +36,7 @@ class ImportVmi extends BaseController
 		$data['PageName'] = 'Import VMI';
 		$data['PageUrl'] = 'Import VMI';
 		$data['content'] = "cms/import/vmi/vmi.php";
-		$data['buttons'] = ['search', 'import', 'export'];
+		$data['buttons'] = ['search', 'import'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -285,6 +290,79 @@ class ImportVmi extends BaseController
 	        'message' => 'Missing parameters: week, company, or year',
 	        'results' => []
 	    ]);
+	}
+
+	public function generateExcel()
+	{
+	    $company = $this->request->getPost('company');
+	    $year = $this->request->getPost('year');
+	    $week = $this->request->getPost('week');
+
+	    $filename = 'vmi_export_' . date('Ymd_His') . '.csv';
+	    session()->set('pending_export_file', $filename);
+
+	    $sparkPath = escapeshellarg(ROOTPATH . 'spark'); // Use ROOTPATH constant
+
+	    $cmd = "php {$sparkPath} export:vmi {$company} {$year} {$week} {$filename}";
+	    // Temporarily disable logging
+	    $log = WRITEPATH . 'logs/export_' . time() . '.log';
+	    exec("nohup $cmd > $log 2>&1 &");
+
+	    // Run without logging
+    	//exec("nohup $cmd > /dev/null 2>&1 &");
+
+	    return $this->response->setJSON([
+	        'status' => 'started',
+	        'filename' => $filename
+	    ]);
+	}
+
+
+    public function check($filename)
+    {
+        $path = WRITEPATH . 'exports/' . $filename;
+        return $this->response->setJSON([
+            'ready' => file_exists($path)
+        ]);
+    }
+
+	public function download($filename)
+	{
+	    $expected = session()->get('pending_export_file');
+
+	    // if ($expected !== $filename) {
+	    //     return $this->response->setStatusCode(403)->setBody('Unauthorized download attempt.');
+	    // }
+
+	    $path = WRITEPATH . 'exports/' . basename($filename);
+	    if (!file_exists($path)) {
+	        return $this->response->setStatusCode(404)->setBody('File not found.');
+	    }
+
+	    session()->remove('pending_export_file');
+
+	    $response = $this->response->download($path, null);
+
+	    register_shutdown_function(function () use ($path) {
+	        if (file_exists($path)) {
+	            unlink($path);
+	        }
+	    });
+
+	    return $response;
+	}
+
+	public function checkPendingDownload()
+	{
+	    $filename = session()->get('pending_export_file');
+
+	    if ($filename && file_exists(WRITEPATH . 'exports/' . $filename)) {
+	        // Clear the session flag once file exists
+	        session()->remove('pending_export_file');
+	        return $this->response->setJSON(['ready' => true, 'filename' => $filename]);
+	    }
+
+	    return $this->response->setJSON(['ready' => false]);
 	}
 
 }

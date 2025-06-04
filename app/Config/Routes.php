@@ -134,7 +134,12 @@ $routes->group('cms/', static function ($routes) {
         $routes->post('import-temp-vmi-data', 'Cms\ImportVmi::import_temp_vmi_data');
         $routes->post('update-aggregated-vmi-data', 'Cms\ImportVmi::update_aggregated_vmi_data');
         $routes->post('delete-temp-vmi-data', 'Cms\ImportVmi::delete_temp_vmi_data');
-        
+
+        $routes->post('generate-excel', 'Cms\ImportVmi::generateExcel');
+        $routes->get('generate-excel', 'Cms\ImportVmi::generateExcel');
+
+        $routes->get('download/(:any)', 'Cms\ImportVmi::download/$1');
+        $routes->get('pending', 'Cms\ImportVmi::checkPendingDownload');
     });
 
     $routes->group('import-ba-sales-report', static function ($routes) {
