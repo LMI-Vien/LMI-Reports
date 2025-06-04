@@ -274,7 +274,7 @@ class StocksPerStore extends BaseController
 				gc_collect_cycles();
 			}
 
-			$title = 'BA_Dashboard_Report_' . date('Ymd_His');
+			$title = 'Stock_Data_per_Store_' . date('Ymd_His');
 	        
 	        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 	        $pdf->SetCreator('LMI SFA');
@@ -287,7 +287,7 @@ class StocksPerStore extends BaseController
 	        $pdf->SetFont('helvetica', '', 12);
 	        $pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 	        $pdf->SetFont('helvetica', '', 10);
-	        $pdf->Cell(0, 5, 'Report: BA Dashboard', 0, 1, 'C');
+	        $pdf->Cell(0, 5, 'Report: Stock Data per Store', 0, 1, 'C');
 	        $pdf->Ln(5);
 
 	        $pdf->SetFont('helvetica', '', 9);
@@ -320,19 +320,34 @@ class StocksPerStore extends BaseController
 				$pdf->SetFont('helvetica', 'B', 10);
 				$pdf->Cell(0, 6, $section['label'], 0, 1, 'L');
 
-				$pdf->SetFont('helvetica', 'B', 10);
-				$pdf->Cell(115, 6, 'Item Name', 1, 0, 'C');
-				$pdf->Cell(20, 6, 'Quantity', 1, 0, 'C');
-				$pdf->Cell(25, 6, 'LMI/RGDI Code', 1, 0, 'C');
-				$pdf->Cell(30, 6, 'Type of SKU', 1, 1, 'C');
-
-				foreach ($section['rows'] as $row) {
-					$pdf->SetFont('helvetica', '', 10);
-					$pdf->Cell(115, 6, $row->item_name, 1, 0, 'L');
-					$pdf->Cell(20, 6, intval($row->sum_total_qty), 1, 0, 'C');
-					$pdf->Cell(25, 6, $row->itmcde, 1, 0, 'C');
-					$pdf->Cell(30, 6, $section['label'], 1, 1, 'C');
+				if ($section['label'] === "Hero SKUs") {
+					$pdf->SetFont('helvetica', 'B', 10);
+					$pdf->Cell(110, 6, 'Item Name', 1, 0, 'C');
+					$pdf->Cell(40, 6, 'LMI/RGDI Code', 1, 0, 'C');
+					$pdf->Cell(40, 6, 'Type of SKU', 1, 1, 'C');
+	
+					foreach ($section['rows'] as $row) {
+						$pdf->SetFont('helvetica', '', 10);
+						$pdf->Cell(110, 6, $row->item_name, 1, 0, 'L');
+						$pdf->Cell(40, 6, $row->itmcde, 1, 0, 'C');
+						$pdf->Cell(40, 6, $section['label'], 1, 1, 'C');
+					}
+				} else {
+					$pdf->SetFont('helvetica', 'B', 10);
+					$pdf->Cell(110, 6, 'Item Name', 1, 0, 'C');
+					$pdf->Cell(20, 6, 'Quantity', 1, 0, 'C');
+					$pdf->Cell(30, 6, 'LMI/RGDI Code', 1, 0, 'C');
+					$pdf->Cell(30, 6, 'Type of SKU', 1, 1, 'C');
+	
+					foreach ($section['rows'] as $row) {
+						$pdf->SetFont('helvetica', '', 10);
+						$pdf->Cell(110, 6, $row->item_name, 1, 0, 'L');
+						$pdf->Cell(20, 6, intval($row->sum_total_qty), 1, 0, 'C');
+						$pdf->Cell(30, 6, $row->itmcde, 1, 0, 'C');
+						$pdf->Cell(30, 6, $section['label'], 1, 1, 'C');
+					}
 				}
+
 			}
 
 	        $pdf->Output($title . '.pdf', 'D');
@@ -458,7 +473,7 @@ class StocksPerStore extends BaseController
 			$sheet = $spreadsheet->getActiveSheet();
 
 			$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-			$sheet->setCellValue('A2', 'Report: BA Dashboard');
+			$sheet->setCellValue('A2', 'Report: Stock Data per Store');
 			$sheet->mergeCells('A1:E1');
 			$sheet->mergeCells('A2:E2');
 
@@ -468,16 +483,45 @@ class StocksPerStore extends BaseController
 				$sheet->fromArray($headers, null, 'A7');
 				$sheet->getStyle('A7:D7')->getFont()->setBold(true);
 
-				foreach ($section['rows'] as $row) {
-					$sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-					$sheet->setCellValueExplicit('B' . $rowNum, intval($row->sum_total_qty), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-					$sheet->setCellValueExplicit('C' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-					$sheet->setCellValueExplicit('D' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-					$rowNum+=1;
+				$brand_ambassador_data = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 1, 0, "'id:EQ=$baId'", "''", "''");
+				$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] : null;
+				$sheet->setCellValue('A4', 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'));
+
+				$brand_data = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_code'", 1, 0, "'id:EQ=$brands'", "''", "''");
+				$brand = isset($brand_data[0]['brand_code']) ? $brand_data[0]['brand_code'] : null;
+				$sheet->setCellValue('B4', 'Brand: ' . ($brand ?: 'ALL'));
+
+				$sheet->setCellValue('C4', 'Outright/Consignment: ALL');
+
+				$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
+				$store = isset($store_data[0]['description']) ? $store_data[0]['description'] : null;
+				$sheet->setCellValue('A5', 'Store Name: ' . ($store ?: 'ALL'));
+
+				$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
+				$asc = isset($asc_data[0]['description']) ? $asc_data[0]['description'] : null;
+				$sheet->setCellValue('B5', 'Area / ASC Name: ' . ($asc ?: ''));
+				$sheet->setCellValue('C5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+
+				if ($section['label'] === "Hero SKUs") {
+					foreach ($section['rows'] as $row) {
+						$sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('C' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('D' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$rowNum+=1;
+					}
+				} else {
+					foreach ($section['rows'] as $row) {
+						$sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('B' . $rowNum, intval($row->sum_total_qty), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+						$sheet->setCellValueExplicit('C' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('D' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$rowNum+=1;
+					}
 				}
+
 			}
 
-			$title = 'BA_Dashboard_Report_' . date('Ymd_His');
+			$title = 'Stock_Data_per_Store_' . date('Ymd_His');
 
 			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 			header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
