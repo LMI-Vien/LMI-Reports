@@ -621,10 +621,6 @@ class StocksAllStore extends BaseController
 				}
 			}
 
-			//----------------------------------------------------------------
-			// 6e) Fetch data for exactly this single status, using the same
-			//     model‐call logic as in generatePdf()
-			//----------------------------------------------------------------
 			$limit  = 99999;
 			$offset = 0;
 
