@@ -322,29 +322,33 @@ class StocksPerStore extends BaseController
 
 				if ($section['label'] === "Hero SKUs") {
 					$pdf->SetFont('helvetica', 'B', 10);
-					$pdf->Cell(110, 6, 'Item Name', 1, 0, 'C');
-					$pdf->Cell(40, 6, 'LMI/RGDI Code', 1, 0, 'C');
-					$pdf->Cell(40, 6, 'Type of SKU', 1, 1, 'C');
+					$pdf->Cell(35, 6, 'LMI/RGDI Code', 1, 0, 'C');
+					$pdf->Cell(30, 6, 'SKU', 1, 0, 'C');
+					$pdf->Cell(95, 6, 'SKU Name', 1, 0, 'C');
+					$pdf->Cell(30, 6, 'SKU Type', 1, 1, 'C');
 	
 					foreach ($section['rows'] as $row) {
 						$pdf->SetFont('helvetica', '', 10);
-						$pdf->Cell(110, 6, $row->item_name, 1, 0, 'L');
-						$pdf->Cell(40, 6, $row->itmcde, 1, 0, 'C');
-						$pdf->Cell(40, 6, $section['label'], 1, 1, 'C');
+						$pdf->Cell(35, 6, $row->itmcde, 1, 0, 'C');
+						$pdf->Cell(30, 6, $row->item, 1, 0, 'C');
+						$pdf->Cell(95, 6, $row->item_name, 1, 0, 'L');
+						$pdf->Cell(30, 6, $section['label'], 1, 1, 'C');
 					}
 				} else {
 					$pdf->SetFont('helvetica', 'B', 10);
-					$pdf->Cell(110, 6, 'Item Name', 1, 0, 'C');
-					$pdf->Cell(20, 6, 'Quantity', 1, 0, 'C');
 					$pdf->Cell(30, 6, 'LMI/RGDI Code', 1, 0, 'C');
-					$pdf->Cell(30, 6, 'Type of SKU', 1, 1, 'C');
+					$pdf->Cell(25, 6, 'SKU', 1, 0, 'C');
+					$pdf->Cell(95, 6, 'SKU Name', 1, 0, 'C');
+					$pdf->Cell(20, 6, 'Quantity', 1, 0, 'C');
+					$pdf->Cell(20, 6, 'SKU Type', 1, 1, 'C');
 	
 					foreach ($section['rows'] as $row) {
 						$pdf->SetFont('helvetica', '', 10);
-						$pdf->Cell(110, 6, $row->item_name, 1, 0, 'L');
-						$pdf->Cell(20, 6, intval($row->sum_total_qty), 1, 0, 'C');
 						$pdf->Cell(30, 6, $row->itmcde, 1, 0, 'C');
-						$pdf->Cell(30, 6, $section['label'], 1, 1, 'C');
+						$pdf->Cell(25, 6, $row->item, 1, 0, 'C');
+						$pdf->Cell(95, 6, $row->item_name, 1, 0, 'L');
+						$pdf->Cell(20, 6, intval($row->sum_total_qty), 1, 0, 'C');
+						$pdf->Cell(20, 6, $section['label'], 1, 1, 'C');
 					}
 				}
 
@@ -479,9 +483,9 @@ class StocksPerStore extends BaseController
 
 			$rowNum = 8;
 			foreach ($allData as $section) {
-				$headers = ['Item Name', 'Quantity', 'LMI/RGDI Code', 'Type of SKU'];
+				$headers = ['LMI/RGDI Code', 'SKU', 'SKU Name', 'Quantity', 'SKU Type'];
 				$sheet->fromArray($headers, null, 'A7');
-				$sheet->getStyle('A7:D7')->getFont()->setBold(true);
+				$sheet->getStyle('A7:E7')->getFont()->setBold(true);
 
 				$brand_ambassador_data = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 1, 0, "'id:EQ=$baId'", "''", "''");
 				$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] : null;
@@ -504,17 +508,19 @@ class StocksPerStore extends BaseController
 
 				if ($section['label'] === "Hero SKUs") {
 					foreach ($section['rows'] as $row) {
-						$sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-						$sheet->setCellValueExplicit('C' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-						$sheet->setCellValueExplicit('D' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('A' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('B' . $rowNum, $row->item, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('C' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('E' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 						$rowNum+=1;
 					}
 				} else {
 					foreach ($section['rows'] as $row) {
-						$sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-						$sheet->setCellValueExplicit('B' . $rowNum, intval($row->sum_total_qty), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-						$sheet->setCellValueExplicit('C' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-						$sheet->setCellValueExplicit('D' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('A' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('B' . $rowNum, $row->item, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('C' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+						$sheet->setCellValueExplicit('D' . $rowNum, intval($row->sum_total_qty), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
+						$sheet->setCellValueExplicit('E' . $rowNum, $section['label'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 						$rowNum+=1;
 					}
 				}
