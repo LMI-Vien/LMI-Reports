@@ -86,10 +86,12 @@ self.onmessage = async function(e) {
                 }
 
                 let item_key = item.trim().toLowerCase();
-                if (!(item_key in customer_sku_code_lookup)) {
-                    addErrorLog(`Invalid SKU Code: ${item}`);
-                    continue;
-                }
+
+                //temporarily disable requested by boss dani
+                // if (!(item_key in customer_sku_code_lookup)) {
+                //     addErrorLog(`Invalid SKU Code: ${item}`);
+                //     continue;
+                // }
 
                 label_type = label_type_lookup[label_type.trim().toLowerCase()] || addErrorLog("Invalid Label Code: " + label_type);
                 item_class = item_class_lookup[item_class.trim().toLowerCase()] || addErrorLog("Invalid Item Class: " + item_class);
