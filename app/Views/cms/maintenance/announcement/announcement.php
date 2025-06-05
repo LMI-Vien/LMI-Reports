@@ -358,7 +358,7 @@
 
         if(validate.standard("popup_modal")){
             if (id !== undefined && id !== null && id !== '') {
-                check_current_db("tbl_announcements", ["title", "description_2", "description_3", "start_date", "end_date"], [title, desc_2, desc_3, start_date, end_date], "status" , "id", id, true, function(exists, duplicateFields) {
+                check_current_db("tbl_announcements", ["title", "description_2", "start_date", "end_date"], [title, desc_2, start_date, end_date], "status" , "id", id, true, function(exists, duplicateFields) {
                     if (!exists) {
                         modal.confirm(confirm_update_message, function(result){
                             if(result){ 
@@ -370,7 +370,7 @@
                     }             
                 });
             }else{
-                check_current_db("tbl_announcements", ["title", "description_2", "description_3", "start_date", "end_date"], [title, desc_2, desc_3, start_date, end_date], "status" , null, null, true, function(exists, duplicateFields) {
+                check_current_db("tbl_announcements", ["title", "description_2", "start_date", "end_date"], [title, desc_2, start_date, end_date], "status" , null, null, true, function(exists, duplicateFields) {
                     if (!exists) {
                         modal.confirm(confirm_add_message, function(result){
                             if(result){ 
