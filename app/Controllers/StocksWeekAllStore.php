@@ -197,25 +197,28 @@ class StocksWeekAllStore extends BaseController
 	}
 
 	public function generatePdf() {
-		$ItemClasses = $this->getParam('itemClass');
-		$ItemClasses = $ItemClasses === '' ? null : $ItemClasses;
+		$itemClassParam = $this->getParam('itemClass');
+		if (is_string($itemClassParam) && strpos($itemClassParam, ',') !== false) {
+			$itemClassList = array_map('trim', explode(',', $itemClassParam));
+		} elseif (is_array($itemClassParam) && count($itemClassParam) > 0) {
+			$itemClassList = $itemClassParam;
+		} elseif (!empty($itemClassParam)) {
+			$itemClassList = [ $itemClassParam ];
+		} else {
+			$itemClassList = [];
+		}
 
-		$itemCatId = trim($this->getParam('itemCategory') ?? '');
-		$itemCatId = $itemCatId === '' ? null : $itemCatId;
+		$itemCatId  = trim($this->getParam('itemCategory')  ?? '');
+		$itemCatId  = ($itemCatId === '') ? null : $itemCatId;
+		$weekStart  = trim($this->getParam('weekFrom')     ?? '');
+		$weekStart  = ($weekStart === '') ? null : $weekStart;
+		$weekEnd    = trim($this->getParam('weekTo')       ?? '');
+		$weekEnd    = ($weekEnd === '') ? null : $weekEnd;
+		$latestYear = trim($this->getParam('year')         ?? '');
+		$latestYear = ($latestYear === '') ? null : $latestYear;
+		$source     = trim($this->getParam('source')       ?? '');
+		$source     = ($source === '') ? null : $source;
 
-		$weekStart = trim($this->getParam('weekFrom') ?? '');
-		$weekStart = $weekStart === '' ? null : $weekStart;
-
-		$weekEnd = trim($this->getParam('weekTo') ?? '');
-		$weekEnd = $weekEnd === '' ? null : $weekEnd;
-
-		$latestYear = trim($this->getParam('year') ?? '');
-		$latestYear = $latestYear === '' ? null : $latestYear;
-
-		$source = trim($this->getParam('source') ?? '');
-		$source = $source === '' ? null : $source;
-
-		// 2) Parse "type" (inventory status) as an array (possibly comma-separated)
 		$typeParam = $this->getParam('type');
 		if (is_string($typeParam) && strpos($typeParam, ',') !== false) {
 			$typeList = array_map('trim', explode(',', $typeParam));
@@ -227,14 +230,6 @@ class StocksWeekAllStore extends BaseController
 			$typeList = [];
 		}
 
-		$limit = 99999;
-		$offset = 0;
-
-		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
-		$orderDirection   = $this->request->getVar('order')[0]['dir']    ?? 'desc';
-		$columns          = $this->request->getVar('columns');
-		$orderByColumn    = $columns[$orderColumnIndex]['data'] ?? 'item_name';
-
 		$sysPar  = $this->Global_model->getSysPar();
 		$npdSku  = [];
 		$heroSku = [];
@@ -245,86 +240,29 @@ class StocksWeekAllStore extends BaseController
 			$dataHero = json_decode($sysPar[0]['hero_sku'], true);
 			$heroSku  = array_map(fn($item) => $item['item_class_description'], $dataHero);
 
-			$dataNpd = json_decode($sysPar[0]['new_item_sku'], true);
-			$npdSku  = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+			$dataNpd  = json_decode($sysPar[0]['new_item_sku'], true);
+			$npdSku   = array_map(fn($item) => $item['item_class_description'], $dataNpd);
 
 			$skuMin = $sysPar[0]['sm_sku_min'];
 			$skuMax = $sysPar[0]['sm_sku_max'];
 			$skuMin = 1;
 		}
 
-		$allRows = [];
-		foreach ($typeList as $statusType) {
-			$statusType = trim($statusType);
-			$dir        = strtoupper($orderDirection);
+		$limit  = 99999;
+		$offset = 0;
 
-			if (intval($source) === 3) {
-				switch ($statusType) {
-					case 'slowMoving':
-						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $dir, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-						break;
-					case 'overStock':
-						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $dir, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-						break;
-					case 'npd':
-						$itemClassFilter = $npdSku;
-						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $dir, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-						break;
-					case 'hero':
-						$itemClassFilter = $heroSku;
-						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $dir,$weekStart, $weekEnd, $latestYear,$itemClassFilter, $ItemClasses, $itemCatId);
-						break;
-					default:
-						continue 2;
-				}
-			} else {
-				switch ($statusType) {
-					case 'slowMoving':
-						$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $dir, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-						break;
-					case 'overStock':
-						$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $dir, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-						break;
-					case 'npd':
-						$itemClassFilter = $npdSku;
-						$data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $dir, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-						break;
-					case 'hero':
-						$itemClassFilter = $heroSku;
-						$data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $dir, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-						break;
-					default:
-						continue 2;
-				}
-			}
+		$allOrders  = $this->request->getVar('order')   ?? [];
+		$allColumns = $this->request->getVar('columns') ?? [];
 
-			$partialRows = $data['data'] ?? [];
-			foreach ($partialRows as $r) {
-				$r->inventory_status = $statusType;
-				$allRows[]           = $r;
-			}
-		}
-		$rows = $allRows; 
-
-		// 6) Build dynamic "Week X" columns exactly like in generateExcel:
-		$weekCols = [];
+		// Build dynamic "Week X" columns (needed for headers later)
+		$weekCols   = [];
 		$isHeroOnly = (count($typeList) === 1 && $typeList[0] === 'hero');
 		if (! $isHeroOnly && $weekStart !== null && $weekEnd !== null) {
-			$startNum = (int)$weekStart;
-			$endNum   = (int)$weekEnd;
+			$startNum = (int) $weekStart;
+			$endNum   = (int) $weekEnd;
 			for ($w = $startNum; $w <= $endNum; $w++) {
 				$weekCols[] = "Week $w";
 			}
-		}
-
-		if ($isHeroOnly) {
-			$headers = ['LMI/RGDI Code', 'SKU Name', 'Item Class', 'Inventory Status'];
-		} else {
-			$headers = array_merge(
-				['LMI/RGDI Code', 'SKU Name', 'Item Class'],
-				$weekCols,
-				['Inventory Status']
-			);
 		}
 
 		$title = "Week by Week Stock Data of all Stores";
@@ -335,8 +273,6 @@ class StocksWeekAllStore extends BaseController
 		$pdf->setPrintHeader(false);
 		$pdf->setPrintFooter(false);
 		$pdf->AddPage();
-
-		$this->printHeader($pdf, $title);
 
 		$result  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "'id:EQ=$latestYear'", "''", "''");
 		$yearMap = !empty($result) ? $result[0]['year'] : '';
@@ -351,139 +287,171 @@ class StocksWeekAllStore extends BaseController
 
 		$statusLabel = empty($typeList) ? 'None' : implode(', ', $typeList);
 		$filterData  = [
-			'Item Classes'     => $ItemClasses   ?? 'None',
-			'Item Category'    => $itemCatId     ?? 'None',
+			'Item Classes'     => empty($itemClassList) ? 'None' : implode(', ', $itemClassList),
+			'Item Category'    => $itemCatId      ?? 'None',
 			'Inventory Status' => $statusLabel,
-			'Week From'        => $weekStart     ?? 'None',
-			'Week To'          => $weekEnd       ?? 'None',
-			'Year'             => $yearMap    	 ?? 'None',
+			'Week From'        => $weekStart      ?? 'None',
+			'Week To'          => $weekEnd        ?? 'None',
+			'Year'             => $yearMap 		  ?? 'None',
 			'Source'           => $sourceMap,
 		];
+		$this->printHeader($pdf, $title);
 		$this->printFilter($pdf, $filterData);
 
-		$pageWidth    = $pdf->getPageWidth();
-		$margins      = $pdf->getMargins();
-		$usableW      = $pageWidth - $margins['left'] - $margins['right'];
-		$colCount     = count($headers);
-		$colWidth     = $usableW / $colCount;
-		$headerHeight = 8;  
-		$rowHeight    = 8;  
-		$lineHeight   = 4;  
+		// Compute “usableW” just once
+		$pageWidth = $pdf->getPageWidth();
+		$margins   = $pdf->getMargins();
+		$usableW   = $pageWidth - $margins['left'] - $margins['right'];
 
-		$pdf->SetFont('helvetica', 'B', 9);
-		$startX = $pdf->GetX();
-		foreach ($headers as $idx => $txt) {
-			$isLastCell = ($idx === $colCount - 1) ? 1 : 0;
-			$pdf->Cell(
-				$colWidth,
-				$headerHeight,
-				$txt,
-				1,
-				$isLastCell,
-				'C'
-			);
-		}
+	
+		// For each status in $typeList, output a separate page‐section
+		foreach ($typeList as $sectionIndex => $singleType) {
+			// Add a new page if not the first section
+			if ($sectionIndex > 0) {
+				$pdf->AddPage();
+			}
 
-		$pdf->SetFont('helvetica', '', 9);
-		foreach ($rows as $row) {
-			$pdf->SetXY($startX, $pdf->GetY());
+			// Print “section header” (Inventory Status)
+			$pdf->SetFont('helvetica', 'B', 10);
+			$pdf->Cell(0, 6, "Inventory Status: " . ucfirst($singleType), 0, 1, 'L');
+			$pdf->Ln(2);
 
-			if ($row->inventory_status === 'hero') {
-				// 1) LMI/RGDI Code
-				$pdf->Cell($colWidth, $rowHeight, $row->item, 1, 0, 'C');
-
-				// 2) SKU Name 
-				$x_after_col2 = $pdf->GetX();
-				$y_current    = $pdf->GetY();
-				$pdf->MultiCell(
-					$colWidth,       // column width
-					$lineHeight,     // line height
-					$row->item_name, // content
-					1,               // draw border
-					'L',             // left‐align text
-					0,               // no fill
-					0,               // ln=0 (we reposition after)
-					'',              // x (auto)
-					'',              // y (auto)
-					true,            // reset auto height
-					0,               // no stretch
-					false,           // not HTML
-					true,            // autopadding
-					$rowHeight,      // force total height = rowHeight
-					'M',             // vertical align = middle
-					true             // fit text if too tall
+			$isHeroSection = ($singleType === 'hero');
+			if ($isHeroSection) {
+				$headers = [
+					'SKU Code',
+					'SKU Name',
+					'LMI/RGDI Code',
+				];
+			} else {
+				$headers = array_merge(
+					['SKU Code', 'SKU Name', 'LMI/RGDI Code'],
+					$weekCols
 				);
-				// Move to the top-left of the next column
-				$pdf->SetXY($x_after_col2 + $colWidth, $y_current);
+			}
 
-				// 3) Item Class
-				$pdf->Cell($colWidth, $rowHeight, $row->itmcde, 1, 0, 'C');
+			// Determine this section’s sorting (using order[$sectionIndex], columns[$sectionIndex])
+			if (isset($allOrders[$sectionIndex])) {
+				// We have a client‐side order[] block for this section
+				$ord = $allOrders[$sectionIndex];
+				$orderColumnIndex = intval($ord['column'] ?? 0);
+				$orderDirection   = strtoupper($ord['dir']    ?? 'DESC');
 
-				// 4) If there are weekCols, “consume” those columns with blanks
-				foreach ($weekCols as $wc) {
-					$pdf->Cell($colWidth, $rowHeight, '', 1, 0, 'C');
+				if (
+					isset($allColumns[$sectionIndex])
+					&& isset($allColumns[$sectionIndex][$orderColumnIndex]['data'])
+				) {
+					$orderByColumn = $allColumns[$sectionIndex][$orderColumnIndex]['data'];
+				} else {
+					// Fallback if the specified column index doesn’t exist
+					$orderByColumn = 'item_name';
+				}
+			} else {
+				// No order[] for this section → use default
+				$orderByColumn  = 'item_name';
+				$orderDirection = 'DESC';
+			}
+
+			$fetchLimit  = $limit;
+			$fetchOffset = $offset;
+
+			if (intval($source) === 3) {
+				switch ($singleType) {
+					case 'slowMoving':
+						$data = $this->Dashboard_model->getDataWeekAllStore($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $itemClassList, $itemCatId);
+						break;
+					case 'overStock':
+						$data = $this->Dashboard_model->getDataWeekAllStore($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $itemClassList, $itemCatId);
+						break;
+					case 'npd':
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					case 'hero':
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					default:
+						$data = ['data' => []];
+						break;
+				}
+			} else {
+				switch ($singleType) {
+					case 'slowMoving':
+						$data = $this->Dashboard_model->getDataVmiAllStore($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $itemClassList, $itemCatId);
+						break;
+					case 'overStock':
+						$data = $this->Dashboard_model->getDataVmiAllStore($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $itemClassList, $itemCatId);
+						break;
+					case 'npd':
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getDataVmiNPDHERO($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection,$weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					case 'hero':
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getDataVmiNPDHERO($fetchLimit, $fetchOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					default:
+						$data = ['data' => []];
+						break;
+				}
+			}
+
+			$rows = $data['data'] ?? [];
+
+			$pdf->SetFont('helvetica', 'B', 9);
+			$colCount = count($headers);
+			$colWidth = $usableW / $colCount;
+			foreach ($headers as $h) {
+				$pdf->Cell($colWidth, 8, $h, 1, 0, 'C');
+			}
+			$pdf->Ln();
+			$pdf->SetFont('helvetica', '', 9);
+
+			$rowHeight  = 8;
+			$lineHeight = 4;
+			$pageHeight   = $pdf->getPageHeight();
+			$bottomMargin = $pdf->getMargins()['bottom'];
+			$bottomLimit  = $pageHeight - $bottomMargin - $rowHeight;
+
+			foreach ($rows as $row) {
+				$currentY = $pdf->GetY();
+
+				// If the next row won't fit, add a new page (no headers or titles)
+				if ($currentY > $bottomLimit) {
+					$pdf->AddPage();
 				}
 
-				// Inventory Status
-				$pdf->Cell(
+				// A) Column 1: SKU Code
+				$currX = $pdf->GetX();
+				$currY = $pdf->GetY();
+				$pdf->Cell($colWidth, $rowHeight, $row->item, 1, 0, 'C');
+
+				// B) Column 2: SKU Name (wrapped)
+				$pdf->MultiCell(
 					$colWidth,
-					$rowHeight,
-					ucfirst($row->inventory_status),
-					1,
-					1,
-					'C'
+					$lineHeight,
+					$row->item_name,
+					1, 'L', 0, 0, '', '', true, 0, false, true, $rowHeight, 'M', true
 				);
-				continue;
+
+				// C) Column 3: LMI/RGDI Code
+				$pdf->SetXY($currX + $colWidth * 2, $currY);
+				$pdf->Cell($colWidth, $rowHeight, $row->itmcde, 1, 0, 'C');
+
+				// D) Week columns if not hero
+				if (!$isHeroSection) {
+					foreach ($weekCols as $wc) {
+						$wkNum = (int) str_replace('Week ', '', $wc);
+						$field = "week_{$wkNum}";
+						$val   = property_exists($row, $field) ? $row->$field : 0;
+						$fmt   = $this->formatComma($val);
+						$pdf->Cell($colWidth, $rowHeight, $fmt, 1, 0, 'C');
+					}
+				}
+
+				$pdf->Ln();
 			}
-
-			// For non-hero rows (slowMoving / overStock / npd), we render weeks + status
-			// 1) LMI/RGDI Code
-			$pdf->Cell($colWidth, $rowHeight, $row->item, 1, 0, 'C');
-
-			// 2) SKU Name (wrapped using MultiCell, then reposition)
-			$x_after_col2 = $pdf->GetX();
-			$y_current    = $pdf->GetY();
-			$pdf->MultiCell(
-				$colWidth,
-				$lineHeight,
-				$row->item_name,
-				1,
-				'L',
-				0,
-				0,
-				'',
-				'',
-				true,
-				0,
-				false,
-				true,
-				$rowHeight,
-				'M',
-				true
-			);
-			$pdf->SetXY($x_after_col2 + $colWidth, $y_current);
-
-			// 3) Item Class
-			$pdf->Cell($colWidth, $rowHeight, $row->itmcde, 1, 0, 'C');
-
-			// 4) Week columns (only if not hero-only)
-			foreach ($weekCols as $wc) {
-				$wkNum = (int) str_replace('Week ', '', $wc);
-				$field = "week_" . $wkNum;
-				$value = property_exists($row, $field) ? $row->$field : 0;
-				$formattedValue = $this->formatComma($value);
-				$pdf->Cell($colWidth, $rowHeight, $formattedValue, 1, 0, 'C');
-			}
-
-			// Last: Inventory Status
-			$pdf->Cell(
-				$colWidth,
-				$rowHeight,
-				ucfirst($row->inventory_status),
-				1,
-				1,
-				'C'
-			);
 		}
 
 		$pdf->Output($title . '.pdf', 'D');
@@ -491,25 +459,32 @@ class StocksWeekAllStore extends BaseController
 	}
 
 	public function generateExcel() {
-		$ItemClasses = $this->getParam('itemClass');
-		$ItemClasses = $ItemClasses === '' ? null : $ItemClasses;
+		$itemClassParam = $this->getParam('itemClass');
+		if (is_string($itemClassParam) && strpos($itemClassParam, ',') !== false) {
+			$itemClassList = array_map('trim', explode(',', $itemClassParam));
+		} elseif (is_array($itemClassParam) && count($itemClassParam) > 0) {
+			$itemClassList = $itemClassParam;
+		} elseif (!empty($itemClassParam)) {
+			$itemClassList = [ $itemClassParam ];
+		} else {
+			$itemClassList = [];
+		}
 
 		$itemCatId = trim($this->getParam('itemCategory') ?? '');
-		$itemCatId = $itemCatId === '' ? null : $itemCatId;
+		$itemCatId = ($itemCatId === '') ? null : $itemCatId;
 
 		$weekStart = trim($this->getParam('weekFrom') ?? '');
-		$weekStart = $weekStart === '' ? null : $weekStart;
+		$weekStart = ($weekStart === '') ? null : $weekStart;
 
 		$weekEnd = trim($this->getParam('weekTo') ?? '');
-		$weekEnd = $weekEnd === '' ? null : $weekEnd;
+		$weekEnd = ($weekEnd === '') ? null : $weekEnd;
 
 		$latestYear = trim($this->getParam('year') ?? '');
-		$latestYear = $latestYear === '' ? null : $latestYear;
+		$latestYear = ($latestYear === '') ? null : $latestYear;
 
 		$source = trim($this->getParam('source') ?? '');
-		$source = $source === '' ? null : $source;
+		$source = ($source === '') ? null : $source;
 
-		// 2) Parse "type" (inventory status) as an array (possibly comma-separated)
 		$typeParam = $this->getParam('type');
 		if (is_string($typeParam) && strpos($typeParam, ',') !== false) {
 			$typeList = array_map('trim', explode(',', $typeParam));
@@ -521,12 +496,11 @@ class StocksWeekAllStore extends BaseController
 			$typeList = [];
 		}
 
-		$limit = 99999;
+		$limit  = 99999;
 		$offset = 0;
-		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
-		$orderDirection   = $this->request->getVar('order')[0]['dir']    ?? 'desc';
-		$columns          = $this->request->getVar('columns');
-		$orderByColumn    = $columns[$orderColumnIndex]['data'] ?? 'item_name';
+
+		$allOrders  = $this->request->getVar('order')   ?? [];
+		$allColumns = $this->request->getVar('columns') ?? [];
 
 		$sysPar  = $this->Global_model->getSysPar();
 		$npdSku  = [];
@@ -546,80 +520,15 @@ class StocksWeekAllStore extends BaseController
 			$skuMin = 1;
 		}
 
-		$allRows = [];
-		foreach ($typeList as $statusType) {
-			$statusType = trim($statusType);
-			$dir        = strtoupper($orderDirection);
-
-			if (intval($source) === 3) {
-				switch ($statusType) {
-					case 'slowMoving':
-						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $dir, $skuMin, $skuMax, $weekStart, $weekEnd,$latestYear, $ItemClasses, $itemCatId);
-						break;
-					case 'overStock':
-						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $dir, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-						break;
-					case 'npd':
-						$itemClassFilter = $npdSku;
-			           $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
-					case 'hero':
-	        			$itemClassFilter = $heroSku;
-			            $data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
-					default:
-						continue 2;
-				}
-			} else {
-				switch ($statusType) {
-					case 'slowMoving':
-			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-			            break;
-			        case 'overStock':
-			            $data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCatId);
-			            break;
-			        case 'npd':
-						$itemClassFilter = $npdSku;
-			           $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
-			        case 'hero':
-	        			$itemClassFilter = $heroSku;
-			            $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCatId);
-			            break;
-					default:
-						continue 2;
-				}
-			}
-
-			$partialRows = $data['data'] ?? [];
-			foreach ($partialRows as $r) {
-				$r->inventory_status = $statusType;
-				$allRows[]           = $r;
-			}
-		}
-
-		$rows = $allRows;
-
-		$weekCols = [];
-		if (!(count($typeList) === 1 && $typeList[0] === 'hero')
-			&& $weekStart !== null
-			&& $weekEnd !== null
-		) {
+		// Build dynamic "Week X" column names (for non-hero sections)
+		$weekCols   = [];
+		$isHeroOnly = (count($typeList) === 1 && $typeList[0] === 'hero');
+		if (!$isHeroOnly && $weekStart !== null && $weekEnd !== null) {
 			$startNum = (int)$weekStart;
 			$endNum   = (int)$weekEnd;
 			for ($w = $startNum; $w <= $endNum; $w++) {
 				$weekCols[] = "Week $w";
 			}
-		}
-
-		if (count($typeList) === 1 && $typeList[0] === 'hero') {
-			$headers = ['LMI/RGDI Code', 'SKU Name', 'Item Class', 'Inventory Status'];
-		} else {
-			$headers = array_merge(
-				['LMI/RGDI Code', 'SKU Name', 'Item Class'],
-				$weekCols,
-				['Inventory Status']
-			);
 		}
 
 		$result  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "'id:EQ=$latestYear'", "''", "''");
@@ -642,7 +551,7 @@ class StocksWeekAllStore extends BaseController
 		$sheet->mergeCells('A2:E2');
 
 		$sheet->setCellValue('A4', 'Item Class:');
-		$sheet->setCellValue('B4', $ItemClasses ?? 'None');
+		$sheet->setCellValue('B4', empty($itemClassList) ? 'None' : implode(', ', $itemClassList));
 		$sheet->setCellValue('C4', 'Inventory Status:');
 		$sheet->setCellValue('D4', empty($typeList) ? 'None' : implode(', ', $typeList));
 
@@ -657,83 +566,151 @@ class StocksWeekAllStore extends BaseController
 		$sheet->setCellValue('D6', $sourceMap);
 		$sheet->setCellValue('E6', 'Generated: ' . date('M d, Y, h:i:s A'));
 
-		$headerRow = 8;
-		$lastCol   = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers));
-		foreach ($headers as $i => $headerText) {
-			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
-			$sheet->setCellValue($colLetter . $headerRow, $headerText);
-		}
-		$sheet->getStyle("A{$headerRow}:{$lastCol}{$headerRow}")
-			->getFont()
-			->setBold(true);
+		// Starting row for writing data sections
+		$rowNum = 8;
 
-		$rowNum = $headerRow + 1;
-		foreach ($rows as $row) {
-			$colIndex = 1;
+		// For each inventory status in $typeList, fetch + write its own block
+		// (no separate worksheet, just a blank row between sections)
+		foreach ($typeList as $sectionIndex => $statusType) {
+			$statusType = trim($statusType);
 
-			// A) LMI/RGDI Code
-			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
-			$sheet->setCellValue($colLetter . $rowNum, $row->item);
+			// Determine this section’s ORDER BY column & direction
+			if (isset($allOrders[$sectionIndex])) {
+				$ord               = $allOrders[$sectionIndex];
+				$orderColumnIndex  = intval($ord['column'] ?? 0);
+				$orderDirection    = strtoupper($ord['dir']    ?? 'DESC');
 
-			// B) SKU Name
-			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
-			$sheet->setCellValue($colLetter . $rowNum, $row->item_name);
-
-			// C) Item Class
-			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
-			$sheet->setCellValue($colLetter . $rowNum, $row->itmcde);
-
-			// D…(week columns) – only if not “hero”-only
-			// if (!(count($typeList) === 1 && $typeList[0] === 'hero')) {
-			// 	foreach ($weekCols as $wc) {
-			// 		$wkNum = (int) str_replace('Week ', '', $wc);
-			// 		$field = "week_" . $wkNum;
-			// 		$value = property_exists($row, $field) ? $row->$field : 0;
-
-			// 		$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
-			// 		$sheet->setCellValue($colLetter . $rowNum, $value);
-			// 	}
-			// }
-			if ($row->inventory_status !== 'hero') {
-				foreach ($weekCols as $wc) {
-					$wkNum = (int) str_replace('Week ', '', $wc);
-					$field = "week_" . $wkNum;
-					$value = property_exists($row, $field) ? $row->$field : 0;
-
-					$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
-					$sheet->setCellValue($colLetter . $rowNum, $value);
+				if (
+					isset($allColumns[$sectionIndex]) &&
+					isset($allColumns[$sectionIndex][$orderColumnIndex]['data'])
+				) {
+					$orderByColumn = $allColumns[$sectionIndex][$orderColumnIndex]['data'];
+				} else {
+					// Fallback if the index is missing
+					$orderByColumn = 'item_name';
 				}
 			} else {
-				// If this is a hero row, still “consume” the same number of columns
-				// (so Inventory Status ends up in the correct place),
-				// but leave them blank:
-				for ($i = 0; $i < count($weekCols); $i++) {
-					$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
-					$sheet->setCellValue($colLetter . $rowNum, '');
+				// Default if no ordering for this section
+				$orderByColumn  = 'item_name';
+				$orderDirection = 'DESC';
+			}
+
+			if (intval($source) === 3) {
+				switch ($statusType) {
+					case 'slowMoving':
+						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $itemClassList, $itemCatId);
+						break;
+					case 'overStock':
+						$data = $this->Dashboard_model->getDataWeekAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear,$itemClassList, $itemCatId);
+						break;
+					case 'npd':
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					case 'hero':
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getDataWeekAllNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					default:
+						// Skip if an unexpected statusType
+						continue 2;
+				}
+			} else {
+				switch ($statusType) {
+					case 'slowMoving':
+						$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $itemClassList, $itemCatId);
+						break;
+					case 'overStock':
+						$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $weekStart, $weekEnd, $latestYear, $itemClassList, $itemCatId);
+						break;
+					case 'npd':
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					case 'hero':
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $itemClassList, $itemCatId);
+						break;
+					default:
+						continue 2;
 				}
 			}
 
-			// Inventory Status (last column)
-			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
-			$sheet->setCellValue($colLetter . $rowNum, ucfirst($row->inventory_status));
+			$partialRows = $data['data'] ?? [];
 
+			if ($statusType === 'hero') {
+				$sectionHeaders = ['LMI/RGDI Code', 'SKU Name', 'Item Class'];
+			} else {
+				$sectionHeaders = array_merge(
+					['LMI/RGDI Code', 'SKU Name', 'Item Class'],
+					$weekCols
+				);
+			}
+			$numCols = count($sectionHeaders);
+			$lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($numCols);
+
+			// Write the “Inventory Status: <StatusType>” row 
+			$sheet->mergeCells("A{$rowNum}:{$lastCol}{$rowNum}");
+			$sheet->setCellValue("A{$rowNum}", "Inventory Status: " . ucfirst($statusType));
+			$sheet->getStyle("A{$rowNum}")
+				->getFont()
+				->setBold(true);
+
+			$rowNum++;
+
+			// Write the column‐header row for this section
+			foreach ($sectionHeaders as $i => $headerText) {
+				$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+				$sheet->setCellValue($colLetter . $rowNum, $headerText);
+			}
+			$sheet->getStyle("A{$rowNum}:{$lastCol}{$rowNum}")
+				->getFont()
+				->setBold(true);
+
+			$rowNum++;
+
+			// Write each data row for this section
+			foreach ($partialRows as $r) {
+				$colIndex = 1;
+
+				// LMI/RGDI Code
+				$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
+				$sheet->setCellValue($colLetter . $rowNum, $r->item);
+
+				// SKU Name
+				$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
+				$sheet->setCellValue($colLetter . $rowNum, $r->item_name);
+
+				// Item Class (itmcde)
+				$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
+				$sheet->setCellValue($colLetter . $rowNum, $r->itmcde);
+
+				// Week columns, if this is not “hero”
+				if ($statusType !== 'hero') {
+					foreach ($weekCols as $wc) {
+						$wkNum = (int) str_replace('Week ', '', $wc);
+						$field = "week_{$wkNum}";
+						$value = property_exists($r, $field) ? $r->$field : 0;
+
+						$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++);
+						$sheet->setCellValue($colLetter . $rowNum, $value);
+					}
+				}
+
+				$rowNum++;
+			}
+			// Leave one blank row before the next section
 			$rowNum++;
 		}
 
-		$title = "Week by Week Stock Data of all Stores";
+		$filename = "Week by Week Stock Data of all Stores.xlsx";
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header("Content-Disposition: attachment; filename=\"{$filename}\"");
 		header('Cache-Control: max-age=0');
 
 		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 		$writer->save('php://output');
 		exit;
 	}
-
-
-	
-    
-
-
 
 }
