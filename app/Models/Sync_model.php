@@ -1710,7 +1710,7 @@ class Sync_model extends Model
                     'store_code' => $row['store_code'],
                     'store_name' => $row['store_name'],
                     'ba_types' => $row['ba_types'],
-                    'ba_ids' => $row['ba_types'],
+                    'ba_ids' => $row['ba_ids'],
                     'brand_ids' => $row['brand_ids'],
                     'c_group' => $row['c_group'],
                     'dept' => $row['dept'],
