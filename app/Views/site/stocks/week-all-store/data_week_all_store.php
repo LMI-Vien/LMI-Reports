@@ -472,59 +472,80 @@
         let selectedWeekTo        = $('#week_to').val();
         let selectedDataSource    = $('#dataSource').val();
 
-        // 2) Determine which DataTable is visible and get its ordering/columns:
-        let dtInstance = null;
-        if ($('#table_slowMoving').is(':visible')) {
-            dtInstance = $('#table_slowMoving').DataTable();
-        }
-        else if ($('#table_overStock').is(':visible')) {
-            dtInstance = $('#table_overStock').DataTable();
-        }
-        else if ($('#table_npd').is(':visible')) {
-            dtInstance = $('#table_npd').DataTable();
-        }
-        else if ($('#table_hero').is(':visible')) {
-            dtInstance = $('#table_hero').DataTable();
-        }
-
-        if (!dtInstance) {
-            modal.alert('No table is currently visible for export.', 'warning');
-            modal.loading(false);
-            return;
-        }
-
-        let pageInfo = dtInstance.page.info();   // { start, length, … }
-        let orderArr = dtInstance.order()[0];    // [ columnIndex, 'asc'/'desc' ]
-        let cols     = dtInstance.settings().init().columns;
-
-        // 3) Build URLSearchParams with both your filters and DataTables params:
         let params = new URLSearchParams();
-
-        // ─── Filters ────────────────────────────────────────────────────────────────
         params.append('itemClass',    selectedItemClass   || '');
         params.append('itemCategory', selectedItemCategory|| '');
-        params.append('type',         selectedType       || '');
+        params.append('type',         Array.isArray(selectedType) ? selectedType.join(',') : (selectedType||''));
         params.append('year',         selectedYear       || '');
         params.append('weekFrom',     selectedWeekFrom   || '');
         params.append('weekTo',       selectedWeekTo     || '');
         params.append('source',       selectedDataSource || '');
 
-        // ─── DataTables paging ──────────────────────────────────────────────────────
-        params.append('limit',  pageInfo.length);  // e.g. 10
-        params.append('offset', pageInfo.start);   // e.g. 0
+        // Loop through all four possible tables
+        let tableTypes = ['slowMoving','overStock','npd','hero'];
+        let tableCount = 0;
+        let firstOrderColumn, firstOrderDir, firstColumnsDef;
 
-        // ─── DataTables ordering ───────────────────────────────────────────────────
-        params.append('order[0][column]', orderArr[0]); // e.g. 2
-        params.append('order[0][dir]',    orderArr[1]); // e.g. 'desc'
+        tableTypes.forEach((type) => {
+            let tableId = `#table_${type}`;
+            if ($(tableId).is(':visible')) {
+                let dt = $(tableId).DataTable();
+                let pageInfo = dt.page.info();   // { start, length, … }
+                let orderArr = dt.order()[0];    // [ columnIndex, 'asc'/'desc' ]
+                let cols     = dt.settings().init().columns;
 
-        // ─── DataTables “columns” array ──────────────────────────────────────────────
-        cols.forEach((colObj, i) => {
-            // colObj.data must match what PHP expects, e.g. 'item', 'item_name', 'sum_total_qty', etc.
-            params.append(`columns[${i}][data]`, colObj.data);
+                // Save the first table’s order/columns so we can also send them at top‐level if needed
+                if (tableCount === 0) {
+                    firstOrderColumn = orderArr[0];
+                    firstOrderDir    = orderArr[1];
+                    firstColumnsDef  = JSON.parse(JSON.stringify(cols));
+                }
+
+                // a) tell PHP which status this chunk belongs to
+                params.append(`typeList[${tableCount}]`, type);
+
+                // b) paging for this table
+                params.append(`limit[${tableCount}]`,  pageInfo.length);
+                params.append(`offset[${tableCount}]`, pageInfo.start);
+
+                // c) ordering for this table
+                params.append(`order[${tableCount}][column]`, orderArr[0]);
+                params.append(`order[${tableCount}][dir]`,    orderArr[1]);
+
+                // d) columns[] array for this table
+                cols.forEach((colObj, colIndex) => {
+                    params.append(`columns[${tableCount}][${colIndex}][data]`, colObj.data);
+                });
+
+                tableCount++;
+            }
         });
 
-        // 4) Pick endpoint based on action
-        let endpoint = action === 'exportPdf'? 'stocks-week-all-store-generate-pdf' : 'stocks-week-all-store-generate-excel';
+        // If none visible, bail out
+        if (tableCount === 0) {
+            modal.alert('No table is currently visible for export.', 'warning');
+            modal.loading(false);
+            return;
+        }
+
+        // If exactly one table was visible, also send its ordering in “top‐level” form
+        //  so that old PHP code (expecting order[0][column]) continues to work.
+        if (tableCount === 1) {
+            // replicate the first table’s order into a top‐level order[0][…]
+            params.append('order[0][column]', firstOrderColumn);
+            params.append('order[0][dir]',    firstOrderDir);
+
+            // also replicate “columns[0][i][data] = …” for the first table as “columns[i][data]”
+            // so that PHP’s existing $columnsParam = $this->request->getVar('columns') still works.
+            firstColumnsDef.forEach((colObj, colIndex) => {
+                params.append(`columns[${colIndex}][data]`, colObj.data);
+            });
+        }
+
+        // Pick endpoint and build URL
+        let endpoint = (action === 'exportPdf')
+                    ? 'stocks-week-all-store-generate-pdf'
+                    : 'stocks-week-all-store-generate-excel';
 
         let url = `${base_url}stocks/${endpoint}?${params.toString()}`;
 
@@ -536,16 +557,46 @@
             <br>End Time: ${formatReadableDate(end_time)}
             <br>Duration: ${duration}
         `;
-        logActivity('Week by Week Stock Data of all Stores', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
+        logActivity('Week by Week Stock Data of all Stores', (action === 'exportPdf') ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
 
-        let iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
+        // Fetch + download
+        let fetchedResponse;
+        fetch(url, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
+            }
+            fetchedResponse = response;
+            return response.blob();
+        })
+        .then(blob => {
+            const cd = fetchedResponse.headers.get('Content-Disposition');
+            const match = cd && /filename="?([^"]+)"/.exec(cd);
+            let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+            const filename = rawName
+                || (action === 'exportPdf'
+                    ? 'Week by Week Stock Data of All Stores.pdf'
+                    : 'Week by Week Stock Data of All Stores.xlsx');
 
-        setTimeout(() => {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(err => {
+            console.error("Download failed:", err);
+            modal.alert("Failed to generate file. Please try again.", "error");
+        })
+        .finally(() => {
             modal.loading(false);
-        }, 10000);
+        });
     }
 
 </script>

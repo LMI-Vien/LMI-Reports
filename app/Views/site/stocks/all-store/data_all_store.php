@@ -216,14 +216,14 @@
                             <button 
                                 class="btn btn-primary mr-2" 
                                 id="ExportPDF"
-                                onclick="handleAction('export_pdf')"
+                                onclick="handleAction('exportPdf')"
                             >
                                 <i class="fas fa-file-export"></i> PDF
                             </button>
                             <button 
                                 class="btn btn-success" 
                                 id="exportButton"
-                                onclick="handleAction('export_excel')"
+                                onclick="handleAction('exportExcel')"
                             >
                                 <i class="fas fa-file-export"></i> Excel
                             </button>

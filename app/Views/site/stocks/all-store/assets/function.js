@@ -1,3 +1,5 @@
+    const start_time = new Date();
+    
     $(document).ready(function() {
         itemClassi.forEach(function (item) {
           $('#itemClass').append(
@@ -70,14 +72,6 @@
             fetchData();
             $('.table-empty').hide();
             }
-    });
-
-
-    $('#previewButton').click(function() {
-    });
-    
-    $('#exportButton').click(function() {
-        //prepareExport();
     });
 
     function fetchData() {
@@ -170,17 +164,6 @@
         });
     }
 
-
-    function handleAction(action) {
-        if (action === 'preview') {
-        } else if (action === 'export') {
-            //prepareExport();
-            modal.alert("Not yet available");
-        } else {
-            modal.alert("Not yet available");
-        }
-    }
-
     function get_data(id, table, parameter) {
         return new Promise((resolve, reject) => {
             let query = id ? " id = " + id : ""
@@ -208,137 +191,225 @@
         })
     }
 
-    async function prepareExport() {
-        let ba = $("#ba_id").val();
-        let area = $("#area_id").val();
-        let brand = $("#brand_id").val();
-        let month = $("#month").val();
-        let week = $("#week").val();
-        let store = $("#store_id").val();
-        let itemClass = $("#item_classi_id").val();
-        let covered_asc = $("[name='coveredASC']:checked").val();
-        
-        let baval = await get_data(ba, 'tbl_brand_ambassador', 'name');
-        let areaval = await get_data(area, 'tbl_area', 'description');
-        let brandval = await get_data(brand, 'tbl_brand', 'brand_description');
-        let monthval = await get_data(month, 'tbl_month', 'month');
-        let weekval = await get_data(week, 'tbl_week', 'name');
-        let itemclassval = await get_data(itemClass, 'tbl_classification', 'item_class_description');
-        let storeval = await get_data(store, 'tbl_store', 'description');
-        
-        let fetchPromises = new Promise((resolve, reject) => {
-            fetchTradeDashboardData({
-                baseUrl: base_url,
-                selectedBa: baval,
-                selectedArea: areaval,
-                selectedBrand: brandval,
-                selectedMonth: monthval,
-                selectedWeek: weekval,
-                selectedStore: storeval,
-                selectedClass: itemclassval,
-                length: 10,
-                start: 0,
-                onSuccess: function(data) {
-                    let newData = data.map(({ ambassador_name, asc_name, brand, item, item_class, item_name, store_name, total_qty }) => ({
-                        "ambassador_name": ambassador_name,
-                        "asc_name": asc_name,
-                        "brand": brand,
-                        "item": item,
-                        "item_class": item_class,
-                        "item_name": item_name,
-                        "store_name": store_name,
-                        "total_qty": total_qty,
-                    }));
-                    resolve(newData);
-                },
-                onError: function(error) {
-                    reject(error);
-                }
-            });
+    function handleAction(action) {
+        modal.loading(true);
+
+        let selectedItemClass       = $('#itemClass').val();       
+        let selectedItemCat         = $('#itemLabelCatId').val();    
+        let selectedInventoryStatus = $('#inventoryStatus').val();  
+        let selectedVendor          = $('#vendorNameId').val();    
+
+        let itemClasses = Array.isArray(selectedItemClass)
+            ? selectedItemClass
+            : (selectedItemClass ? [ selectedItemClass ] : []);
+
+        let statuses = Array.isArray(selectedInventoryStatus)
+            ? selectedInventoryStatus
+            : (selectedInventoryStatus ? [ selectedInventoryStatus ] : []);
+
+        //
+        // 1) Build qs so PHP sees:
+        //    itemClass[]=A&itemClass[]=B
+        // AND inventoryStatus[]=npd&inventoryStatus[]=hero
+        //
+        let qsParts = [];
+
+        // One itemClass[]= per selected class
+        itemClasses.forEach(c => {
+            qsParts.push(`itemClass[]=${encodeURIComponent(c)}`);
         });
 
-        fetchPromises.then((result) => {
-            let formattedData = result.flat();
-
-            const headerData = [
-                ["LIFESTRONG MARKETING INC."],
-                ["Report: Kam1 Dashboard"],
-                ["Date Generated: " + formatDate(new Date())],
-                ["Brand Ambassador: " + (baval ? baval : "ALL")],
-                ["Area: " + (areaval ? areaval : "ALL")],
-                ["Brand: " + (brandval ? brandval : "ALL")],
-                ["Month: " + (monthval ? monthval : "ALL")],
-                ["Week: " + (weekval ? weekval : "ALL")],
-                ["Item Category: " + (itemclassval ? itemclassval : "ALL")],
-                ["Store Name: " + (storeval ? storeval : "ALL")]
-            ];
-
-            exportArrayToCSV(formattedData, `Report: Kam1 Dashboard - ${formatDate(new Date())}`, headerData);
-        }).catch((error) => {
-        })
-    }
-
-    function fetchTradeDashboardData({ 
-        baseUrl, 
-        selectedBa,
-        selectedArea,
-        selectedBrand,
-        selectedMonth,
-        selectedWeek,
-        selectedStore,
-        selectedClass,
-        length,
-        start, 
-        onSuccess, 
-        onError 
-    }) {
-        let allData = [];
-
-        function fetchData(offset) {
-            $.ajax({
-                url: baseUrl + 'stocks/get-data-all-store',
-                type: 'GET',
-                data: {
-                    ba: selectedBa === 0 ? null : selectedBa,
-                    area: selectedArea === 0 ? null : selectedArea,
-                    brand: selectedBrand === 0 ? null : selectedBrand,
-                    month: selectedMonth === 0 ? null : selectedMonth,
-                    week: selectedWeek === 0 ? null : selectedWeek,
-                    store: selectedStore === 0 ? null : selectedStore,
-                    itemcat: selectedClass === 0 ? null : selectedClass,
-                    limit: length,
-                    offset: offset
-                },
-                success: function(response) {
-                    if (response.data && response.data.length) {
-                        allData = allData.concat(response.data);
-
-                        if (response.data.length === length) {
-                            fetchData(offset + length);
-                        } else {
-                            if (onSuccess) onSuccess(allData);
-                        }
-                    } else {
-                        if (onSuccess) onSuccess(allData);
-                    }
-                },
-                error: function(error) {
-                    if (onError) onError(error);
-                }
-            });
+        // itemLabelCat 
+        if (selectedItemCat) {
+            qsParts.push(`itemLabelCat=${encodeURIComponent(selectedItemCat)}`);
         }
 
-        fetchData(start); 
-    }
+        // One inventoryStatus[]= per selected status
+        statuses.forEach(s => {
+            qsParts.push(`inventoryStatus[]=${encodeURIComponent(s)}`);
+        });
 
-    function exportArrayToCSV(data, filename, headerData) {
-        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
+        // vendorName (single)
+        if (selectedVendor) {
+            qsParts.push(`vendorName=${encodeURIComponent(selectedVendor)}`);
+        }
 
-        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
+        let qs = qsParts.join('&');
 
-        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+        //
+        // loop exactly over statuses[] to capture each table’s sort
+        //
+        let extraOrderParams = [];
+        statuses.forEach((statusType, idx) => {
+            let tableId  = `#table_${statusType}`;
+            let dt       = $(tableId).DataTable();
+            let orderArr = dt.order() || [[0, 'desc']];
 
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            let colIdx  = orderArr[0][0];
+            let dir     = orderArr[0][1];
+            let dtCols  = dt.settings().init().columns;
+            let colName = dtCols[colIdx].data; // e.g. "item_class"
 
-        saveAs(blob, filename + ".csv");
+            extraOrderParams.push(`order[${idx}][column]=${colIdx}`);
+            extraOrderParams.push(`order[${idx}][dir]=${dir}`);
+            extraOrderParams.push(`columns[${idx}][data]=${encodeURIComponent(colName)}`);
+
+            extraOrderParams.push(`order[${idx}][colData]=${encodeURIComponent(colName)}`);
+        });
+
+        let orderQueryString = extraOrderParams.join('&');
+
+        let endpoint = (action === 'exportPdf') ? 'all-store-generate-pdf' : 'all-store-generate-excel';
+        let url = `${base_url}stocks/${endpoint}?${qs}&${orderQueryString}`;
+
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
+        const remarks = `
+        Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Overall Stock Data of all Stores', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
+
+        let fetchedResponse; 
+
+        fetch(url, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
+            }
+            fetchedResponse = response; // Save it here for later use
+            return response.blob();
+        })
+        .then(blob => {
+            const contentDisposition = fetchedResponse.headers.get('Content-Disposition');
+            const match = contentDisposition && /filename="?([^"]+)"/.exec(contentDisposition);
+            let rawName = match?.[1] || null;
+
+            if (rawName) {
+                rawName = decodeURIComponent(rawName);
+            }
+            const filename = rawName
+                || (action === 'exportPdf'
+                    ? 'Overall Stock Data of All Stores.pdf'
+                    : 'Overall Stock Data of All Stores.xlsx');
+
+            // 4) Create a blob URL and trigger download
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(err => {
+            console.error("Download failed:", err);
+            modal.alert("Failed to generate file. Please try again.", "error");
+        })
+        .finally(() => {
+            modal.loading(false);
+        });
+
+
+        // kapag nasira yung nasa taas at naka set time out
+        // function handleAction(action) {
+        //     modal.loading(true);
+        //     let selectedItemClass       = $('#itemClass').val();       
+        //     let selectedItemCat         = $('#itemLabelCatId').val();    
+        //     let selectedInventoryStatus = $('#inventoryStatus').val();  
+        //     let selectedVendor          = $('#vendorNameId').val();    
+
+        //     let itemClasses = Array.isArray(selectedItemClass)
+        //         ? selectedItemClass
+        //         : (selectedItemClass ? [ selectedItemClass ] : []);
+
+        //     let statuses = Array.isArray(selectedInventoryStatus)
+        //         ? selectedInventoryStatus
+        //         : (selectedInventoryStatus ? [ selectedInventoryStatus ] : []);
+
+        //     //
+        //     // 1) Build qs so PHP sees:
+        //     //    itemClass[]=A&itemClass[]=B
+        //     // AND inventoryStatus[]=npd&inventoryStatus[]=hero
+        //     //
+        //     let qsParts = [];
+
+        //     // 1a) One itemClass[]= per selected class
+        //     itemClasses.forEach(c => {
+        //         qsParts.push(`itemClass[]=${encodeURIComponent(c)}`);
+        //     });
+
+        //     // 1b) itemLabelCat (single)
+        //     if (selectedItemCat) {
+        //         qsParts.push(`itemLabelCat=${encodeURIComponent(selectedItemCat)}`);
+        //     }
+
+        //     // 1c) One inventoryStatus[]= per selected status
+        //     statuses.forEach(s => {
+        //         qsParts.push(`inventoryStatus[]=${encodeURIComponent(s)}`);
+        //     });
+
+        //     // 1d) vendorName (single)
+        //     if (selectedVendor) {
+        //         qsParts.push(`vendorName=${encodeURIComponent(selectedVendor)}`);
+        //     }
+
+        //     let qs = qsParts.join('&');
+
+        //     //
+        //     // 2) Now loop exactly over statuses[] to capture each table’s sort
+        //     //
+        //     let extraOrderParams = [];
+        //     statuses.forEach((statusType, idx) => {
+        //         let tableId  = `#table_${statusType}`;
+        //         let dt       = $(tableId).DataTable();
+        //         let orderArr = dt.order() || [[0, 'desc']];
+
+        //         let colIdx  = orderArr[0][0];
+        //         let dir     = orderArr[0][1];
+        //         let dtCols  = dt.settings().init().columns;
+        //         let colName = dtCols[colIdx].data; // e.g. "item_class"
+
+        //         extraOrderParams.push(`order[${idx}][column]=${colIdx}`);
+        //         extraOrderParams.push(`order[${idx}][dir]=${dir}`);
+        //         extraOrderParams.push(`columns[${idx}][data]=${encodeURIComponent(colName)}`);
+
+        //         extraOrderParams.push(`order[${idx}][colData]=${encodeURIComponent(colName)}`);
+        //     });
+
+        //     let orderQueryString = extraOrderParams.join('&');
+
+        //     let endpoint = (action === 'exportPdf') ? 'all-store-generate-pdf' : 'all-store-generate-excel';
+        //     let url = `${base_url}stocks/${endpoint}?${qs}&${orderQueryString}`;
+
+        //     const end_time = new Date();
+        //     const duration = formatDuration(start_time, end_time);
+        //     const remarks = `
+        //     Exported Successfully!
+        //         <br>Start Time: ${formatReadableDate(start_time)}
+        //         <br>End Time: ${formatReadableDate(end_time)}
+        //         <br>Duration: ${duration}
+        //     `;
+        //     logActivity(
+        //         'Overall Stock Data of all Stores',
+        //         action === 'exportPdf' ? 'Export PDF' : 'Export Excel',
+        //         remarks, '-', null, null
+        //     );
+
+        //     let iframe = document.createElement('iframe');
+        //     iframe.style.display = 'none';
+        //     iframe.src = url;
+        //     document.body.appendChild(iframe);
+
+        //     setTimeout(function() {
+        //         modal.loading(false);
+        //     }, 5000);
+        // }
     }
