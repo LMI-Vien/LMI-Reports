@@ -173,6 +173,84 @@ class StocksWeekAllStore extends BaseController
 		$pdf->Ln(4);
 	}
 
+	// MULTICELL printFilter
+	// private function printFilter($pdf, $filters) {
+	// 	// — Set font and sizing —
+	// 	$pdf->SetFont('helvetica', '', 9);
+
+	// 	// Compute usable page width (total width minus left/right margins)
+	// 	$pageWidth  = $pdf->getPageWidth();
+	// 	$pageMargin = $pdf->getMargins();
+	// 	$usableWidth = $pageWidth - $pageMargin['left'] - $pageMargin['right'];
+
+	// 	// We want two “rows” of filters (i.e. split the filters array into 2 chunks)
+	// 	$perRow   = ceil(count($filters) / 2);
+	// 	$colWidth = $usableWidth / $perRow;  // width of each column in that row
+
+	// 	// Split $filters into two sub‐arrays (each of length $perRow, except maybe the last)
+	// 	$rows = array_chunk($filters, $perRow, true);
+
+	// 	foreach ($rows as $rowFilters) {
+	// 		// Before we output anything, figure out how tall this row needs to be:
+	// 		//   for each cell, ask TCPDF “how many lines would {$key}: {$value} take,
+	// 		//   if wrapped inside $colWidth?” → then pick the maximum.
+	// 		$currentX = $pdf->GetX();
+	// 		$currentY = $pdf->GetY();
+
+	// 		$cellBaseHeight = 5;    // base height per line
+	// 		$maxLines       = 1;
+
+	// 		foreach ($rowFilters as $key => $value) {
+	// 			$txt = "{$key}: {$value}";
+	// 			// getNumLines() returns “how many lines of text” TCPDF would use
+	// 			// if you put $txt into a cell of width $colWidth.
+	// 			$numLines = $pdf->getNumLines($txt, $colWidth);
+	// 			if ($numLines > $maxLines) {
+	// 				$maxLines = $numLines;
+	// 			}
+	// 		}
+
+	// 		// Now $rowHeight is tall enough to fit the longest‐wrapping cell
+	// 		$rowHeight = $cellBaseHeight * $maxLines;
+
+	// 		// Print every filter (as a MultiCell) at the same Y, stepping X by $colWidth.
+	// 		$x = $currentX;
+	// 		foreach ($rowFilters as $key => $value) {
+	// 			$txt = "{$key}: {$value}";
+
+	// 			$pdf->MultiCell(
+	// 				$colWidth,        // cell width
+	// 				$cellBaseHeight,  // cell height per line
+	// 				$txt,             // the text
+	// 				0,                // no border
+	// 				'L',              // left align
+	// 				false,            // no fill
+	// 				0,                // set ln=0 so it does NOT move down after each call
+	// 				$x,               // x position (absolute)
+	// 				$currentY,        // y position (absolute)
+	// 				true,             // reset pointer after call (important for absolute positioning)
+	// 				0,                // stretch
+	// 				false,            // is HTML?
+	// 				true,             // autopadding
+	// 				$rowHeight,       // maximum height allowed for this cell
+	// 				'T',              // align text to top of this $rowHeight
+	// 				false             // is a “max height” enforced
+	// 			);
+
+	// 			// move right by one column width, ready for next cell
+	// 			$x += $colWidth;
+	// 		}
+
+	// 		// After outputting all columns in this row, move down by rowHeight:
+	// 		$pdf->Ln($rowHeight);
+	// 	}
+
+	// 	$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
+	// 	$pdf->Ln(2);
+	// 	$pdf->Cell(0, 0, '', 'T');
+	// 	$pdf->Ln(4);
+	// }
+
 	// ================================= Header for pdf export =================================
 	private function printHeader($pdf, $title) {
 		$pdf->SetFont('helvetica', '', 12);
@@ -277,6 +355,20 @@ class StocksWeekAllStore extends BaseController
 		$result  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "'id:EQ=$latestYear'", "''", "''");
 		$yearMap = !empty($result) ? $result[0]['year'] : '';
 
+		$itemClassCodes = [];
+		foreach ($itemClassList as $oneClassId) {
+			$result  = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'item_class_code'", 0, 0, "'id:EQ={$oneClassId}'", "''", "''");
+			if (!empty($result) && isset($result[0]['item_class_code'])) {
+				$itemClassCodes[] = $result[0]['item_class_code'];
+			}
+		}
+
+		if (empty($itemClassCodes)) {
+			$itemClassMap = '';  
+		} else {
+			$itemClassMap = implode(', ', $itemClassCodes);
+		}
+
 		if ($source == 2) {
 			$sourceMap = "VMI";
 		} elseif ($source == 3) {
@@ -287,7 +379,7 @@ class StocksWeekAllStore extends BaseController
 
 		$statusLabel = empty($typeList) ? 'None' : implode(', ', $typeList);
 		$filterData  = [
-			'Item Classes'     => empty($itemClassList) ? 'None' : implode(', ', $itemClassList),
+			'Item Classes'     => empty($itemClassMap) ? 'None' : $itemClassMap,
 			'Item Category'    => $itemCatId      ?? 'None',
 			'Inventory Status' => $statusLabel,
 			'Week From'        => $weekStart      ?? 'None',
@@ -534,6 +626,20 @@ class StocksWeekAllStore extends BaseController
 		$result  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "'id:EQ=$latestYear'", "''", "''");
 		$yearMap = !empty($result) ? $result[0]['year'] : '';
 
+		$itemClassCodes = [];
+		foreach ($itemClassList as $oneClassId) {
+			$result  = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'item_class_code'", 0, 0, "'id:EQ={$oneClassId}'", "''", "''");
+			if (!empty($result) && isset($result[0]['item_class_code'])) {
+				$itemClassCodes[] = $result[0]['item_class_code'];
+			}
+		}
+
+		if (empty($itemClassCodes)) {
+			$itemClassMap = '';  
+		} else {
+			$itemClassMap = implode(', ', $itemClassCodes);
+		}
+
 		if ($source == 2) {
 			$sourceMap = "VMI";
 		} elseif ($source == 3) {
@@ -551,7 +657,7 @@ class StocksWeekAllStore extends BaseController
 		$sheet->mergeCells('A2:E2');
 
 		$sheet->setCellValue('A4', 'Item Class:');
-		$sheet->setCellValue('B4', empty($itemClassList) ? 'None' : implode(', ', $itemClassList));
+		$sheet->setCellValue('B4', empty($itemClassMap) ? 'None' : $itemClassMap);
 		$sheet->setCellValue('C4', 'Inventory Status:');
 		$sheet->setCellValue('D4', empty($typeList) ? 'None' : implode(', ', $typeList));
 
