@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use Ramsey\Uuid\Uuid;
 
 class Sync_model extends Model
 {
@@ -32,6 +33,7 @@ class Sync_model extends Model
         $status = 'success';
         $filter = strtolower($where);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_price_code_file_2_lmi");
             while (true) {
                 $sourceData = $this->traccLmiDB->table('pricecodefile2')
                                              ->where('LOWER(prccde)', $filter)
@@ -120,6 +122,7 @@ class Sync_model extends Model
         $status = 'success';
         $filter = strtolower($where);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_price_code_file_2_rgdi");
             while (true) {
                 $sourceData = $this->traccRgdiDB->table('pricecodefile2')
                                              ->where('LOWER(prccde)', $filter)    
@@ -209,6 +212,7 @@ class Sync_model extends Model
         $filter = strtolower($where);
         $brandCode = array_map('strtolower', $brandCode);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_itemfile_lmi");
             while (true) {
                 $builder = $this->traccLmiDB->table('itemfile');
                 $builder->where('LOWER(itmtyp)', $filter);
@@ -316,6 +320,7 @@ class Sync_model extends Model
         $filter = strtolower($where);
         $brandCode = array_map('strtolower', $brandCode);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_itemfile_rgdi");
             while (true) {
                 $builder = $this->traccRgdiDB->table('itemfile');
                 $builder->where('LOWER(itmtyp)', $filter);
@@ -658,6 +663,7 @@ class Sync_model extends Model
         $errorMessage = null;
         $status = 'success';
         try {
+            //$this->sfaDB->query("TRUNCATE TABLE tbl_brand");
             while (true) {
                 $sourceData = $this->traccLmiDB->table('brandfile')
                                                ->limit($batchSize, $offset)
@@ -718,6 +724,7 @@ class Sync_model extends Model
         $errorMessage = null;
         $status = 'success';
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_brand_label_type");
             while (true) {
                 $sourceData = $this->traccLmiDB->table('brand_label_type')
                                                ->limit($batchSize, $offset)
@@ -766,6 +773,7 @@ class Sync_model extends Model
         $errorMessage = null;
         $status = 'success';
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_brand_terms");
             while (true) {
                 $sourceData = $this->traccLmiDB->table('brand_terms')
                                                ->limit($batchSize, $offset)
@@ -816,6 +824,7 @@ class Sync_model extends Model
         $errorMessage = null;
         $status = 'success';
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_classification");
             while (true) {
                 $sourceData = $this->traccLmiDB->table('itemclassfile')
                                                ->limit($batchSize, $offset)
@@ -873,6 +882,7 @@ class Sync_model extends Model
         $status = 'success';
         $filter = strtolower($where);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_cus_payment_group_lmi");
             while (true) {
                 $sourceData = $this->traccLmiDB->table('customergroupfile')
                                                ->where('LOWER(cusgrpcde)', $filter)
@@ -929,6 +939,7 @@ class Sync_model extends Model
         $status = 'success';
         $filter = strtolower($where);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_cus_payment_group_rgdi");
             while (true) {
                 $sourceData = $this->traccRgdiDB->table('customergroupfile')
                                                ->where('LOWER(cusgrpcde)', $filter)
@@ -985,6 +996,7 @@ class Sync_model extends Model
         $status = 'success';
         $filter = strtolower($where);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_customer_lmi");
             while (true) {
                 $sourceData = $this->traccLmiDB->table('customerfile')
                                                ->where('LOWER(prccde)', $filter)
@@ -1070,6 +1082,7 @@ class Sync_model extends Model
         $status = 'success';
         $filter = strtolower($where);
         try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_customer_rgdi");
             while (true) {
                 $sourceData = $this->traccRgdiDB->table('customerfile')
                                                ->where('LOWER(prccde)', $filter)
@@ -1280,16 +1293,289 @@ class Sync_model extends Model
         return ['total_inserted' => $inserted];
     }
 
+    // public function refreshVmiData($week = null, $year = null, $company = null)
+    // {
+
+    //     $whereClause = '';
+
+    //     if ($week && $year && $company) {
+    //         $whereClause = "WHERE tv.week = {$week} AND tv.year = {$year} AND tv.company = {$company}";
+    //     }
+    //     $sql = "
+
+    //         WITH
+    //         dedup_pclmi AS (
+    //             SELECT cusitmcde, MIN(itmcde) AS itmcde
+    //             FROM tbl_price_code_file_2_lmi
+    //             GROUP BY cusitmcde
+    //         ),
+    //         dedup_pcrgdi AS (
+    //             SELECT cusitmcde, MIN(itmcde) AS itmcde
+    //             FROM tbl_price_code_file_2_rgdi
+    //             GROUP BY cusitmcde
+    //         ),
+    //         dedup_pitmlmi AS (
+    //             SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+    //             FROM tbl_itemfile_lmi
+    //             GROUP BY itmcde
+    //         ),
+    //         dedup_itmrgdi AS (
+    //             SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+    //             FROM tbl_itemfile_rgdi
+    //             GROUP BY itmcde
+    //         ),
+    //         aggregated_vmi AS (
+    //             SELECT
+    //                 tv.id,
+    //                 tv.store AS store,
+    //                 tv.area_id,
+    //                 tv.asc_id,
+    //                 tv.brand_ids,
+    //                 tv.brand_ambassador_ids AS ba_ids,
+    //                 tv.ba_types,
+    //                 tv.item,
+    //                 tv.item_name,
+    //                 tv.vmi_status,
+    //                 tv.item_class,
+    //                 tv.supplier,
+    //                 tv.c_group,
+    //                 tv.dept,
+    //                 tv.c_class,
+    //                 tv.sub_class,
+    //                 ROUND(SUM(COALESCE(tv.on_hand, 0)), 2) AS on_hand,
+    //                 ROUND(SUM(COALESCE(tv.in_transit, 0)), 2) AS in_transit,
+    //                 ROUND(SUM(COALESCE(tv.average_sales_unit, 0)), 2) AS average_sales_unit,
+    //                 tv.year,
+    //                 tv.week,
+    //                 tv.company,
+    //                 tv.status
+    //             FROM tbl_vmi tv
+    //             {$whereClause}
+    //             GROUP BY tv.year, tv.week, tv.store, tv.area_id, tv.asc_id, tv.company, tv.item, tv.item_name, tv.item_class
+    //         ),
+    //         final_data AS (
+    //             SELECT
+    //                 avmi.year,
+    //                 avmi.week,
+    //                 avmi.store AS store_id,
+    //                 blt.id AS brand_type_id,
+    //                 bbt.sfa_filter AS brand_term_id,
+    //                 b.id AS tracc_brand_id,
+    //                 avmi.vmi_status,
+    //                 avmi.supplier,
+    //                 GROUP_CONCAT(DISTINCT avmi.ba_ids) AS ba_ids,
+    //                 GROUP_CONCAT(DISTINCT avmi.brand_ids) AS brand_ids,
+    //                 avmi.area_id,
+    //                 avmi.asc_id,
+    //                 avmi.ba_types,
+    //                 avmi.c_group,
+    //                 avmi.dept,
+    //                 avmi.c_class,
+    //                 avmi.sub_class,
+    //                 avmi.company,
+
+    //                 avmi.on_hand AS on_hand,
+    //                 avmi.in_transit AS in_transit,
+    //                 avmi.average_sales_unit AS average_sales_unit,
+    //                 avmi.on_hand + avmi.in_transit AS total_qty,
+    //                 GROUP_CONCAT(DISTINCT CASE WHEN avmi.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
+    //                 CASE WHEN avmi.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
+    //                 CASE WHEN avmi.company = '2' THEN pitmlmi.itmclacde ELSE itmrgdi.itmclacde END AS itmclacde,
+    //                 -- CONCAT(MAX(s.code), ' - ', s.description) AS store_name,
+    //                 avmi.item AS item,
+    //                 avmi.item_name AS item_name,
+    //                 avmi.item_class
+    //             FROM aggregated_vmi avmi
+    //             -- LEFT JOIN tbl_store s. ON avmi.store = s.id
+    //             -- to check if sku_Code = item
+    //             LEFT JOIN dedup_pclmi pclmi ON avmi.item = pclmi.cusitmcde AND avmi.company = '2'
+    //             LEFT JOIN dedup_pcrgdi pcrgdi ON avmi.item = pcrgdi.cusitmcde AND avmi.company != '2'
+
+    //             LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde AND avmi.company = '2'
+    //             LEFT JOIN dedup_itmrgdi itmrgdi ON pcrgdi.itmcde = itmrgdi.itmcde AND avmi.company != '2'
+
+    //             LEFT JOIN tbl_brand b ON 
+    //                 (avmi.company = '2' AND pitmlmi.brncde = b.brand_code) OR
+    //                 (avmi.company != '2' AND itmrgdi.brncde = b.brand_code)
+
+    //             LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
+    //             LEFT JOIN tbl_brand_terms bbt ON b.terms_id = bbt.id
+
+    //             GROUP BY
+    //                 avmi.year,
+    //                 avmi.week,
+    //                 avmi.store,
+    //                 avmi.area_id,
+    //                 avmi.asc_id,
+    //                 avmi.company,
+    //                 avmi.item,
+    //                 avmi.item_name,
+    //                 avmi.item_class,
+    //                 blt.id,
+    //                 bbt.sfa_filter,
+    //                 brncde,
+    //                 b.id
+    //         )
+    //         SELECT * FROM final_data
+    //     ";
+
+    //     $query = $this->sfaDB->query($sql);
+    //     $allData = $query->getResultArray();
+
+    //     if (!$company || !$week || !$year) {
+    //         $this->sfaDB->table('tbl_vmi_pre_aggregated_ba_ids')->truncate();
+    //         $this->sfaDB->table('tbl_vmi_pre_aggregated_brand_ids')->truncate();
+    //         $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->truncate();
+    //     }
+
+    //     $batchSize = 10000;
+    //     $chunks = array_chunk($allData, $batchSize);
+
+    //     $totalInserted = 0;
+    //     $uuidMap = [];
+
+    //     foreach ($chunks as $chunk) {
+    //         $mainBatch = [];
+
+    //         foreach ($chunk as $row) {
+    //             $uuid = Uuid::uuid4()->toString();
+    //             $uuidMap[$uuid] = $row;
+
+    //             $mainBatch[] = [
+    //                 'uuid' => $uuid,
+    //                 'vmi_status' => $row['vmi_status'],
+    //                 'supplier' => $row['supplier'],
+    //                 'store_id' => $row['store_id'],
+    //                 'area_id' => $row['area_id'],
+    //                 'asc_id' => $row['asc_id'],
+    //                 //'store_code' => $row['store_code'],
+    //                 //'store_name' => $row['store_name'],
+    //                 'ba_types' => $row['ba_types'],
+    //                 'c_group' => $row['c_group'],
+    //                 'dept' => $row['dept'],
+    //                 'c_class' => $row['c_class'],
+    //                 'sub_class' => $row['sub_class'],
+    //                 'on_hand' => $row['on_hand'],
+    //                 'in_transit' => $row['in_transit'],
+    //                 'total_qty' => $row['total_qty'],
+    //                 'itmcde' => $row['itmcde'],
+    //                 'brncde' => $row['brncde'],
+    //                 'itmclacde' => $row['itmclacde'],
+    //                 'tracc_brand_id' => $row['tracc_brand_id'],
+    //                 'cusitmcde' => $row['item'],
+    //                 'brand_type_id' => $row['brand_type_id'],
+    //                 'brand_term_id' => $row['brand_term_id'],
+    //                 'item' => $row['item'],
+    //                 'item_name' => $row['item_name'],
+    //                 'item_class' => $row['item_class'],
+    //                 'average_sales_unit' => $row['average_sales_unit'],
+    //                 'ba_deployment_dates' => '',
+    //                 'year' => $row['year'],
+    //                 'week' => $row['week'],
+    //                 'company' => $row['company']
+    //             ];
+    //         }
+
+    //         // Insert this chunk
+    //         $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->insertBatch($mainBatch);
+    //         $totalInserted += count($mainBatch);
+    //     }
+
+    //     // Get inserted IDs
+    //     $uuids = array_keys($uuidMap);
+    //     $insertedRecords = $this->sfaDB->table('tbl_vmi_pre_aggregated_data')
+    //         ->select('id, uuid')
+    //         ->whereIn('uuid', $uuids)
+    //         ->get()
+    //         ->getResultArray();
+
+    //     $uuidToId = [];
+    //     foreach ($insertedRecords as $rec) {
+    //         $uuidToId[$rec['uuid']] = $rec['id'];
+    //     }
+
+    //     // Build BA and Brand batches
+    //     $baBatch = [];
+    //     $brandBatch = [];
+
+    //     foreach ($uuidMap as $uuid => $row) {
+    //         $currentId = $uuidToId[$uuid] ?? null;
+    //         if (!$currentId) continue;
+
+    //         $baIds = array_filter(array_map('trim', explode(',', $row['ba_ids'] ?? '')));
+    //         $brandIds = array_filter(array_map('trim', explode(',', $row['brand_ids'] ?? '')));
+
+    //         foreach ($baIds as $baId) {
+    //             if (is_numeric($baId)) {
+    //                 $baBatch[] = [
+    //                     'pre_aggregated_id' => $currentId,
+    //                     'ba_id' => (int)$baId
+    //                 ];
+    //             }
+    //         }
+
+    //         foreach ($brandIds as $brandId) {
+    //             if (is_numeric($brandId)) {
+    //                 $brandBatch[] = [
+    //                     'pre_aggregated_id' => $currentId,
+    //                     'brand_id' => (int)$brandId
+    //                 ];
+    //             }
+    //         }
+    //     }
+
+    //     // Chunk insert into linking tables
+    //     $chunkSize = 5000;
+
+    //     if (!empty($baBatch)) {
+    //         foreach (array_chunk($baBatch, $chunkSize) as $baChunk) {
+    //             $this->sfaDB->table('tbl_vmi_pre_aggregated_ba_ids')->insertBatch($baChunk);
+    //         }
+    //     }
+
+    //     if (!empty($brandBatch)) {
+    //         foreach (array_chunk($brandBatch, $chunkSize) as $brandChunk) {
+    //             $this->sfaDB->table('tbl_vmi_pre_aggregated_brand_ids')->insertBatch($brandChunk);
+    //         }
+    //     }
+
+    //     // Optional: clean up UUIDs to avoid clutter
+    //     $this->sfaDB->table('tbl_vmi_pre_aggregated_data')
+    //     ->whereIn('uuid', $uuids)
+    //     ->set(['uuid' => null])
+    //     ->update();
+
+    //     return [
+    //         'total_inserted' => count($allData),
+    //         'ba_links_inserted' => count($baBatch),
+    //         'brand_links_inserted' => count($brandBatch)
+    //     ];
+    // }
+
     public function refreshVmiData($week = null, $year = null, $company = null)
     {
+        $builder = $this->sfaDB->table('tbl_vmi');
+
+        $where = [];
+        $bindings = [];
+
+        if ($week !== null && $year !== null && $company !== null) {
+            $where[] = "tv.week = ?";
+            $bindings[] = $week;
+
+            $where[] = "tv.year = ?";
+            $bindings[] = $year;
+
+            $where[] = "tv.company = ?";
+            $bindings[] = $company;
+        }
 
         $whereClause = '';
-
-        if ($week && $year && $company) {
-            $whereClause = "WHERE tv.week = {$week} AND tv.year = {$year} AND tv.company = {$company}";
+        if (!empty($where)) {
+            $whereClause = "WHERE " . implode(' AND ', $where);
         }
-        $sql = "
 
+        $sql = "
             WITH
             dedup_pclmi AS (
                 SELECT cusitmcde, MIN(itmcde) AS itmcde
@@ -1314,7 +1600,7 @@ class Sync_model extends Model
             aggregated_vmi AS (
                 SELECT
                     tv.id,
-                    tv.store AS store_id,
+                    tv.store,
                     tv.area_id,
                     tv.asc_id,
                     tv.brand_ids,
@@ -1338,20 +1624,20 @@ class Sync_model extends Model
                     tv.status
                 FROM tbl_vmi tv
                 {$whereClause}
-                GROUP BY tv.year, tv.week, tv.store, tv.brand_ambassador_ids, tv.brand_ids, tv.area_id, tv.asc_id, tv.company, tv.item, tv.ba_types
+                GROUP BY tv.id
             ),
             final_data AS (
                 SELECT
                     avmi.year,
                     avmi.week,
-                    avmi.store_id,
+                    avmi.store AS store_id,
                     blt.id AS brand_type_id,
                     bbt.sfa_filter AS brand_term_id,
                     b.id AS tracc_brand_id,
                     avmi.vmi_status,
                     avmi.supplier,
-                    GROUP_CONCAT(DISTINCT avmi.ba_ids) AS ba_ids,
-                    GROUP_CONCAT(DISTINCT avmi.brand_ids) AS brand_ids,
+                    GROUP_CONCAT(DISTINCT avmi.ba_ids SEPARATOR ',') AS ba_ids,
+                    GROUP_CONCAT(DISTINCT avmi.brand_ids SEPARATOR ',') AS brand_ids,
                     avmi.area_id,
                     avmi.asc_id,
                     avmi.ba_types,
@@ -1361,69 +1647,161 @@ class Sync_model extends Model
                     avmi.sub_class,
                     avmi.company,
                     s.code AS store_code,
-                    SUM(avmi.on_hand) AS on_hand,
-                    SUM(avmi.in_transit) AS in_transit,
-                    SUM(avmi.average_sales_unit) AS average_sales_unit,
-                    SUM(avmi.on_hand) + SUM(avmi.in_transit) AS total_qty,
-                    GROUP_CONCAT(DISTINCT CASE WHEN avmi.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
+                    avmi.on_hand,
+                    avmi.in_transit,
+                    avmi.average_sales_unit,
+                    avmi.on_hand + avmi.in_transit AS total_qty,
+                    GROUP_CONCAT(DISTINCT CASE WHEN avmi.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END SEPARATOR ',') AS itmcde,
                     CASE WHEN avmi.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
                     CASE WHEN avmi.company = '2' THEN pitmlmi.itmclacde ELSE itmrgdi.itmclacde END AS itmclacde,
                     CONCAT(MAX(s.code), ' - ', s.description) AS store_name,
-                    avmi.item AS item,
-                    avmi.item_name AS item_name,
+                    avmi.item,
+                    avmi.item_name,
                     avmi.item_class
                 FROM aggregated_vmi avmi
-                LEFT JOIN tbl_store s ON avmi.store_id = s.id
-                -- to check if sku_Code = item
+                LEFT JOIN tbl_store s ON avmi.store = s.id
                 LEFT JOIN dedup_pclmi pclmi ON avmi.item = pclmi.cusitmcde AND avmi.company = '2'
                 LEFT JOIN dedup_pcrgdi pcrgdi ON avmi.item = pcrgdi.cusitmcde AND avmi.company != '2'
-
                 LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde AND avmi.company = '2'
                 LEFT JOIN dedup_itmrgdi itmrgdi ON pcrgdi.itmcde = itmrgdi.itmcde AND avmi.company != '2'
-
                 LEFT JOIN tbl_brand b ON 
                     (avmi.company = '2' AND pitmlmi.brncde = b.brand_code) OR
                     (avmi.company != '2' AND itmrgdi.brncde = b.brand_code)
-
                 LEFT JOIN tbl_brand_label_type blt ON b.category_id = blt.id
                 LEFT JOIN tbl_brand_terms bbt ON b.terms_id = bbt.id
-
                 GROUP BY
-                    avmi.year,
-                    avmi.week,
-                    avmi.store_id,
-                    avmi.area_id,
-                    avmi.asc_id,
-                    avmi.company,
-                    avmi.item,
-                    avmi.item_class,
-                    blt.id,
-                    bbt.sfa_filter,
-                    brncde,
-                    b.id
+                    avmi.id
             )
             SELECT * FROM final_data
         ";
 
-        $query = $this->sfaDB->query($sql);
+        $query = $this->sfaDB->query($sql, $bindings);
         $allData = $query->getResultArray();
 
+        // Truncate only on full refresh
         if (!$company || !$week || !$year) {
+            $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=0;');
+            $this->sfaDB->table('tbl_vmi_pre_aggregated_ba_ids')->truncate();
+            $this->sfaDB->table('tbl_vmi_pre_aggregated_brand_ids')->truncate();
             $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->truncate();
+            $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=1;');
         }
-        //$this->db->query("TRUNCATE TABLE tbl_vmi_pre_aggregated_data");
 
         $batchSize = 10000;
         $chunks = array_chunk($allData, $batchSize);
 
+        $uuidMap = [];
+        $totalInserted = 0;
+
         foreach ($chunks as $chunk) {
-            $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->insertBatch($chunk);
+            $mainBatch = [];
+
+            foreach ($chunk as $row) {
+                $uuid = Uuid::uuid4()->toString();
+                $uuidMap[$uuid] = $row;
+
+                $mainBatch[] = [
+                    'uuid' => $uuid,
+                    'vmi_status' => $row['vmi_status'],
+                    'supplier' => $row['supplier'],
+                    'store_id' => $row['store_id'],
+                    'area_id' => $row['area_id'],
+                    'asc_id' => $row['asc_id'],
+                    'store_code' => $row['store_code'],
+                    'store_name' => $row['store_name'],
+                    'ba_types' => $row['ba_types'],
+                    'ba_ids' => $row['ba_types'],
+                    'brand_ids' => $row['brand_ids'],
+                    'c_group' => $row['c_group'],
+                    'dept' => $row['dept'],
+                    'c_class' => $row['c_class'],
+                    'sub_class' => $row['sub_class'],
+                    'on_hand' => $row['on_hand'],
+                    'in_transit' => $row['in_transit'],
+                    'total_qty' => $row['total_qty'],
+                    'itmcde' => $row['itmcde'],
+                    'brncde' => $row['brncde'],
+                    'itmclacde' => $row['itmclacde'],
+                    'tracc_brand_id' => $row['tracc_brand_id'],
+                    'cusitmcde' => $row['item'],
+                    'brand_type_id' => $row['brand_type_id'],
+                    'brand_term_id' => $row['brand_term_id'],
+                    'item' => $row['item'],
+                    'item_name' => $row['item_name'],
+                    'item_class' => $row['item_class'],
+                    'average_sales_unit' => $row['average_sales_unit'],
+                    'ba_deployment_dates' => '',
+                    'year' => $row['year'],
+                    'week' => $row['week'],
+                    'company' => $row['company']
+                ];
+            }
+
+            $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->insertBatch($mainBatch);
+            $totalInserted += count($mainBatch);
         }
 
+        // Map UUIDs back to inserted IDs
+        $uuids = array_keys($uuidMap);
+        $insertedRecords = $this->sfaDB->table('tbl_vmi_pre_aggregated_data')
+            ->select('id, uuid')
+            ->whereIn('uuid', $uuids)
+            ->get()
+            ->getResultArray();
+
+        $uuidToId = array_column($insertedRecords, 'id', 'uuid');
+
+        $baBatch = [];
+        $brandBatch = [];
+
+        foreach ($uuidMap as $uuid => $row) {
+            $id = $uuidToId[$uuid] ?? null;
+            if (!$id) continue;
+
+            $baIds = array_filter(array_map('trim', explode(',', $row['ba_ids'] ?? '')));
+            $brandIds = array_filter(array_map('trim', explode(',', $row['brand_ids'] ?? '')));
+
+            foreach ($baIds as $baId) {
+                if (is_numeric($baId)) {
+                    $baBatch[] = [
+                        'pre_aggregated_id' => $id,
+                        'ba_id' => (int)$baId
+                    ];
+                }
+            }
+
+            foreach ($brandIds as $brandId) {
+                if (is_numeric($brandId)) {
+                    $brandBatch[] = [
+                        'pre_aggregated_id' => $id,
+                        'brand_id' => (int)$brandId
+                    ];
+                }
+            }
+        }
+
+        // Chunked insert
+        foreach (array_chunk($baBatch, 5000) as $baChunk) {
+            $this->sfaDB->table('tbl_vmi_pre_aggregated_ba_ids')->insertBatch($baChunk);
+        }
+
+        foreach (array_chunk($brandBatch, 5000) as $brandChunk) {
+            $this->sfaDB->table('tbl_vmi_pre_aggregated_brand_ids')->insertBatch($brandChunk);
+        }
+
+        // Clear UUIDs
+        $this->sfaDB->table('tbl_vmi_pre_aggregated_data')
+            ->whereIn('uuid', $uuids)
+            ->set(['uuid' => null])
+            ->update();
+
         return [
-            'total_inserted' => count($allData)
+            'total_inserted' => $totalInserted,
+            'ba_links_inserted' => count($baBatch),
+            'brand_links_inserted' => count($brandBatch)
         ];
     }
+
 
     public function refreshVmiWoWData($dataHeaderId = null, $week = null, $year = null)
     {
@@ -1550,10 +1928,12 @@ class Sync_model extends Model
     {
         $scanResult = $this->refreshScanData();
         $vmiResult = $this->refreshVmiData();
+        $vmiWowResult = $this->refreshVmiWoWData();
 
         return [
             'scan' => $scanResult,
             'vmi'  => $vmiResult,
+            'vmiwow'  => $vmiWowResult,
         ];
     }
 

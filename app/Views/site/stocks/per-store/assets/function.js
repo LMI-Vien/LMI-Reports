@@ -101,6 +101,9 @@
                     if(data[0].code){ 
                         $("#ascName").val(data[0].code+' - '+data[0].asc_description);
                         $("#ascNameId").val(data[0].asc_id);       
+                    }else{
+                        $("#ascName").val('');
+                        $("#ascNameId").val('');
                     }             
                 }
             })
@@ -125,10 +128,15 @@
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
                 let data = JSON.parse(res);
+                if(parseInt($('#brandAmbassadorId').val()) === -5 || parseInt($('#brandAmbassadorId').val()) === -6){
+                    $("#storeName").val('');
+                    $("#storeNameId").val('');
+                    return;
+                }
                 if(data.length > 0){
                     if(data[0].code){
                         $("#storeName").val(data[0].code+' - '+data[0].description);
-                        $("#storeNameId").val(data[0].id);      
+                        $("#storeNameId").val(data[0].code);      
                     }             
                 }
             })
@@ -272,47 +280,59 @@
         });
     }
 
-
     function initializeTable(tableId, type, selectedArea, selectedAsc, selectedBaType, selectedBa, selectedStore, selectedBrands) {
         $(tableId).closest('.table-responsive').show(); 
 
         const columns = [
-            { data: 'itmcde' },
-            { data: 'item' },
-            { data: 'item_name' }
+            { data: 'itmcde' },  
+            { data: 'item' },       
+            { data: 'item_name' }    
         ];
 
         if (type !== 'hero') {
-            columns.push({ data: 'sum_total_qty' });
+            columns.push({ data: 'sum_total_qty', render: formatTwoDecimals });
         }
 
-        let defaultSortColumn = 1;
-        if (type !== 'hero') {
-            defaultSortColumn = 3;
+        let defaultSortColumn = type === 'hero' ? 0 : columns.length - 1;
+        let columnDefs = [];
+
+        if (type === 'hero') {
+            columnDefs.push({
+                targets: [1],
+                orderable: false
+            });
+        } else {
+            const lastColumnIndex = columns.length - 1;
+            const nonSortableTargets = Array.from({ length: columns.length }, (_, i) => i)
+                .filter(i => i !== 0 && i !== lastColumnIndex);
+            
+            columnDefs.push({
+                targets: nonSortableTargets,
+                orderable: false
+            });
         }
-        console.log(defaultSortColumn);
+
         $(tableId).DataTable({
             destroy: true,
             ajax: {
                 url: base_url + 'stocks/get-data-per-store',
                 type: 'POST',
                 data: function (d) {
-                    d.area = selectedArea === "" ? null : selectedArea;
-                    d.asc = selectedAsc === "" ? null : selectedAsc;
-                    d.baType = selectedBaType === "" ? null : selectedBaType;
-                    d.ba = selectedBa === "" ? null : selectedBa;
-                    d.store = selectedStore === "" ? null : selectedStore;
-                    d.brands = selectedBrands === [] ? null : selectedBrands;
+                    d.area = selectedArea || null;
+                    d.asc = selectedAsc || null;
+                    d.baType = selectedBaType || null;
+                    d.ba = selectedBa || null;
+                    d.store = selectedStore || null;
+                    d.brands = selectedBrands.length ? selectedBrands : null;
                     d.type = type;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
-                dataSrc: function(json) {
-                    return json.data.length ? json.data : [];
-                }
+                dataSrc: json => json.data || []
             },
             columns: columns,
             order: [[defaultSortColumn, 'desc']],
+            columnDefs: columnDefs,
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
@@ -321,6 +341,10 @@
             colReorder: true,
             lengthChange: false
         });
+    }
+
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
     }
 
     function handleAction(action) {

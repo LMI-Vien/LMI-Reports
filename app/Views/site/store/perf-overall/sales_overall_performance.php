@@ -324,6 +324,16 @@
                 { data: 'growth' },
                 { data: 'sob' }
             ].filter(Boolean),
+            columnDefs: [
+                {
+                     targets: [1, 2, 3],
+                    orderable: false
+                },
+                {
+                    targets: [0, 4, 5],
+                    orderable: true
+                }
+            ],
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,

@@ -269,7 +269,6 @@
         $('.table-empty').show();
     });
 
-
     $(document).on('click', '#refreshButton', function () {
         const fields = [
             { input: '#ItemClass', target: '#ItemClass' },
@@ -330,15 +329,24 @@
             return;
         }
 
-        if (parseInt(weekFromFilter) <= parseInt(weekToFilter)) {
-        } else {
+        const fromWeek = parseInt(weekFromFilter);
+        const toWeek = parseInt(weekToFilter);
+
+        if (fromWeek > toWeek) {
             modal.alert('Invalid Week Range!', "warning");
+            return;
+        }
+
+        const weekDifference = toWeek - fromWeek + 1;
+        if (weekDifference > 12) {
+            modal.alert('You can only select a maximum range of 12 weeks.', "warning");
             return;
         }
 
         const dataSourceText = $('#dataSource').find('option:selected').text();
         const yearFilterText = $('#year').find('option:selected').text();
-        $('#sourceDate').text(dataSourceText+' - '+yearFilterText+' week: '+weekFromFilter+' - '+weekToFilter);
+        $('#sourceDate').text(dataSourceText + ' - ' + yearFilterText + ' week: ' + weekFromFilter + ' - ' + weekToFilter);
+
         if (counter >= 1) {
             fetchData();
             $('.table-empty').hide();
@@ -395,7 +403,7 @@
         }
         const weekFrom = parseInt(selectedWeekFrom, 10);
         const weekTo = parseInt(selectedWeekTo, 10);
-        // Reset week headers
+
         const $headerRow = $(`${tableId}_headers`);
         $headerRow.find("th.week-column").remove();
 
@@ -415,7 +423,9 @@
                         data: `week_${week}`,
                         title: `Week ${week}`,
                         defaultContent: '-',
-                        render: data => data ?? '0'
+                        render: function (data) {
+                            return formatTwoDecimals(data);
+                        }
                     });
                 }
             }
@@ -448,7 +458,13 @@
             columns: baseColumns.concat(dynamicColumns),
             order: type !== 'hero' && weekTo
                 ? [[baseColumns.length, 'desc']]
-                : [[1, 'desc']], 
+                : [[2, 'desc']], 
+            columnDefs: [
+                {
+                    targets: [0, 1],
+                    orderable: false
+                }
+            ],
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
@@ -461,6 +477,9 @@
         });
     }
 
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+    }
 
     function handleAction(action) {
         modal.loading(true);

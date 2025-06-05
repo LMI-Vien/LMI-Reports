@@ -122,7 +122,7 @@ class Dashboard_model extends Model
 	            vmi.brand_type_id, 
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
-	            FORMAT(SUM(vmi.total_qty), 2) AS sum_total_qty,
+	            SUM(vmi.total_qty) AS sum_total_qty,
 	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
 	            FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
 	            ROUND(
@@ -185,6 +185,189 @@ class Dashboard_model extends Model
 	        'data' => $data
 	    ];
 	}
+
+	// public function dataPerStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null)
+	// {
+	// 	$baType = ($baType !== null) ? strval($baType) : null;
+	// 	$storeFilterConditions = [];
+
+	// 	if (!empty($baId)) {
+	// 		$baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
+	// 		foreach ($baIds as $id) {
+	// 			$storeFilterConditions[] = "EXISTS (
+	// 				SELECT 1 FROM tbl_vmi_pre_aggregated_ba_ids b
+	// 				WHERE b.pre_aggregated_id = v.id AND b.ba_id = $id
+	// 			)";
+	// 		}
+	// 	}
+
+	// 	$storeFilterConditionsVmi = [];
+
+	// 	if (!empty($brands)) {
+	// 		$brands = array_map('trim', $brands);
+	// 		foreach ($brands as $brand) {
+	// 			$escaped = db_connect()->escape($brand);
+	// 			$storeFilterConditionsVmi[] = "EXISTS (
+	// 				SELECT 1 FROM tbl_vmi_pre_aggregated_brand_ids bb
+	// 				WHERE bb.pre_aggregated_id = vmi.id AND bb.brand_id = $escaped
+	// 			)";
+	// 		}
+	// 	}
+
+	// 	if (!empty($ItemClasses)) {
+	// 		$ItemClasses = array_map('trim', $ItemClasses);
+	// 		$ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class)", $ItemClasses);
+	// 		$storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
+	// 	}
+
+	// 	$allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
+	// 	$allowedOrderDirections = ['ASC', 'DESC'];
+
+	// 	if (!in_array($orderByColumn, $allowedOrderColumns)) $orderByColumn = 'sum_total_qty';
+	// 	if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) $orderDirection = 'DESC';
+
+	// 	$storeFilterSQL = !empty($storeFilterConditions) ? 'WHERE ' . implode(' AND ', $storeFilterConditions) : '';
+	// 	$storeFilterSQLVmi = !empty($storeFilterConditionsVmi) ? ' AND ' . implode(' AND ', $storeFilterConditionsVmi) : '';
+
+	// 	$baTypeFilter = ($baType !== null && $baType != 3) ? ' AND v.ba_types = ?' : '';
+	// 	$baTypeParams = ($baType !== null && $baType != 3) ? [$baType] : [];
+
+	// 	$companyIdFilter = ($companyId !== null && $companyId != 3) ? ' AND v.company = ?' : '';
+	// 	$companyIdParams = ($companyId !== null && $companyId != 3) ? [$companyId] : [];
+
+	// 	$storeFilter = ($storeId !== null) ? ' AND v.store_id = ?' : '';
+	// 	$storeParams = ($storeId !== null) ? [$storeId] : [];
+
+	// 	$baTypeFilterVmi = str_replace('v.', 'vmi.', $baTypeFilter);
+	// 	$companyIdFilterVmi = str_replace('v.', 'vmi.', $companyIdFilter);
+	// 	$storeFilterVmi = str_replace('v.', 'vmi.', $storeFilter);
+
+	// 	$ascIdFilter = $ascIdFilterVmi = '';
+	// 	$ascIdParams = [];
+
+	// 	if ($ascId !== null) {
+	// 		$ascIdFilter = ' AND v.asc_id = ?';
+	// 		$ascIdFilterVmi = ' AND vmi.asc_id = ?';
+	// 		$ascIdParams = [$ascId];
+	// 	}
+
+	// 	$itemCatFilter = $itemCatFilterVmi = '';
+	// 	$itemCatParams = [];
+
+	// 	if ($itemCat !== null) {
+	// 		$itemCatFilter = ' AND v.itmclacde = ?';
+	// 		$itemCatFilterVmi = ' AND vmi.itmclacde = ?';
+	// 		$itemCatParams = [$itemCat];
+	// 	}
+
+	// 	$areaIdFilter = $areaIdFilterVmi = '';
+	// 	$areaIdParams = [];
+
+	// 	if ($areaId !== null) {
+	// 		$areaIdFilter = ' AND v.area_id = ?';
+	// 		$areaIdFilterVmi = ' AND vmi.area_id = ?';
+	// 		$areaIdParams = [$areaId];
+	// 	}
+
+	// 	$sql = "
+	// 		WITH filtered_stores AS (
+	// 			SELECT DISTINCT v.store_id
+	// 			FROM tbl_vmi_pre_aggregated_data v
+	// 			WHERE v.week = ?
+	// 			  AND v.year = ?
+	// 			  {$ascIdFilter}
+	// 			  {$areaIdFilter}
+	// 			  {$itemCatFilter}
+	// 			  $baTypeFilter
+	// 			  $companyIdFilter
+	// 			  $storeFilter
+	// 		),
+	// 		store_matches AS (
+	// 			SELECT fs.store_id
+	// 			FROM filtered_stores fs
+	// 			JOIN tbl_vmi_pre_aggregated_data v ON fs.store_id = v.store_id
+	// 			$storeFilterSQL
+	// 			GROUP BY fs.store_id
+	// 		)
+	// 		SELECT 
+	// 			vmi.item,
+	// 			vmi.item_name,
+	// 			vmi.area_id,
+	// 			vmi.itmcde,
+	// 			vmi.item_class,
+	// 			vmi.brand_type_id, 
+	// 			GROUP_CONCAT(DISTINCT vmi.company) AS company,
+	// 			COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
+	// 			FORMAT(SUM(vmi.total_qty), 2) AS sum_total_qty,
+	// 			SUM(vmi.average_sales_unit) AS sum_ave_sales,
+	// 			FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
+	// 			ROUND(
+	// 				CASE 
+	// 					WHEN SUM(vmi.average_sales_unit) > 0 
+	// 					THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
+	// 					ELSE 0 
+	// 				END, 2
+	// 			) AS weeks,
+	// 			(
+	// 				SELECT GROUP_CONCAT(DISTINCT ba_id)
+	// 				FROM tbl_vmi_pre_aggregated_ba_ids
+	// 				WHERE pre_aggregated_id = vmi.id
+	// 			) AS ba_ids,
+	// 			GROUP_CONCAT(DISTINCT CASE WHEN vmi.ba_types IS NOT NULL AND vmi.ba_types != '' THEN vmi.ba_types END) AS ba_types,
+	// 			(
+	// 				SELECT GROUP_CONCAT(DISTINCT brand_id)
+	// 				FROM tbl_vmi_pre_aggregated_brand_ids
+	// 				WHERE pre_aggregated_id = vmi.id
+	// 			) AS brand_ids,
+	// 			GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
+	// 			GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids,
+	// 			COUNT(*) OVER() AS total_records
+	// 		FROM tbl_vmi_pre_aggregated_data vmi
+	// 		JOIN store_matches sm ON vmi.store_id = sm.store_id
+	// 		WHERE vmi.week = ?
+	// 		  AND vmi.year = ?
+	// 		  {$ascIdFilterVmi}
+	// 		  {$areaIdFilterVmi}
+	// 		  {$itemCatFilterVmi}
+	// 		  $baTypeFilterVmi
+	// 		  $companyIdFilterVmi
+	// 		  $storeFilterVmi
+	// 		  $storeFilterSQLVmi
+	// 		GROUP BY vmi.item
+	// 		HAVING weeks > ?
+	// 		   AND (? IS NULL OR weeks <= ?)
+	// 		ORDER BY {$orderByColumn} {$orderDirection}
+	// 		LIMIT ? OFFSET ?
+	// 	";
+
+	// 	$params = [];
+
+	// 	$params[] = $week;
+	// 	$params[] = $year;
+	// 	if ($ascId !== null) $params[] = $ascId;
+	// 	if ($areaId !== null) $params[] = $areaId;
+	// 	if ($itemCat !== null) $params[] = $itemCat;
+	// 	$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
+
+	// 	$params[] = $week;
+	// 	$params[] = $year;
+	// 	if ($ascId !== null) $params[] = $ascId;
+	// 	if ($areaId !== null) $params[] = $areaId;
+	// 	if ($itemCat !== null) $params[] = $itemCat;
+	// 	$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
+
+	// 	$params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
+
+	// 	$query = $this->db->query($sql, $params);
+	// 	$data = $query->getResult();
+	// 	$totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
+
+	// 	return [
+	// 		'total_records' => $totalRecords,
+	// 		'data' => $data
+	// 	];
+	// }
+
 
 	public function getItemClassNPDHEROData($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null) {
 
@@ -316,7 +499,7 @@ class Dashboard_model extends Model
 	            vmi.brand_type_id, 
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
-	            FORMAT(SUM(vmi.total_qty), 2) AS sum_total_qty,
+	            SUM(vmi.total_qty) AS sum_total_qty,
 	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
 	            FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
 	            ROUND(
@@ -1672,7 +1855,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -1760,7 +1943,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsWow[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -1847,11 +2030,11 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['itmcde', 'sum_total_qty', 'item', 'item_name'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
-	        $orderByColumn = 'week_'.$weekEnd;
+	        $orderByColumn = 'itmcde';
 	    }
 
 	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
@@ -1944,11 +2127,11 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12'];
+	    $allowedOrderColumns = ['itmcde', 'sum_total_qty', 'item', 'item_name'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
-	        $orderByColumn = 'week_'.$weekEnd;
+	        $orderByColumn = 'itmcde';
 	    }
 
 	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
@@ -2293,11 +2476,11 @@ class Dashboard_model extends Model
 	            CONCAT(MAX(so.store_code), ' - ', s.description) AS store_name,
 	            FORMAT(COALESCE(ty.ty_scanned_data, 0), 2) AS ty_scanned_data,
 	            FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data,
-	            CASE 
-	                WHEN ly.ly_scanned_data IS NULL OR ty.ty_scanned_data IS NULL THEN ''
-	                WHEN COALESCE(ly.ly_scanned_data, 0) = 0 THEN ''
-	                ELSE ROUND((ty.ty_scanned_data - ly.ly_scanned_data) / NULLIF(ly.ly_scanned_data, 0) * 100, 2)
-	            END AS growth,
+				CASE 
+				    WHEN ly.ly_scanned_data IS NULL OR ty.ty_scanned_data IS NULL THEN NULL
+				    WHEN COALESCE(ly.ly_scanned_data, 0) = 0 THEN NULL
+				    ELSE ROUND((ty.ty_scanned_data - ly.ly_scanned_data) / NULLIF(ly.ly_scanned_data, 0) * 100, 2)
+				END AS growth,
 	            ROUND(COALESCE(ty.ty_scanned_data, 0) / NULLIF(tt.total_ty_sales, 0) * 100, 2) AS sob,
 	            COUNT(*) OVER() AS total_records
 	        FROM tbl_sell_out_pre_aggregated_data so

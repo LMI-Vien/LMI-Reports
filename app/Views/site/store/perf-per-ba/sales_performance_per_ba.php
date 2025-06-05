@@ -332,7 +332,7 @@
             ordering: true,
             info: true,
             lengthChange: false,
-            colReorder: true, 
+            colReorder: true,
             ajax: {
                 url: base_url + 'store/get-sales-performance-per-ba',
                 type: 'POST',
@@ -356,33 +356,46 @@
             columns: [
                 { data: 'rank' },
                 { data: 'area_name' },
-                { data: 'store_name' },
-                { data: 'ba_name' },
+                { data: 'store_name' },                     
+                { data: 'ba_name' },                             
                 {
-                    data: 'ba_deployment_date',
-                    render: function(data, type, row) {
+                    data: 'ba_deployment_date', 
+                    render: function(data) {
                         return formatDateToMMDDYYYY(data);
                     }
                 },
-                { data: 'brand_name' },
-                { data: 'ly_scanned_data' },
+                { data: 'brand_name' }, 
+                { data: 'ly_scanned_data' },                          
                 { data: 'actual_sales', render: formatTwoDecimals },
-                { data: 'target_sales' },
-                { data: 'percent_ach' },
-                { data: 'growth' },
+                { data: 'target_sales' },                              
+                { data: 'percent_ach' },                            
+                { data: 'growth' },                                    
                 { data: 'balance_to_target', render: formatTwoDecimals },
-                { data: 'possible_incentives', render: formatTwoDecimals  },
-                { data: 'target_per_remaining_days', render: formatNoDecimals }
-            ].filter(Boolean),
+                { data: 'possible_incentives', render: formatTwoDecimals },
+                { data: 'target_per_remaining_days', render: formatNoDecimals } 
+            ],
+            columnDefs: [
+                {
+                     targets: [1, 2, 3, 4, 5, 6, 7, 8, 11],
+                    orderable: false
+                },
+                {
+                    targets: [0, 9, 10, 12],
+                    orderable: true
+                }
+            ],
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
             serverSide: true,
             searching: false,
+            // colReorder: true,
             lengthChange: false
         });
+
         addColumnToggle(table);
     }
+
 
     function formatDateToMMDDYYYY(dateString) {
         if (!dateString) return '';

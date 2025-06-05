@@ -77,7 +77,7 @@ class StocksWeekAllStore extends BaseController
 		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
 	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'desc';
 	    $columns = $this->request->getVar('columns');
-	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'item_name';
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'itmcde';
 
 		$sysPar = $this->Global_model->getSysPar();
 		$npdSku = [];

@@ -264,5 +264,8 @@
     let area = <?= json_encode($areas) ?>;
     let asc = <?= json_encode($asc) ?>;
     let calendarWeek = '<?= $date; ?>';
-
+    brand_ambassadors.unshift(
+        { id: "-6", name: "Non Ba" },
+        { id: "-5", name: "Vacant" }
+    )
 </script>

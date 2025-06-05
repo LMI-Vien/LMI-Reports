@@ -112,27 +112,38 @@
     }
 
     function initializeTable(tableId, type, selectedItemClass, selectedItemCat, selectedVendor) {
-        $(tableId).closest('.table-responsive').show(); 
+        $(tableId).closest('.table-responsive').show();
 
         const columns = [
-            { data: 'itmcde' },
-            { data: 'item' },
-            { data: 'item_name' },
-            { data: 'item_class' }
+            { data: 'itmcde' },             
+            { data: 'item' },                
+            { data: 'item_name' },          
+            { data: 'item_class' }      
         ];
 
         if (type !== 'hero') {
-            columns.push({ data: 'sum_total_qty' });
+            columns.push({ data: 'sum_total_qty', render: formatTwoDecimals }); 
         }
 
         columns.push(
-            { data: 'sum_ave_sales' },   
-            { data: 'swc' }        
+            { data: 'sum_ave_sales', render: formatTwoDecimals },
+            { data: 'swc' }                                        
         );
 
-        let defaultSortColumn = 1;
-        if (type !== 'hero') {
-            defaultSortColumn = 4;
+        let defaultSortColumn = type === 'hero' ? 0 : 4;
+
+        let columnDefs;
+        if (type === 'hero') {
+            columnDefs = [{
+                targets: Array.from({ length: columns.length }, (_, i) => i).filter(i => i !== 0),
+                orderable: false
+            }];
+        } else {
+            const lastColumnIndex = columns.length - 3;
+            columnDefs = [{
+                targets: Array.from({ length: columns.length }, (_, i) => i).filter(i => i !== 0 && i !== lastColumnIndex),
+                orderable: false
+            }];
         }
 
         $(tableId).DataTable({
@@ -154,6 +165,7 @@
             },
             columns: columns,
             order: [[defaultSortColumn, 'desc']],
+            columnDefs: columnDefs,
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
@@ -162,6 +174,10 @@
             colReorder: true,
             lengthChange: false
         });
+    }
+
+    function formatTwoDecimals(data) {
+        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
     }
 
     function get_data(id, table, parameter) {

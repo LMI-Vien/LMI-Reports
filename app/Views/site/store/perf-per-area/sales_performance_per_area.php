@@ -304,11 +304,22 @@
                 { data: 'balance_to_target', render: formatTwoDecimals },
                 { data: 'target_per_remaining_days', render: formatNoDecimals }
             ].filter(Boolean),
+            columnDefs: [
+                {
+                     targets: [1, 2, 3, 5, 8, 9],
+                    orderable: false
+                },
+                {
+                    targets: [0, 4, 6, 7],
+                    orderable: true
+                }
+            ],
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
             serverSide: true,
             searching: false,
+            // colReorder: true,
             lengthChange: false
         });
     }
