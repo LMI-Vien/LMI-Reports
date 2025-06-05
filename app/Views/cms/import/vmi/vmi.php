@@ -1841,7 +1841,7 @@
     {
         modal.loading(true);
         $.ajax({
-            url: '/cms/import-vmi/generate-excel',
+            url: '<?= base_url('cms/import-vmi/generate-excel');?>',
             method: 'POST',
             data: {
                 company: company,
@@ -1855,13 +1855,13 @@
                     modal.alert("Excel generation has started. Please wait 5–10 minutes for the VMI file to download automatically.", "success");
 
                     let pollInterval = setInterval(function () {
-                        $.getJSON('/cms/import-vmi/pending/', function (response) {
+                        $.getJSON('<?= base_url('cms/import-vmi/pending');?>', function (response) {
                             if (response.ready) {
                                 clearInterval(pollInterval);
 
                                 // Trigger download via iframe
                                 $('<iframe>', {
-                                    src: `/cms/import-vmi/download/${response.filename}`,
+                                    src: `<?= base_url('cms/import-vmi/download');?>${response.filename}`,
                                     style: 'display: none;'
                                 }).appendTo('body');
                             }
