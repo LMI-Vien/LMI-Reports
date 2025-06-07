@@ -2,10 +2,9 @@
         $('#itemLabel').select2({ placeholder: 'Select Brand Label Types' });
         $('#brands').select2({ placeholder: 'Select Brands' });
         autocomplete_field($("#area"), $("#areaId"), area, "description", "id", function(result) {
-            //let url = url;
             let data = {
                 event: "list",
-                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id",
+                select: "a.id, a.description, asc.description as asc_description, asc.id as asc_id, asc.code",
                 query: "a.id = " + result.id,
                 offset: offset,
                 limit: 0,
@@ -25,6 +24,9 @@
                     if(data[0].code){ 
                         $("#ascName").val(data[0].code+' - '+data[0].asc_description);
                         $("#ascNameId").val(data[0].asc_id);       
+                    }else{
+                        $("#ascName").val('');
+                        $("#ascNameId").val('');
                     }             
                 }
             })
@@ -48,11 +50,16 @@
             }
 
             aJax.post(base_url + "cms/global_controller", data, function(res) {
-                let data = JSON.parse(res)[0];
+                let data = JSON.parse(res);
+                if(parseInt($('#brandAmbassadorId').val()) === -5 || parseInt($('#brandAmbassadorId').val()) === -6){
+                    $("#storeName").val('');
+                    $("#storeNameId").val('');
+                    return;
+                }
                 if(data.length > 0){
-                    if(data[0].code){ 
-                        $("#storeName").val(data.code+' - '+data.description);
-                        $("#storeNameId").val(data.id);      
+                    if(data[0].code){
+                        $("#storeName").val(data[0].code+' - '+data[0].description);
+                        $("#storeNameId").val(data[0].code);      
                     }             
                 }
             })

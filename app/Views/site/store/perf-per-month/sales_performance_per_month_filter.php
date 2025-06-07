@@ -59,15 +59,21 @@
                                 <input type="hidden" id="storeNameId">
                             </div>
                             <div class="form-group card-dark mb-3 p-2">
-                                <label for="brand" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Brand Label Type</label>
-                                <input type="text" class="form-control" id="store_branch" placeholder="Please select...">
-                                <input type="hidden" id="store_id">
+                                <label for="itemLabel" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Brand Label Type</label>
+                                    <select id="itemLabel" name="itemLabel[]" class="form-control select2" multiple>
+                                        <?php foreach ($brandLabel as $key => $value) {
+                                            echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['label']) . '</option>';
+                                        } ?>
+                                    </select>
                             </div>
                             <!-- Brand -->
                             <div class="form-group card-dark mb-3 p-2">
-                                <label for="brand" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Item Brand</label>
-                                <input type="text" class="form-control" id="brand" placeholder="Please select...">
-                                <input type="hidden" id="brand_id">
+                                <label for="brands" class="mb-2"><i class="fas fa-boxes mr-1"></i> Item Brand</label>
+                                <select id="brands" name="brands[]" class="form-control select2" multiple>
+                                        <?php foreach ($brands as $key => $value) {
+                                            echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['brand_description']) . '</option>';
+                                        } ?>
+                                    </select>
                             </div>
                             
                            <!-- Buttons -->

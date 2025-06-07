@@ -223,38 +223,26 @@
             ? selectedInventoryStatus
             : (selectedInventoryStatus ? [ selectedInventoryStatus ] : []);
 
-        //
-        // 1) Build qs so PHP sees:
-        //    itemClass[]=A&itemClass[]=B
-        // AND inventoryStatus[]=npd&inventoryStatus[]=hero
-        //
         let qsParts = [];
 
-        // One itemClass[]= per selected class
         itemClasses.forEach(c => {
             qsParts.push(`itemClass[]=${encodeURIComponent(c)}`);
         });
 
-        // itemLabelCat 
         if (selectedItemCat) {
             qsParts.push(`itemLabelCat=${encodeURIComponent(selectedItemCat)}`);
         }
 
-        // One inventoryStatus[]= per selected status
         statuses.forEach(s => {
             qsParts.push(`inventoryStatus[]=${encodeURIComponent(s)}`);
         });
 
-        // vendorName (single)
         if (selectedVendor) {
             qsParts.push(`vendorName=${encodeURIComponent(selectedVendor)}`);
         }
 
         let qs = qsParts.join('&');
 
-        //
-        // loop exactly over statuses[] to capture each table’s sort
-        //
         let extraOrderParams = [];
         statuses.forEach((statusType, idx) => {
             let tableId  = `#table_${statusType}`;
@@ -298,7 +286,7 @@
             if (!response.ok) {
                 throw new Error(`Server returned ${response.status}`);
             }
-            fetchedResponse = response; // Save it here for later use
+            fetchedResponse = response;
             return response.blob();
         })
         .then(blob => {
@@ -314,7 +302,6 @@
                     ? 'Overall Stock Data of All Stores.pdf'
                     : 'Overall Stock Data of All Stores.xlsx');
 
-            // 4) Create a blob URL and trigger download
             const blobUrl = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = blobUrl;
@@ -326,7 +313,6 @@
             URL.revokeObjectURL(blobUrl);
         })
         .catch(err => {
-            console.error("Download failed:", err);
             modal.alert("Failed to generate file. Please try again.", "error");
         })
         .finally(() => {
