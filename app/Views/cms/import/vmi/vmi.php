@@ -250,13 +250,13 @@
         const checkInterval = 10000;
 
         const pollInterval = setInterval(function () {
-            $.getJSON('/cms/import-vmi/pending/', function (response) {
+            $.getJSON('<?= base_url('cms/import-vmi/pending');?>', function (response) {
                 if (response.ready) {
                     const filename = response.filename;
 
                     // Download file via hidden iframe
                     $('<iframe>', {
-                        src: `/cms/import-vmi/download/${response.filename}`,
+                        src: `<?= base_url('cms/import-vmi/download/');?>${response.filename}`,
                         style: 'display: none;'
                     }).appendTo('body');
 
