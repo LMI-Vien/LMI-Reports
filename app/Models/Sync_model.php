@@ -1680,11 +1680,13 @@ class Sync_model extends Model
 
         // Truncate only on full refresh
         if (!$company || !$week || !$year) {
-            $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=0;');
-            $this->sfaDB->table('tbl_vmi_pre_aggregated_ba_ids')->truncate();
-            $this->sfaDB->table('tbl_vmi_pre_aggregated_brand_ids')->truncate();
-            $this->sfaDB->table('tbl_vmi_pre_aggregated_data')->truncate();
-            $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=1;');
+            $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=0');
+            
+            $this->sfaDB->query('TRUNCATE TABLE tbl_vmi_pre_aggregated_ba_ids');
+            $this->sfaDB->query('TRUNCATE TABLE tbl_vmi_pre_aggregated_brand_ids');
+            $this->sfaDB->query('TRUNCATE TABLE tbl_vmi_pre_aggregated_data');
+
+            $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=1');
         }
 
         $batchSize = 10000;

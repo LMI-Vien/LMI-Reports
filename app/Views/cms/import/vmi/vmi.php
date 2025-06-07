@@ -247,7 +247,7 @@
     $(document).ready(function() {
 
     //const filename = "vmi_export.xlsx";
-        const checkInterval = 10000;
+        const checkInterval = 120000;
 
         const pollInterval = setInterval(function () {
             $.getJSON('<?= base_url('cms/import-vmi/pending');?>', function (response) {
@@ -1861,12 +1861,12 @@
 
                                 // Trigger download via iframe
                                 $('<iframe>', {
-                                    src: `<?= base_url('cms/import-vmi/download');?>${response.filename}`,
+                                    src: `<?= base_url('cms/import-vmi/download/');?>${response.filename}`,
                                     style: 'display: none;'
                                 }).appendTo('body');
                             }
                         });
-                    }, 20000);
+                    }, 120000);
                 }
             },
             error: function (xhr) {
