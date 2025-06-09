@@ -330,15 +330,16 @@ class ImportWeekOnWeek extends BaseController
 			$headerTitle = $value['file_name'];
 		}
 
-		$pdf->MultiCell($width, 10, "Item", 0, '', false, 1, 10, 35);
-		$pdf->MultiCell($width, 10, "Item Name", 0, '', false, 1, 10 + ($width * 1), 35);
-		$pdf->MultiCell($width, 10, "Label Type", 0, '', false, 1, 10 + ($width * 2), 35);
-		$pdf->MultiCell($width, 10, "Status", 0, '', false, 1, 10 + ($width * 3), 35);
-		$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 1, 10 + ($width * 4), 35);
-		$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 1, 10 + ($width * 5), 35);
-		$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 1, 10 + ($width * 6), 35);
-		$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 7), 35);
-		$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 8), 35);
+		$pdf->SetFont('helvetica', 'B', 11);
+		$pdf->MultiCell($width, 10, "Item", 0, '', false, 0, 10, 35);
+		$pdf->MultiCell($width, 10, "Item Name", 0, '', false, 0, 10 + ($width * 1), 35);
+		$pdf->MultiCell($width, 10, "Label Type", 0, '', false, 0, 10 + ($width * 2), 35);
+		$pdf->MultiCell($width, 10, "Status", 0, '', false, 0, 10 + ($width * 3), 35);
+		$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 0, 10 + ($width * 4), 35);
+		$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 0, 10 + ($width * 5), 35);
+		$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 0, 10 + ($width * 6), 35);
+		$pdf->MultiCell($width, 10, "SOH", 0, '', false, 0, 10 + ($width * 7), 35);
+		$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 0, 10 + ($width * 8), 35);
 		$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 9), 35);
 
 		$h = 55;
@@ -346,7 +347,7 @@ class ImportWeekOnWeek extends BaseController
 		foreach ($result as $key => $value) {
 			$rowHeight = 15;
 			
-			if ($h + $rowHeight * 7 > $pdf->getPageHeight() - $pdf->getMargins()['bottom']) {
+			if ($h > 250) {
 				$pdf->AddPage();
 				$pdf->SetFont('helvetica', 'B', 12);
 
@@ -357,33 +358,45 @@ class ImportWeekOnWeek extends BaseController
 					$pdf->MultiCell(500, 0, "Import File Name: ".$value['file_name'], 0, '', false, 1, 10, 25);
 				}
 
-				$pdf->MultiCell($width, 10, "Item", 0, '', false, 1, 10, 35);
-				$pdf->MultiCell($width, 10, "Item Name", 0, '', false, 1, 10 + ($width * 1), 35);
-				$pdf->MultiCell($width, 10, "Label Type", 0, '', false, 1, 10 + ($width * 2), 35);
-				$pdf->MultiCell($width, 10, "Status", 0, '', false, 1, 10 + ($width * 3), 35);
-				$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 1, 10 + ($width * 4), 35);
-				$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 1, 10 + ($width * 5), 35);
-				$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 1, 10 + ($width * 6), 35);
-				$pdf->MultiCell($width, 10, "SOH", 0, '', false, 1, 10 + ($width * 7), 35);
-				$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 1, 10 + ($width * 8), 35);
+				$pdf->MultiCell($width, 10, "Item", 0, '', false, 0, 10, 35);
+				$pdf->MultiCell($width, 10, "Item Name", 0, '', false, 0, 10 + ($width * 1), 35);
+				$pdf->MultiCell($width, 10, "Label Type", 0, '', false, 0, 10 + ($width * 2), 35);
+				$pdf->MultiCell($width, 10, "Status", 0, '', false, 0, 10 + ($width * 3), 35);
+				$pdf->MultiCell($width, 10, "Item Class", 0, '', false, 0, 10 + ($width * 4), 35);
+				$pdf->MultiCell($width, 10, "POG Store", 0, '', false, 0, 10 + ($width * 5), 35);
+				$pdf->MultiCell($width, 10, "Quantity", 0, '', false, 0, 10 + ($width * 6), 35);
+				$pdf->MultiCell($width, 10, "SOH", 0, '', false, 0, 10 + ($width * 7), 35);
+				$pdf->MultiCell($width, 10, "Ave Weekly Sales", 0, '', false, 0, 10 + ($width * 8), 35);
 				$pdf->MultiCell($width, 10, "Weeks Cover", 0, '', false, 1, 10 + ($width * 9), 35);
 
-				$h = 30;
+				$h = 45;
 				$pdf->SetFont('helvetica', '', 9);
 			}
 
-			$pdf->MultiCell($width, $rowHeight, ($value['item'] ?? ''), 0, '', false, 1, 10, $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['item_name'] ?? ''), 0, '', false, 1, 10 + ($width * 1), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['label_type'] ?? ''), 0, '', false, 1, 10 + ($width * 2), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['status'] ?? ''), 0, '', false, 1, 10 + ($width * 3), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['item_class'] ?? ''), 0, '', false, 1, 10 + ($width * 4), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['pog_store'] ?? ''), 0, '', false, 1, 10 + ($width * 5), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['quantity'] ?? ''), 0, '', false, 1, 10 + ($width * 6), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['soh'] ?? ''), 0, '', false, 1, 10 + ($width * 7), $h);
-			$pdf->MultiCell($width, $rowHeight, ($value['ave_weekly_sales'] ?? ''), 0, '', false, 1, 10 + ($width * 8), $h);
+			$length = strlen($value['item_name'] ?? '');
+			$pdf->MultiCell($width, $rowHeight, ($value['item'] ?? ''), 0, '', false, 0, 10, $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['item_name'] ?? ''), 0, '', false, 0, 10 + ($width * 1), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['label_type'] ?? ''), 0, '', false, 0, 10 + ($width * 2), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['status'] ?? ''), 0, '', false, 0, 10 + ($width * 3), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['item_class'] ?? ''), 0, '', false, 0, 10 + ($width * 4), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['pog_store'] ?? ''), 0, '', false, 0, 10 + ($width * 5), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['quantity'] ?? ''), 0, '', false, 0, 10 + ($width * 6), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['soh'] ?? ''), 0, '', false, 0, 10 + ($width * 7), $h);
+			$pdf->MultiCell($width, $rowHeight, ($value['ave_weekly_sales'] ?? ''), 0, '', false, 0, 10 + ($width * 8), $h);
 			$pdf->MultiCell($width, $rowHeight, ($value['weeks_cover'] ?? ''), 0, '', false, 1, 10 + ($width * 9), $h);
 
-			$h += $rowHeight * 2;
+			if ($length >= 40) {
+				$plus = 32;
+			} else if ($length >= 30) {
+				$plus = 27;
+			} else if ($length >= 20) {
+				$plus = 22;
+			} else if ($length >= 10) {
+				$plus = 17;
+			} else {
+				$plus = 10;
+			}
+			$h += $plus;
 		}
 
 		$currentDateTime = date('Y-m-d H:i:s');
