@@ -358,6 +358,7 @@ class ImportWeekOnWeek extends BaseController
 					$pdf->MultiCell(500, 0, "Import File Name: ".$value['file_name'], 0, '', false, 1, 10, 25);
 				}
 
+				$pdf->SetFont('helvetica', 'B', 11);
 				$pdf->MultiCell($width, 10, "Item", 0, '', false, 0, 10, 35);
 				$pdf->MultiCell($width, 10, "Item Name", 0, '', false, 0, 10 + ($width * 1), 35);
 				$pdf->MultiCell($width, 10, "Label Type", 0, '', false, 0, 10 + ($width * 2), 35);
