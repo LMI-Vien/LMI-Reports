@@ -106,8 +106,8 @@
         }
 
         const weekDifference = toWeek - fromWeek + 1;
-        if (weekDifference > 12) {
-            modal.alert('You can only select a maximum range of 12 weeks.', "warning");
+        if (weekDifference > 13) {
+            modal.alert('You can only select a maximum range of 13 weeks.', "warning");
             return;
         }
 
@@ -190,10 +190,7 @@
                     dynamicColumns.push({
                         data: `week_${week}`,
                         title: `Week ${week}`,
-                        defaultContent: '-',
-                        render: function (data) {
-                            return formatTwoDecimals(data);
-                        }
+                        defaultContent: '-'
                     });
                 }
             }

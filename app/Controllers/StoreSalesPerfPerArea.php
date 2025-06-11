@@ -424,7 +424,7 @@ class StoreSalesPerfPerArea extends BaseController
 			$formatBalanceToTarget         = $this->formatTwoDecimals($row->balance_to_target);
 			$formatTargetPerRemainingDays  = $this->formatComma($row->target_per_remaining_days);
 			$formatActualSalesReport    	= $this->formatTwoDecimals($row->actual_sales);	
-			$formatTargetSalesTarget		= $this->formatTwoDecimals($row->target_sales);
+			$formatTargetSalesTarget		= $row->target_sales;
 			
 			// rank 
 			$pdf->Cell($colWidth, $rowH, $row->rank, 1, 0, 'C');

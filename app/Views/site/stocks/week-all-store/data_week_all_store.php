@@ -68,9 +68,9 @@
                                         </th>
                                     </tr>
                                      <tr id="table_slowMoving_headers">
-                                        <th class="tbl-title-field">SKU Code</th>
-                                        <th class="tbl-title-field">SKU Description</th>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU Code</th>
+                                        <th class="tbl-title-field text-center">SKU Description</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -105,9 +105,9 @@
                                         </th>
                                     </tr>
                                     <tr id="table_overStock_headers">
-                                        <th class="tbl-title-field">SKU Code</th>
-                                        <th class="tbl-title-field">SKU Description</th>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU Code</th>
+                                        <th class="tbl-title-field text-center">SKU Description</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -142,9 +142,9 @@
                                         </th>
                                     </tr>
                                     <tr id="table_npd_headers">
-                                        <th class="tbl-title-field">SKU Code</th>
-                                        <th class="tbl-title-field">SKU Description</th>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU Code</th>
+                                        <th class="tbl-title-field text-center">SKU Description</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -178,9 +178,9 @@
                                         </th>
                                     </tr>
                                     <tr id="table_hero_headers">
-                                        <th class="tbl-title-field">SKU Code</th>
-                                        <th class="tbl-title-field">SKU Description</th>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU Code</th>
+                                        <th class="tbl-title-field text-center">SKU Description</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
                                     </tr>
                                 </thead>
                                   <tbody>

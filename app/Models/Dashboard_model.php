@@ -1219,19 +1219,19 @@ class Dashboard_model extends Model
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
 			            WHEN ts.target_sales_jan = 0 OR ts.target_sales_jan IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_january / ts.target_sales_jan) * 100, 2)
+			            ELSE ROUND((t.ty_sell_out_january / ts.target_sales_jan) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
 			            WHEN ts.target_sales_jan = 0 OR ts.target_sales_jan IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_january + mt.amount_january) / ts.target_sales_jan) * 100, 2)
+			            ELSE ROUND((mt.amount_january / ts.target_sales_jan) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
 			            WHEN ts.target_sales_jan = 0 OR ts.target_sales_jan IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_january / ts.target_sales_jan) * 100, 2)
+			            ELSE ROUND(((t.ty_sell_out_january + mt.amount_january) / ts.target_sales_jan) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1240,19 +1240,19 @@ class Dashboard_model extends Model
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
 			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            ELSE ROUND((t.ty_sell_out_february / ts.target_sales_feb) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
 			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
 			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1260,20 +1260,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_mar = 0 OR ts.target_sales_mar IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_march / ts.target_sales_mar) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_mar = 0 OR ts.target_sales_mar IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_march / ts.target_sales_mar) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_mar = 0 OR ts.target_sales_mar IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_march + mt.amount_march) / ts.target_sales_mar) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1281,20 +1281,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_apr = 0 OR ts.target_sales_apr IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_april / ts.target_sales_apr) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_apr = 0 OR ts.target_sales_apr IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_april / ts.target_sales_apr) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_apr = 0 OR ts.target_sales_apr IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_april + mt.amount_april) / ts.target_sales_apr) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1302,20 +1302,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_may = 0 OR ts.target_sales_may IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_may / ts.target_sales_may) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_may = 0 OR ts.target_sales_may IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_may / ts.target_sales_may) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_may = 0 OR ts.target_sales_may IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_may + mt.amount_may) / ts.target_sales_may) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1323,20 +1323,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_jun = 0 OR ts.target_sales_jun IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_june / ts.target_sales_jun) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_jun = 0 OR ts.target_sales_jun IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_june / ts.target_sales_jun) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_jun = 0 OR ts.target_sales_jun IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_june + mt.amount_june) / ts.target_sales_jun) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1344,20 +1344,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_jul = 0 OR ts.target_sales_jul IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_july / ts.target_sales_jul) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_jul = 0 OR ts.target_sales_jul IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_july / ts.target_sales_jul) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_jul = 0 OR ts.target_sales_jul IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_july + mt.amount_july) / ts.target_sales_jul) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1365,20 +1365,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_aug = 0 OR ts.target_sales_aug IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_august / ts.target_sales_aug) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_aug = 0 OR ts.target_sales_aug IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_august / ts.target_sales_aug) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_aug = 0 OR ts.target_sales_aug IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_august + mt.amount_august) / ts.target_sales_aug) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1386,20 +1386,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_sep = 0 OR ts.target_sales_sep IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_september / ts.target_sales_sep) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_sep = 0 OR ts.target_sales_sep IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_september / ts.target_sales_sep) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_sep = 0 OR ts.target_sales_sep IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_september + mt.amount_september) / ts.target_sales_sep) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1407,20 +1407,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_oct = 0 OR ts.target_sales_oct IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_october / ts.target_sales_oct) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_oct = 0 OR ts.target_sales_oct IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_october / ts.target_sales_oct) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_oct = 0 OR ts.target_sales_oct IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_october + mt.amount_october) / ts.target_sales_oct) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1428,20 +1428,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_nov = 0 OR ts.target_sales_nov IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_november / ts.target_sales_nov) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_nov = 0 OR ts.target_sales_nov IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_november / ts.target_sales_nov) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_nov = 0 OR ts.target_sales_nov IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_november + mt.amount_november) / ts.target_sales_nov) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1449,20 +1449,20 @@ class Dashboard_model extends Model
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_dec = 0 OR ts.target_sales_dec IS NULL THEN 'N/A'
+			            ELSE ROUND((t.ty_sell_out_december / ts.target_sales_dec) * 100, 2)
 			        END
 
 			    WHEN :ba_type: IN (0, 1) THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_dec = 0 OR ts.target_sales_dec IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_december / ts.target_sales_dec) * 100, 2)
 			        END
 
 			    WHEN :ba_type: = 3 THEN 
 			        CASE 
-			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
-			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			            WHEN ts.target_sales_dec = 0 OR ts.target_sales_dec IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_december + mt.amount_december) / ts.target_sales_dec) * 100, 2)
 			        END
 
 			    ELSE 'N/A'
@@ -1662,11 +1662,12 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['itmcde', 'sum_total_qty', 'item', 'item_name'];
+	    $allowedOrderColumns = ['item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
+
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
-	        $orderByColumn = 'itmcde';
+	        $orderByColumn = 'week_' . $weekEnd;
 	    }
 
 	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
@@ -1759,16 +1760,18 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['itmcde', 'sum_total_qty', 'item', 'item_name'];
+	    $allowedOrderColumns = ['item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
+
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
-	        $orderByColumn = 'itmcde';
+	        $orderByColumn = 'week_' . $weekEnd;
 	    }
 
 	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
 	        $orderDirection = 'DESC';
 	    }
+
 
 	    $storeFilterSQLVmi = !empty($storeFilterConditionsVmi)
 		    ? ' AND ' . implode(' AND ', $storeFilterConditionsVmi)

@@ -290,7 +290,7 @@
         ];
 
         if (type !== 'hero') {
-            columns.push({ data: 'sum_total_qty', render: formatTwoDecimals });
+            columns.push({ data: 'sum_total_qty'});
         }
 
         let defaultSortColumn = type === 'hero' ? 0 : columns.length - 1;

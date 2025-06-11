@@ -73,38 +73,38 @@
                                     </th>
                                 </tr>                          
                                 <tr>
-                                    <th class="tbl-title-field">Rank</th>
-                                    <th class="tbl-title-field">Area</th>
-                                    <th class="tbl-title-field">Store Code / Store Name</th>
-                                    <th class="tbl-title-field sort">Brand Ambassador</th>
-                                    <th class="tbl-title-field sort">Deployed Date</th>
-                                    <th class="tbl-title-field sort">Brand Handle</th>
-                                    <th class="tbl-title-field sort">LY Scanned Data</th>
-                                    <th class="tbl-title-field">Actual Sales Report</th>
-                                    <th class="tbl-title-field">Target</th>
-                                    <th class="tbl-title-field">% Achieved 
+                                    <th class="tbl-title-field text-center">Rank</th>
+                                    <th class="tbl-title-field text-center">Area</th>
+                                    <th class="tbl-title-field text-center">Store Code / Store Name</th>
+                                    <th class="tbl-title-field sort text-center">Brand Ambassador</th>
+                                    <th class="tbl-title-field sort text-center">Deployed Date</th>
+                                    <th class="tbl-title-field sort text-center">Brand Handle</th>
+                                    <th class="tbl-title-field sort text-center">LY Scanned Data</th>
+                                    <th class="tbl-title-field text-center">Actual Sales Report</th>
+                                    <th class="tbl-title-field text-center">Target</th>
+                                    <th class="tbl-title-field text-center">% Achieved 
                                         <span class="tooltip-text">
                                             FORMULA:
                                             <br>
                                             Actual Sales Report / Target * 100 
                                         </span>
                                     </th>
-                                    <th class="tbl-title-field sort">% Growth 
+                                    <th class="tbl-title-field sort text-center">% Growth 
                                         <span class="tooltip-text togglegrowth">
                                             FORMULA:
                                             <br>
                                             Actual Sales Report / LY Scan Data * 100
                                         </span>
                                     </th>
-                                    <th class="tbl-title-field">Balance To Target 
+                                    <th class="tbl-title-field text-center">Balance To Target Per Month 
                                         <span class="tooltip-text">
                                             FORMULA:
                                             <br>
                                             Target - Actual Sales Report
                                         </span>
                                     </th>
-                                    <th class="tbl-title-field">Possible Incentives</th>
-                                    <th class="tbl-title-field">Target Per Remaining Days 
+                                    <th class="tbl-title-field text-center">Possible Incentives</th>
+                                    <th class="tbl-title-field text-center">Balance to Target per Day 
                                         <span class="tooltip-text">
                                             FORMULA:
                                             <br>

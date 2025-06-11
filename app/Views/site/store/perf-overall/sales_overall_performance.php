@@ -68,18 +68,18 @@
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th class="tbl-title-field">Rank</th>
-                                    <th class="tbl-title-field">Store Code / Store Name</th>
-                                    <th class="tbl-title-field">LY Sell Out</th>
-                                    <th class="tbl-title-field">TY Sell Out</th>
-                                    <th class="tbl-title-field">% Growth 
+                                    <th class="tbl-title-field text-center">Rank</th>
+                                    <th class="tbl-title-field text-center">Store Code / Store Name</th>
+                                    <th class="tbl-title-field text-center">LY Sell Out</th>
+                                    <th class="tbl-title-field text-center">TY Sell Out</th>
+                                    <th class="tbl-title-field text-center">% Growth 
                                         <span class="tooltip-text">
                                             FORMULA:
                                             <br>
                                             (TY total gross sales - LY total gross sale) / LY total gross sales * 100
                                         </span>
                                     </th>
-                                    <th class="tbl-title-field">Share of Business
+                                    <th class="tbl-title-field text-center">Share of Business
                                         <span class="tooltip-text">
                                             FORMULA:
                                             <br>

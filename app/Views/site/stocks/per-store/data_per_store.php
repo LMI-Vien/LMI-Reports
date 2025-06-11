@@ -71,10 +71,10 @@
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field">SKU</th>
-                                        <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Total Qty</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU</th>
+                                        <th class="tbl-title-field text-center">SKU Name</th>
+                                        <th class="tbl-title-field text-center">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -108,10 +108,10 @@
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field">SKU</th>
-                                        <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Total Qty</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU</th>
+                                        <th class="tbl-title-field text-center">SKU Name</th>
+                                        <th class="tbl-title-field text-center">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -145,10 +145,10 @@
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field">SKU</th>
-                                        <th class="tbl-title-field">SKU Name</th>
-                                        <th class="tbl-title-field">Total Qty</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU</th>
+                                        <th class="tbl-title-field text-center">SKU Name</th>
+                                        <th class="tbl-title-field text-center">Total Qty</th>
                                     </tr>
                                 </thead>
                                   <tbody>
@@ -182,9 +182,9 @@
                                         </th>
                                     </tr>
                                     <tr>
-                                        <th class="tbl-title-field">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field">SKU</th>
-                                        <th class="tbl-title-field">SKU Name</th>
+                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
+                                        <th class="tbl-title-field text-center">SKU</th>
+                                        <th class="tbl-title-field text-center">SKU Name</th>
                                     </tr>
                                 </thead>
                                   <tbody>

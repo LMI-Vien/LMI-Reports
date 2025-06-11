@@ -32,8 +32,8 @@ class StoreSalesPerfPerMonth extends BaseController
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-performance-per-month'),'Store Sales Performance per Month' => '');
-		$data["source"] = "Actual Sales Report / Scan Data";
-		$data["source_date"] = 'Monthly(temp)';	
+		$data["source"] = "Actual Sales Report, Scan Data, and Target Sales";
+		$data["source_date"] = 'Latest Year';	
 		$data["foot_note"] = 'With BA = Actual Sales, Without BA = Scanned Data';	
 
 		$data['content'] = "site/store/perf-per-month/sales_performance_per_month";
@@ -62,7 +62,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		$ascId = $this->request->getPost('asc');
 		$ascId = $ascId === '' ? null : $ascId;
 		$baTypeId = $this->request->getPost('baType');
-		$baTypeId = $baTypeId === '' ? 3 : $baTypeId;
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
 		$baId = $this->request->getPost('ba');
 		$baId = $baId === '' ? null : $baId;
 		$storeId= $this->request->getPost('store');
@@ -116,7 +116,18 @@ class StoreSalesPerfPerMonth extends BaseController
 			$storeCode = $this->Global_model->get_by_id('tbl_store', $storeId);
 			$storeCode = $storeCode[0]->code;
 		}
-
+		//print_r($baTypeId);
+		//die(); 	
+		// $baTypeId = '3';
+		// $areaId = '5';
+		// $storeId = '18';
+		// $storeCode = '1878';
+		// $ascId = null;
+		// $brands = null;
+		// $brandsIds = null;
+		// $baCode = null;
+		// $baId = null;
+		$brandCategoriesIds = null;
 		if($latest_year){
 
 		    $filters = [
