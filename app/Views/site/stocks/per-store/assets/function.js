@@ -233,7 +233,7 @@
         if (counter >= 1) {
             fetchData();
             $('.table-empty').hide();
-            }
+        }
     });
 
     function fetchData() {

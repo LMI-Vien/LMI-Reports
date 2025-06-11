@@ -28,7 +28,6 @@ class StoreSalesPerfPerMonth extends BaseController
 			"description"   =>  "LMI Portal Wep application",
 			"keyword"       =>  ""
 		);
-		$data['year'] = $this->Global_model->getYears();
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
@@ -39,7 +38,7 @@ class StoreSalesPerfPerMonth extends BaseController
 
 		$data['content'] = "site/store/perf-per-month/sales_performance_per_month";
 		$data['brand_ambassadors'] = $this->Global_model->getBrandAmbassador(0);
-		$data['store_branches'] = $this->Global_model->getStoreBranch(0);
+		$data['store_branches'] = $this->Global_model->getStoreBranchById(0);
 		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
 		$data['asc'] = $this->Global_model->getAsc(0);
 		$data['areas'] = $this->Global_model->getArea(0);
@@ -58,158 +57,91 @@ class StoreSalesPerfPerMonth extends BaseController
 
 	public function getPerfPerMonth()
 	{	
-	    $area = $this->request->getPost('area');
-	    $asc = $this->request->getPost('asc');
-	    $brand = $this->request->getPost('brand');
-	    $ba = $this->request->getPost('ba');
-	    $store = $this->request->getPost('store');
-	    $year = $this->request->getPost('year');
+		$areaId = $this->request->getPost('area');
+		$areaId = $areaId === '' ? null : $areaId;
+		$ascId = $this->request->getPost('asc');
+		$ascId = $ascId === '' ? null : $ascId;
+		$baTypeId = $this->request->getPost('baType');
+		$baTypeId = $baTypeId === '' ? 3 : $baTypeId;
+		$baId = $this->request->getPost('ba');
+		$baId = $baId === '' ? null : $baId;
+		$storeId= $this->request->getPost('store');
+		$storeId = $storeId === '' ? null : $storeId;
+        $brandsIds = $this->request->getPost('brands');
+        $brandsIds = $brandsIds === '' ? null : $brandsIds;
+        $brandCategoriesIds = $this->request->getPost('brandCategories');
+        $brandCategoriesIds = $brandCategoriesIds === '' ? null : $brandCategoriesIds;
+        $sysPar = $this->Global_model->getSysPar();
+		$years = $this->Global_model->getYears(); 
 
-	    $date = null; 
-	    $lookup_month = null;
-	    $lyYear = 0;
-	    $selected_year = null;
-	    $targetYear = null;
-	    $date = null;
-	    if($year){
-	    	$actual_year = $this->Dashboard_model->getYear($year);
-	    	$selected_year = $actual_year[0]['year'];
-	    	$date = $actual_year[0]['year'];
-	    	$targetYear = $actual_year[0]['id'];
-	    }
-
-	    if(empty($area)){
-	    	$area = null;
-	    }
-	    if(empty($store)){
-	    	$store = null;
-	    }
-	    $filters = [
-		    'year' => $selected_year, 
-		    'asc_id' => $asc,    
-		    'store_id' => $store,
-		    'area_id' => $area,
-		    'ba_id' => $ba,
-		    'brand_id' => $brand,
-		    'year_val' => $targetYear
-		];
-	   // $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
-	    // return $this->response->setJSON([
-	    //     'data' => $data['data'],
-		// 	'area' => $area,
-		// 	'asc' => $asc,
-		// 	'brand' => $brand,
-		// 	'ba' => $ba,
-		// 	'store' => $store,
-		// 	'year' => $year,
-	    // ]);
-	    $data = [];
-
-	    return $this->response->setJSON([
-	        'data' => [],
-			'area' => [],
-			'asc' => [],
-			'brand' => [],
-			'ba' => [],
-			'store' => [],
-			'year' => [],
-	    ]);
-	}
-
-	public function getPerfPerTable()
-	{	
-	    $area = $this->request->getPost('area');
-	    $asc = $this->request->getPost('asc');
-	    $brand = $this->request->getPost('brand');
-	    $ba = $this->request->getPost('ba');
-	    $store = $this->request->getPost('store');
-	    $year = $this->request->getPost('year');
-	    $type = $this->request->getPost('trade_type');
-	    $withba = $this->request->getPost('withba');
-		$limit = (int) $this->request->getVar('limit');
-		$offset = (int) $this->request->getVar('offset');
-
-	    $date = null; 
-	    $lookup_month = null;
-	    $lyYear = 0;
-	    $selected_year = null;
-	    $targetYear = null;
-	    $date = null;
-
-	    if($year){
-	    	$actual_year = $this->Dashboard_model->getYear($year);
-	    	$selected_year = $actual_year[0]['year'];
-	    	$date = $actual_year[0]['year'];
-	    	$targetYear = $actual_year[0]['id'];
-	    }
-	    if(empty($area)){
-	    	$area = null;
-	    }
-	    if(empty($store)){
-	    	$store = null;
-	    }
-	    if(empty($ba)){
-	    	$ba = null;
-	    }
-	    if(empty($year)){
-	    	$year = null;
-	    }
-	    if(empty($area)){
-	    	$area = null;
-	    }
-	    if($withba == 'with_ba'){
-	    	$withba  = true;
-	    }else{
-	    	$withba = false;
-	    }
-
-		$latest_vmi_data = $this->Dashboard_model->getLatestVmi($year);
-
-		$ba = null;
-		$store = null;
-		if($latest_vmi_data){
-			$month = $latest_vmi_data['month_id'];
-			$year = $latest_vmi_data['year_id'];
+		$year_values = array_column($years, 'year'); 
+		$year_id = array_column($years, 'id'); 
+		$latest_year = max($year_values);
+		$latest_year_id = max($year_id);
+		// $storeId = null;
+		// $storeCode = null;
+		// $areaId = null;
+		// $ascId = null;
+		// $brands = null;
+		//$brandsIds = [37];
+		//$baId = null;
+		//$baType = strval(3);
+		//$brandCategoriesIds = null;
+		//$baCode = null;
+	    $incentiveRate = 0.015;
+	    $amountPerDay = 8000;
+	    $noOfDays = 0;
+		if($sysPar){
+			$jsonString = $sysPar[0]['brand_label_type'];
+			$data = json_decode($jsonString, true);
+		    $amountPerDay = $sysPar[0]['tba_amount_per_ba'];
+		    $noOfDays = $sysPar[0]['tba_num_days'];
+		    $target_sales = $amountPerDay * $noOfDays;
 		}
-		if(empty($month)){
-	    	$month = null;
-	    }
-	    // switch ($type) {
-	    //     case 'slowMoving':
-	    //        $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 20, 30, $brand, $ba, $store, $limit, $offset, $withba);
-	    //         break;
-	    //     case 'overStock':
-	    //         $data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, $asc, $area, 30, null, $brand, $ba, $store, $limit, $offset, $withba);
-	    //         break;
-	    //     case 'npd':
-	    //     	$item_class_filter = ['N-New Item'];
-	    //        $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'npd', $item_class_filter, $withba);
-	    //         break;
-	    //     case 'hero':
-	    //             $item_class_filter = [
-		// 				'A-Top 500 Pharma/Beauty',
-		// 				//'AU-Top', to follow
-		// 				'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty',
-		// 				'B-Remaining Class B net of BU Pharma/Beauty'
+		$target_sales = $amountPerDay * $noOfDays;
+		// $baId = 10;
+		// $storeId = 1;
+		$baCode = null;
 
-		// 			];
-	    //         $data = $this->Dashboard_model->asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $ba, $store, $limit, $offset, 'hero', $item_class_filter, $withba);
-	    //         break;
-	    //     default:
-	    //     	$data = $this->Dashboard_model->asc_dashboard_table_data($year, $month, 20, 30, $brand, $ba, $store, $limit, $offset);
-	    // }
-	    // return $this->response->setJSON([
-	    //     'draw' => intval($this->request->getVar('draw')),
-	    //     'recordsTotal' => $data['total_records'],
-	    //     'recordsFiltered' => $data['total_records'],
-	    //     'data' => $data['data'],
-	    // ]);	
-	    return $this->response->setJSON([
-	        'draw' => intval($this->request->getVar('draw')),
-	        'recordsTotal' => 0,
-	        'recordsFiltered' => 0,
-	        'data' => []
-	    ]);	
+		if($baId){
+			if($baId == -5 || $baId == -6){
+				$baCode = null;	
+			}else{
+				$baCode = $this->Global_model->get_by_id('tbl_brand_ambassador', $baId);
+				$baCode = $baCode[0]->code;
+			}
+		}
+		$storeCode = null;
+		if($storeId){
+			$storeCode = $this->Global_model->get_by_id('tbl_store', $storeId);
+			$storeCode = $storeCode[0]->code;
+		}
+
+		if($latest_year){
+
+		    $filters = [
+			    'year' => $latest_year, 
+			    'asc_id' => $ascId,    
+			    'store_id' => $storeId,
+			    'store_code' => $storeCode,
+			    'area_id' => $areaId,
+			    'ba_id' => $baId,
+			    'brand_ids' => $brandsIds,
+			    'brand_type_ids' => $brandCategoriesIds,
+			    'ba_code' => $baCode,
+			    'year_val' => $latest_year_id,
+			    'ba_type' => $baTypeId,
+			    'default_target' => $amountPerDay
+			];
+			// echo "<pre>";
+			// print_r($filters);
+			// die();
+		    $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+
+		    return $this->response->setJSON([
+		        'data' => $data['data']
+		    ]);
+		}
 	}
 
 	public function generatePdf()

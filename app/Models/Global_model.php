@@ -1094,26 +1094,6 @@ class Global_model extends Model
     // ------------------------------------------------------- My Magnum Opus -------------------------------------------------------
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
     
-    function get_vmi($vmiOffset) {
-        $query = $this->db->query("CALL get_vmi($vmiOffset)");
-        return $query->getResultArray(); // Return data as an array
-    }
-
-    function get_vmi_where_in($vmiIds) {
-        $query = $this->db->query("CALL get_vmi_where_in($vmiIds)");
-        return $query->getResultArray(); // Return data as an array
-    }
-
-    function get_vmi_count() {
-        $query = $this->db->query("CALL get_vmi_count()");
-        return $query->getResultArray(); // Return data as an array
-    }
-
-    function get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany) {
-        $query = $this->db->query("CALL get_vmi_data($vmiYear, $vmiMonth, $vmiWeek, $vmiCompany)");
-        return $query->getResultArray(); // Return data as an array
-    }
-
     //additional temp
     function getBrandData($order, $limit, $offset) {
         $select = 'id, brand_code, brand_description';
@@ -1150,101 +1130,6 @@ class Global_model extends Model
 
             return $results;
     }
-
-    // function get_valid_records_ba_area_store_brand() {
-    //     $builder = $this->db->table('tbl_brand_ambassador ba');
-    //     $builder->select("
-    //         ba.id,
-    //         ba.code,
-    //         ba.store AS store_id,
-    //         ba.area AS area_id,
-    //         ba.name AS ba_name,
-    //         s.code AS store_code,
-    //         a.code AS area_code,
-    //         GROUP_CONCAT(b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
-    //     ");
-    //     $builder->where('ba.status', 1);
-    //     $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
-    //     $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
-    //     $builder->join('tbl_store s', 'ba.store = s.id', 'left');
-    //     $builder->join('tbl_area a', 'ba.area = a.id', 'left');
-    //     $builder->groupBy('ba.id');
-
-    //     $results = $builder->get()->getResultArray();
-
-    //     return $results;
-    // }
-
-    // function get_valid_records_ba_area_store_brand() {
-    //     $builder = $this->db->table('tbl_store_group sg');
-    //     $builder->select("
-    //         a.id AS area_id,
-    //         a.description AS area_name,
-    //         a.code AS area_code,
-    //         asc.code AS asc_code,
-    //         asc.description AS asc_name,
-    //         GROUP_CONCAT(DISTINCT s.id ORDER BY s.id SEPARATOR ', ') AS store_id,
-    //         GROUP_CONCAT(DISTINCT s.code ORDER BY s.code SEPARATOR ', ') AS store_code,
-    //         GROUP_CONCAT(DISTINCT s.description ORDER BY s.description SEPARATOR ', ') AS store_name,
-    //         GROUP_CONCAT(DISTINCT b.id ORDER BY b.id SEPARATOR ', ') AS brand_id,
-    //         GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brand_name,
-    //         GROUP_CONCAT(DISTINCT
-    //             CASE
-    //                 WHEN bag.brand_ambassador_id = -5 THEN '-5'
-    //                 WHEN bag.brand_ambassador_id = -6 THEN '-6'
-    //                 WHEN ba.status = 1 THEN ba.code
-    //                 ELSE NULL
-    //             END
-    //             ORDER BY ba.code SEPARATOR ', '
-    //         ) AS brand_ambassador_code,
-    //         GROUP_CONCAT(DISTINCT
-    //             CASE
-    //                 WHEN bag.brand_ambassador_id = -5 THEN 'Vacant'
-    //                 WHEN bag.brand_ambassador_id = -6 THEN 'Non BA'
-    //                 WHEN ba.status = 1 THEN ba.name
-    //                 ELSE NULL
-    //             END
-    //             ORDER BY ba.name SEPARATOR ', '
-    //         ) AS brand_ambassador_name,
-    //         GROUP_CONCAT(DISTINCT
-    //                 CASE
-    //                     WHEN bag.brand_ambassador_id = -5 THEN '-5'
-    //                     WHEN bag.brand_ambassador_id = -6 THEN '-6'
-    //                     WHEN ba.status = 1 THEN ba.id
-    //                     ELSE NULL
-    //                 END
-    //                 ORDER BY ba.id SEPARATOR ', '
-    //             ) AS brand_ambassador_id
-    //     ");
-
-    //     $builder->join('tbl_area a', 'a.id = sg.area_id', 'left');
-    //     $builder->join('tbl_store s', 's.id = sg.store_id', 'left');
-    //     $builder->join('tbl_brand_ambassador_group bag', 'bag.store_id = s.id', 'left');
-    //     $builder->join('tbl_brand_ambassador ba', 'ba.id = bag.brand_ambassador_id', 'left');
-    //     $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
-    //     $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
-    //     $builder->join('tbl_area_sales_coordinator asc', 'asc.area_id = a.id', 'left');
-
-    //     $builder->where('a.status', 1);
-    //     $builder->where('s.status', 1);
-    //     $builder->groupStart()
-    //         ->where('asc.id IS NULL')
-    //         ->orWhere('asc.status', 1)
-    //     ->groupEnd();
-
-    //     // Conditional filter: BA must be active if exists (not -5/-6)
-    //     // $builder->groupStart()
-    //     //     ->where('ba.id IS NULL')
-    //     //     ->orWhere('ba.status', 1)
-    //     // ->groupEnd();
-
-    //     // Do not filter by ba.status to include -5 and -6
-
-    //     $builder->groupBy('a.code');
-    //     //$builder->groupBy('asc.id');
-
-    //     return $builder->get()->getResultArray();
-    // }
 
     function get_valid_records_ba_area_store_brand() {
         $builder = $this->db->table('tbl_store_group sg');
@@ -1309,79 +1194,72 @@ class Global_model extends Model
         return $builder->get()->getResultArray();
     }
 
-function get_valid_records_store_area_asc_ba_brand() {
-    $builder = $this->db->table('tbl_store s');
+    function get_valid_records_store_area_asc_ba_brand() {
+        $builder = $this->db->table('tbl_store s');
 
-    $builder->select("
-        sg.area_id AS sg_area_id,
-        sg.store_id AS sg_store_id,
+        $builder->select("
+            sg.area_id AS sg_area_id,
+            sg.store_id AS sg_store_id,
 
-        s.id AS store_id,
-        s.code AS store_code,
-        s.description AS store_name,
+            s.id AS store_id,
+            s.code AS store_code,
+            s.description AS store_name,
 
-        a.id AS area_id,
-        a.code AS area_code,
-        a.description AS area_name,
+            a.id AS area_id,
+            a.code AS area_code,
+            a.description AS area_name,
 
-        ba.type AS ba_types,
-        GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.id ELSE NULL END SEPARATOR ', ') AS asc_id,
-        GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.code ELSE NULL END SEPARATOR ', ') AS asc_code,
-        GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.description ELSE NULL END SEPARATOR ', ') AS asc_name,
+            ba.type AS ba_types,
+            GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.id ELSE NULL END SEPARATOR ', ') AS asc_id,
+            GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.code ELSE NULL END SEPARATOR ', ') AS asc_code,
+            GROUP_CONCAT(DISTINCT CASE WHEN asc.status = 1 THEN asc.description ELSE NULL END SEPARATOR ', ') AS asc_name,
 
-        GROUP_CONCAT(DISTINCT
-            CASE
-                WHEN bag.brand_ambassador_id = -5 THEN '-5'
-                WHEN bag.brand_ambassador_id = -6 THEN '-6'
-                WHEN ba.status = 1 THEN ba.code
-                ELSE NULL
-            END
-            ORDER BY ba.code SEPARATOR ', '
-        ) AS brand_ambassador_code,
+            GROUP_CONCAT(DISTINCT
+                CASE
+                    WHEN bag.brand_ambassador_id = -5 THEN '-5'
+                    WHEN bag.brand_ambassador_id = -6 THEN '-6'
+                    WHEN ba.status = 1 THEN ba.code
+                    ELSE NULL
+                END
+                ORDER BY ba.code SEPARATOR ', '
+            ) AS brand_ambassador_code,
 
-        GROUP_CONCAT(DISTINCT
-            CASE
-                WHEN bag.brand_ambassador_id = -5 THEN 'Vacant'
-                WHEN bag.brand_ambassador_id = -6 THEN 'Non BA'
-                WHEN ba.status = 1 THEN ba.name
-                ELSE NULL
-            END
-            ORDER BY ba.name SEPARATOR ', '
-        ) AS brand_ambassador_name,
+            GROUP_CONCAT(DISTINCT
+                CASE
+                    WHEN bag.brand_ambassador_id = -5 THEN 'Vacant'
+                    WHEN bag.brand_ambassador_id = -6 THEN 'Non BA'
+                    WHEN ba.status = 1 THEN ba.name
+                    ELSE NULL
+                END
+                ORDER BY ba.name SEPARATOR ', '
+            ) AS brand_ambassador_name,
 
-        GROUP_CONCAT(DISTINCT
-            CASE
-                WHEN bag.brand_ambassador_id = -5 THEN '-5'
-                WHEN bag.brand_ambassador_id = -6 THEN '-6'
-                WHEN ba.status = 1 THEN ba.id
-                ELSE NULL
-            END
-            ORDER BY ba.id SEPARATOR ', '
-        ) AS brand_ambassador_id,
+            GROUP_CONCAT(DISTINCT
+                CASE
+                    WHEN bag.brand_ambassador_id = -5 THEN '-5'
+                    WHEN bag.brand_ambassador_id = -6 THEN '-6'
+                    WHEN ba.status = 1 THEN ba.id
+                    ELSE NULL
+                END
+                ORDER BY ba.id SEPARATOR ', '
+            ) AS brand_ambassador_id,
 
-        GROUP_CONCAT(DISTINCT b.id ORDER BY b.id SEPARATOR ', ') AS brand_id,
-        GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brand_name
-    ");
+            GROUP_CONCAT(DISTINCT b.id ORDER BY b.id SEPARATOR ', ') AS brand_id,
+            GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brand_name
+        ");
 
-    $builder->join('tbl_store_group sg', 'sg.store_id = s.id', 'left');
-    $builder->join('tbl_area a', 'a.id = sg.area_id', 'left');
-    $builder->join('tbl_area_sales_coordinator asc', 'asc.area_id = a.id', 'left');
-    $builder->join('tbl_brand_ambassador_group bag', 'bag.store_id = s.id', 'left');
-    $builder->join('tbl_brand_ambassador ba', 'ba.id = bag.brand_ambassador_id', 'left');
-    $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
-    $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
+        $builder->join('tbl_store_group sg', 'sg.store_id = s.id', 'left');
+        $builder->join('tbl_area a', 'a.id = sg.area_id', 'left');
+        $builder->join('tbl_area_sales_coordinator asc', 'asc.area_id = a.id', 'left');
+        $builder->join('tbl_brand_ambassador_group bag', 'bag.store_id = s.id', 'left');
+        $builder->join('tbl_brand_ambassador ba', 'ba.id = bag.brand_ambassador_id', 'left');
+        $builder->join('tbl_ba_brands bba', 'ba.id = bba.ba_id', 'left');
+        $builder->join('tbl_brand b', 'bba.brand_id = b.id', 'left');
 
-    $builder->where('s.status', 1); // include only active stores
-    $builder->groupBy('s.id');
+        $builder->where('s.status', 1); // include only active stores
+        $builder->groupBy('s.id');
 
-    return $builder->get()->getResultArray();
-}
-
-
-
-    function getWeeks() {
-        $query = $this->db->query("CALL get_weeks()");
-        return $query->getResultArray(); // Return data as an array
+        return $builder->get()->getResultArray();
     }
 
     function getMonths() {

@@ -186,189 +186,6 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	// public function dataPerStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null)
-	// {
-	// 	$baType = ($baType !== null) ? strval($baType) : null;
-	// 	$storeFilterConditions = [];
-
-	// 	if (!empty($baId)) {
-	// 		$baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
-	// 		foreach ($baIds as $id) {
-	// 			$storeFilterConditions[] = "EXISTS (
-	// 				SELECT 1 FROM tbl_vmi_pre_aggregated_ba_ids b
-	// 				WHERE b.pre_aggregated_id = v.id AND b.ba_id = $id
-	// 			)";
-	// 		}
-	// 	}
-
-	// 	$storeFilterConditionsVmi = [];
-
-	// 	if (!empty($brands)) {
-	// 		$brands = array_map('trim', $brands);
-	// 		foreach ($brands as $brand) {
-	// 			$escaped = db_connect()->escape($brand);
-	// 			$storeFilterConditionsVmi[] = "EXISTS (
-	// 				SELECT 1 FROM tbl_vmi_pre_aggregated_brand_ids bb
-	// 				WHERE bb.pre_aggregated_id = vmi.id AND bb.brand_id = $escaped
-	// 			)";
-	// 		}
-	// 	}
-
-	// 	if (!empty($ItemClasses)) {
-	// 		$ItemClasses = array_map('trim', $ItemClasses);
-	// 		$ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class)", $ItemClasses);
-	// 		$storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
-	// 	}
-
-	// 	$allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
-	// 	$allowedOrderDirections = ['ASC', 'DESC'];
-
-	// 	if (!in_array($orderByColumn, $allowedOrderColumns)) $orderByColumn = 'sum_total_qty';
-	// 	if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) $orderDirection = 'DESC';
-
-	// 	$storeFilterSQL = !empty($storeFilterConditions) ? 'WHERE ' . implode(' AND ', $storeFilterConditions) : '';
-	// 	$storeFilterSQLVmi = !empty($storeFilterConditionsVmi) ? ' AND ' . implode(' AND ', $storeFilterConditionsVmi) : '';
-
-	// 	$baTypeFilter = ($baType !== null && $baType != 3) ? ' AND v.ba_types = ?' : '';
-	// 	$baTypeParams = ($baType !== null && $baType != 3) ? [$baType] : [];
-
-	// 	$companyIdFilter = ($companyId !== null && $companyId != 3) ? ' AND v.company = ?' : '';
-	// 	$companyIdParams = ($companyId !== null && $companyId != 3) ? [$companyId] : [];
-
-	// 	$storeFilter = ($storeId !== null) ? ' AND v.store_id = ?' : '';
-	// 	$storeParams = ($storeId !== null) ? [$storeId] : [];
-
-	// 	$baTypeFilterVmi = str_replace('v.', 'vmi.', $baTypeFilter);
-	// 	$companyIdFilterVmi = str_replace('v.', 'vmi.', $companyIdFilter);
-	// 	$storeFilterVmi = str_replace('v.', 'vmi.', $storeFilter);
-
-	// 	$ascIdFilter = $ascIdFilterVmi = '';
-	// 	$ascIdParams = [];
-
-	// 	if ($ascId !== null) {
-	// 		$ascIdFilter = ' AND v.asc_id = ?';
-	// 		$ascIdFilterVmi = ' AND vmi.asc_id = ?';
-	// 		$ascIdParams = [$ascId];
-	// 	}
-
-	// 	$itemCatFilter = $itemCatFilterVmi = '';
-	// 	$itemCatParams = [];
-
-	// 	if ($itemCat !== null) {
-	// 		$itemCatFilter = ' AND v.itmclacde = ?';
-	// 		$itemCatFilterVmi = ' AND vmi.itmclacde = ?';
-	// 		$itemCatParams = [$itemCat];
-	// 	}
-
-	// 	$areaIdFilter = $areaIdFilterVmi = '';
-	// 	$areaIdParams = [];
-
-	// 	if ($areaId !== null) {
-	// 		$areaIdFilter = ' AND v.area_id = ?';
-	// 		$areaIdFilterVmi = ' AND vmi.area_id = ?';
-	// 		$areaIdParams = [$areaId];
-	// 	}
-
-	// 	$sql = "
-	// 		WITH filtered_stores AS (
-	// 			SELECT DISTINCT v.store_id
-	// 			FROM tbl_vmi_pre_aggregated_data v
-	// 			WHERE v.week = ?
-	// 			  AND v.year = ?
-	// 			  {$ascIdFilter}
-	// 			  {$areaIdFilter}
-	// 			  {$itemCatFilter}
-	// 			  $baTypeFilter
-	// 			  $companyIdFilter
-	// 			  $storeFilter
-	// 		),
-	// 		store_matches AS (
-	// 			SELECT fs.store_id
-	// 			FROM filtered_stores fs
-	// 			JOIN tbl_vmi_pre_aggregated_data v ON fs.store_id = v.store_id
-	// 			$storeFilterSQL
-	// 			GROUP BY fs.store_id
-	// 		)
-	// 		SELECT 
-	// 			vmi.item,
-	// 			vmi.item_name,
-	// 			vmi.area_id,
-	// 			vmi.itmcde,
-	// 			vmi.item_class,
-	// 			vmi.brand_type_id, 
-	// 			GROUP_CONCAT(DISTINCT vmi.company) AS company,
-	// 			COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
-	// 			FORMAT(SUM(vmi.total_qty), 2) AS sum_total_qty,
-	// 			SUM(vmi.average_sales_unit) AS sum_ave_sales,
-	// 			FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
-	// 			ROUND(
-	// 				CASE 
-	// 					WHEN SUM(vmi.average_sales_unit) > 0 
-	// 					THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
-	// 					ELSE 0 
-	// 				END, 2
-	// 			) AS weeks,
-	// 			(
-	// 				SELECT GROUP_CONCAT(DISTINCT ba_id)
-	// 				FROM tbl_vmi_pre_aggregated_ba_ids
-	// 				WHERE pre_aggregated_id = vmi.id
-	// 			) AS ba_ids,
-	// 			GROUP_CONCAT(DISTINCT CASE WHEN vmi.ba_types IS NOT NULL AND vmi.ba_types != '' THEN vmi.ba_types END) AS ba_types,
-	// 			(
-	// 				SELECT GROUP_CONCAT(DISTINCT brand_id)
-	// 				FROM tbl_vmi_pre_aggregated_brand_ids
-	// 				WHERE pre_aggregated_id = vmi.id
-	// 			) AS brand_ids,
-	// 			GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
-	// 			GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids,
-	// 			COUNT(*) OVER() AS total_records
-	// 		FROM tbl_vmi_pre_aggregated_data vmi
-	// 		JOIN store_matches sm ON vmi.store_id = sm.store_id
-	// 		WHERE vmi.week = ?
-	// 		  AND vmi.year = ?
-	// 		  {$ascIdFilterVmi}
-	// 		  {$areaIdFilterVmi}
-	// 		  {$itemCatFilterVmi}
-	// 		  $baTypeFilterVmi
-	// 		  $companyIdFilterVmi
-	// 		  $storeFilterVmi
-	// 		  $storeFilterSQLVmi
-	// 		GROUP BY vmi.item
-	// 		HAVING weeks > ?
-	// 		   AND (? IS NULL OR weeks <= ?)
-	// 		ORDER BY {$orderByColumn} {$orderDirection}
-	// 		LIMIT ? OFFSET ?
-	// 	";
-
-	// 	$params = [];
-
-	// 	$params[] = $week;
-	// 	$params[] = $year;
-	// 	if ($ascId !== null) $params[] = $ascId;
-	// 	if ($areaId !== null) $params[] = $areaId;
-	// 	if ($itemCat !== null) $params[] = $itemCat;
-	// 	$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
-
-	// 	$params[] = $week;
-	// 	$params[] = $year;
-	// 	if ($ascId !== null) $params[] = $ascId;
-	// 	if ($areaId !== null) $params[] = $areaId;
-	// 	if ($itemCat !== null) $params[] = $itemCat;
-	// 	$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
-
-	// 	$params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
-
-	// 	$query = $this->db->query($sql, $params);
-	// 	$data = $query->getResult();
-	// 	$totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-
-	// 	return [
-	// 		'total_records' => $totalRecords,
-	// 		'data' => $data
-	// 	];
-	// }
-
-
 	public function getItemClassNPDHEROData($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null) {
 
 		$baType = ($baType !== null) ? strval($baType) : null;
@@ -915,8 +732,7 @@ class Dashboard_model extends Model
 	    $limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, 
 	    $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, 
 	    $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, 
-	    $remainingDays = null, $brand_category = null, $brandIds = null
-	) {
+	    $remainingDays = null, $brand_category = null, $brandIds = null) {
 	    $startDate = $tyYear . '-' . $monthFrom . '-01';
 	    $endDate = $tyYear . '-' . $monthTo . '-31';
 	    $brandIds = is_array($brandIds) ? $brandIds : [];
@@ -1163,687 +979,503 @@ class Dashboard_model extends Model
 	    return $query;
 	}
 
-	public function tradeOverallBaDataASC($filters = []) {
-
-		$whereClausesSR = [];
-		$whereClausesSODD = [];
-		$whereClausesTSPS = [];
-    	$params = [];
-
-	    if (!empty($filters['asc_id'])) {
-	        $whereClausesSR[] = "(a_asc.id = :asc_id:)";
-	        $whereClausesSODD[] = "(a_asc.id = :asc_id:)";
-	        $whereClausesTSPS[] = "(a_asc.id = :asc_id:)";
-	        $params['asc_id'] = $filters['asc_id'];
-	    }
-	    if (!empty($filters['area_id'])) {
-	        $whereClausesSR[] = "(ar.id = :area_id: OR ba.area = :area_id: OR s.area_id = :area_id:)";
-	        $whereClausesSODD[] = "(ar.id = :area_id:)";
-	        $whereClausesTSPS[] = "(ar.id = :area_id:)";
-	        $params['area_id'] = $filters['area_id'];
-	    }
-	    if (!empty($filters['brand_id'])) {
-	        $whereClausesSR[] = "(b.id = :brand_id: OR s.brand = :brand_id:)";
-	        $whereClausesSODD[] = "(b.id = :brand_id:)";
-	        $whereClausesTSPS[] = "(b.id = :brand_id:)";
-	        $params['brand_id'] = $filters['brand_id'];
-	    }
-	    if (!empty($filters['store_id'])) {
-	        $whereClausesSR[] = "(st.id = :store_id: OR ba.store = :store_id: OR s.store_id = :store_id:)";
-	        $whereClausesSODD[] = "(st.id = :store_id: OR ba.store = :store_id:)";
-	        $whereClausesTSPS[] = "(st.id = :store_id: OR ba.store = :store_id:)";
-	        $params['store_id'] = $filters['store_id'];
-	    }
-	    if (!empty($filters['ba_id'])) {
-	        $whereClausesSR[] = "(ba.id = :ba_id: OR s.ba_id = :ba_id:)";
-	        $whereClausesSODD[] = "(ba.id = :ba_id:)";
-	        $whereClausesTSPS[] = "(ba.id = :ba_id:)";
-	        $params['ba_id'] = $filters['ba_id'];
-	    }
-
-	if (!empty($filters['year'])) {
-	    $year = $filters['year'];
-	    $nextYear = $year + 1;
-	    $LastYear = $year - 1;
-	    $whereClausesSR[] = "(s.date >= '$year-01-01' AND s.date < '$nextYear-01-01')";
-	    $whereClausesSODD[] = "(sodd.year = '$LastYear')";
-	}	
-	if (!empty($filters['year_val'])) {
-		$year = $filters['year_val'];
-		$whereClausesTSPS[] = "(tsps.year = '$year')";	
-	}	 
-
-	$whereSQLSR = !empty($whereClausesSR) ? "WHERE " . implode(" AND ", $whereClausesSR) : "";
-	$whereSQLSODD = !empty($whereClausesSODD) ? "WHERE " . implode(" AND ", $whereClausesSODD) : "";
-	$whereSQLTSPS = !empty($whereClausesTSPS) ? "WHERE " . implode(" AND ", $whereClausesTSPS) : "";
-	    $sql = "
-	        WITH monthly_totals AS (
-			    SELECT 
-			        -- SUM(DISTINCT CASE WHEN MONTH(s.date) = 1 THEN s.amount ELSE 0 END) AS amount_january,
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 2 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_february,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 3 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_march,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 4 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_april,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 5 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_may,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 6 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_june,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 7 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_july,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 8 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_august,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 9 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_september,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 10 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_october,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 11 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_november,
-			        
-			        -- SUM(DISTINCT CASE 
-			        --     WHEN MONTH(s.date) = 12 THEN s.amount 
-			        --     ELSE 0 
-			        -- END) AS amount_december,
-					SUM(DISTINCT CASE WHEN MONTH(s.date) = 1 THEN 0 ELSE 0 END) AS amount_january,
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 2 THEN 0 
-			            ELSE 0 
-			        END) AS amount_february,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 3 THEN 0 
-			            ELSE 0 
-			        END) AS amount_march,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 4 THEN 0
-			            ELSE 0 
-			        END) AS amount_april,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 5 THEN 0
-			            ELSE 0 
-			        END) AS amount_may,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 6 THEN 0
-			            ELSE 0 
-			        END) AS amount_june,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 7 THEN 0
-			            ELSE 0 
-			        END) AS amount_july,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 8 THEN 0
-			            ELSE 0 
-			        END) AS amount_august,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 9 THEN 0 
-			            ELSE 0 
-			        END) AS amount_september,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 10 THEN 0
-			            ELSE 0 
-			        END) AS amount_october,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 11 THEN 0
-			            ELSE 0 
-			        END) AS amount_november,
-			        
-			        SUM(DISTINCT CASE 
-			            WHEN MONTH(s.date) = 12 THEN 0
-			            ELSE 0 
-			        END) AS amount_december,
-                	GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS ba_sales_brands,
-		            GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ba_sales_brand_ambassadors,
-		            GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS ba_sales_asc_names,
-		            GROUP_CONCAT(DISTINCT st.description ORDER BY st.description SEPARATOR ', ') AS ba_sales_stores,
-		            GROUP_CONCAT(DISTINCT ar.description ORDER BY ar.description SEPARATOR ', ') AS ba_sales_areas
-	            FROM tbl_ba_sales_report s
-	            LEFT JOIN tbl_brand b ON s.brand = b.id
-	            LEFT JOIN tbl_store st ON s.store_id = st.id
-		        LEFT JOIN tbl_brand_ambassador ba ON ba.id = s.ba_id
-		        LEFT JOIN tbl_area a ON ba.area = a.id
-		        LEFT JOIN tbl_area_sales_coordinator a_asc ON a.id = a_asc.area_id
-		        LEFT JOIN tbl_area ar ON s.area_id = ar.id
-				$whereSQLSR
-			        
-	        ),
-	        net_sales_totals AS (
-            SELECT 
-                -- ROUND(SUM(CASE WHEN sodd.month = 1 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_january,
-                -- ROUND(SUM(CASE WHEN sodd.month = 2 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_february,
-                -- ROUND(SUM(CASE WHEN sodd.month = 3 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_march,
-                -- ROUND(SUM(CASE WHEN sodd.month = 4 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_april,
-                -- ROUND(SUM(CASE WHEN sodd.month = 5 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_may,
-                -- ROUND(SUM(CASE WHEN sodd.month = 6 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_june,
-                -- ROUND(SUM(CASE WHEN sodd.month = 7 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_july,
-                -- ROUND(SUM(CASE WHEN sodd.month = 8 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_august,
-                -- ROUND(SUM(CASE WHEN sodd.month = 9 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_september,
-                -- ROUND(SUM(CASE WHEN sodd.month = 10 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_october,
-                -- ROUND(SUM(CASE WHEN sodd.month = 11 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_november,
-                -- ROUND(SUM(CASE WHEN sodd.month = 12 THEN sodd.net_sales ELSE 0 END), 2) AS net_sales_december,
-
-                ROUND(SUM(0), 0) AS net_sales_january,
-                ROUND(SUM(0), 0) AS net_sales_february,
-                ROUND(SUM(0), 0) AS net_sales_march,
-                ROUND(SUM(0), 0) AS net_sales_april,
-                ROUND(SUM(0), 0) AS net_sales_may,
-                ROUND(SUM(0), 0) AS net_sales_june,
-                ROUND(SUM(0), 0) AS net_sales_july,
-                ROUND(SUM(0), 0) AS net_sales_august,
-                ROUND(SUM(0), 0) AS net_sales_september,
-                ROUND(SUM(0), 0) AS net_sales_october,
-                ROUND(SUM(0), 0) AS net_sales_november,
-                ROUND(SUM(0), 0) AS net_sales_december,
-                -- bd.brand_ambassadors AS net_sales_brand_ambassadors,
-                -- bd.ba_types AS net_sales_ba_types,
-                -- bd.ba_deployment_dates AS net_sales_ba_deployment_dates,
-                -- bd.brands AS net_sales_brands,
-                -- st.description AS net_sales_stores,
-                -- bd.asc_name AS net_sales_asc_names,
-                -- bd.area_name AS net_sales_areas
-
-            	GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS net_sales_brands,
-	            GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS net_sales_brand_ambassadors,
-	            GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS net_sales_asc_names,
-	            GROUP_CONCAT(DISTINCT st.description ORDER BY st.description SEPARATOR ', ') AS net_sales_stores,
-	            GROUP_CONCAT(DISTINCT ar.description ORDER BY ar.description SEPARATOR ', ') AS net_sales_areas
-	        FROM tbl_sell_out_data_details sodd
-	        LEFT JOIN tbl_store st ON st.code = sodd.store_code
-	        LEFT JOIN tbl_brand_ambassador ba ON st.id = ba.store
-            LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-            LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-            LEFT JOIN tbl_area ar ON ba.area = ar.id
-            LEFT JOIN tbl_area_sales_coordinator a_asc ON ar.id = a_asc.area_id
-	        $whereSQLSODD
-	        ),
-	        target_sales_totals AS (
-            SELECT 
-                -- COALESCE(SUM(tsps.january), 0) AS target_sales_january,
-                -- COALESCE(SUM(tsps.february), 0) AS target_sales_february,
-                -- COALESCE(SUM(tsps.march), 0) AS target_sales_march,
-                -- COALESCE(SUM(tsps.april), 0) AS target_sales_april,
-                -- COALESCE(SUM(tsps.may), 0) AS target_sales_may,
-                -- COALESCE(SUM(tsps.june), 0) AS target_sales_june,
-                -- COALESCE(SUM(tsps.july), 0) AS target_sales_july,
-                -- COALESCE(SUM(tsps.august), 0) AS target_sales_august,
-                -- COALESCE(SUM(tsps.september), 0) AS target_sales_september,
-                -- COALESCE(SUM(tsps.october), 0) AS target_sales_october,
-                -- COALESCE(SUM(tsps.november), 0) AS target_sales_november,
-                -- COALESCE(SUM(tsps.december), 0) AS target_sales_december,
- 				COALESCE(SUM(0), 0) AS target_sales_january,
-                COALESCE(SUM(0), 0) AS target_sales_february,
-                COALESCE(SUM(0), 0) AS target_sales_march,
-                COALESCE(SUM(0), 0) AS target_sales_april,
-                COALESCE(SUM(0), 0) AS target_sales_may,
-                COALESCE(SUM(0), 0) AS target_sales_june,
-                COALESCE(SUM(0), 0) AS target_sales_july,
-                COALESCE(SUM(0), 0) AS target_sales_august,
-                COALESCE(SUM(0), 0) AS target_sales_september,
-                COALESCE(SUM(0), 0) AS target_sales_october,
-                COALESCE(SUM(0), 0) AS target_sales_november,
-                COALESCE(SUM(0), 0) AS target_sales_december,
-                GROUP_CONCAT(DISTINCT st.description ORDER BY st.description SEPARATOR ', ') AS tsps_stores,
-                GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS tsps_brands,
-        		GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS tsps_brand_ambassadors,
-        		GROUP_CONCAT(DISTINCT a_asc.description ORDER BY a_asc.description SEPARATOR ', ') AS tsps_asc_names,
-        		GROUP_CONCAT(DISTINCT ar.description ORDER BY ar.description SEPARATOR ', ') AS tsps_areas
-	        FROM tbl_target_sales_per_store tsps
-	        LEFT JOIN tbl_store st ON st.id = tsps.location
-	        LEFT JOIN tbl_brand_ambassador ba ON ba.code = tsps.ba_code
-	        LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-	        LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-	        LEFT JOIN tbl_area ar ON ba.area = ar.id
-	        LEFT JOIN tbl_area_sales_coordinator a_asc ON ar.id = a_asc.area_id
-	        $whereSQLTSPS
-	        )
-	        SELECT
-        		nst.*,
-        		mt.*,
-        		tst.*,
-        		ROUND(mt.amount_january / NULLIF(nst.net_sales_january, 0), 2) AS growth_january,
-			    ROUND(mt.amount_february / NULLIF(nst.net_sales_february, 0), 2) AS growth_february,
-			    ROUND(mt.amount_march / NULLIF(nst.net_sales_march, 0), 2) AS growth_march,
-			    ROUND(mt.amount_april / NULLIF(nst.net_sales_april, 0), 2) AS growth_april,
-			    ROUND(mt.amount_may / NULLIF(nst.net_sales_may, 0), 2) AS growth_may,
-			    ROUND(mt.amount_june / NULLIF(nst.net_sales_june, 0), 2) AS growth_june,
-			    ROUND(mt.amount_july / NULLIF(nst.net_sales_july, 0), 2) AS growth_july,
-			    ROUND(mt.amount_august / NULLIF(nst.net_sales_august, 0), 2) AS growth_august,
-			    ROUND(mt.amount_september / NULLIF(nst.net_sales_september, 0), 2) AS growth_september,
-			    ROUND(mt.amount_october / NULLIF(nst.net_sales_october, 0), 2) AS growth_october,
-			    ROUND(mt.amount_november / NULLIF(nst.net_sales_november, 0), 2) AS growth_november,
-			    ROUND(mt.amount_december / NULLIF(nst.net_sales_december, 0), 2) AS growth_december,
-			    ROUND((mt.amount_january / NULLIF(tst.target_sales_january, 0)) * 100, 2) AS achieved_january,
-			    ROUND((mt.amount_february / NULLIF(tst.target_sales_february, 0)) * 100, 2) AS achieved_february,
-			    ROUND((mt.amount_march / NULLIF(tst.target_sales_march, 0)) * 100, 2) AS achieved_march,
-			    ROUND((mt.amount_april / NULLIF(tst.target_sales_april, 0)) * 100, 2) AS achieved_april,
-			    ROUND((mt.amount_may / NULLIF(tst.target_sales_may, 0)) * 100, 2) AS achieved_may,
-			    ROUND((mt.amount_june / NULLIF(tst.target_sales_june, 0)) * 100, 2) AS achieved_june,
-			    ROUND((mt.amount_july / NULLIF(tst.target_sales_july, 0)) * 100, 2) AS achieved_july,
-			    ROUND((mt.amount_august / NULLIF(tst.target_sales_august, 0)) * 100, 2) AS achieved_august,
-			    ROUND((mt.amount_september / NULLIF(tst.target_sales_september, 0)) * 100, 2) AS achieved_september,
-			    ROUND((mt.amount_october / NULLIF(tst.target_sales_october, 0)) * 100, 2) AS achieved_october,
-			    ROUND((mt.amount_november / NULLIF(tst.target_sales_november, 0)) * 100, 2) AS achieved_november,
-			    ROUND((mt.amount_december / NULLIF(tst.target_sales_december, 0)) * 100, 2) AS achieved_december
-	        FROM monthly_totals mt, net_sales_totals nst, target_sales_totals tst
-	    ";
-
-	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResult();
-
-	    return [
-	        'data' => $data
-	    ];
-	}
-
-	public function overallAscSalesReport($filters = [])
+	public function tradeOverallBaDataASC(array $filters = [])
 	{
-	    $whereClausesSR = [];
-	    $whereClausesSODD = [];
-	    $whereClausesTSPS = [];
 	    $params = [];
+	    $whereClausesASR = [];
+	    $whereClausesLYSO = [];
+	    $whereClausesTYSO = [];
+	    $whereClausesTS = [];
 
 	    if (!empty($filters['asc_id'])) {
-	        $whereClausesSR[] = "(a_asc.id = :asc_id:)";
-	        $whereClausesSODD[] = "(a_asc.id = :asc_id:)";
-	        $whereClausesTSPS[] = "(a_asc.id = :asc_id:)";
+	        $whereClausesASR[] = "(s.asc_id = :asc_id:)";
+	        $whereClausesLYSO[] = "(asc_id = :asc_id:)";
+	        $whereClausesTYSO[] = "(asc_id = :asc_id:)";
+	        $whereClausesTS[] = "(asc_id = :asc_id:)";
 	        $params['asc_id'] = $filters['asc_id'];
 	    }
 	    if (!empty($filters['area_id'])) {
-	        $whereClausesSR[] = "(ar.id = :area_id: OR ba.area = :area_id: OR s.area_id = :area_id:)";
-	        $whereClausesSODD[] = "(ar.id = :area_id:)";
-	        $whereClausesTSPS[] = "(ar.id = :area_id:)";
+	        $whereClausesASR[] = "(s.area_id = :area_id:)";
+	        $whereClausesLYSO[] = "(area_id = :area_id:)";
+	        $whereClausesTYSO[] = "(area_id = :area_id:)";
+	        $whereClausesTS[] = "(area_id = :area_id:)";
 	        $params['area_id'] = $filters['area_id'];
 	    }
-	    if (!empty($filters['brand_id'])) {
-	        $whereClausesSR[] = "(b.id = :brand_id: OR s.brand = :brand_id:)";
-	        $whereClausesSODD[] = "(b.id = :brand_id:)";
-	        $whereClausesTSPS[] = "(b.id = :brand_id:)";
-	        $params['brand_id'] = $filters['brand_id'];
+
+	    $brandFindSetConditions = [];
+	    if (!empty($filters['brand_ids']) && is_array($filters['brand_ids'])) {
+	        $brandPlaceholders = [];
+	        foreach ($filters['brand_ids'] as $i => $id) {
+	            $key = "brand_id_$i";
+	            $brandPlaceholders[] = ":$key:";
+	            $brandFindSetConditions[] = "FIND_IN_SET(:$key:, brand_ids)";
+	            $params[$key] = $id;
+	        }
+	        $whereClausesASR[] = "s.brand IN (" . implode(',', $brandPlaceholders) . ")"; //single brand 
+	        $whereClausesLYSO[] = "brand_id IN (" . implode(',', $brandPlaceholders) . ")"; //single brand 
+	        $whereClausesTYSO[] = "brand_id IN (" . implode(',', $brandPlaceholders) . ")";//single brand 
+	        $whereClausesTS[] = '(' . implode(' OR ', $brandFindSetConditions) . ')';//multiple brand comma separated brand 
+	     //   $whereClausesTS[] = "FIND_IN_SET(:brand_ids:, brand_ids)";
 	    }
+
+	    if (!empty($filters['brand_type_ids']) && is_array($filters['brand_type_ids'])) {
+	        $brandTypePlaceholders = [];
+	        foreach ($filters['brand_type_ids'] as $i => $id) {
+	            $key = "brand_type_ids_$i";
+	            $brandTypePlaceholders[] = ":$key:";
+	            $params[$key] = $id;
+	        }
+	        $whereClausesLYSO[] = "brand_type_id IN (" . implode(',', $brandTypePlaceholders) . ")";
+	        $whereClausesTYSO[] = "brand_type_id IN (" . implode(',', $brandTypePlaceholders) . ")";
+	    }
+
 	    if (!empty($filters['store_id'])) {
-	        $whereClausesSR[] = "(st.id = :store_id: OR ba.store = :store_id: OR s.store_id = :store_id:)";
-	        $whereClausesSODD[] = "(st.id = :store_id: OR ba.store = :store_id:)";
-	        $whereClausesTSPS[] = "(st.id = :store_id: OR ba.store = :store_id:)";
+	        $whereClausesASR[] = "(s.store_id = :store_id:)";
 	        $params['store_id'] = $filters['store_id'];
 	    }
+
+	    if (!empty($filters['store_code'])) {
+	        $whereClausesLYSO[] = "(store_code = :store_code:)";
+	        $whereClausesTYSO[] = "(store_code = :store_code:)";
+	        $whereClausesTS[] = "(location = :store_code:)";
+	        $params['store_code'] = $filters['store_code'];
+	    }
+
 	    if (!empty($filters['ba_id'])) {
-	        $whereClausesSR[] = "(ba.id = :ba_id: OR s.ba_id = :ba_id:)";
-	        $whereClausesSODD[] = "(ba.id = :ba_id:)";
-	        $whereClausesTSPS[] = "(ba.id = :ba_id:)";
+	        $whereClausesASR[] = "(s.ba_id = :ba_id:)";
+	        $whereClausesLYSO[] = "FIND_IN_SET(:ba_id:, ba_ids)";
+	        $whereClausesTYSO[] = "FIND_IN_SET(:ba_id:, ba_ids)";
 	        $params['ba_id'] = $filters['ba_id'];
 	    }
+
+	    if (!empty($filters['ba_code'])) {
+	        $whereClausesTS[] = "FIND_IN_SET(:ba_code:, ba_code)";
+	        $params['ba_code'] = $filters['ba_code'];
+	    }
+
+	    $baType = $filters['ba_type'] ?? null;
+	    if (isset($baType) && $baType !== '3') {
+	        $whereClausesASR[] = "(s.ba_type = :ba_type:)";
+	        $whereClausesLYSO[] = "(ba_types = :ba_type:)";
+	        $whereClausesTYSO[] = "(ba_types = :ba_type:)";
+	        $whereClausesTS[] = "(ba_types = :ba_type:)";
+	        $params['ba_type'] = $baType;
+	    }
+
 	    if (!empty($filters['year'])) {
 	        $year = $filters['year'];
+	        $year_id = $filters['year_val'];
 	        $nextYear = $year + 1;
 	        $LastYear = $year - 1;
-	        $whereClausesSR[] = "(s.date >= '$year-01-01' AND s.date < '$nextYear-01-01')";
-	        $whereClausesSODD[] = "(sodd.year = '$LastYear')";
-	    }
-	    if (!empty($filters['year_val'])) {
-	        $year = $filters['year_val'];
-	        $whereClausesTSPS[] = "(tsps.year = '$year')";
+	        $whereClausesASR[] = "(s.date >= '$year-01-01' AND s.date < '$nextYear-01-01')";
+	        $whereClausesLYSO[] = "(year = '$LastYear')";
+	        $whereClausesTYSO[] = "(year = '$year')";
+	        $whereClausesTS[] = "(year = '$year_id') AND status = 1";
 	    }
 
-	    $whereSQLSR = !empty($whereClausesSR) ? "WHERE " . implode(" AND ", $whereClausesSR) : "";
-	    $whereSQLSODD = !empty($whereClausesSODD) ? "WHERE " . implode(" AND ", $whereClausesSODD) : "";
-	    $whereSQLTSPS = !empty($whereClausesTSPS) ? "WHERE " . implode(" AND ", $whereClausesTSPS) : "";
+	    $whereSQLASR = !empty($whereClausesASR) ? "WHERE " . implode(" AND ", $whereClausesASR) : "";
+	    $whereSQLLYSO = !empty($whereClausesLYSO) ? "WHERE " . implode(" AND ", $whereClausesLYSO) : "";
+	    $whereSQLTYSO = !empty($whereClausesTYSO) ? "WHERE " . implode(" AND ", $whereClausesTYSO) : "";
+	    $whereSQLTS = !empty($whereClausesTS) ? "WHERE " . implode(" AND ", $whereClausesTS) : "";
+
+	    $defaultTarget = (int)($filters['default_target'] ?? 8000);
+	    $params['default_target'] = $defaultTarget;
+	    $params['ba_code_list'] = $filters['ba_code'] ?? '';
+
+		 $params['ba_id'] = isset($filters['ba_id']) 
+	     ? (is_array($filters['ba_id']) ? implode(',', $filters['ba_id']) : (string)$filters['ba_id']) 
+		     : '';
+		// // Ensure ba_type is set, even if it’s null
+		 $params['ba_type'] = $baType ?? null;
+
+
+		$targetSalesSelect = implode(", ", array_map(function ($m, $c) use ($baType) {
+		    $alias = "target_sales_" . strtolower(substr($c, 0, 3));
+		    if ((string)$baType === '3') {
+		        return "
+		        COALESCE(SUM(
+		            CASE
+		                WHEN ba_types = 0 THEN :default_target:
+		                WHEN ba_types = 1 AND (LENGTH(ba_code) - LENGTH(REPLACE(ba_code, ',', '')) + 1) >= 2 THEN {$c} * 1.3
+		                WHEN ba_types = 1 THEN {$c}
+		                ELSE 0
+		            END
+		        ), 0) AS {$alias}";
+		    } else {
+		        return "
+		        COALESCE(SUM(
+		            CASE
+		                WHEN FIND_IN_SET(ba_code, :ba_code_list:) THEN {$c}
+		                WHEN ba_types = 1 AND (LENGTH(ba_code) - LENGTH(REPLACE(ba_code, ',', '')) + 1) >= 2 THEN {$c} * 1.3
+		                WHEN ba_types = 0 THEN :default_target:
+		                ELSE {$c}
+		            END
+		        ), 0) AS {$alias}";
+		    }
+		}, range(1, 12), [
+		    'january','february','march','april','may','june',
+		    'july','august','september','october','november','december'
+		]));
 
 	    $sql = "
-	        WITH monthly_totals AS (
-	            SELECT
-	                a_asc.description AS asc_name,
-	                SUM(s.amount) AS total_amount
-	            FROM tbl_ba_sales_report s
-	            LEFT JOIN tbl_brand b ON s.brand = b.id
-	            LEFT JOIN tbl_area_sales_coordinator a_asc ON a_asc.area_id = s.area_id
-	            LEFT JOIN tbl_store st ON s.store_id = st.id
-	            LEFT JOIN tbl_area ar ON s.area_id = ar.id
-	            $whereSQLSR
-	            GROUP BY a_asc.description
-	        ),
-	        net_sales_totals AS (
-	            SELECT
-	                a_asc.description AS asc_name,
-	                SUM(sodd.net_sales) AS total_net_sales
-	            FROM tbl_sell_out_data_details sodd
-	            LEFT JOIN tbl_store st ON st.code = sodd.store_code
-	            LEFT JOIN tbl_brand_ambassador ba ON ba.store = st.id
-	            LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-	            LEFT JOIN tbl_brand b ON bb.brand_id = b.id
-	            LEFT JOIN tbl_area_sales_coordinator a_asc ON ba.area = a_asc.area_id
-	            LEFT JOIN tbl_area ar ON ar.id = a_asc.area_id
-	            $whereSQLSODD
-	            GROUP BY a_asc.description
-	        ),
-	        target_sales_totals AS (
-	            SELECT
-	                a_asc.description AS asc_name,
-	                SUM(COALESCE(tsps.january, 0) + COALESCE(tsps.february, 0) + COALESCE(tsps.march, 0) + 
-	                    COALESCE(tsps.april, 0) + COALESCE(tsps.may, 0) + COALESCE(tsps.june, 0) + 
-	                    COALESCE(tsps.july, 0) + COALESCE(tsps.august, 0) + COALESCE(tsps.september, 0) + 
-	                    COALESCE(tsps.october, 0) + COALESCE(tsps.november, 0) + COALESCE(tsps.december, 0)) 
-	                AS total_target_sales
-	            FROM tbl_target_sales_per_store tsps
-	            LEFT JOIN tbl_store st ON st.id = tsps.location
-	            LEFT JOIN tbl_brand_ambassador ba ON ba.store = st.id
-	            LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-	            LEFT JOIN tbl_brand b ON bb.brand_id = b.id
-	            LEFT JOIN tbl_area_sales_coordinator a_asc ON ba.area = a_asc.area_id
-	            LEFT JOIN tbl_area ar ON ar.id = a_asc.area_id
-	            $whereSQLTSPS
-	            GROUP BY a_asc.description
-	        )
-	        SELECT
-	            mt.asc_name,
-	            mt.total_amount,
-	            nst.total_net_sales,
-	            tst.total_target_sales,
-	            (mt.total_amount - nst.total_net_sales) AS growth,
-	            CASE 
-	                WHEN tst.total_target_sales > 0 THEN (mt.total_amount / tst.total_target_sales) * 100 
-	                ELSE 0 
-	            END AS achieved
-	        FROM monthly_totals mt
-	        LEFT JOIN net_sales_totals nst ON mt.asc_name = nst.asc_name
-	        LEFT JOIN target_sales_totals tst ON mt.asc_name = tst.asc_name;
-	    ";
+	    WITH monthly_totals AS (
+	      SELECT
+	        SUM(CASE WHEN MONTH(s.date) = 1 THEN amount ELSE 0 END) AS amount_january,
+	        SUM(CASE WHEN MONTH(s.date) = 2 THEN amount ELSE 0 END) AS amount_february,
+	        SUM(CASE WHEN MONTH(s.date) = 3 THEN amount ELSE 0 END) AS amount_march,
+	        SUM(CASE WHEN MONTH(s.date) = 4 THEN amount ELSE 0 END) AS amount_april,
+	        SUM(CASE WHEN MONTH(s.date) = 5 THEN amount ELSE 0 END) AS amount_may,
+	        SUM(CASE WHEN MONTH(s.date) = 6 THEN amount ELSE 0 END) AS amount_june,
+	        SUM(CASE WHEN MONTH(s.date) = 7 THEN amount ELSE 0 END) AS amount_july,
+	        SUM(CASE WHEN MONTH(s.date) = 8 THEN amount ELSE 0 END) AS amount_august,
+	        SUM(CASE WHEN MONTH(s.date) = 9 THEN amount ELSE 0 END) AS amount_september,
+	        SUM(CASE WHEN MONTH(s.date) = 10 THEN amount ELSE 0 END) AS amount_october,
+	        SUM(CASE WHEN MONTH(s.date) = 11 THEN amount ELSE 0 END) AS amount_november,
+	        SUM(CASE WHEN MONTH(s.date) = 12 THEN amount ELSE 0 END) AS amount_december
+	      FROM tbl_ba_sales_report s
+	      $whereSQLASR
+	    ),
+	    ly_sell_out_totals AS (
+	      SELECT " . implode(", ", array_map(fn($m) =>
+	        "ROUND(SUM(CASE WHEN month={$m} THEN net_sales ELSE 0 END), 2) AS ly_sell_out_" . strtolower(date('F', mktime(0, 0, 0, $m, 1))),
+	      range(1, 12))) . "
+	      FROM tbl_sell_out_pre_aggregated_data
+	      $whereSQLLYSO
+	    ),
+	    ty_sell_out_totals AS (
+	      SELECT " . implode(", ", array_map(fn($m) =>
+	        "ROUND(SUM(CASE WHEN month={$m} THEN net_sales ELSE 0 END), 2) AS ty_sell_out_" . strtolower(date('F', mktime(0, 0, 0, $m, 1))),
+	      range(1, 12))) . "
+	      FROM tbl_sell_out_pre_aggregated_data
+	      $whereSQLTYSO
+	    ),
+	    target_sales_totals AS (
+	      SELECT $targetSalesSelect
+	      FROM tbl_target_sales_per_store
+	      $whereSQLTS
+	    )
+	    SELECT *,
+			CASE WHEN l.ly_sell_out_january = 0 OR l.ly_sell_out_january IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_january - l.ly_sell_out_january) / l.ly_sell_out_january * 100, 2)
+			END AS growth_january,
 
+			CASE WHEN l.ly_sell_out_february = 0 OR l.ly_sell_out_february IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_february - l.ly_sell_out_february) / l.ly_sell_out_february * 100, 2)
+			END AS growth_february,
+
+			CASE WHEN l.ly_sell_out_march = 0 OR l.ly_sell_out_march IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_march - l.ly_sell_out_march) / l.ly_sell_out_march * 100, 2)
+			END AS growth_march,
+
+			CASE WHEN l.ly_sell_out_april = 0 OR l.ly_sell_out_april IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_april - l.ly_sell_out_april) / l.ly_sell_out_april * 100, 2)
+			END AS growth_april,
+
+			CASE WHEN l.ly_sell_out_may = 0 OR l.ly_sell_out_may IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_may - l.ly_sell_out_may) / l.ly_sell_out_may * 100, 2)
+			END AS growth_may,
+
+			CASE WHEN l.ly_sell_out_june = 0 OR l.ly_sell_out_june IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_june - l.ly_sell_out_june) / l.ly_sell_out_june * 100, 2)
+			END AS growth_june,
+
+			CASE WHEN l.ly_sell_out_july = 0 OR l.ly_sell_out_july IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_july - l.ly_sell_out_july) / l.ly_sell_out_july * 100, 2)
+			END AS growth_july,
+
+			CASE WHEN l.ly_sell_out_august = 0 OR l.ly_sell_out_august IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_august - l.ly_sell_out_august) / l.ly_sell_out_august * 100, 2)
+			END AS growth_august,
+
+			CASE WHEN l.ly_sell_out_september = 0 OR l.ly_sell_out_september IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_september - l.ly_sell_out_september) / l.ly_sell_out_september * 100, 2)
+			END AS growth_september,
+
+			CASE WHEN l.ly_sell_out_october = 0 OR l.ly_sell_out_october IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_october - l.ly_sell_out_october) / l.ly_sell_out_october * 100, 2)
+			END AS growth_october,
+
+			CASE WHEN l.ly_sell_out_november = 0 OR l.ly_sell_out_november IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_november - l.ly_sell_out_november) / l.ly_sell_out_november * 100, 2)
+			END AS growth_november,
+
+			CASE WHEN l.ly_sell_out_december = 0 OR l.ly_sell_out_december IS NULL
+			     THEN 'N/A'
+			     ELSE ROUND((t.ty_sell_out_december - l.ly_sell_out_december) / l.ly_sell_out_december * 100, 2)
+			END AS growth_december,
+
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_jan = 0 OR ts.target_sales_jan IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_january / ts.target_sales_jan) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_jan = 0 OR ts.target_sales_jan IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_january + mt.amount_january) / ts.target_sales_jan) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_jan = 0 OR ts.target_sales_jan IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_january / ts.target_sales_jan) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_january,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_february,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_march,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_april,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_may,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_june,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_july,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_august,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_september,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_october,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_november,
+			CASE 
+			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((l.ly_sell_out_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: IN (0, 1) THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND(((t.ty_sell_out_february + mt.amount_february) / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    WHEN :ba_type: = 3 THEN 
+			        CASE 
+			            WHEN ts.target_sales_feb = 0 OR ts.target_sales_feb IS NULL THEN 'N/A'
+			            ELSE ROUND((mt.amount_february / ts.target_sales_feb) * 100, 2)
+			        END
+
+			    ELSE 'N/A'
+			END AS achieved_december
+
+	    FROM monthly_totals mt
+	    CROSS JOIN ly_sell_out_totals l
+	    CROSS JOIN ty_sell_out_totals t
+	    CROSS JOIN target_sales_totals ts;
+	    ";
 	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResultArray();
-
-	    return [
-	        'data' => $data
-	    ];
+	    return ['data' => $query->getResult()];
 	}
-
-	public function asc_dashboard_table_data($year, $month, $asc, $area, $minWeeks, $maxWeeks, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $withba = false)
-	{
-	    $year = intval($year);
-	    $month = intval($month);
-
-	    $availableWeeksQuery = "
-	        SELECT DISTINCT week 
-	        FROM tbl_vmi_pre_aggregated_data 
-	        WHERE month = ? AND year = ? 
-	        ORDER BY week DESC
-	    ";
-
-	    $availableWeeksResult = $this->db->query($availableWeeksQuery, [$month, $year])->getResultArray();
-	    $availableWeeks = array_column($availableWeeksResult, 'week');
-
-	    $recentWeeks = array_slice($availableWeeks, 0, 3);
-
-	    while (count($recentWeeks) < 3) {
-	        $recentWeeks[] = null;
-	    }
-
-	    $sql = "
-	        SELECT 
-	            vmi.id,
-	            vmi.item,
-	            vmi.item_name,
-	            vmi.lmi_itmcde,
-	            vmi.rgdi_itmcde,
-	            SUM(vmi.total_qty) AS sum_total_qty,
-	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
-	            ROUND(
-	                CASE 
-	                    WHEN SUM(vmi.average_sales_unit) > 0 
-	                    THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
-	                    ELSE 0 
-	                END, 2
-	            ) AS weeks,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_3,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_2,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_1,
-	            vmi.ambassador_names,
-	            vmi.ba_types,
-	            vmi.brands,
-	            vmi.asc_name,
-	            vmi.store_name,
-	            COUNT(*) OVER() AS total_records
-	        FROM tbl_vmi_pre_aggregated_data vmi
-	        WHERE (? IS NULL OR FIND_IN_SET(?, ambassador_names) > 0)
-			  AND (? IS NULL OR FIND_IN_SET(?, brands) > 0)
-			  AND (? IS NULL OR store_name = ?)
-			  AND (? IS NULL OR asc_name = ?)
-			  AND (? IS NULL OR area_name = ?)
-	          AND vmi.status = 1
-	          AND vmi.week IN (?, ?, ?)
-	          AND vmi.month = ?
-	          AND vmi.year = ?
-	          " . ($withba === true ? " AND vmi.ambassador_names IS NOT NULL AND vmi.ambassador_names <> ''" : ($withba === false ? " AND (vmi.ambassador_names IS NULL OR vmi.ambassador_names = '')" : "")) . "
-	        GROUP BY vmi.item
-	        HAVING weeks > ?
-	        AND (? IS NULL OR weeks <= ?)
-	        LIMIT ? OFFSET ?
-	    ";
-
-	    $params = array_merge([
-	        $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	        $brand_ambassador ?: NULL, $brand_ambassador ?: NULL,
-	        $brand ?: NULL, $brand ?: NULL, 
-	        $store_name ?: NULL, $store_name ?: NULL,
-	        $asc ?: NULL, $asc ?: NULL, 
-	        $area ?: NULL, $area ?: NULL, 
-	        $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	        $month ?: NULL, 
-	        $year ?: NULL,
-	        $minWeeks, $maxWeeks, $maxWeeks, 
-	        (int) $page_limit, (int) $page_offset
-	    ]);
-
-	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResult();
-	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-
-	    return [
-	        'total_records' => $totalRecords,
-	        'data' => $data
-	    ];
-	}
-
-	public function asc_dashboard_table_data_npd_hero($year, $month, $asc, $area, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $type, $item_class_filter, $withba = false) {
-
-	    $year = intval($year);
-	    $month = intval($month);
-
-	    $availableWeeksQuery = "
-	        SELECT DISTINCT week 
-	        FROM tbl_vmi_pre_aggregated_data 
-	        WHERE month = ? AND year = ? 
-	        ORDER BY week DESC
-	    ";
-
-	    $availableWeeksResult = $this->db->query($availableWeeksQuery, [$month, $year])->getResultArray();
-	    $availableWeeks = array_column($availableWeeksResult, 'week');
-
-	    $recentWeeks = array_slice($availableWeeks, 0, 3);
-
-	    while (count($recentWeeks) < 3) {
-	        $recentWeeks[] = null;
-	    }
-
-	    $sql = "
-	        SELECT 
-	            vmi.id,
-	            vmi.item,
-	            vmi.item_name,
-	            vmi.lmi_itmcde,
-	            vmi.rgdi_itmcde,
-	            SUM(vmi.total_qty) AS sum_total_qty,
-	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_3,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_2,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_1,
-	            vmi.ambassador_names,
-	            vmi.ba_types,
-	            vmi.brands,
-	            vmi.asc_name,
-	            vmi.store_name,
-	            COUNT(*) OVER() AS total_records
-	        FROM tbl_vmi_pre_aggregated_data vmi
-	        WHERE (? IS NULL OR FIND_IN_SET(?, ambassador_names) > 0)
-	          AND vmi.item_class IN (" . implode(",", array_fill(0, count($item_class_filter), "?")) . ")
-			  AND (? IS NULL OR FIND_IN_SET(?, brands) > 0)
-			  AND (? IS NULL OR store_name = ?)
-			  AND (? IS NULL OR asc_name = ?)
-			  AND (? IS NULL OR area_name = ?)
-	          AND vmi.status = 1
-	          AND vmi.week IN (?, ?, ?)
-	          AND vmi.month = ?
-	          AND vmi.year = ?
-	          " . ($withba === true ? " AND vmi.ambassador_names IS NOT NULL AND vmi.ambassador_names <> ''" : ($withba === false ? " AND (vmi.ambassador_names IS NULL OR vmi.ambassador_names = '')" : "")) . "
-	        GROUP BY vmi.item
-	        LIMIT ? OFFSET ?
-	    ";
-
-	    $params = array_merge([
-	        $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	        $brand_ambassador ?: NULL, $brand_ambassador ?: NULL,
-	        ], $item_class_filter, [ 
-	        $brand ?: NULL, $brand ?: NULL, 
-	        $store_name ?: NULL, $store_name ?: NULL,
-	        $asc ?: NULL, $asc ?: NULL, 
-	        $area ?: NULL, $area ?: NULL, 
-	        $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	        $month ?: NULL, 
-	        $year ?: NULL, 
-	        (int) $page_limit, (int) $page_offset
-	    ]);
-
-	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResult();
-	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-
-	    return [
-	        'total_records' => $totalRecords,
-	        'data' => $data
-	    ];
-	}
-
-	public function getKamOneData($year, $month, $week, $brand, $brand_ambassador, $store_name, $page_limit, $page_offset, $withba = false)
-	{
-	    $year = intval($year);
-	    $month = intval($month);
-	    $week = intval($week);
-		$sql = "
-
-		    WITH brand_data AS (
-		         SELECT 
-		             ba.store AS store_id,
-		             a_asc.description AS asc_name,
-		             a.description as area_name,
-		             GROUP_CONCAT(DISTINCT ba.name ORDER BY ba.name SEPARATOR ', ') AS ambassador_names,
-		             GROUP_CONCAT(DISTINCT b.brand_description ORDER BY b.brand_description SEPARATOR ', ') AS brands
-		         FROM tbl_brand_ambassador ba
-		           LEFT JOIN tbl_ba_brands bb ON ba.id = bb.ba_id
-		           LEFT JOIN tbl_brand b ON b.id = bb.brand_id
-		           LEFT JOIN tbl_area a ON ba.area = a.id
-		           LEFT JOIN tbl_area_sales_coordinator a_asc ON a.id = a_asc.area_id
-		         GROUP BY ba.store
-		     ), item_brands AS (
-		        SELECT
-		            tv.id,
-		            tv.item,
-		            tv.item_name,
-		            tv.on_hand,
-		            tv.in_transit,
-		            tv.item_class,
-		            tv.store,
-		            bd.ambassador_names,
-		            bd.brands,
-		            s.description AS store_name,
-		            bd.asc_name,
-		            bd.area_name
-		        FROM tbl_vmi tv
-		        LEFT JOIN tbl_store s ON tv.store = s.id
-		        LEFT JOIN tbl_store_group sg ON s.id = sg.store_id
-		        LEFT JOIN brand_data bd ON s.id = bd.store_id
-		        GROUP BY tv.id
-		    )
-		    SELECT 
-		        ib.id,
-		        ib.item,
-		        ib.item_name,
-		        ib.item_class,
-		        ib.store,
-		        ib.on_hand + ib.in_transit AS total_qty,
-		        ib.ambassador_names,
-		        ib.brands,
-		        ib.store_name,
-		        ib.asc_name,
-		        ib.area_name,
-		        COUNT(*) OVER() AS total_records
-		    FROM item_brands ib
-		       WHERE (? IS NULL OR ib.brands = ?)
-		       AND (? IS NULL OR ib.ambassador_names = ?)
-		       AND (? IS NULL OR ib.store_name = ?)
-		       AND (? IS NULL OR ?)
-		       AND (? IS NULL OR ?)
-		       AND (? IS NULL OR ?)
-		       " . ($withba === true ? " AND ib.ambassador_names IS NOT NULL AND ib.ambassador_names <> ''" : ($withba === false ? " AND (ib.ambassador_names IS NULL OR ib.ambassador_names = '')" : "")) . "
-		       ORDER BY ib.id
-		       LIMIT ? OFFSET ?
-		    ";
-
-		$params = [
-		    $brand ?: NULL, $brand ?: NULL,
-		    $brand_ambassador ?: NULL, $brand_ambassador ?: NULL, 
-		    $store_name ?: NULL, $store_name ?: NULL, 
-		    $week ?: NULL, $week ?: NULL, 
-		    $month ?: NULL, $month ?: NULL, 
-		    $year ?: NULL, $year ?: NULL, 
-		    $page_limit, $page_offset
-		];
-
-		$query = $this->db->query($sql, $params);
-		$data = $query->getResult();
-		$totalRecords = $data ? $data[0]->total_records : 0;
-
-		return [
-		    'total_records' => $totalRecords,
-		    'data' => $data
-		];
-	}
-
 
 	public function getDataVmiAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null)
 	{
@@ -2213,191 +1845,11 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-
-
-	// public function getKamTwoData($brand_ambassador, $store_name, $sort_field, $sort, $page_limit, $page_offset, $minWeeks, $maxWeeks, $month, $year) {
-	//     $valid_sort_fields = ['item_name', 'sum_total_qty', 'week_1', 'week_2', 'week_3'];
-
-	//     if (!in_array($sort_field, $valid_sort_fields)) {
-	//         $sort_field = 'item_name'; 
-	//     }
-
-	//     if ($sort !== 'ASC' && $sort !== 'DESC') {
-	//         $sort = 'ASC'; 
-	//     }
-
-	//     $availableWeeksQuery = "
-	//         SELECT DISTINCT week 
-	//         FROM tbl_vmi_pre_aggregated_data 
-	//         WHERE month = ? AND year = ? 
-	//         ORDER BY week DESC
-	//     ";
-
-	//     $availableWeeksResult = $this->db->query($availableWeeksQuery, [$month, $year])->getResultArray();
-	//     $availableWeeks = array_column($availableWeeksResult, 'week');
-
-	//     $recentWeeks = array_slice($availableWeeks, 0, 3);
-
-	//     while (count($recentWeeks) < 3) {
-	//         $recentWeeks[] = null;
-	//     }
-
-	//     $sql = "
-	//         SELECT 
-	//             vmi.id,
-	//             vmi.item,
-	//             vmi.item_name,
-	//             vmi.lmi_itmcde,
-	//             vmi.rgdi_itmcde,
-	//             SUM(vmi.total_qty) AS sum_total_qty,
-	//             SUM(vmi.average_sales_unit) AS sum_ave_sales,
-	//             ROUND(
-	//                 CASE 
-	//                     WHEN SUM(vmi.average_sales_unit) > 0 
-	//                     THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
-	//                     ELSE 0 
-	//                 END, 2
-	//             ) AS weeks,
-	//             -- Consolidate data for the selected 3 weeks
-	//             SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_3,
-	//             SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_2,
-	//             SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_1,
-	//             vmi.ambassador_names,
-	//             vmi.ba_types,
-	//             vmi.brands,
-	//             vmi.asc_name,
-	//             vmi.store_name,
-	//             COUNT(*) OVER() AS total_records
-	//         FROM tbl_vmi_pre_aggregated_data vmi
-	//         WHERE (? IS NULL OR FIND_IN_SET(?, ambassador_names) > 0)
-	//           AND (? IS NULL OR store_name = ?)
-	//           AND vmi.status = 1
-	//           AND vmi.week IN (?, ?, ?)
-	//           AND vmi.month = ?
-	//           AND vmi.year = ?
-	//         GROUP BY vmi.item
-	//         HAVING weeks > ?
-	//           AND (? IS NULL OR weeks <= ?)
-	//         ORDER BY $sort_field $sort
-	//         LIMIT ? OFFSET ?
-	//     ";
-
-	//     $params = array_merge([
-	//         $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	//         $brand_ambassador ?: NULL, $brand_ambassador ?: NULL, 
-	//         $store_name ?: NULL, $store_name ?: NULL, 
-	//         $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	//         $month ?: NULL, 
-	//         $year ?: NULL, 
-	//         $minWeeks ?: NULL,  
-	//         $maxWeeks ?: NULL, $maxWeeks ?: NULL,
-	//         (int) $page_limit, (int) $page_offset
-	//     ]);
-
-	//     $query = $this->db->query($sql, $params);
-	//     $data = $query->getResult();
-	//     $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-
-	//     return [
-	//         'total_records' => $totalRecords,
-	//         'data' => $data
-	//     ];
-	// }
-
-	public function getKamTwoHeroNPDData($brand_ambassador, $store_name, $sort_field, $sort, $page_limit, $page_offset, $month, $year, $module, $item_class_filter) {
-	    $valid_sort_fields = ['item_name', 'sum_total_qty'];
-
-	    if (!in_array($sort_field, $valid_sort_fields)) {
-	        $sort_field = 'item_name'; 
-	    }
-
-	    if ($sort !== 'ASC' && $sort !== 'DESC') {
-	        $sort = 'ASC'; 
-	    }
-
-	    $availableWeeksQuery = "
-	        SELECT DISTINCT week 
-	        FROM tbl_vmi_pre_aggregated_data 
-	        WHERE month = ? AND year = ? 
-	        ORDER BY week DESC
-	    ";
-
-	    $availableWeeksResult = $this->db->query($availableWeeksQuery, [$month, $year])->getResultArray();
-	    $availableWeeks = array_column($availableWeeksResult, 'week');
-
-	    $recentWeeks = array_slice($availableWeeks, 0, 3);
-
-	    while (count($recentWeeks) < 3) {
-	        $recentWeeks[] = null;
-	    }
-
-	    $sql = "
-	        SELECT 
-	            vmi.id,
-	            vmi.item,
-	            vmi.item_name,
-	            vmi.lmi_itmcde,
-	            vmi.rgdi_itmcde,
-	            SUM(vmi.total_qty) AS sum_total_qty,
-	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
-	            ROUND(
-	                CASE 
-	                    WHEN SUM(vmi.average_sales_unit) > 0 
-	                    THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
-	                    ELSE 0 
-	                END, 2
-	            ) AS weeks,
-	            -- Consolidate data for the selected 3 weeks
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_3,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_2,
-	            SUM(CASE WHEN vmi.week = ? THEN vmi.total_qty ELSE 0 END) AS week_1,
-	            vmi.week AS trans_date,
-	            vmi.ambassador_names,
-	            vmi.ba_types,
-	            vmi.brands,
-	            vmi.asc_name,
-	            vmi.store_name,
-	            COUNT(*) OVER() AS total_records
-	        FROM tbl_vmi_pre_aggregated_data vmi
-	        WHERE (? IS NULL OR FIND_IN_SET(?, ambassador_names) > 0)
-	          AND (? IS NULL OR store_name = ?)
-	          AND vmi.item_class IN (" . implode(",", array_fill(0, count($item_class_filter), "?")) . ")
-	          AND vmi.status = 1
-	          AND vmi.week IN (?, ?, ?)
-	          AND vmi.month = ?
-	          AND vmi.year = ?
-	        GROUP BY vmi.item
-	        ORDER BY $sort_field $sort
-	        LIMIT ? OFFSET ?
-	    ";
-
-	    $params = array_merge([
-	        $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	        $brand_ambassador ?: NULL, $brand_ambassador ?: NULL, 
-	        $store_name ?: NULL, $store_name ?: NULL, 
-	        ], $item_class_filter, [ 
-	        $recentWeeks[0], $recentWeeks[1], $recentWeeks[2],
-	        $month ?: NULL, 
-	        $year ?: NULL, 
-	        (int) $page_limit, (int) $page_offset
-	    ]);
-
-	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResult();
-	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-
-	    return [
-	        'total_records' => $totalRecords,
-	        'data' => $data
-	    ];
-	}
-
 	public function getStorePerformance(
 	    $month_start, $month_end, $orderByColumn, $orderDirection, $year, $limit, $offset,
 	    $area_id = null, $asc_id = null, $store_code = null,
 	    $ba_id = null, $ba_type = null,
-	    $brand_category = null, $brands = null
-	) {
+	    $brand_category = null, $brands = null) {
 	    $last_year = $year - 1;
 	    $allowedOrderColumns = ['rank', 'store_code', 'ty_scanned_data', 'ly_scanned_data', 'growth', 'sob'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];

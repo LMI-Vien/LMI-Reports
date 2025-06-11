@@ -305,11 +305,11 @@ class ImportVmi extends BaseController
 
 	    $cmd = "php {$sparkPath} export:vmi {$company} {$year} {$week} {$filename}";
 	    // Temporarily disable logging
-	    $log = WRITEPATH . 'logs/export_' . time() . '.log';
-	    exec("nohup $cmd > $log 2>&1 &");
+	    //$log = WRITEPATH . 'logs/export_' . time() . '.log';
+	    //exec("nohup $cmd > $log 2>&1 &");
 
 	    // Run without logging
-    	//exec("nohup $cmd > /dev/null 2>&1 &");
+    	exec("nohup $cmd > /dev/null 2>&1 &");
 
 	    return $this->response->setJSON([
 	        'status' => 'started',
