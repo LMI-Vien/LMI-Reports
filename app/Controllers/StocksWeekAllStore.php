@@ -341,6 +341,7 @@ class StocksWeekAllStore extends BaseController
 			for ($w = $startNum; $w <= $endNum; $w++) {
 				$weekCols[] = "Week $w";
 			}
+			$weekCols = array_reverse($weekCols);
 		}
 
 		$title = "Week by Week Stock Data of all Stores";
@@ -621,6 +622,7 @@ class StocksWeekAllStore extends BaseController
 			for ($w = $startNum; $w <= $endNum; $w++) {
 				$weekCols[] = "Week $w";
 			}
+			$weekCols = array_reverse($weekCols);
 		}
 
 		$result  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "'id:EQ=$latestYear'", "''", "''");
