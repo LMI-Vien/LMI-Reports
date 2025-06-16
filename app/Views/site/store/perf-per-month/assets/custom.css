@@ -52,6 +52,28 @@
         border-radius: 8px 8px 0px 0px !important;
     }
 
+    .tooltip-text {
+        visibility: hidden;
+        width: 220px;
+        background-color: #E6F7FF;
+        color: #004E92;
+        text-align: left;
+        border-radius: 5px;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 12px;
+        white-space: normal;
+    }
+
+    .labeltext:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
     .table {
         margin-bottom: 0;
         border-collapse: separate; /* Required for border-radius */

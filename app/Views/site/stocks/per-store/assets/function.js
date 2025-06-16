@@ -136,7 +136,7 @@
                 if(data.length > 0){
                     if(data[0].code){
                         $("#storeName").val(data[0].code+' - '+data[0].description);
-                        $("#storeNameId").val(data[0].code);      
+                        $("#storeNameId").val(data[0].id);      
                     }             
                 }
             })

@@ -110,10 +110,10 @@ class StocksPerStore extends BaseController
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];
 			$dataHero = json_decode($jsonStringHero, true);
-			$heroSku = array_map(fn($item) => $item['item_class_description'], $dataHero);
+			$heroSku = array_map(fn($item) => $item['id'], $dataHero);
 			$jsonStringNpd = $sysPar[0]['new_item_sku'];
 			$dataNpd = json_decode($jsonStringNpd, true);
-			$npdSku = array_map(fn($item) => $item['item_class_description'], $dataNpd);
+			$npdSku = array_map(fn($item) => $item['id'], $dataNpd);
 		    $skuMin = $sysPar[0]['sm_sku_min'];
 		    $skuMax = $sysPar[0]['sm_sku_max'];
 		}

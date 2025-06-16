@@ -96,9 +96,26 @@
                                 <i class="fas fa-file-export"></i> Excel
                             </button>
                         </div>
-                    <div class="ml-auto text-muted small" style="white-space: nowrap;">
-                        <strong>Note:</strong> <?= !empty($foot_note) ? $foot_note : 'N/A'; ?>
-                    </div>
+                        <div class="ml-auto text-muted small" style="white-space: normal;">
+                            <div class="row">
+                                <div class="col-md-3 mb-2">
+                                    <strong>Note:</strong><br>
+                                    <?= !empty($foot_note) ? $foot_note : 'N/A'; ?>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <strong>Non BA:</strong>
+                                    <p>(TY Sell Out / Target Sales) * 100%</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <strong>Outright/Consignment:</strong>
+                                    <p>(Sales Report / Target Sales) * 100%</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <strong>BA Type = ALL:</strong>
+                                    <p>((TY Sell Out + Sales Report) / Target Sales) * 100%</p>
+                                </div>
+                            </div>
+                        </div>
                 </div>
             </div>
         </div>

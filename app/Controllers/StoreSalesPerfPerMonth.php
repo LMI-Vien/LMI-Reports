@@ -116,8 +116,8 @@ class StoreSalesPerfPerMonth extends BaseController
 			$storeCode = $this->Global_model->get_by_id('tbl_store', $storeId);
 			$storeCode = $storeCode[0]->code;
 		}
-		//print_r($baTypeId);
-		//die(); 	
+		// print_r($storeCode);
+		// die(); 	
 		// $baTypeId = '3';
 		// $areaId = '5';
 		// $storeId = '18';

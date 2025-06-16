@@ -27,7 +27,7 @@ class Dashboard_model extends Model
 
 		if (!empty($ItemClasses)) {
 		    $ItemClasses = array_map('trim', $ItemClasses); // remove any leading/trailing spaces
-		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class)", $ItemClasses);
+		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)", $ItemClasses);
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
@@ -119,6 +119,7 @@ class Dashboard_model extends Model
 	            vmi.area_id,
 	            vmi.itmcde,
 	            vmi.item_class,
+	            ic.item_class_description AS item_class_name,
 	            vmi.brand_type_id, 
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
@@ -140,6 +141,8 @@ class Dashboard_model extends Model
 	            COUNT(*) OVER() AS total_records
 	        FROM tbl_vmi_pre_aggregated_data vmi
 	        JOIN store_matches sm ON vmi.store_id = sm.store_id
+	        LEFT JOIN tbl_item_class ic ON vmi.item_class_id = ic.id
+
 	        WHERE vmi.week = ?
 	          AND vmi.year = ?
 	          {$ascIdFilterVmi}
@@ -207,7 +210,7 @@ class Dashboard_model extends Model
 		//$storeFilterConditionsVmi = [];
 		if (!empty($ItemClasses)) {
 		    $ItemClasses = array_map('trim', $ItemClasses); // remove any leading/trailing spaces
-		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class)", $ItemClasses);
+		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)", $ItemClasses);
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
@@ -236,7 +239,7 @@ class Dashboard_model extends Model
 	    $ItemClassIdsPlaceholder = '';
 	    $ItemClassIdsParams = [];
 	    if (!empty($ItemClassIdsFilter)) {
-	        $ItemClassIdsPlaceholder = ' AND v.item_class IN (' . implode(',', array_fill(0, count($ItemClassIdsFilter), '?')) . ')';
+	        $ItemClassIdsPlaceholder = ' AND v.item_class_id IN (' . implode(',', array_fill(0, count($ItemClassIdsFilter), '?')) . ')';
 	        $ItemClassIdsParams = $ItemClassIdsFilter;
 	    }
 
@@ -309,10 +312,10 @@ class Dashboard_model extends Model
 	        SELECT 
 	            vmi.item,
 	            vmi.item_name,
-	            vmi.item_class,
 	            vmi.area_id,
 	            vmi.itmcde,
 	            vmi.item_class,
+	            ic.item_class_description AS item_class_name,
 	            vmi.brand_type_id, 
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
@@ -334,6 +337,7 @@ class Dashboard_model extends Model
 	            COUNT(*) OVER() AS total_records
 	        FROM tbl_vmi_pre_aggregated_data vmi
 	        JOIN store_matches sm ON vmi.store_id = sm.store_id
+	        LEFT JOIN tbl_item_class ic ON vmi.item_class_id = ic.id
 	        WHERE vmi.week = ?
 	          AND vmi.year = ?
 	          {$ascIdFilterVmi}
@@ -1070,9 +1074,8 @@ class Dashboard_model extends Model
 	        $whereClausesASR[] = "(s.date >= '$year-01-01' AND s.date < '$nextYear-01-01')";
 	        $whereClausesLYSO[] = "(year = '$LastYear')";
 	        $whereClausesTYSO[] = "(year = '$year')";
-	        $whereClausesTS[] = "(year = '$year_id') AND status = 1";
+	        $whereClausesTS[] = "(year = $year_id) AND status = 1";
 	    }
-
 	    $whereSQLASR = !empty($whereClausesASR) ? "WHERE " . implode(" AND ", $whereClausesASR) : "";
 	    $whereSQLLYSO = !empty($whereClausesLYSO) ? "WHERE " . implode(" AND ", $whereClausesLYSO) : "";
 	    $whereSQLTYSO = !empty($whereClausesTYSO) ? "WHERE " . implode(" AND ", $whereClausesTYSO) : "";
@@ -1091,13 +1094,38 @@ class Dashboard_model extends Model
 
 		$targetSalesSelect = implode(", ", array_map(function ($m, $c) use ($baType) {
 		    $alias = "target_sales_" . strtolower(substr($c, 0, 3));
+
 		    if ((string)$baType === '3') {
 		        return "
 		        COALESCE(SUM(
 		            CASE
 		                WHEN ba_types = 0 THEN :default_target:
-		                WHEN ba_types = 1 AND (LENGTH(ba_code) - LENGTH(REPLACE(ba_code, ',', '')) + 1) >= 2 THEN {$c} * 1.3
-		                WHEN ba_types = 1 THEN {$c}
+		                WHEN ba_types = 1 THEN 
+		                    CASE
+		                        WHEN (LENGTH(ba_code) - LENGTH(REPLACE(ba_code, ',', '')) + 1) >= 2 THEN {$c} * 1.3
+		                        ELSE {$c}
+		                    END
+		                WHEN ba_types = 3 THEN {$c}
+		                ELSE 0
+		            END
+		        ), 0) AS {$alias}";
+		    } elseif ((string)$baType === '0') {
+		        return "
+		        COALESCE(SUM(
+		            CASE
+		                WHEN ba_types = 0 THEN :default_target:
+		                ELSE 0
+		            END
+		        ), 0) AS {$alias}";
+		    } elseif ((string)$baType === '1') {
+		        return "
+		        COALESCE(SUM(
+		            CASE
+		                WHEN ba_types = 1 THEN 
+		                    CASE
+		                        WHEN (LENGTH(ba_code) - LENGTH(REPLACE(ba_code, ',', '')) + 1) >= 2 THEN {$c} * 1.3
+		                        ELSE {$c}
+		                    END
 		                ELSE 0
 		            END
 		        ), 0) AS {$alias}";
@@ -1106,9 +1134,7 @@ class Dashboard_model extends Model
 		        COALESCE(SUM(
 		            CASE
 		                WHEN FIND_IN_SET(ba_code, :ba_code_list:) THEN {$c}
-		                WHEN ba_types = 1 AND (LENGTH(ba_code) - LENGTH(REPLACE(ba_code, ',', '')) + 1) >= 2 THEN {$c} * 1.3
-		                WHEN ba_types = 0 THEN :default_target:
-		                ELSE {$c}
+		                ELSE 0
 		            END
 		        ), 0) AS {$alias}";
 		    }
@@ -1483,7 +1509,7 @@ class Dashboard_model extends Model
 
 	    if (!empty($ItemClasses)) {
 	        $ItemClasses = array_map('trim', $ItemClasses);
-	        $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class)", $ItemClasses);
+	        $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)", $ItemClasses);
 	        $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
@@ -1658,7 +1684,7 @@ class Dashboard_model extends Model
 
 		if (!empty($ItemClasses)) {
 		    $ItemClasses = array_map('trim', $ItemClasses);
-		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class)", $ItemClasses);
+		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)", $ItemClasses);
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
@@ -1681,7 +1707,7 @@ class Dashboard_model extends Model
 	    $ItemClassIdsPlaceholder = '';
 	    $ItemClassIdsParams = [];
 	    if (!empty($ItemClassIdsFilter)) {
-	        $ItemClassIdsPlaceholder = ' AND vmi.item_class IN (' . implode(',', array_fill(0, count($ItemClassIdsFilter), '?')) . ')';
+	        $ItemClassIdsPlaceholder = ' AND vmi.item_class_id IN (' . implode(',', array_fill(0, count($ItemClassIdsFilter), '?')) . ')';
 	        $ItemClassIdsParams = $ItemClassIdsFilter;
 	    }
 

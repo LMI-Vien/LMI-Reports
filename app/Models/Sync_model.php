@@ -1909,9 +1909,11 @@ class Sync_model extends Model
                     CONCAT(MAX(s.code), ' - ', s.description) AS store_name,
                     avmi.item,
                     avmi.item_name,
-                    avmi.item_class
+                    avmi.item_class,
+                    ic.id AS item_class_id
                 FROM aggregated_vmi avmi
                 LEFT JOIN tbl_store s ON avmi.store = s.id
+                LEFT JOIN tbl_item_class ic ON avmi.item_class = ic.item_class_description
                 LEFT JOIN dedup_pclmi pclmi ON avmi.item = pclmi.cusitmcde AND avmi.company = '2'
                 LEFT JOIN dedup_pcrgdi pcrgdi ON avmi.item = pcrgdi.cusitmcde AND avmi.company != '2'
                 LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde AND avmi.company = '2'
@@ -1983,6 +1985,7 @@ class Sync_model extends Model
                     'item' => $row['item'],
                     'item_name' => $row['item_name'],
                     'item_class' => $row['item_class'],
+                    'item_class_id' => $row['item_class_id'],
                     'average_sales_unit' => $row['average_sales_unit'],
                     'ba_deployment_dates' => '',
                     'year' => $row['year'],

@@ -4,7 +4,7 @@
         itemClassi.forEach(function (item) {
           $('#itemClass').append(
             $('<option>', {
-              value: item.item_class_code,
+              value: item.id,
               text: item.item_class_description
             })
           );
@@ -118,7 +118,7 @@
             { data: 'itmcde' },             
             { data: 'item' },                
             { data: 'item_name' },          
-            { data: 'item_class' }      
+            { data: 'item_class_name' }      
         ];
 
         if (type !== 'hero') {
