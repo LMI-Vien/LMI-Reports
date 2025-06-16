@@ -268,13 +268,42 @@
         `;
         logActivity('Store Sales Performance', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
 
-        let iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
+        let fetchedResponse;
+        fetch(url, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
+            }
+            fetchedResponse = response;
+            return response.blob();
+        })
+        .then(blob => {
+            const cd = fetchedResponse.headers.get('Content-Disposition');
+            const match = cd && /filename="?([^"]+)"/.exec(cd);
+            let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+            const filename = rawName
+                || (action === 'exportPdf'
+                    ? 'Overall Stores Sales Performance.pdf'
+                    : 'Overall Stores Sales Performance.xlsx');
 
-        setTimeout(function() {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(err => {
+            console.error("Download failed:", err);
+            modal.alert("Failed to generate file. Please try again.", "error");
+        })
+        .finally(() => {
             modal.loading(false);
-        }, 5000);
+        });
 
     }

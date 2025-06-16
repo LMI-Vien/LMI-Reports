@@ -156,25 +156,43 @@ class StoreSalesPerfPerMonth extends BaseController
 	}
 
 	// ================================= Display filters for pdf export ================================
-	private function printFilter($pdf, $filters) {
+	private function printFilter($pdf, $filters, $itemBrandMap = '') {
 		$pdf->SetFont('helvetica', '', 9);
 
 		$pageWidth  = $pdf->getPageWidth();
 		$pageMargin = $pdf->getMargins();
-		$perRow   = ceil(count($filters) / 2);
-		$colWidth = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $perRow;
+		$totalCols  = 3; // 3 columns layout
+		$colWidth   = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $totalCols;
+		$labelWidth = 30; // static width for label text
 
-		// split into two “rows”
-		$rows = array_chunk($filters, $perRow, true);
+		// Split filters into chunks of 3 (3 per row)
+		$rows = array_chunk($filters, $totalCols, true);
 
-		foreach ($rows as $rowFilters) {
-			foreach ($rowFilters as $key => $value) {
-				$pdf->Cell($colWidth, 8, "{$key}: {$value}", 0, 0, 'L');
+		foreach ($rows as $row) {
+			foreach ($row as $label => $value) {
+				$pdf->SetFont('helvetica', 'B', 9);
+				$pdf->Cell($labelWidth, 8, $label . ':', 0, 0, 'L');
+
+				$pdf->SetFont('helvetica', '', 9);
+				$pdf->Cell($colWidth - $labelWidth, 8, $value, 0, 0, 'L');
 			}
 			$pdf->Ln(8);
 		}
 
-		$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
+		// Align "Item Brand" to column 1, and "Generated Date" to column 3
+		$pdf->SetFont('helvetica', 'B', 9);
+		$pdf->Cell($labelWidth, 8, 'Item Brand:', 0, 0, 'L');
+		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Cell($colWidth - $labelWidth, 8, $itemBrandMap ?: 'None', 0, 0, 'L');
+
+		// Spacer for middle column (column 2)
+		$pdf->Cell($colWidth, 8, '', 0, 0);
+
+		$pdf->SetFont('helvetica', 'B', 9);
+		$pdf->Cell($labelWidth, 8, 'Generated Date:', 0, 0, 'L');
+		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Cell($colWidth - $labelWidth, 8, date('M d, Y, h:i:s A'), 0, 1, 'L');
+
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');
 		$pdf->Ln(4);
@@ -200,33 +218,28 @@ class StoreSalesPerfPerMonth extends BaseController
 		$baId = $baId === '' ? null : $baId;
 		$storeId= $this->getParam('store');
 		$storeId = $storeId === '' ? null : $storeId;
-        $brandsIds = $this->getParam('brands');
-        $brandsIds = $brandsIds === '' ? null : $brandsIds;
-        $brandCategoriesIds = $this->getParam('brandCategories');
-        $brandCategoriesIds = $brandCategoriesIds === '' ? null : $brandCategoriesIds;
+		$brandsParam = $this->getParam('brands');
+		if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
+			$brands = array_map('trim', explode(',', $brandsParam));
+		} elseif (is_array($brandsParam) && count($brandsParam) > 0) {
+			$brands = $brandsParam;
+		} elseif (!empty($brandsParam)) {
+			$brands = [ $brandsParam ];
+		} else {
+			$brands = [];
+		}
 
-		// $brandsParam = $this->getParam('brands');
-		// if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
-		// 	$brandsIds = array_map('trim', explode(',', $brandsParam));
-		// } elseif (is_array($brandsParam) && count($brandsParam) > 0) {
-		// 	$brandsIds = $brandsParam;
-		// } elseif (!empty($brandsParam)) {
-		// 	$brandsIds = [ $brandsParam ];
-		// } else {
-		// 	$brandsIds = [];
-		// }
+		$brandCategoriesParam = $this->getParam('brandCategories');
+		if (is_string($brandCategoriesParam) && strpos($brandCategoriesParam, ',') !== false) {
+			$brandCategories = array_map('trim', explode(',', $brandCategoriesParam));
+		} elseif (is_array($brandCategoriesParam) && count($brandCategoriesParam) > 0) {
+			$brandCategories = $brandCategoriesParam;
+		} elseif (!empty($brandCategoriesParam)) {
+			$brandCategories = [ $brandCategoriesParam ];
+		} else {
+			$brandCategories = [];
+		}
 
-		// $brandCatsParam = $this->getParam('brandCategories');
-		// if (is_string($brandCatsParam) && strpos($brandCatsParam, ',') !== false) {
-		// 	$brandCategoriesIds = array_map('trim', explode(',', $brandCatsParam));
-		// } elseif (is_array($brandCatsParam) && count($brandCatsParam) > 0) {
-		// 	$brandCategoriesIds = $brandCatsParam;
-		// } elseif (!empty($brandCatsParam)) {
-		// 	$brandCategoriesIds = [ $brandCatsParam ];
-		// } else {
-		// 	$brandCategoriesIds = [];
-		// }
-		
         $sysPar = $this->Global_model->getSysPar();
 		$years = $this->Global_model->getYears(); 
 	
@@ -274,7 +287,7 @@ class StoreSalesPerfPerMonth extends BaseController
 			    'store_code' => $storeCode,
 			    'area_id' => $areaId,
 			    'ba_id' => $baId,
-			    'brand_ids' => $brandsIds,
+			    'brand_ids' => $brandsParam,
 			    'brand_type_ids' => $brandCategoriesIds,
 			    'ba_code' => $baCode,
 			    'year_val' => $latest_year_id,
@@ -322,25 +335,33 @@ class StoreSalesPerfPerMonth extends BaseController
 		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'code:EQ=$storeId'", "''", "''");
 		$storeMap = !empty($result) ? $result[0]['description'] : '';
 
-		$result = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ=$brandCategoriesIds'", "''", "''");
-		$brandLabelMap = !empty($result) ? $result[0]['label'] : '';
+		$brandsLabel = [];
+		foreach ($brands as $brandsed) {
+			$result  = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ={$brandsed}'", "''", "''");
+			if (!empty($result) && isset($result[0]['brand_description'])) {
+				$brandsLabel[] = $result[0]['brand_description'];
+			}
+		}
 
-		// $brandLabel = [];
-		// foreach ($brandCategoriesIds as $brandLabelId) {
-		// 	$result  = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'item_class_code'", 0, 0, "'id:EQ={$oneClassId}'", "''", "''");
-		// 	if (!empty($result) && isset($result[0]['item_class_code'])) {
-		// 		$brandLabel[] = $result[0]['item_class_code'];
-		// 	}
-		// }
+		$brandLabelType = [];
+		foreach ($brandCategories as $brandCat) {
+			$result  = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ={$brandCat}'", "''", "''");
+			if (!empty($result) && isset($result[0]['label'])) {
+				$brandLabelType[] = $result[0]['label'];
+			}
+		}
 
-		// if (empty($brandLabel)) {
-		// 	$brandLabelMap = '';  
-		// } else {
-		// 	$brandLabelMap = implode(', ', $brandLabel);
-		// }
+		if (empty($brandLabelType)) {
+			$brandLabelTypeMap = '';  
+		} else {
+			$brandLabelTypeMap = implode(', ', $brandLabelType);
+		}
 
-		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$brandsIds'", "''", "''");
-		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
+		if (empty($brandsLabel)) {
+			$itemBrandMap = '';  
+		} else {
+			$itemBrandMap = implode(', ', $brandsLabel);
+		}
 
 		$filterData = [
 			'Area'             		=> $dv($areaMap),
@@ -348,8 +369,8 @@ class StoreSalesPerfPerMonth extends BaseController
 			'BA Type'          		=> $dv($baTypeString),
 			'Brand Ambassador' 		=> $dv($baMap),
 			'Store Name'	   		=> $dv($storeMap),
-			'Brand Label Type'	   	=> $dv($brandLabelMap),
-			'Item Brand'            => $dv($brandMap),
+			'Brand Label Type'	   	=> empty($brandLabelTypeMap) ? 'None' : $brandLabelTypeMap,
+			// 'Item Brand'            => empty($itemBrandMap) ? 'None' : $itemBrandMap,
 		];
 
 		$title = "Store Sales Performance Per Area";
@@ -362,7 +383,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		$pdf->AddPage();
 
 		$this->printHeader($pdf, $title);
-		$this->printFilter($pdf, $filterData);
+		$this->printFilter($pdf, $filterData, $itemBrandMap);
 
 		$pdf->SetFont('helvetica', '', 9);
 		$result = $this->Dashboard_model->tradeOverallBaDataASC($filters);
@@ -401,60 +422,60 @@ class StoreSalesPerfPerMonth extends BaseController
 		foreach ($rows as $row) {
 			$rowH = 8;
 			$pdf->Cell($colWidth, $rowH, 'LY Sell Out', 1, 0, 'L');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_january, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_february, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_march, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_april, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_may, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_june, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_july, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_august, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_september, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_october, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_november, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_december, 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_january), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_february), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_march), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_april), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_may), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_june), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_july), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_august), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_september), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_october), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_november), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_december), 1, 1, 'C');
 
 			$pdf->Cell($colWidth, $rowH, 'TY Sell Out', 1, 0, 'L');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_january, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_february, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_march, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_april, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_may, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_june, 1, 0, 'C'); 
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_july, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_august, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_september, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_october, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_november, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_december, 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_january), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_february), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_march), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_april), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_may), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_june), 1, 0, 'C'); 
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_july), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_august), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_september), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_october), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_november), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_december), 1, 1, 'C');
 
 			$pdf->Cell($colWidth, $rowH, 'Sales Report', 1, 0, 'L');
-			$pdf->Cell($colWidth, $rowH, $row->amount_january, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_february, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_march, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_april, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_may, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_june, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_july, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_august, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_september, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_october, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_november, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->amount_december, 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_january), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_february), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_march), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_april), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_may), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_june), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_july), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_august), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_september), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_october), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_november), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_december), 1, 1, 'C');
 
 			$pdf->Cell($colWidth, $rowH, 'Target Sales', 1, 0, 'L');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_jan, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_feb, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_mar, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_apr, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_may, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_jun, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_jul, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_aug, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_sep, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_oct, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_nov, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->target_sales_dec, 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_jan), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_feb), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_mar), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_apr), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_may), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_jun), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_jul), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_aug), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_sep), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_oct), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_nov), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_dec), 1, 1, 'C');
 
 			$pdf->Cell($colWidth, $rowH, '% Growth', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $row->growth_january, 1, 0, 'C');
@@ -501,32 +522,27 @@ class StoreSalesPerfPerMonth extends BaseController
 		$baId = $baId === '' ? null : $baId;
 		$storeId= $this->getParam('store');
 		$storeId = $storeId === '' ? null : $storeId;
-        $brandsIds = $this->getParam('brands');
-        $brandsIds = $brandsIds === '' ? null : $brandsIds;
-        $brandCategoriesIds = $this->getParam('brandCategories');
-        $brandCategoriesIds = $brandCategoriesIds === '' ? null : $brandCategoriesIds;
+        $brandsParam = $this->getParam('brands');
+		if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
+			$brands = array_map('trim', explode(',', $brandsParam));
+		} elseif (is_array($brandsParam) && count($brandsParam) > 0) {
+			$brands = $brandsParam;
+		} elseif (!empty($brandsParam)) {
+			$brands = [ $brandsParam ];
+		} else {
+			$brands = [];
+		}
 
-		// $brandsParam = $this->getParam('brands');
-		// if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
-		// 	$brandsIds = array_map('trim', explode(',', $brandsParam));
-		// } elseif (is_array($brandsParam) && count($brandsParam) > 0) {
-		// 	$brandsIds = $brandsParam;
-		// } elseif (!empty($brandsParam)) {
-		// 	$brandsIds = [ $brandsParam ];
-		// } else {
-		// 	$brandsIds = [];
-		// }
-
-		// $brandCatsParam = $this->getParam('brandCategories');
-		// if (is_string($brandCatsParam) && strpos($brandCatsParam, ',') !== false) {
-		// 	$brandCategoriesIds = array_map('trim', explode(',', $brandCatsParam));
-		// } elseif (is_array($brandCatsParam) && count($brandCatsParam) > 0) {
-		// 	$brandCategoriesIds = $brandCatsParam;
-		// } elseif (!empty($brandCatsParam)) {
-		// 	$brandCategoriesIds = [ $brandCatsParam ];
-		// } else {
-		// 	$brandCategoriesIds = [];
-		// }
+		$brandCategoriesParam = $this->getParam('brandCategories');
+		if (is_string($brandCategoriesParam) && strpos($brandCategoriesParam, ',') !== false) {
+			$brandCategories = array_map('trim', explode(',', $brandCategoriesParam));
+		} elseif (is_array($brandCategoriesParam) && count($brandCategoriesParam) > 0) {
+			$brandCategories = $brandCategoriesParam;
+		} elseif (!empty($brandCategoriesParam)) {
+			$brandCategories = [ $brandCategoriesParam ];
+		} else {
+			$brandCategories = [];
+		}
 		
         $sysPar = $this->Global_model->getSysPar();
 		$years = $this->Global_model->getYears(); 
@@ -575,7 +591,7 @@ class StoreSalesPerfPerMonth extends BaseController
 			    'store_code' => $storeCode,
 			    'area_id' => $areaId,
 			    'ba_id' => $baId,
-			    'brand_ids' => $brandsIds,
+			    'brand_ids' => $brandsParam,
 			    'brand_type_ids' => $brandCategoriesIds,
 			    'ba_code' => $baCode,
 			    'year_val' => $latest_year_id,
@@ -615,11 +631,33 @@ class StoreSalesPerfPerMonth extends BaseController
 		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'code:EQ=$storeId'", "''", "''");
 		$storeMap = !empty($result) ? $result[0]['description'] : '';
 
-		$result = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ=$brandCategoriesIds'", "''", "''");
-		$brandLabelMap = !empty($result) ? $result[0]['label'] : '';
+		$brandsLabel = [];
+		foreach ($brands as $brandsed) {
+			$result  = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ={$brandsed}'", "''", "''");
+			if (!empty($result) && isset($result[0]['brand_description'])) {
+				$brandsLabel[] = $result[0]['brand_description'];
+			}
+		}
 
-		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$brandsIds'", "''", "''");
-		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
+		$brandLabelType = [];
+		foreach ($brandCategories as $brandCat) {
+			$result  = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ={$brandCat}'", "''", "''");
+			if (!empty($result) && isset($result[0]['label'])) {
+				$brandLabelType[] = $result[0]['label'];
+			}
+		}
+
+		if (empty($brandLabelType)) {
+			$brandLabelTypeMap = '';  
+		} else {
+			$brandLabelTypeMap = implode(', ', $brandLabelType);
+		}
+
+		if (empty($brandsLabel)) {
+			$itemBrandMap = '';  
+		} else {
+			$itemBrandMap = implode(', ', $brandsLabel);
+		}
 
 		$title = "Store Sales Performance Per Month";
 		$data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
@@ -639,8 +677,8 @@ class StoreSalesPerfPerMonth extends BaseController
 		$sheet->setCellValue('D4', 'Brand Ambassador: ' . ($baMap     ?: 'NONE'));
 
 		$sheet->setCellValue('A5', 'Store Name: ' . ($storeMap ?: 'NONE'));
-		$sheet->setCellValue('B5', 'Brand Label Type: '   . ($brandLabelMap   ?: 'NONE'));
-		$sheet->setCellValue('C5', 'Item Brand: '        . ($brandMap       ?: 'NONE'));
+		$sheet->setCellValue('B5', 'Brand Label Type: '   . ($brandLabelTypeMap   ?: 'NONE'));
+		$sheet->setCellValue('C5', 'Item Brand: '        . ($itemBrandMap       ?: 'NONE'));
 		$sheet->setCellValue('D5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 		$headers = [
@@ -788,9 +826,7 @@ class StoreSalesPerfPerMonth extends BaseController
 	}
 
 	private function getParam(string $key) {
-		$v = $this->request->getVar($key); 
-		if (is_array($v)) return $v;
-
+		$v = $this->request->getVar($key);       // accepts GET or POST
 		if (is_null($v)) return null;
 		$v = trim((string)$v);
 		return $v === '' ? null : $v;
@@ -805,4 +841,12 @@ class StoreSalesPerfPerMonth extends BaseController
 			fn($i) => $i > 0
 		);
 	}
+
+	private function formatTwoDecimals($value): string {
+		if (is_null($value) || !is_numeric($value)) {
+			$value = 0;
+		}
+		return number_format((float)$value, 2, '.', ',');
+	}
+	
 }
