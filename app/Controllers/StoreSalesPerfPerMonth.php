@@ -155,212 +155,654 @@ class StoreSalesPerfPerMonth extends BaseController
 		}
 	}
 
-	public function generatePdf()
-	{	
-	    $sort_field = $this->request->getGet('sort_field');
-	    $sort = $this->request->getGet('sort');
-	    $brand = $this->request->getGet('brand');
-	    $brand_ambassador = $this->request->getGet('brand_ambassador');
-	    $store_name = $this->request->getGet('store_name');
-	    $ba_type = $this->request->getGet('ba_type');
-	    $type = $this->request->getGet('type');
-	    $asc_name = $this->request->getGet('asc_name');
-	    $batchSize = 10000; //  10,000 data per batch
-	    $offset = 0;
-	    $out_con = 'ALL';
-	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
-	    
-	    if ($latest_vmi_data) {
-	        $latest_year = $latest_vmi_data['year_id'];
-	        $latest_month = $latest_vmi_data['month_id'];
-	        $latest_week = $latest_vmi_data['week_id'];
+	// ================================= Display filters for pdf export ================================
+	private function printFilter($pdf, $filters) {
+		$pdf->SetFont('helvetica', '', 9);
 
-	        $brand_ambassador = $brand_ambassador ?: null;
-	        $brand = $brand ?: null;
-	        $store_name = $store_name ?: null;
-	        $out_con = $ba_type ?: "ALL";
-	        $asc_name = ($asc_name && $asc_name !== 'Please Select Brand Ambassador') ? $asc_name : "";
+		$pageWidth  = $pdf->getPageWidth();
+		$pageMargin = $pdf->getMargins();
+		$perRow   = ceil(count($filters) / 2);
+		$colWidth = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $perRow;
 
-	        $title = 'BA_Dashboard_Report';
-	        
-	        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-	        $pdf->SetCreator('LMI SFA');
-	        $pdf->SetAuthor('LIFESTRONG MARKETING INC.');
-	        $pdf->SetTitle('BA Dashboard Report');
-	        $pdf->setPrintHeader(false);
-	        $pdf->setPrintFooter(false);
-	        $pdf->AddPage();
-	        
-	        $pdf->SetFont('helvetica', '', 12);
-	        $pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
-	        $pdf->SetFont('helvetica', '', 10);
-	        $pdf->Cell(0, 5, 'Report: BA Dashboard', 0, 1, 'C');
-	        $pdf->Ln(5);
+		// split into two “rows”
+		$rows = array_chunk($filters, $perRow, true);
 
-	        $pdf->SetFont('helvetica', '', 9);
-	        $pdf->Cell(63, 6, 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'), 0, 0, 'L');
-	        $pdf->Cell(63, 6, 'Brand: ' . ($brand ?: 'ALL'), 0, 0, 'L');
-	        $pdf->Cell(63, 6, 'Outright/Consignment: ' . ($out_con ?: 'ALL'), 0, 1, 'L');
-	        
-	        $pdf->Cell(63, 6, 'Store Name: ' . ($store_name ?: 'ALL'), 0, 0, 'L');
-	        $pdf->Cell(63, 6, 'Area / ASC Name: ' . ($asc_name ?: ''), 0, 0, 'L');
-	        $pdf->Cell(63, 6, 'Date Generated: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
-	        
-	        $pdf->Ln(2);
-	        $pdf->Cell(0, 0, '', 'T');
-	        $pdf->Ln(4);
+		foreach ($rows as $rowFilters) {
+			foreach ($rowFilters as $key => $value) {
+				$pdf->Cell($colWidth, 8, "{$key}: {$value}", 0, 0, 'L');
+			}
+			$pdf->Ln(8);
+		}
 
-	        $pdf->SetFont('helvetica', 'B', 10);
-	        $pdf->Cell(110, 6, 'Item Name', 1, 0, 'C');
-	        $pdf->Cell(15, 6, 'Quantity', 1, 0, 'C');
-	        $pdf->Cell(20, 6, 'LMI Code', 1, 0, 'C');
-	        $pdf->Cell(20, 6, 'RGDI Code', 1, 0, 'C');
-	        $pdf->Cell(25, 6, 'Type of SKU', 1, 1, 'C');
+		$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
+		$pdf->Ln(2);
+		$pdf->Cell(0, 0, '', 'T');
+		$pdf->Ln(4);
+	}
 
-	        $pdf->SetFont('helvetica', '', 10);
+	// ================================= Header for pdf export =================================
+	private function printHeader($pdf, $title) {
+		$pdf->SetFont('helvetica', '', 12);
+		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
+		$pdf->SetFont('helvetica', '', 10);
+		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
+		$pdf->Ln(5);
+	}
 
-	        do {
-	            switch ($type) {
-	                case 'slowMoving':
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
-	                    $title = 'BA_Dashboard_Report_Slow_Moving';
-	                    break;
-	                case 'overStock':
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 30, null, $latest_week, $latest_month, $latest_year);
-	                    $title = 'BA_Dashboard_Report_Overstock';
-	                    break;
-	                case 'npd':
-	                    $item_class_filter = ['N-New Item'];
-	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latest_week, $latest_month, $latest_year, $item_class_filter);
-	                    $title = 'BA_Dashboard_Report_NPD';
-	                    break;
-	                case 'hero':
-	                    $item_class_filter = ['A-Top 500 Pharma/Beauty', 'BU-Top 300 of 65% cum sales net of Class A Pharma/Beauty', 'B-Remaining Class B net of BU Pharma/Beauty'];
-	                    $data = $this->Dashboard_model->getItemClassNPDHEROData($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, $latest_week, $latest_month, $latest_year, $item_class_filter);
-	                    $title = 'BA_Dashboard_Report_HERO';
-	                    break;
-	                default:
-	                    $data = $this->Dashboard_model->tradeInfoBa($brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort, $batchSize, $offset, 20, 30, $latest_week, $latest_month, $latest_year);
-	                    $title = 'BA_Dashboard_Report_Slow_Moving';
-	            }
+	public function generatePdf() {	
+	    $areaId = $this->getParam('area');
+		$areaId = $areaId === '' ? null : $areaId;
+		$ascId = $this->getParam('asc');
+		$ascId = $ascId === '' ? null : $ascId;
+		$baTypeId = $this->getParam('baType');
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
+		$baId = $this->getParam('ba');
+		$baId = $baId === '' ? null : $baId;
+		$storeId= $this->getParam('store');
+		$storeId = $storeId === '' ? null : $storeId;
+        $brandsIds = $this->getParam('brands');
+        $brandsIds = $brandsIds === '' ? null : $brandsIds;
+        $brandCategoriesIds = $this->getParam('brandCategories');
+        $brandCategoriesIds = $brandCategoriesIds === '' ? null : $brandCategoriesIds;
 
-	            if ($data) {
-	                foreach ($data['data'] as $row) {
-	                    $pdf->Cell(110, 6, $row->item_name, 1, 0, 'L');
-	                    $pdf->Cell(15, 6, $row->sum_total_qty, 1, 0, 'C');
-	                    $pdf->Cell(20, 6, $row->lmi_itmcde, 1, 0, 'C');
-	                    $pdf->Cell(20, 6, $row->rgdi_itmcde, 1, 0, 'C');
-	                    $pdf->Cell(25, 6, $type, 1, 1, 'C');
-	                }
-	            }
+		// $brandsParam = $this->getParam('brands');
+		// if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
+		// 	$brandsIds = array_map('trim', explode(',', $brandsParam));
+		// } elseif (is_array($brandsParam) && count($brandsParam) > 0) {
+		// 	$brandsIds = $brandsParam;
+		// } elseif (!empty($brandsParam)) {
+		// 	$brandsIds = [ $brandsParam ];
+		// } else {
+		// 	$brandsIds = [];
+		// }
 
-	            $offset += $batchSize;
+		// $brandCatsParam = $this->getParam('brandCategories');
+		// if (is_string($brandCatsParam) && strpos($brandCatsParam, ',') !== false) {
+		// 	$brandCategoriesIds = array_map('trim', explode(',', $brandCatsParam));
+		// } elseif (is_array($brandCatsParam) && count($brandCatsParam) > 0) {
+		// 	$brandCategoriesIds = $brandCatsParam;
+		// } elseif (!empty($brandCatsParam)) {
+		// 	$brandCategoriesIds = [ $brandCatsParam ];
+		// } else {
+		// 	$brandCategoriesIds = [];
+		// }
+		
+        $sysPar = $this->Global_model->getSysPar();
+		$years = $this->Global_model->getYears(); 
+	
+		$year_values = array_column($years, 'year'); 
+		$year_id = array_column($years, 'id'); 
+		$latest_year = max($year_values);
+		$latest_year_id = max($year_id);
+		
+	    $incentiveRate = 0.015;
+	    $amountPerDay = 8000;
+	    $noOfDays = 0;
+		if($sysPar){
+			$jsonString = $sysPar[0]['brand_label_type'];
+			$data = json_decode($jsonString, true);
+		    $amountPerDay = $sysPar[0]['tba_amount_per_ba'];
+		    $noOfDays = $sysPar[0]['tba_num_days'];
+		    $target_sales = $amountPerDay * $noOfDays;
+		}
+		$target_sales = $amountPerDay * $noOfDays;
 
-	            // Free memory
-	            unset($data);
-	            gc_collect_cycles(); 
-	        } while (!empty($data['data']));
+		$baCode = null;
 
-	        $pdf->Output($title . '.pdf', 'D');
-	        exit;
-	    }
+		if($baId){
+			if($baId == -5 || $baId == -6){
+				$baCode = null;	
+			}else{
+				$baCode = $this->Global_model->get_by_id('tbl_brand_ambassador', $baId);
+				$baCode = $baCode[0]->code;
+			}
+		}
+
+		$storeCode = null;
+		if($storeId){
+			$storeCode = $this->Global_model->get_by_id('tbl_store', $storeId);
+			$storeCode = $storeCode[0]->code;
+		}
+
+		$brandCategoriesIds = null;
+		if($latest_year){
+
+		    $filters = [
+			    'year' => $latest_year, 
+			    'asc_id' => $ascId,    
+			    'store_id' => $storeId,
+			    'store_code' => $storeCode,
+			    'area_id' => $areaId,
+			    'ba_id' => $baId,
+			    'brand_ids' => $brandsIds,
+			    'brand_type_ids' => $brandCategoriesIds,
+			    'ba_code' => $baCode,
+			    'year_val' => $latest_year_id,
+			    'ba_type' => $baTypeId,
+			    'default_target' => $amountPerDay
+			];
+		}
+
+		$baTypeString = '';
+		switch ($baTypeId) {
+			case '3':
+				$baTypeString = 'ALL';
+				break;
+			
+			case '1':
+				$baTypeString = "Outright";
+				break;
+			
+			case '0':
+				$baTypeString = "Consignment";
+				break;
+			
+			default:
+				$baTypeString = 'NONE';
+				break;
+		}
+
+		$dv = function($value, $default = 'None') {
+			if (is_array($value)) {
+				return empty($value) ? $default : implode(', ', $value);
+			}
+			$value = trim((string)$value);
+			return $value === '' ? $default : $value;
+		};
+
+		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$areaId'", "''", "''");
+		$areaMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$ascId'", "''", "''");
+		$ascMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$baId'", "''", "''");
+		$baMap = !empty($result) ? $result[0]['name'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'code:EQ=$storeId'", "''", "''");
+		$storeMap = !empty($result) ? $result[0]['description'] : '';
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ=$brandCategoriesIds'", "''", "''");
+		$brandLabelMap = !empty($result) ? $result[0]['label'] : '';
+
+		// $brandLabel = [];
+		// foreach ($brandCategoriesIds as $brandLabelId) {
+		// 	$result  = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'item_class_code'", 0, 0, "'id:EQ={$oneClassId}'", "''", "''");
+		// 	if (!empty($result) && isset($result[0]['item_class_code'])) {
+		// 		$brandLabel[] = $result[0]['item_class_code'];
+		// 	}
+		// }
+
+		// if (empty($brandLabel)) {
+		// 	$brandLabelMap = '';  
+		// } else {
+		// 	$brandLabelMap = implode(', ', $brandLabel);
+		// }
+
+		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$brandsIds'", "''", "''");
+		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
+
+		$filterData = [
+			'Area'             		=> $dv($areaMap),
+			'ASC'              		=> $dv($ascMap),
+			'BA Type'          		=> $dv($baTypeString),
+			'Brand Ambassador' 		=> $dv($baMap),
+			'Store Name'	   		=> $dv($storeMap),
+			'Brand Label Type'	   	=> $dv($brandLabelMap),
+			'Item Brand'            => $dv($brandMap),
+		];
+
+		$title = "Store Sales Performance Per Area";
+		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf->SetCreator('LMI SFA');
+		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
+		$pdf->SetTitle($title);
+		$pdf->setPrintHeader(false);
+		$pdf->setPrintFooter(false);
+		$pdf->AddPage();
+
+		$this->printHeader($pdf, $title);
+		$this->printFilter($pdf, $filterData);
+
+		$pdf->SetFont('helvetica', '', 9);
+		$result = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+		$rows = $result['data'];
+
+		$pageWidth  = $pdf->getPageWidth();
+		$margins    = $pdf->getMargins();
+		$colWidth   = ($pageWidth - $margins['left'] - $margins['right']) / 13;
+
+		$headers = [
+			'January',
+			'February',
+			'March',
+			'April',
+			'May',
+			'June',
+			'July',
+			'August',
+			'September',
+			'October',
+			'November',
+			'December',
+		];
+
+		$pdf->SetFont('helvetica','B',9);
+
+		// First column: empty for label header
+		$pdf->Cell($colWidth, 8, '', 1, 0, 'C');
+
+		foreach ($headers as $i => $text) {
+			$pdf->Cell($colWidth, 8, $text, 1, ($i === count($headers) - 1 ? 1 : 0), 'C');
+		}
+
+		$pdf->SetFont('helvetica','',9);
+		$lineH = 4; 
+		foreach ($rows as $row) {
+			$rowH = 8;
+			$pdf->Cell($colWidth, $rowH, 'LY Sell Out', 1, 0, 'L');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_january, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_february, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_march, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_april, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_may, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_june, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_july, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_august, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_september, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_october, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_november, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ly_sell_out_december, 1, 1, 'C');
+
+			$pdf->Cell($colWidth, $rowH, 'TY Sell Out', 1, 0, 'L');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_january, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_february, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_march, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_april, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_may, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_june, 1, 0, 'C'); 
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_july, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_august, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_september, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_october, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_november, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->ty_sell_out_december, 1, 1, 'C');
+
+			$pdf->Cell($colWidth, $rowH, 'Sales Report', 1, 0, 'L');
+			$pdf->Cell($colWidth, $rowH, $row->amount_january, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_february, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_march, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_april, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_may, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_june, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_july, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_august, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_september, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_october, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_november, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->amount_december, 1, 1, 'C');
+
+			$pdf->Cell($colWidth, $rowH, 'Target Sales', 1, 0, 'L');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_jan, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_feb, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_mar, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_apr, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_may, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_jun, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_jul, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_aug, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_sep, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_oct, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_nov, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->target_sales_dec, 1, 1, 'C');
+
+			$pdf->Cell($colWidth, $rowH, '% Growth', 1, 0, 'L');
+			$pdf->Cell($colWidth, $rowH, $row->growth_january, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_february, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_march, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_april, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_may, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_june, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_july, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_august, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_september, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_october, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_november, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_december, 1, 1, 'C');
+
+			$pdf->Cell($colWidth, $rowH, '% Achieved', 1, 0, 'L');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_january, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_february, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_march, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_april, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_may, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_june, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_july, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_august, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_september, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_october, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_november, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_december, 1, 1, 'C');
+		}
+
+		$pdf->Output($title . '.pdf', 'D');
+		exit;
 	}
 
 
-	public function generateExcel()
-	{
-	    $sort_field = $this->request->getGet('sort_field');
-	    $sort = $this->request->getGet('sort');
-	    $brand = $this->request->getGet('brand') ?: null;
-	    $brand_ambassador = $this->request->getGet('brand_ambassador') ?: null;
-	    $store_name = $this->request->getGet('store_name') ?: null;
-	    $ba_type = $this->request->getGet('ba_type') ?: null;
-	    $type = $this->request->getGet('type');
-	    $asc_name = $this->request->getGet('asc_name');
-	    $out_con = $ba_type ? 'ALL' : 'ALL';
+	public function generateExcel() {
+	    $areaId = $this->getParam('area');
+		$areaId = $areaId === '' ? null : $areaId;
+		$ascId = $this->getParam('asc');
+		$ascId = $ascId === '' ? null : $ascId;
+		$baTypeId = $this->getParam('baType');
+		$baTypeId = $baTypeId === '' ? null : $baTypeId;
+		$baId = $this->getParam('ba');
+		$baId = $baId === '' ? null : $baId;
+		$storeId= $this->getParam('store');
+		$storeId = $storeId === '' ? null : $storeId;
+        $brandsIds = $this->getParam('brands');
+        $brandsIds = $brandsIds === '' ? null : $brandsIds;
+        $brandCategoriesIds = $this->getParam('brandCategories');
+        $brandCategoriesIds = $brandCategoriesIds === '' ? null : $brandCategoriesIds;
 
-	    $latest_vmi_data = $this->Dashboard_model->getLatestVmi();
-	    if (!$latest_vmi_data) {
-	        return;
-	    }
+		// $brandsParam = $this->getParam('brands');
+		// if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
+		// 	$brandsIds = array_map('trim', explode(',', $brandsParam));
+		// } elseif (is_array($brandsParam) && count($brandsParam) > 0) {
+		// 	$brandsIds = $brandsParam;
+		// } elseif (!empty($brandsParam)) {
+		// 	$brandsIds = [ $brandsParam ];
+		// } else {
+		// 	$brandsIds = [];
+		// }
 
-	    $latest_year = $latest_vmi_data['year_id'];
-	    $latest_month = $latest_vmi_data['month_id'];
-	    $latest_week = $latest_vmi_data['week_id'];
+		// $brandCatsParam = $this->getParam('brandCategories');
+		// if (is_string($brandCatsParam) && strpos($brandCatsParam, ',') !== false) {
+		// 	$brandCategoriesIds = array_map('trim', explode(',', $brandCatsParam));
+		// } elseif (is_array($brandCatsParam) && count($brandCatsParam) > 0) {
+		// 	$brandCategoriesIds = $brandCatsParam;
+		// } elseif (!empty($brandCatsParam)) {
+		// 	$brandCategoriesIds = [ $brandCatsParam ];
+		// } else {
+		// 	$brandCategoriesIds = [];
+		// }
+		
+        $sysPar = $this->Global_model->getSysPar();
+		$years = $this->Global_model->getYears(); 
+	
+		$year_values = array_column($years, 'year'); 
+		$year_id = array_column($years, 'id'); 
+		$latest_year = max($year_values);
+		$latest_year_id = max($year_id);
+		
+	    $incentiveRate = 0.015;
+	    $amountPerDay = 8000;
+	    $noOfDays = 0;
+		if($sysPar){
+			$jsonString = $sysPar[0]['brand_label_type'];
+			$data = json_decode($jsonString, true);
+		    $amountPerDay = $sysPar[0]['tba_amount_per_ba'];
+		    $noOfDays = $sysPar[0]['tba_num_days'];
+		    $target_sales = $amountPerDay * $noOfDays;
+		}
+		$target_sales = $amountPerDay * $noOfDays;
 
-	    $asc_name = ($asc_name === 'Please Select Brand Ambassador') ? "" : $asc_name;
+		$baCode = null;
 
-	    $title = 'BA_Dashboard_Report';
-	    switch ($type) {
-	        case 'slowMoving':
-	            $title .= '_Slow_Moving';
-	            break;
-	        case 'overStock':
-	            $title .= '_Overstock';
-	            break;
-	        case 'npd':
-	            $title .= '_NPD';
-	            break;
-	        case 'hero':
-	            $title .= '_HERO';
-	            break;
-	    }
+		if($baId){
+			if($baId == -5 || $baId == -6){
+				$baCode = null;	
+			}else{
+				$baCode = $this->Global_model->get_by_id('tbl_brand_ambassador', $baId);
+				$baCode = $baCode[0]->code;
+			}
+		}
 
-	    $spreadsheet = new Spreadsheet();
-	    $sheet = $spreadsheet->getActiveSheet();
+		$storeCode = null;
+		if($storeId){
+			$storeCode = $this->Global_model->get_by_id('tbl_store', $storeId);
+			$storeCode = $storeCode[0]->code;
+		}
 
-	    $sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-	    $sheet->setCellValue('A2', 'Report: BA Dashboard');
-	    $sheet->mergeCells('A1:E1');
-	    $sheet->mergeCells('A2:E2');
+		$brandCategoriesIds = null;
+		if($latest_year){
 
-	    $sheet->setCellValue('A4', 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'));
-	    $sheet->setCellValue('B4', 'Brand: ' . ($brand ?: 'ALL'));
-	    $sheet->setCellValue('C4', 'Outright/Consignment: ' . ($out_con ?: 'ALL'));
+		    $filters = [
+			    'year' => $latest_year, 
+			    'asc_id' => $ascId,    
+			    'store_id' => $storeId,
+			    'store_code' => $storeCode,
+			    'area_id' => $areaId,
+			    'ba_id' => $baId,
+			    'brand_ids' => $brandsIds,
+			    'brand_type_ids' => $brandCategoriesIds,
+			    'ba_code' => $baCode,
+			    'year_val' => $latest_year_id,
+			    'ba_type' => $baTypeId,
+			    'default_target' => $amountPerDay
+			];
+		}
 
-	    $sheet->setCellValue('A5', 'Store Name: ' . ($store_name ?: 'ALL'));
-	    $sheet->setCellValue('B5', 'Area / ASC Name: ' . ($asc_name ?: ''));
-	    $sheet->setCellValue('C5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		$baTypeString = '';
+		switch ($baTypeId) {
+			case '3':
+				$baTypeString = 'ALL';
+				break;
+			
+			case '1':
+				$baTypeString = "Outright";
+				break;
+			
+			case '0':
+				$baTypeString = "Consignment";
+				break;
+			
+			default:
+				$baTypeString = 'NONE';
+				break;
+		}
 
-	    $headers = ['Item Name', 'Quantity', 'LMI Code', 'RGDI Code', 'Type of SKU'];
-	    $sheet->fromArray($headers, null, 'A7');
-	    $sheet->getStyle('A7:E7')->getFont()->setBold(true);
+		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$areaId'", "''", "''");
+		$areaMap = !empty($result) ? $result[0]['description'] : '';
 
-	    $rowNum = 8;
-	    $batchSize = 5000;
-	    $offset = 0;
-	    do {
-	        $data = $this->Dashboard_model->tradeInfoBa(
-	            $brand, $brand_ambassador, $store_name, $ba_type, $sort_field, $sort,
-	            $batchSize, $offset, 20, 30, $latest_week, $latest_month, $latest_year
-	        );
+		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$ascId'", "''", "''");
+		$ascMap = !empty($result) ? $result[0]['description'] : '';
 
-	        if (!$data || empty($data['data'])) {
-	            break;
-	        }
+		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$baId'", "''", "''");
+		$baMap = !empty($result) ? $result[0]['name'] : '';
 
-	        foreach ($data['data'] as $row) {
-	            $sheet->setCellValueExplicit('A' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $sheet->setCellValueExplicit('B' . $rowNum, $row->sum_total_qty, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC);
-	            $sheet->setCellValueExplicit('C' . $rowNum, $row->lmi_itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $sheet->setCellValueExplicit('D' . $rowNum, $row->rgdi_itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $sheet->setCellValueExplicit('E' . $rowNum, $type, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-	            $rowNum++;
-	        }
+		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'code:EQ=$storeId'", "''", "''");
+		$storeMap = !empty($result) ? $result[0]['description'] : '';
 
-	        $offset += $batchSize;
-	    } while (count($data['data']) === $batchSize);
+		$result = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ=$brandCategoriesIds'", "''", "''");
+		$brandLabelMap = !empty($result) ? $result[0]['label'] : '';
 
-	    foreach (range('A', 'E') as $columnID) {
-	        $sheet->getColumnDimension($columnID)->setAutoSize(true);
-	    }
+		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$brandsIds'", "''", "''");
+		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
 
-	    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-	    header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
-	    header('Cache-Control: max-age=0');
+		$title = "Store Sales Performance Per Month";
+		$data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+		$rows   = $data['data'];
 
-	    $writer = new Xlsx($spreadsheet);
-	    $writer->save('php://output');
-	    exit;
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
+		$sheet->setCellValue('A2', 'Report: Store Sales Performance Overall');
+		$sheet->mergeCells('A1:E1');
+		$sheet->mergeCells('A2:E2');
+
+		$sheet->setCellValue('A4', 'Area: '  . ($areaMap ?: 'NONE'));
+		$sheet->setCellValue('B4', 'ASC: ' . ($ascMap ?: 'NONE'));
+		$sheet->setCellValue('C4', 'BA Type: '. ($baTypeString     ?: 'NONE'));
+		$sheet->setCellValue('D4', 'Brand Ambassador: ' . ($baMap     ?: 'NONE'));
+
+		$sheet->setCellValue('A5', 'Store Name: ' . ($storeMap ?: 'NONE'));
+		$sheet->setCellValue('B5', 'Brand Label Type: '   . ($brandLabelMap   ?: 'NONE'));
+		$sheet->setCellValue('C5', 'Item Brand: '        . ($brandMap       ?: 'NONE'));
+		$sheet->setCellValue('D5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+
+		$headers = [
+			'January',
+			'February',
+			'March',
+			'April',
+			'May',
+			'June',
+			'July',
+			'August',
+			'September',
+			'October',
+			'November',
+			'December',
+		];
+
+		$sheet->fromArray($headers, null, 'B7');
+		$sheet->setCellValue('A7', ''); // Blank first column (label placeholder)
+		$sheet->getStyle('B7:M7')->getFont()->setBold(true);
+		$sheet->getStyle('A8:A13')->getFont()->setBold(true);
+		
+
+		$rowNum = 8;
+		foreach ($rows as $row) {
+			// LY Sell Out
+			$sheet->setCellValue("A{$rowNum}", 'LY Sell Out');
+			$sheet->fromArray([
+				$row->ly_sell_out_january,
+				$row->ly_sell_out_february,
+				$row->ly_sell_out_march,
+				$row->ly_sell_out_april,
+				$row->ly_sell_out_may,
+				$row->ly_sell_out_june,
+				$row->ly_sell_out_july,
+				$row->ly_sell_out_august,
+				$row->ly_sell_out_september,
+				$row->ly_sell_out_october,
+				$row->ly_sell_out_november,
+				$row->ly_sell_out_december
+			], null, "B{$rowNum}");
+			$rowNum++;
+
+			// TY Sell Out
+			$sheet->setCellValue("A{$rowNum}", 'TY Sell Out');
+			$sheet->fromArray([
+				$row->ty_sell_out_january,
+				$row->ty_sell_out_february,
+				$row->ty_sell_out_march,
+				$row->ty_sell_out_april,
+				$row->ty_sell_out_may,
+				$row->ty_sell_out_june,
+				$row->ty_sell_out_july,
+				$row->ty_sell_out_august,
+				$row->ty_sell_out_september,
+				$row->ty_sell_out_october,
+				$row->ty_sell_out_november,
+				$row->ty_sell_out_december
+			], null, "B{$rowNum}");
+			$rowNum++;
+
+			// Sales Report
+			$sheet->setCellValue("A{$rowNum}", 'Sales Report');
+			$sheet->fromArray([
+				$row->amount_january,
+				$row->amount_february,
+				$row->amount_march,
+				$row->amount_april,
+				$row->amount_may,
+				$row->amount_june,
+				$row->amount_july,
+				$row->amount_august,
+				$row->amount_september,
+				$row->amount_october,
+				$row->amount_november,
+				$row->amount_december
+			], null, "B{$rowNum}");
+			$rowNum++;
+
+			// Target Sales
+			$sheet->setCellValue("A{$rowNum}", 'Target Sales');
+			$sheet->fromArray([
+				$row->target_sales_jan,
+				$row->target_sales_feb,
+				$row->target_sales_mar,
+				$row->target_sales_apr,
+				$row->target_sales_may,
+				$row->target_sales_jun,
+				$row->target_sales_jul,
+				$row->target_sales_aug,
+				$row->target_sales_sep,
+				$row->target_sales_oct,
+				$row->target_sales_nov,
+				$row->target_sales_dec
+			], null, "B{$rowNum}");
+			$rowNum++;
+
+			// % Growth
+			$sheet->setCellValue("A{$rowNum}", '% Growth');
+			$sheet->fromArray([
+				$row->growth_january,
+				$row->growth_february,
+				$row->growth_march,
+				$row->growth_april,
+				$row->growth_may,
+				$row->growth_june,
+				$row->growth_july,
+				$row->growth_august,
+				$row->growth_september,
+				$row->growth_october,
+				$row->growth_november,
+				$row->growth_december
+			], null, "B{$rowNum}");
+			$rowNum++;
+
+			// % Achieved
+			$sheet->setCellValue("A{$rowNum}", '% Achieved');
+			$sheet->fromArray([
+				$row->achieved_january,
+				$row->achieved_february,
+				$row->achieved_march,
+				$row->achieved_april,
+				$row->achieved_may,
+				$row->achieved_june,
+				$row->achieved_july,
+				$row->achieved_august,
+				$row->achieved_september,
+				$row->achieved_october,
+				$row->achieved_november,
+				$row->achieved_december
+			], null, "B{$rowNum}");
+			$rowNum++;
+
+			// Optional: empty row between groups
+			$rowNum++;
+		}
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
+
+	private function getParam(string $key) {
+		$v = $this->request->getVar($key); 
+		if (is_array($v)) return $v;
+
+		if (is_null($v)) return null;
+		$v = trim((string)$v);
+		return $v === '' ? null : $v;
+	}
+
+	private function parseCsvParam(?string $csv): array {
+		if ($csv === null || trim($csv) === '') {
+			return [];
+		}
+		return array_filter(
+			array_map('intval', explode(',', $csv)),
+			fn($i) => $i > 0
+		);
 	}
 }

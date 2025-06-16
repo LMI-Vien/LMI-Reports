@@ -83,15 +83,15 @@
                         <div class="d-flex justify-content-end mt-3">
                             <button 
                                 class="btn btn-primary mr-2" 
-                                id="ExportPDF"
-                                onclick="handleAction('export_pdf')"
+                                id="exportPdf"
+                                onclick="handleAction('exportPdf')"
                             >
                                 <i class="fas fa-file-export"></i> PDF
                             </button>
                             <button 
                                 class="btn btn-success" 
-                                id="exportButton"
-                                onclick="handleAction('export_excel')"
+                                id="exportExcel"
+                                onclick="handleAction('exportExcel')"
                             >
                                 <i class="fas fa-file-export"></i> Excel
                             </button>
@@ -117,4 +117,5 @@
         { id: "-6", name: "Non Ba" },
         { id: "-5", name: "Vacant" }
     )
+    const start_time = new Date();
 </script>

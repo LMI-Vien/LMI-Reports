@@ -53,7 +53,7 @@ $routes->group('store/', static function ($routes) {
     $routes->post('get-sales-performance-per-month', 'StoreSalesPerfPerMonth::getPerfPerMonth');
     $routes->post('get-sales-performance-per-table', 'StoreSalesPerfPerMonth::getPerfPerTable');
     $routes->get('per-month-generate-pdf', 'StoreSalesPerfPerMonth::generatePdf');
-    $routes->get('per-month-generate-excel-ba', 'StoreSalesPerfPerMonth::generateExcel');
+    $routes->get('per-month-generate-excel', 'StoreSalesPerfPerMonth::generateExcel');
 
     //overall
     $routes->get('sales-overall-performance', 'StoreSalesPerfOverall::perfPerOverall');

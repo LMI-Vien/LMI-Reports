@@ -59,7 +59,7 @@
                 if(data.length > 0){
                     if(data[0].code){
                         $("#storeName").val(data[0].code+' - '+data[0].description);
-                        $("#storeNameId").val(data[0].code);      
+                        $("#storeNameId").val(data[0].id);      
                     }             
                 }
             })
@@ -253,9 +253,15 @@
             brands : selectedBrands
         }
         aJax.post(url2, data, function (result) {
+            console.log("AJAX response:", result);
             var html = '';
             if (result.data.length > 0) {
                 let salesData = result.data[0];
+
+                console.log("Sales data for charts:", salesData);
+                console.log("Sales Report array:", dataValues.salesReport);
+                console.log("Target Sales array:", dataValues.targetSales);
+                console.log("Percentage Achieved array:", dataValues.PerAchieved);
 
                 dataValues.salesReport = [
                     salesData.amount_january, salesData.amount_february, salesData.amount_march,
@@ -279,6 +285,7 @@
                 ];
 
                 $.each(result.data, function(x,y) {
+                    console.log(`Row ${x} data:`, y);
                     html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>'+formatTwoDecimals(y.ly_sell_out_january || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_february || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_march || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_april || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_may || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_june || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_july || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_august || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_september || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_october || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_november || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_december || "0.00")+'</td></tr>';
                     html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">TY Sell Out</td><td>'+formatTwoDecimals(y.ty_sell_out_january || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_february || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_march || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_april || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_may || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_june || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_july || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_august || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_september || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_october || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_november || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_december || "0.00")+'</td></tr>';
                     html += '<tr><td style="background-color: #ffc107;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>'+formatTwoDecimals(y.amount_january || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_february || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_march || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_april || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_may || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_june || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_july || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_august || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_september || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_october || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_november || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_december || "0.00")+'</td></tr>';
@@ -318,35 +325,47 @@
     }
 
     function handleAction(action) {
-        let selectedASC = $('#asc_id').val() || '0';
-        let selectedArea = $('#area_id').val() || '0';
-        let selectedBrand = $('#brand_id').val() || '0';
-        let selectedYear = $('#year').val() || '0';
-        let selectedStore = $('#store_id').val() || '0';
-        let selectedBa = $('#ba_id').val() || '0';
-        let withba = $("input[name='coveredASC']:checked").val();
-        let printData = [];
+        modal.loading(true);
+        let selectedArea = $('#areaId').val();
+        let selectedAsc = $('#ascNameId').val();
+        let selectedBaType = $('input[name="filterType"]:checked').val();
+        let selectedBa = $('#brandAmbassadorId').val();
+        let selectedStore = $('#storeNameId').val();
+        let selectedBrands = $('#brands').val();   
+        let selectedBrandCategories = $('#itemLabel').val();
 
-        let tables = [
-            { id: "#slowMovingTable", type: "slowMoving" },
-            { id: "#overstockTable", type: "overStock" },
-            { id: "#npdTable", type: "npd" },
-            { id: "#heroTable", type: "hero" }
-        ];
+        let qs = [
+            `area=`             + encodeURIComponent(selectedArea),
+            `asc=`              + encodeURIComponent(selectedAsc),
+            `baType=`           + encodeURIComponent(selectedBaType),
+            `ba=`               + encodeURIComponent(selectedBa),
+            `store=`            + encodeURIComponent(selectedStore),
+            `brands=`           + encodeURIComponent(selectedBrands),
+            `brandCategory=`    + encodeURIComponent(selectedBrandCategories),
+        ].join('&');
 
-        let url = base_url + 'trade-dashboard/generate-' + (action === 'exportPDF' ? 'pdf' : 'excel') + '-asc_dashboard?'
-            + 'asc=' + encodeURIComponent(selectedASC)
-            + '&area=' + encodeURIComponent(selectedArea)
-            + '&brand=' + encodeURIComponent(selectedBrand)
-            + '&year=' + encodeURIComponent(selectedYear)
-            + '&store=' + encodeURIComponent(selectedStore)
-            + '&ba=' + encodeURIComponent(selectedBa)
-            + '&withba=' + encodeURIComponent(withba);
+        let endpoint = action === 'exportPdf' ? 'per-month-generate-pdf' : 'per-month-generate-excel';
 
-        // window.open(url, '_blank');
+        let url = `${base_url}store/${endpoint}?${qs}`;
+
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
+
+        const remarks = `
+            Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Store Sales Performance per Month', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
+
         let iframe = document.createElement('iframe');
-        iframe.style.display = "none";
+        iframe.style.display = 'none';
         iframe.src = url;
         document.body.appendChild(iframe);
+
+        setTimeout(function() {
+            modal.loading(false);
+        }, 5000);
     }
 
