@@ -220,7 +220,7 @@
 </div>
 
 <script>
-    var query = "status >= 0";
+    var query = "s.status >= 0";
     var column_filter = '';
     var order_filter = '';
     var limit = 10; 
@@ -257,7 +257,7 @@
             offset = 1;
             get_pagination(query);
             new_query = query;
-            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+            new_query += ' and s.code like \'%'+search_input+'%\' or '+query+' and s.description like \'%'+search_input+'%\' or '+query+' and ba.code like \'%'+search_input+'%\' or '+query+' and ba.name like \'%'+search_input+'%\'';
             get_data(new_query);
         }
     });
@@ -395,18 +395,30 @@
         $('#filter_modal').modal('hide');
     })
 
-    function get_data(query, field = "id, updated_date", order = "asc, desc") {
+    function get_data(query, field = "s.id, s.updated_date", order = "asc, desc") {
         var data = {
             event : "list",
-            select : "id, code, description, status, updated_date, created_date",
+            select : "s.id, s.code, s.description, s.status, s.updated_date, s.created_date, ba.code AS ba_code, ba.name AS ba_name",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_store",
+            table : "tbl_store s",
             order : {
                 field : field,
                 order : order 
-            }
+            },
+            join : [
+                {
+                    table: "tbl_brand_ambassador_group bag",
+                    query: "bag.store_id = s.id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.id = bag.brand_ambassador_id",
+                    type: "left"
+                }
+            ]
 
         }
 
@@ -449,18 +461,30 @@
         });
     };
 
-    function get_pagination(query, field = "updated_date", order = "desc") {
+    function get_pagination(query, field = "s.updated_date", order = "desc") {
         var data = {
         event : "pagination",
-            select : "id",
+            select : "s.id",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_store",
+            table : "tbl_store s",
             order : {
-                field : "updated_date", 
-                order : "desc" 
-            }
+                field : field, 
+                order : order
+            },
+            join : [
+                {
+                    table: "tbl_brand_ambassador_group bag",
+                    query: "bag.store_id = s.id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    query: "ba.id = bag.brand_ambassador_id",
+                    type: "left"
+                }
+            ]
 
         }
 

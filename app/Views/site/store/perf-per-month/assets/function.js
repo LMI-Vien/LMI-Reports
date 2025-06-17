@@ -253,15 +253,9 @@
             brands : selectedBrands
         }
         aJax.post(url2, data, function (result) {
-            console.log("AJAX response:", result);
             var html = '';
             if (result.data.length > 0) {
                 let salesData = result.data[0];
-
-                console.log("Sales data for charts:", salesData);
-                console.log("Sales Report array:", dataValues.salesReport);
-                console.log("Target Sales array:", dataValues.targetSales);
-                console.log("Percentage Achieved array:", dataValues.PerAchieved);
 
                 dataValues.salesReport = [
                     salesData.amount_january, salesData.amount_february, salesData.amount_march,
@@ -285,7 +279,6 @@
                 ];
 
                 $.each(result.data, function(x,y) {
-                    console.log(`Row ${x} data:`, y);
                     html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">LY Sell Out</td><td>'+formatTwoDecimals(y.ly_sell_out_january || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_february || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_march || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_april || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_may || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_june || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_july || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_august || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_september || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_october || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_november || "0.00")+'</td><td>'+formatTwoDecimals(y.ly_sell_out_december || "0.00")+'</td></tr>';
                     html += '<tr><td style="background-color: #ebe6f3;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">TY Sell Out</td><td>'+formatTwoDecimals(y.ty_sell_out_january || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_february || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_march || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_april || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_may || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_june || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_july || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_august || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_september || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_october || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_november || "0.00")+'</td><td>'+formatTwoDecimals(y.ty_sell_out_december || "0.00")+'</td></tr>';
                     html += '<tr><td style="background-color: #ffc107;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sales Report</td><td>'+formatTwoDecimals(y.amount_january || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_february || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_march || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_april || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_may || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_june || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_july || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_august || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_september || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_october || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_november || "0.00")+'</td><td>'+formatTwoDecimals(y.amount_december || "0.00")+'</td></tr>';
@@ -341,7 +334,7 @@
             `ba=`               + encodeURIComponent(selectedBa),
             `store=`            + encodeURIComponent(selectedStore),
             `brands=`           + encodeURIComponent(selectedBrands),
-            `brandCategory=`    + encodeURIComponent(selectedBrandCategories),
+            `brandCategories=`  + encodeURIComponent(selectedBrandCategories),
         ].join('&');
 
         let endpoint = action === 'exportPdf' ? 'per-month-generate-pdf' : 'per-month-generate-excel';
@@ -359,13 +352,42 @@
         `;
         logActivity('Store Sales Performance per Month', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
 
-        let iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = url;
-        document.body.appendChild(iframe);
+        let fetchedResponse;
+        fetch(url, {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
+            }
+            fetchedResponse = response;
+            return response.blob();
+        })
+        .then(blob => {
+            const cd = fetchedResponse.headers.get('Content-Disposition');
+            const match = cd && /filename="?([^"]+)"/.exec(cd);
+            let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+            const filename = rawName
+                || (action === 'exportPdf'
+                    ? 'Store Sales Performance per Month.pdf'
+                    : 'Store Sales Performance per Month.xlsx');
 
-        setTimeout(function() {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(err => {
+            console.error("Download failed:", err);
+            modal.alert("Failed to generate file. Please try again.", "error");
+        })
+        .finally(() => {
             modal.loading(false);
-        }, 5000);
+        });
     }
 

@@ -1349,7 +1349,7 @@
             search_input = $('#search_query').val();
             offset = 1;
             new_query = query;
-            new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\'';
+            new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\' OR ascr.description like \'%'+search_input+'%\' OR ascr.code like \'%'+search_input+'%\'';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -1894,7 +1894,8 @@
     function get_data(query, field = "code, updated_date", order = "asc, desc") {
         var data = {
             event : "list_pagination",
-            select : "a.id, a.code, a.description, a.status, a.created_date, a.updated_date, s.description as store_name",
+            select : `a.id, a.code, a.description, a.status, a.created_date, a.updated_date, 
+            s.description as store_name, ascr.description AS asc_name, ascr.code as asc_code`,
             query : query,
             offset : offset,
             limit : limit,
@@ -1912,6 +1913,11 @@
                 {
                     table: "tbl_store s",
                     query: "s.id = sg.store_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_area_sales_coordinator ascr",
+                    query: "ascr.area_id = a.id",
                     type: "left"
                 }
             ],
