@@ -103,7 +103,7 @@
                                     <?= !empty($foot_note) ? $foot_note : 'N/A'; ?>
                                 </div>
                                 <div class="col-md-3 mb-2">
-                                    <strong>Non BA/Vacant:</strong>
+                                    <strong>Without BA/Vacant:</strong>
                                     <p>Achieved = (TY Sell Out / Target Sales) * 100%</p>
                                 </div>
                                 <div class="col-md-3 mb-2">

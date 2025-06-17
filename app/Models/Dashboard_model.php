@@ -1018,7 +1018,7 @@ class Dashboard_model extends Model
 	        $whereClausesASR[] = "s.brand IN (" . implode(',', $brandPlaceholders) . ")"; //single brand 
 	        $whereClausesLYSO[] = "brand_id IN (" . implode(',', $brandPlaceholders) . ")"; //single brand 
 	        $whereClausesTYSO[] = "brand_id IN (" . implode(',', $brandPlaceholders) . ")";//single brand 
-	        $whereClausesTS[] = '(' . implode(' OR ', $brandFindSetConditions) . ')';//multiple brand comma separated brand 
+	        //$whereClausesTS[] = '(' . implode(' OR ', $brandFindSetConditions) . ')';//multiple brand comma separated brand 
 	     //   $whereClausesTS[] = "FIND_IN_SET(:brand_ids:, brand_ids)";
 	    }
 
@@ -1031,6 +1031,7 @@ class Dashboard_model extends Model
 	        }
 	        $whereClausesLYSO[] = "brand_type_id IN (" . implode(',', $brandTypePlaceholders) . ")";
 	        $whereClausesTYSO[] = "brand_type_id IN (" . implode(',', $brandTypePlaceholders) . ")";
+	        $whereClausesASR[] = "blt.category_id IN (" . implode(',', $brandTypePlaceholders) . ")";
 	    }
 
 	    if (!empty($filters['store_id'])) {
@@ -1146,6 +1147,7 @@ class Dashboard_model extends Model
 	    $sql = "
 	    WITH monthly_totals AS (
 	      SELECT
+	      	blt.category_id,
 	        SUM(CASE WHEN MONTH(s.date) = 1 THEN amount ELSE 0 END) AS amount_january,
 	        SUM(CASE WHEN MONTH(s.date) = 2 THEN amount ELSE 0 END) AS amount_february,
 	        SUM(CASE WHEN MONTH(s.date) = 3 THEN amount ELSE 0 END) AS amount_march,
@@ -1159,6 +1161,7 @@ class Dashboard_model extends Model
 	        SUM(CASE WHEN MONTH(s.date) = 11 THEN amount ELSE 0 END) AS amount_november,
 	        SUM(CASE WHEN MONTH(s.date) = 12 THEN amount ELSE 0 END) AS amount_december
 	      FROM tbl_ba_sales_report s
+	      LEFT JOIN tbl_brand blt ON s.brand = blt.id
 	      $whereSQLASR
 	    ),
 	    ly_sell_out_totals AS (
