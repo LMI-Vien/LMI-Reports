@@ -127,7 +127,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		// $brandsIds = null;
 		// $baCode = null;
 		// $baId = null;
-		$brandCategoriesIds = null;
+		//$brandCategoriesIds = null;
 		if($latest_year){
 
 		    $filters = [
