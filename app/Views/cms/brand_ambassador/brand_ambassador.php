@@ -118,7 +118,7 @@
 
                         <div class="form-group">
                             <label>Deployment Date</label>
-                            <input type="date" class="form-control required" id="deployment_date">
+                            <input type="text" class="form-control required datepicker" id="deployment_date">
                         </div>
 
                         <div class="form-group">

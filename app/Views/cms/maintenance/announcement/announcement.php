@@ -123,11 +123,11 @@
                     </div> -->
                     <div class="mb-3">
                         <label for="start_date" class="form-label">Start Date</label>
-                        <input type="datetime-local" class="form-control required" id="start_date" aria-describedby="start_date">
+                        <input type="text" class="form-control required datetimepicker" id="start_date" aria-describedby="start_date">
                     </div>
                     <div class="mb-3">
                         <label for="end_date" class="form-label">End Date</label>
-                        <input type="datetime-local" class="form-control required" id="end_date" aria-describedby="end_date">
+                        <input type="text" class="form-control required datetimepicker" id="end_date" aria-describedby="end_date">
                     </div>
 
                 </form>

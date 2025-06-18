@@ -93,7 +93,7 @@
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Deployment Date</label>
-                        <input type="date" class="form-control required" id="deployment_date">
+                        <input type="text" class="form-control required datepicker" id="deployment_date">
                         <small id="description" class="form-text text-muted">* required</small>
                     </div>
 

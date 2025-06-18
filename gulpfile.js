@@ -41,11 +41,31 @@ gulp.task('scripts', function () {
     .pipe(gulp.dest(paths.destJs));
 });
 
-gulp.task('copyChartJS', function () {
-  return gulp.src('node_modules/chart.js/dist/chart.umd.js')
-    .pipe(rename('chart.min.js'))
+
+gulp.task('copyLibs', function () {
+  return gulp
+    .src([
+      'node_modules/chart.js/dist/chart.umd.js',
+      'node_modules/jquery-ui-timepicker-addon/dist/jquery-ui-timepicker-addon.js',
+      'node_modules/jquery-ui-timepicker-addon/dist/jquery-ui-timepicker-addon.css'
+    ])
+    .pipe(rename(function (path) {
+      if (path.basename === 'chart.umd') {
+        path.basename = 'chart.min';
+      }
+      if (path.basename === 'jquery-ui-timepicker-addon') {
+        // Differentiate .js and .css
+        if (path.extname === '.js') {
+          path.basename = 'timepicker';
+        }
+        if (path.extname === '.css') {
+          path.basename = 'timepicker';
+        }
+      }
+    }))
     .pipe(gulp.dest(paths.destChartJs));
 });
 
+
 // Default task
-gulp.task('default', gulp.parallel('styles', 'scripts', 'copyChartJS'));
+gulp.task('default', gulp.parallel('styles', 'scripts', 'copyLibs'));
