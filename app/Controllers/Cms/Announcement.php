@@ -35,14 +35,16 @@ class Announcement extends BaseController
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
 				"assets/js/moment.js",
-				"assets/js/xlsx.full.min.js"
+				"assets/js/xlsx.full.min.js",
+				"assets/site/js/timepicker.js"
                     );
         $data['css'] = array(
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
         		"assets/cms/css/main_style.css",
-        		"assets/css/style.css"
+        		"assets/css/style.css",
+				"assets/site/js/timepicker.css"
                     );
 		return view("cms/layout/template", $data);	
 	}
