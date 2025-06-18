@@ -116,9 +116,8 @@ $(document).ready(function () {
     aJax.get("<?= base_url('cms/cms-preference/get-title');?>",function(data) {
       $('.logo-lg').html(data);
     })
-//  aJax.get("<?= base_url('cms/cms-preference/get-pending-approvals'); ?>?session_role=" + session_role, function(data) {
+    
     aJax.get("<?= base_url('cms/cms-preference/get-pending-approvals'); ?>", function(data) {
-        console.log(data);
             $('#notificationCount').html(data);
             $('#approvalCount').html(data + ' Pending Approvals');
     });

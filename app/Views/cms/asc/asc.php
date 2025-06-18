@@ -80,7 +80,7 @@
                         <div hidden>
                             <input type="text" class="form-control" id="id" aria-describedby="id">
                         </div>
-                        <input type="text" class="form-control required" maxlength="25" id="code" aria-describedby="code">
+                        <input type="text" class="form-control" id="code" aria-describedby="code" disabled>
                         <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
                     
@@ -664,6 +664,9 @@
         $('#popup_modal #area option').removeAttr('selected'); // Remove 'selected' from all options
         $('#popup_modal #area option:first').attr('selected', 'selected'); // Add 'selected' to the first option
         $('#popup_modal #deployment_date').val('');
+        setTimeout(() => {
+            $('#popup_modal #code').prop('disabled', true)
+        }, 500);
     }
 
     // decides whether to enable or disable input fields
@@ -692,46 +695,75 @@
     }
 
     function validate_data() {
-        if(validate.standard("form-save-modal")){
 
-            var id = $('#id').val() || 0;
-            var code = $('#code').val().trim()
-            var description = $('#description').val().trim()
-            var status = $('#status').prop('checked')
-            var deployment_date = $('#deployment_date').val()
-            var area_id = $('#popup_modal #area').val();
+        generateASCCode(function (generatedCode) {
+            if(validate.standard("form-save-modal")){
 
-            if (code === '' || description === '' || deployment_date === '' || area_id === '') {
-                modal.alert(missing_user_input_message, 'error', () => {
-                    reset_form();
-                })
-                return;
-            }
+                var id = $('#id').val() || 0;
+                var code = $('#code').val().trim()
+                var description = $('#description').val().trim()
+                var status = $('#status').prop('checked')
+                var deployment_date = $('#deployment_date').val()
+                var area_id = $('#popup_modal #area').val();
 
-            var db_fields = [];
-            var input_fields = [];
-            if (id != 0) {
-                db_fields = ["id", "code", "description", "area_id"];
-                input_fields = [id, code, description, area_id];
-                excludeField = "id";
-                excludeId = id;
-            } else {
-                db_fields = ["code", "description", "area_id"];
-                input_fields = [code, description, area_id];
-                excludeField = null;
-                excludeId = null;
-            }
-
-            check_current_db("tbl_area_sales_coordinator", db_fields, input_fields, "status" , excludeField, excludeId, true, function(exists, duplicateFields) {
-                if(!exists) {
-                    if (id != 0) {
-                        confirm_edit(id, code, description, status, deployment_date, area_id);
-                    } else {
-                        confirm_save(code, description, status, deployment_date, area_id);
-                    }
+                if (description === '' || deployment_date === '' || area_id === '') {
+                    modal.alert(missing_user_input_message, 'error', () => {
+                        reset_form();
+                    })
+                    return;
                 }
-            });
-        }
+
+                var db_fields = [];
+                var input_fields = [];
+                if (id != 0) {
+                    db_fields = ["id", "description", "area_id"];
+                    input_fields = [id, description, area_id];
+                    excludeField = "id";
+                    excludeId = id;
+                } else {
+                    db_fields = ["description", "area_id"];
+                    input_fields = [description, area_id];
+                    excludeField = null;
+                    excludeId = null;
+                }
+
+                check_current_db("tbl_area_sales_coordinator", db_fields, input_fields, "status" , excludeField, excludeId, true, function(exists, duplicateFields) {
+                    if(!exists) {
+                        if (id != 0) {
+                            confirm_edit(id, code, description, status, deployment_date, area_id);
+                        } else {
+                            code = generatedCode;
+                            confirm_save(code, description, status, deployment_date, area_id);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function generateASCCode(callback) {
+        const url = "<?= base_url('cms/global_controller'); ?>";
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = ('0' + (now.getMonth() + 1)).slice(-2);
+
+        aJax.post(url, {
+            event: "get_last_code",
+            table: "tbl_area_sales_coordinator",
+            field: "code"
+        }, function (res) {
+            const lastCode = res.last_code || '';
+            const prefix = `ASC-${year}-${month}`;
+            let newCode = `${prefix}-001`;
+
+            if (lastCode.startsWith(prefix)) {
+                const lastSeq = parseInt(lastCode.split('-')[3]) || 0;
+                const newSeq = ('000' + (lastSeq + 1)).slice(-3);
+                newCode = `${prefix}-${newSeq}`;
+            }
+
+            callback(newCode);
+        });
     }
 
     function confirm_save(code, description, status, date, area) {

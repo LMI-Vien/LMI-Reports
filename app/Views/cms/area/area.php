@@ -115,7 +115,7 @@
                                 <input type="text" class="form-control" id="id" aria-describedby="id">
                             </div>
                             <label for="code" class="form-label">Area Code</label>
-                            <input type="text" class="form-control" id="code" maxlength="25" disabled readonly>
+                            <input type="text" class="form-control" id="code" disabled>
                             <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                         </div>
                         <div class="mb-3">
