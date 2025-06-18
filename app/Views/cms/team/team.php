@@ -69,7 +69,7 @@
                 <form id="form-modal">
                     <div class="mb-3">
                         <label for="code" class="form-label">Team Code</label>
-                        <input type="text" class="form-control required" id="code" aria-describedby="code" maxlength="25">
+                        <input type="text" class="form-control" id="code" aria-describedby="code" disabled>
                         <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                     </div>
                     <div class="mb-3">
@@ -423,6 +423,9 @@
     function reset_modal_fields() {
         $('#popup_modal #code, #popup_modal #team_description, #popup_modal').val('');
         $('#popup_modal #status').prop('checked', true);
+        setTimeout(() => {
+            $('#popup_modal #code').prop('disabled', true)
+        }, 500);
     }
 
     function clear_import_table() {
@@ -526,41 +529,70 @@
     }
 
     function save_data(action, id) {
-        var code = $('#code').val();
-        var description = $('#team_description').val();
-        var chk_status = $('#status').prop('checked');
-        if (chk_status) {
-            status_val = 1;
-        } else {
-            status_val = 0;
-        }
-        if(validate.standard("form-save-modal")){
-            if (id !== undefined && id !== null && id !== '') {
-                check_current_db("tbl_team", ["code", "team_description"], [code, description], "status" , "id", id, true, function(exists, duplicateFields) {
-                    if (!exists) {
-                        modal.confirm(confirm_update_message, function(result){
-                            if(result){ 
-                                    modal.loading(true);
-                                save_to_db(code, description, status_val, id)
-                            }
-                        });
-    
-                    }             
-                });
-            }else{
-                check_current_db("tbl_team", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
-                    if (!exists) {
-                        modal.confirm(confirm_add_message, function(result){
-                            if(result){ 
-                                    modal.loading(true);
-                                save_to_db(code, description, status_val, null)
-                            }
-                        });
-    
-                    }                  
-                });
+        generateASCCode(function (generatedCode) {
+            var code = $('#code').val();
+            var description = $('#team_description').val();
+            var chk_status = $('#status').prop('checked');
+            if (chk_status) {
+                status_val = 1;
+            } else {
+                status_val = 0;
             }
-        }
+            if(validate.standard("form-save-modal")){
+                if (id !== undefined && id !== null && id !== '') {
+                    
+                    check_current_db("tbl_team", ["team_description"], [description], "status" , "id", id, true, function(exists, duplicateFields) {
+                        if (!exists) {
+                            modal.confirm(confirm_update_message, function(result){
+                                if(result){ 
+                                    modal.loading(true);
+                                    save_to_db(code, description, status_val, id)
+                                }
+                            });
+        
+                        }             
+                    });
+                }else{
+                    code = generatedCode;
+                    check_current_db("tbl_team", ["team_description"], [description], "status" , null, null, true, function(exists, duplicateFields) {
+                        if (!exists) {
+                            modal.confirm(confirm_add_message, function(result){
+                                if(result){ 
+                                    modal.loading(true);
+                                    save_to_db(code, description, status_val, null)
+                                }
+                            });
+        
+                        }                  
+                    });
+                }
+            }
+        });
+    }
+
+    function generateASCCode(callback) {
+        const url = "<?= base_url('cms/global_controller'); ?>";
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = ('0' + (now.getMonth() + 1)).slice(-2);
+
+        aJax.post(url, {
+            event: "get_last_code",
+            table: "tbl_team",
+            field: "code"
+        }, function (res) {
+            const lastCode = res.last_code || '';
+            const prefix = `TEAM-${year}-${month}`;
+            let newCode = `${prefix}-001`;
+
+            if (lastCode.startsWith(prefix)) {
+                const lastSeq = parseInt(lastCode.split('-')[3]) || 0;
+                const newSeq = ('000' + (lastSeq + 1)).slice(-3);
+                newCode = `${prefix}-${newSeq}`;
+            }
+
+            callback(newCode);
+        });
     }
 
     function delete_data(id) {
