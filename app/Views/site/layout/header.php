@@ -7,9 +7,9 @@
         <meta property="og:description" content="<?=$meta['description']?>" />
 
         <!-- AdminLTE CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
+        <link rel="stylesheet" href="<?= base_url('assets/css/adminlte.min.css') ?>">
         <!-- FontAwesome Icons -->
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<?= base_url('assets/fontawesome/fa6_beta3/all.min.css') ?>">
         <link rel="icon" href="<?= base_url('assets/img/lmi_logo.ico') ?>" type="image/x-icon">
 
         <title><?=$meta['title']?></title>
@@ -21,9 +21,9 @@
         <!-- jQuery and Bootstrap Bundle (for dropdown functionality) -->
         <script type="text/javascript" src="<?= base_url();?>assets/js/jquery-3.7.1.min.js" ></script>
         <script type="text/javascript" src="<?= base_url();?>assets/js/cms_custom.js" ></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script type="text/javascript" src="<?= base_url();?>assets/js/bootstrap.bundle.min.js" ></script>
+        <script type="text/javascript" src="<?= base_url();?>assets/js/sweetalert2@11.js" ></script>
         <!-- AdminLTE JS -->
-        <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/js/adminlte.min.js"></script>
+        <script type="text/javascript" src="<?= base_url();?>assets/js/adminlte.min.js" ></script>
   
     </head>

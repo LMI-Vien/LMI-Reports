@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-
-       
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta property="og:title" content="<?=$meta['title']?>" />
         <meta property="og:description" content="<?=$meta['description']?>" />
         <title><?=$meta['title']?></title>
         
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+        <link rel="stylesheet" href="<?= base_url('assets/fonts/roboto.css') ?>">
         <link rel="icon" href="<?= base_url('assets/img/lmi_logo.ico') ?>" type="image/x-icon">
         
         <script type="text/javascript" src="<?= base_url();?>assets/js/jquery-3.7.1.min.js" ></script>
         <script type="text/javascript" src="<?= base_url();?>assets/js/cms_custom.js" ></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script type="text/javascript" src="<?= base_url();?>assets/js/sweetalert2@11.js" ></script>
+        
         <!-- Include Material Icons -->
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="<?= base_url('assets/fonts/material-icons/icon.css') ?>">
         <!-- Include basic styling -->
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<?= base_url('assets/css/bootstrap.min.css') ?>">
         <?php if(!empty($css)) : ?>
             <?php foreach($css as $path) : ?>
                 <link rel="stylesheet" type="text/css" href="<?= base_url() . $path?>">
             <?php endforeach; ?>
         <?php endif; ?>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
-        <!-- <link rel="stylesheet" href="/resources/demos/style.css"> -->
-        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+        <script src="<?= base_url();?>assets/js/popper.min.js" ></script>
+        <link rel="stylesheet" href="<?= base_url('assets/css/jquery-ui.css') ?>">
+        
+        <script src="<?= base_url();?>assets/js/jquery-ui.js" ></script>
+        <script src="<?= base_url();?>assets/js/xlsx.full.min.js" ></script>
+        <script src="<?= base_url();?>assets/js/FileSaver.min.js" ></script>
     </head>
 
     <script>
