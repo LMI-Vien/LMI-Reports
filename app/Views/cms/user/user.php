@@ -17,7 +17,7 @@
    /* .hidden{
         display: none;
     }*/
-    .itagomo {
+    .display-none {
         display: none;
     }
 </style>
@@ -116,7 +116,7 @@
                         <label class="form-check-label large-label" for="status">Active</label>
                     </div>
                     
-                    <div class="form-check itagomo">
+                    <div class="form-check display-none">
                         <input type="checkbox" class="form-check-input large-checkbox" id="update_pass">
                         <label class="form-check-label large-label" for="update_pass">Update Password?</label>
                     </div>
@@ -398,10 +398,12 @@
         if (actions === 'edit') $footer.append(buttons.edit);
         $footer.append(buttons.close);
         if (actions === 'edit'){
-            $('.itagomo').show();
+            $('.display-none').show();
             $('.password-div').remove();
+            $('#update_pass').prop('checked', false)
         }else if(actions === 'add'){
-            $('.itagomo').hide();
+            $('.password-div').remove();
+            $('.display-none').hide();
             var passwordFormHtml = `
             <div class="panel-body password-div"> 
                 <div accept-charset="UTF-8" role="form" class="form-signin">
@@ -438,7 +440,7 @@
             </div>`;
             $('hr').after(passwordFormHtml);
         }else{
-            $('.itagomo').hide();
+            $('.display-none').hide();
             $('.password-div').remove();
         }
         $modal.modal('show');
