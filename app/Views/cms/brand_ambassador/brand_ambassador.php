@@ -286,6 +286,10 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination(query);
+        
+        $('.datepicker').datepicker({
+            dateFormat: 'yy-mm-dd'
+        });
 
     });
 
@@ -943,19 +947,17 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     let year = today.getFullYear();
                     let month = String(today.getMonth() + 1).padStart(2, '0');
                     let newSequence = 1;
+                    let prefix = `${year}-${month}`;
 
-                    if (lastCode) {
-                        let parts = lastCode.split('-');
-                        let lastYear = parseInt(parts[0], 10);
-                        let lastMonth = parseInt(parts[1], 10);
+                    if (lastCode && lastCode.startsWith(`BA-${prefix}`)) {
+                        let parts = lastCode.replace('BA-', '').split('-');
                         let lastSequence = parseInt(parts[2], 10);
-
-                        if (lastYear === year && lastMonth === parseInt(month, 10)) {
+                        if (!isNaN(lastSequence)) {
                             newSequence = lastSequence + 1;
                         }
                     }
 
-                    return `${year}-${month}-${String(newSequence).padStart(3, '0')}`;
+                    return `BA-${prefix}-${String(newSequence).padStart(3, '0')}`;
                 }
 
                 function updateOverallProgress(stepName, completed, total) {
@@ -1014,8 +1016,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
                     function processUpdates(callback) {
                         if (updateRecords.length > 0) {
-                            //return;
-
                             batch_update(url, updateRecords, "tbl_brand_ambassador", "id", true, (response) => {
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
@@ -1150,7 +1150,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
         let brandBatchIndex     = 0;
         let brandDataKeys       = inserted_ids.map(obj => obj.id);
         let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
-
         let allNewEntries   = [];
         let originalEntries = [];
 
@@ -1215,7 +1214,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
                                 );
             let chunkData        = [];
             let baIdsToDelete    = [];
-
             chunkKeys.forEach(id => {
                 const ba_id     = insertedMap[id];
                 const brand_ids = brand_per_ba[id];
@@ -1233,23 +1231,11 @@ function saveValidatedData(valid_data, brand_per_ba) {
                 }
             });
 
-            // accumulate for final log
             allNewEntries = allNewEntries.concat(chunkData);
 
-            // helper to insert after delete
             function insertNewBrandRecords() {
                 if (chunkData.length > 0) {
                     batch_insert(url, chunkData, "tbl_ba_brands", false, function(resp) {
-                        // const insertEnd = new Date();
-                        // const remarks = `
-                        //         Action: Inserted ${chunkData.length} BA-Brand links
-                        //         <br>Batch: ${brandBatchIndex + 1}/${total_brand_batches}
-                        //         <br>Start: ${formatReadableDate(batchStart)}
-                        //         <br>End: ${formatReadableDate(insertEnd)}
-                        //         <br>Duration: ${formatDuration(batchStart, insertEnd)}
-                        //     `;
-
-                        // logActivity("ba-brand-module-import", "Insert BA-Brand Batch", remarks, "-", JSON.stringify(chunkData), "");
 
                         brandBatchIndex++;
                         setTimeout(processNextBrandBatch, 100);
@@ -1479,24 +1465,27 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
     function generateCode(callback) {
         const url = "<?= base_url('cms/global_controller'); ?>";
-        let data = {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = ('0' + (now.getMonth() + 1)).slice(-2);
+        const prefix = `BA-${year}-${month}`;
+
+        aJax.post(url, {
             event: "get_last_code",
-            table: "tbl_brand_ambassador",
+            table: "tbl_area",
             field: "code"
-        };
+        }, function (res) {
+            const lastCode = res.last_code || '';
+            let newCode = `${prefix}-001`;
 
-        aJax.post(url, data, function(result) {
-            var lastCode = result.last_code || '';
-            var currentYear = new Date().getFullYear();
-            var currentMonth = ('0' + (new Date().getMonth() + 1)).slice(-2);
-
-            if (!lastCode || !lastCode.startsWith(currentYear + "-" + currentMonth)) {
-                callback(`${currentYear}-${currentMonth}-001`);
-            } else {
-                var lastSeq = parseInt(lastCode.split('-')[2]) || 0;
-                var newSeq = ('000' + (lastSeq + 1)).slice(-3);
-                callback(`${currentYear}-${currentMonth}-${newSeq}`);
+            if (lastCode.startsWith(prefix)) {
+                const parts = lastCode.replace('BA-', '').split('-');
+                const lastSeq = parseInt(parts[2], 10) || 0;
+                const newSeq = ('000' + (lastSeq + 1)).slice(-3);
+                newCode = `${prefix}-${newSeq}`;
             }
+
+            callback(newCode);
         });
     }
 
@@ -1663,19 +1652,17 @@ function saveValidatedData(valid_data, brand_per_ba) {
                     let year = today.getFullYear();
                     let month = String(today.getMonth() + 1).padStart(2, '0');
                     let newSequence = 1;
+                    let prefix = `${year}-${month}`;
 
-                    if (lastCode) {
-                        let parts = lastCode.split('-');
-                        let lastYear = parseInt(parts[0], 10);
-                        let lastMonth = parseInt(parts[1], 10);
+                    if (lastCode && lastCode.startsWith(`BA-${prefix}`)) {
+                        let parts = lastCode.replace('BA-', '').split('-'); 
                         let lastSequence = parseInt(parts[2], 10);
-
-                        if (lastYear === year && lastMonth === parseInt(month, 10)) {
+                        if (!isNaN(lastSequence)) {
                             newSequence = lastSequence + 1;
                         }
                     }
 
-                    return `${year}-${month}-${String(newSequence).padStart(3, '0')}`;
+                    return `BA-${prefix}-${String(newSequence).padStart(3, '0')}`;
                 }
 
                 const newCode = generateNewCode();

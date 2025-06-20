@@ -142,7 +142,6 @@
                             <thead>
                                 <tr>
                                     <th class='center-content'>Line #</th>
-                                    <th class='center-content'>Team Code</th>
                                     <th class='center-content'>Team Description</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
@@ -167,8 +166,8 @@
 
 <script>
     var query = "status >= 0";
-    var column_filter = '';
-    var order_filter = '';
+    var column_filter = 'code';
+    var order_filter = 'order';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url('cms/global_controller');?>";
@@ -238,7 +237,7 @@
         });
     }
 
-    function get_pagination(query, field = "updated_date", order = "desc") {
+    function get_pagination(query, field = "code", order = "order") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
@@ -497,39 +496,73 @@
                 field: "id",
                 where: id,
                 data: {
-                    code: inp_code,
                     team_description: inp_description,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                     status: status_val
                 }
             };
-        } else {
-            modal_alert_success = success_save_message;
-            data = {
-                event: "insert",
-                table: "tbl_team",
-                data: {
-                    code: inp_code,
-                    team_description: inp_description,
-                    created_date: formatDate(new Date()),
-                    created_by: user_id,
-                    status: status_val
-                }
-            };
-        }
-
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function() {
-                location.reload();
+            aJax.post(url,data,function(result){
+                var obj = is_json(result);
+                modal.loading(false);
+                modal.alert(modal_alert_success, 'success', function() {
+                    location.reload();
+                });
             });
-        });
+        } else {
+            aJax.post(url, { table: "tbl_team", event: "get_last_code", field: "code" }, function(codeResponse) {
+                let codeResult = codeResponse;
+                let lastCode = null;
+
+                if (codeResult.message === 'success' && codeResult.last_code) {
+                    lastCode = codeResult.last_code;
+                }
+                modal_alert_success = success_save_message;
+                function generateNewCode() {
+                    let today = new Date();
+                    let year = today.getFullYear();
+                    let month = String(today.getMonth() + 1).padStart(2, '0');
+                    let newSequence = 1;
+                    let prefix = `${year}-${month}`;
+
+                    if (lastCode && lastCode.startsWith(`TEAM-${prefix}`)) {
+                        let parts = lastCode.replace('TEAM-', '').split('-'); 
+                        let lastSequence = parseInt(parts[2], 10);
+                        if (!isNaN(lastSequence)) {
+                            newSequence = lastSequence + 1;
+                        }
+                    }
+
+                    return `TEAM-${prefix}-${String(newSequence).padStart(3, '0')}`;
+                }
+
+                const newCode = generateNewCode();
+
+                data = {
+                    event: "insert",
+                    table: "tbl_team",
+                    data: {
+                        code: newCode,
+                        team_description: inp_description,
+                        created_date: formatDate(new Date()),
+                        created_by: user_id,
+                        status: status_val
+                    }
+                };
+
+                aJax.post(url,data,function(result){
+                    var obj = is_json(result);
+                    modal.loading(false);
+                    modal.alert(modal_alert_success, 'success', function() {
+                        location.reload();
+                    });
+                });
+            });
+        }
     }
 
     function save_data(action, id) {
-        generateASCCode(function (generatedCode) {
+        generateTeamCode(function (generatedCode) {
             var code = $('#code').val();
             var description = $('#team_description').val();
             var chk_status = $('#status').prop('checked');
@@ -570,7 +603,7 @@
         });
     }
 
-    function generateASCCode(callback) {
+    function generateTeamCode(callback) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         const now = new Date();
         const year = now.getFullYear();
@@ -634,7 +667,6 @@
                             }
 
                             var teamCount = Number(obj[0].team_count) || 0;
-                            console.log("Team Count:", teamCount);
 
                             if (teamCount > 0) { 
                                 modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
@@ -899,7 +931,6 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Team Code": row["Team Code"] || "",
                 "Team Description": row["Team Description"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
@@ -956,7 +987,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['team code', 'team description', 'status'];
+            let td_validator = ['team description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -970,180 +1001,194 @@
         updatePaginationControls();
     }
 
-   function saveValidatedData(valid_data) {
+    function saveValidatedData(valid_data) {
         const overallStart = new Date();
-        let batch_size = 5000;
-        let total_batches = Math.ceil(valid_data.length / batch_size);
+        const batch_size = 5000;
+        const total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
         let retry_count = 0;
-        let max_retries = 5; 
-        let errorLogs = [];
-        let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_team';
-        let selected_fields = ['id', 'code', 'team_description'];
+        const max_retries = 5;
+        const errorLogs = [];
 
-        //for lookup of duplicate recors
-        const matchFields = ["code", "team_description"];  
-        const matchType = "OR";  //use OR/AND depending on the condition
+        const url = "<?= base_url('cms/global_controller');?>";
+        const table = 'tbl_team';
+        const selected_fields = ['id', 'team_description'];
+        const matchFields = ['team_description'];
+        const matchType = 'OR';
+
         modal.loading_progress(true, "Validating and Saving data...");
 
-        // Fetch existing records to determine insert vs. update
-        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-            // let result = JSON.parse(response);
+        aJax.post(url, { table, event: "fetch_existing", selected_fields }, function (response) {
             const result = JSON.parse(response);
             const allEntries = result.existing || [];
 
-            // Build a Set of codes you're importing:
-            const codeSet = new Set(valid_data.map(r => r.code));
+            const descSet = new Set(valid_data.map(r => r.team_description.trim().toLowerCase()));
 
-            // Keep only the rows whose code matches:
-            const originalEntries = allEntries.filter(rec => codeSet.has(rec.code));
+            const originalEntries = allEntries.filter(r =>
+                descSet.has(r.team_description)
+            );
+            let existingMap = new Map();
+            allEntries.forEach(record => {
+                const key = matchFields.map(field => (record[field] || "")).join("|");
+                existingMap.set(key, record.id);
+            });
 
-            let existingMap = new Map(); // Stores records using composite keys
-
-            if (result.existing) {
-                result.existing.forEach(record => {
-                    let key = matchFields.map(field => record[field] || "").join("|"); 
-                    existingMap.set(key, record.id);
-                });
-            }
-
-            function updateOverallProgress(stepName, completed, total) {
-                let progress = Math.round((completed / total) * 100);
-                updateSwalProgress(stepName, progress);
-            }
-
-            function processNextBatch() {
-                if (batch_index >= total_batches) {
-                    modal.loading_progress(false);
-
-                    const overallEnd = new Date();
-                    const duration = formatDuration(overallStart, overallEnd);
-
-                    const remarks = `
-                        Action: Import/Update Team Batch
-                        <br>Processed ${valid_data.length} records
-                        <br>Errors: ${errorLogs.length}
-                        <br>Start: ${formatReadableDate(overallStart)}
-                        <br>End: ${formatReadableDate(overallEnd)}
-                        <br>Duration: ${duration}
-                    `;
-
-                    logActivity("import-team-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
-
-                    if (errorLogs.length > 0) {
-                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-                    } else {
-                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-                    }
-                    return;
+            aJax.post(url, { table, event: "get_last_code", field: "code" }, function (codeResponse) {
+                let lastCode = '';
+                if (typeof codeResponse === 'string') {
+                    codeResponse = JSON.parse(codeResponse);
+                }
+                if (codeResponse.message === 'success' && codeResponse.last_code) {
+                    lastCode = codeResponse.last_code;
                 }
 
-                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-                let newRecords = [];
-                let updateRecords = [];
+                function generateNewCode() {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const prefix = `${year}-${month}`;
+                    let newSequence = 1;
 
-                batch.forEach(row => {
-                    let matchedId = null;
-
-                    if (matchType === "AND") {
-                        let key = matchFields.map(field => row[field] || "").join("|");
-                        if (existingMap.has(key)) {
-                            matchedId = existingMap.get(key);
+                    if (lastCode.startsWith(`TEAM-${prefix}`)) {
+                        const parts = lastCode.replace('TEAM-', '').split('-');
+                        const lastSequence = parseInt(parts[2], 10);
+                        if (!isNaN(lastSequence)) {
+                            newSequence = lastSequence + 1;
                         }
-                    } else {
-                        for (let [key, id] of existingMap.entries()) {
-                            let keyParts = key.split("|");
+                    }
 
-                            // for (let field of matchFields) {
-                            //     if (keyParts.includes(row[field])) {
-                            //         matchedId = id;
-                            //     }
-                            // }
+                    lastCode = `TEAM-${prefix}-${String(newSequence).padStart(3, '0')}`;
+                    return lastCode;
+                }
 
-                            if (keyParts[0] === row["code"]) {
-                                matchedId = id;
-                                break; // Stop looping once a match is found
+                function updateOverallProgress(stepName, completed, total) {
+                    const progress = Math.round((completed / total) * 100);
+                    updateSwalProgress(stepName, progress);
+                }
+
+                function processNextBatch() {
+                    if (batch_index >= total_batches) {
+                        modal.loading_progress(false);
+
+                        const overallEnd = new Date();
+                        const duration = formatDuration(overallStart, overallEnd);
+
+                        const remarks = `
+                            Action: Import/Update Team Batch
+                            <br>Processed ${valid_data.length} records
+                            <br>Errors: ${errorLogs.length}
+                            <br>Start: ${formatReadableDate(overallStart)}
+                            <br>End: ${formatReadableDate(overallEnd)}
+                            <br>Duration: ${duration}
+                        `;
+
+                        logActivity("import-team-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+                        if (errorLogs.length > 0) {
+                            createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                            modal.alert("Some records encountered errors. Check the log.", 'info', () => { });
+                        } else {
+                            modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                        }
+                        return;
+                    }
+
+                    const batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                    const newRecords = [];
+                    const updateRecords = [];
+
+                    batch.forEach(row => {
+                        let matchedId = null;
+
+                        if (matchType === "AND") {
+                            const key = matchFields.map(field => row[field] || "").join("|");
+                            if (existingMap.has(key)) {
+                                matchedId = existingMap.get(key);
                             }
-
-                            // if (matchedId) break;
-                        }
-                    }
-
-                    if (matchedId) {
-                        row.id = matchedId;
-                        row.updated_date = formatDate(new Date());
-                        delete row.created_date;
-                        updateRecords.push(row);
-                    } else {
-                        row.created_by = user_id;
-                        row.created_date = formatDate(new Date());
-                        newRecords.push(row);
-                    }
-                });
-
-                function processUpdates() {
-                    return new Promise((resolve) => {
-                        if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_team", "id", false, (response) => {
-                                if (response.message !== 'success') {
-                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
                         } else {
-                            resolve();
+                            for (let [key, id] of existingMap.entries()) {
+                                const keyParts = key.split("|");
+                                let match = matchFields.some((field, i) => keyParts[i] === row[field]);
+                                if (match) {
+                                    matchedId = id;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (matchedId) {
+                            row.id = matchedId;
+                            row.updated_date = formatDate(new Date());
+                            delete row.created_date;
+                            updateRecords.push(row);
+                        } else {
+                            row.code = generateNewCode();
+                            row.created_by = user_id;
+                            row.created_date = formatDate(new Date());
+                            newRecords.push(row);
                         }
                     });
-                }
 
-                function processInserts() {
-                    return new Promise((resolve) => {
-                        if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_team", false, (response) => {
-                                if (response.message === 'success') {
+                    function processUpdates() {
+                        return new Promise((resolve) => {
+                            if (updateRecords.length > 0) {
+                                batch_update(url, updateRecords, table, "id", false, (response) => {
+                                    if (response.message !== 'success') {
+                                        errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                    }
+                                    resolve();
+                                });
+                            } else {
+                                resolve();
+                            }
+                        });
+                    }
+
+                    function processInserts() {
+                        return new Promise((resolve) => {
+                            if (newRecords.length > 0) {
+                                batch_insert(url, newRecords, table, false, (response) => {
+                                    if (response.message !== 'success') {
+                                        errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                    }
                                     updateOverallProgress("Saving Team...", batch_index + 1, total_batches);
-                                } else {
-                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                                }
+                                    resolve();
+                                });
+                            } else {
                                 resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function handleSaveError() {
-                    if (retry_count < max_retries) {
-                        retry_count++;
-                        let wait_time = Math.pow(2, retry_count) * 1000;
-                        setTimeout(() => {
-                            processInserts().then(() => {
-                                batch_index++;
-                                retry_count = 0;
-                                processNextBatch();
-                            }).catch(handleSaveError);
-                        }, wait_time);
-                    } else {
-                        modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+                            }
+                        });
                     }
+
+                    function handleSaveError() {
+                        if (retry_count < max_retries) {
+                            retry_count++;
+                            const wait_time = Math.pow(2, retry_count) * 1000;
+                            setTimeout(() => {
+                                processInserts().then(() => {
+                                    batch_index++;
+                                    retry_count = 0;
+                                    processNextBatch();
+                                }).catch(handleSaveError);
+                            }, wait_time);
+                        } else {
+                            modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => { });
+                        }
+                    }
+
+                    processUpdates()
+                        .then(processInserts)
+                        .then(() => {
+                            batch_index++;
+                            setTimeout(processNextBatch, 300);
+                        })
+                        .catch(handleSaveError);
                 }
 
-                // Execute updates first, then inserts, then proceed to next batch
-                processUpdates()
-                    .then(processInserts)
-                    .then(() => {
-                        batch_index++;
-                        setTimeout(processNextBatch, 300);
-                    })
-                    .catch(handleSaveError);
-            }
-
-            setTimeout(processNextBatch, 1000);
+                processNextBatch();
+            });
         });
     }
+
 
     function excel_date_to_readable_date(excel_date) {
         var dateStr = excel_date.split('/').map((part, index) => {
@@ -1218,7 +1263,6 @@
 
         formattedData = [
             {
-                "Team Code": "",
                 "Team Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."

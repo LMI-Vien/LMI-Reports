@@ -3,16 +3,15 @@ self.onmessage = async function(e) {
     let BASE_URL = e.data.base_url;
     let invalid = false;
     let errorLogs = [];
-    let unique_code = new Set();
     let unique_description = new Set();
     let valid_data = [];
-    var err_counter = 0;
+    let err_counter = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?areas=1`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?areas=1`);
         let ba_data = await get_ba_valid_response.json();
 
-        area_records = ba_data.areas;
+        let area_records = ba_data.areas;
         let area_lookup = {};
         area_records.forEach(area => area_lookup[area.code] = area.id);
 
@@ -21,7 +20,6 @@ self.onmessage = async function(e) {
             return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
         }
 
-        // Process in smaller batches to avoid memory issues
         let batchSize = 2000;
         let index = 0;
 
@@ -34,25 +32,13 @@ self.onmessage = async function(e) {
             for (let i = 0; i < batchSize && index < data.length; i++, index++) {
                 let row = data[index];
                 let tr_count = index + 1;
-                let code = row["ASC Code"] ? row["ASC Code"].trim() : "";
+
                 let description = row["ASC Name"] ? row["ASC Name"].trim() : "";
                 let status = row["Status"] ? row["Status"].toLowerCase() : "";
                 let deployment_date = row["Deployment Date"] ? row["Deployment Date"].trim() : "";
                 let user_id = row["Created By"] ? row["Created By"].trim() : "";
                 let area_id = row["Area"] ? row["Area"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
-
-                if (unique_code.has(code)) {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Duplicated Code at line #: ${tr_count}`);
-                    err_counter++;
-                } else if (code.length > 25 || code === "") {
-                    invalid = true;
-                    errorLogs.push(`⚠️ Invalid Code at line #: ${tr_count}`);
-                    err_counter++;
-                } else {
-                    unique_code.add(code);
-                }
 
                 if (unique_description.has(description)) {
                     invalid = true;
@@ -87,7 +73,7 @@ self.onmessage = async function(e) {
                 let area_lower = area_id.toLowerCase();
                 if (area_lower in normalized_area_lookup) {
                     area_id = normalized_area_lookup[area_lower];
-                }else {
+                } else {
                     invalid = true;
                     errorLogs.push(`⚠️ Invalid Area at line #: ${tr_count}`);
                     err_counter++;
@@ -99,7 +85,6 @@ self.onmessage = async function(e) {
 
                 if (!invalid) {
                     valid_data.push({
-                        code: code,
                         description: description,
                         status: status === "active" ? 1 : 0,
                         deployment_date: deployment_date,
@@ -109,11 +94,12 @@ self.onmessage = async function(e) {
                     });
                 }
             }
+
             setTimeout(processBatch, 0);
         }
 
-            processBatch();
-        }catch (error) {
+        processBatch();
+    } catch (error) {
         self.postMessage({ invalid: true, errorLogs: [`Validation failed: ${error.message}`], err_counter: 1 });
     }
 };

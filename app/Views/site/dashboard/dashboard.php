@@ -207,7 +207,6 @@
   var announcementTypes = <?= json_encode($announcementTypes) ?>;
   
   $(document).ready(function () {
-    console.log(announcementTypes)
   })
 
   function formatDate(dateStr) {

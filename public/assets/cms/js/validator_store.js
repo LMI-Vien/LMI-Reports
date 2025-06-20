@@ -116,12 +116,17 @@ self.onmessage = async function(e) {
                         let ba_id = ba_lookup[s];
 
                         if (store_ba_global_tag_map[ba_id] && store_ba_global_tag_map[ba_id] !== code) {
-                            //invalid = true;
+                            //to be confirm
+                            // invalid = true;
                             // if (!invalid_ba) {
                             //     invalid_ba = true;
-                            //     errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store (${store_ba_global_tag_map[ba_id]}).`);
+                            //     errorLogs.push(`⚠️ Brand Ambassador "${s}" at line #: ${tr_count} is already assigned to another Store.`);
                             //     err_counter++;
                             // }
+                            if (!ba_per_store[code].includes(ba_id)) {
+                                ba_per_store[code].push(ba_id);
+                            }
+                            store_ba_global_tag_map[ba_id] = code;
                         } else {
                             if (!ba_per_store[code].includes(ba_id)) {
                                 ba_per_store[code].push(ba_id);

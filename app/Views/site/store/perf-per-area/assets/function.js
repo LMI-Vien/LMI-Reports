@@ -41,6 +41,33 @@
         });
 
         autocomplete_field($("#ascName"), $("#ascNameId"), asc, "description");
+
+        $("#month").on("change", function() {
+            let selected = $("#monthTo").val();
+            let start = $("#month").val();
+            let html = "<option value=''>Please select..</option>";
+
+            months.forEach(month => {
+                if (parseInt(month.id) >= start) {
+                    html += `<option value="${month.id}">${month.month}</option>`;
+                }
+            });
+
+            $("#monthTo").html(html);
+        });
+
+        $("#monthTo").on("change", function() {
+            let selected = $("#month").val();
+            let end = $("#monthTo").val();
+            let html = "<option value=''>Please select..</option>";
+
+            months.forEach(month => {
+                if (parseInt(month.id) < end) {
+                    html += `<option value="${month.id}">${month.month}</option>`;
+                }
+            });
+            $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
+        });
     });
 
     $(document).on('click', '#clearButton', function () {
@@ -167,33 +194,6 @@
             lengthChange: false
         });
     }
-
-    $("#month").on("change", function() {
-        let selected = $("#monthTo").val();
-        let start = $("#month").val();
-        let html = "<option value=''>Please select..</option>";
-
-        months.forEach(month => {
-            if (parseInt(month.id) >= start) {
-                html += `<option value="${month.id}">${month.month}</option>`;
-            }
-        });
-
-        $("#monthTo").html(html);
-    });
-
-    $("#monthTo").on("change", function() {
-        let selected = $("#month").val();
-        let end = $("#monthTo").val();
-        let html = "<option value=''>Please select..</option>";
-
-        months.forEach(month => {
-            if (parseInt(month.id) < end) {
-                html += `<option value="${month.id}">${month.month}</option>`;
-            }
-        });
-        $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
-    });
 
     function formatNoDecimals(data) {
         return data ? Number(data).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0';

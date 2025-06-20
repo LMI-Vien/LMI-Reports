@@ -8,6 +8,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Login::login');
 $routes->get('/dashboard', 'Dashboard::index');
 $routes->get('/dashboard/get-counts', 'Dashboard::getCounts');
+$routes->post('/dashboard/get-ba-asc-name', 'Dashboard::get_ba_asc_name');
 
 $routes->group('stocks/', static function ($routes) {
     //per store
@@ -158,7 +159,6 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('get-title', 'Cms\CmsPreference::get_title');
         $routes->get('get-site-menu', 'Cms\CmsPreference::get_site_menu');
         $routes->get('get-pending-approvals', 'Cms\CmsPreference::getPendingApprovals');
-        
     });
 
     $routes->group('roles/', static function ($routes) {
@@ -175,15 +175,14 @@ $routes->group('cms/', static function ($routes) {
     });
     
     $routes->get('team', 'Cms\Team::index');
-    
-    $routes->group('newfile', static function ($routes) {
-        $routes->get('/', 'Cms\Newfile::index');
-    });
 
     $routes->get('store-branch', 'Cms\StoreBranch::index');
 
     $routes->group('area', static function ($routes) {
         $routes->get('/', 'Cms\Area::index');
+        $routes->get('get-latest-area-code', 'Cms\Area::get_latest_area_code');
+        $routes->get('get-existing-area-data', 'Cms\Area::get_existing_area_data');
+        
     });
 
     $routes->group('asc', static function ($routes) {

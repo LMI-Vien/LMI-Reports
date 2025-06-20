@@ -23,6 +23,12 @@ class StoreSalesPerfPerMonth extends BaseController
 	{
 		$uri = current_url(true);
 		$data['uri'] = $uri;
+		$years = $this->Global_model->getYears(); 
+
+		$year_values = array_column($years, 'year'); 
+		$year_id = array_column($years, 'id'); 
+		$latest_year = max($year_values);
+
 		$data['meta'] = array(
 			"title"         =>  "LMI Portal",
 			"description"   =>  "LMI Portal Wep application",
@@ -33,7 +39,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		$data['PageUrl'] = 'Trade Dashboard';
 		$data["breadcrumb"] = array('Store' => base_url('store/sales-performance-per-month'),'Store Sales Performance per Month' => '');
 		$data["source"] = "Actual Sales Report, Scan Data, and Target Sales";
-		$data["source_date"] = 'Latest Year';	
+		$data["source_date"] = $latest_year;	
 		$data["foot_note"] = 'With BA = Actual Sales, Without BA = Scanned Data';	
 
 		$data['content'] = "site/store/perf-per-month/sales_performance_per_month";

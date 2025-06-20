@@ -149,6 +149,17 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination(query);
+        
+        $('.datetimepicker').datetimepicker({
+            dateFormat: 'yy-mm-dd',
+            timeFormat: 'hh:mm tt',
+            showSecond: false,
+            showMillisec: false,
+            showMicrosec: false,
+            showTimezone: false,
+            controlType: 'select',
+            oneLine: true 
+        });
 
         const today = new Date();
         today.setMinutes(today.getMinutes() - today.getTimezoneOffset()); 

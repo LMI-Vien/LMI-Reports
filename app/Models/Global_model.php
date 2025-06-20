@@ -156,6 +156,25 @@ class Global_model extends Model
         return $q->getResult();
     }
 
+    function get_by_name($table, $selectFields, $name, $join = null) {
+        $builder = $this->db->table($table)->select($selectFields);
+
+        if (!empty($join) && is_array($join)) {
+            foreach ($join as $vl) {
+                $builder->join($vl['table'], $vl['query'], $vl['type'] ?? 'inner');
+            }
+        }
+
+        $fieldParts = explode(',', $selectFields);
+        $firstField = trim($fieldParts[0]);
+
+        $fieldName = preg_replace('/\s+AS\s+\w+$/i', '', $firstField);
+
+        return $builder->where($fieldName, $name)->get()->getResult();
+    }
+
+
+
     function get_by_menu_url($url) {
         $builder = $this->db->table('site_menu')
                             ->where("menu_url", $url);
@@ -1103,7 +1122,7 @@ class Global_model extends Model
 
     function get_valid_records_store_group() {
         $results = $this->db->table('tbl_store_group sg')
-            ->select('sg.id, sg.area_id, sg.store_id, a.code as area_code')
+            ->select('sg.id, sg.area_id, sg.store_id, a.code as area_code, a.description')
             ->join('tbl_area a', 'a.id = sg.area_id', 'left')
             ->get()
             ->getResultArray();

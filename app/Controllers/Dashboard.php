@@ -76,4 +76,70 @@ class Dashboard extends BaseController
         $counts = $this->Dashboard_model->getCounts();
         return $this->response->setJSON($counts);
     }
+
+	public function get_ba_asc_name() {
+	    $name = $this->request->getPost('name');
+	    $role = $this->session->get('sess_user_role');
+	    $response = ['status' => 'error', 'message' => 'No result found'];
+	    //$role = 8;
+	    //$name = 'asda 1';
+	    if (empty($name)) {
+	        return $this->response->setJSON($response);
+	    }
+
+	    $table = 'tbl_area_sales_coordinator asc';
+	    $field = 'asc.description AS asc_name, asc.id AS asc_id, a.id AS area_id, a.description AS area';
+	    $join = [
+	        ['table' => 'tbl_area a', 'query' => 'asc.area_id = a.id', 'type' => 'left'],
+	        ['table' => 'tbl_store_group sg', 'query' => 'a.id = sg.area_id', 'type' => 'left'],
+	        ['table' => 'tbl_store s', 'query' => 'sg.store_id = s.id', 'type' => 'left']
+	    ];
+
+	    if ($role == 7) { // Brand Ambassador
+	        $table = 'tbl_brand_ambassador ba';
+	        $field = 'ba.name AS brand_ambassador, ba.id AS brand_ambassador_id, a.id AS area_id, a.description AS area';
+	        $join = [
+	            ['table' => 'tbl_brand_ambassador_group bag', 'query' => 'ba.id = bag.brand_ambassador_id', 'type' => 'left'],
+	            ['table' => 'tbl_store s', 'query' => 'bag.store_id = s.id', 'type' => 'left'],
+	            ['table' => 'tbl_store_group sg', 'query' => 's.id = sg.store_id', 'type' => 'left'],
+	            ['table' => 'tbl_area a', 'query' => 'sg.area_id = a.id', 'type' => 'left']
+	        ];
+	    }
+
+	    $result = $this->Global_model->get_by_name($table, $field, $name, $join);
+
+	    if (!empty($result)) {
+	        $row = $result[0];
+	        $data = [];
+
+	        if ($role == 7) {
+	            $data = [
+	                'brandAmbassador'   => $row->brand_ambassador ?? '',
+	                'brandAmbassadorId' => $row->brand_ambassador_id ?? '',
+	                'area'              => (!empty($row->area_id) && !empty($row->area))
+	                    ? "AREA-" . str_pad($row->area_id, 4, '0', STR_PAD_LEFT) . " - " . $row->area
+	                    : '',
+	                'areaId'            => $row->area_id ?? ''
+	            ];
+	        } else {
+	            $data = [
+	                'ascName'   => $row->asc_name ?? '',
+	                'ascNameId' => $row->asc_id ?? '',
+	                'area'      => (!empty($row->area_id) && !empty($row->area))
+	                    ? "AREA-" . str_pad($row->area_id, 4, '0', STR_PAD_LEFT) . " - " . $row->area
+	                    : '',
+	                'areaId'    => $row->area_id ?? ''
+	            ];
+	        }
+
+	        return $this->response->setJSON([
+	            'status' => 'success',
+	            'data'   => $data
+	        ]);
+	    }
+
+	    return $this->response->setJSON($response);
+	}
+
+
 }

@@ -200,7 +200,6 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' scope="col">Line #</th>
-                                        <th class='center-content' scope="col">Area Code</th>
                                         <th class='center-content' scope="col">Area Description</th>
                                         <th class='center-content' scope="col">Store Codes</th>
                                         <th class='center-content' scope="col">Status</th>
@@ -565,7 +564,6 @@
                 html += `</tbody>`; 
 
                 StoreTotalRecords = result.pagination.total_record;
-                console.log(StoreTotalRecords);
                 StoreTotalPages = Math.ceil(StoreTotalRecords / BASE_PAGE_SIZE);
 
                 html += `
@@ -636,7 +634,6 @@
     let selectedStores = [];
     let initialStoreNames = [];    
 
-    // edit is being overwritten
     function populate_modal(inp_id, actions, callback) {
         const query = `status >= 0 and id = ${inp_id}`;
         const url   = "<?= base_url('cms/global_controller');?>";
@@ -648,7 +645,6 @@
         };
 
         const areaStores = selectedStores;
-        console.log('areaStores: ', areaStores);
 
         aJax.post(url, data, function(result) {
             const obj = is_json(result);
@@ -662,10 +658,6 @@
             $('#code').val(d.code);
             $('#description').val(d.description);
             $('#status').prop('checked', d.status == 1);
-
-            // const areaStores = get_area_stores(d.id);
-            // console.log('areaStores: ', areaStores);
-
             
             if (areaStores.length === 0 && actions === 'edit') {
                 add_line();
@@ -847,7 +839,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['area code', 'area description', 'store codes', 'status']; 
+            let td_validator = ['area description', 'store codes', 'status']; 
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -953,7 +945,6 @@
                 row["Store Codes"] = [...new Set(storeList)]; // Remove duplicates
             }
             return {
-                "Area Code": row["Area Code"] || "",
                 "Area Description": row["Area Description"] || "", 
                 "Status": row["Status"] || "", 
                 "Store Codes": row["Store Codes"] || "", 
@@ -1736,33 +1727,66 @@
                 field: "id",
                 where: id,
                 data: {
-                    code: inp_code,
                     description: inp_description,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                     status: status_val
                 }
             };
-        } else {
-            modal_alert_success = success_save_message;
-            data = {
-                event: "insert",
-                table: "tbl_area",
-                data: {
-                    code: inp_code,
-                    description: inp_description,
-                    created_date: formatDate(new Date()),
-                    created_by: user_id,
-                    status: status_val
-                }
-            };
-        }
 
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            cb(obj)
-            modal.loading(false);
-        });
+            aJax.post(url, data, function(result) {
+                var obj = is_json(result);
+                cb(obj);
+                modal.loading(false);
+            });
+        } else {
+            aJax.post(url, { table: "tbl_area", event: "get_last_code", field: "code" }, function(codeResponse) {
+                let codeResult = codeResponse;
+                let lastCode = null;
+
+                if (codeResult.message === 'success' && codeResult.last_code) {
+                    lastCode = codeResult.last_code;
+                }
+
+                function generateNewCode() {
+                    let today = new Date();
+                    let year = today.getFullYear();
+                    let month = String(today.getMonth() + 1).padStart(2, '0');
+                    let newSequence = 1;
+                    let prefix = `${year}-${month}`;
+                    if (lastCode && lastCode.startsWith(`AREA-${prefix}`)) {
+                        let parts = lastCode.replace('AREA-', '').split('-');
+                        let lastSequence = parseInt(parts[2], 10);
+                        if (!isNaN(lastSequence)) {
+                            newSequence = lastSequence + 1;
+                        }
+                    }
+
+                    return `AREA-${prefix}-${String(newSequence).padStart(3, '0')}`;
+                }
+
+                const newCode = generateNewCode();
+
+                modal_alert_success = success_save_message;
+                data = {
+                    event: "insert",
+                    table: "tbl_area",
+                    data: {
+                        code: newCode,
+                        description: inp_description,
+                        created_date: formatDate(new Date()),
+                        created_by: user_id,
+                        status: status_val
+                    }
+                };
+
+                aJax.post(url, data, function(result) {
+                    var obj = is_json(result);
+                    cb(obj);
+                    modal.loading(false);
+                });
+            });
+        }
     }
 
     function delete_data(id) {
@@ -1899,8 +1923,8 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.description, 10) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.code, 20) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.description, 20) + "</td>";
                         // html += "<td style='width: 20%'>" + y.store + "</td>";
                         html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
@@ -1942,14 +1966,12 @@
 
         formattedData = [
             {
-                "Area Code": "",
                 "Area Description": "",
                 "Status": "",
                 "Store Codes": "",
                 "NOTE:": "Please do not change the column headers."
             },
             {
-                "Area Code": "",
                 "Area Description": "",
                 "Status": "",
                 "Store Codes": "",

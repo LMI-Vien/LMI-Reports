@@ -208,20 +208,23 @@
             }
         });
 
-        const areaFilter = $('#area').val();
-        const invStatusFilter = $('#inventoryStatus').val();
+        baFilter = $('#brandAmbassador').val();
+        invStatusFilter = $('#inventoryStatus').val();
 
-        if (!areaFilter && invStatusFilter.length === 0) {
-            modal.alert('Please select both "Area" and Inventory Status" before filtering.', "warning");
+        if (!baFilter && invStatusFilter.length === 0) {
+            modal.alert('Please select both "Brand Ambassador" and Inventory Status" before filtering.', "warning");
             return;
         }
 
-        if (!areaFilter || areaFilter.length === 0) {
-            modal.alert('Please select "Area" before filtering.', "warning");
-            return;
-        }
+        // if (!areaFilter || areaFilter.length === 0) {
+        //     modal.alert('Please select "Area" before filtering.', "warning");
+        //     return;
+        // }
 
         // Validate Inventory Status (multi-select)
+
+        invStatusFilter = $('#inventoryStatus').val();
+        console.log(invStatusFilter);
         if (!invStatusFilter || invStatusFilter.length === 0) {
             modal.alert('Please select "Inventory Status" before filtering.', "warning");
             return;

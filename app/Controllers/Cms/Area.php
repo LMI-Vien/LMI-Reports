@@ -54,4 +54,34 @@ class Area extends BaseController
 		return $this->response->setJSON(["stores" => $stores]);
 	}
 
+	public function get_latest_area_code() {
+	    $year  = date('Y');
+	    $month = date('m');
+	    $prefix = "AREA-{$year}-{$month}-";
+
+	    $row = $this->db->table('tbl_area')
+	        ->select('code')
+	        ->like('code', $prefix, 'after')
+	        ->orderBy('code', 'DESC')
+	        ->limit(1)
+	        ->get()
+	        ->getRow();
+
+	    $latestCode = $row->code ?? "{$prefix}000";
+
+	    return $this->response->setJSON([
+	        'code' => $latestCode
+	    ]);
+	}
+
+	public function get_existing_area_data() {
+	    $result = $this->db->table('tbl_area')
+	        ->select('code, description')
+	        ->where('status', 1)
+	        ->get()
+	        ->getResultArray();
+
+	    return $this->response->setJSON($result);
+	}
+
 }

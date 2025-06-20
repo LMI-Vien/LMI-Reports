@@ -1605,9 +1605,7 @@ function group_update(url, update_table, conditions, update_data, isHistorical =
     });
 }
 
-function batch_update(url, data, table, primaryKey, get_code, callback) {
-    aJax.post(url, { event: "batch_update", table, field: primaryKey, data, get_code, where_in: data.map(item => item[primaryKey]) }, response => callback(JSON.parse(response)));
-}
+
 
 function batch_delete(url, table, field, field_value, where_in_field, callback) {
     aJax.post(url, { event: "batch_delete", table, field, field_value, where_in_field }, response => callback(JSON.parse(response)));
@@ -1621,9 +1619,32 @@ function batch_delete_with_conditions(url, table, conditions, callback) {
     }, response => callback(JSON.parse(response)));
 }
 
-function batch_insert(url, insert_batch_data, batch_table, get_code, callback) {
-    aJax.post(url, { event: "batch_insert", table: batch_table, get_code, insert_batch_data }, callback);
+function batch_update(url, data, table, primaryKey, get_code, callback) {
+    aJax.post(url, {
+        event: "batch_update",
+        table,
+        field: primaryKey,
+        data,
+        get_code,
+        where_in: data.map(item => item[primaryKey])
+    }, response => {
+        const parsed = typeof response === 'string' ? JSON.parse(response) : response;
+        callback(parsed);
+    });
 }
+
+function batch_insert(url, insert_batch_data, batch_table, get_code, callback) {
+    aJax.post(url, {
+        event: "batch_insert",
+        table: batch_table,
+        get_code,
+        insert_batch_data
+    }, response => {
+        const parsed = typeof response === 'string' ? JSON.parse(response) : response;
+        callback(parsed);
+    });
+}
+
 
 function formatDateToISO(dateString) {
     let parts = dateString.split("-");
@@ -1822,24 +1843,6 @@ function cleanUpModule(raw) {
 	}
 	return decoded;
 }
-
-$(function () {
-    $('.datepicker').datepicker({
-        dateFormat: 'yy-mm-dd'
-    });
-
-	$('.datetimepicker').datetimepicker({
-        dateFormat: 'yy-mm-dd',
-        timeFormat: 'hh:mm tt',
-		showSecond: false,
-        showMillisec: false,
-        showMicrosec: false,
-        showTimezone: false,
-        controlType: 'select',
-        oneLine: true 
-    });
-});
-
 
 
 // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⡹⢎⡔⢠⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⡀⠄⡀⠠⢀⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿

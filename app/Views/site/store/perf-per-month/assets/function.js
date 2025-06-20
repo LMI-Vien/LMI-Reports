@@ -107,24 +107,14 @@
         });
 
         const area = $('#area').val();
-        const storeName = $('#storeName').val();
+        //const storeName = $('#storeName').val();
 
-        if (!area && !storeName) {
-            modal.alert('Please select both "Area" and "Store" before filtering.', "warning");
-            return;
-        }
 
         if (!area) {
             modal.alert('Please select "Area" before filtering.', "warning");
             return;
         }
 
-        if (!storeName) {
-            modal.alert('Please select "Store" before filtering.', "warning");
-            return;
-        }
-
-        
         if (counter >= 1) {
            // modal.loading(true);
             fetchData();
@@ -237,11 +227,7 @@
         let selectedStore = $('#storeNameId').val();
         let selectedBrands = $('#brands').val();   
         let selectedBrandCategories = $('#itemLabel').val();
-        console.log(selectedArea, 'selectedArea');
-        console.log(selectedAsc, 'selectedAsc');
-        console.log(selectedBaType, 'selectedBaType');
-        console.log(selectedStore, 'selectedStore');
-       // return;
+
         url2 = base_url + 'store/get-sales-performance-per-month';
         var data = {
             area : selectedArea,
