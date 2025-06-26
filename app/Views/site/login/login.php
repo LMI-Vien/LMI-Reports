@@ -10,7 +10,7 @@
             <img src="<?= base_url('assets/img/lifestrong-logo-hi-res.webp'); ?>" alt="Company Logo">
         </div>
         <h1>Login</h1>
-        <form id="loginFormUser">
+        <form id="loginFormUser" method="post">
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="text" id="emailadd" name="emailadd" placeholder="Enter your email">
@@ -35,7 +35,7 @@
     </div>
 
 <script>
-var base_url = '<?= base_url();?>';
+var baseUrl = '<?= base_url();?>';
 $(document).ready(function () {
     $("#loginFormUser").on("submit", function (e) {
         e.preventDefault();
@@ -60,7 +60,7 @@ $(document).ready(function () {
             return modal.alert_custom("Fill up the password.", "Password is required.", "warning");
         }
 
-        $.post(base_url + 'login/validate_log', { emailadd, password })
+        $.post(baseUrl + 'login/validate_log', { emailadd, password })
             .done(function (response) {
                 try {
                     const parsedResponse = is_json(response);
@@ -71,7 +71,7 @@ $(document).ready(function () {
                     console.log("Result Count:", resultCount);
 
                     const messages = {
-                        3: ["Login Successful.", `Welcome ${emailadd} !`, "success", () => location.href = base_url + 'dashboard'],
+                        3: ["Login Successful.", `Welcome ${emailadd} !`, "success", () => location.href = baseUrl + 'dashboard'],
                         2: ["Inactive.", "This Account is Inactive.", "warning"],
                         1: ["Login Failed.", attempts, "error"],
                         0: ["Login Failed.", attempts, "error"],
