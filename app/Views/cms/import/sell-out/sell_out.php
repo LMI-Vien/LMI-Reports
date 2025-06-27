@@ -447,7 +447,7 @@
             "("+query+" AND m.month like '%" + keyword+ "%') OR "+
             "("+query+" AND so.remarks like '%" + keyword + "%')"
             get_data(new_query);
-            get_pagination(query);
+            get_pagination(new_query);
         }
     });
 

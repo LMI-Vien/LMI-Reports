@@ -676,6 +676,7 @@
         offset = 1;
         modal.loading(true); 
         get_data(query);
+        get_pagination(query);
         modal.loading(false);
     });
     

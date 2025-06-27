@@ -120,6 +120,7 @@
 
     body .hide-div {
       display: none;
+      padding: 10px;
     }
 
     .select2-selection__choice__display {

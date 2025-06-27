@@ -25,7 +25,6 @@
                         <table class= "table table-bordered listdata">
                             <thead>
                                 <tr>
-                                    <th class = "w-10 hidden"></th>
                                     <th class = "w-10"><input class ="selectall" type ="checkbox"></th>
                                     <th class = "center-align-format">Menu Name</th>
                                     <th class = "center-align-format">Parent Name</th>

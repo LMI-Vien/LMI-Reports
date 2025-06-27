@@ -432,6 +432,8 @@
     pagination.onchange(function(){
         offset = $(this).val();
         get_data(query, column_filter, order_filter);
+        $('.selectall').prop('checked', false);
+        $('.btn_status').hide();
     });
 
     $(document).on("change", ".record-entries", function(e) {
@@ -443,7 +445,7 @@
         offset = 1;
         modal.loading(true); 
         get_data(query);
-        get_pagination(query)
+        get_pagination(query);
         modal.loading(false);
     });
 
@@ -454,6 +456,7 @@
             new_query = query;
             new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
             get_data(new_query);
+            get_pagination(new_query);
         }
     });
 
@@ -491,8 +494,8 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
+        get_pagination(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
     })
     

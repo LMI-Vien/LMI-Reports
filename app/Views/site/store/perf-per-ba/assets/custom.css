@@ -1,17 +1,17 @@
-th:nth-child(1), td:nth-child(1)   { width: 4%; }   /* Rank */
-th:nth-child(2), td:nth-child(2)   { width: 6%; }   /* Area */
-th:nth-child(3), td:nth-child(3)   { width: 12%; }  /* Store Code / Store Name */
-th:nth-child(4), td:nth-child(4)   { width: 10%; }  /* Brand Ambassador */
-th:nth-child(5), td:nth-child(5)   { width: 8%; }   /* Deployed Date */
-th:nth-child(6), td:nth-child(6)   { width: 8%; }   /* Brand Handle */
+th:nth-child(1), td:nth-child(1)   { width: 2%; }   /* Rank */
+th:nth-child(2), td:nth-child(2)   { width: 10%; }   /* Area */
+th:nth-child(3), td:nth-child(3)   { width: 13%; }  /* Store Code / Store Name */
+th:nth-child(4), td:nth-child(4)   { width: 12%; }  /* Brand Ambassador */
+th:nth-child(5), td:nth-child(5)   { width: 7%; }   /* Deployed Date */
+th:nth-child(6), td:nth-child(6)   { width: 5%; }   /* Brand Handle */
 th:nth-child(7), td:nth-child(7)   { width: 10%; }  /* LY Scanned Data */
 th:nth-child(8), td:nth-child(8)   { width: 10%; }  /* Actual Sales Report */
 th:nth-child(9), td:nth-child(9)   { width: 5%; }   /* Target */
-th:nth-child(10), td:nth-child(10) { width: 5%; }   /* % Achieved */
-th:nth-child(11), td:nth-child(11) { width: 4%; }   /* % Growth */
-th:nth-child(12), td:nth-child(12) { width: 6%; }   /* Balance To Target */
-th:nth-child(13), td:nth-child(13) { width: 6%; }   /* Possible Incentives */
-th:nth-child(14), td:nth-child(14) { width: 6%; }   /* Target Per Remaining Days */
+th:nth-child(10), td:nth-child(10) { width: 2%; }   /* % Achieved */
+th:nth-child(11), td:nth-child(11) { width: 2%; }   /* % Growth */
+th:nth-child(12), td:nth-child(12) { width: 8%; }   /* Balance To Target */
+th:nth-child(13), td:nth-child(13) { width: 4%; }   /* Possible Incentives */
+th:nth-child(14), td:nth-child(14) { width: 8%; }   /* Target Per Remaining Days */
 
 body .hide-div {
   display: none;
@@ -210,4 +210,9 @@ label {
 .static-header {
     pointer-events: none !important;
     cursor: default !important;
+}
+
+.dataTables_filter {
+    margin-bottom: 10px;
+    padding-right: 10px;
 }

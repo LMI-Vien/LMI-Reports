@@ -394,21 +394,11 @@
                     query: "a.id = ba.agency",
                     type: "left"
                 },
-                // {
-                //     table: "tbl_store s",
-                //     query: "s.id = ba.store",
-                //     type: "left"
-                // },
                 {
                     table: "tbl_team t",
                     query: "t.id = ba.team",
                     type: "left"
                 },
-                // {
-                //     table: "tbl_area ar",
-                //     query: "ar.id = ba.area",
-                //     type: "left"
-                // }
             ] 
 
         }
@@ -475,8 +465,8 @@
         query += m_date_from ? ` AND ba.updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND ba.updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
+        get_pagination(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
     })
     
@@ -507,6 +497,7 @@
         offset = 1;
         modal.loading(true); 
         get_data(query);
+        get_pagination(query);
         modal.loading(false);
     });
 

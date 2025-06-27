@@ -243,8 +243,9 @@
             pageLength: 10,
             processing: true,
             serverSide: true,
-            searching: false,
-            // colReorder: true,
+            searching: true,
+            colReorder: true,
+            dom: '<"top d-flex justify-content-end"f>rt<"bottom d-flex justify-content-between"ip>',
             lengthChange: false
         });
 
