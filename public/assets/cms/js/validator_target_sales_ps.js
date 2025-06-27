@@ -178,9 +178,9 @@ self.onmessage = async function(e) {
                         let ba_record = fetch_data.ba.find(ba => ba.code === code);
                         if (ba_record && ba_record.type !== undefined) {
                             ba_types_found.add(parseInt(ba_record.type));
-                        } else {
-                            has_invalid_ba = true;
-                            addErrorLog(`Missing BA type for code: ${code}`);
+                        // } else {
+                        //     has_invalid_ba = true;
+                        //     addErrorLog(`Missing BA type for code: ${code}`);
                         }
                     } else {
                         has_invalid_ba = true;

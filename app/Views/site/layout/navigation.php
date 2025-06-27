@@ -7,6 +7,9 @@
                 font-size: 10px; /* Reduce font size for date */
                 display: block;
             }
+            .hide{
+                display: none;
+            }
         </style>
 
         <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
@@ -58,7 +61,7 @@
                 setTimeout(updateSidebarIcon, 300);
               });
             get_menu_site();
-
+            localStorage.setItem('AdminLTE:Sidebar:Collapsed', true);
             $("#logout").on("click", function(e) {
                 e.preventDefault();
 
@@ -177,7 +180,11 @@
                     }
 
                     if (role_filter == 0) {
+                        $('#refreshButton').addClass('hide');
                         $('body').addClass('sidebar-collapse');
+                        localStorage.setItem('AdminLTE:Sidebar:Collapsed', true);
+                        localStorage.setItem('AdminLTE:Sidebar:Collapsed', 'true');
+                        localStorage.setItem('AdminLTE:Sidebar:Open', 'false');
                         $('a.nav-link.bg-primary[data-widget="pushmenu"]').remove();
 
                         // Auto-fill filter fields if necessary
@@ -211,7 +218,7 @@
                                     $("#area").val(info.area);
                                     $("#areaId").val(info.areaId);
                                 }
-                                $("#inventoryStatus").val(['slowMoving', 'overStock', 'npd', 'hero']).trigger("change");
+                                $("#inventoryStatus").val(['slowMoving', 'overStock', 'hero']).trigger("change");
                                 $("#refreshButton").click();
 
                             } else if (url === 'store/sales-performance-per-month') {
@@ -235,7 +242,8 @@
                                 $("#monthTo").val(12);
                                 $("#refreshButton").click();
 
-                            } else if (url === 'store/sales-overall-performance' && role === 8) {
+                            } else if (url === 'store/sales-overall-growth' && role === 8) {
+                                console.log('adsa');
                                 $("#ascName").val(info.ascName);
                                 $("#ascNameId").val(info.ascNameId);
                                 $("#storeName").val('Cubao'); // Optional: dynamic?

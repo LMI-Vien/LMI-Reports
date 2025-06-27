@@ -79,10 +79,9 @@ class Dashboard extends BaseController
 
 	public function get_ba_asc_name() {
 	    $name = $this->request->getPost('name');
-	    $role = $this->session->get('sess_user_role');
+	    $role = $this->session->get('sess_site_role');
 	    $response = ['status' => 'error', 'message' => 'No result found'];
 	    //$role = 8;
-	    //$name = 'asda 1';
 	    if (empty($name)) {
 	        return $this->response->setJSON($response);
 	    }
