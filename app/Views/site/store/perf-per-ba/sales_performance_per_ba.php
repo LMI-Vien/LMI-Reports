@@ -41,9 +41,16 @@
                             </ol>
                         </nav>
                         <!-- Right side content -->
-                        <div class="ml-auto text-muted small" style="white-space: nowrap;">
-                            <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
-
+                        <div class="ml-auto p-3 rounded bg-light border shadow-sm small text-secondary" style="max-width: 650px;">
+                            <div class="mb-2">
+                                <i class="fas fa-database text-dark mr-1"></i> 
+                                <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
+                            </div>
+                            <div>
+                                <i class="fas fa-calendar-week text-dark mr-1"></i>
+                                <strong>Current Week:</strong> 
+                                <span id="currentWeek" class="text-dark font-weight-medium"></span>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>

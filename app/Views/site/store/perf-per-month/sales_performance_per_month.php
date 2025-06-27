@@ -42,9 +42,16 @@
                             </ol>
                         </nav>
                         <!-- Right side content -->
-                        <div class="ml-auto text-muted small" style="white-space: nowrap;">
-                            <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
-
+                        <div class="ml-auto p-3 rounded bg-light border shadow-sm small text-secondary" style="max-width: 550px;">
+                            <div class="mb-2">
+                                <i class="fas fa-database text-dark mr-1"></i> 
+                                <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
+                            </div>
+                            <div>
+                                <i class="fas fa-calendar-week text-dark mr-1"></i>
+                                <strong>Current Week:</strong> 
+                                <span id="currentWeek" class="text-dark font-weight-medium"></span>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -71,7 +78,7 @@
                                     <tr>
                                         <th class="tbl-title-field"></th>
                                         <th class="tbl-title-field">Jan</th><th class="tbl-title-field">Feb</th><th class="tbl-title-field">Mar</th><th class="tbl-title-field">Apr</th><th class="tbl-title-field">May</th><th class="tbl-title-field">Jun</th>
-                                        <th class="tbl-title-field">Jul</th><th class="tbl-title-field">Aug</th><th class="tbl-title-field">Sep</th><th class="tbl-title-field">Oct</th><th class="tbl-title-field">Nov</th><th class="tbl-title-field">Dec</th>
+                                        <th class="tbl-title-field">Jul</th><th class="tbl-title-field">Aug</th><th class="tbl-title-field">Sep</th><th class="tbl-title-field">Oct</th><th class="tbl-title-field">Nov</th><th class="tbl-title-field">Dec</th><th class="tbl-title-field">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody class="asc-dashboard-body">

@@ -1,4 +1,12 @@
     $(document).ready(function() {
+
+        const currentWeek = getCurrentWeek();
+        if (currentWeek) {
+            $('#currentWeek').text(currentWeek.display);
+        } else {
+            $('#currentWeek').text('N/A');
+        }
+
         let highestYear = $("#year option:not(:first)").map(function () {
             return parseInt($(this).val());
         }).get().sort((a, b) => b - a)[0];
@@ -181,7 +189,7 @@
             lengthChange: false,
             colReorder: true, 
             ajax: {
-                url: base_url + 'store/get-sales-overall-performance',
+                url: base_url + 'store/get-sales-overall-growth',
                 type: 'POST',
                 data: function(d) {
                     d.area = selectedArea === "" ? null : selectedArea;
@@ -255,7 +263,7 @@
             'monthEnd='         + encodeURIComponent(selectedMonthEnd)
         ].join('&');
 
-        let endpoint = action === 'exportPdf' ? 'overall-performance-generate-pdf' : 'overall-performance-generate-excel';
+        let endpoint = action === 'exportPdf' ? 'overall-growth-generate-pdf' : 'overall-growth-generate-excel';
 
         let url = `${base_url}store/${endpoint}?${qs}`;
 
@@ -268,7 +276,7 @@
             <br>End Time: ${formatReadableDate(end_time)}
             <br>Duration: ${duration}
         `;
-        logActivity('Store Sales Performance', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
+        logActivity('Overall Store Sales Growth', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
 
         let fetchedResponse;
         fetch(url, {
@@ -288,8 +296,8 @@
             let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
             const filename = rawName
                 || (action === 'exportPdf'
-                    ? 'Overall Stores Sales Performance.pdf'
-                    : 'Overall Stores Sales Performance.xlsx');
+                    ? 'Overall Stores Sales Growth.pdf'
+                    : 'Overall Stores Sales Growth.xlsx');
 
             const blobUrl = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -308,4 +316,52 @@
             modal.loading(false);
         });
 
+    }
+
+    const getCalendarWeeks = (year) => {
+        const weeks = [];
+        const startDate = new Date(year, 0, 1); // Jan 1
+        const day = startDate.getDay(); // day of the week (0 = Sunday)
+        
+        const firstMonday = new Date(startDate);
+        if (day !== 1) {
+            const offset = (day === 0 ? 1 : (9 - day)); 
+            firstMonday.setDate(startDate.getDate() + offset);
+        }
+        
+        let currentDate = new Date(firstMonday);
+        let weekNumber = 1;
+        
+        while (currentDate.getFullYear() <= year) {
+            const weekStart = new Date(currentDate);
+            const weekEnd = new Date(currentDate);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+        
+            if (weekStart.getFullYear() > year) break;
+            
+            weeks.push({
+                id: weekNumber,
+                display: `Week ${weekNumber} (${weekStart.toISOString().slice(0, 10)} - ${weekEnd.toISOString().slice(0, 10)})`,
+                week: weekNumber++,
+                start: weekStart.toISOString().slice(0, 10),
+                end: weekEnd.toISOString().slice(0, 10),
+            });
+            
+            currentDate.setDate(currentDate.getDate() + 7);
+        }
+        
+        return weeks;
+    }
+
+    function getCurrentWeek(year = new Date().getFullYear()) {
+        const weeks = getCalendarWeeks(year);
+        const today = new Date().toISOString().slice(0, 10);
+
+        for (const week of weeks) {
+            if (today >= week.start && today <= week.end) {
+                return week;
+            }
+        }
+
+        return null;
     }

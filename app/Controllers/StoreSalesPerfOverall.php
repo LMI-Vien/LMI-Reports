@@ -38,7 +38,7 @@ class StoreSalesPerfOverall extends BaseController
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
 		$data['PageUrl'] = 'Trade Dashboard';
-		$data["breadcrumb"] = array('Store' => base_url('store/sales-overall-performance'),'Overall Stores Sales Performance' => '');
+		$data["breadcrumb"] = array('Store' => base_url('store/sales-overall-growth'),'Overall Stores Sales Growth' => '');
 		$data["source"] = "Scan Data(LMI/RGDI)";
 		$data["source_date"] = '<span id="sourceDate">N / A</span>';	
 		$data['content'] = "site/store/perf-overall/sales_overall_performance";
@@ -179,7 +179,7 @@ class StoreSalesPerfOverall extends BaseController
 			'Month Range'      => ($monthStartMap && $monthEndMap) ? "$monthStartMap - $monthEndMap" : 'None',
 		];
 
-		$title = "Store Sales Performance Overall";
+		$title = "Overall Store Sales Growth";
 		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
@@ -303,7 +303,7 @@ class StoreSalesPerfOverall extends BaseController
 		$orderColumnIndex = isset($order['column']) ? (int) $order['column'] : 0;
 		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc']) ? strtolower($order['dir']) : 'asc';
 
-		$title = "Store Sales Performance Overall";
+		$title = "Overall Store Sales Growth";
 		$data = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, $limit, $offset, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands);
 		$rows   = $data['data'];
 
@@ -354,7 +354,7 @@ class StoreSalesPerfOverall extends BaseController
 		$sheet       = $spreadsheet->getActiveSheet();
 
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-		$sheet->setCellValue('A2', 'Report: Store Sales Performance Overall');
+		$sheet->setCellValue('A2', 'Report: Overall Store Sales Growth');
 		$sheet->mergeCells('A1:E1');
 		$sheet->mergeCells('A2:E2');
 

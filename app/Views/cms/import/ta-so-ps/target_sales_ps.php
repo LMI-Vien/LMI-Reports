@@ -125,12 +125,12 @@
                             <input type="text" class="form-control required" id="ba_code" aria-describedby="ba_code">
                         </div>
                         <div class="mb-3">
-                            <label for="location" class="form-label">Location</label>
+                            <label for="location" class="form-label">Store Code</label>
                             <input type="text" class="form-control required" id="location" aria-describedby="location">
                         </div>
 
                         <div class="mb-3">
-                            <label for="location_desc" class="form-label">Location Description</label>
+                            <label for="location_desc" class="form-label">Store Description</label>
                             <input type="text" class="form-control required" id="location_desc" aria-describedby="location_desc">
                         </div>
 
@@ -258,7 +258,7 @@
                                         <tr>
                                             <th class='center-content'>Line #</th>
                                             <th class='center-content'>BA Code</th>
-                                            <th class='center-content'>Location</th>
+                                            <th class='center-content'>Store Code</th>
                                             <!-- <th class='center-content'>Location Description</th> -->
                                             <th class='center-content'>January</th>
                                             <th class='center-content'>February</th>
@@ -1024,7 +1024,7 @@
         let jsonData = dataset.map(row => {
             return {
                 "BA Code": row["BA Code"] || "",
-                "Location": row["Location"] || "",
+                "Store Code": row["Store Code"] || "",
                 "January": row["January"] || "",
                 "February": row["February"] || "",
                 "March": row["March"] || "",
@@ -1125,7 +1125,7 @@
                 return acc;  
             }, {});
 
-            let td_validator = ['ba code', 'location', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+            let td_validator = ['ba code', 'store code', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
             td_validator.forEach(column => {
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; 
 
@@ -1287,11 +1287,11 @@
                     
                     const dataWithNames = valid_data.map(row => ({
                         ba_code:  row.ba_code,
-                        location: row.location,
+                        store_code: row.store_code,
                         year: yearLookup[row.year]
                     }));
 
-                    const headers = ['ba_code', 'location', 'year']; 
+                    const headers = ['ba_code', 'store_code', 'year']; 
                     const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
 
                     saveImportDetailsToServer(dataWithNames, headers, 'target_sales_per_store', url, function(filePath) {
@@ -1444,7 +1444,7 @@
         let formattedData = [
             {
                 "BA Code":"",
-                "Location":"",
+                "Store Code":"",
                 "January":"",
                 "February":"",
                 "March":"",
@@ -1506,7 +1506,7 @@
                         location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
                     }) => ({
                         "BA Code":ba_code,
-                        "Location":location,
+                        "Store":location,
                         "January":january,
                         "February":february,
                         "March":march,
@@ -1562,7 +1562,7 @@
                         location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
                     }) => ({
                         "BA Code":ba_code,
-                        "Location":location,
+                        "Store":location,
                         "January":january,
                         "February":february,
                         "March":march,
@@ -1622,7 +1622,7 @@
                                             location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
                                         }) => ({
                                             "BA Code":ba_code,
-                                            "Location":location,
+                                            "Store Code":location,
                                             "January":january,
                                             "February":february,
                                             "March":march,
@@ -1668,7 +1668,7 @@
 
             }) => ({
                 "BA Code":ba_code,
-                "Location":location,
+                "Store":location,
                 "January":january,
                 "February":february,
                 "March":march,

@@ -119,7 +119,7 @@ self.onmessage = async function(e) {
                 let resolved_ba_code_str = [];
                 let ba_types_found = new Set();
                 let has_invalid_ba = false;
-                let store_code_raw = row["Location"] ? row["Location"].trim() : "";
+                let store_code_raw = row["Store Code"] ? row["Store Code"].trim() : "";
                 let store_code_lower = store_code_raw.toLowerCase();
                 let store_code_id = normalized_store_lookup[store_code_lower];
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
@@ -135,11 +135,11 @@ self.onmessage = async function(e) {
 
                 if (unique_code.has(store_code_lower)) {
                     invalid = true;
-                    errorLogs.push(`⚠️ Duplicated Store Code/Location at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Duplicated Store Code at line #: ${tr_count}`);
                     err_counter++;
                 } else if (store_code_lower.length > 25 || store_code_lower === "") {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Store Code/Location at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Store Code at line #: ${tr_count}`);
                     err_counter++;
                 } else {
                     unique_code.add(store_code_lower);
@@ -207,7 +207,7 @@ self.onmessage = async function(e) {
     
                 if (!store_code_id) {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Location/Store Code at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Store Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 

@@ -57,11 +57,11 @@ $routes->group('store/', static function ($routes) {
     $routes->get('per-month-generate-excel', 'StoreSalesPerfPerMonth::generateExcel');
 
     //overall
-    $routes->get('sales-overall-performance', 'StoreSalesPerfOverall::perfPerOverall');
-    $routes->post('get-sales-overall-performance', 'StoreSalesPerfOverall::getPerfPerOverall');
-    $routes->get('get-sales-overall-performance', 'StoreSalesPerfOverall::getPerfPerOverall');
-    $routes->get('overall-performance-generate-pdf', 'StoreSalesPerfOverall::generatePdf');
-    $routes->get('overall-performance-generate-excel', 'StoreSalesPerfOverall::generateExcel');
+    $routes->get('sales-overall-growth', 'StoreSalesPerfOverall::perfPerOverall');
+    $routes->post('get-sales-overall-growth', 'StoreSalesPerfOverall::getPerfPerOverall');
+    $routes->get('get-sales-overall-growth', 'StoreSalesPerfOverall::getPerfPerOverall');
+    $routes->get('overall-growth-generate-pdf', 'StoreSalesPerfOverall::generatePdf');
+    $routes->get('overall-growth-generate-excel', 'StoreSalesPerfOverall::generateExcel');
 });
 
 //sample API 

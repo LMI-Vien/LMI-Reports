@@ -153,7 +153,7 @@ class StoreSalesPerfPerMonth extends BaseController
 			// echo "<pre>";
 			// print_r($filters);
 			// die();
-		    $data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+		    $data = $this->Dashboard_model->storeSalesPerfPerMonth($filters);
 
 		    return $this->response->setJSON([
 		        'data' => $data['data']
@@ -392,7 +392,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		$this->printFilter($pdf, $filterData, $itemBrandMap);
 
 		$pdf->SetFont('helvetica', '', 9);
-		$result = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+		$result = $this->Dashboard_model->storeSalesPerfPerMonth($filters);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();
@@ -666,7 +666,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		}
 
 		$title = "Store Sales Performance Per Month";
-		$data = $this->Dashboard_model->tradeOverallBaDataASC($filters);
+		$data = $this->Dashboard_model->storeSalesPerfPerMonth($filters);
 		$rows   = $data['data'];
 
 		$spreadsheet = new Spreadsheet();

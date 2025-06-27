@@ -1073,7 +1073,7 @@ class Dashboard_model extends Model
 	    return $query;
 	}
 
-	public function tradeOverallBaDataASC(array $filters = [])
+	public function storeSalesPerfPerMonth(array $filters = [])
 	{
 	    $params = [];
 	    $whereClausesASR = [];
@@ -1274,6 +1274,31 @@ class Dashboard_model extends Model
 	      $whereSQLTS
 	    )
 	    SELECT *,
+	    	ROUND(
+			    COALESCE(amount_january, 0) + COALESCE(amount_february, 0) + COALESCE(amount_march, 0) +
+			    COALESCE(amount_april, 0) + COALESCE(amount_may, 0) + COALESCE(amount_june, 0) +
+			    COALESCE(amount_july, 0) + COALESCE(amount_august, 0) + COALESCE(amount_september, 0) +
+			    COALESCE(amount_october, 0) + COALESCE(amount_november, 0) + COALESCE(amount_december, 0)
+			  , 2) AS total_amount,
+			ROUND((
+			    COALESCE(l.ly_sell_out_january,0) + COALESCE(l.ly_sell_out_february,0) + COALESCE(l.ly_sell_out_march,0) +
+			    COALESCE(l.ly_sell_out_april,0) + COALESCE(l.ly_sell_out_may,0) + COALESCE(l.ly_sell_out_june,0) +
+			    COALESCE(l.ly_sell_out_july,0) + COALESCE(l.ly_sell_out_august,0) + COALESCE(l.ly_sell_out_september,0) +
+			    COALESCE(l.ly_sell_out_october,0) + COALESCE(l.ly_sell_out_november,0) + COALESCE(l.ly_sell_out_december,0)
+			), 2) AS total_ly_sell_out,
+			ROUND((
+			    COALESCE(t.ty_sell_out_january,0) + COALESCE(t.ty_sell_out_february,0) + COALESCE(t.ty_sell_out_march,0) +
+			    COALESCE(t.ty_sell_out_april,0) + COALESCE(t.ty_sell_out_may,0) + COALESCE(t.ty_sell_out_june,0) +
+			    COALESCE(t.ty_sell_out_july,0) + COALESCE(t.ty_sell_out_august,0) + COALESCE(t.ty_sell_out_september,0) +
+			    COALESCE(t.ty_sell_out_october,0) + COALESCE(t.ty_sell_out_november,0) + COALESCE(t.ty_sell_out_december,0)
+			), 2) AS total_ty_sell_out,
+			ROUND((
+			    COALESCE(ts.target_sales_jan,0) + COALESCE(ts.target_sales_feb,0) + COALESCE(ts.target_sales_mar,0) +
+			    COALESCE(ts.target_sales_apr,0) + COALESCE(ts.target_sales_may,0) + COALESCE(ts.target_sales_jun,0) +
+			    COALESCE(ts.target_sales_jul,0) + COALESCE(ts.target_sales_aug,0) + COALESCE(ts.target_sales_sep,0) +
+			    COALESCE(ts.target_sales_oct,0) + COALESCE(ts.target_sales_nov,0) + COALESCE(ts.target_sales_dec,0)
+			), 2) AS total_target,
+
 			CASE WHEN l.ly_sell_out_january = 0 OR l.ly_sell_out_january IS NULL
 			     THEN 'N/A'
 			     ELSE ROUND((t.ty_sell_out_january - l.ly_sell_out_january) / l.ly_sell_out_january * 100, 2)
@@ -1333,7 +1358,25 @@ class Dashboard_model extends Model
 			     THEN 'N/A'
 			     ELSE ROUND((t.ty_sell_out_december - l.ly_sell_out_december) / l.ly_sell_out_december * 100, 2)
 			END AS growth_december,
-
+			-- eto
+	        SUM(ts.target_sales_jan - mt.amount_january) AS balance_to_target_jan,
+			SUM(ts.target_sales_feb - mt.amount_february) AS balance_to_target_feb,
+			SUM(ts.target_sales_mar - mt.amount_march) AS balance_to_target_mar,
+			SUM(ts.target_sales_apr - mt.amount_april) AS balance_to_target_apr,
+			SUM(ts.target_sales_may - mt.amount_may) AS balance_to_target_may,
+			SUM(ts.target_sales_jun - mt.amount_june) AS balance_to_target_jun,
+			SUM(ts.target_sales_jul - mt.amount_july) AS balance_to_target_jul,
+			SUM(ts.target_sales_aug - mt.amount_august) AS balance_to_target_aug,
+			SUM(ts.target_sales_sep - mt.amount_september) AS balance_to_target_sep,
+			SUM(ts.target_sales_oct - mt.amount_october) AS balance_to_target_oct,
+			SUM(ts.target_sales_nov - mt.amount_november) AS balance_to_target_nov,
+			SUM(ts.target_sales_dec - mt.amount_december) AS balance_to_target_dec,
+			ROUND((
+			    COALESCE(ts.target_sales_jan - mt.amount_january) + COALESCE(ts.target_sales_feb - mt.amount_february) +
+			    COALESCE(ts.target_sales_mar - mt.amount_march) + COALESCE(ts.target_sales_apr - mt.amount_april) + COALESCE(ts.target_sales_may - mt.amount_may) +
+			    COALESCE(ts.target_sales_jun - mt.amount_june) + COALESCE(ts.target_sales_jul - mt.amount_july) + COALESCE(ts.target_sales_aug - mt.amount_august) +
+			    COALESCE(ts.target_sales_sep - mt.amount_september) + COALESCE(ts.target_sales_oct - mt.amount_october) + COALESCE(ts.target_sales_nov - mt.amount_november) + COALESCE(ts.target_sales_dec - mt.amount_december)
+			), 2) AS total_balance_to_target,
 			CASE 
 			    WHEN FIND_IN_SET('-5', :ba_id:) OR FIND_IN_SET('-6', :ba_id:) THEN 
 			        CASE 

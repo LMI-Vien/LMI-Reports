@@ -46,7 +46,7 @@ class StocksPerStore extends BaseController
 		$data['title'] = "Trade Dashboard";
 		$data['page_name'] = 'Trade Dashboard';
 		$data['page_url'] = 'Trade Dashboard';
-		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-per-store'),'Stock Data per Store' => '');
+		$data["breadcrumb"] = array('Stocks' => base_url('stocks/data-per-store'),'Stock Data per Area or Store' => '');
 		$data["source"] = "VMI (LMI/RGDI)";
 		$data["source_date"] = '<span id="sourceDate">N / A</span>';
 		$data["date"] = $sourceDate;	
@@ -290,7 +290,7 @@ class StocksPerStore extends BaseController
 	        $pdf->SetFont('helvetica', '', 12);
 	        $pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 	        $pdf->SetFont('helvetica', '', 10);
-	        $pdf->Cell(0, 5, 'Report: Stock Data per Store', 0, 1, 'C');
+	        $pdf->Cell(0, 5, 'Report: Stock Data per Area or Store', 0, 1, 'C');
 	        $pdf->Ln(5);
 
 	        $pdf->SetFont('helvetica', '', 9);
@@ -480,7 +480,7 @@ class StocksPerStore extends BaseController
 			$sheet = $spreadsheet->getActiveSheet();
 
 			$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-			$sheet->setCellValue('A2', 'Report: Stock Data per Store');
+			$sheet->setCellValue('A2', 'Report: Stock Data per Area or Store');
 			$sheet->mergeCells('A1:E1');
 			$sheet->mergeCells('A2:E2');
 

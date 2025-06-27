@@ -1,4 +1,11 @@
     $(document).ready(function() {
+        const currentWeek = getCurrentWeek();
+        if (currentWeek) {
+            $('#currentWeek').text(currentWeek.display);
+        } else {
+            $('#currentWeek').text('N/A');
+        }
+
         let highestYear = $("#year option:not(:first)").map(function () {
             return parseInt($(this).val());
         }).get().sort((a, b) => b - a)[0];
@@ -423,3 +430,16 @@
         
         $('#' + selected_class).html(html);
     };
+
+    function getCurrentWeek(year = new Date().getFullYear()) {
+        const weeks = getCalendarWeeks(year);
+        const today = new Date().toISOString().slice(0, 10);
+
+        for (const week of weeks) {
+            if (today >= week.start && today <= week.end) {
+                return week;
+            }
+        }
+
+        return null;
+    }

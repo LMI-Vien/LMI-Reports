@@ -40,10 +40,10 @@
                   <i class="fas fa-warehouse mr-1"></i> Inventory Status
                 </label>
                 <select id="inventoryStatus" name="inventoryStatus[]" class="form-control select2" multiple>
-                  <option value="slowMoving">Slow Moving</option>
-                  <option value="overStock">Overstocks</option>
-                  <option value="npd">NPD</option>
-                  <option value="hero">Hero</option>
+                  <option value="slowMoving" title="Items that are not selling quickly">Slow Moving</option>
+                  <option value="overStock" title="Items with excessive stock levels">Overstocks</option>
+                  <option value="npd" title="New product development items">NPD</option>
+                  <option value="hero" title="Top-selling or flagship products">Hero</option>
                 </select>
               </div>
 
