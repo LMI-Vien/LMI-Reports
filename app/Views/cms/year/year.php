@@ -189,10 +189,10 @@
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
             offset = 1;
-            get_pagination(query);
             new_query = query;
             new_query += ' and year like \'%'+search_input+'%\'';
             get_data(new_query);
+            get_pagination(query);
         }
     });
 
@@ -219,8 +219,8 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
+        get_pagination(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
     })
     
@@ -247,10 +247,10 @@
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
         offset = 1;
-        get_pagination(query);
         new_query = query;
         new_query += ' and year like \'%'+search_input+'%\'';
         get_data(new_query);
+        get_pagination(query);
     });
 
     $(document).on("change", ".record-entries", function(e) {

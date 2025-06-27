@@ -62,7 +62,7 @@
                     </div>
                     <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
                                 <!-- added min-width so the table header would not get compressed using width : x% -->
-                        <table id="overall_ba_sales_tbl" class="table table-bordered" style="min-width: 3000px;"> 
+                        <table id="overall_ba_sales_tbl" class="table table-bordered"> 
                             <thead>
                                 <tr>
                                     <th colspan="14"

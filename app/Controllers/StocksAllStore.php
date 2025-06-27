@@ -98,6 +98,9 @@ class StocksAllStore extends BaseController
 	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'desc';
 	    $columns = $this->request->getVar('columns');
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'sum_total_qty';
+	    
+		$searchValue = trim($this->request->getVar('search')['value'] ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
 
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar = $this->Global_model->getSysPar();
@@ -135,21 +138,21 @@ class StocksAllStore extends BaseController
 		    $orderDirection = strtoupper($orderDirection);
 		    switch ($type) {
 		        case 'slowMoving':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat, $searchValue);
 		            break;
 		        case 'overStock':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat, $searchValue);
 		            break;
 		        case 'npd':
 					$itemClassFilter = $npdSku;
-		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCat);
+		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCat, $searchValue);
 		            break;
 		        case 'hero':
         			$itemClassFilter = $heroSku;
-		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCat);
+		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCat, $searchValue);
 		            break;
 		        default:
-		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat);
+		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCat, $searchValue);
 		    }
 
 		    return $this->response->setJSON([

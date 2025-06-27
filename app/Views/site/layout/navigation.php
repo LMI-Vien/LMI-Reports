@@ -119,7 +119,7 @@
 
         function get_ba_asc_id(callback) {
             var url = "<?= site_url('dashboard/get-ba-asc-name'); ?>";
-            $.post(url, { name: 'test 01' }, function(response) {
+            $.post(url, { name: session_user_name }, function(response) {
                 let res = response;
                 console.log(response);
                 if (res && res.status === 'success') {
@@ -164,7 +164,7 @@
 
                     // Access control
                     if (role_view == 0 || (role_view == 0 && role_generate == 0 && role_export == 0 && role_filter == 0)) {
-                        location.href = "<?= base_url(); ?>";
+                        location.href = "<?= base_url('login/logout'); ?>";
                         return;
                     }
 

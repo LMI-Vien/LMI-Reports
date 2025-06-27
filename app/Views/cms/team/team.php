@@ -273,10 +273,10 @@
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
             offset = 1;
-            get_pagination(query);
             new_query = query;
             new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
             get_data(new_query);
+            get_pagination(query);
         }
     });
 
@@ -285,10 +285,10 @@
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
         offset = 1;
-        get_pagination(query);
         new_query = query;
         new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
         get_data(new_query);
+        get_pagination(query);
     });
 
     $('#btn_filter').on('click', function(event) {
@@ -314,9 +314,8 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        console.log(order_filter, column_filter);
-        get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
+        get_pagination(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
     })
     

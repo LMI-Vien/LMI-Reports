@@ -224,7 +224,6 @@
         // Validate Inventory Status (multi-select)
 
         invStatusFilter = $('#inventoryStatus').val();
-        console.log(invStatusFilter);
         if (!invStatusFilter || invStatusFilter.length === 0) {
             modal.alert('Please select "Inventory Status" before filtering.', "warning");
             return;
@@ -340,7 +339,7 @@
             pageLength: 10,
             processing: true,
             serverSide: true,
-            searching: false,
+            searching: true,
             colReorder: true,
             lengthChange: false
         });

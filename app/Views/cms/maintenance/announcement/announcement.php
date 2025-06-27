@@ -524,10 +524,10 @@
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
             offset = 1;
-            get_pagination(query);
             new_query = query;
             new_query += ' and title like \'%'+search_input+'%\'';
             get_data(new_query);
+            get_pagination(query);
         }
     });
 
@@ -536,10 +536,10 @@
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
         offset = 1;
-        get_pagination(query);
         new_query = query;
         new_query += ' and title like \'%'+search_input+'%\'';
         get_data(new_query);
+        get_pagination(query);
     });
 
     $('#btn_filter').on('click', function(event) {
@@ -565,9 +565,8 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        console.log(order_filter, column_filter);
-        get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
+        get_pagination(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
     })
     
@@ -624,17 +623,17 @@
 
         if (parseInt(status) === -2) {
             message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Team Masterfile?`;
+            message.message = `Delete ${code_string} from Announcement Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
             message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Team Masterfile?`;
+            message.message = `Publish ${code_string} from Announcement Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
             message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Team Masterfile?`;
+            message.message = `Unpublish ${code_string} from Announcement Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }

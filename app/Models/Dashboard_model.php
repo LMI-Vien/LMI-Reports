@@ -7,10 +7,27 @@ use CodeIgniter\Model;
 class Dashboard_model extends Model
 {
 
-	public function dataPerStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null)
+	public function dataPerStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null)
 	{
 		$baType = ($baType !== null) ? strval($baType) : null;
 	    $storeFilterConditions = [];
+
+	    $searchColumns = [
+	        'vmi.item',
+	        'vmi.itmdsc',
+	        'vmi.itmcde'
+	    ];
+
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
 
 	    if (!empty($baId)) {
 	        $baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
@@ -31,7 +48,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde', 'sum_ave_sales', 'swc'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -115,7 +132,7 @@ class Dashboard_model extends Model
 	        )
 	        SELECT 
 	            vmi.item,
-	            vmi.item_name,
+	            vmi.itmdsc AS item_name,
 	            vmi.area_id,
 	            vmi.itmcde,
 	            vmi.item_class,
@@ -155,6 +172,7 @@ class Dashboard_model extends Model
 	        GROUP BY vmi.item
 	        HAVING weeks > ?
 	           AND (? IS NULL OR weeks <= ?)
+	           {$searchHavingClause}
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -175,8 +193,17 @@ class Dashboard_model extends Model
 		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
 
+	    // For HAVING filters
+	    $params[] = $minWeeks;
+	    $params[] = $maxWeeks;
+	    $params[] = $maxWeeks;
 
-	    $params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
+	    // Add search placeholders
+	    $params = array_merge($params, $searchParams);
+
+	    // Pagination
+	    $params[] = (int)$pageLimit;
+	    $params[] = (int)$pageOffset;
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
@@ -189,10 +216,27 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getItemClassNPDHEROData($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null) {
+	public function getItemClassNPDHEROData($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null) {
 
 		$baType = ($baType !== null) ? strval($baType) : null;
 	    $storeFilterConditions = [];
+
+	    $searchColumns = [
+	        'vmi.item',
+	        'vmi.itmdsc',
+	        'vmi.itmcde'
+	    ];
+
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
 
 	    if (!empty($baId)) {
 	        $baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
@@ -214,7 +258,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde', 'sum_ave_sales', 'swc'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -311,7 +355,7 @@ class Dashboard_model extends Model
 	        )
 	        SELECT 
 	            vmi.item,
-	            vmi.item_name,
+	            vmi.itmdsc AS item_name,
 	            vmi.area_id,
 	            vmi.itmcde,
 	            vmi.item_class,
@@ -349,6 +393,8 @@ class Dashboard_model extends Model
 	          $storeFilterVmi
 	          $storeFilterSQLVmi
 	        GROUP BY vmi.item
+			HAVING 1=1
+			    {$searchHavingClause}
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -370,6 +416,7 @@ class Dashboard_model extends Model
 		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $ItemClassIdsParams, $baTypeParams, $companyIdParams, $storeParams);
 
+		$params = array_merge($params, $searchParams);
 		# Pagination
 		$params[] = (int)$pageLimit;
 		$params[] = (int)$pageOffset;
@@ -421,12 +468,30 @@ class Dashboard_model extends Model
             return $results;
     }
 
-	public function salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null)
+	public function salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null, $searchValue = null)
 	{
 		$range = ($monthTo - $monthFrom) + 1;
 		$startDate = $tyYear .'-'. $monthFrom . '-01';
 		$endDate = $tyYear .'-'. $monthTo . '-31';
 		$brandIds = is_array($brandIds) ? $brandIds : [];
+
+		$searchColumns = [
+		    'a.description',        // area
+		    'st.description',       // store
+		    'ba.name',              // ba
+		    'b.brand_description'   // brand
+		];
+
+		$searchHavingClause = '';
+		$searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
 
 		$additionalWhere = [];
 		$brandTypeCondition = '';
@@ -654,7 +719,7 @@ class Dashboard_model extends Model
 		LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
 
 		WHERE (" . (empty($brandIds) ? "1=1" : "b.id IN (" . implode(',', array_fill(0, count($brandIds), '?')) . ")") . ")
-
+		$searchHavingClause
 		GROUP BY s.store_id, s.ba_id, s.area_id
 
 		ORDER BY {$orderByColumn} {$orderDirection}
@@ -717,6 +782,10 @@ class Dashboard_model extends Model
 		    $params = array_merge($params, $brandIds);
 		}
 
+		if (!empty($searchParams)) {
+		    $params = array_merge($params, $searchParams);
+		}
+
 		$params[] = (int) $limit;
 		$params[] = (int) $offset;
 
@@ -736,10 +805,26 @@ class Dashboard_model extends Model
 	    $limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, 
 	    $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, 
 	    $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, 
-	    $remainingDays = null, $brand_category = null, $brandIds = null) {
+	    $remainingDays = null, $brand_category = null, $brandIds = null, $searchValue = null) {
 	    $startDate = $tyYear . '-' . $monthFrom . '-01';
 	    $endDate = $tyYear . '-' . $monthTo . '-31';
 	    $brandIds = is_array($brandIds) ? $brandIds : [];
+
+	    $searchColumns = [
+	        'a.description',        //area
+	        'd_asc.description'      //asc
+	    ];
+
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+		if (!empty($searchValue)) {
+		    $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+		    $searchHavingClause = ' HAVING ' . implode(' OR ', $likeConditions);
+		    foreach ($searchColumns as $_) {
+		        $searchParams[] = '%' . $searchValue . '%';
+		    }
+		}
 
 	    $additionalWhere = [];
 	    $brandTypeCondition = '';
@@ -896,6 +981,7 @@ class Dashboard_model extends Model
 	    LEFT JOIN tbl_brand b ON b.id = bb.brand_id
 	    LEFT JOIN tbl_area_sales_coordinator d_asc ON s.asc_id = d_asc.id
 	    GROUP BY s.area_id
+	    $searchHavingClause
 	    ORDER BY {$orderByColumn} {$orderDirection}
 	    LIMIT ? OFFSET ?
 	    ";
@@ -956,6 +1042,10 @@ class Dashboard_model extends Model
 	            $params[] = $bid;
 	        }
 	    }
+
+		if (!empty($searchParams)) {
+		    $params = array_merge($params, $searchParams);
+		}
 
 	    $params[] = $limit;
 	    $params[] = $offset;
@@ -1506,9 +1596,26 @@ class Dashboard_model extends Model
 	    return ['data' => $query->getResult()];
 	}
 
-	public function getDataVmiAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null)
+	public function getDataVmiAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null, $searchValue = null)
 	{
 	    $storeFilterConditionsVmi = [];
+
+	    $searchColumns = [
+	        'vmi.item',
+	        'vmi.itmdsc',
+	        'vmi.itmcde'
+	    ];
+
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
 
 	    if (!empty($ItemClasses)) {
 	        $ItemClasses = array_map('trim', $ItemClasses);
@@ -1516,7 +1623,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -1538,16 +1645,18 @@ class Dashboard_model extends Model
 	    }
 
 	    $weekColumns = '';
+	    $itemClassColumns = '';
 	    for ($w = $weekStart; $w <= $weekEnd; $w++) {
 	        $weekColumns .= ", SUM(CASE WHEN vmi.week = $w THEN vmi.total_qty ELSE 0 END) AS week_$w\n";
+	        $itemClassColumns .= ", MAX(CASE WHEN vmi.week = $w THEN ic.item_class_description ELSE NULL END) AS item_class_week_$w\n";
 	    }
 
 	    $sql = "
 	        SELECT 
 	            vmi.item,
-	            vmi.item_name,
+	            vmi.itmdsc AS item_name,
 	            vmi.itmcde,
-	            vmi.item_class,
+	            MAX(ic.item_class_description) AS item_class,
 	            vmi.brand_type_id, 
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
@@ -1561,8 +1670,10 @@ class Dashboard_model extends Model
 	                END, 2
 	            ) AS weeks,
 	            COUNT(*) OVER() AS total_records
-	            $weekColumns
+	            {$weekColumns}
+	            {$itemClassColumns}
 	        FROM tbl_vmi_pre_aggregated_data vmi
+	        LEFT JOIN tbl_item_class ic ON vmi.item_class_id = ic.id
 	        WHERE vmi.week BETWEEN ? AND ?
 	          AND vmi.year = ?
 	          {$itemCatFilterVmi}
@@ -1570,6 +1681,7 @@ class Dashboard_model extends Model
 	        GROUP BY vmi.item
 	        HAVING weeks > ?
 	           AND (? IS NULL OR weeks <= ?)
+	           {$searchHavingClause}
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -1582,7 +1694,13 @@ class Dashboard_model extends Model
 	    $params[] = $year;
 	    $params = array_merge($params, $itemCatParams);
 
-	    $params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
+	    $params[] = $minWeeks;
+	    $params[] = $maxWeeks;
+	    $params[] = $maxWeeks;
+	    $params = array_merge($params, $searchParams);
+	    $params[] = (int)$pageLimit;
+	    $params[] = (int)$pageOffset;
+	    //$params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
@@ -1594,9 +1712,26 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getDataWeekAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null)
+	public function getDataWeekAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null, $searchValue = null)
 	{
 	    $storeFilterConditionsWow = [];
+
+	    $searchColumns = [
+	        'wow.item',
+	        'wow.itmdsc',
+	        'wow.itmcde'
+	    ];
+
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
 
 	    if (!empty($ItemClasses)) {
 	        $ItemClasses = array_map('trim', $ItemClasses);
@@ -1604,7 +1739,7 @@ class Dashboard_model extends Model
 	        $storeFilterConditionsWow[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 	    }
 
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
@@ -1626,16 +1761,18 @@ class Dashboard_model extends Model
 	    }
 
 	    $weekColumns = '';
+	    $itemClassColumns = '';
 	    for ($w = $weekStart; $w <= $weekEnd; $w++) {
 	        $weekColumns .= ", SUM(CASE WHEN wow.week = $w THEN wow.quantity ELSE 0 END) AS week_$w\n";
+	        $itemClassColumns .= ", MAX(CASE WHEN wow.week = $w THEN ic.item_class_description ELSE NULL END) AS item_class_week_$w\n";
 	    }
 
 	    $sql = "
 	        SELECT 
 	            wow.item,
-	            wow.item_name,
+	            wow.itmdsc AS item_name,
 	            wow.itmcde,
-	            wow.item_class,
+	            ic.item_class_description AS item_class_name,
 	            wow.brand_type_id, 
 	            COALESCE(NULLIF(wow.itmcde, ''), 'N / A') AS itmcde,
 	            FORMAT(SUM(wow.quantity), 2) AS sum_total_qty,
@@ -1648,8 +1785,10 @@ class Dashboard_model extends Model
 	                END, 2
 	            ) AS weeks,
 	            COUNT(*) OVER() AS total_records
-	            $weekColumns
+	            {$weekColumns}
+	            {$itemClassColumns}	
 	        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
+	        LEFT JOIN tbl_item_class ic ON wow.item_class = ic.id
 	        WHERE wow.week BETWEEN ? AND ?
 	          AND wow.year = ?
 	          {$itemCatFilterWow}
@@ -1657,6 +1796,7 @@ class Dashboard_model extends Model
 	        GROUP BY wow.item
 	        HAVING weeks > ?
 	           AND (? IS NULL OR weeks <= ?)
+	           {$searchHavingClause}
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -1669,7 +1809,13 @@ class Dashboard_model extends Model
 	    $params[] = $year;
 	    $params = array_merge($params, $itemCatParams);
 
-	    $params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
+	    $params[] = $minWeeks;
+	    $params[] = $maxWeeks;
+	    $params[] = $maxWeeks;
+	    $params = array_merge($params, $searchParams);
+	    $params[] = (int)$pageLimit;
+	    $params[] = (int)$pageOffset;
+	    //$params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
@@ -1681,9 +1827,26 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getDataVmiNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCat = null) {
+	public function getDataVmiNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCat = null, $searchValue = null) {
 
 		$storeFilterConditionsVmi = [];
+
+	    $searchColumns = [
+	        'vmi.item',
+	        'vmi.itmdsc',
+	        'vmi.itmcde'
+	    ];
+
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
 
 		if (!empty($ItemClasses)) {
 		    $ItemClasses = array_map('trim', $ItemClasses);
@@ -1691,7 +1854,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
+	    $allowedOrderColumns = ['item', 'itmdsc', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 
@@ -1723,15 +1886,17 @@ class Dashboard_model extends Model
 		}
 
 	    $weekColumns = '';
+	    $itemClassColumns = '';
 	    for ($w = $weekStart; $w <= $weekEnd; $w++) {
 	        $weekColumns .= ", SUM(CASE WHEN vmi.week = $w THEN vmi.total_qty ELSE 0 END) AS week_$w\n";
+	        $itemClassColumns .= ", MAX(CASE WHEN vmi.week = $w THEN ic.item_class_description ELSE NULL END) AS item_class_week_$w\n";
 	    }
 
 	    $sql = "
 	        SELECT 
 	            vmi.item,
-	            vmi.item_name,
-	            vmi.item_class,
+	            vmi.itmdsc AS item_name,
+	            ic.item_class_description AS item_class_name,
 	            vmi.itmcde,
 	            vmi.brand_type_id, 
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
@@ -1746,14 +1911,18 @@ class Dashboard_model extends Model
 	                END, 2
 	            ) AS weeks,
 	            COUNT(*) OVER() AS total_records
-	            $weekColumns
+	            {$weekColumns}
+	            {$itemClassColumns}
 	        FROM tbl_vmi_pre_aggregated_data vmi
+	        LEFT JOIN tbl_item_class ic ON vmi.item_class_id = ic.id
 	        WHERE vmi.week BETWEEN ? AND ?
 	          AND vmi.year = ?
 	          {$itemCatFilterVmi}
 	          {$ItemClassIdsPlaceholder}
 	          {$storeFilterSQLVmi}
 	        GROUP BY vmi.item
+        	HAVING 1=1
+		    	{$searchHavingClause}
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -1766,6 +1935,8 @@ class Dashboard_model extends Model
 
 		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $ItemClassIdsParams);
+
+		$params = array_merge($params, $searchParams);
 		$params[] = (int)$pageLimit;
 		$params[] = (int)$pageOffset;
 
@@ -1779,9 +1950,26 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getDataWeekAllNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCat = null) {
+	public function getDataWeekAllNPDHERO($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $year, $ItemClassIdsFilter = null, $ItemClasses = null, $itemCat = null, $searchValue = null) {
 
 		$storeFilterConditionsVmi = [];
+
+	    $searchColumns = [
+	        'wow.item',
+	        'wow.itmdsc',
+	        'wow.itmcde'
+	    ];
+
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
 
 		if (!empty($ItemClasses)) {
 		    $ItemClasses = array_map('trim', $ItemClasses);
@@ -1789,7 +1977,7 @@ class Dashboard_model extends Model
 		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
 		}
 
-	    $allowedOrderColumns = ['item', 'item_name', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
+	    $allowedOrderColumns = ['item', 'itmdsc', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
 
@@ -1822,15 +2010,17 @@ class Dashboard_model extends Model
 		}
 
 	    $weekColumns = '';
+	    $itemClassColumns = '';
 	    for ($w = $weekStart; $w <= $weekEnd; $w++) {
 	        $weekColumns .= ", SUM(CASE WHEN wow.week = $w THEN wow.quantity ELSE 0 END) AS week_$w\n";
+	        $itemClassColumns .= ", MAX(CASE WHEN wow.week = $w THEN ic.item_class_description ELSE NULL END) AS item_class_week_$w\n";
 	    }
 
 	    $sql = "
 	        SELECT 
 	            wow.item,
-	            wow.item_name,
-	            wow.item_class,
+	            wow.itmdsc AS item_name,
+	            ic.item_class_description AS item_class_name,
 	            wow.itmcde,
 	            wow.brand_type_id, 
 	            COALESCE(NULLIF(wow.itmcde, ''), 'N / A') AS itmcde,
@@ -1844,14 +2034,18 @@ class Dashboard_model extends Model
 	                END, 2
 	            ) AS weeks,
 	            COUNT(*) OVER() AS total_records
-	            $weekColumns
+	            {$weekColumns}
+	            {$itemClassColumns}
 	        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
+	        LEFT JOIN tbl_item_class ic ON wow.item_class = ic.id
 	        WHERE wow.week BETWEEN ? AND ?
 	          AND wow.year = ?
 	          {$itemCatFilterVmi}
 	          {$ItemClassIdsPlaceholder}
 	          {$storeFilterSQLVmi}
 	        GROUP BY wow.item
+			HAVING 1=1
+			    {$searchHavingClause}
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?
 	    ";
@@ -1864,6 +2058,7 @@ class Dashboard_model extends Model
 
 		if ($itemCat !== null) $params[] = $itemCat;
 		$params = array_merge($params, $ItemClassIdsParams);
+		$params = array_merge($params, $searchParams);
 		$params[] = (int)$pageLimit;
 		$params[] = (int)$pageOffset;
 
@@ -1881,10 +2076,25 @@ class Dashboard_model extends Model
 	    $month_start, $month_end, $orderByColumn, $orderDirection, $year, $limit, $offset,
 	    $area_id = null, $asc_id = null, $store_code = null,
 	    $ba_id = null, $ba_type = null,
-	    $brand_category = null, $brands = null) {
+	    $brand_category = null, $brands = null, $searchValue = null) {
 	    $last_year = $year - 1;
 	    $allowedOrderColumns = ['rank', 'store_code', 'ty_scanned_data', 'ly_scanned_data', 'growth', 'sob'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
+
+		$searchColumns = [
+		    'store_name',       // store
+		];
+
+		$searchHavingClause = '';
+		$searchParams = [];
+
+		if (!empty($searchValue)) {
+		    $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+		    $searchHavingClause = ' HAVING ' . implode(' OR ', $likeConditions);
+		    foreach ($searchColumns as $_) {
+		        $searchParams[] = '%' . $searchValue . '%';
+		    }
+		}
 
 	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
 	        $orderByColumn = 'rank';
@@ -1980,6 +2190,7 @@ class Dashboard_model extends Model
 	          AND (? IS NULL OR so.store_code = ?)
 	          $additionalWhereSQL
 	        GROUP BY so.store_code, ly.ly_scanned_data, ty.ty_scanned_data, tt.total_ty_sales, dsc.total_unique_store_codes
+	        $searchHavingClause
 	        ORDER BY {$orderByColumn} {$orderDirection}
 	        LIMIT ? OFFSET ?;
 	    ";
@@ -1995,10 +2206,14 @@ class Dashboard_model extends Model
 	            $area_id, $area_id,
 	            $asc_id, $asc_id,
 	            $store_code, $store_code
-	        ],
-
-	        [$limit, $offset]
+	        ]
 	    );
+
+	    $params = array_merge($params, $searchParams);
+
+	    // Pagination
+	    $params[] = (int)$limit;
+	    $params[] = (int)$offset;
 
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();

@@ -223,7 +223,8 @@
             pageLength: 10,
             processing: true,
             serverSide: true,
-            searching: false,
+            searching: true,
+            // colReorder: true,
             lengthChange: false
         });
     }

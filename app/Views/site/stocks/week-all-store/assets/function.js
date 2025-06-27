@@ -178,7 +178,7 @@
         const dynamicColumns = [];
 
         if (type !== 'hero') {
-            colspan = (weekTo - weekFrom) + 4;
+            colspan = ((weekTo - weekFrom + 1) * 2) + 3;
             $('#table_slowMoving_TH').attr('colspan', colspan);
             $('#table_overStock_TH').attr('colspan', colspan);
             $('#table_npd_TH').attr('colspan', colspan);
@@ -186,12 +186,18 @@
             if (!isNaN(weekFrom) && !isNaN(weekTo) && weekFrom <= weekTo) {
                 for (let week = weekTo; week >= weekFrom; week--) {
                     $headerRow.append(`<th class="tbl-title-field week-column">Week ${week}</th>`);
+                    $headerRow.append(`<th class="tbl-title-field week-column">Item Class Week ${week}</th>`);
 
                     dynamicColumns.push({
                         data: `week_${week}`,
                         title: `Week ${week}`,
                         defaultContent: '-'
                     });
+                    dynamicColumns.push({
+                        data: `item_class_week_${week}`,
+                        title: `Item Class`,
+                        defaultContent: '-'
+                    });    
                 }
             }
         }
@@ -234,11 +240,9 @@
             pageLength: 10,
             processing: true,
             serverSide: true,
-            searching: false,
+            searching: true,
             colReorder: true,
-            lengthChange: false,
-            colReorder: true,
-            dom: 'rt<"bottom"ip>', // remove automatic <thead> generation
+            lengthChange: false
         });
     }
 

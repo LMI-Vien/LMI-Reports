@@ -355,9 +355,8 @@
         query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
-        console.log(query);
-        get_pagination(query, column_filter, order_filter);
         get_data(query, column_filter, order_filter);
+        get_pagination(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
     })
     
@@ -388,6 +387,7 @@
         offset = 1;
         modal.loading(true); 
         get_data(query);
+        get_pagination(query);
         modal.loading(false);
     });
 

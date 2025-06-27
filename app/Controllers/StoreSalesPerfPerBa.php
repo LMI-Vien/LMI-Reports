@@ -126,6 +126,9 @@ class StoreSalesPerfPerBa extends BaseController
 	    $columns = $this->request->getVar('columns');
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
 
+		$searchValue = trim($this->request->getVar('search')['value'] ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+
 		if($sysPar){
 			$jsonString = $sysPar[0]['brand_label_type'];
 			$data = json_decode($jsonString, true);
@@ -151,10 +154,10 @@ class StoreSalesPerfPerBa extends BaseController
 		// $brandIds = [37];
 		// $date = "2025-04";
 		// $baTypeId = 3;
-		// 		print_r($target_sales);
+		// print_r($target_sales);
 		// die();
 
-	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds, $searchValue);
 
 	    return $this->response->setJSON([
 	        'draw' => intval($this->request->getVar('draw')),

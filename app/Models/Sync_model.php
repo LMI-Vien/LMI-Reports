@@ -1181,12 +1181,12 @@ class Sync_model extends Model
                 GROUP BY cusitmcde
             ),
             dedup_pitmlmi AS (
-                SELECT itmcde, MIN(brncde) AS brncde
+                SELECT itmcde, itmdsc, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
                 FROM tbl_itemfile_lmi
                 GROUP BY itmcde
             ),
             dedup_itmrgdi AS (
-                SELECT itmcde, MIN(brncde) AS brncde
+                SELECT itmcde, itmdsc, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
                 FROM tbl_itemfile_rgdi
                 GROUP BY itmcde
             ),
@@ -1228,7 +1228,9 @@ class Sync_model extends Model
                     SUM(aso.net_sales) AS net_sales,
                     SUM(aso.quantity) AS quantity,
                     GROUP_CONCAT(DISTINCT CASE WHEN aso.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
+                    GROUP_CONCAT(DISTINCT CASE WHEN aso.company = '2' THEN pitmlmi.itmdsc ELSE itmrgdi.itmdsc END) AS itmdsc,
                     CASE WHEN aso.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
+                    CASE WHEN aso.company = '2' THEN pitmlmi.itmclacde ELSE itmrgdi.itmclacde END AS itmclacde,
                     CONCAT(MAX(aso.store_code), ' - ', s.description) AS store_name,
                     GROUP_CONCAT(DISTINCT aso.sku_code) AS sku_codes
                 FROM aggregated_so aso
@@ -1840,12 +1842,12 @@ class Sync_model extends Model
                 GROUP BY cusitmcde
             ),
             dedup_pitmlmi AS (
-                SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+                SELECT itmcde, itmdsc, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
                 FROM tbl_itemfile_lmi
                 GROUP BY itmcde
             ),
             dedup_itmrgdi AS (
-                SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+                SELECT itmcde, itmdsc, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
                 FROM tbl_itemfile_rgdi
                 GROUP BY itmcde
             ),
@@ -1904,6 +1906,7 @@ class Sync_model extends Model
                     avmi.average_sales_unit,
                     avmi.on_hand + avmi.in_transit AS total_qty,
                     GROUP_CONCAT(DISTINCT CASE WHEN avmi.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END SEPARATOR ',') AS itmcde,
+                    CASE WHEN avmi.company = '2' THEN pitmlmi.itmdsc ELSE itmrgdi.itmdsc END AS itmdsc,
                     CASE WHEN avmi.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
                     CASE WHEN avmi.company = '2' THEN pitmlmi.itmclacde ELSE itmrgdi.itmclacde END AS itmclacde,
                     CONCAT(MAX(s.code), ' - ', s.description) AS store_name,
@@ -1936,9 +1939,9 @@ class Sync_model extends Model
         if (!$company || !$week || !$year) {
             $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=0');
             
-            $this->sfaDB->query('TRUNCATE TABLE tbl_vmi_pre_aggregated_ba_ids');
-            $this->sfaDB->query('TRUNCATE TABLE tbl_vmi_pre_aggregated_brand_ids');
-            $this->sfaDB->query('TRUNCATE TABLE tbl_vmi_pre_aggregated_data');
+            $this->sfaDB->query('DELETE FROM tbl_vmi_pre_aggregated_ba_ids');
+            $this->sfaDB->query('DELETE FROM tbl_vmi_pre_aggregated_brand_ids');
+            $this->sfaDB->query('DELETE FROM tbl_vmi_pre_aggregated_data');
 
             $this->sfaDB->query('SET FOREIGN_KEY_CHECKS=1');
         }
@@ -1976,6 +1979,7 @@ class Sync_model extends Model
                     'in_transit' => $row['in_transit'],
                     'total_qty' => $row['total_qty'],
                     'itmcde' => $row['itmcde'],
+                    'itmdsc' => $row['itmdsc'],
                     'brncde' => $row['brncde'],
                     'itmclacde' => $row['itmclacde'],
                     'tracc_brand_id' => $row['tracc_brand_id'],
@@ -2016,54 +2020,54 @@ class Sync_model extends Model
 
         // $uuidToId = array_column($insertedRecords, 'id', 'uuid');
 
-        $baBatch = [];
-        $brandBatch = [];
+        // $baBatch = [];
+        // $brandBatch = [];
 
-        foreach ($uuidMap as $uuid => $row) {
-            $id = $uuidToId[$uuid] ?? null;
-            if (!$id) continue;
+        // foreach ($uuidMap as $uuid => $row) {
+        //     $id = $uuidToId[$uuid] ?? null;
+        //     if (!$id) continue;
 
-            $baIds = array_filter(array_map('trim', explode(',', $row['ba_ids'] ?? '')));
-            $brandIds = array_filter(array_map('trim', explode(',', $row['brand_ids'] ?? '')));
+        //     $baIds = array_filter(array_map('trim', explode(',', $row['ba_ids'] ?? '')));
+        //     $brandIds = array_filter(array_map('trim', explode(',', $row['brand_ids'] ?? '')));
 
-            foreach ($baIds as $baId) {
-                if (is_numeric($baId)) {
-                    $baBatch[] = [
-                        'pre_aggregated_id' => $id,
-                        'ba_id' => (int)$baId
-                    ];
-                }
-            }
+        //     foreach ($baIds as $baId) {
+        //         if (is_numeric($baId)) {
+        //             $baBatch[] = [
+        //                 'pre_aggregated_id' => $id,
+        //                 'ba_id' => (int)$baId
+        //             ];
+        //         }
+        //     }
 
-            foreach ($brandIds as $brandId) {
-                if (is_numeric($brandId)) {
-                    $brandBatch[] = [
-                        'pre_aggregated_id' => $id,
-                        'brand_id' => (int)$brandId
-                    ];
-                }
-            }
-        }
+        //     foreach ($brandIds as $brandId) {
+        //         if (is_numeric($brandId)) {
+        //             $brandBatch[] = [
+        //                 'pre_aggregated_id' => $id,
+        //                 'brand_id' => (int)$brandId
+        //             ];
+        //         }
+        //     }
+        // }
 
         // Chunked insert
-        foreach (array_chunk($baBatch, 5000) as $baChunk) {
-            $this->sfaDB->table('tbl_vmi_pre_aggregated_ba_ids')->insertBatch($baChunk);
-        }
+        // foreach (array_chunk($baBatch, 5000) as $baChunk) {
+        //     $this->sfaDB->table('tbl_vmi_pre_aggregated_ba_ids')->insertBatch($baChunk);
+        // }
 
-        foreach (array_chunk($brandBatch, 5000) as $brandChunk) {
-            $this->sfaDB->table('tbl_vmi_pre_aggregated_brand_ids')->insertBatch($brandChunk);
-        }
+        // foreach (array_chunk($brandBatch, 5000) as $brandChunk) {
+        //     $this->sfaDB->table('tbl_vmi_pre_aggregated_brand_ids')->insertBatch($brandChunk);
+        // }
 
         // Clear UUIDs
-        $this->sfaDB->table('tbl_vmi_pre_aggregated_data')
-            ->whereIn('uuid', $uuids)
-            ->set(['uuid' => null])
-            ->update();
+        // $this->sfaDB->table('tbl_vmi_pre_aggregated_data')
+        //     ->whereIn('uuid', $uuids)
+        //     ->set(['uuid' => null])
+        //     ->update();
 
         return [
-            'total_inserted' => $totalInserted,
-            'ba_links_inserted' => count($baBatch),
-            'brand_links_inserted' => count($brandBatch)
+            'total_inserted' => $totalInserted
+            //'ba_links_inserted' => count($baBatch),
+            //'brand_links_inserted' => count($brandBatch)
         ];
     }
 
@@ -2090,12 +2094,12 @@ class Sync_model extends Model
                     GROUP BY cusitmcde
                 ),
                 dedup_pitmlmi AS (
-                    SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+                    SELECT itmcde, itmdsc, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
                     FROM tbl_itemfile_lmi
                     GROUP BY itmcde
                 ),
                 dedup_itmrgdi AS (
-                    SELECT itmcde, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
+                    SELECT itmcde, itmdsc, MIN(brncde) AS brncde, MIN(itmclacde) AS itmclacde
                     FROM tbl_itemfile_rgdi
                     GROUP BY itmcde
                 ),
@@ -2122,6 +2126,7 @@ class Sync_model extends Model
                     SELECT
                         avmi.*,
                         COALESCE(pclmi.itmcde, pcrgdi.itmcde) AS itmcde,
+                        COALESCE(pitmlmi.itmdsc, itmrgdi.itmdsc) AS itmdsc,
                         COALESCE(pitmlmi.brncde, itmrgdi.brncde) AS brncde,
                         COALESCE(pitmlmi.itmclacde, itmrgdi.itmclacde) AS itmclacde,
                         CASE 
@@ -2149,6 +2154,7 @@ class Sync_model extends Model
                         SUM(jd.ave_weekly_sales) AS ave_weekly_sales,
                         SUM(jd.weeks_cover) AS weeks_cover,
                         jd.itmcde,
+                        jd.itmdsc,
                         jd.brncde,
                         jd.itmclacde,
                         jd.item,
@@ -2173,7 +2179,7 @@ class Sync_model extends Model
         $query = $this->sfaDB->query($sql);
         $allData = $query->getResultArray();
 
-        if (!$dataHeaderId || !$week || !$year) {
+        if (empty($dataHeaderId) && empty($week) && empty($year)) {
             $this->sfaDB->table('tbl_week_on_week_vmi_pre_aggregated_data')->truncate();
         }
 

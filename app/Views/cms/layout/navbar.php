@@ -199,13 +199,22 @@ $('.brand-link').on('click', function (e) {
 });
 
 
-  $(window).on('load', function() { 
+  $(window).on('load', function() {
     user_role_editor();
     //static values from user roles
     if(parseInt(session_role) === 3 || parseInt(session_role) === 4){
         user_role_approver();
     }
   });
+
+function removeRoleButtons(selector) {
+    const interval = setInterval(() => {
+        const $elems = $(selector);
+        if ($elems.length > 0) {
+            $elems.remove();
+        }
+    }, 100);
+}
 
   function user_role_editor() {
     var query = "cms_menu.status >= 0 AND menu_url = '"+menu_url+"' AND role_id = '"+session_role+"'"; 
@@ -241,64 +250,56 @@ $('.brand-link').on('click', function (e) {
                 }
 
                 if (role_delete == 0) {
-                  $('.btn_trash').remove();
-                  $('#btn_delete').remove();
+                      removeRoleButtons('.delete, .btn_trash, #btn_delete');
                 }
 
                 if (role_write == 0 && role_delete == 0) {
-                  $('.btn_add').remove();
-                  $('.btn_update').remove();
-                  $('.btn_save').remove();
-                  $("body :input").prop("disabled", true);
-                  $("a.edit").addClass('disabled');
-                  $("tbody tr").removeClass('ui-sortable-handle');
-                  $('tbody').removeClass('ui-sortable');
-                  $('table').removeClass('sorted_table');
+                      removeRoleButtons('.btn_add, .save, .update, .delete, .btn_update, .btn_save');
+                      //$("body :input").prop("disabled", true);
+                      $("a.edit").addClass('disabled');
+                      $("tbody tr").removeClass('ui-sortable-handle');
+                      $('tbody').removeClass('ui-sortable');
+                      $('table').removeClass('sorted_table');
 
-                  if ($("table td:nth-child(2)").has("span.move-menu").length > 0) {
-                    $('tbody').sortable('disable');
-                    $("table th:first-child,td:nth-child(2)").remove();
-                  }
-                  if ($("table td:nth-child(2)").has("input.select").length > 0) {
-                    $("table th:first-child,td:nth-child(2)").remove();
-                  }
-                  if ($('table td:last-child').has(".edit").length > 0) {
-                    $('table th:last-child,td:last-child').remove();
-                  }
-                  $('.close').removeAttr('disabled');
+                      if ($("table td:nth-child(2)").has("span.move-menu").length > 0) {
+                        $('tbody').sortable('disable');
+                        $("table th:first-child,td:nth-child(2)").remove();
+                      }
+                      if ($("table td:nth-child(2)").has("input.select").length > 0) {
+                        $("table th:first-child,td:nth-child(2)").remove();
+                      }
+                      if ($('table td:last-child').has(".edit").length > 0) {
+                        $('table th:last-child,td:last-child').remove();
+                      }
+                      $('.close').removeAttr('disabled');
                 } else if (role_write == 0 && role_delete == 1) {
-                  $('.btn_add').remove();
-                  $('.box-header a[data-status="1"]').remove();
-                  $('.box-header a[data-status="0"]').remove();
-                  $('.btn_update').remove();
-                  $('.btn_save').remove();
-                  $('.btn_add_folder').remove();
-                  $('.btn_upload').remove();
-                  $('.btn_sitemap').remove();
-                  $("body :input").prop("disabled", true);
-                  $("body :button").prop("disabled", false);
-                  $("body #search_query").prop("disabled", false);
-                  $("a.edit").addClass('disabled');
-                  $("tbody tr").removeClass('ui-sortable-handle');
-                  $('tbody').removeClass('ui-sortable');
-                  $('table').removeClass('sorted_table');
+                      removeRoleButtons('.btn_add, .btn_update, .btn_save, .btn_add_folder, .btn_upload, .btn_sitemap');
+                      $('.box-header a[data-status="1"]').remove();
+                      $('.box-header a[data-status="0"]').remove();
+                      //$("body :input").prop("disabled", true);
+                      $("body :button").prop("disabled", false);
+                      $("body #search_query").prop("disabled", false);
+                      $("a.edit").addClass('disabled');
+                      $("tbody tr").removeClass('ui-sortable-handle');
+                      $('tbody').removeClass('ui-sortable');
+                      $('table').removeClass('sorted_table');
 
-                  if ($("table td:first-child").has("input.select").length > 0) {
-                    $("th :input").removeAttr('disabled');
-                    $(".select").removeAttr('disabled');
-                  }
-                  if ($("table td:nth-child(2)").has("span.move-menu").length > 0) {
-                    $('tbody').sortable('disable');
-                    $("table th:first-child,td:nth-child(2)").remove();
-                  } 
-                  if ($("table td:nth-child(2)").has("input.select").length > 0) {
-                    $("th :input").removeAttr('disabled');
-                    $(".select").removeAttr('disabled');
-                  } 
-                  if ($('table td:last-child').has(".edit").length > 0) {
-                    $('table th:last-child').hide();
-                    $('table td:last-child').hide();
-                  }
+                      if ($("table td:first-child").has("input.select").length > 0) {
+                        $("th :input").removeAttr('disabled');
+                        $(".select").removeAttr('disabled');
+                      }
+                      if ($("table td:nth-child(2)").has("span.move-menu").length > 0) {
+                        $('tbody').sortable('disable');
+                        $("table th:first-child,td:nth-child(2)").remove();
+                      } 
+                      if ($("table td:nth-child(2)").has("input.select").length > 0) {
+                        $("th :input").removeAttr('disabled');
+                        $(".select").removeAttr('disabled');
+                      } 
+                      if ($('table td:last-child').has(".edit").length > 0) {
+                        $('table th:last-child').hide();
+                        $('table td:last-child').hide();
+                      }
                 }
            });
         }

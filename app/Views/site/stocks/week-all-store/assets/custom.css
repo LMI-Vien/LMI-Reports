@@ -111,6 +111,7 @@
 
     body .hide-div {
       display: none;
+      padding: 10px !important;
     }
 
     .select2-selection__choice__display {
