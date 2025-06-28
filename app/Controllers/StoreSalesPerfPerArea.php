@@ -190,7 +190,12 @@ class StoreSalesPerfPerArea extends BaseController
 
 	// ================================= Display filters for pdf export ================================
 	private function printFilter($pdf, $filters) {
+		$pdf->SetFont('helvetica', 'B', 9);
+		$source = "Actual Sales Report / Scan Data (LMI/RGDI)";
+		$pdf->MultiCell(0, 8, "Source: " . $source, 0, 'C', 0, 1, '', '', true);
+
 		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Ln(2);
 
 		$pageWidth  = $pdf->getPageWidth();
 		$pageMargin = $pdf->getMargins();
@@ -207,7 +212,17 @@ class StoreSalesPerfPerArea extends BaseController
 			$pdf->Ln(8);
 		}
 
-		$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
+		$currentWeekText = 'Current Week: ' . $currentWeekDisplay;
+		$generatedText   = 'Generated Date: ' . date('M d, Y, h:i:s A');
+
+		// Adjust spacing manually between them
+		$pdf->Cell(100, 6, $currentWeekText, 0, 0, 'L');  // Width ~100mm for week
+		$pdf->Cell(85, 6, '', 0, 0);                      // Spacer ~10mm
+		$pdf->Cell(0, 6, $generatedText, 0, 1, 'L');      // Remaining width for date
+
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');
 		$pdf->Ln(4);
@@ -296,6 +311,9 @@ class StoreSalesPerfPerArea extends BaseController
 	    $columns = $this->request->getVar('columns');
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
 
+		$searchValue = trim($this->getParam('searchValue') ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+
 		if($sysPar){
 			$jsonString = $sysPar[0]['brand_label_type'];
 			$data = json_decode($jsonString, true);
@@ -368,7 +386,7 @@ class StoreSalesPerfPerArea extends BaseController
 			'Month Range'      => ($monthStartMap && $monthEndMap) ? "$monthStartMap - $monthEndMap" : 'None',
 		];
 
-		$title = "Store Sales Performance Per Area";
+		$title = "Store Sales Performance per Area";
 		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
@@ -381,7 +399,7 @@ class StoreSalesPerfPerArea extends BaseController
 		$this->printFilter($pdf, $filterData);
 
 		$pdf->SetFont('helvetica', '', 9);
-		$result = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $orderColumnIndex, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+		$result = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $orderColumnIndex, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds, $searchValue);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();
@@ -527,6 +545,9 @@ class StoreSalesPerfPerArea extends BaseController
 	    $columns = $this->request->getVar('columns');
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
 
+		$searchValue = trim($this->getParam('searchValue') ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+
 		if($sysPar){
 			$jsonString = $sysPar[0]['brand_label_type'];
 			$data = json_decode($jsonString, true);
@@ -547,8 +568,8 @@ class StoreSalesPerfPerArea extends BaseController
 		$storeId = null;
 		$baId = null;
 
-		$title = "Store Sales Performance Per Area";
-		$data = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $orderColumnIndex, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+		$title = "Store Sales Performance per Area";
+		$data = $this->Dashboard_model->salesPerformancePerArea($limit, $offset, $orderColumnIndex, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds, $searchValue);
 		$rows   = $data['data'];
 
 		$baTypeString = '';
@@ -588,20 +609,25 @@ class StoreSalesPerfPerArea extends BaseController
 		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
 
+		$currentWeek = $this->getCurrentWeek();
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
 		$sheet->setCellValue('A2', 'Report: Store Sales Performance Overall');
-		$sheet->mergeCells('A1:E1');
-		$sheet->mergeCells('A2:E2');
+		$sheet->setCellValue('A4', 'Source: Actual Sales Report / Scan Data (LMI/RGDI)');
+		$sheet->setCellValue('A5', 'Current Week: ' . $currentWeekDisplay);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
 
-		$sheet->setCellValue('A4', 'Area: '  . ($areaMap ?: 'NONE'));
-		$sheet->setCellValue('B4', 'ASC: ' . ($ascMap ?: 'NONE'));
-		$sheet->setCellValue('C4', 'BA Type: '. ($baTypeString     ?: 'NONE'));
-		$sheet->setCellValue('D4', 'Brand: ' . ($brandMap     ?: 'NONE'));
+		$sheet->setCellValue('A7', 'Area: '  . ($areaMap ?: 'NONE'));
+		$sheet->setCellValue('B7', 'ASC: ' . ($ascMap ?: 'NONE'));
+		$sheet->setCellValue('C7', 'BA Type: '. ($baTypeString     ?: 'NONE'));
+		$sheet->setCellValue('D7', 'Brand: ' . ($brandMap     ?: 'NONE'));
 
-		$sheet->setCellValue('A5', 'Month Start: ' . ($monthStartMap ?: 'NONE'));
-		$sheet->setCellValue('B5', 'Month End: '   . ($monthEndMap   ?: 'NONE'));
-		$sheet->setCellValue('C5', 'Year: '        . ($year       ?: 'NONE'));
-		$sheet->setCellValue('D5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		$sheet->setCellValue('A8', 'Month Start: ' . ($monthStartMap ?: 'NONE'));
+		$sheet->setCellValue('B8', 'Month End: '   . ($monthEndMap   ?: 'NONE'));
+		$sheet->setCellValue('C8', 'Year: '        . ($year       ?: 'NONE'));
+		$sheet->setCellValue('D8', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 		$headers = [
 			'Rank',
@@ -616,10 +642,10 @@ class StoreSalesPerfPerArea extends BaseController
 			'Target Per Remaining Days',
 		];
 
-		$sheet->fromArray($headers, null, 'A7');
-		$sheet->getStyle('A7:J7')->getFont()->setBold(true);
+		$sheet->fromArray($headers, null, 'A10');
+		$sheet->getStyle('A10:J10')->getFont()->setBold(true);
 
-		$rowNum = 8;
+		$rowNum = 11;
 		foreach ($rows as $row) {
 			$sheet->setCellValue('A'.$rowNum,$row->rank);
 			$sheet->setCellValue('B'.$rowNum,$row->area_name);
@@ -664,4 +690,56 @@ class StoreSalesPerfPerArea extends BaseController
 			fn($i) => $i > 0
 		);
 	}
+
+	private function getCalendarWeeks($year) {
+		$weeks = [];
+
+		// ISO week 1 always contains January 4
+		$date = new \DateTime();
+		$date->setDate($year, 1, 4);
+
+		// Move to the Monday of that week
+		$dayOfWeek = (int)$date->format('N'); // 1 (Mon) to 7 (Sun)
+		$date->modify('-' . ($dayOfWeek - 1) . ' days'); // Go back to Monday
+
+		$weekNumber = 1;
+
+		while ((int)$date->format('o') <= $year) {
+			$weekStart = clone $date;
+			$weekEnd = clone $date;
+			$weekEnd->modify('+6 days');
+
+			if ((int)$weekStart->format('o') > $year) break;
+
+			$weeks[] = [
+				'id'      => $weekNumber,
+				'display' => 'Week ' . $weekNumber . ' (' . $weekStart->format('Y-m-d') . ' - ' . $weekEnd->format('Y-m-d') . ')',
+				'week'    => $weekNumber,
+				'start'   => $weekStart->format('Y-m-d'),
+				'end'     => $weekEnd->format('Y-m-d'),
+			];
+
+			$date->modify('+7 days');
+			$weekNumber++;
+		}
+
+		return $weeks;
+	}
+
+    private function getCurrentWeek($year = null) {
+        if ($year === null) {
+            $year = (int)date('Y');
+        }
+
+        $weeks = $this->getCalendarWeeks($year);
+        $today = date('Y-m-d');
+
+        foreach ($weeks as $week) {
+            if ($today >= $week['start'] && $today <= $week['end']) {
+                return $week;
+            }
+        }
+
+        return null;
+    }
 }
