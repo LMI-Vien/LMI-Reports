@@ -166,8 +166,11 @@
                     d.type = type;
                     d.limit = d.length;
                     d.offset = d.start;
+
+                    console.log('→ Ajax payload:', d);
                 },
                 dataSrc: function(json) {
+                    console.log('← Ajax response:', json);
                     return json.data.length ? json.data : [];
                 }
             },
@@ -221,7 +224,27 @@
         let selectedItemClass       = $('#itemClass').val();       
         let selectedItemCat         = $('#itemLabelCatId').val();    
         let selectedInventoryStatus = $('#inventoryStatus').val();  
-        let selectedVendor          = $('#vendorNameId').val();    
+        let selectedVendor          = $('#vendorNameId').val();
+
+        let searchValueSlowMoving = '';
+        if ($.fn.dataTable.isDataTable('#table_slowMoving')) {
+            searchValueSlowMoving = $('#table_slowMoving').DataTable().search();
+        }
+
+        let searchValueOverstock = '';
+        if ($.fn.dataTable.isDataTable('#table_overStock')) {
+            searchValueOverstock = $('#table_overStock').DataTable().search();
+        }
+
+        let searchValueNpd = '';
+        if ($.fn.dataTable.isDataTable('#table_npd')) {
+            searchValueNpd = $('#table_npd').DataTable().search();
+        }
+
+        let searchValueHero = '';
+        if ($.fn.dataTable.isDataTable('#table_hero')) {
+            searchValueHero = $('#table_hero').DataTable().search();
+        }
 
         let itemClasses = Array.isArray(selectedItemClass)
             ? selectedItemClass
@@ -247,6 +270,22 @@
 
         if (selectedVendor) {
             qsParts.push(`vendorName=${encodeURIComponent(selectedVendor)}`);
+        }
+
+        if (searchValueSlowMoving) {
+            qsParts.push(`search[slowmoving]=${encodeURIComponent(searchValueSlowMoving)}`);
+        }
+
+        if (searchValueOverstock) {
+            qsParts.push(`search[overstock]=${encodeURIComponent(searchValueOverstock)}`);
+        }
+
+        if (searchValueNpd) {
+            qsParts.push(`search[npd]=${encodeURIComponent(searchValueNpd)}`);
+        }
+
+        if (searchValueHero) {
+            qsParts.push(`search[hero]=${encodeURIComponent(searchValueHero)}`);
         }
 
         let qs = qsParts.join('&');
@@ -326,125 +365,26 @@
         .finally(() => {
             modal.loading(false);
         });
-
-
-        // kapag nasira yung nasa taas at naka set time out
-        // function handleAction(action) {
-        //     modal.loading(true);
-        //     let selectedItemClass       = $('#itemClass').val();       
-        //     let selectedItemCat         = $('#itemLabelCatId').val();    
-        //     let selectedInventoryStatus = $('#inventoryStatus').val();  
-        //     let selectedVendor          = $('#vendorNameId').val();    
-
-        //     let itemClasses = Array.isArray(selectedItemClass)
-        //         ? selectedItemClass
-        //         : (selectedItemClass ? [ selectedItemClass ] : []);
-
-        //     let statuses = Array.isArray(selectedInventoryStatus)
-        //         ? selectedInventoryStatus
-        //         : (selectedInventoryStatus ? [ selectedInventoryStatus ] : []);
-
-        //     //
-        //     // 1) Build qs so PHP sees:
-        //     //    itemClass[]=A&itemClass[]=B
-        //     // AND inventoryStatus[]=npd&inventoryStatus[]=hero
-        //     //
-        //     let qsParts = [];
-
-        //     // 1a) One itemClass[]= per selected class
-        //     itemClasses.forEach(c => {
-        //         qsParts.push(`itemClass[]=${encodeURIComponent(c)}`);
-        //     });
-
-        //     // 1b) itemLabelCat (single)
-        //     if (selectedItemCat) {
-        //         qsParts.push(`itemLabelCat=${encodeURIComponent(selectedItemCat)}`);
-        //     }
-
-        //     // 1c) One inventoryStatus[]= per selected status
-        //     statuses.forEach(s => {
-        //         qsParts.push(`inventoryStatus[]=${encodeURIComponent(s)}`);
-        //     });
-
-        //     // 1d) vendorName (single)
-        //     if (selectedVendor) {
-        //         qsParts.push(`vendorName=${encodeURIComponent(selectedVendor)}`);
-        //     }
-
-        //     let qs = qsParts.join('&');
-
-        //     //
-        //     // 2) Now loop exactly over statuses[] to capture each table’s sort
-        //     //
-        //     let extraOrderParams = [];
-        //     statuses.forEach((statusType, idx) => {
-        //         let tableId  = `#table_${statusType}`;
-        //         let dt       = $(tableId).DataTable();
-        //         let orderArr = dt.order() || [[0, 'desc']];
-
-        //         let colIdx  = orderArr[0][0];
-        //         let dir     = orderArr[0][1];
-        //         let dtCols  = dt.settings().init().columns;
-        //         let colName = dtCols[colIdx].data; // e.g. "item_class"
-
-        //         extraOrderParams.push(`order[${idx}][column]=${colIdx}`);
-        //         extraOrderParams.push(`order[${idx}][dir]=${dir}`);
-        //         extraOrderParams.push(`columns[${idx}][data]=${encodeURIComponent(colName)}`);
-
-        //         extraOrderParams.push(`order[${idx}][colData]=${encodeURIComponent(colName)}`);
-        //     });
-
-        //     let orderQueryString = extraOrderParams.join('&');
-
-        //     let endpoint = (action === 'exportPdf') ? 'all-store-generate-pdf' : 'all-store-generate-excel';
-        //     let url = `${base_url}stocks/${endpoint}?${qs}&${orderQueryString}`;
-
-        //     const end_time = new Date();
-        //     const duration = formatDuration(start_time, end_time);
-        //     const remarks = `
-        //     Exported Successfully!
-        //         <br>Start Time: ${formatReadableDate(start_time)}
-        //         <br>End Time: ${formatReadableDate(end_time)}
-        //         <br>Duration: ${duration}
-        //     `;
-        //     logActivity(
-        //         'Overall Stock Data of all Stores',
-        //         action === 'exportPdf' ? 'Export PDF' : 'Export Excel',
-        //         remarks, '-', null, null
-        //     );
-
-        //     let iframe = document.createElement('iframe');
-        //     iframe.style.display = 'none';
-        //     iframe.src = url;
-        //     document.body.appendChild(iframe);
-
-        //     setTimeout(function() {
-        //         modal.loading(false);
-        //     }, 5000);
-        // }
     }
 
-    const getCalendarWeeks = (year) => {
+    function getCalendarWeeks(year) {
         const weeks = [];
-        const startDate = new Date(year, 0, 1); // Jan 1
-        const day = startDate.getDay(); // day of the week (0 = Sunday)
-        
-        const firstMonday = new Date(startDate);
-        if (day !== 1) {
-            const offset = (day === 0 ? 1 : (9 - day)); 
-            firstMonday.setDate(startDate.getDate() + offset);
-        }
-        
-        let currentDate = new Date(firstMonday);
+
+        // Start from the first Monday of the ISO week 1
+        let date = new Date(year, 0, 4); // Jan 4 is always in the first ISO week
+        const day = date.getDay();
+        const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+        date.setDate(date.getDate() + diff);
+
         let weekNumber = 1;
-        
-        while (currentDate.getFullYear() <= year) {
-            const weekStart = new Date(currentDate);
-            const weekEnd = new Date(currentDate);
+
+        while (date.getFullYear() <= year || (date.getFullYear() === year + 1 && weekNumber < 54)) {
+            const weekStart = new Date(date);
+            const weekEnd = new Date(date);
             weekEnd.setDate(weekEnd.getDate() + 6);
-        
-            if (weekStart.getFullYear() > year) break;
-            
+
+            if (weekStart.getFullYear() > year && weekEnd.getFullYear() > year) break;
+
             weeks.push({
                 id: weekNumber,
                 display: `Week ${weekNumber} (${weekStart.toISOString().slice(0, 10)} - ${weekEnd.toISOString().slice(0, 10)})`,
@@ -452,10 +392,10 @@
                 start: weekStart.toISOString().slice(0, 10),
                 end: weekEnd.toISOString().slice(0, 10),
             });
-            
-            currentDate.setDate(currentDate.getDate() + 7);
+
+            date.setDate(date.getDate() + 7); // move to next Monday
         }
-        
+
         return weeks;
     }
 
