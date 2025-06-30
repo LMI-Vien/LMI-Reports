@@ -166,11 +166,8 @@
                     d.type = type;
                     d.limit = d.length;
                     d.offset = d.start;
-
-                    console.log('→ Ajax payload:', d);
                 },
                 dataSrc: function(json) {
-                    console.log('← Ajax response:', json);
                     return json.data.length ? json.data : [];
                 }
             },
