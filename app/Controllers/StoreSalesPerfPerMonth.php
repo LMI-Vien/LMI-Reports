@@ -162,8 +162,13 @@ class StoreSalesPerfPerMonth extends BaseController
 	}
 
 	// ================================= Display filters for pdf export ================================
-	private function printFilter($pdf, $filters, $itemBrandMap = '') {
+	private function printFilter($pdf, $filters, $itemBrandMap = '', $latestYear = null) {
+		$pdf->SetFont('helvetica', 'B', 9);
+		$source = "Actual Sales Report, Scan Data, and Target Sales - " . ($latestYear ?? 'N/A');
+		$pdf->MultiCell(0, 8, "Source: " . $source, 0, 'C', 0, 1, '', '', true);
+
 		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Ln(2);
 
 		$pageWidth  = $pdf->getPageWidth();
 		$pageMargin = $pdf->getMargins();
@@ -186,13 +191,19 @@ class StoreSalesPerfPerMonth extends BaseController
 		}
 
 		// Align "Item Brand" to column 1, and "Generated Date" to column 3
+		$labelWidth = 30;
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
 		$pdf->SetFont('helvetica', 'B', 9);
 		$pdf->Cell($labelWidth, 8, 'Item Brand:', 0, 0, 'L');
 		$pdf->SetFont('helvetica', '', 9);
 		$pdf->Cell($colWidth - $labelWidth, 8, $itemBrandMap ?: 'None', 0, 0, 'L');
 
-		// Spacer for middle column (column 2)
-		$pdf->Cell($colWidth, 8, '', 0, 0);
+		$pdf->SetFont('helvetica', 'B', 9);
+		$pdf->Cell($labelWidth, 8, 'Current Week:', 0, 0, 'L');
+		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Cell($colWidth - $labelWidth, 8, $currentWeekDisplay, 0, 0, 'L');
 
 		$pdf->SetFont('helvetica', 'B', 9);
 		$pdf->Cell($labelWidth, 8, 'Generated Date:', 0, 0, 'L');
@@ -379,7 +390,7 @@ class StoreSalesPerfPerMonth extends BaseController
 			// 'Item Brand'            => empty($itemBrandMap) ? 'None' : $itemBrandMap,
 		];
 
-		$title = "Store Sales Performance Per Area";
+		$title = "Store Sales Performance per Month";
 		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
@@ -389,7 +400,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		$pdf->AddPage();
 
 		$this->printHeader($pdf, $title);
-		$this->printFilter($pdf, $filterData, $itemBrandMap);
+		$this->printFilter($pdf, $filterData, $itemBrandMap, $latest_year);
 
 		$pdf->SetFont('helvetica', '', 9);
 		$result = $this->Dashboard_model->storeSalesPerfPerMonth($filters);
@@ -397,7 +408,7 @@ class StoreSalesPerfPerMonth extends BaseController
 
 		$pageWidth  = $pdf->getPageWidth();
 		$margins    = $pdf->getMargins();
-		$colWidth   = ($pageWidth - $margins['left'] - $margins['right']) / 13;
+		$colWidth   = ($pageWidth - $margins['left'] - $margins['right']) / 14;
 
 		$headers = [
 			'January',
@@ -412,6 +423,7 @@ class StoreSalesPerfPerMonth extends BaseController
 			'October',
 			'November',
 			'December',
+			'Total',
 		];
 
 		$pdf->SetFont('helvetica','B',9);
@@ -427,6 +439,7 @@ class StoreSalesPerfPerMonth extends BaseController
 		$lineH = 4; 
 		foreach ($rows as $row) {
 			$rowH = 8;
+			$pdf->SetFont('helvetica', '', 7);
 			$pdf->Cell($colWidth, $rowH, 'LY Sell Out', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_january), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_february), 1, 0, 'C');
@@ -439,8 +452,10 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_september), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_october), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_november), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_december), 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_december), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_ly_sell_out), 1, 1, 'C');
 
+			$pdf->SetFont('helvetica', '', 7);
 			$pdf->Cell($colWidth, $rowH, 'TY Sell Out', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_january), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_february), 1, 0, 'C');
@@ -453,8 +468,10 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_september), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_october), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_november), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_december), 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ty_sell_out_december), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_ty_sell_out), 1, 1, 'C');
 
+			$pdf->SetFont('helvetica', '', 7);
 			$pdf->Cell($colWidth, $rowH, 'Sales Report', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_january), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_february), 1, 0, 'C');
@@ -467,8 +484,10 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_september), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_october), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_november), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_december), 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->amount_december), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_amount), 1, 1, 'C');
 
+			$pdf->SetFont('helvetica', '', 7);
 			$pdf->Cell($colWidth, $rowH, 'Target Sales', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_jan), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_feb), 1, 0, 'C');
@@ -481,7 +500,24 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_sep), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_oct), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_nov), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_dec), 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->target_sales_dec), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_target), 1, 1, 'C');
+
+			$pdf->SetFont('helvetica', '', 7);
+			$pdf->MultiCell($colWidth, $rowH, "Balance\nTo Target", 1, 'L', false, 0);
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_jan), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_feb), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_mar), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_apr), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_may), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_jun), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_jul), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_aug), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_sep), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_oct), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_nov), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_dec), 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_balance_to_target), 1, 1, 'C');
 
 			$pdf->Cell($colWidth, $rowH, '% Growth', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $row->growth_january, 1, 0, 'C');
@@ -495,7 +531,8 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $row->growth_september, 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $row->growth_october, 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $row->growth_november, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_december, 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->growth_december, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, '-', 1, 1, 'C');
 
 			$pdf->Cell($colWidth, $rowH, '% Achieved', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $row->achieved_january, 1, 0, 'C');
@@ -509,7 +546,8 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $row->achieved_september, 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $row->achieved_october, 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $row->achieved_november, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->achieved_december, 1, 1, 'C');
+			$pdf->Cell($colWidth, $rowH, $row->achieved_december, 1, 0, 'C');
+			$pdf->Cell($colWidth, $rowH, '-', 1, 1, 'C');
 		}
 
 		$pdf->Output($title . '.pdf', 'D');
@@ -637,6 +675,10 @@ class StoreSalesPerfPerMonth extends BaseController
 		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'code:EQ=$storeId'", "''", "''");
 		$storeMap = !empty($result) ? $result[0]['description'] : '';
 
+		$years  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "''", "''", "''");
+		$year_values = array_column($years, 'year');
+		$latest_year = max($year_values);
+
 		$brandsLabel = [];
 		foreach ($brands as $brandsed) {
 			$result  = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ={$brandsed}'", "''", "''");
@@ -665,27 +707,32 @@ class StoreSalesPerfPerMonth extends BaseController
 			$itemBrandMap = implode(', ', $brandsLabel);
 		}
 
-		$title = "Store Sales Performance Per Month";
+		$title = "Store Sales Performance per Month";
 		$data = $this->Dashboard_model->storeSalesPerfPerMonth($filters);
 		$rows   = $data['data'];
 
 		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
 
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
 		$sheet->setCellValue('A2', 'Report: Store Sales Performance Overall');
-		$sheet->mergeCells('A1:E1');
-		$sheet->mergeCells('A2:E2');
+		$sheet->setCellValue('A4', 'Source: Actual Sales Report, Scan Data, and Target Sales - ' . $latest_year);
+		$sheet->setCellValue('A5', 'Current Week: ' . $currentWeekDisplay);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
 
-		$sheet->setCellValue('A4', 'Area: '  . ($areaMap ?: 'NONE'));
-		$sheet->setCellValue('B4', 'ASC: ' . ($ascMap ?: 'NONE'));
-		$sheet->setCellValue('C4', 'BA Type: '. ($baTypeString     ?: 'NONE'));
-		$sheet->setCellValue('D4', 'Brand Ambassador: ' . ($baMap     ?: 'NONE'));
+		$sheet->setCellValue('A7', 'Area: '  . ($areaMap ?: 'NONE'));
+		$sheet->setCellValue('B7', 'ASC: ' . ($ascMap ?: 'NONE'));
+		$sheet->setCellValue('C7', 'BA Type: '. ($baTypeString     ?: 'NONE'));
+		$sheet->setCellValue('D7', 'Brand Ambassador: ' . ($baMap     ?: 'NONE'));
 
-		$sheet->setCellValue('A5', 'Store Name: ' . ($storeMap ?: 'NONE'));
-		$sheet->setCellValue('B5', 'Brand Label Type: '   . ($brandLabelTypeMap   ?: 'NONE'));
-		$sheet->setCellValue('C5', 'Item Brand: '        . ($itemBrandMap       ?: 'NONE'));
-		$sheet->setCellValue('D5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		$sheet->setCellValue('A8', 'Store Name: ' . ($storeMap ?: 'NONE'));
+		$sheet->setCellValue('B8', 'Brand Label Type: '   . ($brandLabelTypeMap   ?: 'NONE'));
+		$sheet->setCellValue('C8', 'Item Brand: '        . ($itemBrandMap       ?: 'NONE'));
+		$sheet->setCellValue('D8', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 		$headers = [
 			'January',
@@ -700,15 +747,16 @@ class StoreSalesPerfPerMonth extends BaseController
 			'October',
 			'November',
 			'December',
+			'Total',
 		];
 
-		$sheet->fromArray($headers, null, 'B7');
-		$sheet->setCellValue('A7', ''); // Blank first column (label placeholder)
-		$sheet->getStyle('B7:M7')->getFont()->setBold(true);
-		$sheet->getStyle('A8:A13')->getFont()->setBold(true);
+		$sheet->fromArray($headers, null, 'B10');
+		$sheet->setCellValue('A10', ''); // Blank first column (label placeholder)
+		$sheet->getStyle('B10:N10')->getFont()->setBold(true);
+		$sheet->getStyle('A11:A17')->getFont()->setBold(true);
 		
 
-		$rowNum = 8;
+		$rowNum = 11;
 		foreach ($rows as $row) {
 			// LY Sell Out
 			$sheet->setCellValue("A{$rowNum}", 'LY Sell Out');
@@ -724,7 +772,8 @@ class StoreSalesPerfPerMonth extends BaseController
 				$row->ly_sell_out_september,
 				$row->ly_sell_out_october,
 				$row->ly_sell_out_november,
-				$row->ly_sell_out_december
+				$row->ly_sell_out_december,
+				$row->total_ly_sell_out
 			], null, "B{$rowNum}");
 			$rowNum++;
 
@@ -742,7 +791,8 @@ class StoreSalesPerfPerMonth extends BaseController
 				$row->ty_sell_out_september,
 				$row->ty_sell_out_october,
 				$row->ty_sell_out_november,
-				$row->ty_sell_out_december
+				$row->ty_sell_out_december,
+				$row->total_ty_sell_out
 			], null, "B{$rowNum}");
 			$rowNum++;
 
@@ -760,7 +810,8 @@ class StoreSalesPerfPerMonth extends BaseController
 				$row->amount_september,
 				$row->amount_october,
 				$row->amount_november,
-				$row->amount_december
+				$row->amount_december,
+				$row->total_amount
 			], null, "B{$rowNum}");
 			$rowNum++;
 
@@ -778,7 +829,27 @@ class StoreSalesPerfPerMonth extends BaseController
 				$row->target_sales_sep,
 				$row->target_sales_oct,
 				$row->target_sales_nov,
-				$row->target_sales_dec
+				$row->target_sales_dec,
+				$row->total_target
+			], null, "B{$rowNum}");
+			$rowNum++;
+
+			// % Growth
+			$sheet->setCellValue("A{$rowNum}", 'Balance To Target');
+			$sheet->fromArray([
+				$row->balance_to_target_jan,
+				$row->balance_to_target_feb,
+				$row->balance_to_target_mar,
+				$row->balance_to_target_apr,
+				$row->balance_to_target_may,
+				$row->balance_to_target_jun,
+				$row->balance_to_target_jul,
+				$row->balance_to_target_aug,
+				$row->balance_to_target_sep,
+				$row->balance_to_target_oct,
+				$row->balance_to_target_nov,
+				$row->balance_to_target_dec,
+				$row->total_balance_to_target
 			], null, "B{$rowNum}");
 			$rowNum++;
 
@@ -796,7 +867,8 @@ class StoreSalesPerfPerMonth extends BaseController
 				$row->growth_september,
 				$row->growth_october,
 				$row->growth_november,
-				$row->growth_december
+				$row->growth_december,
+				'-'
 			], null, "B{$rowNum}");
 			$rowNum++;
 
@@ -814,7 +886,8 @@ class StoreSalesPerfPerMonth extends BaseController
 				$row->achieved_september,
 				$row->achieved_october,
 				$row->achieved_november,
-				$row->achieved_december
+				$row->achieved_december,
+				'-'
 			], null, "B{$rowNum}");
 			$rowNum++;
 
@@ -854,5 +927,58 @@ class StoreSalesPerfPerMonth extends BaseController
 		}
 		return number_format((float)$value, 2, '.', ',');
 	}
+
+	private function getCalendarWeeks($year) {
+		$weeks = [];
+
+		// ISO week 1 always contains January 4
+		$date = new \DateTime();
+		$date->setDate($year, 1, 4);
+
+		// Move to the Monday of that week
+		$dayOfWeek = (int)$date->format('N'); // 1 (Mon) to 7 (Sun)
+		$date->modify('-' . ($dayOfWeek - 1) . ' days'); // Go back to Monday
+
+		$weekNumber = 1;
+
+		while ((int)$date->format('o') <= $year) {
+			$weekStart = clone $date;
+			$weekEnd = clone $date;
+			$weekEnd->modify('+6 days');
+
+			if ((int)$weekStart->format('o') > $year) break;
+
+			$weeks[] = [
+				'id'      => $weekNumber,
+				'display' => 'Week ' . $weekNumber . ' (' . $weekStart->format('Y-m-d') . ' - ' . $weekEnd->format('Y-m-d') . ')',
+				'week'    => $weekNumber,
+				'start'   => $weekStart->format('Y-m-d'),
+				'end'     => $weekEnd->format('Y-m-d'),
+			];
+
+			$date->modify('+7 days');
+			$weekNumber++;
+		}
+
+		return $weeks;
+	}
+
+
+    private function getCurrentWeek($year = null) {
+        if ($year === null) {
+            $year = (int)date('Y');
+        }
+
+        $weeks = $this->getCalendarWeeks($year);
+        $today = date('Y-m-d');
+
+        foreach ($weeks as $week) {
+            if ($today >= $week['start'] && $today <= $week['end']) {
+                return $week;
+            }
+        }
+
+        return null;
+    }
 	
 }

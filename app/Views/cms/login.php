@@ -53,15 +53,14 @@
             $.post(baseUrl + 'cms/login/validate_log', { username, password })
                 .done(function (response) {
                     try {
-                        const parsedResponse = is_json(response);
-                        const resultCount = parsedResponse.count;
-                        const attempts = parsedResponse.message || "Incorrect Email Address or Password.";
+                        const { count: resultCount, message, attempts } = is_json(response);
+                        const FEEDBACK = attempts || message || "Incorrect Email Address or Password.";
 
                         const messages = {
                             3: ["Login Successful.", `Welcome ${username} !`, "success", () => location.href = baseUrl + 'cms/home'],
                             2: ["Inactive.", "This Account is Inactive.", "warning"],
-                            1: ["Login Failed.", attempts, "error"],
-                            0: ["Login Failed.", attempts, "error"],
+                            1: ["Login Failed.", FEEDBACK, "error"],
+                            0: ["Login Failed.", FEEDBACK, "error"],
                             4: ["Login Failed.", "This account is Blocked/Locked.", "error"],
                             5: ["Login Failed.", "Expired Account.", "error"],
                             6: ["Password is Expired.", "Expired Account.", "error"]

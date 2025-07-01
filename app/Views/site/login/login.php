@@ -63,18 +63,14 @@ $(document).ready(function () {
         $.post(baseUrl + 'login/validate_log', { emailadd, password })
             .done(function (response) {
                 try {
-                    const parsedResponse = is_json(response);
-                    const resultCount = parsedResponse.count;
-                    const attempts = "Incorrect Email Address or Password.";
-
-                    console.log("ATTEMPTS REMAINING:", attempts);
-                    console.log("Result Count:", resultCount);
+                    const { count: resultCount, message, attempts } = is_json(response);
+                    const FEEDBACK = attempts || message || "Incorrect Email Address or Password.";
 
                     const messages = {
                         3: ["Login Successful.", `Welcome ${emailadd} !`, "success", () => location.href = baseUrl + 'dashboard'],
                         2: ["Inactive.", "This Account is Inactive.", "warning"],
-                        1: ["Login Failed.", attempts, "error"],
-                        0: ["Login Failed.", attempts, "error"],
+                        1: ["Login Failed.", FEEDBACK, "error"],
+                        0: ["Login Failed.", FEEDBACK, "error"],
                         4: ["Login Failed.", "This account is Blocked/Locked.", "error"],
                         5: ["Login Failed.", "Expired Account.", "error"],
                         6: ["Password is Expired.", "Expired Account.", "error"]

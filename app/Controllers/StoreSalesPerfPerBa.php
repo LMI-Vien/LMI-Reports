@@ -177,12 +177,6 @@ class StoreSalesPerfPerBa extends BaseController
 
 	public function generatePdf()
 	{	
-		// $month = date('m');
-		// $days = $this->getDaysInMonth($month, $this->getCurrentYear());
-		// $day = date('d');
-		// $tpr = $days - $day; 
-		
-
 		$sysPar = $this->Global_model->getSysPar();
 		$areaId = trim($this->request->getGet('area'));
 		$areaId = $areaId === '' ? null : $areaId;
@@ -255,6 +249,9 @@ class StoreSalesPerfPerBa extends BaseController
 
 	    $brandIds = $this->request->getGet('brands');
         $brandIds = $brandIds === '' ? null : $brandIds;
+
+		$searchValue = trim($this->request->getGet('searchValue'));
+		$searchValue = $searchValue === '' ? null : $searchValue;
 
 		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
 	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
@@ -336,17 +333,7 @@ class StoreSalesPerfPerBa extends BaseController
 			'Month Range'      => ($monthStartMap && $monthEndMap) ? "$monthStartMap $year - $monthEndMap $year" : 'None',
 		];
 
-		// print_r(json_encode($areaMap));
-		// print_r(json_encode($ascMap));
-		// print_r(json_encode($baMap));
-		// print_r(json_encode($storeMap));
-		// print_r(json_encode($brandMap));
-		// print_r(json_encode($monthStartMap));
-		// print_r(json_encode($monthEndMap));
-		// print_r(json_encode($filterData));
-		// die();
-
-		$title = "Store Sales Performance Overall";
+		$title = "Store Sales Performance per Brand Ambassador";
 		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
@@ -362,7 +349,7 @@ class StoreSalesPerfPerBa extends BaseController
 
 		$result = $this->Dashboard_model->
 		salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, 
-		$areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+		$areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds, $searchValue);
 
 		$rows = $result['data'];
 
@@ -402,16 +389,16 @@ class StoreSalesPerfPerBa extends BaseController
 				$row->area_name,
 				$row->store_name,
 				$row->ba_name,
-				$row->ba_deployment_date,
+				$this->formatDate($row->ba_deployment_date),
 				$row->brand_name,
-				$row->ly_scanned_data,
-				$row->actual_sales,
-				$row->target_sales,
+				$this->formatTwoDecimals($row->ly_scanned_data),
+				$this->formatTwoDecimals($row->actual_sales),
+				$this->formatTwoDecimals($row->target_sales),
 				$row->percent_ach,
 				$row->growth,
-				$row->balance_to_target,
-				$row->possible_incentives,
-				$row->target_per_remaining_days
+				$this->formatTwoDecimals($row->balance_to_target),
+				$this->formatTwoDecimals($row->possible_incentives),
+				$this->formatTwoDecimals($row->target_per_remaining_days)
 			];
 
 			$numLinesArray = array_map(function($text) use ($pdf, $colWidth) {
@@ -458,7 +445,12 @@ class StoreSalesPerfPerBa extends BaseController
 
 	// ================================= Display filters for pdf export ================================
 	private function printFilter($pdf, $filters) {
+		$pdf->SetFont('helvetica', 'B', 9);
+		$source = "Actual Sales Report, Scan Data and Target Sales Per Store (LMI/RGDI)";
+		$pdf->MultiCell(0, 8, "Source: " . $source, 0, 'C', 0, 1, '', '', true);
+
 		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Ln(2);
 
 		$pageWidth  = $pdf->getPageWidth();
 		$pageMargin = $pdf->getMargins();
@@ -485,7 +477,17 @@ class StoreSalesPerfPerBa extends BaseController
 			$pdf->Ln(8);
 		}
 
-		$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
+		$currentWeekText = 'Current Week: ' . $currentWeekDisplay;
+		$generatedText   = 'Generated Date: ' . date('M d, Y, h:i:s A');
+
+		// Adjust spacing manually between them
+		$pdf->Cell(100, 6, $currentWeekText, 0, 0, 'L');  // Width ~100mm for week
+		$pdf->Cell(38, 6, '', 0, 0);                      // Spacer ~10mm
+		$pdf->Cell(0, 6, $generatedText, 0, 1, 'L');      // Remaining width for date
+
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');
 		$pdf->Ln(4);
@@ -566,6 +568,9 @@ class StoreSalesPerfPerBa extends BaseController
 	    $brandIds = $this->request->getGet('brands');
         $brandIds = $brandIds === '' ? null : $brandIds;
 
+		$searchValue = trim($this->request->getGet('searchValue'));
+		$searchValue = $searchValue === '' ? null : $searchValue;
+
 		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
 	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
 	    $columns = $this->request->getVar('columns');
@@ -588,9 +593,9 @@ class StoreSalesPerfPerBa extends BaseController
 		}
 		$target_sales = $amountPerDay * $noOfDays;
 
-	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds);
+	    $data = $this->Dashboard_model->salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthId, $monthEndId, $lyYear, $tyYear, $yearId, $storeId, $areaId, $ascId, $baId, $baTypeId, $tpr, $brand_category, $brandIds, $searchValue);
 		
-		$title = "Store Sales Performance per BA";
+		$title = "Store Sales Performance per Brand Ambassador";
 		$rows = $data['data'];
 
 		$baTypeString = '';
@@ -636,25 +641,31 @@ class StoreSalesPerfPerBa extends BaseController
 		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
 
+		$currentWeek = $this->getCurrentWeek();
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-		$sheet->setCellValue('A2', 'Report: Store Sales Performance Overall');
-		$sheet->mergeCells('A1:E1');
-		$sheet->mergeCells('A2:E2');
+		$sheet->setCellValue('A2', 'Report: Store Sales Performance per Brand Ambassador');
+		$sheet->setCellValue('A4', 'Source: Actual Sales Report, Scan Data and Target Sales Per Store (LMI/RGDI)');
+		$sheet->setCellValue('A5', 'Current Week: ' . $currentWeekDisplay);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
+		
 
-		$sheet->setCellValue('A4', 'Area: '   . ($areaMap ?: 'NONE'));
-		$sheet->setCellValue('A5', 'ASC: ' . ($ascMap ?: 'NONE'));
+		$sheet->setCellValue('A7', 'Area: '   . ($areaMap ?: 'NONE'));
+		$sheet->setCellValue('A8', 'ASC: ' . ($ascMap ?: 'NONE'));
 
-		$sheet->setCellValue('B4', 'BA Type: '. ($baTypeString ?: 'NONE'));
-		$sheet->setCellValue('B5', 'BA: ' . ($baMap ?: 'NONE'));
+		$sheet->setCellValue('B7', 'BA Type: '. ($baTypeString ?: 'NONE'));
+		$sheet->setCellValue('B8', 'BA: ' . ($baMap ?: 'NONE'));
 
-		$sheet->setCellValue('C4', 'Store: '  . ($storeMap ?: 'NONE'));
-		$sheet->setCellValue('C5', 'Brand: ' . ($brandMap ?: 'NONE'));
+		$sheet->setCellValue('C7', 'Store: '  . ($storeMap ?: 'NONE'));
+		$sheet->setCellValue('C8', 'Brand: ' . ($brandMap ?: 'NONE'));
 
-		$sheet->setCellValue('D4', 'Month Start: ' . ($monthStartMap ?: 'NONE'));
-		$sheet->setCellValue('D5', 'Month End: '   . ($monthEndMap ?: 'NONE'));
+		$sheet->setCellValue('D7', 'Month Start: ' . ($monthStartMap ?: 'NONE'));
+		$sheet->setCellValue('D8', 'Month End: '   . ($monthEndMap ?: 'NONE'));
 
-		$sheet->setCellValue('E4', 'Year: '        . ($year ?: 'NONE'));
-		$sheet->setCellValue('E5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		$sheet->setCellValue('E7', 'Year: '        . ($year ?: 'NONE'));
+		$sheet->setCellValue('E8', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 		$headers = [
 			"Rank",
@@ -672,10 +683,10 @@ class StoreSalesPerfPerBa extends BaseController
 			"Possible Incentives",
 			"Target per Remaining Days"
 		];
-		$sheet->fromArray($headers, null, 'A8');
-		$sheet->getStyle('A8:N8')->getFont()->setBold(true);
+		$sheet->fromArray($headers, null, 'A10');
+		$sheet->getStyle('A10:N10')->getFont()->setBold(true);
 
-		$rowNum = 9;
+		$rowNum = 11;
 		foreach ($rows as $row) {
 			$sheet->setCellValue('A'.$rowNum,$row->rank);
 			$sheet->setCellValue('B'.$rowNum,$row->area_name);
@@ -707,4 +718,70 @@ class StoreSalesPerfPerBa extends BaseController
 		$writer->save('php://output');
 		exit;
 	}
+
+	private function getCalendarWeeks($year) {
+		$weeks = [];
+
+		// ISO week 1 always contains January 4
+		$date = new \DateTime();
+		$date->setDate($year, 1, 4);
+
+		// Move to the Monday of that week
+		$dayOfWeek = (int)$date->format('N'); // 1 (Mon) to 7 (Sun)
+		$date->modify('-' . ($dayOfWeek - 1) . ' days'); // Go back to Monday
+
+		$weekNumber = 1;
+
+		while ((int)$date->format('o') <= $year) {
+			$weekStart = clone $date;
+			$weekEnd = clone $date;
+			$weekEnd->modify('+6 days');
+
+			if ((int)$weekStart->format('o') > $year) break;
+
+			$weeks[] = [
+				'id'      => $weekNumber,
+				'display' => 'Week ' . $weekNumber . ' (' . $weekStart->format('Y-m-d') . ' - ' . $weekEnd->format('Y-m-d') . ')',
+				'week'    => $weekNumber,
+				'start'   => $weekStart->format('Y-m-d'),
+				'end'     => $weekEnd->format('Y-m-d'),
+			];
+
+			$date->modify('+7 days');
+			$weekNumber++;
+		}
+
+		return $weeks;
+	}
+
+    private function getCurrentWeek($year = null) {
+        if ($year === null) {
+            $year = (int)date('Y');
+        }
+
+        $weeks = $this->getCalendarWeeks($year);
+        $today = date('Y-m-d');
+
+        foreach ($weeks as $week) {
+            if ($today >= $week['start'] && $today <= $week['end']) {
+                return $week;
+            }
+        }
+
+        return null;
+    }
+
+	private function formatTwoDecimals($value): string {
+		if (is_null($value) || !is_numeric($value)) {
+			$value = 0;
+		}
+		return number_format((float)$value, 2, '.', ',');
+	}
+
+	private function formatDate($dateStr) {
+		if (empty($dateStr) || $dateStr === '0000-00-00') return '-';
+		$timestamp = strtotime($dateStr);
+		return date('M-d-y', $timestamp);
+	}
+
 }

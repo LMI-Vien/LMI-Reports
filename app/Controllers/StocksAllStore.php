@@ -107,7 +107,7 @@ class StocksAllStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];
 			$dataHero = json_decode($jsonStringHero, true);
@@ -172,61 +172,6 @@ class StocksAllStore extends BaseController
 	    }
 	}
 
-	// ================================= Display filters for pdf export ================================
-	private function printFilter($pdf, $filters) {
-		$pdf->SetFont('helvetica', '', 9);
-
-		$pageWidth  = $pdf->getPageWidth();
-		$pageMargin = $pdf->getMargins();
-		$perRow   = ceil(count($filters) / 2);
-		$colWidth = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $perRow;
-
-		// split into two “rows”
-		$rows = array_chunk($filters, $perRow, true);
-
-		foreach ($rows as $rowFilters) {
-			foreach ($rowFilters as $key => $value) {
-				$pdf->Cell($colWidth, 8, "{$key}: {$value}", 0, 0, 'L');
-			}
-			$pdf->Ln(8);
-		}
-
-		$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
-		$pdf->Ln(2);
-		$pdf->Cell(0, 0, '', 'T');
-		$pdf->Ln(4);
-	}
-
-	// ================================= Header for pdf export =================================
-	private function printHeader($pdf, $title) {
-		$pdf->SetFont('helvetica', '', 12);
-		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
-		$pdf->SetFont('helvetica', '', 10);
-		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
-		$pdf->Ln(5);
-	}
-
-	private function getParam(string $key) {
-		$v = $this->request->getVar($key);
-		if (is_null($v)) {
-			return null;
-		}
-		// If the request gave us an array, just return it immediately
-		if (is_array($v)) {
-			return $v;
-		}
-		// Otherwise it’s a scalar string—trim it and return or null
-		$v = trim((string)$v);
-		return $v === '' ? null : $v;
-	}
-
-	private function formatComma($value): string {
-		if (!is_numeric($value)) {
-			return (string)$value;
-		}
-		return number_format((float)$value, 0, '.', ',');
-	}
-
 	public function generatePdf() {
 		$areaId    = null;
 		$ascId     = null;
@@ -265,6 +210,16 @@ class StocksAllStore extends BaseController
 			$typeList = [];
 		}
 
+		$searchParams = $this->getParam('search') ?? [];
+		$searchValue = [];
+		if (is_array($searchParams)) {
+			foreach ($searchParams as $key => $value) {
+				$val = trim((string)$value);
+				if ($val !== '') {
+					$searchValue[$key] = $val;
+				}
+			}
+		}
 
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar         = $this->Global_model->getSysPar();
@@ -274,11 +229,13 @@ class StocksAllStore extends BaseController
 		$skuMax         = 30;
 
 		if ($sysPar) {
-			$dataHero = json_decode($sysPar[0]['hero_sku'], true);
-			$heroSku  = array_map(fn($it) => $it['item_class_description'], $dataHero);
+			$jsonStringHero = $sysPar[0]['hero_sku'];
+			$dataHero = json_decode($jsonStringHero, true);
+			$heroSku = array_map(fn($item) => $item['id'], $dataHero);
 
-			$dataNpd  = json_decode($sysPar[0]['new_item_sku'], true);
-			$npdSku   = array_map(fn($it) => $it['item_class_description'], $dataNpd);
+			$jsonStringNpd = $sysPar[0]['new_item_sku'];
+			$dataNpd = json_decode($jsonStringNpd, true);
+			$npdSku = array_map(fn($item) => $item['id'], $dataNpd);
 
 			$skuMin = $sysPar[0]['sm_sku_min'];
 			$skuMax = $sysPar[0]['sm_sku_max'];
@@ -293,17 +250,31 @@ class StocksAllStore extends BaseController
 		$pdf->setPrintFooter(false);
 		$pdf->AddPage();
 
-		$this->printHeader($pdf, $title);
-
 		$result  = $this->Global_model->dynamic_search("'tbl_company'", "''", "'name'", 0, 0, "'id:EQ=$companyId'", "''", "''");
 		$vendorMap = !empty($result) ? $result[0]['name'] : '';
 
+		$itemClassCodes = [];
+		foreach ($itemClassList as $oneClassId) {
+			$result  = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'item_class_code'", 0, 0, "'id:EQ={$oneClassId}'", "''", "''");
+			if (!empty($result) && isset($result[0]['item_class_code'])) {
+				$itemClassCodes[] = $result[0]['item_class_code'];
+			}
+		}
+
+		if (empty($itemClassCodes)) {
+			$itemClassMap = '';  
+		} else {
+			$itemClassMap = implode(', ', $itemClassCodes);
+		}
+
 		$filterData = [
-			'Item Class'       => empty($itemClassList) ? 'None' : implode(', ', $itemClassList),
+			'Item Classes'     => empty($itemClassMap) ? 'None' : $itemClassMap,
 			'Item Category'    => $itemCatId      ?? 'None',
 			'Inventory Status' => empty($typeList) ? 'None' : implode(', ', $typeList),
 			'Vendor'           => $vendorMap      ?? 'None',
 		];
+
+		$this->printHeader($pdf, $title);
 		$this->printFilter($pdf, $filterData);
 
 		//
@@ -375,6 +346,7 @@ class StocksAllStore extends BaseController
 			$limit  = 99999;
 			$offset = 0;
 
+			$currentSearchTerm = $searchValue[strtolower($singleType)] ?? null;
 
 			if ($latestVmiData) {
 				$latestYear = $latestVmiData['year_id'];
@@ -383,19 +355,21 @@ class StocksAllStore extends BaseController
 
 				switch ($singleType) {
 					case 'slowMoving':
-						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId);
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 						break;
 					case 'overStock':
-						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId);
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 						break;
 					case 'npd':
-						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $npdSku, $companyId, $itemClassList, $itemCatId);
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 						break;
 					case 'hero':
-						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $heroSku, $companyId, $itemClassList, $itemCatId);
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 						break;
 					default:
-						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax,$latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId,$companyId, $itemClassList, $itemCatId);
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax,$latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId,$companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 						break;
 				}
 			} else {
@@ -441,7 +415,7 @@ class StocksAllStore extends BaseController
 						$row->item_class,
 						1, 'L', 0, 0, '', '', true, 0, false, true, $rowHeight, 'M', true
 					);
-					$pdf->Cell($colWidth, $rowHeight, $row->sum_ave_sales, 1, 0, 'C');
+					$pdf->Cell($colWidth, $rowHeight, $this->formatTwoDecimals($row->sum_ave_sales), 1, 0, 'C');
 					$pdf->Cell($colWidth, $rowHeight, $row->swc,           1, 1, 'C');
 				} else {
 					// Non‐hero rows (slowMoving / overStock / npd):
@@ -460,7 +434,7 @@ class StocksAllStore extends BaseController
 						$row->item_class,
 						1, 'L', 0, 0, '', '', true, 0, false, true, $rowHeight, 'M', true
 					);
-					$pdf->Cell($colWidth, $rowHeight, $row->sum_total_qty, 1, 0, 'C');
+					$pdf->Cell($colWidth, $rowHeight, $this->formatTwoDecimals($row->sum_total_qty), 1, 0, 'C');
 					$pdf->Cell($colWidth, $rowHeight, $row->sum_ave_sales, 1, 0, 'C');
 					$pdf->Cell($colWidth, $rowHeight, $row->swc,           1, 1, 'C');
 				}
@@ -514,6 +488,17 @@ class StocksAllStore extends BaseController
 			$typeList = [];
 		}
 
+		$searchParams = $this->getParam('search') ?? [];
+		$searchValue = [];
+		if (is_array($searchParams)) {
+			foreach ($searchParams as $key => $value) {
+				$val = trim((string)$value);
+				if ($val !== '') {
+					$searchValue[$key] = $val;
+				}
+			}
+		}
+
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar        = $this->Global_model->getSysPar();
 		$npdSku        = [];
@@ -522,11 +507,13 @@ class StocksAllStore extends BaseController
 		$skuMax        = 30;
 
 		if ($sysPar) {
-			$dataHero = json_decode($sysPar[0]['hero_sku'], true);
-			$heroSku  = array_map(fn($it) => $it['item_class_description'], $dataHero);
+			$jsonStringHero = $sysPar[0]['hero_sku'];
+			$dataHero = json_decode($jsonStringHero, true);
+			$heroSku = array_map(fn($item) => $item['id'], $dataHero);
 
-			$dataNpd  = json_decode($sysPar[0]['new_item_sku'], true);
-			$npdSku   = array_map(fn($it) => $it['item_class_description'], $dataNpd);
+			$jsonStringNpd = $sysPar[0]['new_item_sku'];
+			$dataNpd = json_decode($jsonStringNpd, true);
+			$npdSku = array_map(fn($item) => $item['id'], $dataNpd);
 
 			$skuMin = $sysPar[0]['sm_sku_min'];
 			$skuMax = $sysPar[0]['sm_sku_max'];
@@ -535,27 +522,46 @@ class StocksAllStore extends BaseController
 		$result  = $this->Global_model->dynamic_search("'tbl_company'", "''", "'name'", 0, 0, "'id:EQ=$companyId'", "''", "''");
 		$vendorMap = !empty($result) ? $result[0]['name'] : '';
 
-		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+		$itemClassCodes = [];
+		foreach ($itemClassList as $oneClassId) {
+			$result  = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'item_class_code'", 0, 0, "'id:EQ={$oneClassId}'", "''", "''");
+			if (!empty($result) && isset($result[0]['item_class_code'])) {
+				$itemClassCodes[] = $result[0]['item_class_code'];
+			}
+		}
+
+		if (empty($itemClassCodes)) {
+			$itemClassMap = '';  
+		} else {
+			$itemClassMap = implode(', ', $itemClassCodes);
+		}
+
+		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
+
+		$currentWeek = $this->getCurrentWeek();
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
 
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
 		$sheet->setCellValue('A2', 'Report: Overall Stock Data of All Stores');
-		$sheet->mergeCells('A1:E1');
-		$sheet->mergeCells('A2:E2');
+		$sheet->setCellValue('A4', 'Source: VMI (LMI/RGDI)');
+		$sheet->setCellValue('A5', 'Current Week: ' . $currentWeekDisplay);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
 
-		$sheet->setCellValue('A4', 'Item Class:');
-		$sheet->setCellValue('B4', implode(', ', $itemClassList) ?: 'None');
-		$sheet->setCellValue('C4', 'Inventory Category:');
-		$sheet->setCellValue('D4', $itemCatId      ?? 'None');
+		$sheet->setCellValue('A7', 'Item Class:');
+		$sheet->setCellValue('B7', empty($itemClassMap) ? 'None' : $itemClassMap);
+		$sheet->setCellValue('C7', 'Inventory Category:');
+		$sheet->setCellValue('D7', $itemCatId      ?? 'None');
 
-		$sheet->setCellValue('A5', 'Inventory Status:');
-		$sheet->setCellValue('B5', implode(', ', $typeList) ?: 'None');
-		$sheet->setCellValue('C5', 'Vendor:');
-		$sheet->setCellValue('D5', $vendorMap      ?? 'None');
+		$sheet->setCellValue('A8', 'Inventory Status:');
+		$sheet->setCellValue('B8', implode(', ', $typeList) ?: 'None');
+		$sheet->setCellValue('C8', 'Vendor:');
+		$sheet->setCellValue('D8', $vendorMap      ?? 'None');
 
-		$sheet->setCellValue('A6', 'Generated: ' . date('M d, Y, h:i:s A'));
+		$sheet->setCellValue('A9', 'Generated: ' . date('M d, Y, h:i:s A'));
 
-		$currentRow = 8;
+		$currentRow = 11;
 
 		foreach ($typeList as $sectionIndex => $singleType) {
 			// 6a) If not the very first block, leave a blank row
@@ -625,29 +631,33 @@ class StocksAllStore extends BaseController
 			$limit  = 99999;
 			$offset = 0;
 
+			$currentSearchTerm = $searchValue[strtolower($singleType)] ?? null;
+
 			if ($latestVmiData) {
 				$latestYear = $latestVmiData['year_id'];
 				$latestWeek = $latestVmiData['week_id'];
 
 				switch ($singleType) {
 					case 'slowMoving':
-						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId);
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 					break;
 
 					case 'overStock':
-						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId);
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 					break;
 
 					case 'npd':
-						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $npdSku, $companyId, $itemClassList, $itemCatId);
+						$itemClassFilter = $npdSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 					break;
 
 					case 'hero':
-						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $heroSku, $companyId, $itemClassList, $itemCatId);
+						$itemClassFilter = $heroSku;
+						$data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 					break;
 
 					default:
-						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId);
+						$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $itemClassList, $itemCatId, $currentSearchTerm);
 					break;
 				}
 			} else {
@@ -705,6 +715,172 @@ class StocksAllStore extends BaseController
 		$writer->save('php://output');
 		exit;
 	}
+
+	// ================================= Display filters for pdf export ================================
+	private function printFilter($pdf, $filters) {
+		$pdf->SetFont('helvetica', '', 9);
+		$source = "VMI (LMI/RGDI)";
+		$pdf->MultiCell(0, 8, "Source: " . $source, 0, 'C', 0, 1, '', '', true);
+
+		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Ln(2);
+
+		$pageWidth  = $pdf->getPageWidth();
+		$pageMargin = $pdf->getMargins();
+		$usableWidth = $pageWidth - $pageMargin['left'] - $pageMargin['right'];
+
+		$perRow   = ceil(count($filters) / 2);
+		$colWidth = $usableWidth / $perRow; 
+
+		$rows = array_chunk($filters, $perRow, true);
+
+		foreach ($rows as $rowFilters) {
+			$currentX = $pdf->GetX();
+			$currentY = $pdf->GetY();
+
+			$cellBaseHeight = 5;  
+			$maxLines       = 1;
+
+			foreach ($rowFilters as $key => $value) {
+				$txt = "{$key}: {$value}";
+				$numLines = $pdf->getNumLines($txt, $colWidth);
+				if ($numLines > $maxLines) {
+					$maxLines = $numLines;
+				}
+			}
+
+			$rowHeight = $cellBaseHeight * $maxLines;
+
+			$x = $currentX;
+			foreach ($rowFilters as $key => $value) {
+				$txt = "{$key}: {$value}";
+
+				$pdf->MultiCell(
+					$colWidth,        
+					$cellBaseHeight,  
+					$txt,             
+					0,               
+					'L',              
+					false,            
+					0,                
+					$x,               
+					$currentY,        
+					true,             
+					0,                
+					false,           
+					true,             
+					$rowHeight,      
+					'T',              
+					false             
+				);
+
+				$x += $colWidth;
+			}
+
+			$pdf->Ln($rowHeight);
+		}
+
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
+		$currentWeekText = 'Current Week: ' . $currentWeekDisplay;
+		$generatedText   = 'Generated Date: ' . date('M d, Y, h:i:s A');
+
+		$pdf->Cell(100, 6, $currentWeekText, 0, 0, 'L');  
+		$pdf->Cell(38, 6, '', 0, 0);                      
+		$pdf->Cell(0, 6, $generatedText, 0, 1, 'L');
+
+		$pdf->Ln(2);
+		$pdf->Cell(0, 0, '', 'T');
+		$pdf->Ln(4);
+	}
+
+	// ================================= Header for pdf export =================================
+	private function printHeader($pdf, $title) {
+		$pdf->SetFont('helvetica', '', 12);
+		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
+		$pdf->SetFont('helvetica', '', 10);
+		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
+		$pdf->Ln(5);
+	}
+
+	private function getParam(string $key) {
+		$v = $this->request->getVar($key);
+		if (is_null($v)) {
+			return null;
+		}
+
+		if (is_array($v)) {
+			return $v;
+		}
+
+		$v = trim((string)$v);
+		return $v === '' ? null : $v;
+	}
+
+	private function formatComma($value): string {
+		if (!is_numeric($value)) {
+			return (string)$value;
+		}
+		return number_format((float)$value, 0, '.', ',');
+	}
+
+	private function formatTwoDecimals($value): string {
+		if (is_null($value) || !is_numeric($value)) {
+			$value = 0;
+		}
+		return number_format((float)$value, 2, '.', ',');
+	}
+
+	private function getCalendarWeeks($year) {
+		$weeks = [];
+
+		$date = new \DateTime();
+		$date->setDate($year, 1, 4);
+
+		$dayOfWeek = (int)$date->format('N');
+		$date->modify('-' . ($dayOfWeek - 1) . ' days');
+
+		$weekNumber = 1;
+
+		while ((int)$date->format('o') <= $year) {
+			$weekStart = clone $date;
+			$weekEnd = clone $date;
+			$weekEnd->modify('+6 days');
+
+			if ((int)$weekStart->format('o') > $year) break;
+
+			$weeks[] = [
+				'id'      => $weekNumber,
+				'display' => 'Week ' . $weekNumber . ' (' . $weekStart->format('Y-m-d') . ' - ' . $weekEnd->format('Y-m-d') . ')',
+				'week'    => $weekNumber,
+				'start'   => $weekStart->format('Y-m-d'),
+				'end'     => $weekEnd->format('Y-m-d'),
+			];
+
+			$date->modify('+7 days');
+			$weekNumber++;
+		}
+
+		return $weeks;
+	}
+
+    private function getCurrentWeek($year = null) {
+        if ($year === null) {
+            $year = (int)date('Y');
+        }
+
+        $weeks = $this->getCalendarWeeks($year);
+        $today = date('Y-m-d');
+
+        foreach ($weeks as $week) {
+            if ($today >= $week['start'] && $today <= $week['end']) {
+                return $week;
+            }
+        }
+
+        return null;
+    }
 
 
 }

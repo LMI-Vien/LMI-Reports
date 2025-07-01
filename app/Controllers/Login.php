@@ -141,7 +141,7 @@ class Login extends BaseController
 		// Check if the email exists
 		$account = $this->Global_model->check_email($email);
 		if (!$account) {
-			echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'attempts' => '']);
+			echo json_encode(['count' => 1, 'result' => null, 'message' => 'It seems that you\'re not in my database.', 'attempts' => '']);
 			return;
 		}
 	

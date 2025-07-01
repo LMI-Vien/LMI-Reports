@@ -115,6 +115,9 @@ class StoreSalesPerfOverall extends BaseController
 		$orderColumnIndex = isset($order['column']) ? (int) $order['column'] : 0;
 		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc']) ? strtolower($order['dir']) : 'asc';
 
+		$searchValue = trim($this->getParam('searchValue') ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+
 		// helper closure to turn empty values into “None”
 		$dv = function($value, $default = 'None') {
 			if (is_array($value)) {
@@ -167,6 +170,10 @@ class StoreSalesPerfOverall extends BaseController
 		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthEnd'", "''", "''");
 		$monthEndMap = !empty($result) ? $result[0]['month'] : '';
 
+		$years = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "''", "''", "''");
+		$year_values = array_column($years, 'year');
+		$latest_year = !empty($year_values) ? max($year_values) : 'N/A';
+
 		$filterData = [
 			'Area'             => $dv($areaMap),
 			'ASC'              => $dv($ascMap),
@@ -189,11 +196,11 @@ class StoreSalesPerfOverall extends BaseController
 		$pdf->AddPage();
 
 		$this->printHeader($pdf, $title);
-		$this->printFilter($pdf, $filterData);
+		$this->printFilter($pdf, $filterData, $latest_year);
 
 		$pdf->SetFont('helvetica', '', 9);
 
-		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, 9999, 0, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands);
+		$result = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, 9999, 0, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands, $searchValue);
 		$rows = $result['data'];
 
 		$pageWidth  = $pdf->getPageWidth();
@@ -246,41 +253,6 @@ class StoreSalesPerfOverall extends BaseController
 		exit;
 	}
 
-	// ================================= Header for pdf export =================================
-	private function printHeader($pdf, $title) {
-		$pdf->SetFont('helvetica', '', 12);
-		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
-		$pdf->SetFont('helvetica', '', 10);
-		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
-		$pdf->Ln(5);
-	}
-
-	// ================================= Display filters for pdf export ================================
-	private function printFilter($pdf, $filters) {
-		$pdf->SetFont('helvetica', '', 9);
-
-		$pageWidth  = $pdf->getPageWidth();
-		$pageMargin = $pdf->getMargins();
-		$perRow   = ceil(count($filters) / 2);
-		$colWidth = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $perRow;
-
-		// split into two “rows”
-		$rows = array_chunk($filters, $perRow, true);
-
-		foreach ($rows as $rowFilters) {
-			foreach ($rowFilters as $key => $value) {
-				$pdf->Cell($colWidth, 8, "{$key}: {$value}", 0, 0, 'L');
-			}
-			$pdf->Ln(8);
-		}
-
-		$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
-		$pdf->Ln(2);
-		$pdf->Cell(0, 0, '', 'T');
-		$pdf->Ln(4);
-	}
-
-
 	public function generateExcel() {
 		$area              = $this->getParam('area');
 		$asc               = $this->getParam('asc');
@@ -303,8 +275,11 @@ class StoreSalesPerfOverall extends BaseController
 		$orderColumnIndex = isset($order['column']) ? (int) $order['column'] : 0;
 		$orderDirection   = isset($order['dir']) && in_array(strtolower($order['dir']), ['asc','desc']) ? strtolower($order['dir']) : 'asc';
 
+		$searchValue = trim($this->getParam('searchValue') ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+
 		$title = "Overall Store Sales Growth";
-		$data = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, $limit, $offset, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands);
+		$data = $this->Dashboard_model->getStorePerformance($monthStart, $monthEnd, $orderColumnIndex, $orderDirection, $year, $limit, $offset, $area, $asc, $store, $brandAmbassador, $baType, $brandCategories, $brands, $searchValue);
 		$rows   = $data['data'];
 
 		$baTypeString = '';
@@ -350,27 +325,36 @@ class StoreSalesPerfOverall extends BaseController
 		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthEnd'", "''", "''");
 		$monthEndMap = !empty($result) ? $result[0]['month'] : '';
 
+		$years = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "''", "''", "''");
+		$year_values = array_column($years, 'year');
+		$latest_year = !empty($year_values) ? max($year_values) : 'N/A';
+
 		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
 
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
 		$sheet->setCellValue('A2', 'Report: Overall Store Sales Growth');
-		$sheet->mergeCells('A1:E1');
-		$sheet->mergeCells('A2:E2');
+		$sheet->setCellValue('A4', 'Source: Scan Data(LMI/RGDI) - ' . $latest_year);
+		$sheet->setCellValue('A5', 'Current Week: ' . $currentWeekDisplay);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
 
-		$sheet->setCellValue('A4', 'Store: '  . ($storeMap ?: 'NONE'));
-		$sheet->setCellValue('B4', 'Area: '   . ($areaMap       ?: 'NONE'));
-		$sheet->setCellValue('C4', 'Sort By: '. ($ascMap        ?: 'NONE'));
-		$sheet->setCellValue('D4', 'BA Type: '. ($baTypeString     ?: 'NONE'));
-		$sheet->setCellValue('E4', 'Brand: ' . ($brandMap     ?: 'NONE'));
-		$sheet->setCellValue('F4', 'Brand Ambassador: ' . ($baMap ?: 'NONE'));
-		$sheet->setCellValue('A5', 'Brand Category: ' . ($brandLabelMap ?: 'NONE'));
-		$sheet->setCellValue('B5', 'ASC: ' . ($ascMap ?: 'NONE'));
+		$sheet->setCellValue('A7', 'Store: '  . ($storeMap ?: 'NONE'));
+		$sheet->setCellValue('B7', 'Area: '   . ($areaMap       ?: 'NONE'));
+		$sheet->setCellValue('C7', 'Sort By: '. ($ascMap        ?: 'NONE'));
+		$sheet->setCellValue('D7', 'BA Type: '. ($baTypeString     ?: 'NONE'));
+		$sheet->setCellValue('E7', 'Brand: ' . ($brandMap     ?: 'NONE'));
+		$sheet->setCellValue('F7', 'Brand Ambassador: ' . ($baMap ?: 'NONE'));
+		$sheet->setCellValue('A8', 'Brand Category: ' . ($brandLabelMap ?: 'NONE'));
+		$sheet->setCellValue('B8', 'ASC: ' . ($ascMap ?: 'NONE'));
 
-		$sheet->setCellValue('C5', 'Month Start: ' . ($monthStartMap ?: 'NONE'));
-		$sheet->setCellValue('D5', 'Month End: '   . ($monthEndMap   ?: 'NONE'));
-		$sheet->setCellValue('E5', 'Year: '        . ($year       ?: 'NONE'));
-		$sheet->setCellValue('F5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		$sheet->setCellValue('C8', 'Month Start: ' . ($monthStartMap ?: 'NONE'));
+		$sheet->setCellValue('D8', 'Month End: '   . ($monthEndMap   ?: 'NONE'));
+		$sheet->setCellValue('E8', 'Year: '        . ($year       ?: 'NONE'));
+		$sheet->setCellValue('F8', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 		$headers = [
 			"Rank",
@@ -380,11 +364,11 @@ class StoreSalesPerfOverall extends BaseController
 			"% Growth",
 			"Share of Business"
 		];
-		$sheet->fromArray($headers, null, 'A8');
-		$sheet->getStyle('A8:F8')->getFont()->setBold(true);
+		$sheet->fromArray($headers, null, 'A10');
+		$sheet->getStyle('A10:F10')->getFont()->setBold(true);
 
 
-		$rowNum = 9;
+		$rowNum = 11;
 		foreach ($rows as $row) {
 			$sheet->setCellValue('A'.$rowNum,$row->rank);
 			$sheet->setCellValue('B'.$rowNum,$row->store_name);
@@ -425,5 +409,106 @@ class StoreSalesPerfOverall extends BaseController
 			fn($i) => $i > 0
 		);
 	}
+
+	// ================================= Header for pdf export =================================
+	private function printHeader($pdf, $title) {
+		$pdf->SetFont('helvetica', '', 12);
+		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
+		$pdf->SetFont('helvetica', '', 10);
+		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
+		$pdf->Ln(5);
+	}
+
+	// ================================= Display filters for pdf export ================================
+	private function printFilter($pdf, $filters, $latestYear = null) {
+		$pdf->SetFont('helvetica', 'B', 9);
+		$source = "Scan Data(LMI/RGDI) - " . ($latestYear ?? 'N/A');
+		$pdf->MultiCell(0, 8, "Source: " . $source, 0, 'C', 0, 1, '', '', true);
+
+		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Ln(2);
+
+		$pageWidth  = $pdf->getPageWidth();
+		$pageMargin = $pdf->getMargins();
+		$perRow   = ceil(count($filters) / 2);
+		$colWidth = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $perRow;
+
+		// split into two “rows”
+		$rows = array_chunk($filters, $perRow, true);
+
+		foreach ($rows as $rowFilters) {
+			foreach ($rowFilters as $key => $value) {
+				$pdf->Cell($colWidth, 8, "{$key}: {$value}", 0, 0, 'L');
+			}
+			$pdf->Ln(8);
+		}
+
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
+		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+
+		$currentWeekText = 'Current Week: ' . $currentWeekDisplay;
+		$generatedText   = 'Generated Date: ' . date('M d, Y, h:i:s A');
+
+		// Adjust spacing manually between them
+		$pdf->Cell(100, 6, $currentWeekText, 0, 0, 'L');  // Width ~100mm for week
+		$pdf->Cell(66, 6, '', 0, 0);                      // Spacer ~10mm
+		$pdf->Cell(0, 6, $generatedText, 0, 1, 'L');      // Remaining width for date
+
+		$pdf->Ln(2);
+		$pdf->Cell(0, 0, '', 'T');
+		$pdf->Ln(4);
+	}
+
+	private function getCalendarWeeks($year) {
+		$weeks = [];
+
+		// ISO week 1 always contains January 4
+		$date = new \DateTime();
+		$date->setDate($year, 1, 4);
+
+		// Move to the Monday of that week
+		$dayOfWeek = (int)$date->format('N'); // 1 (Mon) to 7 (Sun)
+		$date->modify('-' . ($dayOfWeek - 1) . ' days'); // Go back to Monday
+
+		$weekNumber = 1;
+
+		while ((int)$date->format('o') <= $year) {
+			$weekStart = clone $date;
+			$weekEnd = clone $date;
+			$weekEnd->modify('+6 days');
+
+			if ((int)$weekStart->format('o') > $year) break;
+
+			$weeks[] = [
+				'id'      => $weekNumber,
+				'display' => 'Week ' . $weekNumber . ' (' . $weekStart->format('Y-m-d') . ' - ' . $weekEnd->format('Y-m-d') . ')',
+				'week'    => $weekNumber,
+				'start'   => $weekStart->format('Y-m-d'),
+				'end'     => $weekEnd->format('Y-m-d'),
+			];
+
+			$date->modify('+7 days');
+			$weekNumber++;
+		}
+
+		return $weeks;
+	}
+
+    private function getCurrentWeek($year = null) {
+        if ($year === null) {
+            $year = (int)date('Y');
+        }
+
+        $weeks = $this->getCalendarWeeks($year);
+        $today = date('Y-m-d');
+
+        foreach ($weeks as $week) {
+            if ($today >= $week['start'] && $today <= $week['end']) {
+                return $week;
+            }
+        }
+
+        return null;
+    }
 
 }
