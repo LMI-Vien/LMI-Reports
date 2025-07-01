@@ -359,6 +359,10 @@
 
     function handleAction(action) {
         const selectedInventoryStatus = $('#inventoryStatus').val();
+        var tableSlowMoving = $('input[aria-controls="table_slowMoving"]').val() || '';
+        var tableHero = $('input[aria-controls="table_hero"]').val() || '';
+        var tableNpd = $('input[aria-controls="table_npd"]').val() || '';
+        var tableOverStock = $('input[aria-controls="table_overStock"]').val() || '';
 
         const params = new URLSearchParams();
         params.append('area', $('#areaId').val() || '');
@@ -367,6 +371,10 @@
         params.append('ba', $('#brandAmbassadorId').val() || '');
         params.append('store', $('#storeNameId').val() || '');
         params.append('types', JSON.stringify(selectedInventoryStatus));
+        params.append('table_slowMoving', tableSlowMoving);
+        params.append('table_hero', tableHero);
+        params.append('table_npd', tableNpd);
+        params.append('table_overStock', tableOverStock);
 
         const brands = $('#brands').val();
         if (Array.isArray(brands)) {
