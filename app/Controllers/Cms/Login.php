@@ -98,7 +98,7 @@ class Login extends BaseController
 	    $account = valid_email($username) ? $this->Global_model->check_email($username) : $this->Global_model->check_user($username);
 	    
 	    if (!$account) {
-	        echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials']);
+	        echo json_encode(['count' => 1, 'result' => null, 'message' => 'It seems that you\'re not in my database.']);
 	        return;
 	    }
 
@@ -116,12 +116,12 @@ class Login extends BaseController
 
 	    // Check if account is blocked or locked
 	    if ($user->user_block_logs == 3) {
-	        echo json_encode(['count' => 5, 'result' => null, 'message' => 'Account is blocked', 'message' => $login_attempts]);
+	        echo json_encode(['count' => 5, 'result' => null, 'message' => 'Account is blocked', 'attempts' => $login_attempts]);
 	        return;
 	    }
 	    
 	    if ($user->user_lock_time && $current_datetime < $user->user_lock_time) {
-	        echo json_encode(['count' => 4, 'result' => null, 'message' => 'Account is temporarily locked', 'message' => $login_attempts]);
+	        echo json_encode(['count' => 4, 'result' => null, 'message' => 'Account is temporarily locked', 'attempts' => $login_attempts]);
 	        return;
 	    }
 
@@ -138,7 +138,7 @@ class Login extends BaseController
 	            : $this->Global_model->validate_log($username, $password);
 	    if(empty($data)){
 			$this->get_error_logs($username);
-		    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'message' => $login_attempts]);
+		    echo json_encode(['count' => 1, 'result' => null, 'message' => 'Invalid credentials', 'attempts' => $login_attempts]);
 		    return;
 	    }        
 	    if ($data->status > 0 ) {
