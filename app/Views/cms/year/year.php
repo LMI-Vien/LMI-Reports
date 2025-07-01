@@ -687,7 +687,6 @@
         }
 
         aJax.post(url, data, function(result) {
-            console.log(result);
             // return;
             var obj = is_json(result);
             if (obj && obj.length > 0 && obj[0].last_sort_order !== null) {

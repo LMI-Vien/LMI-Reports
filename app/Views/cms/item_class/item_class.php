@@ -590,11 +590,9 @@
     //                 };
 
     //                 aJax.post(url, data, function(response) {
-    //                     console.log("Raw Response:", response);
 
     //                     try {
     //                         var obj = JSON.parse(response);
-    //                         console.log("Parsed Response Data:", obj);
 
     //                         if (!obj || obj.length === 0) { 
     //                             console.error("Invalid or empty response:", response);
@@ -602,7 +600,6 @@
     //                         }
 
     //                         var teamCount = Number(obj[0].team_count) || 0;
-    //                         console.log("Team Count:", teamCount);
 
     //                         if (teamCount > 0) { 
     //                             modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
@@ -627,7 +624,6 @@
         aJax.post(url, data, function(response) {
             try {
                 var obj = JSON.parse(response);
-                console.log("Item Class Counts:", obj);
 
                 let item = obj.find(row => row.id == id);
 
@@ -855,8 +851,6 @@
                 });
                 return fixedRow;
             });
-
-            console.log(jsonData);
 
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);

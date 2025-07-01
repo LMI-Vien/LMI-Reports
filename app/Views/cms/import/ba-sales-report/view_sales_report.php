@@ -186,7 +186,6 @@
     var base_url = '<?= base_url();?>';
     var ba_sales_report_date = "<?=$uri->getSegment(4);?>";
     var query = "basr.status >= 0 and basr.date = '"+ba_sales_report_date+"'";
-    console.log(query);
 
     $(document).ready(function() {
         get_data(query);
@@ -233,8 +232,6 @@
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
-
-            console.log(result);
 
             if(result) {
                 if (result.length > 0) {
@@ -296,8 +293,6 @@
         open_modal(id, date);
 
         updateModalTitle("Total Amount");
-        
-        console.log(id, date);
     }
 
     // function open_modal(id) {
@@ -338,12 +333,10 @@
     //     }
 
     //     aJax.post(url,data,function(result){
-    //         // console.log("result mo to: ",result)
     //         var obj = is_json(result);
     //         if(obj){
     //             $.each(obj, function(index,y) {
     //                 $('#id').val(y.id);
-    //                 // console.log(y.id);
     //                 $('#ba_name').val(y.ba_name);
     //                 $('#ba_total_amount').val(y.total_amount);
     //             }); 
@@ -374,7 +367,6 @@
         };
 
         aJax.post(url, data, function(result) {
-            console.log("AJAX Response:", result);
             var obj = is_json(result);
             if (obj && obj.length > 0) {
                 let totalAmount = 0; 

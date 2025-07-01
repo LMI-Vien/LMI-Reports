@@ -946,7 +946,6 @@
         });
 
         // let search_string = unique_brandAmbs.join('|');
-        // console.log(search_string, 'search_string'); 
         // dynamic_search(
         //     "'tbl_brand_ambassador_group a'", 
         //     "'left join tbl_brand_ambassador b on a.brand_ambassador_id = b.id'", 
@@ -958,14 +957,12 @@
         //     `''`,
         //     (res) => {
         //         console.clear();
-        //         console.log(res, res.length, search_string, actions, id);
         //         let err_msg = 'These Brand Ambassadors have already been added to a different Store.';
 
         //         let invalidItems = res.filter(item => item.store_id !== id);
 
         //         if (invalidItems.length !== 0) {
         //             $.each(invalidItems, function(index, item) {
-        //                 console.log(`id: ${id}`, `brand ambassador id: ${item.brand_ambassador_id}`, `store id: ${item.store_id}`);
         //             });
 
         //             modal.loading(false);

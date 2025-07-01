@@ -93,10 +93,8 @@
             };
 
             aJax.post("<?=base_url('cms/error-logs/get-error-log-files');?>",data, function(result){
-                obj = is_json(result);          
-           // console.log(obj);
+                obj = is_json(result);   
               obj = obj.data;
-              console.log(obj);
                var html = "";    
             if (obj) {
                 if (obj.length > 0) {
@@ -112,7 +110,6 @@
                     html = '<tr><td colspan=12 class="colspan-no-record">'+ no_records +'</td></tr>';
                 }
             }
-            console.log(html);
             $('.table_body').html(html);
             
         }, function(result) {

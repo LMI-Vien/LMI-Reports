@@ -69,7 +69,6 @@ self.onmessage = async function(e) {
                 } else if (Array.isArray(bas)) {
                     ba_list = bas.map(s => String(s).trim().toLowerCase());
                 }
-                //console.log(ba_list);
                 // for (let s of ba_list) {
                 //     if (s in ba_lookup) {
                 //         let ba_id = ba_lookup[s];

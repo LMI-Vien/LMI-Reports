@@ -1509,18 +1509,14 @@
 
     function startTimer() {
         startTime = new Date(); 
-        console.log("Timer started at: " + startTime.toLocaleTimeString());
     }
 
     function stopTimer() {
         if (!startTime) {
-            console.log("Timer was not started!");
             return;
         }
         
         endTime = new Date(); // Get the current time
-        console.log("Timer stopped at: " + endTime.toLocaleTimeString());
-        
         let timeDiff = endTime - startTime; // Time difference in milliseconds
         let seconds = Math.floor(timeDiff / 1000); // Convert to seconds
         let minutes = Math.floor(seconds / 60);
@@ -1528,8 +1524,6 @@
         
         seconds = seconds % 60; // Remaining seconds
         minutes = minutes % 60; // Remaining minutes
-
-        console.log(`Elapsed time: ${hours}h ${minutes}m ${seconds}s`);
     }
 
     function download_template() {
@@ -1586,7 +1580,6 @@
              * @param {Array} res - ajax response containing store records
              */
             const processResponse = (res) => {
-                console.log(res)
                 formattedData = res.map(({
                     asc_code, asc_description, 
                     status, deployment_date, 
@@ -1634,8 +1627,6 @@
                 `''`, 
                 (res) => {
                     if (res && res.length > 0) {
-                        console.log(res[0].total_records, 'asc count');
-
                         let asc_count = res[0].total_records; // Total number of records
 
                         // Fetch data in batches of 100,000 records
@@ -1650,7 +1641,6 @@
                                 `''`, 
                                 `''`, 
                                 (res) => {
-                                    console.log(res)
                                     let newData = res.map(({
                                         asc_code, asc_description, 
                                         status, deployment_date, 
@@ -1669,7 +1659,7 @@
                         }
                         
                     } else {
-                        console.log('No data received'); // error handling
+                        //console.log('No data received'); // error handling
                     }
                 }
             );
@@ -1678,9 +1668,6 @@
 
         // Initiate data retrieval
         fetchAscs();
-
-        console.log(formattedData, 'formattedData')
-
         // Header information for the exported Excel file
         const headerData = [
             ["Company Name: Lifestrong Marketing Inc."],
@@ -1694,8 +1681,6 @@
 
         // Hide the loading progress modal
         modal.loading_progress(false);
-
-        console.log('done');
         stopTimer();
     };
 

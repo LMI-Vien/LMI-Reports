@@ -124,7 +124,6 @@
             var url = "<?= site_url('dashboard/get-ba-asc-name'); ?>";
             $.post(url, { name: session_user_name }, function(response) {
                 let res = response;
-                console.log(response);
                 if (res && res.status === 'success') {
                     callback(res.data); // pass { brandAmbassador, brandAmbassadorId, ascName, ascNameId, area, areaId }
                 } else {
@@ -243,7 +242,6 @@
                                 $("#refreshButton").click();
 
                             } else if (url === 'store/sales-overall-growth' && role === 8) {
-                                console.log('adsa');
                                 $("#ascName").val(info.ascName);
                                 $("#ascNameId").val(info.ascNameId);
                                 $("#storeName").val('Cubao'); // Optional: dynamic?

@@ -207,7 +207,6 @@
     //     };
 
     //     aJax.post(url, data, (response) => {
-    //         console.log(response);
     //         modal.loading(false);
     //         const result = JSON.parse(response);
     //         if (!result || result.length === 0) return;
@@ -652,11 +651,8 @@
             });
 
             if (!ids.size) {
-                console.log(`[mapField] nothing to map for ${field}`);
                 return resolve();
             }
-
-            console.log(`[mapField] fetching ${field} IDs:`, Array.from(ids));
 
             aJax.post(url, {
                 event:  'list',
@@ -665,7 +661,6 @@
                 query:  'id IN (' + Array.from(ids).join(',') + ')'
                 }, resp => {
                 const rows = JSON.parse(resp);
-                console.log(`[mapField] got rows for ${field}:`, rows);
 
                 // build id → label map
                 const lookup = {};
@@ -701,7 +696,6 @@
             limit:  1
         }, (resp) => {
             const entry   = JSON.parse(resp)[0] || {};
-            console.log('RAW ENTRY:', entry);
 
             let newData   = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
             let oldData   = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
@@ -711,9 +705,6 @@
             const normalize = x => Array.isArray(x) ? x : [x];
             const newArr = normalize(newData);
             const oldArr = normalize(oldData);
-
-            console.log('Parsed newData:', newData);
-            console.log('Parsed oldData:', oldData);
 
             // 2) Status code → label
             [newArr, oldArr].forEach(arr => {
@@ -778,16 +769,12 @@
                 default:                               configsToMap = []; 
             }
 
-            console.log('Mapping configs for module', entry.module, configsToMap);
-
             // Kick off one mapField promise per config
             const mapPromises = configsToMap.map(cfg =>
                 mapField(cfg, newArr, oldArr, url)
             );
 
             Promise.all(mapPromises).then(() => {
-                console.log('After mapField: newData =', newArr);
-                console.log('After mapField: oldData =', oldArr);
 
                 // 4) Now do the generic created_by / updated_by lookup
                 const idsToLookup = new Set();
