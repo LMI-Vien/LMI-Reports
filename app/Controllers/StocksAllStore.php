@@ -107,7 +107,7 @@ class StocksAllStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];
 			$dataHero = json_decode($jsonStringHero, true);
