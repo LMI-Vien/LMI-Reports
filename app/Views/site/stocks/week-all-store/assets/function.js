@@ -266,6 +266,10 @@
         let selectedWeekFrom      = $('#week_from').val();
         let selectedWeekTo        = $('#week_to').val();
         let selectedDataSource    = $('#dataSource').val();
+        var tableSlowMoving = $('input[aria-controls="table_slowMoving"]').val() || '';
+        var tableHero = $('input[aria-controls="table_hero"]').val() || '';
+        var tableNpd = $('input[aria-controls="table_npd"]').val() || '';
+        var tableOverStock = $('input[aria-controls="table_overStock"]').val() || '';
 
         let params = new URLSearchParams();
         params.append('itemClass',    selectedItemClass   || '');
@@ -275,6 +279,11 @@
         params.append('weekFrom',     selectedWeekFrom   || '');
         params.append('weekTo',       selectedWeekTo     || '');
         params.append('source',       selectedDataSource || '');
+        params.append('search',       '');
+        params.append('table_slowMoving', tableSlowMoving.trim());
+        params.append('table_hero', tableHero.trim());
+        params.append('table_npd', tableNpd.trim());
+        params.append('table_overStock', tableOverStock.trim());
 
         let tableTypes = ['slowMoving','overStock','npd','hero'];
         let tableCount = 0;
