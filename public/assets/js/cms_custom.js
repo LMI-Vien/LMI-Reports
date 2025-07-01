@@ -617,8 +617,8 @@ var modal = {
 }
 
 function updateSwalProgress(title, progress) {
-    if (progress > 100) {
-        progress = 90;
+    if (progress > 98) {
+        progress = 98;
     }
     $("#progress-bar").css("width", progress + "%");
     if(progress){
