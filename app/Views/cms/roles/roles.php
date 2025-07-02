@@ -553,7 +553,6 @@ ul.child_menu {
             site_menu_role_data : site_menu_data,
             user_role_data : role_id
         }
-        // console.log(data);
         // return;
         aJax.post("<?= base_url('cms/roles/menu-update');?>",data,function(result){
             modal.loading(false);

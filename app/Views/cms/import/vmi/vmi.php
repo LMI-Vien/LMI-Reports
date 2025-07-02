@@ -1877,7 +1877,6 @@
             },
             success: function (res) {
                 if (res.status === 'started') {
-                    //console.log('Export started:', res.filename);
                     modal.loading(false);
                     modal.alert("Excel generation has started. Please wait 5–10 minutes for the VMI file to download automatically.", "success");
 

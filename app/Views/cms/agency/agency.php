@@ -630,14 +630,9 @@
                     };
 
                     aJax.post(url, data, function(response) {
-                        console.log("Raw Response:", response);
-
                         try {
                             var obj = JSON.parse(response);
-                            console.log("Parsed Response Data:", obj);
-
                             if (!Array.isArray(obj)) { 
-                                console.error("Invalid response format:", response);
                                 modal.alert("Error processing response data.", "error", ()=>{});
                                 return;
                             }
@@ -648,7 +643,6 @@
                             }
 
                             var Count = Number(obj[0].agency_count) || 0;
-                            console.log("Count:", Count);
 
                             if (Count > 0) { 
                                 modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
@@ -656,7 +650,6 @@
                                 proceed_delete(id); 
                             }
                         } catch (e) {
-                            console.error("Error parsing response:", e, response);
                             modal.alert("Error processing response data.", "error", ()=>{});
                         }
                     });
@@ -1019,8 +1012,6 @@
                 return fixedRow;
             });
 
-            console.log(jsonData);
-
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
             });
@@ -1303,11 +1294,9 @@
             dynamic_search("'tbl_agency'", "''", "'COUNT(id) as total_records'", 0, 0, `'status:IN=0|1'`,  `''`, `''`, (res) => {
                 if (res && res.length > 0) {
                     let total_records = res[0].total_records;
-                    console.log(total_records, 'total records');
 
                     for (let index = 0; index < total_records; index += 100000) {
                         dynamic_search("'tbl_agency'", "''", "'code, agency, status'", 100000, index, `'status:IN=0|1'`,  `''`, `''`, (res) => {
-                            console.log(res, 'look here')
                             let newData = res.map(({ 
                                 code, agency, status
                             }) => ({
@@ -1319,7 +1308,7 @@
                         })
                     }
                 } else {
-                    console.log('No data received');
+                    //console.log('No data received');
                 }
             })
         };

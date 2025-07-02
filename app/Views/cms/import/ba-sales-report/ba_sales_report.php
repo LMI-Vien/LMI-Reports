@@ -447,7 +447,6 @@
         aJax.post(url,data,function(result){
             var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
             modal.loading(false);
-            console.log(obj, 'obj')
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
     }
@@ -676,8 +675,6 @@
                 });
                 return fixedRow;
             });
-
-            console.log(jsonData);
 
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
@@ -925,7 +922,6 @@
                     const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
 
                     saveImportDetailsToServer(dataWithNames, headers, 'import_ba_sales_report', url, function(filePath) {
-                        console.log("valid data: ", valid_data);
                         const end_time = new Date();
                         const duration = formatDuration(start_time, end_time);
 
@@ -1529,7 +1525,7 @@
                                 )
                             }
                         } else {
-                            console.log('No data received');
+                            //console.log('No data received');
                         }
                     }
                 )

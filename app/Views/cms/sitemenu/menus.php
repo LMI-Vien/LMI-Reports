@@ -149,19 +149,13 @@
                     $.each(result, (x,y) => {
                         menu_id_list.push(y.menu_parent_id,);
                     })
-                    console.log(menu_id_list)
                     
                     get_field_values('site_menu', 'menu_name', 'id', menu_id_list, (res)=>{
-                        console.log(res)
-                        
                         $.each(res, (x,y) => {
                             menu_mapping[x] = y;
                         })
                         menu_mapping[0] = ''
-                        console.log(menu_mapping, 'menu_mapping')
                     })
-
-                    console.log(menu_mapping, 'menu_mapping')
 
                     $.each(result, (x,y) => {
                         html += '<tr>';
@@ -475,7 +469,7 @@
         } else {
             status = '0'
         }
-        console.log(menu_name, menu_url, menu_type, sub_menu_id, status)
+
         if (id !== undefined && id !== null && id !== '') {
             db_fields = ["id", "menu_name"];
             input_fields = [id, menu_name];
@@ -491,14 +485,12 @@
         check_current_db("site_menu", db_fields, input_fields, "status" , excludeField, excludeId, true, function(exists, duplicateFields) {
             if(!exists) {
                 if (id !== undefined && id !== null && id !== '') {
-                    console.log('edit')
                     modal.confirm(confirm_update_message,function(result){
                         if(result) {
                             save_to_db(menu_name, menu_url, menu_type, sub_menu_id, status, id)
                         }
                     })
                 } else {
-                    console.log('save')
                     modal.confirm(confirm_add_message,function(result){
                         if (result) {
                             save_to_db(menu_name, menu_url, menu_type, sub_menu_id, status, null)

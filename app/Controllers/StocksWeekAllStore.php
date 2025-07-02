@@ -99,7 +99,6 @@ class StocksWeekAllStore extends BaseController
 			$npdSku = array_map(fn($item) => $item['id'], $dataNpd);
 		    $skuMin = $sysPar[0]['sm_sku_min'];
 		    $skuMax = $sysPar[0]['sm_sku_max'];
-		    $skuMin = 1;
 		}
 
 			$orderDirection = strtoupper($orderDirection);
@@ -261,7 +260,6 @@ class StocksWeekAllStore extends BaseController
 
 	// 		$skuMin = $sysPar[0]['sm_sku_min'];
 	// 		$skuMax = $sysPar[0]['sm_sku_max'];
-	// 		$skuMin = 1;
 	// 	}
 
 	// 	$limit  = 99999;
@@ -547,7 +545,6 @@ class StocksWeekAllStore extends BaseController
 			$npdSku = array_map(fn($item) => $item['id'], $dataNpd);
 		    $skuMin = $sysPar[0]['sm_sku_min'];
 		    $skuMax = $sysPar[0]['sm_sku_max'];
-		    $skuMin = 1;
 		}
 
 		$weekCols = [];
@@ -911,7 +908,6 @@ class StocksWeekAllStore extends BaseController
 
 	// 		$skuMin = $sysPar[0]['sm_sku_min'];
 	// 		$skuMax = $sysPar[0]['sm_sku_max'];
-	// 		$skuMin = 1;
 	// 	}
 
 	// 	// Build dynamic "Week X" column names (for non-hero sections)
@@ -1180,7 +1176,6 @@ class StocksWeekAllStore extends BaseController
 			$npdSku = array_map(fn($item) => $item['id'], $dataNpd);
 		    $skuMin = $sysPar[0]['sm_sku_min'];
 		    $skuMax = $sysPar[0]['sm_sku_max'];
-		    $skuMin = 1;
 		}
 
 		$weekCols = [];
@@ -1426,7 +1421,6 @@ class StocksWeekAllStore extends BaseController
 
 				$rowNum++;
 			}
-			// die('a most horrible death');
 			$rowNum++;
 		}
 

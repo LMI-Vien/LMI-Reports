@@ -1063,7 +1063,6 @@
                     `''`,
                     (res) => {
                         year = [year];
-                        console.log(year);
                         batch_delete(url, "tbl_accounts_target_sellout_pa", "year", year, 'year', function(resp) {
                             modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                         });
@@ -1121,8 +1120,6 @@
                 });
                 return fixedRow;
             });
-
-            console.log(jsonData);
 
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
@@ -1289,8 +1286,6 @@
         worker.onmessage = function(e) {
             modal.loading_progress(false);
             const { invalid, errorLogs, valid_data, err_counter } = e.data;
-            console.log(invalid);
-            console.log(valid_data, 'valid_data');
             if (invalid) {
                 let errorMsg = err_counter > 1000 
                     ? '⚠️ Too many errors detected. Please download the error log for details.'
@@ -1450,7 +1445,6 @@
                     const url = "<?= base_url('cms/global_controller/save_import_log_file') ?>";
 
                     saveImportDetailsToServer(valid_data, headers, 'import_target_sell_out_per_account', url, function(filePath) {
-                        console.log(valid_data);
                         const end_time = new Date();
                         const duration = formatDuration(start_time, end_time);
 
@@ -1738,7 +1732,6 @@
                 `''`, 
                 `''`,
                 (res) => {
-                    console.log(year, res);
                     let store_ids = []
                     let store_map = {}
             
@@ -2008,7 +2001,6 @@
                                 )
                             }
                         } else {
-                            console.log('No data received');
                         }
                     }
                 )

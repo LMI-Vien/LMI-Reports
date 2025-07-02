@@ -548,8 +548,8 @@
                 year : $("#year").val(),
                 week: $("#week").val(),
             },
-            success: function (response) { console.log(response) },
-            error: function (xhr, status, error) { console.log(xhr, status, error) }
+            success: function (response) { },
+            error: function (xhr, status, error) {}
         });
     }
 

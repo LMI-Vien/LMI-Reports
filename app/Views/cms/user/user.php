@@ -307,7 +307,6 @@
     // $(document).on('click', '.delete_data', function() {
     //     var id = $(this).attr('id');
     //     delete_data(id); 
-    //     // console.log('hello');
     // });
 
     // $(document).on('click', '.edit', function() {

@@ -654,11 +654,9 @@
                     };
 
                     aJax.post(url, data, function(response) {
-                        console.log("Raw Response:", response);
 
                         try {
                             var obj = JSON.parse(response);
-                            console.log("Parsed Response Data:", obj);
 
                             if (!obj || obj.length === 0) { 
                                 console.error("Invalid or empty response:", response);
@@ -877,8 +875,6 @@
                 });
                 return fixedRow;
             });
-
-            console.log(jsonData);
 
             processInChunks(jsonData, 5000, () => {
                 paginateData(rowsPerPage);
@@ -1317,7 +1313,6 @@
                 (res) => {
                     if (res && res.length > 0) {
                         let total_records = res[0].total_records;
-                        console.log(total_records, 'total records');
 
                         for (let index = 0; index < total_records; index += 100000) {
                             dynamic_search(
@@ -1335,7 +1330,6 @@
                             )
                         }
                     } else {
-                        console.log('No data received');
                     }
                 }
             )
