@@ -393,27 +393,24 @@
         populateDropdown(id, getCalendarWeeks(selectedYear), 'display', 'id');
     }
 
-    const getCalendarWeeks = (year) => {
+    function getCalendarWeeks(year) {
         const weeks = [];
-        const startDate = new Date(year, 0, 1); // Jan 1
-        const day = startDate.getDay(); // day of the week (0 = Sunday)
-        
-        const firstMonday = new Date(startDate);
-        if (day !== 1) {
-            const offset = (day === 0 ? 1 : (9 - day)); 
-            firstMonday.setDate(startDate.getDate() + offset);
-        }
-        
-        let currentDate = new Date(firstMonday);
+
+        // Start from the first Monday of the ISO week 1
+        let date = new Date(year, 0, 4); // Jan 4 is always in the first ISO week
+        const day = date.getDay();
+        const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+        date.setDate(date.getDate() + diff);
+
         let weekNumber = 1;
-        
-        while (currentDate.getFullYear() <= year) {
-            const weekStart = new Date(currentDate);
-            const weekEnd = new Date(currentDate);
+
+        while (date.getFullYear() <= year || (date.getFullYear() === year + 1 && weekNumber < 54)) {
+            const weekStart = new Date(date);
+            const weekEnd = new Date(date);
             weekEnd.setDate(weekEnd.getDate() + 6);
-        
-            if (weekStart.getFullYear() > year) break;
-            
+
+            if (weekStart.getFullYear() > year && weekEnd.getFullYear() > year) break;
+
             weeks.push({
                 id: weekNumber,
                 display: `Week ${weekNumber} (${weekStart.toISOString().slice(0, 10)} - ${weekEnd.toISOString().slice(0, 10)})`,
@@ -421,10 +418,10 @@
                 start: weekStart.toISOString().slice(0, 10),
                 end: weekEnd.toISOString().slice(0, 10),
             });
-            
-            currentDate.setDate(currentDate.getDate() + 7);
+
+            date.setDate(date.getDate() + 7); // move to next Monday
         }
-        
+
         return weeks;
     }
 
