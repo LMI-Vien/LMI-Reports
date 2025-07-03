@@ -77,13 +77,14 @@ class Role extends BaseController
 
 	public function audit_trail()
 	{
-		$auditData['user_id'] = session()->sess_uid;
-		$auditData['url'] =str_replace(base_url("dynamic") . '/', "", $_SERVER['HTTP_REFERER']); ;
+		$auditData['user'] = session()->sess_name;
+		$auditData['module'] =str_replace(base_url("dynamic") . '/', "", $_SERVER['HTTP_REFERER']); ;
 	  	$auditData['action'] = strip_tags(ucwords("Create"));
-	  	$auditData['created_date'] = date('Y-m-d H:i:s'); 
-		$table = 'cms_audit_trail';
+	  	$auditData['created_at'] = date('Y-m-d H:i:s');
+	  	$auditData['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; 
+		$table = 'activity_logs';
 
-		if($auditData['user_id'] != null){
+		if($auditData['user'] != null){
 			$this->Global_model->save_data($table,$auditData);
 		}
 	}

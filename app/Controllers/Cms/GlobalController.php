@@ -910,11 +910,12 @@ class GlobalController extends BaseController
 
 	public function audit_trail()
 	{
-	    $data['user_id'] = $session->sess_uid;
-	  	$data['url'] =str_replace(base_url("cms") . '/', "", rtrim($_POST['uri'],"#")); ;
+	    $data['user'] = $session->sess_name;
+	  	$data['module'] = str_replace(base_url("cms") . '/', "", rtrim($_POST['uri'],"#"));
+	  	$data['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 	  	$data['action'] = strip_tags(ucwords($_POST['action']));
-	  	$data['created_date'] = date('Y-m-d H:i:s'); 
-	  	$table = 'cms_audit_trail';
+	  	$data['created_at'] = date('Y-m-d H:i:s'); 
+	  	$table = 'activity_logs';
 	  	$this->Global_model->save_data($table,$data);
 	}
 

@@ -264,13 +264,14 @@ class Login extends BaseController
 	        ];
 
 	        // Add to audit trail
-	        // $data2 = [
-	        //     'user_id' => $value->id,
-	        //     'url' => "",
-	        //     'action' => strip_tags(ucwords("Login")),
-	        //     'created_date' => date('Y-m-d H:i:s')
-	        // ];
-	        // $this->Global_model->save_data('cms_audit_trail', $data2);
+	        $data2 = [
+	            'user' => $value->name,
+	            'module' => "Dashboard",
+	            'action' => strip_tags(ucwords("Login")),
+	            'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+	            'created_at' => date('Y-m-d H:i:s')
+	        ];
+	        $this->Global_model->save_data('activity_logs', $data2);
 	    }
 	    $session->set($newdata);
 	}
@@ -278,26 +279,17 @@ class Login extends BaseController
 	public function logout() {
 	    $session = session();
 
+        $data2 = [
+            'user' => $value->name,
+            'module' => "Dashboard",
+            'action' => strip_tags(ucwords("Logout")),
+            'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        $this->Global_model->save_data('activity_logs', $data2);
+
 	    $sessionKeys = ['sess_site_uid', 'sess_site_user', 'sess_site_email', 'sess_site_name', 'sess_site_role'];
 	    $session->remove($sessionKeys);
 		return redirect()->to(base_url("/login")); 
 	}
-
-	    // $audit_data['user_id'] = $session->get('sess_uid');
-	  	// $audit_data['url'] ="";
-	  	// $audit_data['action'] = strip_tags(ucwords("Logout"));
-	  	// $audit_data['created_date'] = date('Y-m-d H:i:s'); 
-	  	// $table = 'cms_audit_trail';
-
-	  	// if($audit_data['user_id'] != null){
-	  	// 	$this->Global_model->save_data($table,$audit_data);
-	  	// }
-
-	// public function sign_out()
-	// {
-	// 	$session = session();
-	// 	$session->setTempdata('logout_data', 'You are successfully logged out.', 5);
-	// 	redirect(base_url('login'));
-	// }
-
 }

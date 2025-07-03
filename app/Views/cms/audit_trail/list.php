@@ -28,7 +28,7 @@
                                         <th class = 'center-align-format'>Device IP</th>
                                         <th class = 'center-align-format'>Download Logs</th>
                                         <th class = 'center-align-format'>Remarks</th>
-                                        <th class = 'center-align-format'>Action</th>
+                                        <th class = 'center-align-format'>View</th>
                                     </tr>  
                                  </thead>
                                 <tbody class="table_body word_break">
@@ -97,7 +97,7 @@
                         html += '<td>' + (y.ip_address ?? '-') + '</td>';
                         html += '<td>' + (y.link ?? '-') + '</td>';
                         html += '<td>' + (y.remarks ?? '-') + '</td>';
-                        if(y.new_data != ""){
+                        if (y.new_data !== "" && y.new_data !== null) {
                             html += '   <td style="width: 50px;"><a class="view_history" href="#" data-id="'+y.id+'"><i class="fa fa-eye"></i></a></td>';
                         } else {
                             html += '   <td style="width: 50px;"></td>';
@@ -185,73 +185,6 @@
         get_pagination(new_query);
     });
 
-    // $(document).on('click', '.view_history', function (e) {
-    //     e.preventDefault();
-    //     modal.loading(true);
-
-    //     const data_id = $(this).attr("data-id");
-    //     const query = "id = " + data_id;
-    //     const url = "<?= base_url("cms/global_controller"); ?>";
-
-    //     const data = {
-    //         event: "list",
-    //         select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
-    //         query: query,
-    //         offset: offset,
-    //         limit: limit,
-    //         table: "activity_logs",
-    //         order: {
-    //             field: "created_at",
-    //             order: "desc"
-    //         }
-    //     };
-
-    //     aJax.post(url, data, (response) => {
-    //         modal.loading(false);
-    //         const result = JSON.parse(response);
-    //         if (!result || result.length === 0) return;
-
-    //         const entry = result[0];
-
-    //         const newData = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
-    //         let oldData = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
-
-    //         // Fix: If old_data is an array with one object, extract the first object
-    //         if (Array.isArray(oldData) && oldData.length === 1) {
-    //             oldData = oldData[0];
-    //         }
-
-    //         const allKeys = new Set([...Object.keys(newData), ...Object.keys(oldData)]);
-
-    //         let html = '<table class="col-md-12 table table-bordered m-t-20"><thead><tr>';
-    //         html += '<th class="center-align-format al-100-px">Field</th>';
-    //         html += '<th class="center-align-format al-370-px">Old Data</th>';
-    //         html += '<th class="center-align-format al-370-px">New Data</th>';
-    //         html += '</tr></thead><tbody>';
-
-    //         if (allKeys.size > 0) {
-    //             allKeys.forEach(key => {
-    //                 const oldVal = oldData[key] ?? 'No Data';
-    //                 const newVal = newData[key] ?? 'No Data';
-    //                 const changed = oldVal !== newVal;
-
-    //                 html += '<tr>';
-    //                 html += `<td class="al-100-px">${key}</td>`;
-    //                 html += `<td class="w-370-px">${oldVal}</td>`;
-    //                 html += `<td class="w-370-px ${changed ? 'bg-c7cdfa' : ''}">${newVal}</td>`;
-    //                 html += '</tr>';
-    //             });
-    //         } else {
-    //             html += '<tr><td colspan="3" class="text-center">No changes found</td></tr>';
-    //         }
-
-    //         html += '</tbody></table>';
-
-    //         modal.show('<div class="scroll-500">' + html + '</div>', "large", function () { });
-    //     });
-    // });
-
-
     $(document).on('click', '#btnFilterDr', function() {
         var startDate = $('#startDate').val();
         var endDate   = $('#endDate').val();
@@ -285,165 +218,6 @@
         get_data(query);
     });
 
-    // mapping of the created_by and updated_by fields to usernames
-    // $(document).on('click', '.view_history', function (e) {
-    //     e.preventDefault();
-    //     modal.loading(true);
-
-    //     const dataId = $(this).attr('data-id');
-    //     const url    = "<?= base_url('cms/global_controller') ?>";
-
-    //     // 1) Fetch the activity log entry
-    //     aJax.post(url, {
-    //         event:  'list',
-    //         select: "id, user, module, action, new_data, old_data, remarks, ip_address, created_at",
-    //         query:  'id=' + dataId,
-    //         table:  'activity_logs',
-    //         order:  { 
-    //             field: 'created_at',
-    //             order: 'desc' 
-    //         },
-    //         limit:  1
-    //     }, (resp) => {
-    //         const entry   = JSON.parse(resp)[0] || {};
-    //         let newData = is_json(entry.new_data) ? JSON.parse(entry.new_data) : {};
-    //         let oldData = is_json(entry.old_data) ? JSON.parse(entry.old_data) : {};
-
-    //         // If oldData is an array of one, just unpack it
-    //         if (Array.isArray(oldData) && oldData.length === 1) {
-    //             oldData = oldData[0];
-    //         }
-
-    //         // 2) Convert status codes (0/1) into human-readable labels
-    //         [newData, oldData].forEach(obj => {
-    //             if (obj.status !== undefined) {
-    //                 obj.status = obj.status == 1 ? 'Active' : 'Inactive';
-    //             }
-    //         });
-
-    //         // Helper to build & show the diff table
-    //         function renderTable() {
-    //             modal.loading(false);
-
-    //             const allKeys = new Set([
-    //                 ...Object.keys(oldData),
-    //                 ...Object.keys(newData)
-    //             ]);
-
-    //             let html = `
-    //                 <table class="col-md-12 table table-bordered m-t-20">
-    //                 <thead>
-    //                     <tr>
-    //                     <th class="center-align-format al-100-px">Field</th>
-    //                     <th class="center-align-format al-370-px">Old Data</th>
-    //                     <th class="center-align-format al-370-px">New Data</th>
-    //                     </tr>
-    //                 </thead>
-    //                 <tbody>
-    //             `;
-
-    //             if (allKeys.size) {
-    //                 allKeys.forEach(key => {
-    //                 const o = oldData[key] ?? 'No Data';
-    //                 const n = newData[key] ?? 'No Data';
-    //                 const changed = o !== n;
-
-    //                 html += `
-    //                     <tr>
-    //                     <td class="al-100-px">${key}</td>
-    //                     <td class="w-370-px">${o}</td>
-    //                     <td class="w-370-px ${changed ? 'bg-c7cdfa' : ''}">${n}</td>
-    //                     </tr>
-    //                 `;
-    //                 });
-    //             } else {
-    //                 html += `
-    //                 <tr>
-    //                     <td colspan="3" class="text-center">No changes found</td>
-    //                 </tr>
-    //                 `;
-    //             }
-
-    //             html += `
-    //                 </tbody>
-    //                 </table>
-    //             `;
-
-    //             modal.show(
-    //                 '<div class="scroll-500">' + html + '</div>',
-    //                 'large'
-    //             );
-    //         }
-
-            
-
-    //         // 3) Gather any user-ID fields we need to lookup
-    //         const idsToLookup = new Set();
-    //             // // created_by 
-    //             // if (newData.created_by) idsToLookup.add(newData.created_by);
-    //             // if (oldData.created_by) idsToLookup.add(oldData.created_by);
-
-    //             // // updated_by
-    //             // if (newData.updated_by) idsToLookup.add(newData.updated_by);
-    //             // if (oldData.updated_by) idsToLookup.add(oldData.updated_by);
-
-    //             ['created_by', 'updated_by'].forEach(field => {
-    //                 if (newData[field]) idsToLookup.add(newData[field]);
-    //                 if (oldData[field]) idsToLookup.add(oldData[field]);
-    //             });
-
-    //             // if there's nothing to map, just render immediately
-    //             if (idsToLookup.size === 0) {
-    //                 return renderTable();
-    //             }
-
-
-    //         // 4) Batch-fetch all usernames at once
-    //         const idList = Array.from(idsToLookup).join(',');
-    //             aJax.post(url, {
-    //                 event:  'list',
-    //                 select: 'id, username',
-    //                 query:  'id IN (' + idList + ')',
-    //                 table:  'cms_users'
-    //             }, (userResp) => {
-    //                 const users = JSON.parse(userResp);
-    //                 const userMap   = {};
-    //             users.forEach(u => { userMap[u.id] = u.username; });
-
-                
-    //             // if (newData.created_by && map[newData.created_by]) {
-    //             //     newData.created_by = map[newData.created_by];
-    //             // }
-    //             // if (oldData.created_by && map[oldData.created_by]) {
-    //             //     oldData.created_by = map[oldData.created_by];
-    //             // }
-    //             // if (newData.updated_by && map[newData.updated_by]) {
-    //             //     newData.updated_by = map[newData.updated_by];
-    //             // }
-    //             // if (oldData.updated_by && map[oldData.updated_by]) {
-    //             //     oldData.updated_by = map[oldData.updated_by];
-    //             // }
-
-    //             // 5) Swap IDs for usernames in both oldData & newData
-    //             ['created_by', 'updated_by'].forEach(field => {
-    //                 if (newData[field] && userMap[newData[field]]) {
-    //                     newData[field] = userMap[newData[field]];
-    //                 }
-    //                 if (oldData[field] && userMap[oldData[field]]) {
-    //                     oldData[field] = userMap[oldData[field]];
-    //                 }
-    //             });
-
-    //             renderTable();
-    //         });
-    //     });
-    // });
-
-
-    // THIS IS GOOD STUFF, it works but needed to review why on earth it works. 
-    // ——————————————————————————————
-    // 0) Module lookup configurations
-    // ——————————————————————————————
     const lookupConfigs = {
         'brand-ambassador': [                   // module name
             {

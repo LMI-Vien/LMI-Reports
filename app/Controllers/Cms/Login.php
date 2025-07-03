@@ -232,12 +232,13 @@ class Login extends BaseController
 
 	        // Add to audit trail
 	        $data2 = [
-	            'user_id' => $value->id,
-	            'url' => "",
+	            'user' => $value->name,
+	            'module' => "CMS",
 	            'action' => strip_tags(ucwords("Login")),
-	            'created_date' => date('Y-m-d H:i:s')
+	            'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+	            'created_at' => date('Y-m-d H:i:s')
 	        ];
-	        $this->Global_model->save_data('cms_audit_trail', $data2);
+	        $this->Global_model->save_data('activity_logs', $data2);
 	    }
 	    $session->set($newdata);
 	}
@@ -245,8 +246,8 @@ class Login extends BaseController
 	public function sign_out() {
 
 		//for VMI export only
+		$session = session();
 	    $filename = session()->get('pending_export_file');
-
 	    if ($filename) {
 	        $filePath = WRITEPATH . 'exports/' . basename($filename);
 	        if (file_exists($filePath)) {
@@ -255,17 +256,16 @@ class Login extends BaseController
 	        session()->remove('pending_export_file');
 	    }
 
-		$session = session();
-	    $data2['user_id'] = $session->get('sess_uid');
-	  	$data2['url'] ="";
+	    $data2['user'] = $session->get('sess_name');
+	  	$data2['module'] ="CMS";
 	  	$data2['action'] = strip_tags(ucwords("Logout"));
-	  	$data2['created_date'] = date('Y-m-d H:i:s'); 
-	  	$table = 'cms_audit_trail';
+	  	$data2['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; 
+	  	$data2['created_at'] = date('Y-m-d H:i:s'); 
+	  	$table = 'activity_logs';
 
-	  	if($data2['user_id'] != null){
+	  	if($data2['user'] != null){
 	  		$this->Global_model->save_data($table,$data2);
 	  	}
-	  	$session = session();
 	  	//$session->destroy();
 		$sessionKeys = ['sess_uid', 'sess_user', 'sess_email', 'sess_name', 'sess_role'];
 	    $session->remove($sessionKeys);
