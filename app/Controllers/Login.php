@@ -280,7 +280,7 @@ class Login extends BaseController
 	    $session = session();
 
         $data2 = [
-            'user' => $value->name,
+            'user' => $session->get('sess_site_name'),
             'module' => "Dashboard",
             'action' => strip_tags(ucwords("Logout")),
             'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',

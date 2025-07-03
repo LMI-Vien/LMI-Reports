@@ -84,21 +84,22 @@
                             id="step5" 
                             >
                                 <div class="row g-2">
-                                <div class="col-12 col-md-6"
-                                id="step3"
-                                >
-                                    <button type="button" class="btn btn-secondary w-100 btn-sm" id="clearButton">
-                                    <i class="fas fa-sync-alt"></i> Clear
-                                    </button>
+                                    <div class="col-12 col-md-6"
+                                    id="step3"
+                                    >
+                                        <button type="button" class="btn btn-secondary w-100 btn-sm" id="clearButton">
+                                        <i class="fas fa-sync-alt"></i> Clear
+                                        </button>
+                                    </div>
+                                    <div class="col-12 col-md-6"
+                                    id="step4" style="margin-bottom: 60px;"
+                                    >
+                                        <button type="button" class="btn btn-primary w-100 btn-sm" id="refreshButton">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-12 col-md-6"
-                                id="step4"
-                                >
-                                    <button type="button" class="btn btn-primary w-100 btn-sm" id="refreshButton">
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                    </button>
-                                </div>
-                                </div>
+                                <div class="row g-2"></div>
                             </div>
 
                         </div>

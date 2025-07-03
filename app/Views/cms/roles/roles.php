@@ -297,8 +297,8 @@ ul.child_menu {
                                 + ", "+ y.status + ")\" data-status='"
                                 + y.status + "' id='"
                                 + y.id + "' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span></a>";
-                            if(y.id > 4){
-                                html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";    
+                            if (y.id > 4 && y.id != 7 && y.id != 8) {
+                                html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>"; 
                             }    
                             
                             html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";

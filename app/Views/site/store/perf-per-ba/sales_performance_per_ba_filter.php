@@ -113,7 +113,7 @@
                                     <i class="fas fa-sync-alt"></i> Clear
                                     </button>
                                 </div>
-                                <div class="col-12 col-md-6">
+                                <div class="col-12 col-md-6" style="margin-bottom: 60px;">
                                     <button type="button" class="btn btn-primary w-100 btn-sm" id="refreshButton">
                                     <i class="fas fa-sync-alt"></i> Refresh
                                     </button>
