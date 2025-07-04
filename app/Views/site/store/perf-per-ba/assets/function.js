@@ -1,5 +1,5 @@
-    $(document).ready(function() {
 
+    $(document).ready(function() {
         const currentWeek = getCurrentWeek();
         if (currentWeek) {
             $('#currentWeek').text(currentWeek.display);

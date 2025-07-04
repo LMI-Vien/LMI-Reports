@@ -470,6 +470,18 @@ class Dashboard_model extends Model
 
 	public function salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null, $searchValue = null)
 	{
+		$roleId = session()->sess_site_role ?? null;
+		$maskedLyScannedField = ($roleId == 7 || $roleId == 8)
+		    ? "'-' AS ly_scanned_data"
+		    : "FORMAT(
+		        CASE 
+		            WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN 
+		                ROUND(COALESCE(ly.ly_scanned_data, 0) / 
+		                     (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
+		            ELSE COALESCE(ly.ly_scanned_data, 0)
+		        END, 2
+		    ) AS ly_scanned_data";
+
 		$range = ($monthTo - $monthFrom) + 1;
 		$startDate = $tyYear .'-'. $monthFrom . '-01';
 		$endDate = $tyYear .'-'. $monthTo . '-31';
@@ -652,16 +664,7 @@ class Dashboard_model extends Model
 			        END
 			    ), 0) * 100, 2
 			) AS percent_ach,
-
-		    FORMAT(
-		        CASE 
-		            WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN 
-		                ROUND(COALESCE(ly.ly_scanned_data, 0) / 
-		                     (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
-		            ELSE COALESCE(ly.ly_scanned_data, 0)
-		        END, 2
-		    ) AS ly_scanned_data,
-
+			{$maskedLyScannedField},
 		    CASE 
 		        WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN
 		            ROUND(
@@ -810,6 +813,11 @@ class Dashboard_model extends Model
 	    $endDate = $tyYear . '-' . $monthTo . '-31';
 	    $brandIds = is_array($brandIds) ? $brandIds : [];
 
+		$roleId = session()->sess_site_role ?? null;
+		$maskedLyScannedField = ($roleId == 7 || $roleId == 8)
+		    ? "'-' AS ly_scanned_data"
+		    : "FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data";
+
 	    $searchColumns = [
 	        'a.description',        //area
 	        'd_asc.description'      //asc
@@ -943,7 +951,7 @@ class Dashboard_model extends Model
 	        ROUND(
 	            COALESCE(sd.actual_sales, 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
 	        ) AS percent_ach,
-	        FORMAT(COALESCE(ly.ly_scanned_data, 0),2) AS ly_scanned_data,
+	        $maskedLyScannedField,
 	        ROUND(
 	            (COALESCE(sd.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
 	            2
@@ -1358,7 +1366,6 @@ class Dashboard_model extends Model
 			     THEN 'N/A'
 			     ELSE ROUND((t.ty_sell_out_december - l.ly_sell_out_december) / l.ly_sell_out_december * 100, 2)
 			END AS growth_december,
-			-- eto
 	        SUM(ts.target_sales_jan - mt.amount_january) AS balance_to_target_jan,
 			SUM(ts.target_sales_feb - mt.amount_february) AS balance_to_target_feb,
 			SUM(ts.target_sales_mar - mt.amount_march) AS balance_to_target_mar,

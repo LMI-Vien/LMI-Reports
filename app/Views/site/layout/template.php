@@ -3,7 +3,7 @@
 	$uri = current_url(true); 
 ?>
 	<?= view("site/layout/header", $meta); ?>
-    <body class="hold-transition sidebar-mini layout-fixed">
+    <body class="hold-transition sidebar-mini layout-fixed body-class">
 	    <div class="wrapper">
 			<?= view("site/layout/navigation"); ?>	
 			<?= view($content); ?> 

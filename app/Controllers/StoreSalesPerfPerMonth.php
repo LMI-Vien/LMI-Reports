@@ -441,19 +441,36 @@ class StoreSalesPerfPerMonth extends BaseController
 			$rowH = 8;
 			$pdf->SetFont('helvetica', '', 7);
 			$pdf->Cell($colWidth, $rowH, 'LY Sell Out', 1, 0, 'L');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_january), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_february), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_march), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_april), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_may), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_june), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_july), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_august), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_september), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_october), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_november), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_december), 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_ly_sell_out), 1, 1, 'C');
+
+			if($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8){
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 1, 'C');
+			}else{
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_january), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_february), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_march), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_april), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_may), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_june), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_july), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_august), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_september), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_october), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_november), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->ly_sell_out_december), 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_ly_sell_out), 1, 1, 'C');
+			}
 
 			$pdf->SetFont('helvetica', '', 7);
 			$pdf->Cell($colWidth, $rowH, 'TY Sell Out', 1, 0, 'L');
@@ -549,7 +566,6 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $row->achieved_december, 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, '-', 1, 1, 'C');
 		}
-
 		$pdf->Output($title . '.pdf', 'D');
 		exit;
 	}
@@ -760,7 +776,24 @@ class StoreSalesPerfPerMonth extends BaseController
 		foreach ($rows as $row) {
 			// LY Sell Out
 			$sheet->setCellValue("A{$rowNum}", 'LY Sell Out');
-			$sheet->fromArray([
+			if($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8){
+				$sheet->fromArray([
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-',
+				'-'
+			], null, "B{$rowNum}");
+			}else{
+			    $sheet->fromArray([
 				$row->ly_sell_out_january,
 				$row->ly_sell_out_february,
 				$row->ly_sell_out_march,
@@ -775,6 +808,7 @@ class StoreSalesPerfPerMonth extends BaseController
 				$row->ly_sell_out_december,
 				$row->total_ly_sell_out
 			], null, "B{$rowNum}");
+			}
 			$rowNum++;
 
 			// TY Sell Out

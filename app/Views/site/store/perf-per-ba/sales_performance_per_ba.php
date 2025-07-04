@@ -1,7 +1,10 @@
 <?php
     $dir = dirname(__FILE__);
     $minify = new \App\Libraries\MinifyLib();
+    // $version = '20250704'; // for versioning
 
+    // echo $minify->css($cssPath . '?v=' . $version, 'Store Custom CSS');
+    // echo $minify->js($jsPath . '?v=' . $version, 'App Functions JS');
     echo $minify->css($dir . '/assets/custom.css', 'Store Custom CSS');
     echo $minify->js($dir . '/assets/function.js', 'App Functions JS');
 ?>

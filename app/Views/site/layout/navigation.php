@@ -49,6 +49,10 @@
 
         <script>
 
+        var menu_url = '<?=$combine_url = ltrim($_SERVER['REQUEST_URI'], '/');?>';
+        var session_role = '<?= $session->sess_site_role?>';
+        var session_user_name = '<?= $session->sess_site_name?>';
+
           $(document).ready(function () {
             $('body').removeClass('sidebar-mini');
             $('body').addClass('sidebar-mini-no-expand');
@@ -115,11 +119,6 @@
             document.getElementById('currentDateTime').textContent = formattedDate;
         }
 
-        var menu_url = '<?=$combine_url = ltrim($_SERVER['REQUEST_URI'], '/');?>';
-        var session_role = '<?= $session->sess_site_role?>';
-        var session_user_name = '<?= $session->sess_site_name?>';
-
-
         function get_ba_asc_id(callback) {
             var url = "<?= site_url('dashboard/get-ba-asc-name'); ?>";
             $.post(url, { name: session_user_name }, function(response) {
@@ -170,9 +169,6 @@
                         return;
                     }
 
-                    if (role_generate == 0) {
-                        $('#refreshButton, #clearButton').remove();
-                    }
 
                     if (role_export == 0) {
                         $('#ExportPDF, #exportButton').remove();
@@ -191,8 +187,6 @@
                             if (!info) return;
                             let url = menu_url;
                             let role = parseInt(session_role);
-                            //temp
-                            //role = 8;
                             // Mapping logic per URL and role
                             if (url === 'store/sales-performance-per-ba') {
                                 if (role === 7) {
@@ -217,14 +211,14 @@
                                     $("#area").val(info.area);
                                     $("#areaId").val(info.areaId);
                                 }
-                                $("#inventoryStatus").val(['slowMoving', 'overStock', 'hero']).trigger("change");
+                                $("#inventoryStatus").val(['slowMoving', 'overStock', 'npd']).trigger("change");
                                 $("#refreshButton").click();
 
                             } else if (url === 'store/sales-performance-per-month') {
                                 if (role === 7) {
                                     $("#brandAmbassador").val(info.brandAmbassador);
                                     $("#brandAmbassadorId").val(info.brandAmbassadorId);
-                                    $("#area").val(info.brandAmbassador); // fallback
+                                    $("#area").val(info.area);
                                     $("#areaId").val(info.areaId);
                                 } else if (role === 8) {
                                     $("#ascName").val(info.ascName);
@@ -240,19 +234,30 @@
                                 $("#month").val(1);
                                 $("#monthTo").val(12);
                                 $("#refreshButton").click();
-
+                                $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
                             } else if (url === 'store/sales-overall-growth' && role === 8) {
                                 $("#ascName").val(info.ascName);
                                 $("#ascNameId").val(info.ascNameId);
-                                $("#storeName").val('Cubao'); // Optional: dynamic?
-                                $("#storeNameId").val(58);     // Optional: dynamic?
                                 $("#month").val(1);
                                 $("#monthTo").val(12);
                                 $("#refreshButton").click();
+                                $('#sourceDate').text($("#year option:selected").text() + " - " + $("#month option:selected").text() + " to " + $("#monthTo option:selected").text());
                             }
                         });
                     }
+
+                    if (role_generate == 0) {
+                        $('.main-sidebar').removeClass('sidebar-mini');
+                        $('.main-sidebar').addClass('hide');
+                        $('.main-header, .content-wrapper, .main-footer').css('margin-left', 0);
+
+                        set_field_state('#area, #ascName, .btn-outline-light, #brands, #year, #month, #monthTo, #brandAmbassador, #inventoryStatus, #storeName, #itemLabel', 'view');
+                    }
                 });
             });
+        }
+
+        function set_field_state(selector, isReadOnly) {
+            $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
         }
     </script>
