@@ -86,7 +86,7 @@ self.onmessage = async function(e) {
                     }
                 }
 
-                if (!["1 (active)", "3 (de-listed)"].includes(vmi_status)) {
+                if (!["1 (active)", "3 (de-listed)", "2 (new)"].includes(vmi_status)) {
                     addErrorLog("Invalid VMI Status");
                 }
 

@@ -892,7 +892,8 @@ ul.child_menu {
                          
                     });
                     setTimeout(() => { 
-                        $(htm).insertAfter($('.main_menu_'+module_name+"_"+id)); 
+                        $(htm).insertAfter($('.main_menu_'+module_name+"_"+id));
+                        modal.loading(false);
                     }, 500);  
                 }
             });
@@ -1015,6 +1016,7 @@ ul.child_menu {
                             //Select all Filter
                             select_filter();
                         }
+                        modal.loading(false);
                     }, 500);
                           
                 }
@@ -1740,7 +1742,7 @@ ul.child_menu {
     });
 
     function open_modal(msg, actions, id) {
-        modal.loading(true);
+        //modal.loading(true);
         $(".form-control").css('border-color','#ccc');
         $(".validate_error_message").remove();
         let $modal = $('#user_role_modal');
@@ -1781,14 +1783,15 @@ ul.child_menu {
         }
         
         setTimeout(() => {
-            modal.loading(false);
             $modal.modal('show');
+            modal.loading(true);
             set_field_state('#name, #status, .chckbx_menu_site, .chckbx_menu, .select_all_view, .select_all_generate, .select_all_export, .select_all_filter, .select_all_read, .select_all_write, .select_all_delete, .select_all_approve', isReadOnly);
         }, 2000);
         
     }
 
     function populate_modal(inp_id) {
+        //modal.loading(true);
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -1817,6 +1820,7 @@ ul.child_menu {
                     }
                     get_data_modules(query, "edit");
                     get_data_site_menu(query, "edit");
+                    //modal.loading(false);
                 }); 
             }
         });
