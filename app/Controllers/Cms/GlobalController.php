@@ -892,7 +892,7 @@ class GlobalController extends BaseController
 	  		$data2['old_data'] = json_encode($old_data);
 	  	}
 	  	$data2['link'] = '-'; 
-	  	$data2['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; 
+	  	$data2['ip_address'] = $this->request->getIPAddress(); 
 	  	$data2['created_at'] = date('Y-m-d H:i:s'); 
 	  	$this->Global_model->save_data('activity_logs',$data2);
 	}
@@ -912,7 +912,7 @@ class GlobalController extends BaseController
 	{
 	    $data['user'] = $session->sess_name;
 	  	$data['module'] = str_replace(base_url("cms") . '/', "", rtrim($_POST['uri'],"#"));
-	  	$data['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+	  	$data['ip_address'] = $this->request->getIPAddress();
 	  	$data['action'] = strip_tags(ucwords($_POST['action']));
 	  	$data['created_at'] = date('Y-m-d H:i:s'); 
 	  	$table = 'activity_logs';

@@ -25,7 +25,7 @@ if (!function_exists('log_activity')) {
             'link'        => $link,
             'new_data'     => $new_data,
             'old_data'     => $old_data,
-            'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+            'ip_address'  => $this->request->getIPAddress(),
             'created_at'  => date('Y-m-d H:i:s'),
         ];
 

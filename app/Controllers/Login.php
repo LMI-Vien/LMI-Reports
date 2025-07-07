@@ -268,7 +268,7 @@ class Login extends BaseController
 	            'user' => $value->name,
 	            'module' => "Dashboard",
 	            'action' => strip_tags(ucwords("Login")),
-	            'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+	            'ip_address'  => $this->request->getIPAddress(),
 	            'created_at' => date('Y-m-d H:i:s')
 	        ];
 	        $this->Global_model->save_data('activity_logs', $data2);
@@ -283,7 +283,7 @@ class Login extends BaseController
             'user' => $session->get('sess_site_name'),
             'module' => "Dashboard",
             'action' => strip_tags(ucwords("Logout")),
-            'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+            'ip_address'  => $this->request->getIPAddress(),
             'created_at' => date('Y-m-d H:i:s')
         ];
         $this->Global_model->save_data('activity_logs', $data2);

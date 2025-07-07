@@ -235,7 +235,7 @@ class Login extends BaseController
 	            'user' => $value->name,
 	            'module' => "CMS",
 	            'action' => strip_tags(ucwords("Login")),
-	            'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+	            'ip_address'  => $this->request->getIPAddress(),
 	            'created_at' => date('Y-m-d H:i:s')
 	        ];
 	        $this->Global_model->save_data('activity_logs', $data2);
@@ -259,7 +259,7 @@ class Login extends BaseController
 	    $data2['user'] = $session->get('sess_name');
 	  	$data2['module'] ="CMS";
 	  	$data2['action'] = strip_tags(ucwords("Logout"));
-	  	$data2['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; 
+	  	$data2['ip_address'] = $this->request->getIPAddress(); 
 	  	$data2['created_at'] = date('Y-m-d H:i:s'); 
 	  	$table = 'activity_logs';
 

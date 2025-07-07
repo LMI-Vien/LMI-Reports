@@ -81,7 +81,7 @@ class Role extends BaseController
 		$auditData['module'] =str_replace(base_url("dynamic") . '/', "", $_SERVER['HTTP_REFERER']); ;
 	  	$auditData['action'] = strip_tags(ucwords("Create"));
 	  	$auditData['created_at'] = date('Y-m-d H:i:s');
-	  	$auditData['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'; 
+	  	$auditData['ip_address'] = $this->request->getIPAddress(); 
 		$table = 'activity_logs';
 
 		if($auditData['user'] != null){
