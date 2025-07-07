@@ -225,6 +225,7 @@ class StoreSalesPerfOverall extends BaseController
 		$pdf->SetFont('helvetica','',9);
 
 		$lineH = 4;  // mm per text line
+		$role = $this->session->get('sess_site_role');
 		foreach ($rows as $row) {
 			$numNameLines = $pdf->getNumLines($row->store_name, $colWidth);
 			$numLines = max(1, $numNameLines);
@@ -244,14 +245,20 @@ class StoreSalesPerfOverall extends BaseController
 				'', '', true  // reset height
 			);
 
-			if($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8){
+			if ($role == 7 || $role == 8) {
 				$pdf->Cell($colWidth, $rowH, '-',  1, 0, 'C');
 			}else{
 				$pdf->Cell($colWidth, $rowH, $row->ly_scanned_data,  1, 0, 'C');
 			}
 			
 			$pdf->Cell($colWidth, $rowH, $row->ty_scanned_data,  1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth,           1, 0, 'C');
+			
+			if ($role == 7 || $role == 8) {
+				$pdf->Cell($colWidth, $rowH, '-',  1, 0, 'C');
+			}else{
+				$pdf->Cell($colWidth, $rowH, $row->growth,           1, 0, 'C');
+			}
+			
 			$pdf->Cell($colWidth, $rowH, $row->sob,              1, 1, 'C');
 		}
 
@@ -375,16 +382,25 @@ class StoreSalesPerfOverall extends BaseController
 
 
 		$rowNum = 11;
+		$role = $this->session->get('sess_site_role');
 		foreach ($rows as $row) {
 			$sheet->setCellValue('A'.$rowNum,$row->rank);
 			$sheet->setCellValue('B'.$rowNum,$row->store_name);
-			if($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8){
+
+			if ($role == 7 || $role == 8) {
 				$sheet->setCellValue('C'.$rowNum, '-');
 			}else{
 				$sheet->setCellValue('C'.$rowNum, $row->ly_scanned_data);
 			}
+
 			$sheet->setCellValue('D'.$rowNum, $row->ty_scanned_data);
-			$sheet->setCellValue('E'.$rowNum, $row->growth);
+
+			if ($role == 7 || $role == 8) {
+				$sheet->setCellValue('E'.$rowNum, '-');	
+			}else{
+				$sheet->setCellValue('E'.$rowNum, $row->growth);
+			}
+			
 			$sheet->setCellValue('F'.$rowNum, $row->sob);
 
 			$rowNum++;

@@ -210,7 +210,8 @@
                         json.data = json.data.map(row => {
                             return {
                                 ...row,
-                                ly_scanned_data: '-'
+                                ly_scanned_data: '-',
+                                growth: '-'
                             };
                         });
                     }

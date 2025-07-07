@@ -470,17 +470,17 @@ class Dashboard_model extends Model
 
 	public function salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null, $searchValue = null)
 	{
-		$roleId = session()->sess_site_role ?? null;
-		$maskedLyScannedField = ($roleId == 7 || $roleId == 8)
-		    ? "'-' AS ly_scanned_data"
-		    : "FORMAT(
-		        CASE 
-		            WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN 
-		                ROUND(COALESCE(ly.ly_scanned_data, 0) / 
-		                     (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
-		            ELSE COALESCE(ly.ly_scanned_data, 0)
-		        END, 2
-		    ) AS ly_scanned_data";
+		// $roleId = session()->sess_site_role ?? null;
+		// $maskedLyScannedField = ($roleId == 7 || $roleId == 8)
+		//     ? "'-' AS ly_scanned_data"
+		//     : "FORMAT(
+		//         CASE 
+		//             WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN 
+		//                 ROUND(COALESCE(ly.ly_scanned_data, 0) / 
+		//                      (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
+		//             ELSE COALESCE(ly.ly_scanned_data, 0)
+		//         END, 2
+		//     ) AS ly_scanned_data";
 
 		$range = ($monthTo - $monthFrom) + 1;
 		$startDate = $tyYear .'-'. $monthFrom . '-01';
@@ -664,7 +664,14 @@ class Dashboard_model extends Model
 			        END
 			    ), 0) * 100, 2
 			) AS percent_ach,
-			{$maskedLyScannedField},
+			FORMAT(
+		        CASE 
+		            WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN 
+		                ROUND(COALESCE(ly.ly_scanned_data, 0) / 
+		                     (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
+		            ELSE COALESCE(ly.ly_scanned_data, 0)
+		        END, 2
+		    ) AS ly_scanned_data,
 		    CASE 
 		        WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN
 		            ROUND(
@@ -813,10 +820,10 @@ class Dashboard_model extends Model
 	    $endDate = $tyYear . '-' . $monthTo . '-31';
 	    $brandIds = is_array($brandIds) ? $brandIds : [];
 
-		$roleId = session()->sess_site_role ?? null;
-		$maskedLyScannedField = ($roleId == 7 || $roleId == 8)
-		    ? "'-' AS ly_scanned_data"
-		    : "FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data";
+		// $roleId = session()->sess_site_role ?? null;
+		// $maskedLyScannedField = ($roleId == 7 || $roleId == 8)
+		//     ? "'-' AS ly_scanned_data"
+		//     : "FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data";
 
 	    $searchColumns = [
 	        'a.description',        //area
@@ -951,7 +958,7 @@ class Dashboard_model extends Model
 	        ROUND(
 	            COALESCE(sd.actual_sales, 0) / NULLIF(COALESCE(t.target_sales, 0), 0) * 100, 2
 	        ) AS percent_ach,
-	        $maskedLyScannedField,
+	        FORMAT(COALESCE(ly.ly_scanned_data, 0), 2) AS ly_scanned_data,
 	        ROUND(
 	            (COALESCE(sd.actual_sales, 0) / NULLIF(ly.ly_scanned_data, 0)) * 100,
 	            2

@@ -437,6 +437,7 @@ class StoreSalesPerfPerArea extends BaseController
 
 		$pdf->SetFont('helvetica','',9);
 		$lineH = 4; 
+		$role = $this->session->get('sess_site_role');
 		foreach ($rows as $row) {
 			$numNameLines = $pdf->getNumLines($row->store_name, $colWidth);
 			$numLines = max(1, $numNameLines);
@@ -454,7 +455,11 @@ class StoreSalesPerfPerArea extends BaseController
 			// area sales coordinator 
 			$pdf->MultiCell($colWidth, $rowH, $row->asc_name, 1, 'C', 0, 0, '', '', true);
 			// ly scan data
-			$pdf->Cell($colWidth, $rowH, $row->ly_scanned_data, 1, 0, 'C');
+			if ($role == 7 || $role == 8) {
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');	
+			}else{
+				$pdf->Cell($colWidth, $rowH, $row->ly_scanned_data, 1, 0, 'C');
+			}
 			// actual sales report
 			$pdf->Cell($colWidth, $rowH, $formatActualSalesReport, 1, 0, 'C');
 			// target
@@ -462,7 +467,11 @@ class StoreSalesPerfPerArea extends BaseController
 			// achieve 
 			$pdf->Cell($colWidth, $rowH, $row->percent_ach, 1, 0, 'C');
 			// growth
-			$pdf->Cell($colWidth, $rowH, $row->growth, 1, 0, 'C');
+			if ($role == 7 || $role == 8) {
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');	
+			}else{
+				$pdf->Cell($colWidth, $rowH, $row->growth, 1, 0, 'C');
+			}
 			// balance to target
 			$pdf->Cell($colWidth, $rowH, $formatBalanceToTarget, 1, 0, 'C');
 			// target per remaining days
@@ -646,15 +655,24 @@ class StoreSalesPerfPerArea extends BaseController
 		$sheet->getStyle('A10:J10')->getFont()->setBold(true);
 
 		$rowNum = 11;
+		$role = $this->session->get('sess_site_role');
 		foreach ($rows as $row) {
 			$sheet->setCellValue('A'.$rowNum,$row->rank);
 			$sheet->setCellValue('B'.$rowNum,$row->area_name);
 			$sheet->setCellValue('C'.$rowNum, $row->asc_name);
-			$sheet->setCellValue('D'.$rowNum, $row->ly_scanned_data);
+			if ($role == 7 || $role == 8) {
+				$sheet->setCellValue('D'.$rowNum, '-');
+			}else{
+				$sheet->setCellValue('D'.$rowNum, $row->ly_scanned_data);
+			}
 			$sheet->setCellValue('E'.$rowNum, $row->actual_sales);
 			$sheet->setCellValue('F'.$rowNum, $row->target_sales);
 			$sheet->setCellValue('G'.$rowNum, $row->percent_ach);
-			$sheet->setCellValue('H'.$rowNum, $row->growth);
+			if ($role == 7 || $role == 8) {
+				$sheet->setCellValue('H'.$rowNum, '-');
+			}else{
+				$sheet->setCellValue('H'.$rowNum, $row->growth);
+			}
 			$sheet->setCellValue('I'.$rowNum, $row->balance_to_target);
 			$sheet->setCellValue('J'.$rowNum, $row->target_per_remaining_days);
 

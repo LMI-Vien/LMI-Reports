@@ -437,12 +437,13 @@ class StoreSalesPerfPerMonth extends BaseController
 
 		$pdf->SetFont('helvetica','',9);
 		$lineH = 4; 
+		$role = $this->session->get('sess_site_role');
 		foreach ($rows as $row) {
 			$rowH = 8;
 			$pdf->SetFont('helvetica', '', 7);
 			$pdf->Cell($colWidth, $rowH, 'LY Sell Out', 1, 0, 'L');
 
-			if($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8){
+			if ($role == 7 || $role == 8) {
 				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
 				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
 				$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals('-'), 1, 0, 'C');
@@ -536,20 +537,37 @@ class StoreSalesPerfPerMonth extends BaseController
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->balance_to_target_dec), 1, 0, 'C');
 			$pdf->Cell($colWidth, $rowH, $this->formatTwoDecimals($row->total_balance_to_target), 1, 1, 'C');
 
-			$pdf->Cell($colWidth, $rowH, '% Growth', 1, 0, 'L');
-			$pdf->Cell($colWidth, $rowH, $row->growth_january, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_february, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_march, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_april, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_may, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_june, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_july, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_august, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_september, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_october, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_november, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, $row->growth_december, 1, 0, 'C');
-			$pdf->Cell($colWidth, $rowH, '-', 1, 1, 'C');
+			if ($role == 7 || $role == 8) {
+				$pdf->Cell($colWidth, $rowH, '% Growth', 1, 0, 'L');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 1, 'C');
+			}else{
+				$pdf->Cell($colWidth, $rowH, '% Growth', 1, 0, 'L');
+				$pdf->Cell($colWidth, $rowH, $row->growth_january, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_february, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_march, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_april, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_may, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_june, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_july, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_august, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_september, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_october, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_november, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, $row->growth_december, 1, 0, 'C');
+				$pdf->Cell($colWidth, $rowH, '-', 1, 1, 'C');
+			}
 
 			$pdf->Cell($colWidth, $rowH, '% Achieved', 1, 0, 'L');
 			$pdf->Cell($colWidth, $rowH, $row->achieved_january, 1, 0, 'C');
@@ -773,161 +791,153 @@ class StoreSalesPerfPerMonth extends BaseController
 		
 
 		$rowNum = 11;
+		$role = $this->session->get('sess_site_role');
+
 		foreach ($rows as $row) {
-			// LY Sell Out
-			$sheet->setCellValue("A{$rowNum}", 'LY Sell Out');
-			if($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8){
-				$sheet->fromArray([
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-',
-				'-'
-			], null, "B{$rowNum}");
-			}else{
-			    $sheet->fromArray([
-				$row->ly_sell_out_january,
-				$row->ly_sell_out_february,
-				$row->ly_sell_out_march,
-				$row->ly_sell_out_april,
-				$row->ly_sell_out_may,
-				$row->ly_sell_out_june,
-				$row->ly_sell_out_july,
-				$row->ly_sell_out_august,
-				$row->ly_sell_out_september,
-				$row->ly_sell_out_october,
-				$row->ly_sell_out_november,
-				$row->ly_sell_out_december,
-				$row->total_ly_sell_out
-			], null, "B{$rowNum}");
-			}
-			$rowNum++;
+		    // LY Sell Out
+		    $sheet->setCellValue("A{$rowNum}", 'LY Sell Out');
+		    if ($role == 7 || $role == 8) {
+		        $sheet->fromArray(array_fill(0, 13, '-'), null, "B{$rowNum}");
+		    } else {
+		        $sheet->fromArray([
+		            $row->ly_sell_out_january,
+		            $row->ly_sell_out_february,
+		            $row->ly_sell_out_march,
+		            $row->ly_sell_out_april,
+		            $row->ly_sell_out_may,
+		            $row->ly_sell_out_june,
+		            $row->ly_sell_out_july,
+		            $row->ly_sell_out_august,
+		            $row->ly_sell_out_september,
+		            $row->ly_sell_out_october,
+		            $row->ly_sell_out_november,
+		            $row->ly_sell_out_december,
+		            $row->total_ly_sell_out
+		        ], null, "B{$rowNum}");
+		    }
+		    $rowNum++;
 
-			// TY Sell Out
-			$sheet->setCellValue("A{$rowNum}", 'TY Sell Out');
-			$sheet->fromArray([
-				$row->ty_sell_out_january,
-				$row->ty_sell_out_february,
-				$row->ty_sell_out_march,
-				$row->ty_sell_out_april,
-				$row->ty_sell_out_may,
-				$row->ty_sell_out_june,
-				$row->ty_sell_out_july,
-				$row->ty_sell_out_august,
-				$row->ty_sell_out_september,
-				$row->ty_sell_out_october,
-				$row->ty_sell_out_november,
-				$row->ty_sell_out_december,
-				$row->total_ty_sell_out
-			], null, "B{$rowNum}");
-			$rowNum++;
+		    // TY Sell Out
+		    $sheet->setCellValue("A{$rowNum}", 'TY Sell Out');
+		    $sheet->fromArray([
+		        $row->ty_sell_out_january,
+		        $row->ty_sell_out_february,
+		        $row->ty_sell_out_march,
+		        $row->ty_sell_out_april,
+		        $row->ty_sell_out_may,
+		        $row->ty_sell_out_june,
+		        $row->ty_sell_out_july,
+		        $row->ty_sell_out_august,
+		        $row->ty_sell_out_september,
+		        $row->ty_sell_out_october,
+		        $row->ty_sell_out_november,
+		        $row->ty_sell_out_december,
+		        $row->total_ty_sell_out
+		    ], null, "B{$rowNum}");
+		    $rowNum++;
 
-			// Sales Report
-			$sheet->setCellValue("A{$rowNum}", 'Sales Report');
-			$sheet->fromArray([
-				$row->amount_january,
-				$row->amount_february,
-				$row->amount_march,
-				$row->amount_april,
-				$row->amount_may,
-				$row->amount_june,
-				$row->amount_july,
-				$row->amount_august,
-				$row->amount_september,
-				$row->amount_october,
-				$row->amount_november,
-				$row->amount_december,
-				$row->total_amount
-			], null, "B{$rowNum}");
-			$rowNum++;
+		    // Sales Report
+		    $sheet->setCellValue("A{$rowNum}", 'Sales Report');
+		    $sheet->fromArray([
+		        $row->amount_january,
+		        $row->amount_february,
+		        $row->amount_march,
+		        $row->amount_april,
+		        $row->amount_may,
+		        $row->amount_june,
+		        $row->amount_july,
+		        $row->amount_august,
+		        $row->amount_september,
+		        $row->amount_october,
+		        $row->amount_november,
+		        $row->amount_december,
+		        $row->total_amount
+		    ], null, "B{$rowNum}");
+		    $rowNum++;
 
-			// Target Sales
-			$sheet->setCellValue("A{$rowNum}", 'Target Sales');
-			$sheet->fromArray([
-				$row->target_sales_jan,
-				$row->target_sales_feb,
-				$row->target_sales_mar,
-				$row->target_sales_apr,
-				$row->target_sales_may,
-				$row->target_sales_jun,
-				$row->target_sales_jul,
-				$row->target_sales_aug,
-				$row->target_sales_sep,
-				$row->target_sales_oct,
-				$row->target_sales_nov,
-				$row->target_sales_dec,
-				$row->total_target
-			], null, "B{$rowNum}");
-			$rowNum++;
+		    // Target Sales
+		    $sheet->setCellValue("A{$rowNum}", 'Target Sales');
+		    $sheet->fromArray([
+		        $row->target_sales_jan,
+		        $row->target_sales_feb,
+		        $row->target_sales_mar,
+		        $row->target_sales_apr,
+		        $row->target_sales_may,
+		        $row->target_sales_jun,
+		        $row->target_sales_jul,
+		        $row->target_sales_aug,
+		        $row->target_sales_sep,
+		        $row->target_sales_oct,
+		        $row->target_sales_nov,
+		        $row->target_sales_dec,
+		        $row->total_target
+		    ], null, "B{$rowNum}");
+		    $rowNum++;
 
-			// % Growth
-			$sheet->setCellValue("A{$rowNum}", 'Balance To Target');
-			$sheet->fromArray([
-				$row->balance_to_target_jan,
-				$row->balance_to_target_feb,
-				$row->balance_to_target_mar,
-				$row->balance_to_target_apr,
-				$row->balance_to_target_may,
-				$row->balance_to_target_jun,
-				$row->balance_to_target_jul,
-				$row->balance_to_target_aug,
-				$row->balance_to_target_sep,
-				$row->balance_to_target_oct,
-				$row->balance_to_target_nov,
-				$row->balance_to_target_dec,
-				$row->total_balance_to_target
-			], null, "B{$rowNum}");
-			$rowNum++;
+		    // Balance To Target
+		    $sheet->setCellValue("A{$rowNum}", 'Balance To Target');
+		    $sheet->fromArray([
+		        $row->balance_to_target_jan,
+		        $row->balance_to_target_feb,
+		        $row->balance_to_target_mar,
+		        $row->balance_to_target_apr,
+		        $row->balance_to_target_may,
+		        $row->balance_to_target_jun,
+		        $row->balance_to_target_jul,
+		        $row->balance_to_target_aug,
+		        $row->balance_to_target_sep,
+		        $row->balance_to_target_oct,
+		        $row->balance_to_target_nov,
+		        $row->balance_to_target_dec,
+		        $row->total_balance_to_target
+		    ], null, "B{$rowNum}");
+		    $rowNum++;
 
-			// % Growth
-			$sheet->setCellValue("A{$rowNum}", '% Growth');
-			$sheet->fromArray([
-				$row->growth_january,
-				$row->growth_february,
-				$row->growth_march,
-				$row->growth_april,
-				$row->growth_may,
-				$row->growth_june,
-				$row->growth_july,
-				$row->growth_august,
-				$row->growth_september,
-				$row->growth_october,
-				$row->growth_november,
-				$row->growth_december,
-				'-'
-			], null, "B{$rowNum}");
-			$rowNum++;
+		    // % Growth
+		    $sheet->setCellValue("A{$rowNum}", '% Growth');
+		    if ($role == 7 || $role == 8) {
+		        $sheet->fromArray(array_fill(0, 12, '-'), null, "B{$rowNum}");
+		    } else {
+		        $sheet->fromArray([
+		            $row->growth_january,
+		            $row->growth_february,
+		            $row->growth_march,
+		            $row->growth_april,
+		            $row->growth_may,
+		            $row->growth_june,
+		            $row->growth_july,
+		            $row->growth_august,
+		            $row->growth_september,
+		            $row->growth_october,
+		            $row->growth_november,
+		            $row->growth_december
+		        ], null, "B{$rowNum}");
+		    }
+		    $rowNum++;
 
-			// % Achieved
-			$sheet->setCellValue("A{$rowNum}", '% Achieved');
-			$sheet->fromArray([
-				$row->achieved_january,
-				$row->achieved_february,
-				$row->achieved_march,
-				$row->achieved_april,
-				$row->achieved_may,
-				$row->achieved_june,
-				$row->achieved_july,
-				$row->achieved_august,
-				$row->achieved_september,
-				$row->achieved_october,
-				$row->achieved_november,
-				$row->achieved_december,
-				'-'
-			], null, "B{$rowNum}");
-			$rowNum++;
+		    // % Achieved
+		    $sheet->setCellValue("A{$rowNum}", '% Achieved');
+		    $sheet->fromArray([
+		        $row->achieved_january,
+		        $row->achieved_february,
+		        $row->achieved_march,
+		        $row->achieved_april,
+		        $row->achieved_may,
+		        $row->achieved_june,
+		        $row->achieved_july,
+		        $row->achieved_august,
+		        $row->achieved_september,
+		        $row->achieved_october,
+		        $row->achieved_november,
+		        $row->achieved_december,
+		        '-'
+		    ], null, "B{$rowNum}");
+		    $rowNum++;
 
-			// Optional: empty row between groups
-			$rowNum++;
+		    // Optional: empty row between groups
+		    $rowNum++;
 		}
+
 
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");

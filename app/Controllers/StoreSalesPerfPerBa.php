@@ -391,11 +391,11 @@ class StoreSalesPerfPerBa extends BaseController
 				$row->ba_name,
 				$this->formatDate($row->ba_deployment_date),
 				$row->brand_name,
-				$this->formatTwoDecimals($row->ly_scanned_data),
+				($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8) ? '-' : $this->formatTwoDecimals($row->ly_scanned_data),
 				$this->formatTwoDecimals($row->actual_sales),
 				$this->formatTwoDecimals($row->target_sales),
 				$row->percent_ach,
-				$row->growth,
+				($this->session->get('sess_site_role') == 7 || $this->session->get('sess_site_role') == 8) ? '-' : $row->growth,
 				$this->formatTwoDecimals($row->balance_to_target),
 				$this->formatTwoDecimals($row->possible_incentives),
 				$this->formatTwoDecimals($row->target_per_remaining_days)
@@ -687,18 +687,27 @@ class StoreSalesPerfPerBa extends BaseController
 		$sheet->getStyle('A10:N10')->getFont()->setBold(true);
 
 		$rowNum = 11;
+		$role = $this->session->get('sess_site_role');
 		foreach ($rows as $row) {
 			$sheet->setCellValue('A'.$rowNum,$row->rank);
 			$sheet->setCellValue('B'.$rowNum,$row->area_name);
 			$sheet->setCellValue('C'.$rowNum,$row->store_name);
 			$sheet->setCellValue('D'.$rowNum,$row->ba_name);
 			$sheet->setCellValue('E'.$rowNum,$row->ba_deployment_date);
-			$sheet->setCellValue('F'.$rowNum,$row->brand_name);
-			$sheet->setCellValue('G'.$rowNum,$row->ly_scanned_data);
+			$sheet->setCellValue('F'.$rowNum,$row->brand_name);			
+			if ($role == 7 || $role == 8) {
+				$sheet->setCellValue('G'.'-');
+			}else{
+				$sheet->setCellValue('G'.$rowNum,$row->ly_scanned_data);
+			}
 			$sheet->setCellValue('H'.$rowNum,$row->actual_sales);
 			$sheet->setCellValue('I'.$rowNum,$row->target_sales);
 			$sheet->setCellValue('J'.$rowNum,$row->percent_ach);
-			$sheet->setCellValue('K'.$rowNum,$row->growth);
+			if ($role == 7 || $role == 8) {
+				$sheet->setCellValue('K'.'-');
+			}else{
+				$sheet->setCellValue('K'.$rowNum,$row->growth);
+			}
 			$sheet->setCellValue('L'.$rowNum,$row->balance_to_target);
 			$sheet->setCellValue('M'.$rowNum,$row->possible_incentives);
 			$sheet->setCellValue('N'.$rowNum,$row->target_per_remaining_days);

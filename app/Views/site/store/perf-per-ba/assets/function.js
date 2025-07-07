@@ -213,6 +213,15 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
+                    if(session_role == 7 || session_role == 8 ){
+                        json.data = json.data.map(row => {
+                            return {
+                                ...row,
+                                ly_scanned_data: '-',
+                                growth: '-'
+                            };
+                        });
+                    }
                     return json.data.length ? json.data : [];
                 }
             },
