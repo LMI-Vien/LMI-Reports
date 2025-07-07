@@ -433,20 +433,22 @@ class Dashboard_model extends Model
 
 	public function getLatestVmi($year = null) {
 	    $builder = $this->db->table('tbl_vmi v')
-			->select('y.id as year_id, y.year, c.id as company_id, c.name as company_name, v.week AS week_id')
-	        ->where('v.status', 1)
+	        ->select('y.id as year_id, y.year, c.id as company_id, c.name as company_name, v.week AS week_id')
 	        ->join('tbl_company c', 'v.company = c.id')
-	        ->join('tbl_year y', 'v.year = y.id')
-	        ->orderBy('y.year', 'DESC')
-	        ->orderBy('v.week', 'DESC')
-	        ->orderBy('c.name', 'DESC')
-	        ->limit(1);
+	        ->join('tbl_year y', 'v.year = y.id');
 
+	    $builder->where('v.status', 1);
 	    if (!empty($year)) {
 	        $builder->where('v.year', $year);
 	    }
+
+	    $builder->orderBy('v.year', 'DESC');
+	    $builder->orderBy('v.week', 'DESC');
+	    $builder->limit(1);
+
 	    return $builder->get()->getRowArray();
 	}
+
 
    	public function getMonth($id){
         $results = $this->db->table('tbl_month')
