@@ -86,7 +86,7 @@ class StocksWeekAllStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 	    //$ItemClasses = null;
 	    //$itemCat = null;
 
@@ -100,7 +100,6 @@ class StocksWeekAllStore extends BaseController
 		    $skuMin = $sysPar[0]['sm_sku_min'];
 		    $skuMax = $sysPar[0]['sm_sku_max'];
 		}
-
 			$orderDirection = strtoupper($orderDirection);
 			if(intval($source) === 3){
 			    switch ($type) {
@@ -534,7 +533,7 @@ class StocksWeekAllStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];
@@ -1165,7 +1164,7 @@ class StocksWeekAllStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];

@@ -106,7 +106,7 @@ class StocksPerStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 	    $companyId = null;
 	    $ItemClasses = null;
 	    $itemCatId = null;
@@ -222,7 +222,7 @@ class StocksPerStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 	    $companyId = null;
 	    $ItemClasses = null;
 	    $itemCatId = null;
@@ -469,7 +469,7 @@ class StocksPerStore extends BaseController
 		$npdSku = [];
 		$heroSku = [];
 		$skuMin = 20;
-		$skuMin = 30;
+		$skuMax = 30;
 	    $companyId = null;
 	    $ItemClasses = null;
 	    $itemCatId = null;
