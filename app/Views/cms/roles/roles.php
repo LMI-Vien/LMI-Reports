@@ -1791,12 +1791,11 @@ ul.child_menu {
             get_data_site_menu(query, "add");
         }
         
+        modal.loading(true);
         setTimeout(() => {
             $modal.modal('show');
-            modal.loading(true);
             set_field_state('#name, #status, .chckbx_menu_site, .chckbx_menu, .select_all_view, .select_all_generate, .select_all_export, .select_all_filter, .select_all_read, .select_all_write, .select_all_delete, .select_all_approve', isReadOnly);
         }, 2000);
-        
     }
 
     function populate_modal(inp_id) {
