@@ -998,6 +998,7 @@ ul.child_menu {
                     });
                     setTimeout(() => { 
                         $(htm).insertAfter($('.main_menu_'+module_name+"_"+id));
+                        modal.loading(false);
                         if(action == "edit"){
                             //Select all Read
                             select_read();
@@ -1016,7 +1017,6 @@ ul.child_menu {
                             //Select all Filter
                             select_filter();
                         }
-                        modal.loading(false);
                     }, 500);
                           
                 }
