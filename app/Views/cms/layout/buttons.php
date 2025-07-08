@@ -425,12 +425,10 @@
 	.ui-datepicker {
 		z-index: 9999 !important;  
 	}
-
 </style>
 
 <script type="text/javascript">
 	$('.status_action').hide();
- 
     $(document).on('click', '#btn_close', function(){   
         <?php 
             $url =  "http://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
@@ -446,19 +444,6 @@
 		$('[data-toggle="tooltip"]').tooltip();   
 	});
     
-	// $('.start-date').materialDatePicker({
-    // 	time : false,
-    // 	weekStart : 0
-    // }).on('change', function(e, date){
-    // 	$('.end-date').val($('.start-date').val()).prop('disabled', false);
-    // 	$('.end-date').materialDatePicker({
-    // 		time : false,
-    // 		weekStart : 0
-    // 	});
-    // 	$('.end-date').materialDatePicker('setMinDate', date);
-    // });
-    
-
     $(document).on('cut copy paste input', '.start-date, .end-date', function(e) {
         e.preventDefault();
     });

@@ -249,6 +249,7 @@ ul.child_menu {
     var user_id = '<?=$session->sess_uid;?>';
     var role = parseInt("<?=$session->sess_role;?>");
     var roles_menu_id = 0;
+
     $(document).ready(function() {
       get_data(query);
       get_pagination(query);
@@ -727,7 +728,9 @@ ul.child_menu {
                           }
 
                           htm += "</li>";
+
                               get_sub_menu(y.menu_id, "cms_menu", "cmsmenu", action, counter_cmsmenu);
+
                         }
                     htm += "</ul>";
                 });
@@ -808,7 +811,9 @@ ul.child_menu {
                           htm += "<div class='menu_chkbx'><input class='chckbx_menu_site export_site export_"+counter_sitemenu+" chckbx_menu_export parent_chckbox_export_"+y.menu_id+"' name='menu_role_export' type = 'checkbox' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu_site("+y.menu_id+")' "+checked_export+"></div>";
                           htm += "<div class='menu_chkbx'><input class='chckbx_menu_site filter_site filter_"+counter_sitemenu+" chckbx_menu_filter parent_chckbox_filter_"+y.menu_id+"' name='menu_role_filter' type = 'checkbox' data-id="+y.menu_id+" value='0' onchange='chckbox_parent_menu_site("+y.menu_id+")' "+checked_filter+"></div>";
                           htm += "</li>";
+                          
                             get_sub_menu(y.menu_id, "site_menu", "sitemenu", action, counter_sitemenu);
+
                         }
                     htm += "</ul>";
                     counter++;
@@ -891,10 +896,12 @@ ul.child_menu {
                         counter++;
                          
                     });
+
                     setTimeout(() => { 
                         $(htm).insertAfter($('.main_menu_'+module_name+"_"+id));
                         modal.loading(false);
-                    }, 500);  
+                    }, 500);
+                    
                 }
             });
         }else{
@@ -996,9 +1003,10 @@ ul.child_menu {
                         counter++;
                          
                     });
+
                     setTimeout(() => { 
                         $(htm).insertAfter($('.main_menu_'+module_name+"_"+id));
-                        modal.loading(false);
+                        
                         if(action == "edit"){
                             //Select all Read
                             select_read();
@@ -1017,7 +1025,8 @@ ul.child_menu {
                             //Select all Filter
                             select_filter();
                         }
-                    }, 2000);
+                        modal.loading(false);
+                    }, 3000);
                           
                 }
             });            
@@ -1792,6 +1801,8 @@ ul.child_menu {
 
     function populate_modal(inp_id) {
         //modal.loading(true);
+        
+
         var query = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -1818,8 +1829,13 @@ ul.child_menu {
                     }else{
                        query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 AND `menu_id` != 8 AND `menu_id` != 6 and role_id != 0";
                     }
+
                     get_data_modules(query, "edit");
-                    get_data_site_menu(query, "edit");
+                    get_data_site_menu(query, "edit");                        
+                    setTimeout(() => { 
+                        modal.loading(false);
+                    }, 3500);  
+
                     //modal.loading(false);
                 }); 
             }

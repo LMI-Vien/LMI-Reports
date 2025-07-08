@@ -5,6 +5,7 @@
 .notification-data {
     display: none;
 }
+</style>
 
 <?php
     //get url for db table checking on user role
@@ -29,7 +30,6 @@
     }
 ?>
 
-</style>
 <nav class="main-header navbar navbar-expand navbar-white elevation-2">
   <!-- Left navbar links -->
   <ul class="navbar-nav">
@@ -88,6 +88,32 @@ var menu_url = 'cms/'+'<?=$combine_url;?>';
 var session_role = '<?= $session->sess_role?>';
 
 $(document).ready(function () {
+    $(document).on('click', 'button, a', function(e) {
+        var element = $(this);
+        if (element.hasClass('nav-link') || element.hasClass('brand-link') || element.hasClass('text-primary')) {
+            return;
+        }
+        if (element.is('a')) {
+            var tempClasses = element.attr('class');
+            var tempId = element.attr('id'); 
+            element.removeAttr('id');
+            element.addClass('disabled');
+            setTimeout(function() {
+                if (tempId) {
+                    element.attr('id', tempId);
+                }
+            }, 2000);
+        }
+        setTimeout(function() {
+            if (element.is('button')) {
+                element.prop('disabled', false);
+            } else if (element.is('a')) {
+                element.removeClass('disabled');
+            }
+        }, 2000);
+    });
+
+
     $(".logout-btn").on("click", function(e) {
         e.preventDefault();
 
