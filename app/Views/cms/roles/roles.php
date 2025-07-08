@@ -1017,7 +1017,7 @@ ul.child_menu {
                             //Select all Filter
                             select_filter();
                         }
-                    }, 500);
+                    }, 2000);
                           
                 }
             });            
