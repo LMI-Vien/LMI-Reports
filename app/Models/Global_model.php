@@ -295,31 +295,29 @@ class Global_model extends Model
     public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
     {
         $sql = "
-            SELECT *
-            FROM (
-                SELECT 
-                    v.id,
-                    c.name AS company,
-                    y.year,
-                    v.week AS week,
-                    v.created_date,
-                    v.updated_date,
-                    v.year as filter_year,
-                    v.week as filter_week,
-                    v.company as filter_company,
-                    u.name AS imported_by,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY v.year, v.week, c.name
-                        ORDER BY v.updated_date DESC
-                    ) AS row_num
+            SELECT 
+                v.id,
+                c.name AS company,
+                y.year,
+                v.week,
+                v.created_date,
+                v.updated_date,
+                v.year AS filter_year,
+                v.week AS filter_week,
+                v.company AS filter_company,
+                u.name AS imported_by
+            FROM tbl_vmi v
+            LEFT JOIN cms_users u ON u.id = v.created_by
+            LEFT JOIN tbl_company c ON c.id = v.company
+            LEFT JOIN tbl_year y ON y.id = v.year
+            INNER JOIN (
+                SELECT v.status, v.year, v.week, v.company, MAX(v.id) AS latest_id
                 FROM tbl_vmi v
-                LEFT JOIN cms_users u ON u.id = v.created_by
-                LEFT JOIN tbl_company c ON c.id = v.company
-                LEFT JOIN tbl_year y ON y.id = v.year
                 " . ($query ? "WHERE $query" : "") . "
-            ) t
-            WHERE row_num = 1
-            LIMIT $offset, $limit
+                GROUP BY year, week, company
+            ) latest 
+                ON latest.latest_id = v.id
+            LIMIT $limit OFFSET $offset
         ";
 
         return $this->db->query($sql)->getResult();

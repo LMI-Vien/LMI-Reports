@@ -16,6 +16,7 @@ if (!function_exists('log_activity')) {
         $db = \Config\Database::connect();
 
         $session = session();
+        $request = \Config\Services::request();
 
         $data = [
             'user' => $session->get('sess_site_name') ? $session->get('sess_site_name') : $session->get('sess_name'),
@@ -25,7 +26,7 @@ if (!function_exists('log_activity')) {
             'link'        => $link,
             'new_data'     => $new_data,
             'old_data'     => $old_data,
-            'ip_address'  => $this->request->getIPAddress(),
+            'ip_address'  => $request->getIPAddress(),
             'created_at'  => date('Y-m-d H:i:s'),
         ];
 
