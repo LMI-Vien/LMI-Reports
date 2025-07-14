@@ -141,7 +141,7 @@ class Dashboard_model extends Model
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
 	            SUM(vmi.total_qty) AS sum_total_qty,
-	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
+	            CAST(SUM(vmi.average_sales_unit) AS INT) AS sum_ave_sales,
 	            FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
 	            ROUND(
 	                CASE 
@@ -364,7 +364,7 @@ class Dashboard_model extends Model
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
 	            SUM(vmi.total_qty) AS sum_total_qty,
-	            SUM(vmi.average_sales_unit) AS sum_ave_sales,
+	            CAST(SUM(vmi.average_sales_unit) AS INT) AS sum_ave_sales,
 	            FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
 	            ROUND(
 	                CASE 

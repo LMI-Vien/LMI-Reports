@@ -130,11 +130,11 @@
         ];
 
         if (type !== 'hero') {
-            columns.push({ data: 'sum_total_qty' }); 
+            columns.push({ data: 'sum_total_qty', render: formatNumberWithCommas }); 
         }
 
         columns.push(
-            { data: 'sum_ave_sales', render: formatTwoDecimals },
+            { data: 'sum_ave_sales', render: formatNumberWithCommas },
             { data: 'swc' }                                        
         );
 
@@ -188,6 +188,10 @@
         return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
     }
 
+    function formatNumberWithCommas(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+ 
     function get_data(id, table, parameter) {
         return new Promise((resolve, reject) => {
             let query = id ? " id = " + id : ""

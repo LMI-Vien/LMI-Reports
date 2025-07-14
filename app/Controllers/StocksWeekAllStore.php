@@ -578,7 +578,7 @@ class StocksWeekAllStore extends BaseController
 		if ($source == 2) {
 			$sourceMap = "VMI";
 		} elseif ($source == 3) {
-			$sourceMap = "Week by Week";
+			$sourceMap = "Week on Week (Sell Out)";
 		} else {
 			$sourceMap = "No Source";
 		}
@@ -1197,7 +1197,7 @@ class StocksWeekAllStore extends BaseController
 		if ($source == 2) {
 			$sourceMap = "VMI";
 		} elseif ($source == 3) {
-			$sourceMap = "Week by Week";
+			$sourceMap = "Week on Week (Sell Out)";
 		} else {
 			$sourceMap = "No Source";
 		}

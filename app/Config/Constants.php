@@ -24,18 +24,25 @@ defined('APP_NAMESPACE') || define('APP_NAMESPACE', 'App');
  | the vendor folder is in the Root directory, but you can customize that here.
  */
 defined('COMPOSER_PATH') || define('COMPOSER_PATH', ROOTPATH . 'vendor/autoload.php');
+$protocol = 'http://localhost:8080/'; // Default fallback
 
-$protocol = 'http://';
-if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-    $protocol = 'https://';
-} elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-    $protocol = 'https://';
+if (PHP_SAPI !== 'cli') {
+    $protocol = 'http://';
+
+    if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        $protocol = 'https://';
+    } elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+        $protocol = 'https://';
+    }
+
+    if (isset($_SERVER['HTTP_HOST'])) {
+        $protocol .= $_SERVER['HTTP_HOST'];
+        $protocol .= str_replace(basename($_SERVER['SCRIPT_NAME']), "", $_SERVER['SCRIPT_NAME']);
+    }
 }
 
-$protocol .= $_SERVER['HTTP_HOST'];
-$protocol .= str_replace(basename($_SERVER['SCRIPT_NAME']), "", $_SERVER['SCRIPT_NAME']);
-
 defined('BASE') || define('BASE', $protocol);
+
 
 /*
  |--------------------------------------------------------------------------

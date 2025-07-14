@@ -165,15 +165,19 @@
                     <div id="password_chcklist">
                         <p>Password Must:</p>
                         <div class="password_chcklist_contanier">
+                            <input type="checkbox"  id="min_ten_chckbx_p" class="min_ten_chckbx password_checkbox required_input hidden"> 
                             <i class="fas fa-check-square min_ten_chck" ></i> <p class="min_ten_chckbx_p"> Minimum of 10 characters</p>
                         </div>
                         <div class="password_chcklist_contanier">
+                            <input type="checkbox" id="special_chckbx_p" class="special_chckbx password_checkbox required_input hidden"> 
                             <i class="fas fa-check-square special_chck"></i> <p class="special_chckbx_p">At least 1 Special Character</p>
                         </div>
                         <div class="password_chcklist_contanier">
+                            <input type="checkbox" id="upper_chckbx_p" class="upper_chckbx password_checkbox required_input hidden">
                             <i class="fas fa-check-square upper_chck"></i> <p class="upper_chckbx_p">At least 1 Uppercase</p>
                         </div>
                         <div class="password_chcklist_contanier">
+                            <input type="checkbox" id="number_chckbx_p" class="number_chckbx password_checkbox required_input hidden"> 
                             <i class="fas fa-check-square number_chck"></i> <p class="number_chckbx_p">At least 1 Number</p>
                         </div>
                     </div>
@@ -422,15 +426,19 @@
                         <div id="password_chcklist">
                             <p>Password Must:</p>
                             <div class="password_chcklist_contanier">
+                                <input type="checkbox"  id="min_ten_chckbx_p" class="min_ten_chckbx password_checkbox required_input hidden"> 
                                 <i class="fas fa-check-square min_ten_chck" ></i> <p class="min_ten_chckbx_p"> Minimum of 10 characters</p>
                             </div>
                             <div class="password_chcklist_contanier">
+                                <input type="checkbox" id="special_chckbx_p" class="special_chckbx password_checkbox required_input hidden"> 
                                 <i class="fas fa-check-square special_chck"></i> <p class="special_chckbx_p">At least 1 Special Character</p>
                             </div>
                             <div class="password_chcklist_contanier">
+                                <input type="checkbox" id="upper_chckbx_p" class="upper_chckbx password_checkbox required_input hidden">
                                 <i class="fas fa-check-square upper_chck"></i> <p class="upper_chckbx_p">At least 1 Uppercase</p>
                             </div>
                             <div class="password_chcklist_contanier">
+                                <input type="checkbox" id="number_chckbx_p" class="number_chckbx password_checkbox required_input hidden"> 
                                 <i class="fas fa-check-square number_chck"></i> <p class="number_chckbx_p">At least 1 Number</p>
                             </div>
                         </div>
@@ -507,6 +515,7 @@
     }
 
     function validatePassword(action, update_password_val, id) {
+
         if (action !== "update" && action !== "save") return;
 
         var counter = 0;
@@ -523,12 +532,6 @@
             password_mismatch: "<span class='validate_error_message' style='color: red;'>New password does not match Confirm password.<br></span>",
             password_used: "<span class='validate_error_message' style='color: red;'>You have already used this password. Try a new one.<br></span>"
         };
-
-        function showError(selector, message) {
-            $(selector).html(message);
-            $(selector.replace('-err', '')).css('border-color', 'red');
-            counter++;
-        }
 
         /* New Password */
         if (new_password === '') {
@@ -557,12 +560,16 @@
             }
         });
 
-        // ✅ Always call `validate_save(id)` if password validation passes OR password update is not required
-        if (counter === 0) {
+        if (counter == 0) {
             setTimeout(() => validate_save(id), 1000);
         }
-    }
 
+        function showError(selector, message) {
+            $(selector).html(message);
+            $(selector.replace('-err', '')).css('border-color', 'red');
+            counter++;
+        }
+    }
 
     function validate_save(id){
      

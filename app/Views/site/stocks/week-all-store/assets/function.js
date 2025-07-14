@@ -198,7 +198,10 @@
                     dynamicColumns.push({
                         data: `week_${week}`,
                         title: `Week ${week}`,
-                        defaultContent: '-'
+                        defaultContent: '-',
+                        render: function (data) {
+                            return formatNumberWithCommas(data);
+                        }
                     });
                     dynamicColumns.push({
                         data: `item_class_week_${week}`,
@@ -255,6 +258,10 @@
 
     function formatTwoDecimals(data) {
         return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+    }
+
+    function formatNumberWithCommas(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     function handleAction(action) {

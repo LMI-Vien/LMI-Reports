@@ -65,8 +65,8 @@
                 <div class="form-group card-dark mb-3 p-2">
                   <label for="dataSource" class="mb-2"><i class="fas fa-database mr-1"></i> Data Source</label>
                   <select id="dataSource" class="form-select">
-                    <option value="2">VMI (Sell Out)</option>
-                    <option value="3">WEEK on WEEK Sales (Sell In)</option>
+                    <option value="2">VMI</option>
+                    <option value="3">WEEK on WEEK Sales (Sell Out)</option>
                   </select>
                 </div>
 

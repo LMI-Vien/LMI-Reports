@@ -300,7 +300,7 @@
         ];
 
         if (type !== 'hero') {
-            columns.push({ data: 'sum_total_qty'});
+            columns.push({ data: 'sum_total_qty', render: formatNumberWithCommas });
         }
 
         let defaultSortColumn = type === 'hero' ? 0 : columns.length - 1;
@@ -355,6 +355,10 @@
 
     function formatTwoDecimals(data) {
         return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+    }
+
+    function formatNumberWithCommas(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     function handleAction(action) {
