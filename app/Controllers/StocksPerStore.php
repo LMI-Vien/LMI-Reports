@@ -349,8 +349,11 @@ class StocksPerStore extends BaseController
 			$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] : null;
 		}
 		$pdf->Cell(63, 6, 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'), 0, 0, 'L');
-
-		$selectedBrands = implode(", ", $brands);
+		$selectedBrands = '';
+		if($brands){
+			$selectedBrands = implode(", ", $brands);
+			
+		}
 		$pdf->Cell(63, 6, 'Brand: ' . ($selectedBrands ?: 'ALL'), 0, 0, 'L');
 
 		$baTypeLabels = [
@@ -593,8 +596,12 @@ class StocksPerStore extends BaseController
 				$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] : null;
 			}
 			$sheet->setCellValue('A4', 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'));
+			$selectedBrands = '';
+			if($brands){
+				$selectedBrands = implode(", ", $brands);
+				
+			}
 
-			$selectedBrands = implode(", ", $brands);
 			$sheet->setCellValue('B4', 'Brand: ' . ($selectedBrands ?: 'ALL'));
 
 			$baTypeLabels = [
@@ -602,8 +609,9 @@ class StocksPerStore extends BaseController
 				'1' => 'Outright',
 				'3' => 'All',
 			];
+
 			$baLabels = isset($baTypeLabels[$baTypeId]) ? $baTypeLabels[$baTypeId] : 'All';
-			$sheet->setCellValue('C4', 'Outright/Consignment: '.$baTypeLabels);
+			$sheet->setCellValue('C4', 'Outright/Consignment: '.$baTypeLabels[$baTypeId]);
 
 			$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
 			$store = isset($store_data[0]['description']) ? $store_data[0]['description'] : null;
