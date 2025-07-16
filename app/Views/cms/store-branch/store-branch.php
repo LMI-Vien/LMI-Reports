@@ -419,7 +419,8 @@
                     query: "ba.id = bag.brand_ambassador_id",
                     type: "left"
                 }
-            ]
+            ],
+            group : "s.code"
 
         }
 

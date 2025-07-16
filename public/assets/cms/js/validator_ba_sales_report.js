@@ -95,8 +95,8 @@ self.onmessage = async function (e) {
                 if (brand) {
                     let brand_lower = brand.toLowerCase();
 
-                    brand2 = brand_lookup[brand_lower] || null;
-                    if (!brand2) {
+                    brand_id = brand_lookup[brand_lower] || null;
+                    if (!brand_id) {
                         addErrorLog(`Brand "${brand}" not recognized`);
                         continue;
                     }
@@ -173,7 +173,7 @@ self.onmessage = async function (e) {
                         store_code: store_code,
                         ba_id: ba || 0,
                         ba_type: ba_type,
-                        brand: brand,
+                        brand: brand_id,
                         asc_id: asc_id || 0,
                         date: date,
                         amount: amount,

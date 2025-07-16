@@ -746,7 +746,7 @@ ul.child_menu {
             $('.module_body_container').html(htm);      
             setTimeout(() => {
                 $('.not_in_use').prop('disabled', true);
-            }, 1000);
+            }, 3000);
         });
     }
 
