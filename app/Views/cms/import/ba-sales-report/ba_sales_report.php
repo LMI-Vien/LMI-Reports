@@ -310,7 +310,7 @@
 
     $(document).ready(function() {
         get_data(query);
-        get_pagination();
+        get_pagination(query);
     });
 
     function get_data(new_query) {
@@ -401,7 +401,7 @@
         });
     }
 
-    function get_pagination() {
+    function get_pagination(query) {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "pagination",
@@ -567,8 +567,8 @@
     }
 
     function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
+        if (str.length > 15) {
+            return str.substring(0, 15) + "...";
         } else {
             return str;
         }

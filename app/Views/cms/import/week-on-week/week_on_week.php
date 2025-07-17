@@ -212,7 +212,7 @@
                 },
             ],
             order : {
-                field : "a.year",
+                field : "a.created_date",
                 order : "desc" 
             }
 
@@ -276,8 +276,20 @@
             offset : offset,
             limit : limit,
             table : "tbl_week_on_week_header as a",
+            join : [
+                {
+                    table : "tbl_year as b",
+                    query : "a.year = b.id",
+                    type : "left"
+                },
+                {
+                    table : "cms_users as c",
+                    query : "a.created_by = c.id",
+                    type : "left"
+                },
+            ],
             order : {
-                field : "a.year",
+                field : "a.created_date",
                 order : "desc" 
             }
 

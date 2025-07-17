@@ -1472,6 +1472,10 @@ function ViewDateformat(dateString) {
 }
 
 function trimText(str, length) {
+    if (typeof str !== 'string') {
+        str = '';
+    }
+
     if (str.length > length) {
         return str.substring(0, length) + "...";
     } else {

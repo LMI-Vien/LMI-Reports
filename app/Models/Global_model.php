@@ -295,28 +295,28 @@ class Global_model extends Model
     public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
     {
         $sql = "
-            SELECT 
-                v.id,
-                c.name AS company,
-                y.year,
-                v.week,
-                v.created_date,
-                v.updated_date,
-                v.year AS filter_year,
-                v.week AS filter_week,
-                v.company AS filter_company,
-                u.name AS imported_by
-            FROM tbl_vmi v
-            LEFT JOIN cms_users u ON u.id = v.created_by
-            LEFT JOIN tbl_company c ON c.id = v.company
-            LEFT JOIN tbl_year y ON y.id = v.year
-            INNER JOIN (
-                SELECT v.status, v.year, v.week, v.company, MAX(v.id) AS latest_id
+            SELECT company, year, week, created_date, updated_date, filter_year, filter_company, imported_by
+            FROM (
+                SELECT 
+                    c.name AS company,
+                    y.year,
+                    v.week,
+                    v.created_date,
+                    v.updated_date,
+                    v.year AS filter_year,
+                    v.company AS filter_company,
+                    u.name AS imported_by,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY v.year, v.week, v.company
+                        ORDER BY v.updated_date DESC
+                    ) AS row_num
                 FROM tbl_vmi v
+                LEFT JOIN cms_users u ON u.id = v.created_by
+                LEFT JOIN tbl_company c ON c.id = v.company
+                LEFT JOIN tbl_year y ON y.id = v.year
                 " . ($query ? "WHERE $query" : "") . "
-                GROUP BY year, week, company
-            ) latest 
-                ON latest.latest_id = v.id
+            ) ranked
+            WHERE row_num = 1
             LIMIT $limit OFFSET $offset
         ";
 
@@ -334,7 +334,7 @@ class Global_model extends Model
                     ps.status,
                     ps.created_date,
                     ps.updated_date,
-                    y.year as filter_year,
+                    b.year as filter_year,
                     u.name AS imported_by,
                     u.id AS imported_by_id,
                     ROW_NUMBER() OVER (
@@ -343,7 +343,7 @@ class Global_model extends Model
                     ) AS row_num
                 FROM tbl_target_sales_per_store ps
                 LEFT JOIN cms_users u ON u.id = ps.created_by
-                LEFT JOIN tbl_year y ON y.id = ps.year
+                LEFT JOIN tbl_year b ON b.id = ps.year
                 " . ($query ? "WHERE $query" : "") . "
             ) t
             WHERE row_num = 1

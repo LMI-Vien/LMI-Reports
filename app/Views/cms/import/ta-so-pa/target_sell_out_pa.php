@@ -1606,7 +1606,7 @@
             limit : 0,
             table : "tbl_year",
             order : {
-                field : "id",
+                field : "year",
                 order : "asc" 
             }
         }

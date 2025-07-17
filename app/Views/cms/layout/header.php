@@ -24,8 +24,6 @@
             <?php endforeach; ?>
         <?php endif; ?>
         <script src="<?= base_url();?>assets/js/popper.min.js" ></script>
-        <link rel="stylesheet" href="<?= base_url('assets/css/jquery-ui.css') ?>">
-        
         <script src="<?= base_url();?>assets/js/jquery-ui.js" ></script>
         <script src="<?= base_url();?>assets/js/xlsx.full.min.js" ></script>
         <script src="<?= base_url();?>assets/js/FileSaver.min.js" ></script>

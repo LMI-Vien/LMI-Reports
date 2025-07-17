@@ -127,8 +127,9 @@
                         html += "<td scope=\"col\">" + trimText(y.name, 10) + "</td>";
                         html += "<td scope=\"col\">" +status+ "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
+                        html += "<td class='center-content' scope=\"col\">" + 
+                        (y.updated_date && y.updated_date !== '0000-00-00 00:00:00' && y.updated_date.trim() !== '' ? ViewDateformat(y.updated_date) : "N/A") + 
+                    "</td>";
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
@@ -203,7 +204,7 @@
             new_query = query;
             new_query += ' and name like \'%'+search_input+'%\'';
             get_data(new_query);
-            get_pagination(query);
+            get_pagination(new_query);
         }
     });
 
@@ -215,7 +216,7 @@
         new_query = query;
         new_query += ' and name like \'%'+search_input+'%\'';
         get_data(new_query);
-        get_pagination(query);
+        get_pagination(new_query);
     });
 
     $('#btn_filter').on('click', function(event) {
@@ -539,8 +540,8 @@
     }
 
     function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
+        if (str.length > 15) {
+            return str.substring(0, 15) + "...";
         } else {
             return str;
         }

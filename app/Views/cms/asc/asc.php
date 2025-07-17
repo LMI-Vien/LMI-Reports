@@ -780,7 +780,7 @@
             val_status = 0
             chk_val = 'Inactive'
         }
-
+        
         var new_area_code = '';
         var area_code_array = {};
         get_field_values('tbl_area', 'code', 'id', [area], (res)=>{
@@ -905,6 +905,7 @@
                         } else {
                             status_val = 'Active'
                         }
+                        old['code'] = asc.code;
                         old['description'] = asc.description;
                         old['deployment_date'] = asc.deployment_date;
                         old['status'] = status_val;
@@ -917,11 +918,11 @@
         var old_area_code = '';
         var new_area_code = '';
         var area_code_array = {};
+        
         get_field_values('tbl_area', 'code', 'id', [old.area_id, area], (res)=>{
             $.each(res, (x,y) => {
                 area_code_array[x] = y
             })
-
             var html = "<table class= 'table table-bordered listdata'>"
             html += "<thead>"
             html += "<tr>"

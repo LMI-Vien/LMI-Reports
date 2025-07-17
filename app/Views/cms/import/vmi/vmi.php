@@ -285,7 +285,6 @@
             var result = JSON.parse(result);
             var html = '';
             var latestDate = null;
-            modal.loading(false);
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
@@ -333,7 +332,9 @@
                     html = '<tr><td colspan=18 class="center-align-format">'+ no_records +'</td></tr>';
                 }
             }
+
             $('.table_body').html(html);
+            modal.loading(false);
         });
     }
 
@@ -341,7 +342,7 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-          select: "c.name AS company, y.year as year, w.name, week",
+          select: "c.name AS company, y.year as year, u.name, week",
           query: new_query,
           offset: offset,
           limit: limit,
@@ -360,6 +361,11 @@
               {
                   table: "tbl_week w",
                   query: "w.id = v.week",
+                  type: "left"
+              },
+              {
+                  table: "cms_users u",
+                  query: "u.id = v.created_by",
                   type: "left"
               }
           ],
@@ -393,7 +399,7 @@
             var search_conditions = [
                 "c.name LIKE '%" + keyword + "%'",
                 "y.year LIKE '%" + keyword + "%'",
-                "w.name LIKE '%" + keyword + "%'"
+                "u.name LIKE '%" + keyword + "%'"
             ];
 
             var combined_query = "(" + search_conditions.join(" OR ") + ")";
@@ -415,7 +421,7 @@
         modal.loading(true); 
         get_data(query);
         get_pagination(query);
-        modal.loading(false);
+        //modal.loading(false);
     });
 
     function clear_import_table() {
@@ -1310,7 +1316,7 @@
             limit : 0,
             table : "tbl_year",
             order : {
-                field : "id",
+                field : "year",
                 order : "asc" 
             }
         }

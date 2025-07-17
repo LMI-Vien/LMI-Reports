@@ -540,6 +540,7 @@
                     updateAggregatedScanData(data_header_id, month, year);
                     logAll(start_time, valid_data);
                     setTimeout(() => {
+                        modal.loading(true);
                         modal.alert(
                             "All records inserted successfully!", 'success',
                             () => {

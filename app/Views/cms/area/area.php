@@ -553,11 +553,19 @@
                     html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
                     html += "<td scope=\"col\">" + trimText(y.description, 20) + "</td>";
                     if (action !== "view") {
-                        html += `<td align="middle">
-                                    <button type="button" class="rmv-btn" onclick="remove_store('${y.code}', ${area_id})">
-                                        <i class="fa fa-minus" aria-hidden="true"></i>
-                                    </button>
-                                </td>`;
+                        if (x === 0) {
+                            html += `<td align="middle">
+                                        <button type="button" class="rmv-btn" disabled>
+                                            <i class="fa fa-minus" aria-hidden="true"></i>
+                                        </button>
+                                    </td>`;
+                        } else {
+                            html += `<td align="middle">
+                                        <button type="button" class="rmv-btn" onclick="remove_store('${y.code}', ${area_id})">
+                                            <i class="fa fa-minus" aria-hidden="true"></i>
+                                        </button>
+                                    </td>`;
+                        }
                     }
                     html += "</tr>";
                 });
@@ -1278,7 +1286,7 @@
             search_input = $('#search_query').val();
             offset = 1;
             new_query = query;
-            new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\' OR ascr.description like \'%'+search_input+'%\' OR ascr.code like \'%'+search_input+'%\'';
+            new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\' OR ascr.description like \'%'+search_input+'%\' OR ascr.code like \'%'+search_input+'%\' OR s.code like \'%'+search_input+'%\'';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -1290,7 +1298,7 @@
         search_input = $('#search_query').val();
         offset = 1;
         new_query = query;
-        new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\'';
+        new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\' OR s.code like \'%'+search_input+'%\'';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -1312,11 +1320,11 @@
         column_filter = $("input[name='column']:checked").val();
         query = "a.status >= 0";
         
-        query += status_f ? ` AND status = ${status_f}` : '';
-        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : ''; 
-        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
-        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
-        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
+        query += status_f ? ` AND a.status = ${status_f}` : '';
+        query += c_date_from ? ` AND a.created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND a.created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND a.updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND a.updated_date <= '${m_date_to} 23:59:59'` : '';
         
         get_data(query, column_filter, order_filter);
         get_pagination(query, column_filter, order_filter);
@@ -1341,17 +1349,19 @@
         $('#filter_modal').modal('hide');
     })
 
-    function get_pagination(query, field = "a.updated_date", order = "desc") {
+    function get_pagination(query, field = "a.code", order = "asc") {
+        var url = "<?= base_url("cms/global_controller");?>";
         var data = {
-        event : "pagination",
-            select : "a.id",
+          event : "pagination",
+            select : `a.id, a.code, a.description, a.status, a.created_date, a.updated_date, 
+            s.description as store_name, s.code as store_code, ascr.description AS asc_name, ascr.code as asc_code`,
             query : query,
             offset : offset,
             limit : limit,
             table : "tbl_area a",
             order : {
                 field : field,
-                order : order 
+                order : order
             },
             join : [
                 {
@@ -1363,18 +1373,63 @@
                     table: "tbl_store s",
                     query: "s.id = sg.store_id",
                     type: "left"
+                },
+                {
+                    table: "tbl_area_sales_coordinator ascr",
+                    query: "ascr.area_id = a.id",
+                    type: "left"
                 }
             ],
             group: "a.code" 
-
         }
 
         aJax.post(url,data,function(result){
-            var obj = is_json(result); 
+            var obj = is_json(result);
             modal.loading(false);
             pagination.generate(obj.total_page, ".list_pagination", get_data);
         });
     }
+
+    // function get_pagination(query, field = "a.code", order = "asc") {
+    //     var data = {
+    //     event : "pagination",
+    //         select : `a.id, a.code, a.description, a.status, a.created_date, a.updated_date, 
+    //         s.description as store_name, ascr.description AS asc_name, ascr.code as asc_code`,
+    //         query : query,
+    //         offset : offset,
+    //         limit : limit,
+    //         table : "tbl_area a",
+    //         order : {
+    //             field : field,
+    //             order : order 
+    //         },
+    //         join : [
+    //             {
+    //                 table: "tbl_store_group sg",
+    //                 query: "sg.area_id = a.id",
+    //                 type: "left"
+    //             },
+    //             {
+    //                 table: "tbl_store s",
+    //                 query: "s.id = sg.store_id",
+    //                 type: "left"
+    //             },
+    //             {
+    //                 table: "tbl_area_sales_coordinator ascr",
+    //                 query: "ascr.area_id = a.id",
+    //                 type: "left"
+    //             }
+    //         ],
+    //         group: "a.code" 
+
+    //     }
+
+    //     aJax.post(url,data,function(result){
+    //         var obj = is_json(result); 
+    //         modal.loading(false);
+    //         pagination.generate(obj.total_page, ".list_pagination", get_data);
+    //     });
+    // }
 
     pagination.onchange(function(){
         offset = $(this).val();
@@ -1483,6 +1538,7 @@
                 } else {
                     status_val = 0;
                 }
+
 
                 // logic for adding
                 if (id === undefined || id === null || id === '') 
@@ -1883,7 +1939,7 @@
         var data = {
             event : "list_pagination",
             select : `a.id, a.code, a.description, a.status, a.created_date, a.updated_date, 
-            s.description as store_name, ascr.description AS asc_name, ascr.code as asc_code`,
+            s.description as store_name, s.code as store_code, ascr.description AS asc_name, ascr.code as asc_code`,
             query : query,
             offset : offset,
             limit : limit,

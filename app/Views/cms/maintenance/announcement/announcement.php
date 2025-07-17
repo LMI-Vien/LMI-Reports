@@ -106,8 +106,8 @@
                          </select>
                     </div>
                     <div class="mb-3">
-                        <label for="desc_2" class="form-label">Description 2</label>
-                        <textarea class="form-control" id="desc_2" aria-describedby="desc_2"></textarea>
+                        <label for="description_2" class="form-label">Description 2</label>
+                        <textarea class="form-control" id="description_2" aria-describedby="description_2"></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="desc_3" class="form-label">Description 3</label>
@@ -171,17 +171,27 @@
             const startDateValue = $(this).val();
             $('#end_date').attr('min', startDateValue);  
         });
-
-        $('#end_date').on('input', function () {
-            const startDateValue = $('#start_date').val();
-            const endDateValue = $(this).val();
-            
-            if (endDateValue && endDateValue < startDateValue) {
-                alert("End date cannot be before the start date.");
-                $(this).val(""); 
-            }
-        });
     });     
+
+    $('#start_date, #end_date').on('input change', function () {
+        const startDateValue = $('#start_date').val();
+        const endDateValue = $('#end_date').val();
+
+        if (startDateValue && endDateValue) {
+            const startDate = new Date(startDateValue);
+            const endDate = new Date(endDateValue);
+
+            if (endDate < startDate) {
+                modal.alert("End date cannot be before the start date.", 'error');
+                $('#end_date').val("");
+            }
+
+            if (startDate > endDate) {
+                modal.alert("Start date cannot be after the end date.", 'error');
+                $('#start_date').val("");
+            }
+        }
+    });
 
     function get_data(query, field = "id", order = "order") {
       var url = "<?= base_url("cms/global_controller");?>";
@@ -360,7 +370,7 @@
     function save_data(action, id) {
         var title = $('#title').val();
         var desc_1 = $('#desc_1').val();
-        var desc_2 = $('#desc_2').val();
+        var desc_2 = $('#description_2').val();
         var desc_3 = $('#desc_3').val();
         // var ban_1 = $('#ban_1').val();
         // var ban_2 = $('#ban_2').val();
@@ -527,7 +537,7 @@
             new_query = query;
             new_query += ' and title like \'%'+search_input+'%\'';
             get_data(new_query);
-            get_pagination(query);
+            get_pagination(new_query);
         }
     });
 
@@ -539,7 +549,7 @@
         new_query = query;
         new_query += ' and title like \'%'+search_input+'%\'';
         get_data(new_query);
-        get_pagination(query);
+        get_pagination(new_query);
     });
 
     $('#btn_filter').on('click', function(event) {

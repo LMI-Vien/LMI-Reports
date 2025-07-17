@@ -481,7 +481,7 @@
           limit: limit,
           table: "tbl_target_sales_per_store ps",
           order : {
-              field : "ps.id",
+              field : "ps.created_date",
               order : "asc" 
           },
           join: [
@@ -852,8 +852,8 @@
     }
 
     function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
+        if (str.length > 15) {
+            return str.substring(0, 15) + "...";
         } else {
             return str;
         }

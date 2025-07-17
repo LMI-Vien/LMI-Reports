@@ -259,7 +259,7 @@
             new_query = query;
             new_query += ' and s.code like \'%'+search_input+'%\' or '+query+' and s.description like \'%'+search_input+'%\' or '+query+' and ba.code like \'%'+search_input+'%\' or '+query+' and ba.name like \'%'+search_input+'%\'';
             get_data(new_query);
-            get_pagination(query);
+            get_pagination(new_query);
         }
     });
 
@@ -365,13 +365,13 @@
         
         order_filter = $("input[name='order']:checked").val();
         column_filter = $("input[name='column']:checked").val();
-        query = "status >= 0";
+        query = "s.status >= 0";
         
-        query += status_f ? ` AND status = ${status_f}` : '';
-        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : ''; 
-        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
-        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
-        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
+        query += status_f ? ` AND s.status = ${status_f}` : '';
+        query += c_date_from ? ` AND s.created_date >= '${c_date_from} 00:00:00'` : ''; 
+        query += c_date_to ? ` AND s.created_date <= '${c_date_to} 23:59:59'` : '';
+        query += m_date_from ? ` AND s.updated_date >= '${m_date_from} 00:00:00'` : '';
+        query += m_date_to ? ` AND s.updated_date <= '${m_date_to} 23:59:59'` : '';
         
         get_data(query, column_filter, order_filter);
         get_pagination(query, column_filter, order_filter);
@@ -396,7 +396,7 @@
         $('#filter_modal').modal('hide');
     })
 
-    function get_data(query, field = "s.id, s.updated_date", order = "asc, desc") {
+    function get_data(query, field = "s.id, s.updated_date", order = "asc") {
         var data = {
             event : "list",
             select : "s.id, s.code, s.description, s.status, s.updated_date, s.created_date, ba.code AS ba_code, ba.name AS ba_name",
@@ -463,7 +463,7 @@
         });
     };
 
-    function get_pagination(query, field = "s.updated_date", order = "desc") {
+    function get_pagination(query, field = "s.updated_date", order = "asc") {
         var data = {
         event : "pagination",
             select : "s.id",
@@ -486,7 +486,8 @@
                     query: "ba.id = bag.brand_ambassador_id",
                     type: "left"
                 }
-            ]
+            ],
+            group : "s.code"
 
         }
 
@@ -1975,8 +1976,8 @@
     };
 
     function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
+        if (str.length > 15) {
+            return str.substring(0, 15) + "...";
         } else {
             return str;
         }
@@ -2194,11 +2195,4 @@
         });
     };
 
-    function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
-        } else {
-            return str;
-        }
-    };
 </script>

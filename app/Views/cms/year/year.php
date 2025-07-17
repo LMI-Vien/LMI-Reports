@@ -96,7 +96,7 @@
       get_pagination(query);
     });
 
-    function get_data(query, field = "id", order = "asc") {
+    function get_data(query, field = "year", order = "asc") {
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
@@ -127,7 +127,9 @@
                         html += "<td scope=\"col\">" + trimText(y.year, 10) + "</td>";
                         html += "<td scope=\"col\">" +status+ "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+                        html += "<td class='center-content' scope=\"col\">" + 
+                        (y.updated_date && y.updated_date !== '0000-00-00 00:00:00' && y.updated_date.trim() !== '' ? ViewDateformat(y.updated_date) : "N/A") + 
+                    "</td>";
 
                         if (y.id == 0) {
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
@@ -153,7 +155,7 @@
         });
     }
 
-    function get_pagination(query, field = "id", order = "asc") {
+    function get_pagination(query, field = "year", order = "asc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
@@ -192,7 +194,7 @@
             new_query = query;
             new_query += ' and year like \'%'+search_input+'%\'';
             get_data(new_query);
-            get_pagination(query);
+            get_pagination(new_query);
         }
     });
 
@@ -537,8 +539,8 @@
     }
 
     function trimText(str) {
-        if (str.length > 10) {
-            return str.substring(0, 10) + "...";
+        if (str.length > 15) {
+            return str.substring(0, 15) + "...";
         } else {
             return str;
         }
