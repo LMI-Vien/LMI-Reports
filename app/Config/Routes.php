@@ -186,7 +186,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('store-branch', static function ($routes) {
         $routes->get('/', 'Cms\StoreBranch::index');
-        $routes->match(['GET', 'POST'], 'export-team', 'Cms\StoreBranch::export_store');
+        $routes->match(['GET', 'POST'], 'export-store', 'Cms\StoreBranch::export_store');
     });
 
     $routes->group('area', static function ($routes) {
