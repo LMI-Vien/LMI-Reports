@@ -168,7 +168,9 @@ class Area extends BaseController
 			$sheet->setCellValueExplicit('A' . $rowNum, $row->code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 			$sheet->setCellValueExplicit('B' . $rowNum, $row->description, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 			$sheet->setCellValueExplicit('C' . $rowNum, $row->status == 1 ? 'Active' : 'Inactive', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-			$sheet->setCellValueExplicit('D' . $rowNum, $store_data[$key]->stores, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			//$sheet->setCellValueExplicit('D' . $rowNum, $store_data[$key]->stores, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$storeValue = isset($store_data[$key]->stores) ? $store_data[$key]->stores : '';
+			$sheet->setCellValueExplicit('D' . $rowNum, $storeValue, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 			$rowNum+=1;
 			
 		}

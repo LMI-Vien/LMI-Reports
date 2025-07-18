@@ -87,7 +87,7 @@
                 <form id="form-modal">
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control required" id="title" aria-describedby="title">
+                        <input type="text" class="form-control required" id="title" aria-describedby="title" maxlength="150">
                     </div>
                     <div class="mb-3">
                         <label for="desc_1" class="form-label">Description 1</label>
@@ -283,7 +283,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#title, #desc_1, #desc_2, #desc_3, #start_date, #end_date', isReadOnly);
+        set_field_state('#title, #desc_1, #description_2, #desc_3, #start_date, #end_date', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -323,7 +323,7 @@
 
     function reset_modal_fields() {
         // $('#popup_modal #title, #popup_modal #desc_1, #popup_modal #desc_2, #popup_modal #desc_3, #popup_modal #start_date, #popup_modal #end_date, #popup_modal').val('');
-        $('#popup_modal').find('#title, #desc_1, #desc_2, #desc_3, #start_date, #end_date').val('');
+        $('#popup_modal').find('#title, #desc_1, #description_2, #desc_3, #start_date, #end_date').val('');
     }
 
     function create_button(btn_txt, btn_id, btn_class, onclick_event) {
@@ -355,7 +355,7 @@
                 $.each(obj, function(index,d) {
                     $('#title').val(d.title);
                     $('#desc_1').val(d.description_1);
-                    $('#desc_2').val(d.description_2);
+                    $('#description_2').val(d.description_2);
                     $('#desc_3').val(d.description_3);
                     // $('#ban_1').val(d.banner_1);
                     // $('#ban_2').val(d.banner_2);
