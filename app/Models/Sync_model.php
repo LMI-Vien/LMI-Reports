@@ -1192,6 +1192,7 @@ class Sync_model extends Model
             ),
             aggregated_so AS (
                 SELECT
+                    so.id,
                     so.year,
                     so.month,
                     so.store_code,
@@ -1208,10 +1209,11 @@ class Sync_model extends Model
                 FROM tbl_sell_out_data_details so
                 INNER JOIN tbl_sell_out_data_header h ON so.data_header_id = h.id
                 {$whereClause}
-                GROUP BY so.year, so.month, so.store_code, so.brand_ambassador_ids, so.brand_ids, so.area_id, so.asc_id, so.data_header_id, so.sku_code, so.ba_types
+                GROUP BY so.id
             ),
             final_data AS (
                 SELECT
+                    aso.id,
                     aso.year,
                     aso.month,
                     aso.store_code,
@@ -1227,12 +1229,14 @@ class Sync_model extends Model
                     SUM(aso.gross_sales) AS gross_sales,
                     SUM(aso.net_sales) AS net_sales,
                     SUM(aso.quantity) AS quantity,
-                    GROUP_CONCAT(DISTINCT CASE WHEN aso.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
-                    GROUP_CONCAT(DISTINCT CASE WHEN aso.company = '2' THEN pitmlmi.itmdsc ELSE itmrgdi.itmdsc END) AS itmdsc,
+                    MIN(DISTINCT CASE WHEN aso.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END) AS itmcde,
+                    MIN(DISTINCT CASE WHEN aso.company = '2' THEN pitmlmi.itmdsc ELSE itmrgdi.itmdsc END) AS itmdsc,
                     CASE WHEN aso.company = '2' THEN pitmlmi.brncde ELSE itmrgdi.brncde END AS brncde,
                     CASE WHEN aso.company = '2' THEN pitmlmi.itmclacde ELSE itmrgdi.itmclacde END AS itmclacde,
-                    CONCAT(MAX(aso.store_code), ' - ', s.description) AS store_name,
-                    GROUP_CONCAT(DISTINCT aso.sku_code) AS sku_codes
+                    CONCAT(MIN(aso.store_code), ' - ', s.description) AS store_name,
+                    MIN(DISTINCT aso.sku_code) AS sku_codes,
+                    CASE WHEN aso.company = '2' THEN itmunitlmi.untprc ELSE itmunitrgdi.untprc END AS unit_price,
+                    (CASE WHEN aso.company = '2' THEN itmunitlmi.untprc ELSE itmunitrgdi.untprc END) * SUM(aso.quantity) AS amount
                 FROM aggregated_so aso
                 LEFT JOIN tbl_store s ON aso.store_code = s.code
 
@@ -1242,6 +1246,9 @@ class Sync_model extends Model
                 LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde AND aso.company = '2'
                 LEFT JOIN dedup_itmrgdi itmrgdi ON pcrgdi.itmcde = itmrgdi.itmcde AND aso.company != '2'
 
+                LEFT JOIN tbl_item_unit_file_lmi itmunitlmi ON pclmi.itmcde = itmunitlmi.itmcde AND itmunitlmi.untmea = 'PCS' AND aso.company = '2'
+                LEFT JOIN tbl_item_unit_file_rgdi itmunitrgdi ON pcrgdi.itmcde = itmunitrgdi.itmcde AND itmunitrgdi.untmea = 'PCS' AND aso.company != '2'
+
                 LEFT JOIN tbl_brand b ON 
                     (aso.company = '2' AND pitmlmi.brncde = b.brand_code) OR
                     (aso.company != '2' AND itmrgdi.brncde = b.brand_code)
@@ -1250,16 +1257,7 @@ class Sync_model extends Model
                 LEFT JOIN tbl_brand_terms bbt ON b.terms_id = bbt.id
 
                 GROUP BY
-                    aso.year,
-                    aso.month,
-                    aso.store_code,
-                    aso.area_id,
-                    aso.asc_id,
-                    aso.company,
-                    blt.id,
-                    bbt.sfa_filter,
-                    brncde,
-                    b.id
+                    aso.id
             )
             SELECT * FROM final_data
         ";
@@ -2194,6 +2192,195 @@ class Sync_model extends Model
             'total_inserted' => count($allData)
         ];
     }
+
+    public function syncItemUnitFileLmiData($where, $batchSize = 5000)
+    {
+        $offset = 0;
+        $totalRecordsSynced = 0;
+        $errorMessage = null;
+        $status = 'success';
+        $filter = strtolower($where);
+        try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_item_unit_file_lmi");
+            
+            while (true) {
+                $sourceData = $this->traccLmiDB->table('itemunitfile')
+                                                 ->limit($batchSize, $offset)
+                                                 ->get()
+                                                 ->getResultArray();
+
+                if (empty($sourceData)) {
+                    break;
+                }
+
+                $values = [];
+                foreach ($sourceData as $row) {
+                    $untprc = $this->getUntprcLmi($row['itmcde'], $row['untmea']);
+                    $values[] = "(
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['itmcde']) . "',
+                        '" . $this->esc($row['conver']) . "',
+                        '" . $this->esc($row['untmea']) . "',
+                        '" . $this->esc($untprc) . "',
+                        '" . $this->esc($row['untcst']) . "'
+                    )";
+                }
+
+                if (!empty($values)) {
+                    $sql = "INSERT INTO tbl_item_unit_file_lmi (recid, itmcde, conver, untmea, untprc, untcst) 
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                              itmcde = VALUES(itmcde),
+                              conver = VALUES(conver),
+                              untmea = VALUES(untmea),
+                              untprc = VALUES(untprc),
+                              untcst = VALUES(untcst)";
+
+                    $this->sfaDB->query($sql);
+                    $totalRecordsSynced += count($sourceData);
+                }
+
+                $offset += $batchSize;
+            }
+        } catch (\Exception $e) {
+            $status = 'error';
+            $errorMessage = $e->getMessage();
+        }    
+
+        return $status === 'success' ? "Data sync completed for Item Unit File LMI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    }
+
+    public function syncItemUnitFileRgdiData($where, $batchSize = 5000)
+    {
+        $offset = 0;
+        $totalRecordsSynced = 0;
+        $errorMessage = null;
+        $status = 'success';
+        $filter = strtolower($where);
+        try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_item_unit_file_rgdi");
+            
+            while (true) {
+                $sourceData = $this->traccRgdiDB->table('itemunitfile')
+                                                 ->limit($batchSize, $offset)
+                                                 ->get()
+                                                 ->getResultArray();
+
+                if (empty($sourceData)) {
+                    break;
+                }
+
+                $values = [];
+                foreach ($sourceData as $row) {
+                    $untprc = $this->getUntprcRgdi($row['itmcde'], $row['untmea']);
+                    $values[] = "(
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['itmcde']) . "',
+                        '" . $this->esc($row['conver']) . "',
+                        '" . $this->esc($row['untmea']) . "',
+                        '" . $this->esc($untprc) . "',
+                        '" . $this->esc($row['untcst']) . "'
+                    )";
+                }
+
+                if (!empty($values)) {
+                    $sql = "INSERT INTO tbl_item_unit_file_rgdi (recid, itmcde, conver, untmea, untprc, untcst) 
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                              itmcde = VALUES(itmcde),
+                              conver = VALUES(conver),
+                              untmea = VALUES(untmea),
+                              untprc = VALUES(untprc),
+                              untcst = VALUES(untcst)";
+
+                    $this->sfaDB->query($sql);
+                    $totalRecordsSynced += count($sourceData);
+                }
+
+                $offset += $batchSize;
+            }
+        } catch (\Exception $e) {
+            $status = 'error';
+            $errorMessage = $e->getMessage();
+        }    
+
+        return $status === 'success' ? "Data sync completed for Item Unit File RGDI with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    }
+
+    private function getUntprcRgdi($itmcde, $untmea)
+    {
+        if ($untmea === 'PCS') {
+            $result = $this->sfaDB->table('tbl_price_code_file_2_rgdi')
+                         ->select('untprc')
+                         ->where('itmcde', $itmcde)
+                         ->where('untmea', 'PCS')   
+                         ->get()
+                         ->getRowArray();
+
+            return $result['untprc'] ?? 0;
+        }
+
+        preg_match('/\d+/', $untmea, $matches);
+        if (!empty($matches)) {
+            $number = $matches[0];
+
+            $result = $this->sfaDB->table('tbl_price_code_file_2_rgdi')
+                                             ->select('untprc')
+                                             ->where('itmcde', $itmcde)
+                                             ->where('untmea', $untmea)
+                                             ->get()
+                                             ->getRowArray();
+
+
+
+            if (!empty($result) && !empty($result['untprc'])) {
+                $untprc = $result['untprc'] / $number;
+                return $untprc;
+            }else{
+                return 0;
+            }
+        }
+
+        return 0;
+    }
+
+    private function getUntprcLmi($itmcde, $untmea)
+    {
+        if ($untmea === 'PCS') {
+            $result = $this->sfaDB->table('tbl_price_code_file_2_lmi')
+                         ->select('untprc')
+                         ->where('itmcde', $itmcde)
+                         ->where('untmea', 'PCS')   
+                         ->get()
+                         ->getRowArray();
+
+            return $result['untprc'] ?? 0;
+        }
+
+        preg_match('/\d+/', $untmea, $matches);
+        if (!empty($matches)) {
+            $number = $matches[0];
+
+            $result = $this->sfaDB->table('tbl_price_code_file_2_lmi')
+                                             ->select('untprc')
+                                             ->where('itmcde', $itmcde)
+                                             ->where('untmea', $untmea)
+                                             ->get()
+                                             ->getRowArray();
+
+
+
+            if (!empty($result) && !empty($result['untprc'])) {
+                $untprc = $result['untprc'] / $number;
+                return $untprc;
+            }else{
+                return 0;
+            }
+        }
+
+        return 0;
+    }
+
 
     public function refreshAll()
     {

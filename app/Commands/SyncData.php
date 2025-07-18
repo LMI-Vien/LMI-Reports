@@ -73,7 +73,9 @@ class SyncData extends BaseCommand
             'syncCusPaymentGroupRgdiData'=> ['Watsons Personal Care Stores', 5000],
             'syncCusPaymentGroupLmiData' => ['Watsons Personal Care Stores', 5000],
             'syncCustomerLmiData'        => ['Watsons', 5000],
-            'syncCustomerRgdiData'       => ['Watsons', 5000]
+            'syncCustomerRgdiData'       => ['Watsons', 5000],
+            'syncItemUnitFileLmiData'        => ['Watsons', 5000],
+            'syncItemUnitFileRgdiData'       => ['Watsons', 5000]
         ];
 
         $methods = [
@@ -88,7 +90,11 @@ class SyncData extends BaseCommand
             'syncCusPaymentGroupRgdiData',
             'syncCusPaymentGroupLmiData',
             'syncCustomerLmiData',
-            'syncCustomerRgdiData'
+            'syncCustomerRgdiData',
+            'syncItemUnitFileLmiData',
+            'syncItemUnitFileRgdiData'
+
+
         ];
 
         $results = [];
