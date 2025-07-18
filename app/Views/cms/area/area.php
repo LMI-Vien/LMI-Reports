@@ -2015,11 +2015,30 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    handleExport()
+                    exportArea();
                 }, 500);
             }
         })
     })
+
+    const exportArea = () => {
+        var ids = [];
+
+        $('.select:checked').each(function () {
+            var id = $(this).attr('data-id');
+            ids.push(`'${id}'`);
+        });
+
+        console.log(ids, 'ids');
+
+        const params = new URLSearchParams();
+        ids.length > 0 ? 
+            params.append('selectedids', ids.join(',')) :
+            params.append('selectedids', '0');
+
+        window.open("<?= base_url('cms/');?>" + 'area/export-area?'+ params.toString(), '_blank');
+        modal.loading_progress(false);
+    }
 
     function download_template() {
         const headerData = [];
@@ -2041,97 +2060,6 @@
 
         exportArrayToCSV(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
     }
-
-    function handleExport() {
-        var formattedData = [];
-        var ids = [];
-        
-        $('.select:checked').each(function () {
-            var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Collect IDs in an array
-        });
-        
-        const fetchStores = (callback) => {
-            const processResponse = (res) => {
-                formattedData = res.map(({ 
-                    area_code, area_description, status, store_description
-                }) => ({
-                    Code: area_code,
-                    Description: area_description,
-                    Status: status === "1" ? "Active" : "Inactive",
-                    "Stores": store_description,
-                }));
-            };
-
-            ids.length > 0 
-                ? dynamic_search(
-                    "'tbl_area a'", 
-                    "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
-                    "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.code, c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
-                    0, 
-                    0, 
-                    `'a.id:IN=${ids.join('|')} a.status:IN=0|1'`,  
-                    `''`, 
-                    `'a.id'`,
-                    processResponse
-                )
-                : batch_export();
-        };
-
-        const batch_export = () => {
-            dynamic_search(
-                "'tbl_area'", 
-                "''", 
-                "'COUNT(id) AS total_records'", 
-                0, 
-                0, 
-                `'status:IN=0|1'`,  
-                `''`, 
-                `''`,
-                (res) => {
-                    if (res && res.length > 0) {
-                        let total_records = res[0].total_records;
-
-                        for (let index = 0; index < total_records; index += 100000) {
-                            dynamic_search(
-                                "'tbl_area a'", 
-                                "'LEFT JOIN tbl_store_group b ON a.id = b.area_id INNER JOIN tbl_store c ON b.store_id = c.id'", 
-                                "'a.code as area_code, a.description as area_description, a.status, GROUP_CONCAT(DISTINCT c.code, c.description ORDER BY c.description ASC SEPARATOR \", \") AS store_description'", 
-                                100000, 
-                                index, 
-                                `'a.status:IN=0|1'`,  
-                                `''`, 
-                                `'a.id'`, 
-                                (res) => {
-                                    let newData = res.map(({ 
-                                        id, area_code, area_description, status, store_description
-                                    }) => ({
-                                        Code: area_code,
-                                        Description: area_description,
-                                        Status: status === "1" ? "Active" : "Inactive",
-                                        "Stores": store_description || '',
-                                    }));
-                                    formattedData.push(...newData); // Append new data to formattedData array
-                                }
-                            )
-                        }
-                    }
-                }
-            )
-        };
-
-        fetchStores();
-
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["Masterfile: Area"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
-
-        exportArrayToCSV(formattedData, `Masterfile: Area - ${formatDate(new Date())}`, headerData);
-        modal.loading_progress(false);
-    };
 
     function exportArrayToCSV(data, filename, headerData) {
 

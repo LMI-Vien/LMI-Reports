@@ -142,20 +142,6 @@
                             </div>
                         </div>
 
-                        <!-- <div class="form-group">
-                            <label>Area</label>
-                            <select name="area" class="form-control required" id="area">
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Store</label>
-                            <select name="store" class="form-control required" id="store">
-                            </select>
-                        </div> -->
-
-                        
-
                         <div class="form-group">
                             <label>Team</label>
                             <select name="team" class="form-control required" id="team">
@@ -312,21 +298,11 @@
                     query: "a.id = ba.agency",
                     type: "left"
                 },
-                // {
-                //     table: "tbl_store s",
-                //     query: "s.id = ba.store",
-                //     type: "left"
-                // },
                 {
                     table: "tbl_team t",
                     query: "t.id = ba.team",
                     type: "left"
                 }
-                // {
-                //     table: "tbl_area ar",
-                //     query: "ar.id = ba.area",
-                //     type: "left"
-                // }
             ]            
             
 
@@ -423,7 +399,6 @@
         search_input = $('#search_query').val();
         offset = 1;
         new_query = query;
-        // new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR t.team_description LIKE '%" +  search_input + "%' OR b.brand_description LIKE '%" + search_input + "%')";
         new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%')";
         get_data(new_query);
         get_pagination(new_query);
@@ -910,7 +885,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
     modal.loading_progress(true, "Validating and Saving data...");
 
     aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
-        // let result = JSON.parse(response);
         const result = JSON.parse(response);
         const allEntries = result.existing || [];
         
@@ -1066,74 +1040,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
     });
 }
 
-    // backup
-    // function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
-    //     let batch_size = 5000;
-    //     let brandBatchIndex = 0;
-    //     let brandDataKeys = inserted_ids.map(obj => obj.id);
-
-    //     let total_brand_batches = Math.ceil(brandDataKeys.length / batch_size);
-    //     let insertedMap = {};
-
-    //     inserted_ids.forEach(({ id, code }) => {
-    //         insertedMap[id] = id;
-    //     });
-
-    //     function processNextBrandBatch() {
-    //         if (brandBatchIndex >= total_brand_batches) {
-    //             callback();
-    //             return;
-    //         }
-
-    //         let chunkKeys = brandDataKeys.slice(brandBatchIndex * batch_size, (brandBatchIndex + 1) * batch_size);
-    //         let chunkData = [];
-    //         let baIdsToDelete = [];
-
-    //         chunkKeys.forEach(id => {
-    //             let ba_id = insertedMap[id];
-    //             let brand_ids = brand_per_ba[id];
-    //             if (ba_id && brand_ids) {
-    //                 baIdsToDelete.push(ba_id);
-    //                 brand_ids.forEach(brand_id => {
-    //                     chunkData.push({
-    //                         ba_id: ba_id,
-    //                         brand_id: brand_id,
-    //                         created_by: user_id,
-    //                         created_date: formatDate(new Date()),
-    //                         updated_date: formatDate(new Date())
-    //                     });
-    //                 });
-    //             }
-    //         });
-
-    //         function insertNewBrandRecords() {
-    //             if (chunkData.length > 0) {
-    //                 batch_insert(url, chunkData, "tbl_ba_brands", false, function() {
-    //                     brandBatchIndex++;
-    //                     setTimeout(processNextBrandBatch, 100);
-    //                 });
-    //             } else {
-    //                 brandBatchIndex++;
-    //                 setTimeout(processNextBrandBatch, 100);
-    //             }
-    //         }
-
-    //         if (baIdsToDelete.length > 0) {
-    //             batch_delete(url, "tbl_ba_brands", "ba_id", baIdsToDelete, 'brand_id', function() {
-    //                 insertNewBrandRecords();
-    //             });
-    //         } else {
-    //             insertNewBrandRecords();
-    //         }
-    //     }
-
-    //     if (brandDataKeys.length > 0) {
-    //         processNextBrandBatch();
-    //     } else {
-    //         callback();
-    //     }
-    // }
-
     function processBrandPerBA(inserted_ids, brand_per_ba, callback) {
         const url               = "<?= base_url('cms/global_controller');?>";
         const overallStart      = new Date();
@@ -1247,8 +1153,7 @@ function saveValidatedData(valid_data, brand_per_ba) {
                                 <br>Time: ${formatReadableDate(deleteEnd)}
                             `;
 
-                        // logActivity("ba-module-import", "Delete BA-Brand Batch", remarks, "-", JSON.stringify({ deletedBAIds: baIdsToDelete}), "");
-
+                        
                         insertNewBrandRecords();
                     }
                 );
@@ -1428,7 +1333,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
             if (id !== undefined && id !== null && id !== '') {
                 code = $('#code').val();
-                //check_current_db("tbl_brand_ambassador", ["store", "code"], [store, code], "status", "id", id, true, function(exists) {
                 check_current_db("tbl_brand_ambassador", ["name"], [name], "status" , "id", id, true, function(exists, duplicateFields) {
 
                     if (!exists) {
@@ -1525,29 +1429,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
                         batch.push(data);
                     });
                 }
-
-                // if (valid) {
-                //     save_to_db(name, deployment_date, agency, team, type, status_val, code, id, (obj) => {
-                //         insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
-                //         if(id){
-                //             insert_batch = batch.map(batch => ({...batch, ba_id: id}));
-                //         }
-                //         if (Array.isArray(baIdsToDelete) && baIdsToDelete.length > 0) {
-                //             batch_delete(url, "tbl_ba_brands", "ba_id", baIdsToDelete, 'brand_id', function(resp) {
-                //             });
-                //         }
-                //         batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
-                //             modal.loading(false);
-                //             modal.alert(success_update_message, "success", function() {
-                //                 location.reload();
-                //             });
-                //         });
-
-                //     });
-                // } else {
-                //     modal.loading(false);
-                //     modal.alert('Brand not found', 'error', function() {});
-                // }
 
                 if (valid) {
                     save_to_db(name, deployment_date, agency, team, type, status_val, code, id, (obj) => {
@@ -1682,7 +1563,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
                 aJax.post(url, data, function(result) {
                     var obj = is_json(result);
-                     //cb = { code: newCode };
                     cb(obj);
                     modal.loading(false);
                 });
@@ -1993,239 +1873,28 @@ function saveValidatedData(valid_data, brand_per_ba) {
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    handleExport()
+                    exportBa()
                 }, 500);
             }
         })
     })
 
-    function handleExport() {
-        var formattedData = [];
+    const exportBa = () => {
         var ids = [];
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Collect IDs in an array
+            ids.push(`'${id}'`);
         });
 
-        const fetchStores = (callback) => {
-            const processResponse = (res) => {
-                let agency_ids = [];
-                let team_ids = [];
-                let brand_ids = [];
+        console.log(ids, 'ids');
 
-                let agency_map = {}
-                let team_map = {};
-                let brand_map = {};
+        const params = new URLSearchParams();
+        ids.length > 0 ? 
+            params.append('selectedids', ids.join(',')) :
+            params.append('selectedids', '0');
 
-                res.forEach(item => {
-                    agency_ids.push(`${item.agency}`);
-                    team_ids.push(`${item.team}`);
-                    brand_ids.push(`${item.id}`);
-                });
-
-                dynamic_search(
-                    "'tbl_agency'", "''", "'id, agency'", 0, 0, `'id:IN=${agency_ids.join('|')}'`, `''`, `''`,
-                    (result) => {
-                        result.forEach(
-                            item => {
-                                if (!agency_map[item.id]) {
-                                    agency_map[item.id] = {};
-                                }
-                                agency_map[item.id] = item.agency;
-                            }
-                        );
-                    }
-                );
-                dynamic_search(
-                    "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
-                    (result) => {
-                        result.forEach(
-                            item => {
-                                if (!team_map[item.id]) {
-                                    team_map[item.id] = {};
-                                }
-                                team_map[item.id] = item.team_description;
-                            }
-                        );
-                    }
-                );
-                
-                dynamic_search(
-                    "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
-                    "'a.ba_id as id, GROUP_CONCAT(DISTINCT b.brand_code ORDER BY b.brand_code ASC SEPARATOR \", \") AS brands'", 
-                    0, 0, `'a.ba_id:IN=${brand_ids.join('|')}'`, `''`, `'a.ba_id'`,
-                    (result) => {
-                        result.forEach(
-                            item => {
-                                if (!brand_map[item.id]) {
-                                    brand_map[item.id] = {};
-                                }
-                                brand_map[item.id] = item.brands;
-                            }
-                        );
-                    }
-                );
-                
-                formattedData = res.map(({ 
-                    id, 
-                    code, description, deployed_date, type, status, 
-                    agency, team
-                }) => ({
-                    "BA Code": code,
-                    "BA Name": description,
-                    "Deployment Date": deployed_date,
-                    Agency: agency_map[agency],
-                    Brand: brand_map[id],
-                    Team: team_map[team],
-                    Type: type === "1" ? "Outright" : "Consign",
-                    Status: status === "1" ? "Active" : "Inactive",
-                }));
-            };
-
-            ids.length > 0 
-                ? dynamic_search(
-                    "'tbl_brand_ambassador'", 
-                    "''", 
-                    "'id, code, name as description, deployment_date as deployed_date, type, status, agency, team'",
-                    0, 
-                    0, 
-                    `'id:IN=${ids.join('|')} and status:IN=0|1'`,  
-                    `''`, 
-                    `''`, 
-                    processResponse
-                )
-                : batch_export();
-        };
-
-        const batch_export = () => {
-            dynamic_search(
-                "'tbl_brand_ambassador'", 
-                "''", 
-                "'COUNT(id) as total_records'",
-                0, 
-                0, 
-                `'status:IN=0|1'`, 
-                `''`, 
-                `''`, 
-                (res) => {
-                    if (res && res.length > 0) {
-                        let total_records = res[0].total_records;
-
-                        for (let index = 0; index < total_records; index += 100000) {
-                            var ano_ire = [];
-
-                            get_brand_ambassador_brands(index, (result) => {
-
-                                result.forEach(({ id, brands }) => {
-                                    ano_ire[id] = brands;  // Assign value to ano_ire array using id as index
-                                });
-                            });
-
-                            dynamic_search(
-                                "'tbl_brand_ambassador'", 
-                                "''", 
-                                "'id, code, name as description, deployment_date as deployed_date, type, status, agency, team'",
-                                // "'id, code, name as description, deployment_date as deployed_date, type, status, agency, store, team, area'",
-                                100000, 
-                                index, 
-                                `'status:IN=0|1'`, 
-                                `''`, 
-                                `''`, 
-                                (res) => {
-
-                                    let agency_ids = [];
-                                    let team_ids = [];
-                                    let brand_ids = [];
-
-                                    let agency_map = {}
-                                    let team_map = {};
-                                    let brand_map = {};
-
-                                    res.forEach(item => {
-                                        agency_ids.push(`${item.agency}`);
-                                        team_ids.push(`${item.team}`);
-                                        brand_ids.push(`${item.id}`);
-                                    });
-
-                                    dynamic_search(
-                                        "'tbl_agency'", "''", "'id, agency'", 0, 0, `'id:IN=${agency_ids.join('|')}'`, `''`, `''`,
-                                        (result) => {
-                                            result.forEach(
-                                                item => {
-                                                    if (!agency_map[item.id]) {
-                                                        agency_map[item.id] = {};
-                                                    }
-                                                    agency_map[item.id] = item.agency;
-                                                }
-                                            );
-                                        }
-                                    );
-
-                                    dynamic_search(
-                                        "'tbl_team'", "''", "'id, team_description'", 0, 0, `'id:IN=${team_ids.join('|')}'`, `''`, `''`,
-                                        (result) => {
-                                            result.forEach(
-                                                item => {
-                                                    if (!team_map[item.id]) {
-                                                        team_map[item.id] = {};
-                                                    }
-                                                    team_map[item.id] = item.team_description;
-                                                }
-                                            );
-                                        }
-                                    );
-
-                                    dynamic_search(
-                                        "'tbl_ba_brands a'", "'left join tbl_brand b on a.brand_id = b.id'", 
-                                        "'a.ba_id as id, GROUP_CONCAT(DISTINCT b.brand_code ORDER BY b.brand_code ASC SEPARATOR \", \") AS brands'", 
-                                        0, 0, `'a.ba_id:IN=${brand_ids.join('|')}'`, `''`, `'a.ba_id'`,
-                                        (result) => {
-                                            result.forEach(
-                                                item => {
-                                                    if (!brand_map[item.id]) {
-                                                        brand_map[item.id] = {};
-                                                    }
-                                                    brand_map[item.id] = item.brands;
-                                                }
-                                            );
-                                        }
-                                    );
-
-                                    let newData = res.map(({ 
-                                        id, 
-                                        code, description, deployed_date, type, status, 
-                                        agency, team
-                                    }) => ({
-                                        Code: code,
-                                        Name: description,
-                                        "Deployment Date": deployed_date,
-                                        Agency: agency_map[agency],
-                                        Brand: brand_map[id],
-                                        Team: team_map[team],
-                                        Type: type === "1" ? "Outright" : "Consign",
-                                        Status: status === "1" ? "Active" : "Inactive",
-                                    }));
-                                    formattedData.push(...newData); // Append new data to formattedData array
-                                }
-                            )
-                        }
-                    } else {
-                    }
-                }
-            )
-        };
-
-        fetchStores();
-
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["Masterfile: Brand Ambassador"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
-
-        exportArrayToCSV(formattedData, `Masterfile: Brand Ambassador - ${formatDate(new Date())}`, headerData);
+        window.open("<?= base_url('cms/');?>" + 'brand-ambassador/export-ba?'+ params.toString(), '_blank');
         modal.loading_progress(false);
     }
 
