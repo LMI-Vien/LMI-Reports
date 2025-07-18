@@ -1,45 +1,4 @@
 <style>
-    .rmv-btn {
-        border-radius: 20px;
-        background-color: #C80000;
-        color: white;
-        border: 0.5px solid #990000;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-
-    .rmv-btn:disabled {
-        border-radius: 20px;
-        background-color: gray;
-        color: black;
-        border: 0.5px solid gray;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    .add_line {
-        margin-right: 10px;
-        margin-bottom: 10px;
-        padding: 10px;
-        min-width: 75px;
-        max-height: 30px;
-        line-height: 0.5;
-        background-color: #339933;
-        color: white;
-        border: 1px solid #267326;
-        border-radius: 10px;
-        box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.5);
-    }
-
-    .add_line:disabled {
-        background-color: gray !important;
-        color: black !important;
-    }
-
-    #list-data {
-        overflow: visible !important;
-        max-height: none !important;
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
-    }
-
     .centered-form {
         background-color: #F7F7F7; 
         padding: 120px 100px 20px 100px; /* top, right, bottom, left */

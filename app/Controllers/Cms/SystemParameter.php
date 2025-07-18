@@ -30,10 +30,10 @@ class SystemParameter extends BaseController
 		$data['buttons'] = [];
 		$data['content'] = "cms/maintenance/system_parameter/system_parameter.php";
 		$data['session'] = session();
-		$data['hero'] = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'*'", 0, 0, "''", "''", "''");
-		$data['newItem'] = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'*'", 0, 0, "''", "''", "''");
-		$data['brandExcluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "''", "''", "''");
-		$data['brandIncluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "''", "''", "''");
+		$data['hero'] = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'*'", 0, 0, "'status:EQ=1'", "''", "''");
+		$data['newItem'] = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'*'", 0, 0, "'status:EQ=1'", "''", "''");
+		$data['brandExcluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "'status:EQ=1'", "''", "''");
+		$data['brandIncluded'] = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'*'", 0, 0, "'status:EQ=1'", "''", "''");
 		$data['brandLabelTypeOptions'] = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'*'", 0, 0, "''", "''", "''");
 
 		$data['js'] = array(

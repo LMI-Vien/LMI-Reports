@@ -1554,13 +1554,15 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
                         const batchStart = new Date();
 
-                        
+                        var baId = id || obj.insertId || obj.id || obj.ID;
+
                         insert_batch = batch.map(batch => ({...batch, ba_id: obj.ID}));
                         if(id){
                             insert_batch = batch.map(batch => ({...batch, ba_id: id}));
                         }
                         if (Array.isArray(baIdsToDelete) && baIdsToDelete.length > 0) {
                             batch_delete(url, "tbl_ba_brands", "ba_id", baIdsToDelete, 'brand_id', function(resp) {
+                                console.log(resp);
                             });
                         }
                         batch_insert(url, insert_batch, 'tbl_ba_brands', false, () => {
@@ -1570,13 +1572,15 @@ function saveValidatedData(valid_data, brand_per_ba) {
 
                             const remarks = `
                                 Action: Create Brand Ambassador Brand Groups
-                                <br>Inserted: ${insert_batch.length} records for BA ID ${obj.ID}
+                                <br>Inserted: ${insert_batch.length} records for BA ID ${baId}
+                                <br>Deleted: ${baIdsToDelete.length} records for BA ID ${baId}
                                 <br>Start Time: ${formatReadableDate(batchStart)}
                                 <br>End Time: ${formatReadableDate(batchEnd)}
                                 <br>Duration: ${duration}
                             `;
 
                             logActivity("ba-brand-module", "Insert Brand", remarks, "-", JSON.stringify(insert_batch), "");
+                            logActivity("ba-brand-module", "Delete Brand", remarks, "-", JSON.stringify(baIdsToDelete), "");
 
                             modal.loading(false);
                             modal.alert(success_update_message, "success", function() {
