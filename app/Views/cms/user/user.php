@@ -329,8 +329,10 @@
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
             offset = 1;
-            new_query = query;
-            new_query += ' AND u.name like \'%'+search_input+'%\' OR u.email like \'%'+search_input+'%\'';
+            new_query = '';
+            new_query += '(u.name like \'%'+search_input+'%\' OR u.email like \'%'+search_input+'%\') AND ';
+            new_query += query;
+            console.log(new_query);
             get_data(new_query);
             get_pagination(new_query);
         }

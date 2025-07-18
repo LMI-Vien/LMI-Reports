@@ -152,7 +152,7 @@
         
         $('.datetimepicker').datetimepicker({
             dateFormat: 'yy-mm-dd',
-            timeFormat: 'hh:mm tt',
+            timeFormat: 'HH:mm',
             showSecond: false,
             showMillisec: false,
             showMicrosec: false,
