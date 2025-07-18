@@ -1017,7 +1017,7 @@
 
                     const remarks = `
                         Action: Create Batch Store Groups
-                        <br>Inserted ${batch.length} records for area ID ${id}
+                        <br>Inserted ${batch.length} records for area ID ${finalStoreId}
                         <br>Start Time: ${formatReadableDate(batchStart)}
                         <br>End Time: ${formatReadableDate(batchEnd)}
                         <br>Duration: ${duration}

@@ -1702,6 +1702,7 @@
                                         // plus activity logs
                                         if (valid) {
                                             save_to_db(code, description, store, status_val, id, (obj) => {
+                                                var finalAreaId = id;
                                                 const batchStart = new Date();
         
                                                 if (batch.length != 0) {
@@ -1711,7 +1712,7 @@
             
                                                         const remarks = `
                                                             Action: Create Batch Store Groups
-                                                            <br>Inserted ${batch.length} records for area ID ${obj.ID}
+                                                            <br>Inserted ${batch.length} records for area ID ${finalAreaId}
                                                             <br>Start Time: ${formatReadableDate(batchStart)}
                                                             <br>End Time: ${formatReadableDate(batchEnd)}
                                                             <br>Duration: ${duration}

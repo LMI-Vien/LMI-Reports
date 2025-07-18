@@ -480,6 +480,42 @@
             const newArr = normalize(newData);
             const oldArr = normalize(oldData);
 
+            const flattenNested = (arr, field, extractKey) => {
+            arr.forEach(obj => {
+                let v = obj[field];
+                    if (typeof v === 'string' && is_json(v)) {
+                    try {
+                        let a = JSON.parse(v);
+                        // if we got an array of objects, pull out the one key we care about:
+                        if (Array.isArray(a) && a.length && typeof a[0] === 'object') {
+                        obj[field] = a
+                            .map(item => item[extractKey] ?? JSON.stringify(item))
+                            .join(', ');
+                        }
+                        // otherwise if array of primitives:
+                        else if (Array.isArray(a)) {
+                        obj[field] = a.join(', ');
+                        }
+                    } catch (_){/* ignore */} 
+                    }
+                });
+            };
+
+            // list every column you want to flatten, and
+            // the property inside those objects that you really want to show:
+            [
+                { field: 'new_item_sku',         key: 'item_class_description' },
+                { field: 'hero_sku',             key: 'item_class_description' },
+                { field: 'brand_code_included',  key: 'brand_code' },
+                { field: 'brand_code_excluded',  key: 'brand_code' },
+                { field: 'brand_label_type',     key: 'label' },
+                { field: 'cus_grp_code_lmi',     key: 'code' },
+                { field: 'cus_grp_code_rgdi',    key: 'code' },
+            ].forEach(cfg => {
+                flattenNested(newArr, cfg.field, cfg.key);
+                flattenNested(oldArr, cfg.field, cfg.key);
+            });
+
             // 2) Status code → label
             [newArr, oldArr].forEach(arr => {
                 arr.forEach(obj => {
@@ -758,12 +794,25 @@
                         Object.keys(pair.old).forEach(k=>allKeys.add(k));
                     });
 
+                // let html = `
+                //     <table class="table table-bordered m-t-20">
+                //     <thead>
+                //         <tr><th>Field</th><th>Old Data</th><th>New Data</th></tr>
+                //     </thead>
+                //     <tbody>
+                // `;
+
                 let html = `
+                    <div class="table-responsive" style="max-height:500px; overflow-y:auto;">
                     <table class="table table-bordered m-t-20">
-                    <thead>
-                        <tr><th>Field</th><th>Old Data</th><th>New Data</th></tr>
-                    </thead>
-                    <tbody>
+                        <thead>
+                        <tr>
+                            <th style="white-space:nowrap">Field</th>
+                            <th style="white-space:nowrap">Old Data</th>
+                            <th style="white-space:nowrap">New Data</th>
+                        </tr>
+                        </thead>
+                        <tbody>
                 `;
                 toRender.forEach(pair => {
                     Array.from(allKeys).forEach(key => {

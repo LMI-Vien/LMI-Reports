@@ -584,15 +584,15 @@
             //const headers = ['module', 'action', 'remarks', 'new_data', 'old_data'];
 
             //saveImportDetailsToServer(valid_data, headers, 'agency_logs', function(filePath) {
-                const remarks = `
-                    Action: ${valid_data[0].action}
-                    <br>${valid_data[0].remarks}
-                    <br>Start Time: ${formatReadableDate(start_time)}
-                    <br>End Time: ${formatReadableDate(end_time)}
-                    <br>Duration: ${duration}
-                `;
-                const link = '-';
-                logActivity("agency-module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
+                // const remarks = `
+                //     Action: ${valid_data[0].action}
+                //     <br>${valid_data[0].remarks}
+                //     <br>Start Time: ${formatReadableDate(start_time)}
+                //     <br>End Time: ${formatReadableDate(end_time)}
+                //     <br>Duration: ${duration}
+                // `;
+                // const link = '-';
+                // logActivity("agency-module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
                 
                 modal.loading(false);
                 modal.alert(modal_alert_success, 'success', function () {
