@@ -3,6 +3,8 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Area extends BaseController
 {
@@ -82,6 +84,104 @@ class Area extends BaseController
 	        ->getResultArray();
 
 	    return $this->response->setJSON($result);
+	}
+
+	public function export_area() {
+		$ids = $this->request->getGet('selectedids');
+		$ids = $ids === [] ? null : $ids;
+		$result_data = '';
+
+		if ($ids == 0) {
+			// $result_data = $this->Global_model->get_data_list(
+			// 	$table, $query, $limit, $offset, $select, $order_field, $order_type, $join, $group
+			// );
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_area', 'status >= 0', 999999999, 0, 'id, code, description, status', '', '', '', ''
+			);
+
+			$sgIds = [];
+			foreach ($result_data as $area_ids) {
+				$sgIds[] = $area_ids->id;
+			}
+			$sgIds = implode(",", $sgIds);
+
+			$store_data = $this->Global_model->get_data_list(
+				'tbl_store_group sg', 
+				"sg.area_id IN ($sgIds)", 
+				999999999, 
+				0, 
+				'sg.area_id,GROUP_CONCAT(s.code, s.description ORDER BY s.description) AS stores', 
+				'', 
+				'', 
+				// 'LEFT JOIN tbl_store s ON s.id = sg.store_id', 
+				[
+					[
+						"table"=> "tbl_store s",
+						"query"=> "s.id = sg.store_id",
+						"type"=> "left"
+					]
+				],
+				'sg.area_id'
+			);
+		} 
+		else {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_area', "id IN ($ids)", 999999999, 0, 'code, description, status', '', '', '', ''
+			);
+			$store_data = $this->Global_model->get_data_list(
+				'tbl_store_group sg', 
+				"sg.area_id IN ($ids)", 
+				999999999, 
+				0, 
+				'sg.area_id,GROUP_CONCAT(s.code, s.description ORDER BY s.description) AS stores', 
+				'', 
+				'', 
+				// 'tbl_store s ON s.id = sg.store_id', 
+				[
+					[
+						"table"=> "tbl_store s",
+						"query"=> "s.id = sg.store_id",
+						"type"=> "left"
+					]
+				],
+				'sg.area_id'
+			);
+		}
+		$currentDateTime = date('Y-m-d H:i:s');
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Masterfile: Area');
+		$sheet->setCellValue('A3', 'Date Printed: '.$currentDateTime);
+		$sheet->mergeCells('A1:D1');
+		$sheet->mergeCells('A2:D2');
+		$sheet->mergeCells('A3:D3');
+
+		$rowNum = 6;
+		foreach ($result_data as $key => $row) {
+			$headers = ['Area Code', 'Area Description', 'Status', 'Stores'];
+			$sheet->fromArray($headers, null, 'A5');
+			$sheet->getStyle('A5:D5')->getFont()->setBold(true);
+
+			$sheet->setCellValueExplicit('A' . $rowNum, $row->code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('B' . $rowNum, $row->description, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('C' . $rowNum, $row->status == 1 ? 'Active' : 'Inactive', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('D' . $rowNum, $store_data[$key]->stores, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$rowNum+=1;
+			
+		}
+
+		$title = 'Area Masterfile' . date('Ymd_His');
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
 	}
 
 }

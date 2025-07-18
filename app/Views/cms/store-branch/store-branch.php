@@ -2098,72 +2098,30 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    handleExport()
+                    exportStore()
                 }, 500);
             }
         })
     })
 
-    function handleExport() {
-        var formattedData = [];
+    const exportStore = () => {
         var ids = [];
 
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Collect IDs in an array
+            ids.push(`'${id}'`);
         });
 
-        const fetchStores = (callback) => {
-            const processResponse = (res) => {
-                formattedData = res.map(({ 
-                    code, description, status
-                }) => ({
-                    Code: code,
-                    Description: description,
-                    Status: status === "1" ? "Active" : "Inactive",
-                }));
-            };
+        console.log(ids, 'ids');
 
-            ids.length > 0 
-                ? dynamic_search("'tbl_store'", "''", "'code, description, status'", 0, 0, `"id:IN=${ids.join('|')}"`,  `''`,  `''`,
-                    processResponse
-                )
-                : batch_export();
-        };
+        const params = new URLSearchParams();
+        ids.length > 0 ? 
+            params.append('selectedids', ids.join(',')) :
+            params.append('selectedids', '0');
 
-        const batch_export = () => {
-            dynamic_search("'tbl_store'", "''", "'COUNT(id) as total_records'", 0, 0, `'status:IN=0|1'`,  `''`, `''`, (res) => {
-                if (res && res.length > 0) {
-                    let total_records = res[0].total_records;
-
-                    for (let index = 0; index < total_records; index += 100000) {
-                        dynamic_search("'tbl_store'", "''", "'code, description, status'", 100000, index, `'status:IN=0|1'`,  `''`, `''`, (res) => {
-                            let newData = res.map(({ 
-                                code, description, status
-                            }) => ({
-                                "Store/Branch Code": code,
-                                "Description": description,
-                                "Status": status === "1" ? "Active" : "Inactive",
-                            }));
-                            formattedData.push(...newData); // Append new data to formattedData array
-                        })
-                    }
-                }
-            })
-        };
-
-        fetchStores();
-
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["Masterfile: Store/Branch"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
-
-        exportArrayToCSV(formattedData, `Masterfile: Store/Branch"], - ${formatDate(new Date())}`, headerData);
+        window.open("<?= base_url('cms/');?>" + 'store-branch/export-store?'+ params.toString(), '_blank');
         modal.loading_progress(false);
-    };
+    }
 
     function exportArrayToCSV(data, filename, headerData) {
         // Create a new worksheet

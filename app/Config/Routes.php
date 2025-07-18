@@ -31,6 +31,7 @@ $routes->group('stocks/', static function ($routes) {
     $routes->post('get-data-week-all-store', 'StocksWeekAllStore::GetDataWeekAllStore');
     $routes->get('stocks-week-all-store-generate-pdf', 'StocksWeekAllStore::generatePdf');
     $routes->get('stocks-week-all-store-generate-excel', 'StocksWeekAllStore::generateExcel');
+    $routes->get('stocks-week-all-store-generate-all', 'StocksWeekAllStore::generateAll');
 });
 
 $routes->group('store/', static function ($routes) {
@@ -168,25 +169,37 @@ $routes->group('cms/', static function ($routes) {
         $routes->post('delete-role-tagging', 'Cms\Role::delete_role_tagging');
     });
     
-    $routes->get('agency', 'Cms\Agency::index');
+    $routes->group('agency', static function ($routes) {
+        $routes->get('/', 'Cms\Agency::index');
+        $routes->match(['GET', 'POST'], 'export-agency', 'Cms\Agency::export_agency');
+    });
 
     $routes->group('brand-ambassador', static function ($routes) {
         $routes->get('/', 'Cms\BrandAmbassador::index');
+        $routes->match(['GET', 'POST'], 'export-ba', 'Cms\BrandAmbassador::export_ba');
     });
     
-    $routes->get('team', 'Cms\Team::index');
+    $routes->group('team', static function ($routes) {
+        $routes->get('/', 'Cms\Team::index');
+        $routes->match(['GET', 'POST'], 'export-team', 'Cms\Team::export_team');
+    });
 
-    $routes->get('store-branch', 'Cms\StoreBranch::index');
+    $routes->group('store-branch', static function ($routes) {
+        $routes->get('/', 'Cms\StoreBranch::index');
+        $routes->match(['GET', 'POST'], 'export-team', 'Cms\StoreBranch::export_store');
+    });
 
     $routes->group('area', static function ($routes) {
         $routes->get('/', 'Cms\Area::index');
         $routes->get('get-latest-area-code', 'Cms\Area::get_latest_area_code');
         $routes->get('get-existing-area-data', 'Cms\Area::get_existing_area_data');
+        $routes->match(['GET', 'POST'], 'export-area', 'Cms\Area::export_area');
         
     });
 
     $routes->group('asc', static function ($routes) {
         $routes->get('/', 'Cms\Asc::index');
+        $routes->match(['GET', 'POST'], 'export-asc', 'Cms\Asc::export_asc');
     });
 
     $routes->get('year', 'Cms\Year::index');

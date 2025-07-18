@@ -1549,141 +1549,30 @@
                 startTimer()
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    handleExport()
+                    exportAsc()
                 }, 500);
             }
         })
     })
 
-    /**
-     * Handles the export process for Area Sales Coordinator data.
-     * This function retrieves selected records or fetches all records if none are selected,
-     * formats the data, and exports it to an Excel file.
-     */
-    function handleExport() {
-        var formattedData = []; // Array to store formatted data for export
-        var ids = []; // Array to store selected record IDs
-        
-        // Collect selected record IDs from checkboxes
+    const exportAsc = () => {
+        var ids = [];
+
         $('.select:checked').each(function () {
             var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Wrap ID in single quotes
+            ids.push(`'${id}'`);
         });
-        
-        /**
-         * Fetches store data based on selected IDs.
-         * If IDs are provided, fetches specific records; otherwise, fetches all records in batches.
-         * @param {Function} callback - Function to process the response data
-         */
-        const fetchAscs = (callback) => {
-            /**
-             * Processes the ajax response and formats the data.
-             * @param {Array} res - ajax response containing store records
-             */
-            const processResponse = (res) => {
-                formattedData = res.map(({
-                    asc_code, asc_description, 
-                    status, deployment_date, 
-                    area_code, area_description 
-                }) => ({
-                    "ASC Code": asc_code,
-                    "ASC Name": asc_description,
-                    Status: status === "1" ? "Active" : "Inactive",
-                    "Deployment Date": deployment_date,
-                    "Area Code": area_code,
-                    "Area Description": area_description,
-                }));
-            };
 
-            // If specific IDs are selected, fetch corresponding records; 
-            // otherwise, perform batch export
-            ids.length > 0 
-            ? dynamic_search(
-                "'tbl_area_sales_coordinator a'", 
-                "'left join tbl_area b on a.area_id = b.id'", 
-                "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
-                0, 
-                0, 
-                `'a.id:IN=${ids.join('|')} and a.status:IN=0|1'`,  
-                `''`, 
-                `''`, 
-                processResponse
-            )
-            : batch_export();
-        };
+        console.log(ids, 'ids');
 
-        /**
-         * Fetches all store data in batches if no specific IDs are selected.
-         * Uses pagination to handle large datasets "efficiently".
-         */
-        function batch_export() {
-            dynamic_search(
-                "'tbl_area_sales_coordinator a'", 
-                "''", 
-                "'COUNT(id) as total_records'", 
-                0, 
-                0, 
-                `'status:IN=0|1'`,  
-                `''`, 
-                `''`, 
-                (res) => {
-                    if (res && res.length > 0) {
-                        let asc_count = res[0].total_records; // Total number of records
+        const params = new URLSearchParams();
+        ids.length > 0 ? 
+            params.append('selectedids', ids.join(',')) :
+            params.append('selectedids', '0');
 
-                        // Fetch data in batches of 100,000 records
-                        for (let index = 0; index < asc_count; index += 100000) {
-                            dynamic_search(
-                                "'tbl_area_sales_coordinator a'", 
-                                "'left join tbl_area b on a.area_id = b.id'", 
-                                "'a.code as asc_code, a.description as asc_description, a.deployment_date as deployment_date, a.status as status, b.code as area_code, b.description as area_description'", 
-                                100000, 
-                                index, 
-                                `'a.status:IN=0|1'`,  
-                                `''`, 
-                                `''`, 
-                                (res) => {
-                                    let newData = res.map(({
-                                        asc_code, asc_description, 
-                                        status, deployment_date, 
-                                        area_code, area_description 
-                                    }) => ({
-                                        Code: asc_code,
-                                        Description: asc_description,
-                                        Status: status === "1" ? "Active" : "Inactive",
-                                        "Deployment Date": deployment_date,
-                                        "Area Code": area_code,
-                                        "Area Description": area_description,
-                                    }));
-                                    formattedData.push(...newData); // Append new data to formattedData array
-                                }
-                            )
-                        }
-                        
-                    } else {
-                        //console.log('No data received'); // error handling
-                    }
-                }
-            );
-            
-        }
-
-        // Initiate data retrieval
-        fetchAscs();
-        // Header information for the exported Excel file
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["Masterfile: Area Sales Coordinator"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
-
-        // Export the formatted data to an Excel file
-        exportArrayToCSV(formattedData, `Masterfile: Area Sales Coordinator - ${formatDate(new Date())}`, headerData);
-
-        // Hide the loading progress modal
+        window.open("<?= base_url('cms/');?>" + 'asc/export-asc?'+ params.toString(), '_blank');
         modal.loading_progress(false);
-        stopTimer();
-    };
+    }
 
     function exportArrayToCSV(data, filename, headerData) {
         // Create a new worksheet
