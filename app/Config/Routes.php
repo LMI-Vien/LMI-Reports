@@ -257,3 +257,5 @@ $routes->group('cms/', static function ($routes) {
 	});
 
 });
+
+$routes->set404Override('App\Controllers\ErrorHandler::show404');
