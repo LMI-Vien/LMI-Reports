@@ -432,22 +432,54 @@ class Dashboard_model extends Model
 	}
 
 	public function getLatestVmi($year = null) {
-	    $builder = $this->db->table('tbl_vmi v')
-	        ->select('y.id as year_id, y.year, c.id as company_id, c.name as company_name, v.week AS week_id')
-	        ->join('tbl_company c', 'v.company = c.id')
-	        ->join('tbl_year y', 'v.year = y.id');
+	    $builder = $this->db->table('tbl_vmi_header vh')
+	        ->select('y.id as year_id, y.year, c.id as company_id, c.name as company_name, vh.week AS week_id')
+	        ->join('tbl_company c', 'vh.company = c.id')
+	        ->join('tbl_year y', 'vh.year = y.id');
 
-	    $builder->where('v.status', 1);
+	    $builder->where('vh.status', 1);
 	    if (!empty($year)) {
-	        $builder->where('v.year', $year);
+	        $builder->where('vh.year', $year);
 	    }
 
-	    $builder->orderBy('v.year', 'DESC');
-	    $builder->orderBy('v.week', 'DESC');
+	    $builder->orderBy('y.year', 'DESC');
+	    $builder->orderBy('vh.week', 'DESC');
 	    $builder->limit(1);
 
 	    return $builder->get()->getRowArray();
 	}
+
+// public function getLatestVmi($year = null)
+// {
+//     // Subquery to get the max year and week (with optional year filtering)
+//     $subquery = $this->db->table('tbl_vmi')
+//         ->select('MAX(CONCAT(LPAD(year, 4, "0"), LPAD(week, 2, "0"))) AS max_key', false)
+//         ->where('status', 1);
+
+//     if (!empty($year)) {
+//         $subquery->where('year', $year);
+//     }
+
+//     $maxKey = $subquery->get()->getRow()->max_key;
+
+//     if (!$maxKey) return null;
+
+//     // Extract year and week from maxKey
+//     $yearPart = (int)substr($maxKey, 0, 4);
+//     $weekPart = (int)substr($maxKey, 4, 2);
+
+//     // Final query to get detailed info
+//     return $this->db->table('tbl_vmi v')
+//         ->select('y.id AS year_id, y.year, c.id AS company_id, c.name AS company_name, v.week AS week_id')
+//         ->join('tbl_company c', 'v.company = c.id')
+//         ->join('tbl_year y', 'v.year = y.id')
+//         ->where('v.status', 1)
+//         ->where('v.year', $yearPart)
+//         ->where('v.week', $weekPart)
+//         ->get()
+//         ->getRowArray();
+// }
+
 
 
    	public function getMonth($id){

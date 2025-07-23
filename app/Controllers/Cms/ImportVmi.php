@@ -36,7 +36,8 @@ class ImportVmi extends BaseController
 		$data['PageName'] = 'Import VMI';
 		$data['PageUrl'] = 'Import VMI';
 		$data['content'] = "cms/import/vmi/vmi.php";
-		$data['buttons'] = ['search', 'import'];
+		$data['buttons'] = ['import', 'search'];
+		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -50,7 +51,7 @@ class ImportVmi extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/cms/css/main_style.css",//css sa style ni master Vien
+        		"assets/cms/css/main_style.css",
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		
@@ -71,7 +72,8 @@ class ImportVmi extends BaseController
 		$data['PageUrl'] = 'Import VMI';
 		$data['content'] = "cms/import/vmi/view_vmi.php";
 		$data['buttons'] = ['search'];
-		$data['session'] = session(); //for frontend accessing the session data
+		$data['session'] = session();
+
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
 				"assets/js/xlsx.full.min.js",
@@ -84,7 +86,7 @@ class ImportVmi extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/cms/css/main_style.css",//css sa style ni master Vien
+        		"assets/cms/css/main_style.css",
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		
@@ -164,7 +166,6 @@ class ImportVmi extends BaseController
 	                            'in_transit' => trim($row[11]) ? $row[11] : 0,
 	                            'average_sales_unit' => trim($row[12]) ? $row[12] : 0.00,
 	                            'year' => $year,
-	                            // 'month' => $month,
 	                            'week' => $week,
 	                            'company' => $company,
 	                            'created_date' => date('Y-m-d H:i:s'),
@@ -205,7 +206,6 @@ class ImportVmi extends BaseController
 	                            'in_transit' => trim($row[11]) ? $row[11] : 0,
 	                            'average_sales_unit' => trim($row[12]) ? $row[12] : 0.00,
 	                            'year' => $year,
-	                            // 'month' => $month,
 	                            'week' => $week,
 	                            'company' => $company,
 	                            'created_date' => date('Y-m-d H:i:s'),
@@ -249,11 +249,9 @@ class ImportVmi extends BaseController
 		    $page = $this->request->getGet('page') ?? 1;
     		$limit = $this->request->getGet('limit') ?? 1000;
     		$year = $this->request->getGet('inp_year') ?? '';
-    		// $month = $this->request->getGet('inp_month') ?? '';
     		$week = $this->request->getGet('inp_week') ?? '';
     		$company = $this->request->getGet('inp_company') ?? '';
 
-    		// $result = $this->Global_model->fetch_temp_data($limit, $page, $year, $month, $week, $company, $this->session->get('sess_uid'));
     		$result = $this->Global_model->fetch_temp_data($limit, $page, $year, $week, $company, $this->session->get('sess_uid'));
 		    return $this->response->setJSON([
 		        "success" => true,
@@ -294,29 +292,37 @@ class ImportVmi extends BaseController
 
 	public function generateExcel()
 	{
+
 	    $company = $this->request->getPost('company');
 	    $year = $this->request->getPost('year');
 	    $week = $this->request->getPost('week');
-
 	    $filename = 'vmi_export_' . date('Ymd_His') . '.csv';
 	    session()->set('pending_export_file', $filename);
-
-	    $sparkPath = escapeshellarg(ROOTPATH . 'spark'); // Use ROOTPATH constant
+	    // Clean up old logs
+    	$this->cleanupLogs();
+	    $sparkPath = escapeshellarg(ROOTPATH . 'spark'); 
 
 	    $cmd = "php {$sparkPath} export:vmi {$company} {$year} {$week} {$filename}";
 	    // Temporarily disable logging
-	    //$log = WRITEPATH . 'logs/export_' . time() . '.log';
-	    //exec("nohup $cmd > $log 2>&1 &");
-
-	    // Run without logging
-    	exec("nohup $cmd > /dev/null 2>&1 &");
-
+	    $log = WRITEPATH . 'logs/export_' . time() . '.log';
+	    exec("nohup $cmd > $log 2>&1 &");
 	    return $this->response->setJSON([
 	        'status' => 'started',
 	        'filename' => $filename
 	    ]);
 	}
 
+	private function cleanupLogs()
+	{
+	    $logDir = WRITEPATH . 'logs/';
+	    $logFiles = glob($logDir . 'export_*.log');
+
+	    foreach ($logFiles as $file) {
+	        //if (filemtime($file) < time() - 2 * 24 * 60 * 60) {
+	            unlink($file);
+	        //}
+	    }
+	}
 
     public function check($filename)
     {

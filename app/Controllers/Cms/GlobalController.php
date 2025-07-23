@@ -83,18 +83,33 @@ class GlobalController extends BaseController
 
 					$limit = isset($_POST['limit'])? $_POST['limit'] : 99999;
 					$offset = isset($_POST['offset'])? $_POST['offset'] : 1;
-					// print_r($limit);
-					// die();
+
 					$order_field = isset($_POST['order']['field'])? $_POST['order']['field'] : null;
 					$order_type = isset($_POST['order']['order']) ? $_POST['order']['order']: null;
 					$join = isset($_POST['join']) ? $_POST['join']: null;
 					$group= isset($_POST['group']) ? $_POST['group']: null;
 
-					if ($table === 'tbl_vmi_grouped') {
-					    $result_data = $this->Global_model->get_vmi_grouped_with_latest_updated($query, $limit, ($offset - 1) * $limit);
-					    echo json_encode($result_data);
-					    break;
-					}
+					// if ($table === 'tbl_vmi_grouped') {
+					//     $result_data_list = $this->Global_model->get_vmi_grouped_with_latest_updated($query, $limit, ($offset - 1) * $limit);
+					//     $total_count = $this->Global_model->count_vmi_grouped_with_latest_updated($query);
+
+					//     $total_pages = $total_count > $limit ? ceil($total_count / $limit) : 1;
+
+					//     $result_return_pagination = array(
+					//         "total_record" => $total_count,
+					//         "total_page"   => $total_pages
+					//     );
+
+					//     $result_return = array(
+					//         "list" => $result_data_list,
+					//         "pagination" => $result_return_pagination,
+					//         "total_data" => count($result_data_list)
+					//     );
+
+					//     echo json_encode($result_return);
+					//     break;
+					// }
+
 					if ($table === 'tbl_sales_per_store_grouped') {
 					    $result_data = $this->Global_model->get_per_store_grouped($query, $limit, ($offset - 1) * $limit);
 					    echo json_encode($result_data);
@@ -590,29 +605,6 @@ class GlobalController extends BaseController
 	        		echo "Error updating data: " . $e->getMessage();
 				}
 			break;
-
-			// case 'total_delete':
-			// try { 
-			// 	$table = $_POST['table'];
-			// 	$field = $_POST['field'];
-			// 	$where = $_POST['where'];
-
-			// 	// echo json_encode(['debug' => "$table,$field,$where"]);
-
-			// 	// Get old data for audit trail before deletion
-			// 	$query = "$field = '$where'";
-			// 	$old_data = $this->Global_model->get_data_list($table, $query, 1, 0, "*", null, null, null);
-
-			// 	// Perform delete operation
-			// 	$status = $this->Global_model->total_delete($table, $field, $where);
-			// 	echo $status;
-
-			// 	// Insert audit trail for deletion
-			// 	$this->audit_trail_controller("Delete", null, $old_data);
-			// } catch (Exception $e) {
-			// 	echo "Error deleting data: " . $e->getMessage();
-			// }
-			// break;
 			case 'total_delete':
 				try {
 				    $table = $_POST['table'];
@@ -673,7 +665,6 @@ class GlobalController extends BaseController
 			        echo "Error updating data: " . $e->getMessage();
 			    }
 			    break;
-
 			case 'batch_delete':
 				    try {
 
@@ -720,7 +711,6 @@ class GlobalController extends BaseController
 					echo "Error updating data: " . $e->getMessage();
 				}
 				break;
-
 			case 'delete':
 					try { 
 						$table = $_POST['table'];
@@ -749,7 +739,6 @@ class GlobalController extends BaseController
 		        		echo "Error deleting data: " . $e->getMessage();
 					}
 				break;
-
 			case 'pagination':
 				$query = $_POST['query'];
 				$table = $_POST['table'];
@@ -807,7 +796,6 @@ class GlobalController extends BaseController
 			                ]);
 
 			    break;
-
 			case 'get_last_inserted_code':
 		        try {
 		            // Fetch the last inserted code
@@ -870,6 +858,58 @@ class GlobalController extends BaseController
 			        }
 			    } catch (Exception $e) {
 			        return $this->response->setJSON(['message' => 'error', 'error' => $e->getMessage()]);
+			    }
+			    break;
+			case 'insert_or_get_header':
+				$session = session();
+				$data = $this->request->getPost('data');
+				$year = $data['year'] ?? null;
+				$week = $data['week'] ?? null;
+				$company = $data['company'] ?? null;
+				$created_by = $data['created_by'] ?? null;
+				$created_date = $data['created_date'] ?? null;
+
+			    $created_by = $created_by;
+			    $updated_by = $session->sess_uid;
+			    if (!$year || !$week || !$company) {
+			        return $this->response->setJSON(['error' => 'Missing required fields.']);
+			    }
+
+			    $builder = $this->db->table('tbl_vmi_header');
+			    $builder->where([
+			        'year' => $year,
+			        'week' => $week,
+			        'company' => $company
+			    ]);
+			    $existing = $builder->get()->getRow();
+
+			    if ($existing) {
+				    $builder->where('id', $existing->id)->update([
+				        'updated_by' => $updated_by,
+				        'updated_date' => date('Y-m-d H:i:s')
+				    ]);
+
+				    return $this->response->setJSON([
+					    'status' => true,
+					    'id' => $existing->id,
+					    'updated' => true
+					]);
+			    } else {
+			        $header_data = [
+			            'year' => $year,
+			            'week' => $week,
+			            'company' => $company,
+			            'status' => 1,
+			            'created_by' => $created_by,
+			            'updated_by' => '',
+			            'created_date' => date('Y-m-d H:i:s'),
+			            'updated_date' => ''
+			        ];
+			        $builder->insert($header_data);
+			        return $this->response->setJSON([
+					    'status' => true,
+					    'id' => $this->db->insertID()
+					]);
 			    }
 			    break;
 		}

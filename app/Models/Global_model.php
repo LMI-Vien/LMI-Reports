@@ -292,36 +292,62 @@ class Global_model extends Model
         }
     }
 
-    public function get_vmi_grouped_with_latest_updated($query = null, $limit = 99999, $offset = 0)
-    {
-        $sql = "
-            SELECT company, year, week, created_date, updated_date, filter_year, filter_company, imported_by
-            FROM (
-                SELECT 
-                    c.name AS company,
-                    y.year,
-                    v.week,
-                    v.created_date,
-                    v.updated_date,
-                    v.year AS filter_year,
-                    v.company AS filter_company,
-                    u.name AS imported_by,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY v.year, v.week, v.company
-                        ORDER BY v.updated_date DESC
-                    ) AS row_num
-                FROM tbl_vmi v
-                LEFT JOIN cms_users u ON u.id = v.created_by
-                LEFT JOIN tbl_company c ON c.id = v.company
-                LEFT JOIN tbl_year y ON y.id = v.year
-                " . ($query ? "WHERE $query" : "") . "
-            ) ranked
-            WHERE row_num = 1
-            LIMIT $limit OFFSET $offset
-        ";
+    // public function get_vmi_grouped_with_latest_updated($query = null, $limit = 100, $offset = 0)
+    // {
+    //     $filter_inner = $query ? "AND $query" : "";
+    //     $filter_outer = $query ? "AND " . $this->prefixFilterWithAlias($query) : "";
 
-        return $this->db->query($sql)->getResult();
-    }
+    //     $sql = "
+    //         SELECT 
+    //             c.name AS company,
+    //             y.year,
+    //             v.week,
+    //             v.created_date,
+    //             v.updated_date,
+    //             v.year AS filter_year,
+    //             v.company AS filter_company,
+    //             u.name AS imported_by
+    //         FROM (
+    //             SELECT *, ROW_NUMBER() OVER (PARTITION BY year, week, company ORDER BY updated_date DESC) AS rn
+    //             FROM tbl_vmi
+    //             WHERE 1=1 $filter_inner
+    //         ) v
+    //         LEFT JOIN cms_users u ON u.id = v.created_by
+    //         LEFT JOIN tbl_company c ON c.id = v.company
+    //         LEFT JOIN tbl_year y ON y.id = v.year
+    //         WHERE v.rn = 1 $filter_outer
+    //         ORDER BY v.updated_date DESC
+    //         LIMIT $limit OFFSET $offset
+    //             ";
+
+    //     return $this->db->query($sql)->getResult();
+    // }
+
+    // private function prefixFilterWithAlias($query, $alias = 'v') {
+    //     // Matches columns at the beginning or after AND/OR
+    //     return preg_replace_callback('/(?<!\.)\b(year|week|company)\b/', function ($matches) use ($alias) {
+    //         return $alias . '.' . $matches[1];
+    //     }, $query);
+    // }
+
+
+    // public function count_vmi_grouped_with_latest_updated($query = null)
+    // {
+    //     $filter = $query ? "AND $query" : "";
+
+    //     $sql = "
+    //         SELECT COUNT(*) AS total
+    //         FROM (
+    //             SELECT 1
+    //             FROM tbl_vmi
+    //             WHERE 1=1 $filter
+    //             GROUP BY year, week, company
+    //         ) AS grouped
+    //     ";
+
+    //     $result = $this->db->query($sql)->getRow();
+    //     return $result->total ?? 0;
+    // }
 
     public function get_per_store_grouped($query = null, $limit = 99999, $offset = 0)
     {
