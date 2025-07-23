@@ -798,7 +798,6 @@
         let table = 'tbl_vmi';
         const start_time = new Date();
         const { year, week, company, created_by, created_date } = valid_data[0];
-       console.log(created_by);
        // return;   
         const selected_fields = [
             'id', 'store', 'item', 'item_name', 'vmi_status', 'item_class',
@@ -820,10 +819,6 @@
         const filters = [inp_year, inp_week, inp_company];
 
         modal.loading_progress(true, "Validating and Saving data...");
-//         console.log("Sending to server:");
-// console.log("Filters:", filters);
-// console.log("Data:", { year, week, company });
-        // Step 1: Insert or get vmi_header_id
         aJax.post(url, {
             table: "tbl_vmi_header",
             event: "insert_or_get_header",
@@ -831,7 +826,6 @@
             data: { year, week, company, created_by, created_date }
         }, function(headerResponse) {
             let headerResult = headerResponse;
-            console.log(headerResponse);
             if (!headerResult.status || !headerResult.id) {
                 modal.alert("Error creating/retrieving VMI header.", "error");
                 modal.loading_progress(false);
@@ -1742,6 +1736,7 @@
             success: function (res) {
                 if (res.status === 'started') {
                     modal.loading(false);
+                    logActivity('VMI Module', 'Export Data', null, null, null, null);
                     modal.alert("Excel generation has started. Please wait 5–10 minutes for the VMI file to download automatically.", "success");
 
                     let pollInterval = setInterval(function () {

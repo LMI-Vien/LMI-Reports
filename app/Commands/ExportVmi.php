@@ -4,24 +4,24 @@ namespace App\Commands;
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 use App\Models\Global_model;
+use ZipArchive;
 
 class ExportVmi extends BaseCommand
 {
     protected $group       = 'custom';
     protected $name        = 'export:vmi';
-    protected $description = 'Export VMI data to CSV';
+    protected $description = 'Export VMI data to CSV and zip it if large';
 
     public function run(array $params)
     {
-
         $cleanForCsv = function ($value) {
-            return preg_replace('/[\x00-\x1F\x7F]/u', '', $value); // remove control characters
+            return preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
         };
 
-        $company = $params[0] ?? null;
-        $year = $params[1] ?? null;
-        $week = $params[2] ?? null;
-        $filename = $params[3] ?? ('vmi_export_' . date('Ymd_His') . '.csv');
+        $company  = $params[0] ?? null;
+        $year     = $params[1] ?? null;
+        $week     = $params[2] ?? null;
+        $zipFile  = $params[3] ?? ('vmi_export_' . date('Ymd_His') . '.zip');
 
         $query = ($company && $year && $week)
             ? "v.year = {$year} AND v.week = {$week} AND v.company = {$company}"
@@ -40,21 +40,24 @@ class ExportVmi extends BaseCommand
             mkdir($exportPath, 0777, true);
         }
 
-        $filePath = $exportPath . DIRECTORY_SEPARATOR . $filename;
-        $handle = fopen($filePath, 'w');
-        fwrite($handle, "\xEF\xBB\xBF");
-        // Header
-        $headers = ['Store Code', 'Store Name', 'Item', 'Item Name', 'VMI Status', 'Item Class', 'Supplier', 'Group', 'Dept', 'Class', 'Sub Class', 'On Hand', 'In Transit', 'Ave Sales Unit'];
-        fputcsv($handle, $headers);
-
-        // Batch processing
         $model = new Global_model();
-        $batchSize = 15000;
+        $batchSize = 1000000;
         $offset = 0;
+        $part = 1;
+        $csvFiles = [];
 
         do {
             $batch = $model->get_data_list("tbl_vmi v", $query, $batchSize, $offset, $select, "v.year", "desc", $join, null);
             if (!$batch) break;
+
+            $partFilename = str_replace('.zip', '', $zipFile) . "_part{$part}.csv";
+            $filePath = $exportPath . DIRECTORY_SEPARATOR . $partFilename;
+            $handle = fopen($filePath, 'w');
+            fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM
+
+            // Write headers
+            $headers = ['Store Code', 'Store Name', 'Item', 'Item Name', 'VMI Status', 'Item Class', 'Supplier', 'Group', 'Dept', 'Class', 'Sub Class', 'On Hand', 'In Transit', 'Ave Sales Unit'];
+            fputcsv($handle, $headers);
 
             foreach ($batch as $row) {
                 fputcsv($handle, array_map($cleanForCsv, [
@@ -75,14 +78,34 @@ class ExportVmi extends BaseCommand
                 ]));
             }
 
+            fclose($handle);
+            $csvFiles[] = $filePath;
+
             $offset += $batchSize;
+            $part++;
             unset($batch);
             gc_collect_cycles();
 
         } while (true);
 
-        fclose($handle);
-        CLI::write("CSV export completed: {$filename}", 'green');
-    }
+        // Create ZIP
+        $zipPath = $exportPath . DIRECTORY_SEPARATOR . $zipFile;
+        $zip = new ZipArchive();
 
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+            foreach ($csvFiles as $csv) {
+                $zip->addFile($csv, basename($csv));
+            }
+            $zip->close();
+
+            // Clean up CSV parts after zipping
+            foreach ($csvFiles as $csv) {
+                unlink($csv);
+            }
+
+            CLI::write("Export completed: {$zipFile}", 'green');
+        } else {
+            CLI::error("Failed to create ZIP file: {$zipPath}");
+        }
+    }
 }

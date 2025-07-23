@@ -296,7 +296,7 @@ class ImportVmi extends BaseController
 	    $company = $this->request->getPost('company');
 	    $year = $this->request->getPost('year');
 	    $week = $this->request->getPost('week');
-	    $filename = 'vmi_export_' . date('Ymd_His') . '.csv';
+	    $filename = 'vmi_export_' . date('Ymd_His') . '.zip';
 	    session()->set('pending_export_file', $filename);
 	    // Clean up old logs
     	$this->cleanupLogs();
@@ -347,7 +347,10 @@ class ImportVmi extends BaseController
 
 	    session()->remove('pending_export_file');
 
-	    $response = $this->response->download($path, null);
+	    //$response = $this->response->download($path, null);
+	    $response = $this->response
+    		->setHeader('Content-Type', 'application/zip')
+    		->download($path, null);
 
 	    register_shutdown_function(function () use ($path) {
 	        if (file_exists($path)) {
