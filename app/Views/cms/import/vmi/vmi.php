@@ -266,15 +266,15 @@
             });
         }, checkInterval);
 
-      get_data(query);
+      get_data();
     });
 
-    function get_data(new_query) {
+    function get_data() {
         modal.loading(true);
         var data = {
             event : "list_pagination",
             select : "vmih.id, vmih.year AS filter_year, vmih.week, vmih.week AS filter_week, vmih.company AS filter_company, c.name AS company, y.year, vmih.status, vmih.created_by, vmih.created_date, vmih.updated_date, cu.name AS imported_by",
-            query : new_query,
+            query : query,
             offset : offset,
             limit : limit,
             table : "tbl_vmi_header vmih",
@@ -356,10 +356,13 @@
 
             $('.table_body').html(html);
             modal.loading(false);
-            console.log(result.pagination.total_page);
             if(result.pagination){
               if(result.pagination.total_page > 1){
                   pagination.generate(result.pagination.total_page, ".list_pagination", get_data);
+                    currentPage = offset;
+                    $(".pager_number option[value="+currentPage+"]").prop("selected", false)
+                    $('.pager_number').val(currentPage);
+                    $('.pager_no').html("Page " + numeral(currentPage).format('0,0'));
               }
               else if(result.total_data < limit) {
               $('.list_pagination').empty();
@@ -369,11 +372,11 @@
     }
 
     pagination.onchange(function(){
-        offset = $(this).val();
-        get_data(query);
-        $('.selectall').prop('checked', false);
-        $('.btn_status').hide();
-        $("#search_query").val("");
+      offset = $(this).val();
+      modal.loading(true);
+      get_data();
+      $("#search_query").val("");
+      modal.loading(false);
     });
 
     $(document).on('keypress', '#search_query', function(e) {               
@@ -395,10 +398,10 @@
             var combined_query = "(" + search_conditions.join(" OR ") + ")";
 
             // Construct the final query (if there's an existing query, combine it with AND)
-            var new_query = query ? "(" + query + " AND " + combined_query + ")" : combined_query;
+            var query = query ? "(" + query + " AND " + combined_query + ")" : combined_query;
 
             // Send the final query to your get_data function
-            get_data(new_query);
+            get_data();
         }
     });
 
@@ -410,7 +413,7 @@
         limit = parseInt(record_entries);
         offset = 1;
         modal.loading(true); 
-        get_data(query);
+        get_data();
         //modal.loading(false);
     });
 
