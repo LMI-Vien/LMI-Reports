@@ -344,9 +344,9 @@ class StocksPerStore extends BaseController
 			$brand_ambassador = 'Non BA';
 		} else {
 			$brand_ambassador_data = $this->Global_model->dynamic_search(
-				"'tbl_brand_ambassador'", "''", "'name'", 1, 0, "'id:EQ=$baId'", "''", "''"
+				"'tbl_brand_ambassador'", "''", "'code, name'", 1, 0, "'id:EQ=$baId'", "''", "''"
 			);
-			$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] : null;
+			$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] . ' - ' . $brand_ambassador_data[0]['name'] : null;
 		}
 		$pdf->Cell(63, 6, 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'), 0, 0, 'L');
 		$selectedBrands = '';
@@ -364,13 +364,28 @@ class StocksPerStore extends BaseController
 		$baLabels = isset($baTypeLabels[$baTypeId]) ? $baTypeLabels[$baTypeId] : 'All';
 		$pdf->Cell(63, 6, 'Outright/Consignment: '.$baLabels, 0, 1, 'L');
 
-		$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
-		$store = isset($store_data[0]['description']) ? $store_data[0]['description'] : null;
+		$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'code, description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
+		$store = isset($store_data[0]['description']) ? $store_data[0]['code'] . ' - ' . $store_data[0]['description'] : null;
 		$pdf->Cell(63, 6, 'Store Name: ' . ($store ?: 'ALL'), 0, 0, 'L');
 
-		$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
-		$asc = isset($asc_data[0]['description']) ? $asc_data[0]['description'] : null;
-		$pdf->Cell(63, 6, 'Area / ASC Name: ' . ($asc ?: ''), 0, 0, 'L');
+		$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'code, description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
+		$asc = isset($asc_data[0]['description']) ? $asc_data[0]['code'] . ' - ' . $asc_data[0]['description'] : null;
+
+        $area_data = $this->Global_model->dynamic_search("'tbl_area'", "''", "'code, description'", 1, 0, "'id:EQ=$areaId'", "''", "''");
+		$area = isset($area_data[0]['description']) ? $area_data[0]['code'] . ' - ' . $area_data[0]['description'] : null;
+		
+
+		if(strlen($area . '/' . $asc) > 40) {
+		    // Move to the next line
+		    $pdf->Ln(6); // Line break
+		    $pdf->Cell(63, 6, 'Area / ASC Name: ', 0, 0, 'L');
+		    $pdf->MultiCell(0, 6, $area . ' / ' . $asc, 0, 'L');
+		} else {
+		    // If it fits in one line, place it alongside Store Name
+		    $pdf->Cell(63, 6, 'Area / ASC Name: ' . ($area . ' / ' . $asc ?: ''), 0, 0, 'L');
+		}
+
+		//$pdf->Cell(63, 6, 'Area / ASC Name: ' . ($area .'/'. $asc ?: ''), 0, 0, 'L');
 		$pdf->Cell(63, 6, 'Date Generated: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
 		
 		$pdf->Ln(2);
@@ -613,13 +628,17 @@ class StocksPerStore extends BaseController
 			$baLabels = isset($baTypeLabels[$baTypeId]) ? $baTypeLabels[$baTypeId] : 'All';
 			$sheet->setCellValue('C4', 'Outright/Consignment: '.$baTypeLabels[$baTypeId]);
 
-			$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
-			$store = isset($store_data[0]['description']) ? $store_data[0]['description'] : null;
+			$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'code, description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
+			$store = isset($store_data[0]['description']) ? $store_data[0]['code'] .' - '. $store_data[0]['description'] : null;
 			$sheet->setCellValue('A5', 'Store Name: ' . ($store ?: 'ALL'));
 
-			$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
-			$asc = isset($asc_data[0]['description']) ? $asc_data[0]['description'] : null;
-			$sheet->setCellValue('B5', 'Area / ASC Name: ' . ($asc ?: ''));
+			$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'code, description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
+			$asc = isset($asc_data[0]['description']) ? $asc_data[0]['description'] .' - '. $asc_data[0]['description'] : null;
+
+			$area_data = $this->Global_model->dynamic_search("'tbl_area'", "''", "'code, description'", 1, 0, "'id:EQ=$areaId'", "''", "''");
+			$area = isset($area_data[0]['description']) ? $area_data[0]['code'] .' - '. $area_data[0]['description'] : null;
+
+			$sheet->setCellValue('B5', 'Area / ASC Name: ' . ($area . '/'. $asc ?: ''));
 			$sheet->setCellValue('C5', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 			if ($section['label'] === "Hero SKUs") {

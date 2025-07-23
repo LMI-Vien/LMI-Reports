@@ -132,7 +132,7 @@ class Dashboard_model extends Model
 	        )
 	        SELECT 
 	            vmi.item,
-	            vmi.itmdsc AS item_name,
+	            COALESCE(vmi.itmdsc, vmi.item_name) AS item_name,
 	            vmi.area_id,
 	            vmi.itmcde,
 	            vmi.item_class,
@@ -355,7 +355,7 @@ class Dashboard_model extends Model
 	        )
 	        SELECT 
 	            vmi.item,
-	            vmi.itmdsc AS item_name,
+	            COALESCE(vmi.itmdsc, vmi.item_name) AS item_name,
 	            vmi.area_id,
 	            vmi.itmcde,
 	            vmi.item_class,
@@ -1745,7 +1745,7 @@ class Dashboard_model extends Model
 	    $sql = "
 	        SELECT 
 	            vmi.item,
-	            vmi.itmdsc AS item_name,
+	            COALESCE(vmi.itmdsc, vmi.item_name) AS item_name,
 	            vmi.itmcde,
 	            MAX(ic.item_class_description) AS item_class,
 	            vmi.brand_type_id, 
@@ -1861,7 +1861,7 @@ class Dashboard_model extends Model
 	    $sql = "
 	        SELECT 
 	            wow.item,
-	            wow.itmdsc AS item_name,
+	            COALESCE(wow.itmdsc, wow.item_name) AS item_name,
 	            wow.itmcde,
 	            ic.item_class_description AS item_class_name,
 	            wow.brand_type_id, 
@@ -1986,7 +1986,7 @@ class Dashboard_model extends Model
 	    $sql = "
 	        SELECT 
 	            vmi.item,
-	            vmi.itmdsc AS item_name,
+	            COALESCE(vmi.itmdsc, vmi.item_name) AS item_name,
 	            ic.item_class_description AS item_class_name,
 	            vmi.itmcde,
 	            vmi.brand_type_id, 
@@ -2110,7 +2110,7 @@ class Dashboard_model extends Model
 	    $sql = "
 	        SELECT 
 	            wow.item,
-	            wow.itmdsc AS item_name,
+	            COALESCE(wow.itmdsc, wow.item_name) AS item_name,
 	            ic.item_class_description AS item_class_name,
 	            wow.itmcde,
 	            wow.brand_type_id, 
