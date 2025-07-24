@@ -379,31 +379,21 @@
       modal.loading(false);
     });
 
-    $(document).on('keypress', '#search_query', function(e) {               
-        if (e.keyCode === 13) {
-            var keyword = $(this).val().trim();
+    $(document).on('keydown', '#search_query', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        if (event.key == 'Enter') {
+            search_input = $('#search_query').val();
             offset = 1;
-
-            // Escape the keyword to prevent SQL injection (you can implement your own escape function or use libraries)
-            var escaped_keyword = keyword.replace(/'/g, "''");  // Basic escape for single quotes
-
-            // Construct the search conditions
-            var search_conditions = [
-                "c.name LIKE '%" + escaped_keyword + "%'",
-                "y.year LIKE '%" + escaped_keyword + "%'",
-                "cu.name LIKE '%" + escaped_keyword + "%'"
-            ];
-
-            // Combine the search conditions
-            var combined_query = "(" + search_conditions.join(" OR ") + ")";
-
-            // Construct the final query (if there's an existing query, combine it with AND)
-            var query = query ? "(" + query + " AND " + combined_query + ")" : combined_query;
-
-            // Send the final query to your get_data function
+            if(search_input){
+                query = 'vmih.status >= 0 and c.name like \'%'+search_input+'%\' or y.year like \'%'+search_input+'%\' or cu.name like \'%'+search_input+'%\'';
+            }else{
+                query = 'vmih.status >= 0';
+            }
             get_data();
         }
     });
+
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
