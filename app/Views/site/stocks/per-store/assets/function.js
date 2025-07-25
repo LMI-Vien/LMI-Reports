@@ -390,6 +390,7 @@
     }
 
     function handleAction(action) {
+        modal.loading(true);
         const selectedInventoryStatus = $('#inventoryStatus').val();
         var tableSlowMoving = $('input[aria-controls="table_slowMoving"]').val() || '';
         var tableHero = $('input[aria-controls="table_hero"]').val() || '';
@@ -398,10 +399,14 @@
 
         const params = new URLSearchParams();
         params.append('area', $('#areaId').val() || '');
+        params.append('areaText', $('#area').val() || '');
         params.append('asc', $('#ascNameId').val() || '');
+        params.append('ascText', $('#ascName').val() || '');
         params.append('baType', $('input[name="filterType"]:checked').val() || '');
         params.append('ba', $('#brandAmbassadorId').val() || '');
+        params.append('baText', $('#brandAmbassador').val() || '');
         params.append('store', $('#storeNameId').val() || '');
+        params.append('storeText', $('#storeName').val() || '');
         params.append('types', JSON.stringify(selectedInventoryStatus));
         params.append('table_slowMoving', tableSlowMoving);
         params.append('table_hero', tableHero);
@@ -409,17 +414,13 @@
         params.append('table_overStock', tableOverStock);
 
         const brands = $('#brands').val();
-        if (Array.isArray(brands)) {
-            brands.forEach(b => params.append('brands[]', b));
-        } else {
-            params.append('brands', brands || '');
-        }
+        params.append('brands', JSON.stringify(brands));
+        console.log(brands, 'progress 2')
 
         const linkto = action === 'export_pdf'
             ? "stocks/per-store-generate-pdf?"
             : "stocks/per-store-generate-excel-ba?";
 
-        // window.open(base_url + linkto + params.toString(), '_blank');
         let url = `${base_url}${linkto}`;
         const jsonData = paramsToJSON(params);
         $.ajax({
@@ -427,10 +428,6 @@
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(jsonData),
-            // success: (res) => {
-            //     console.log(res);
-            //     modal.loading(false)
-            // }
             xhrFields: {
                 responseType: 'blob'
             },

@@ -246,6 +246,9 @@ class StocksWeekAllStore extends BaseController
 		$limit = 999999999;
 		$offset = 0;
 
+		$allOrders  = $json['order']   ?? [];
+		$allColumns = $json['columns'] ?? [];
+
 	    $orderDirection = $json['order'][0]['dir'] ?? 'desc';
 
 		$tableSlowMoving = trim($json['table_slowMoving'] ?? '');

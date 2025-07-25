@@ -332,8 +332,6 @@
                 modal.loading(false);
             }
         });
-        return;
-
         const end_time = new Date();
         const duration = formatDuration(start_time, end_time);
         const remarks = `
@@ -343,49 +341,8 @@
             <br>Duration: ${duration}
         `;
         logActivity('Overall Stock Data of all Stores', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
-
-        let fetchedResponse; 
-
-        fetch(url, {
-            method: 'GET',
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server returned ${response.status}`);
-            }
-            fetchedResponse = response;
-            return response.blob();
-        })
-        .then(blob => {
-            const contentDisposition = fetchedResponse.headers.get('Content-Disposition');
-            const match = contentDisposition && /filename="?([^"]+)"/.exec(contentDisposition);
-            let rawName = match?.[1] || null;
-
-            if (rawName) {
-                rawName = decodeURIComponent(rawName);
-            }
-            const filename = rawName
-                || (action === 'exportPdf'
-                    ? 'Overall Stock Data of All Stores.pdf'
-                    : 'Overall Stock Data of All Stores.xlsx');
-
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-
-            URL.revokeObjectURL(blobUrl);
-        })
-        .catch(err => {
-            modal.alert("Failed to generate file. Please try again.", "error");
-        })
-        .finally(() => {
-            modal.loading(false);
-        });
+        
+        return;
     }
 
     function getCalendarWeeks(year) {
