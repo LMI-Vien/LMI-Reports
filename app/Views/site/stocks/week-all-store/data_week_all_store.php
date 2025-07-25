@@ -61,7 +61,7 @@
                           <i class="fas fa-filter mr-2"></i> Please select a filter
                       </div>
                         <div class="hide-div">
-                        <div class="hide-div card" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="hide-div card" style="overflow-x: auto; height: 650px; padding: 0px;">
                             <table id="table_slowMoving" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -98,7 +98,7 @@
                             </table>
                         </div>
 
-                        <div class="hide-div card" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="hide-div card" style="overflow-x: auto; height: 650px; padding: 0px;">
                             <table id="table_overStock" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -135,7 +135,7 @@
                             </table>
                         </div>
 
-                        <div class="hide-div card" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="hide-div card" style="overflow-x: auto; height: 650px; padding: 0px;">
                             <table id="table_npd" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -172,7 +172,7 @@
                             </table>
                         </div>
 
-                        <div class="hide-div card" style="overflow-x: auto; height: 450px; padding: 0px;">
+                        <div class="hide-div card" style="overflow-x: auto; height: 650px; padding: 0px;">
                             <table id="table_hero" class="table table-bordered">
                                 <thead>
                                     <tr>

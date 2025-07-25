@@ -70,7 +70,7 @@
                     <div class="sortable row text-center p-2" id="columnToggleContainer" class="mb-3" style="color: black;background-color: rgb(108 117 125);border-radius: 10px;margin: 10px;">
                         <strong class="col">Select Columns:</strong>
                     </div>
-                    <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
+                    <div class="mb-3" style="overflow-x: auto; height: 600px; padding: 0px;">
                                 <!-- added min-width so the table header would not get compressed using width : x% -->
                         <table id="overall_ba_sales_tbl" class="table table-bordered"> 
                             <thead>

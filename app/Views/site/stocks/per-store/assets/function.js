@@ -108,10 +108,12 @@
                 if(data.length > 0){
                     if(data[0].code){ 
                         $("#ascName").val(data[0].code+' - '+data[0].asc_description);
-                        $("#ascNameId").val(data[0].asc_id);       
+                        $("#ascNameId").val(data[0].asc_id);
+                        $("#ascName").prop('disabled', true); 
                     }else{
                         $("#ascName").val('');
                         $("#ascNameId").val('');
+                        $("#ascName").prop('disabled', false); 
                     }             
                 }
             })
@@ -139,13 +141,17 @@
                 if(parseInt($('#brandAmbassadorId').val()) === -5 || parseInt($('#brandAmbassadorId').val()) === -6){
                     $("#storeName").val('');
                     $("#storeNameId").val('');
+                    $("#storeName").prop('disabled', false);
                     return;
                 }
                 if(data.length > 0){
                     if(data[0].code){
                         $("#storeName").val(data[0].code+' - '+data[0].description);
-                        $("#storeNameId").val(data[0].id);      
-                    }             
+                        $("#storeNameId").val(data[0].id); 
+                        $("#storeName").prop('disabled', true);   
+                    }else{
+                        $("#storeName").prop('disabled', false);
+                    }        
                 }
             })
         });
@@ -192,6 +198,19 @@
         $('#popup_modal').modal('hide');
     }
 
+    $(document).on('change', '#brandAmbassador', function () {
+        data = $(this).val();
+        if(!(data)){
+            $("#storeName").prop('disabled', false);
+        }
+    });
+
+    $(document).on('change', '#area', function () {
+        data = $(this).val();
+        if(!(data)){
+            $("#ascName").prop('disabled', false);
+        }
+    });
 
     $(document).on('click', '#refreshButton', function () {
         const fields = [
@@ -370,6 +389,9 @@
 
         const params = new URLSearchParams();
         params.append('area', $('#areaId').val() || '');
+
+area = $('#areaId').text()
+
         params.append('asc', $('#ascNameId').val() || '');
         params.append('baType', $('input[name="filterType"]:checked').val() || '');
         params.append('ba', $('#brandAmbassadorId').val() || '');
