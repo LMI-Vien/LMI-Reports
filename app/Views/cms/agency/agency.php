@@ -313,9 +313,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and agency like \'%'+search_input+'%\'';
+            new_query += ' and code like \'%'+escaped_keyword+'%\' or '+query+' and agency like \'%'+escaped_keyword+'%\'';
             get_data(new_query);
             get_pagination(new_query);
         }

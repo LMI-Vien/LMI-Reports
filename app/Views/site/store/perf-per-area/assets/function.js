@@ -43,7 +43,10 @@
                         $("#ascName").val('');
                         $("#ascNameId").val('');
                     }             
-                }
+                }else{
+                    $("#storeName").val('');
+                    $("#storeNameId").val('');
+                }  
             })
         });
 

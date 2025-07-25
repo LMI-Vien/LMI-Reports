@@ -384,9 +384,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             if(search_input){
-                query = 'vmih.status >= 0 and c.name like \'%'+search_input+'%\' or y.year like \'%'+search_input+'%\' or cu.name like \'%'+search_input+'%\'';
+                query = 'vmih.status >= 0 and c.name like \'%'+escaped_keyword+'%\' or y.year like \'%'+escaped_keyword+'%\' or cu.name like \'%'+escaped_keyword+'%\'';
             }else{
                 query = 'vmih.status >= 0';
             }

@@ -114,8 +114,12 @@
                         $("#ascName").val('');
                         $("#ascNameId").val('');
                         $("#ascName").prop('disabled', false); 
-                    }             
-                }
+                    }           
+                }else{
+                    $("#ascName").val('');
+                    $("#ascNameId").val('');
+                    $("#ascName").prop('disabled', false); 
+                }    
             })
         });
 
@@ -150,9 +154,15 @@
                         $("#storeNameId").val(data[0].id); 
                         $("#storeName").prop('disabled', true);   
                     }else{
+                        $("#storeName").val('');
+                        $("#storeNameId").val('');
                         $("#storeName").prop('disabled', false);
-                    }        
-                }
+                    }       
+                }else{
+                    $("#storeName").val('');
+                    $("#storeNameId").val('');
+                    $("#storeName").prop('disabled', false);
+                }  
             })
         });
 

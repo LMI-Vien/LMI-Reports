@@ -47,7 +47,10 @@
                         $("#ascName").val('');
                         $("#ascNameId").val('');
                     }             
-                }
+                }else{
+                    $("#ascName").val('');
+                    $("#ascNameId").val('');
+                }  
             })
         });
 
@@ -74,8 +77,14 @@
                     if(data[0].code){
                         $("#storeName").val(data[0].code+' - '+data[0].description);
                         $("#storeNameId").val(data[0].code);      
+                    }else{
+                        $("#storeName").val('');
+                        $("#storeNameId").val('');
                     }             
-                }
+                }else{
+                    $("#storeName").val('');
+                    $("#storeNameId").val('');
+                }  
             })
         });
 
