@@ -15,23 +15,22 @@ $routes->group('stocks/', static function ($routes) {
     $routes->get('data-per-store', 'StocksPerStore::dataPerStore');
     $routes->post('get-data-per-store', 'StocksPerStore::getDataPerStore');
     $routes->get('get-data-per-store', 'StocksPerStore::getDataPerStore');
-    $routes->get('per-store-generate-pdf', 'StocksPerStore::generatePdf');
-    $routes->get('per-store-generate-excel-ba', 'StocksPerStore::generateExcel');
+    $routes->post('per-store-generate-pdf', 'StocksPerStore::generatePdf');
+    $routes->post('per-store-generate-excel-ba', 'StocksPerStore::generateExcel');
 
     //all store
     $routes->get('data-all-store', 'StocksAllStore::dataAllStore');
     $routes->get('get-data-all-store', 'StocksAllStore::GetdataAllStore');
     $routes->post('get-data-all-store', 'StocksAllStore::GetdataAllStore');
-    $routes->get('all-store-generate-pdf', 'StocksAllStore::generatePdf');
-    $routes->get('all-store-generate-excel', 'StocksAllStore::generateExcel');
+    $routes->post('all-store-generate-pdf', 'StocksAllStore::generatePdf');
+    $routes->post('all-store-generate-excel', 'StocksAllStore::generateExcel');
 
     //week all store
     $routes->get('data-week-all-store', 'StocksWeekAllStore::dataWeekAllStore');
     $routes->get('get-data-week-all-store', 'StocksWeekAllStore::GetDataWeekAllStore');
     $routes->post('get-data-week-all-store', 'StocksWeekAllStore::GetDataWeekAllStore');
-    $routes->get('stocks-week-all-store-generate-pdf', 'StocksWeekAllStore::generatePdf');
-    $routes->get('stocks-week-all-store-generate-excel', 'StocksWeekAllStore::generateExcel');
-    $routes->get('stocks-week-all-store-generate-all', 'StocksWeekAllStore::generateAll');
+    $routes->post('stocks-week-all-store-generate-pdf', 'StocksWeekAllStore::generatePdf');
+    $routes->post('stocks-week-all-store-generate-excel', 'StocksWeekAllStore::generateExcel');
 });
 
 $routes->group('store/', static function ($routes) {

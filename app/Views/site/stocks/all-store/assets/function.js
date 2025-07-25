@@ -221,98 +221,118 @@
 
     function handleAction(action) {
         modal.loading(true);
-
         let selectedItemClass       = $('#itemClass').val();       
         let selectedItemCat         = $('#itemLabelCatId').val();    
         let selectedInventoryStatus = $('#inventoryStatus').val();  
         let selectedVendor          = $('#vendorNameId').val();
-
-        let searchValueSlowMoving = '';
-        if ($.fn.dataTable.isDataTable('#table_slowMoving')) {
-            searchValueSlowMoving = $('#table_slowMoving').DataTable().search();
-        }
-
-        let searchValueOverstock = '';
-        if ($.fn.dataTable.isDataTable('#table_overStock')) {
-            searchValueOverstock = $('#table_overStock').DataTable().search();
-        }
-
-        let searchValueNpd = '';
-        if ($.fn.dataTable.isDataTable('#table_npd')) {
-            searchValueNpd = $('#table_npd').DataTable().search();
-        }
-
-        let searchValueHero = '';
-        if ($.fn.dataTable.isDataTable('#table_hero')) {
-            searchValueHero = $('#table_hero').DataTable().search();
-        }
-
-        let itemClasses = Array.isArray(selectedItemClass)
-            ? selectedItemClass
-            : (selectedItemClass ? [ selectedItemClass ] : []);
-
-        let statuses = Array.isArray(selectedInventoryStatus)
-            ? selectedInventoryStatus
-            : (selectedInventoryStatus ? [ selectedInventoryStatus ] : []);
-
-        let qsParts = [];
-
-        itemClasses.forEach(c => {
-            qsParts.push(`itemClass[]=${encodeURIComponent(c)}`);
+        let selectedItemClassText   = $('#itemClass').select2('data').map(function(item) {
+            return item.text;
         });
+        let selectedVendorText      = $('#vendorNameId').text();
 
-        if (selectedItemCat) {
-            qsParts.push(`itemLabelCat=${encodeURIComponent(selectedItemCat)}`);
-        }
+        // Table searches
+        let searchValueSlowMoving = $.fn.dataTable.isDataTable('#table_slowMoving') 
+            ? $('#table_slowMoving').DataTable().search() 
+            : '';
 
-        statuses.forEach(s => {
-            qsParts.push(`inventoryStatus[]=${encodeURIComponent(s)}`);
-        });
+        let searchValueOverstock = $.fn.dataTable.isDataTable('#table_overStock') 
+            ? $('#table_overStock').DataTable().search() 
+            : '';
 
-        if (selectedVendor) {
-            qsParts.push(`vendorName=${encodeURIComponent(selectedVendor)}`);
-        }
+        let searchValueNpd = $.fn.dataTable.isDataTable('#table_npd') 
+            ? $('#table_npd').DataTable().search() 
+            : '';
 
-        if (searchValueSlowMoving) {
-            qsParts.push(`search[slowmoving]=${encodeURIComponent(searchValueSlowMoving)}`);
-        }
+        let searchValueHero = $.fn.dataTable.isDataTable('#table_hero') 
+            ? $('#table_hero').DataTable().search() 
+            : '';
 
-        if (searchValueOverstock) {
-            qsParts.push(`search[overstock]=${encodeURIComponent(searchValueOverstock)}`);
-        }
+        // Normalize arrays
+        let itemClasses = Array.isArray(selectedItemClass) ? selectedItemClass : (selectedItemClass ? [selectedItemClass] : []);
+        let statuses = Array.isArray(selectedInventoryStatus) ? selectedInventoryStatus : (selectedInventoryStatus ? [selectedInventoryStatus] : []);
 
-        if (searchValueNpd) {
-            qsParts.push(`search[npd]=${encodeURIComponent(searchValueNpd)}`);
-        }
+        // Create the payload object
+        let postData = {
+            itemClass: itemClasses,
+            itemLabelCat: selectedItemCat || null,
+            inventoryStatus: statuses,
+            vendorName: selectedVendor || null,
+            vendorText: selectedVendorText,
+            itmclstxt: selectedItemClassText,
+            search: {
+                slowmoving: searchValueSlowMoving || null,
+                overstock: searchValueOverstock || null,
+                npd: searchValueNpd || null,
+                hero: searchValueHero || null
+            },
+            order: [],
+            columns: []
+        };
+        console.log(postData)
 
-        if (searchValueHero) {
-            qsParts.push(`search[hero]=${encodeURIComponent(searchValueHero)}`);
-        }
-
-        let qs = qsParts.join('&');
-
-        let extraOrderParams = [];
+        // Loop through each status table to capture order info
         statuses.forEach((statusType, idx) => {
             let tableId  = `#table_${statusType}`;
             let dt       = $(tableId).DataTable();
             let orderArr = dt.order() || [[0, 'desc']];
+            
+            let colIdx   = orderArr[0][0];
+            let dir      = orderArr[0][1];
+            let dtCols   = dt.settings().init().columns;
+            let colName  = dtCols[colIdx].data;
 
-            let colIdx  = orderArr[0][0];
-            let dir     = orderArr[0][1];
-            let dtCols  = dt.settings().init().columns;
-            let colName = dtCols[colIdx].data; // e.g. "item_class"
+            postData.order.push({
+                index: idx,
+                column: colIdx,
+                dir: dir,
+                colData: colName
+            });
 
-            extraOrderParams.push(`order[${idx}][column]=${colIdx}`);
-            extraOrderParams.push(`order[${idx}][dir]=${dir}`);
-            extraOrderParams.push(`columns[${idx}][data]=${encodeURIComponent(colName)}`);
-
-            extraOrderParams.push(`order[${idx}][colData]=${encodeURIComponent(colName)}`);
+            postData.columns.push({
+                index: idx,
+                data: colName
+            });
         });
 
-        let orderQueryString = extraOrderParams.join('&');
-
+        alert(action)
         let endpoint = (action === 'exportPdf') ? 'all-store-generate-pdf' : 'all-store-generate-excel';
-        let url = `${base_url}stocks/${endpoint}?${qs}&${orderQueryString}`;
+        let url = `${base_url}stocks/${endpoint}`;
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Overall Stock Data of All Stores.pdf'
+                        : 'Overall Stock Data of All Stores.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
+        return;
 
         const end_time = new Date();
         const duration = formatDuration(start_time, end_time);
