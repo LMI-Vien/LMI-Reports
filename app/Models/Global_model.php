@@ -1521,6 +1521,76 @@ class Global_model extends Model
         return $q->getResult();
     }
 
+    function getYearCounts()
+    {
+        $sql = "
+            SELECT 
+                way.id,
+                way.year,
+                COALESCE(vmiy.vmiyear_count, 0) AS vmiyear_count,
+                COALESCE(sopa.sellout_count_pa, 0) AS sellout_count_pa,
+                COALESCE(tsps.targetsalesps_count, 0) AS targetsalesps_count,
+                COALESCE(wowdets.weekonweeks_count, 0) AS weekonweeks_count,
+                COALESCE(so.sellout_count, 0) AS sellout_count
+            FROM  
+                tbl_year AS way
+            LEFT JOIN (
+                SELECT year, COUNT(DISTINCT year) AS vmiyear_count
+                FROM tbl_vmi
+                GROUP BY year
+            ) AS vmiy ON vmiy.year = way.id
+            LEFT JOIN (
+                SELECT year, COUNT(DISTINCT year) AS sellout_count_pa
+                FROM tbl_accounts_target_sellout_pa
+                GROUP BY year
+            ) AS sopa ON sopa.year = way.id
+            LEFT JOIN (
+                SELECT year, COUNT(DISTINCT year) AS targetsalesps_count
+                FROM tbl_target_sales_per_store
+                GROUP BY year
+            ) AS tsps ON tsps.year = way.id
+            LEFT JOIN (
+                SELECT year, COUNT(DISTINCT year) AS weekonweeks_count
+                FROM tbl_week_on_week_details
+                GROUP BY year
+            ) AS wowdets ON wowdets.year = way.id
+            LEFT JOIN (
+                SELECT year, COUNT(DISTINCT year) AS sellout_count
+                FROM tbl_sell_out_data_header
+                GROUP BY year
+            ) AS so ON so.year = way.year;
+        ";
+
+        $query = $this->db->query($sql);
+        return $query->getResultArray(); 
+    }
+
+    function getCompanyCounts()
+    {
+        $sql = "
+            SELECT 
+                comp.id,
+                comp.name,
+                EXISTS (
+                    SELECT 1 
+                    FROM tbl_vmi AS v 
+                    WHERE v.company = comp.id
+                    LIMIT 1
+                ) AS vmi_comp_count,
+                EXISTS (
+                    SELECT 1
+                    FROM tbl_sell_out_data_header AS so
+                    WHERE so.company = comp.id
+                    LIMIT 1
+                ) AS so_comp_count
+            FROM 
+                tbl_company AS comp;
+        ";
+
+        $query = $this->db->query($sql);
+        return $query->getResultArray(); 
+    }
+
 }
 
 

@@ -562,59 +562,6 @@
         }
     }
 
-    // WIP PA !!! 
-    // function delete_data(id) {
-    //     get_field_values("tbl_item_class", "item_class_code", "id", [id], (res) => {
-    //         let class_code = res[id];
-    //         let message = is_json(confirm_delete_message);
-    //         message.message = `Delete <b><i>${class_code}</i></b> from Team Masterfile?`;
-
-    //         modal.confirm(JSON.stringify(message),function(result){
-    //             if (result) {
-    //                 var url = "<?= base_url('cms/global_controller');?>"; 
-    //                 var data = {
-    //                     event: "list",
-    //                     select: "t.id, t.code, COUNT(bra.team) AS team_count",
-    //                     query: "t.id = " + id, 
-    //                     offset: offset,  
-    //                     limit: limit,   
-    //                     table: "tbl_team t",
-    //                     join: [
-    //                         {
-    //                             table: "tbl_brand_ambassador bra",
-    //                             query: "bra.team = t.id",
-    //                             type: "left"
-    //                         }
-    //                     ],
-    //                     group: "t.id, t.code"  
-    //                 };
-
-    //                 aJax.post(url, data, function(response) {
-
-    //                     try {
-    //                         var obj = JSON.parse(response);
-
-    //                         if (!obj || obj.length === 0) { 
-    //                             console.error("Invalid or empty response:", response);
-    //                             return;
-    //                         }
-
-    //                         var teamCount = Number(obj[0].team_count) || 0;
-
-    //                         if (teamCount > 0) { 
-    //                             modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                         } else {
-    //                             proceed_delete(id); 
-    //                         }
-    //                     } catch (e) {
-    //                         console.error("Error parsing response:", e, response);
-    //                     }
-    //                 });
-    //             }
-    //         });
-    //     })
-    // }
-
     function delete_data(id) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
@@ -704,6 +651,92 @@
         }
     }
 
+    // $(document).on('click', '.btn_status', function (e) {
+    //     var status = $(this).attr("data-status");
+    //     var modal_obj = "";
+    //     var modal_alert_success = "";
+    //     var hasExecuted = false;
+
+    //     let id = $("input.select:checked");
+    //     let code = [];
+    //     let code_string = "";
+
+    //     id.each(function () {
+    //         code.push($(this).attr("data-id"));
+    //     })
+
+    //     get_field_values("tbl_item_class", "item_class_code", "id", code, (res) => {
+    //         if(code.length == 1) {
+    //             code_string = `Code <b><i>${res[code[0]]}</b></i>`;
+    //         }
+    //     })
+
+    //     if (parseInt(status) === -2) {
+    //         message = is_json(confirm_delete_message);
+    //         message.message = `Delete ${code_string} from Item Class Masterfile?`;
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_delete_message;
+    //     } else if (parseInt(status) === 1) {
+    //         message = is_json(confirm_publish_message);
+    //         message.message = `Publish ${code_string} from Item Class Masterfile?`;
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_publish_message;
+    //     } else {
+    //         message = is_json(confirm_unpublish_message);
+    //         message.message = `Unpublish ${code_string} from Item Class Masterfile?`;
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_unpublish_message;
+    //     }
+
+    //     modal.confirm(modal_obj, function (result) {
+    //         if (result) {
+    //             var url = "<?= base_url('cms/global_controller');?>";
+    //             var dataList = [];
+                
+    //             $('.select:checked').each(function () {
+    //                 var id = $(this).attr('data-id');
+    //                 dataList.push({
+    //                     event: "update",
+    //                     table: "tbl_item_class",
+    //                     field: "id",
+    //                     where: id,
+    //                     data: {
+    //                         status: status,
+    //                         updated_date: formatDate(new Date())
+    //                     }
+    //                 });
+    //             });
+
+    //             if (dataList.length === 0) return;
+
+    //             var processed = 0;
+    //             dataList.forEach(function (data, index) {
+    //                 aJax.post(url, data, function (result) {
+    //                     if (hasExecuted) return; 
+
+    //                     modal.loading(false);
+    //                     processed++;
+
+    //                     if (result === "success") {
+    //                         if (!hasExecuted) {
+    //                             hasExecuted = true;
+    //                             $('.btn_status').hide();
+    //                             modal.alert(modal_alert_success, 'success', function () {
+    //                                 location.reload();
+    //                             });
+    //                         }
+    //                     } else {
+    //                         if (!hasExecuted) {
+    //                             hasExecuted = true;
+    //                             modal.alert(failed_transaction_message, function () {});
+    //                         }
+    //                     }
+    //                 });
+    //             });
+    //         }
+    //     });
+    // });
+
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
         var modal_obj = "";
@@ -716,38 +749,77 @@
 
         id.each(function () {
             code.push($(this).attr("data-id"));
-        })
+        });
 
         get_field_values("tbl_item_class", "item_class_code", "id", code, (res) => {
-            if(code.length == 1) {
-                code_string = `Code <b><i>${res[code[0]]}</b></i>`;
+            if (code.length === 1) {
+                code_string = `Code <b><i>${res[code[0]]}</i></b>`;
             }
-        })
 
-        if (parseInt(status) === -2) {
-            message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Item Class Masterfile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_delete_message;
-        } else if (parseInt(status) === 1) {
-            message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Item Class Masterfile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_publish_message;
-        } else {
-            message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Item Class Masterfile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_unpublish_message;
-        }
+            if (parseInt(status) === -2) {
+                var url = "<?= base_url('cms/global_controller'); ?>";
+                var usageCheck = { event: "get_item_class_counts" };
 
-        modal.confirm(modal_obj, function (result) {
-            if (result) {
+                aJax.post(url, usageCheck, function (response) {
+                    try {
+                        var usageData = JSON.parse(response);
+                        let blocked = [];
+
+                        code.forEach(function (cid) {
+                            let item = usageData.find(row => row.id == cid);
+                            if (item && (Number(item.new_item_count) > 0 || Number(item.hero_item_count) > 0)) {
+                                blocked.push(res[cid]);
+                            }
+                        });
+
+                        if (blocked.length > 0) {
+                            if (blocked.length === 1) {
+                                modal.alert(`The item class <b>${blocked[0]}</b> is in use and cannot be deleted.`, "error");
+                            } else {
+                                modal.alert(`Some selected item classes are in use and cannot be deleted.`, "error");
+                            }
+                            return;
+                        }
+
+                        let message = is_json(confirm_delete_message);
+                        message.message = `Delete ${code_string} from Item Class Masterfile?`;
+                        modal_obj = JSON.stringify(message);
+                        modal_alert_success = success_delete_message;
+
+                        proceedItemClassStatusUpdate(code, status, modal_obj, modal_alert_success);
+                    } catch (e) {
+                        console.error("Usage check failed:", response);
+                        modal.alert("Error validating item class usage.", "error");
+                    }
+                });
+
+                return; 
+            }
+
+            // For publish/unpublish
+            let message;
+            if (parseInt(status) === 1) {
+                message = is_json(confirm_publish_message);
+                message.message = `Publish ${code_string} from Item Class Masterfile?`;
+                modal_alert_success = success_publish_message;
+            } else {
+                message = is_json(confirm_unpublish_message);
+                message.message = `Unpublish ${code_string} from Item Class Masterfile?`;
+                modal_alert_success = success_unpublish_message;
+            }
+
+            modal_obj = JSON.stringify(message);
+            proceedItemClassStatusUpdate(code, status, modal_obj, modal_alert_success);
+        });
+
+        function proceedItemClassStatusUpdate(code, status, modal_obj, modal_alert_success) {
+            modal.confirm(modal_obj, function (result) {
+                if (!result) return;
+
                 var url = "<?= base_url('cms/global_controller');?>";
                 var dataList = [];
-                
-                $('.select:checked').each(function () {
-                    var id = $(this).attr('data-id');
+
+                code.forEach(function (id) {
                     dataList.push({
                         event: "update",
                         table: "tbl_item_class",
@@ -762,32 +834,27 @@
 
                 if (dataList.length === 0) return;
 
-                var processed = 0;
-                dataList.forEach(function (data, index) {
-                    aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; 
+                var hasExecuted = false;
+                dataList.forEach(function (data) {
+                    if (hasExecuted) return;
 
+                    aJax.post(url, data, function (result) {
                         modal.loading(false);
-                        processed++;
 
                         if (result === "success") {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                $('.btn_status').hide();
-                                modal.alert(modal_alert_success, 'success', function () {
-                                    location.reload();
-                                });
-                            }
+                            hasExecuted = true;
+                            $('.btn_status').hide();
+                            modal.alert(modal_alert_success, 'success', function () {
+                                location.reload();
+                            });
                         } else {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                modal.alert(failed_transaction_message, function () {});
-                            }
+                            hasExecuted = true;
+                            modal.alert(failed_transaction_message, function () {});
                         }
                     });
                 });
-            }
-        });
+            });
+        }
     });
 
     function ViewDateformat(dateString) {
