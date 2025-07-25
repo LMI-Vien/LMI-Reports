@@ -339,24 +339,84 @@
         let selectedMonthEnd = $('#monthTo').val();
         let searchValue = $('#overall_ba_sales_tbl').DataTable().search(); 
 
-        let qs = [
-            'area='             + encodeURIComponent(selectedArea),
-            'asc='              + encodeURIComponent(selectedAsc),
-            'baType='           + encodeURIComponent(selectedBaType),
-            'ba='               + encodeURIComponent(selectedBa),
-            'store='            + encodeURIComponent(selectedStore),
-            'brands='           + encodeURIComponent(selectedBrands),
-            'year='             + encodeURIComponent(selectedYear),
-            'month_start='      + encodeURIComponent(selectedMonthStart),
-            'month_end='        + encodeURIComponent(selectedMonthEnd),
-            'searchValue='      + encodeURIComponent(searchValue),
-            'limit='            + encodeURIComponent(99999),
-            'offset='           + encodeURIComponent(0),
-        ].join('&');
+        // let qs = [
+        //     'area='             + encodeURIComponent(selectedArea),
+        //     'asc='              + encodeURIComponent(selectedAsc),
+        //     'baType='           + encodeURIComponent(selectedBaType),
+        //     'ba='               + encodeURIComponent(selectedBa),
+        //     'store='            + encodeURIComponent(selectedStore),
+        //     'brands='           + encodeURIComponent(selectedBrands),
+        //     'year='             + encodeURIComponent(selectedYear),
+        //     'month_start='      + encodeURIComponent(selectedMonthStart),
+        //     'month_end='        + encodeURIComponent(selectedMonthEnd),
+        //     'searchValue='      + encodeURIComponent(searchValue),
+        //     'limit='            + encodeURIComponent(99999),
+        //     'offset='           + encodeURIComponent(0),
+        // ].join('&');
+
+        let postData = {
+            area: selectedArea,
+            asc: selectedAsc,
+            baType: selectedBaType,
+            ba: selectedBa,
+            store: selectedStore,
+            brands: selectedBrands,
+            year: selectedYear,
+            month_start: selectedMonthStart,
+            month_end: selectedMonthEnd,
+            searchValue: searchValue,
+            limit: 99999,
+            offset: 0
+        };
 
         let endpoint = action === 'export_pdf' ? 'per-ba-generate-pdf' : 'per-ba-generate-excel-ba';
 
-        let url = `${base_url}store/${endpoint}?${qs}`;
+        // let url = `${base_url}store/${endpoint}?${qs}`;
+        let url = `${base_url}store/${endpoint}`;
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            // success : (res) => {
+            //     console.log(res, "response")
+            //     modal.loading(false)
+            // },
+            // error: () => {
+            //     alert('alert')
+            //     modal.loading(false)
+            // }
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Store Sales Performance per Brand Ambassador.pdf'
+                        : 'Store Sales Performance per Brand Ambassador.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
+        return;
 
         const end_time = new Date();
         const duration = formatDuration(start_time, end_time);
@@ -367,7 +427,14 @@
             <br>End Time: ${formatReadableDate(end_time)}
             <br>Duration: ${duration}
         `;
-        logActivity('Store Sales Performance per Brand Ambassador', action === 'export_pdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
+        logActivity(
+            'Store Sales Performance per Brand Ambassador', 
+            action === 'export_pdf' ? 'Export PDF' : 'Export Excel', 
+            remarks, 
+            '-', 
+            null, 
+            null
+        );
 
         let fetchedResponse;
         fetch(url, {

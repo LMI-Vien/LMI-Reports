@@ -177,35 +177,37 @@ class StoreSalesPerfPerBa extends BaseController
 
 	public function generatePdf()
 	{	
+		$json = $this->request->getJSON(true); 
 		$sysPar = $this->Global_model->getSysPar();
-		$areaId = trim($this->request->getGet('area'));
+		$areaId = trim($json['area']);
 		$areaId = $areaId === '' ? null : $areaId;
-
-		$ascId = trim($this->request->getGet('asc'));
+		
+		$ascId = trim($json['asc']);
 		$ascId = $ascId === '' ? null : $ascId;
-
-		$baTypeId = trim($this->request->getGet('baType'));
+		
+		$baTypeId = trim($json['baType']);
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
-
-		$baId = trim($this->request->getGet('ba'));
+		
+		$baId = $json['ba'];
 		$baId = $baId === '' ? null : $baId;
-
-		$storeId= trim($this->request->getGet('store')); //change this to store_id
+		
+		$storeId= trim($json['store']); //change this to store_id
 		$storeId = $storeId === '' ? null : $storeId;
-
-        $brandIds = $this->request->getGet('brands');
+		
+        $brandIds = $json['brands'];
         $brandIds = $brandIds === '' ? null : $brandIds;
-
-	    $year = $this->request->getGet('year')?? 0;            
-	    $monthId = $this->request->getVar('month_start') ?? 1;
-	    $monthEndId = $this->request->getVar('month_end') ?? 12;
-
-		$limit = $this->request->getVar('limit');
+		
+	    $year = $json['year']?? 0;            
+	    $monthId = $json['month_start'] ?? 1;
+	    $monthEndId = $json['month_end'] ?? 12;
+		
+		$limit = $json['limit'];
 		$limit = is_numeric($limit) ? (int)$limit : 10;
-
-		$offset = $this->request->getVar('offset');
+		
+		$offset = $json['offset'];
 		$offset = is_numeric($offset) ? (int)$offset : 0;
-
+		// echo json_encode($json); die();
+		
 	    $formatted_month = str_pad($monthId, 2, '0', STR_PAD_LEFT);
 	    $date = null; 
 	    $lookup_month = null;
@@ -247,16 +249,16 @@ class StoreSalesPerfPerBa extends BaseController
 			$tpr = $days - $day; 
 	    }
 
-	    $brandIds = $this->request->getGet('brands');
-        $brandIds = $brandIds === '' ? null : $brandIds;
-
-		$searchValue = trim($this->request->getGet('searchValue'));
+	    $brandIds = $json['brands'];
+        $brandIds = $brandIds === [] ? null : $brandIds;
+		
+		$searchValue = trim($json['searchValue']);
 		$searchValue = $searchValue === '' ? null : $searchValue;
-
-		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
-	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
-	    $columns = $this->request->getVar('columns');
-	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
+		
+		$orderColumnIndex = $json['order'][0]['column'] ?? 0;
+	    $orderDirection = $json['order'][0]['dir'] ?? 'asc';
+	    $orderByColumn = 'store_name';
+		// echo json_encode($json); die();
 
 		if($sysPar){
 			$jsonString = $sysPar[0]['brand_label_type'];
@@ -300,25 +302,25 @@ class StoreSalesPerfPerBa extends BaseController
 				$baTypeString = 'NONE';
 				break;
 		}
-
+		
 		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$areaId'", "''", "''");
 		$areaMap = !empty($result) ? $result[0]['description'] : '';
-
+		
 		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$ascId'", "''", "''");
 		$ascMap = !empty($result) ? $result[0]['description'] : '';
-
+		
 		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$baId'", "''", "''");
 		$baMap = !empty($result) ? $result[0]['name'] : '';
-
+		
 		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'id:EQ=$storeId'", "''", "''");
 		$storeMap = !empty($result) ? $result[0]['description'] : '';
-
+		
 		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$brandIds'", "''", "''");
 		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
-
+		
 		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthId'", "''", "''");
 		$monthStartMap = !empty($result) ? $result[0]['month'] : '';
-
+		
 		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthEndId'", "''", "''");
 		$monthEndMap = !empty($result) ? $result[0]['month'] : '';
 
