@@ -174,25 +174,26 @@ class StocksPerStore extends BaseController
 
 	public function generatePdf()
 	{	
-		$areaId = trim($this->request->getGet('area') ?? '');
+		$json = $this->request->getJSON(true); 
+		$areaId = trim($json['area'] ?? '');
 		$areaId = $areaId === '' ? null : $areaId;
 
-		$ascId = trim($this->request->getGet('asc') ?? '');
+		$ascId = trim($json['asc'] ?? '');
 		$ascId = $ascId === '' ? null : $ascId;
 
-		$baTypeId = trim($this->request->getGet('baType') ?? '');
+		$baTypeId = trim($json['baType'] ?? '');
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
 
-		$baId = trim($this->request->getGet('ba') ?? '');
+		$baId = trim($json['ba'] ?? '');
 		$baId = $baId === '' ? null : $baId;
 
-		$storeId = trim($this->request->getGet('store') ?? '');
+		$storeId = trim($json['store'] ?? '');
 		$storeId = $storeId === '' ? null : $storeId;
 
-		$brands = $this->request->getGet('brands');
+		$brands = $json['brands'] ?? '';
 		$brands = $brands === '' ? null : $brands;
-
-		$types = json_decode($this->request->getGet('types'), true);
+		
+		$types = json_decode($json['types'], true);
 		if (!$types || !is_array($types)) {
 			$types = ['hero']; // fallback
 		}
@@ -200,22 +201,40 @@ class StocksPerStore extends BaseController
 		$limit = 99999; // use a really huge number to include everything
 		$offset = 0;
 
-		$orderColumnIndex = $this->request->getGet('orderIndex') ?? 0;
-	    $orderDirection = $this->request->getGet('orderDir') ?? 'desc';
-	    $columns = json_decode($this->request->getGet('columns'), true);
+		$orderColumnIndex = $json['orderIndex'] ?? 0;
+	    $orderDirection = $json['orderDir'] ?? 'desc';
+	    $columns = $json['columns'] ?? '';
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'sum_total_qty';
-
-	    $tableSlowMoving = trim($this->request->getGet('table_slowMoving') ?? '');
+		
+	    $tableSlowMoving = trim($json['table_slowMoving'] ?? '');
 		$tableSlowMoving = $tableSlowMoving === '' ? null : $tableSlowMoving;
-
-		$tableHero = trim($this->request->getGet('table_hero') ?? '');
+		
+		$tableHero = trim($json['table_hero'] ?? '');
 		$tableHero = $tableHero === '' ? null : $tableHero;
-
-		$tableNpd = trim($this->request->getGet('table_npd') ?? '');
+		
+		$tableNpd = trim($json['table_npd'] ?? '');
 		$tableNpd = $tableNpd === '' ? null : $tableNpd;
-
-		$tableOverStock = trim($this->request->getGet('table_overStock') ?? '');
+		
+		$tableOverStock = trim($json['table_overStock'] ?? '');
 		$tableOverStock = $tableOverStock === '' ? null : $tableOverStock;
+		
+		// print_r($areaId);
+		// print_r($ascId);
+		// print_r($baTypeId);
+		// print_r($baId);
+		// print_r($storeId);
+		// print_r($brands);
+		// print_r($types);
+		// print_r($orderColumnIndex);
+		// print_r($orderDirection);
+		// print_r($columns);
+		// print_r($orderByColumn);
+		// print_r($tableSlowMoving);
+		// print_r($tableHero);
+		// print_r($tableNpd);
+		// print_r($tableOverStock);
+		// print_r($json); 
+		// die();
 
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar = $this->Global_model->getSysPar();

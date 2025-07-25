@@ -264,12 +264,47 @@
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
+    function paramsToJSON(params) {
+        const json = {};
+
+        for (const [key, value] of params.entries()) {
+            const keys = key.match(/[^\[\]]+/g); 
+
+            if (keys.length === 1) {
+                json[keys[0]] = value;
+            } else {
+                let temp = json;
+                for (let i = 0; i < keys.length; i++) {
+                    const k = keys[i];
+ 
+                    if (i === keys.length - 1) {
+                        temp[k] = value;
+                    } else { 
+                        if (!temp[k]) {
+                            temp[k] = /^\d+$/.test(keys[i + 1]) ? [] : {};
+                        }
+                        temp = temp[k];
+                    }
+                }
+            }
+        }
+
+        return json;
+    }
+
     function handleAction(action) {
         modal.loading(true);
         let selectedItemClass     = $('#itemClass').val();
+        let selectedItemClassText = $('#itemClass').select2('data').map(function(item) {
+            return item.text;
+        });
         let selectedItemCategory  = $('#itemLabelCat').val();
         let selectedType          = $('#inventoryStatus').val();
+        let typeList = $('#inventoryStatus').select2('data').map((item) => {
+            return item.text
+        });
         let selectedYear          = $('#year').val();
+        let selectedYearText      = $('#year option:selected').text();
         let selectedWeekFrom      = $('#week_from').val();
         let selectedWeekTo        = $('#week_to').val();
         let selectedDataSource    = $('#dataSource').val();
@@ -286,6 +321,9 @@
         params.append('weekFrom',     selectedWeekFrom   || '');
         params.append('weekTo',       selectedWeekTo     || '');
         params.append('source',       selectedDataSource || '');
+        params.append('itmclstxt',    selectedItemClassText || '');
+        params.append('yrtxt',        selectedYearText || '');
+        params.append('typeList',     typeList || '');
         params.append('search',       '');
         params.append('table_slowMoving', tableSlowMoving.trim());
         params.append('table_hero', tableHero.trim());
@@ -343,7 +381,43 @@
                     ? 'stocks-week-all-store-generate-pdf'
                     : 'stocks-week-all-store-generate-excel';
 
-        let url = `${base_url}stocks/${endpoint}?${params.toString()}`;
+        let url = `${base_url}stocks/${endpoint}`;
+
+        const jsonData = paramsToJSON(params);
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(jsonData),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Week by Week Stock Data of All Stores.pdf'
+                        : 'Week by Week Stock Data of All Stores.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
 
         const end_time = new Date();
         const duration = formatDuration(start_time, end_time);
@@ -354,44 +428,6 @@
             <br>Duration: ${duration}
         `;
         logActivity('Week by Week Stock Data of all Stores', (action === 'exportPdf') ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
-
-        let fetchedResponse;
-        fetch(url, {
-            method: 'GET',
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server returned ${response.status}`);
-            }
-            fetchedResponse = response;
-            return response.blob();
-        })
-        .then(blob => {
-            const cd = fetchedResponse.headers.get('Content-Disposition');
-            const match = cd && /filename="?([^"]+)"/.exec(cd);
-            let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
-            const filename = rawName
-                || (action === 'exportPdf'
-                    ? 'Week by Week Stock Data of All Stores.pdf'
-                    : 'Week by Week Stock Data of All Stores.xlsx');
-
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(blobUrl);
-        })
-        .catch(err => {
-            console.error("Download failed:", err);
-            modal.alert("Failed to generate file. Please try again.", "error");
-        })
-        .finally(() => {
-            modal.loading(false);
-        });
     }
 
 
