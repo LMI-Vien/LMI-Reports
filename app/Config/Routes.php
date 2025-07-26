@@ -45,16 +45,16 @@ $routes->group('store/', static function ($routes) {
     $routes->get('sales-performance-per-area', 'StoreSalesPerfPerArea::perfPerArea');
     $routes->get('get-sales-performance-per-area', 'StoreSalesPerfPerArea::getPerfPerArea');
     $routes->post('get-sales-performance-per-area', 'StoreSalesPerfPerArea::getPerfPerArea');
-    $routes->get('per-area-generate-pdf', 'StoreSalesPerfPerArea::generatePdf');
-    $routes->get('per-area-generate-excel', 'StoreSalesPerfPerArea::generateExcel');
+    $routes->post('per-area-generate-pdf', 'StoreSalesPerfPerArea::generatePdf');
+    $routes->post('per-area-generate-excel', 'StoreSalesPerfPerArea::generateExcel');
 
     //per month
     $routes->get('sales-performance-per-month', 'StoreSalesPerfPerMonth::perfPerMonth');
     $routes->get('get-sales-performance-per-month', 'StoreSalesPerfPerMonth::getPerfPerMonth');
     $routes->post('get-sales-performance-per-month', 'StoreSalesPerfPerMonth::getPerfPerMonth');
     $routes->post('get-sales-performance-per-table', 'StoreSalesPerfPerMonth::getPerfPerTable');
-    $routes->get('per-month-generate-pdf', 'StoreSalesPerfPerMonth::generatePdf');
-    $routes->get('per-month-generate-excel', 'StoreSalesPerfPerMonth::generateExcel');
+    $routes->post('per-month-generate-pdf', 'StoreSalesPerfPerMonth::generatePdf');
+    $routes->post('per-month-generate-excel', 'StoreSalesPerfPerMonth::generateExcel');
 
     //overall
     $routes->get('sales-overall-growth', 'StoreSalesPerfOverall::perfPerOverall');

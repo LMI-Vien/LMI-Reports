@@ -225,17 +225,19 @@ class StoreSalesPerfPerMonth extends BaseController
 	}
 
 	public function generatePdf() {	
-	    $areaId = $this->getParam('area');
+        $json = $this->request->getJSON(true);
+
+	    $areaId = $json['area'];
 		$areaId = $areaId === '' ? null : $areaId;
-		$ascId = $this->getParam('asc');
+		$ascId = $json['asc'];
 		$ascId = $ascId === '' ? null : $ascId;
-		$baTypeId = $this->getParam('baType');
+		$baTypeId = $json['baType'];
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
-		$baId = $this->getParam('ba');
+		$baId = $json['ba'];
 		$baId = $baId === '' ? null : $baId;
-		$storeId= $this->getParam('store');
+		$storeId= $json['store'];
 		$storeId = $storeId === '' ? null : $storeId;
-		$brandsParam = $this->getParam('brands');
+		$brandsParam = $json['brands'];
 		if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
 			$brands = array_map('trim', explode(',', $brandsParam));
 		} elseif (is_array($brandsParam) && count($brandsParam) > 0) {
@@ -246,7 +248,7 @@ class StoreSalesPerfPerMonth extends BaseController
 			$brands = [];
 		}
 
-		$brandCategoriesParam = $this->getParam('brandCategories');
+		$brandCategoriesParam = $json['brandCategories'];
 		if (is_string($brandCategoriesParam) && strpos($brandCategoriesParam, ',') !== false) {
 			$brandCategories = array_map('trim', explode(',', $brandCategoriesParam));
 		} elseif (is_array($brandCategoriesParam) && count($brandCategoriesParam) > 0) {
@@ -340,44 +342,21 @@ class StoreSalesPerfPerMonth extends BaseController
 			return $value === '' ? $default : $value;
 		};
 
-		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$areaId'", "''", "''");
-		$areaMap = !empty($result) ? $result[0]['description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$ascId'", "''", "''");
-		$ascMap = !empty($result) ? $result[0]['description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$baId'", "''", "''");
-		$baMap = !empty($result) ? $result[0]['name'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'code:EQ=$storeId'", "''", "''");
-		$storeMap = !empty($result) ? $result[0]['description'] : '';
-
-		$brandsLabel = [];
-		foreach ($brands as $brandsed) {
-			$result  = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ={$brandsed}'", "''", "''");
-			if (!empty($result) && isset($result[0]['brand_description'])) {
-				$brandsLabel[] = $result[0]['brand_description'];
-			}
-		}
-
-		$brandLabelType = [];
-		foreach ($brandCategories as $brandCat) {
-			$result  = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ={$brandCat}'", "''", "''");
-			if (!empty($result) && isset($result[0]['label'])) {
-				$brandLabelType[] = $result[0]['label'];
-			}
-		}
-
-		if (empty($brandLabelType)) {
-			$brandLabelTypeMap = '';  
+		$areaMap = $json['areaMap'];
+		$ascMap = $json['ascMap'];
+		$baMap = $json['baMap'];
+		$storeMap = $json['storeMap'];
+		$result = $json['brandLabelTypeMap'];
+		if (is_array($result)) {
+			$brandLabelTypeMap = implode(', ', $result);
 		} else {
-			$brandLabelTypeMap = implode(', ', $brandLabelType);
+			$brandLabelTypeMap = '';
 		}
-
-		if (empty($brandsLabel)) {
-			$itemBrandMap = '';  
+		$result = $json['itemBrandMap'];
+		if (is_array($result)) {
+			$itemBrandMap = implode(', ', $result);
 		} else {
-			$itemBrandMap = implode(', ', $brandsLabel);
+			$itemBrandMap = '';
 		}
 
 		$filterData = [
@@ -590,17 +569,19 @@ class StoreSalesPerfPerMonth extends BaseController
 
 
 	public function generateExcel() {
-	    $areaId = $this->getParam('area');
+        $json = $this->request->getJSON(true);
+
+	    $areaId = $json['area'];
 		$areaId = $areaId === '' ? null : $areaId;
-		$ascId = $this->getParam('asc');
+		$ascId = $json['asc'];
 		$ascId = $ascId === '' ? null : $ascId;
-		$baTypeId = $this->getParam('baType');
+		$baTypeId = $json['baType'];
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
-		$baId = $this->getParam('ba');
+		$baId = $json['ba'];
 		$baId = $baId === '' ? null : $baId;
-		$storeId= $this->getParam('store');
+		$storeId= $json['store'];
 		$storeId = $storeId === '' ? null : $storeId;
-        $brandsParam = $this->getParam('brands');
+        $brandsParam = $json['brands'];
 		if (is_string($brandsParam) && strpos($brandsParam, ',') !== false) {
 			$brands = array_map('trim', explode(',', $brandsParam));
 		} elseif (is_array($brandsParam) && count($brandsParam) > 0) {
@@ -611,7 +592,7 @@ class StoreSalesPerfPerMonth extends BaseController
 			$brands = [];
 		}
 
-		$brandCategoriesParam = $this->getParam('brandCategories');
+		$brandCategoriesParam = $json['brandCategories'];
 		if (is_string($brandCategoriesParam) && strpos($brandCategoriesParam, ',') !== false) {
 			$brandCategories = array_map('trim', explode(',', $brandCategoriesParam));
 		} elseif (is_array($brandCategoriesParam) && count($brandCategoriesParam) > 0) {
@@ -697,48 +678,21 @@ class StoreSalesPerfPerMonth extends BaseController
 				break;
 		}
 
-		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$areaId'", "''", "''");
-		$areaMap = !empty($result) ? $result[0]['description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$ascId'", "''", "''");
-		$ascMap = !empty($result) ? $result[0]['description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$baId'", "''", "''");
-		$baMap = !empty($result) ? $result[0]['name'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'code:EQ=$storeId'", "''", "''");
-		$storeMap = !empty($result) ? $result[0]['description'] : '';
-
-		$years  = $this->Global_model->dynamic_search("'tbl_year'", "''", "'year'", 0, 0, "''", "''", "''");
-		$year_values = array_column($years, 'year');
-		$latest_year = max($year_values);
-
-		$brandsLabel = [];
-		foreach ($brands as $brandsed) {
-			$result  = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ={$brandsed}'", "''", "''");
-			if (!empty($result) && isset($result[0]['brand_description'])) {
-				$brandsLabel[] = $result[0]['brand_description'];
-			}
-		}
-
-		$brandLabelType = [];
-		foreach ($brandCategories as $brandCat) {
-			$result  = $this->Global_model->dynamic_search("'tbl_brand_label_type'", "''", "'label'", 0, 0, "'id:EQ={$brandCat}'", "''", "''");
-			if (!empty($result) && isset($result[0]['label'])) {
-				$brandLabelType[] = $result[0]['label'];
-			}
-		}
-
-		if (empty($brandLabelType)) {
-			$brandLabelTypeMap = '';  
+		$areaMap = $json['areaMap'];
+		$ascMap = $json['ascMap'];
+		$baMap = $json['baMap'];
+		$storeMap = $json['storeMap'];
+		$result = $json['brandLabelTypeMap'];
+		if (is_array($result)) {
+			$brandLabelTypeMap = implode(', ', $result);
 		} else {
-			$brandLabelTypeMap = implode(', ', $brandLabelType);
+			$brandLabelTypeMap = '';
 		}
-
-		if (empty($brandsLabel)) {
-			$itemBrandMap = '';  
+		$result = $json['itemBrandMap'];
+		if (is_array($result)) {
+			$itemBrandMap = implode(', ', $result);
 		} else {
-			$itemBrandMap = implode(', ', $brandsLabel);
+			$itemBrandMap = '';
 		}
 
 		$title = "Store Sales Performance per Month";

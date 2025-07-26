@@ -338,6 +338,15 @@
         let selectedMonthStart = $('#month').val();
         let selectedMonthEnd = $('#monthTo').val();
         let searchValue = $('#overall_ba_sales_tbl').DataTable().search(); 
+        let textArea = $('#area').val();
+        let textAsc = $('#ascName').val();
+        let textBa = $('#brandAmbassador').val();
+        let textStore = $('#storeName').val();
+        let monthStart = $('#month').val();
+        let monthEnd = $('#monthTo').val();
+        let brandList = $('#brands').select2('data').map((item) => {
+            return item.text
+        });
 
         // let qs = [
         //     'area='             + encodeURIComponent(selectedArea),
@@ -366,7 +375,14 @@
             month_end: selectedMonthEnd,
             searchValue: searchValue,
             limit: 99999,
-            offset: 0
+            offset: 0,
+            textArea: textArea,
+            textAsc: textAsc,
+            textBa: textBa,
+            textStore: textStore,
+            brandList: JSON.stringify(brandList),
+            monthStart: monthStart,
+            monthEnd: monthEnd
         };
 
         let endpoint = action === 'export_pdf' ? 'per-ba-generate-pdf' : 'per-ba-generate-excel-ba';
@@ -416,7 +432,6 @@
                 modal.loading(false);
             }
         });
-        return;
 
         const end_time = new Date();
         const duration = formatDuration(start_time, end_time);
@@ -435,44 +450,6 @@
             null, 
             null
         );
-
-        let fetchedResponse;
-        fetch(url, {
-            method: 'GET',
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server returned ${response.status}`);
-            }
-            fetchedResponse = response;
-            return response.blob();
-        })
-        .then(blob => {
-            const cd = fetchedResponse.headers.get('Content-Disposition');
-            const match = cd && /filename="?([^"]+)"/.exec(cd);
-            let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
-            const filename = rawName
-                || (action === 'exportPdf'
-                    ? 'Store Sales Performance per Brand Ambassador.pdf'
-                    : 'Store Sales Performance per Brand Ambassador.xlsx');
-
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(blobUrl);
-        })
-        .catch(err => {
-            console.error("Download failed:", err);
-            modal.alert("Failed to generate file. Please try again.", "error");
-        })
-        .finally(() => {
-            modal.loading(false);
-        });
     }
 
     function getCalendarWeeks(year) {

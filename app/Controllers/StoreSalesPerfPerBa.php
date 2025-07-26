@@ -191,7 +191,7 @@ class StoreSalesPerfPerBa extends BaseController
 		$baId = $json['ba'];
 		$baId = $baId === '' ? null : $baId;
 		
-		$storeId= trim($json['store']); //change this to store_id
+		$storeId= trim($json['store']);
 		$storeId = $storeId === '' ? null : $storeId;
 		
         $brandIds = $json['brands'];
@@ -206,30 +206,17 @@ class StoreSalesPerfPerBa extends BaseController
 		
 		$offset = $json['offset'];
 		$offset = is_numeric($offset) ? (int)$offset : 0;
-		// echo json_encode($json); die();
 		
-	    $formatted_month = str_pad($monthId, 2, '0', STR_PAD_LEFT);
-	    $date = null; 
-	    $lookup_month = null;
 	    $lyYear = 0;
 	    $tyYear = 0;
 	    $selected_year = null;
-	    $lyMonth = null;
-	    $date = null;
-
+		
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
 	    	$yearId = $actual_year[0]['id'];
 	    	$selected_year = $actual_year[0]['year'];
 	    	$lyYear = $selected_year - 1;
 	    	$tyYear = $selected_year;
-	    	$date = $actual_year[0]['year'];
-	    	$targetYear = $actual_year[0]['year'];
-	    }
-
-	    if($monthEndId){
-	    	$date = $formatted_month;
-	    	$lyMonth = $monthId;
 	    }
 	    
 	    $days = null;
@@ -238,7 +225,6 @@ class StoreSalesPerfPerBa extends BaseController
 
 		if($year && $monthId){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
-	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
 		    if(intval($monthId) === intval($month)){
 				$days = $this->getDaysInMonth($monthId, $this->getCurrentYear());
 			}
@@ -255,10 +241,8 @@ class StoreSalesPerfPerBa extends BaseController
 		$searchValue = trim($json['searchValue']);
 		$searchValue = $searchValue === '' ? null : $searchValue;
 		
-		$orderColumnIndex = $json['order'][0]['column'] ?? 0;
 	    $orderDirection = $json['order'][0]['dir'] ?? 'asc';
 	    $orderByColumn = 'store_name';
-		// echo json_encode($json); die();
 
 		if($sysPar){
 			$jsonString = $sysPar[0]['brand_label_type'];
@@ -303,27 +287,31 @@ class StoreSalesPerfPerBa extends BaseController
 				break;
 		}
 		
-		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$areaId'", "''", "''");
-		$areaMap = !empty($result) ? $result[0]['description'] : '';
+		$result = $json['textArea'];
+		$areaMap = !empty($result) ? $result : '';
 		
-		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$ascId'", "''", "''");
-		$ascMap = !empty($result) ? $result[0]['description'] : '';
+		$result = $json['textAsc'];
+		$ascMap = !empty($result) ? $result : '';
 		
-		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$baId'", "''", "''");
-		$baMap = !empty($result) ? $result[0]['name'] : '';
+		$result = $json['textBa'];
+		$baMap = !empty($result) ? $result : '';
 		
-		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'id:EQ=$storeId'", "''", "''");
-		$storeMap = !empty($result) ? $result[0]['description'] : '';
+		$result = $json['textStore'];
+		$storeMap = !empty($result) ? $result : '';
 		
-		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$brandIds'", "''", "''");
-		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
+		$result = json_decode($json['brandList'], true);
+		if (is_array($result)) {
+			$brandMap = implode(', ', $result);
+		} else {
+			$brandMap = '';
+		}
 		
-		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthId'", "''", "''");
-		$monthStartMap = !empty($result) ? $result[0]['month'] : '';
+		$result = $json['monthStart'];
+		$monthStartMap = !empty($result) ? $result : '';
 		
-		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthEndId'", "''", "''");
-		$monthEndMap = !empty($result) ? $result[0]['month'] : '';
-
+		$result = $json['monthEnd'];
+		$monthEndMap = !empty($result) ? $result : '';
+		
 		$filterData = [
 			'Area'             => $dv($areaMap),
 			'ASC'              => $dv($ascMap),
@@ -497,43 +485,39 @@ class StoreSalesPerfPerBa extends BaseController
 
 	public function generateExcel()
 	{	
+		$json = $this->request->getJSON(true); 
 		$sysPar = $this->Global_model->getSysPar();
-		$areaId = trim($this->request->getGet('area'));
+		$areaId = trim($json['area']);
 		$areaId = $areaId === '' ? null : $areaId;
 
-		$ascId = trim($this->request->getGet('asc'));
+		$ascId = trim($json['asc']);
 		$ascId = $ascId === '' ? null : $ascId;
 
-		$baTypeId = trim($this->request->getGet('baType'));
+		$baTypeId = trim($json['baType']);
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
 
-		$baId = trim($this->request->getGet('ba'));
+		$baId = trim($json['ba']);
 		$baId = $baId === '' ? null : $baId;
 
-		$storeId= trim($this->request->getGet('store')); //change this to store_id
+		$storeId= trim($json['store']); //change this to store_id
 		$storeId = $storeId === '' ? null : $storeId;
 
-        $brandIds = $this->request->getGet('brands');
+        $brandIds = $json['brands'];
         $brandIds = $brandIds === '' ? null : $brandIds;
 
-	    $year = $this->request->getGet('year')?? 0;            
-	    $monthId = $this->request->getVar('month_start') ?? 1;
-	    $monthEndId = $this->request->getVar('month_end') ?? 12;
+	    $year = $json['year']?? 0;            
+	    $monthId = $json['month_start'] ?? 1;
+	    $monthEndId = $json['month_end'] ?? 12;
 
-		$limit = $this->request->getVar('limit');
+		$limit = $json['limit'];
 		$limit = is_numeric($limit) ? (int)$limit : 10;
 
-		$offset = $this->request->getVar('offset');
+		$offset = $json['offset'];
 		$offset = is_numeric($offset) ? (int)$offset : 0;
 
-	    $formatted_month = str_pad($monthId, 2, '0', STR_PAD_LEFT);
-	    $date = null; 
-	    $lookup_month = null;
 	    $lyYear = 0;
 	    $tyYear = 0;
 	    $selected_year = null;
-	    $lyMonth = null;
-	    $date = null;
 
 	    if($year){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
@@ -541,22 +525,14 @@ class StoreSalesPerfPerBa extends BaseController
 	    	$selected_year = $actual_year[0]['year'];
 	    	$lyYear = $selected_year - 1;
 	    	$tyYear = $selected_year;
-	    	$date = $actual_year[0]['year'];
-	    	$targetYear = $actual_year[0]['year'];
 	    }
 
-	    if($monthEndId){
-	    	$date = $formatted_month;
-	    	$lyMonth = $monthId;
-	    }
-	    
 	    $days = null;
 	    $tpr = 0;
 	    $month = date('m');
 
 		if($year && $monthId){
 	    	$actual_year = $this->Dashboard_model->getYear($year);
-	    	$date = $actual_year[0]['year'] . "-" . $formatted_month;
 		    if(intval($monthId) === intval($month)){
 				$days = $this->getDaysInMonth($monthId, $this->getCurrentYear());
 			}
@@ -567,16 +543,14 @@ class StoreSalesPerfPerBa extends BaseController
 			$tpr = $days - $day; 
 	    }
 	    
-	    $brandIds = $this->request->getGet('brands');
+	    $brandIds = $json['brands'];
         $brandIds = $brandIds === '' ? null : $brandIds;
 
-		$searchValue = trim($this->request->getGet('searchValue'));
+		$searchValue = trim($json['searchValue']);
 		$searchValue = $searchValue === '' ? null : $searchValue;
 
-		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
-	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
-	    $columns = $this->request->getVar('columns');
-	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'store_name';
+	    $orderDirection = $json['order'][0]['dir'] ?? 'asc';
+	    $orderByColumn = 'store_name';
 
 		if($sysPar){
 			$jsonString = $sysPar[0]['brand_label_type'];
@@ -619,26 +593,30 @@ class StoreSalesPerfPerBa extends BaseController
 				break;
 		}
 
-		$result = $this->Global_model->dynamic_search("'tbl_area'", "''", "'description'", 0, 0, "'id:EQ=$areaId'", "''", "''");
-		$areaMap = !empty($result) ? $result[0]['description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'description'", 0, 0, "'id:EQ=$ascId'", "''", "''");
-		$ascMap = !empty($result) ? $result[0]['description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_brand_ambassador'", "''", "'name'", 0, 0, "'id:EQ=$baId'", "''", "''");
-		$baMap = !empty($result) ? $result[0]['name'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_store'", "''", "'description'", 0, 0, "'id:EQ=$storeId'", "''", "''");
-		$storeMap = !empty($result) ? $result[0]['description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_brand'", "''", "'brand_description'", 0, 0, "'id:EQ=$brandIds'", "''", "''");
-		$brandMap = !empty($result) ? $result[0]['brand_description'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthId'", "''", "''");
-		$monthStartMap = !empty($result) ? $result[0]['month'] : '';
-
-		$result = $this->Global_model->dynamic_search("'tbl_month'", "''", "'month'", 0, 0, "'id:EQ=$monthEndId'", "''", "''");
-		$monthEndMap = !empty($result) ? $result[0]['month'] : '';
+		$result = $json['textArea'];
+		$areaMap = !empty($result) ? $result : '';
+		
+		$result = $json['textAsc'];
+		$ascMap = !empty($result) ? $result : '';
+		
+		$result = $json['textBa'];
+		$baMap = !empty($result) ? $result : '';
+		
+		$result = $json['textStore'];
+		$storeMap = !empty($result) ? $result : '';
+		
+		$result = json_decode($json['brandList'], true);
+		if (is_array($result)) {
+			$brandMap = implode(', ', $result);
+		} else {
+			$brandMap = '';
+		}
+		
+		$result = $json['monthStart'];
+		$monthStartMap = !empty($result) ? $result : '';
+		
+		$result = $json['monthEnd'];
+		$monthEndMap = !empty($result) ? $result : '';
 
 		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
@@ -698,7 +676,7 @@ class StoreSalesPerfPerBa extends BaseController
 			$sheet->setCellValue('E'.$rowNum,$row->ba_deployment_date);
 			$sheet->setCellValue('F'.$rowNum,$row->brand_name);			
 			if ($role == 7 || $role == 8) {
-				$sheet->setCellValue('G'.'-');
+				$sheet->setCellValue('G'.$rowNum, '-');
 			}else{
 				$sheet->setCellValue('G'.$rowNum,$row->ly_scanned_data);
 			}
@@ -706,7 +684,7 @@ class StoreSalesPerfPerBa extends BaseController
 			$sheet->setCellValue('I'.$rowNum,$row->target_sales);
 			$sheet->setCellValue('J'.$rowNum,$row->percent_ach);
 			if ($role == 7 || $role == 8) {
-				$sheet->setCellValue('K'.'-');
+				$sheet->setCellValue('K'.$rowNum, '-');
 			}else{
 				$sheet->setCellValue('K'.$rowNum,$row->growth);
 			}
