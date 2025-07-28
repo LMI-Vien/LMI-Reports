@@ -346,6 +346,18 @@
                 select: 'id, name',
                 value:  'name'
             },
+            {
+                field:  'inserted',
+                table:  'tbl_brand',
+                select: 'id, brand_code',
+                value:  'brand_code'
+            },
+            {
+                field:  'deleted',
+                table:  'tbl_brand',
+                select: 'id, brand_code',
+                value:  'brand_code'
+            }
         ],
         'brand-ambassador-module-import': [
             {
@@ -414,36 +426,44 @@
         return new Promise(resolve => {
             const { field, table, select, value } = fieldConfig;
 
-            // Ensure we have arrays of objects to work with
-            const newArr = Array.isArray(newData) ? newData : [newData];
-            const oldArr = Array.isArray(oldData) ? oldData : [oldData];
+            const newArr = Array.isArray(newData) ? newData : [ newData ];
+            const oldArr = Array.isArray(oldData) ? oldData : [ oldData ];
 
-            // collect unique IDs from every row
+            // collect IDs (even inside arrays)
             const ids = new Set();
             newArr.concat(oldArr).forEach(obj => {
-            if (obj && obj[field] != null) ids.add(obj[field]);
+            const val = obj[field];
+            if (val == null) return;
+            if (Array.isArray(val)) val.forEach(v => v != null && ids.add(v));
+                else ids.add(val);
             });
 
-            if (!ids.size) {
-                return resolve();
-            }
+            // console.log(`[mapField] field="${field}" → IDs=[${[...ids].join()}]`);
+
+            if (!ids.size) return resolve();
 
             aJax.post(url, {
-                event:  'list',
-                table:  table,
-                select: select,
-                query:  'id IN (' + Array.from(ids).join(',') + ')'
+                event: 'list',
+                table,
+                select,
+                query: 'id IN (' + [...ids].join(',') + ')'
                 }, resp => {
                 const rows = JSON.parse(resp);
+                // console.log(`[mapField] fetched rows for "${field}":`, rows);
 
-                // build id → label map
+                // build lookup
                 const lookup = {};
                 rows.forEach(r => lookup[r.id] = r[value]);
 
-                // overwrite every object's field
+                // map back
                 newArr.concat(oldArr).forEach(obj => {
-                    if (obj && obj[field] != null && lookup[obj[field]]) {
-                    obj[field] = lookup[obj[field]];
+                    const val = obj[field];
+                    if (val == null) return;
+                    if (Array.isArray(val)) {
+                        obj[field] = val.map(id => lookup[id] || id).join(', ');
+                    }
+                    else if (lookup[val]) {
+                        obj[field] = lookup[val];
                     }
                 });
 
@@ -559,25 +579,52 @@
 
 
             // 3) Module‐specific lookups via switch‐case
-            let moduleKey = entry.module.split('/')[0];
-            let configsToMap;
-            switch (moduleKey) {
-                case 'brand-ambassador':               configsToMap = lookupConfigs['brand-ambassador']; break;
-                case 'asc':                            configsToMap = lookupConfigs['asc']; break;
-                case 'store-group-module':             configsToMap = lookupConfigs['store-group-module']; break;
-                case 'store-group-module-import':      configsToMap = lookupConfigs['store-group-module-import']; break;
-                case 'area':                           configsToMap = lookupConfigs['area']; break;
-                case 'asc-module-import':              configsToMap = lookupConfigs['asc-module-import']; break;
-                case 'ba-per-store-module-import':     configsToMap = lookupConfigs['ba-per-store-module-import']; break;
-                case 'ba-brand-group-module':          configsToMap = lookupConfigs['ba-brand-group-module']; break;
-                case 'store-branch':                   configsToMap = lookupConfigs['store-branch']; break;
-                case 'ba-brand-module':                configsToMap = lookupConfigs['ba-brand-module']; break;
-                case 'brand-ambassador-module-import': configsToMap = lookupConfigs['brand-ambassador-module-import']; break;
-                case 'ba-module-import':               configsToMap = lookupConfigs['ba-module-import']; break;
-                case 'import-sell-out':                configsToMap = lookupConfigs['import-sell-out']; break;
-                case 'import-week-on-week':            configsToMap = lookupConfigs['import-week-on-week']; break;
-                default:                               configsToMap = []; 
+            // let moduleKey = entry.module.split('/')[0];
+            // let configsToMap;
+            // switch (moduleKey) {
+            //     case 'brand-ambassador':               configsToMap = lookupConfigs['brand-ambassador']; break;
+            //     case 'asc':                            configsToMap = lookupConfigs['asc']; break;
+            //     case 'store-group-module':             configsToMap = lookupConfigs['store-group-module']; break;
+            //     case 'store-group-module-import':      configsToMap = lookupConfigs['store-group-module-import']; break;
+            //     case 'area':                           configsToMap = lookupConfigs['area']; break;
+            //     case 'asc-module-import':              configsToMap = lookupConfigs['asc-module-import']; break;
+            //     case 'ba-per-store-module-import':     configsToMap = lookupConfigs['ba-per-store-module-import']; break;
+            //     case 'ba-brand-group-module':          configsToMap = lookupConfigs['ba-brand-group-module']; break;
+            //     case 'store-branch':                   configsToMap = lookupConfigs['store-branch']; break;
+            //     case 'ba-brand-module':                configsToMap = lookupConfigs['ba-brand-module']; break;
+            //     case 'brand-ambassador-module-import': configsToMap = lookupConfigs['brand-ambassador-module-import']; break;
+            //     case 'ba-module-import':               configsToMap = lookupConfigs['ba-module-import']; break;
+            //     case 'import-sell-out':                configsToMap = lookupConfigs['import-sell-out']; break;
+            //     case 'import-week-on-week':            configsToMap = lookupConfigs['import-week-on-week']; break;
+            //     // case 'ba-brand-module-delete':         configsToMap = lookupConfigs['ba-brand-module-delete']; break;
+            //     default:                               configsToMap = []; 
+            // }
+
+            function normalizeKey(s) {
+                return s
+                    .trim()                                   
+                    .toLowerCase()                            
+                    .replace(/[\u2010-\u2015\u2212]/g, '-')   
+                    .replace(/[^a-z0-9\-]/g, '');             
             }
+
+            // 2) get the raw module key from your log entry
+            const rawKey = (entry.module || '').split('/')[0];
+
+            // 3) find the matching config key by comparing normalized forms
+            const matchedKey = Object
+                .keys(lookupConfigs)
+                .find(cfgKey => normalizeKey(cfgKey) === normalizeKey(rawKey));
+
+            // 4) fall back to empty array if nothing matches
+            const configsToMap = lookupConfigs[matchedKey] || [];
+
+            // console.log(
+            //     'raw module:', JSON.stringify(rawKey),
+            //     'normalized:', normalizeKey(rawKey),
+            //     'matched config:', matchedKey,
+            //     'fields:', configsToMap.map(c=>c.field)
+            // );
 
             // Kick off one mapField promise per config
             const mapPromises = configsToMap.map(cfg =>
@@ -623,85 +670,6 @@
                 });
             });
 
-            // 5) renderTable (BASIS)
-            // function renderTable() {
-            //     modal.loading(false);
-
-            //     // 1) Normalize into arrays
-            //     const newArr = Array.isArray(newData) ? newData : [newData];
-            //     const oldArr = Array.isArray(oldData) ? oldData : [oldData];
-
-            //     // 2) Group rows by area_id
-            //     const groupBy = (arr) => arr.reduce((g, r) => {
-            //         const key = r.area_id;
-            //         (g[key] = g[key] || []).push(r);
-            //         return g;
-            //     }, {});
-            //         const newGroups = groupBy(newArr);
-            //         const oldGroups = groupBy(oldArr);
-
-            //         // 3) Collapse each group into a summary object
-            //         const toRender = Object.keys(newGroups).map(area_id => {
-            //         const ns = newGroups[area_id];
-            //         const os = oldGroups[area_id] || [];
-
-            //         const summaryNew = {}, summaryOld = {};
-            //         const keys = Object.keys(ns[0]);
-
-            //         keys.forEach(key => {
-            //         if (key === 'store_id') {
-            //             // join all distinct store_ids
-            //             summaryNew.store_id = [...new Set(ns.map(r => r.store_id))].join(', ');
-            //             summaryOld.store_id = os.length
-            //             ? [...new Set(os.map(r => r.store_id))].join(', ')
-            //             : 'No Data';
-            //         } else {
-            //             // take the first value (identical across the group)
-            //             summaryNew[key] = ns[0][key] ?? 'No Data';
-            //             summaryOld[key] = os[0]?.[key] ?? 'No Data';
-            //         }
-            //         });
-
-            //         return { new: summaryNew, old: summaryOld };
-            //     });
-
-            //     // 4) Collect all field names across summaries
-            //     const allKeys = new Set();
-            //         toRender.forEach(pair => {
-            //             Object.keys(pair.new).forEach(k => allKeys.add(k));
-            //             Object.keys(pair.old).forEach(k => allKeys.add(k));
-            //     });
-
-            //     // 5) Render the table
-            //     let html = `
-            //         <table class="table table-bordered m-t-20">
-            //         <thead>
-            //             <tr><th>Field</th><th>Old Data</th><th>New Data</th></tr>
-            //         </thead>
-            //         <tbody>
-            //     `;
-            //     toRender.forEach(pair => {
-            //         Array.from(allKeys).forEach(key => {
-            //         const o = pair.old[key] ?? 'No Data';
-            //         const n = pair.new[key] ?? 'No Data';
-            //         const changed = o !== n;
-            //         html += `
-            //             <tr>
-            //             <td>${key}</td>
-            //             <td>${o}</td>
-            //             <td class="${changed ? 'bg-c7cdfa' : ''}">${n}</td>
-            //             </tr>
-            //         `;
-            //         });
-            //     });
-            //     if (toRender.length === 0) {
-            //         html += `<tr><td colspan="3" class="text-center">No changes found</td></tr>`;
-            //     }
-            //     html += `</tbody></table>`;
-
-            //     modal.show('<div class="scroll-500">'+html+'</div>', 'large');
-            // }
-
             // which modules should always be grouped & collapsed by area_id
             const areaSummaryModules = new Set([
                 'store-group-module-import',
@@ -712,8 +680,11 @@
                 modal.loading(false);
 
                 // 1) normalize
-                const newArr = Array.isArray(newData) ? newData : [newData];
-                const oldArr = Array.isArray(oldData) ? oldData : [oldData];
+                let rawNew = Array.isArray(newData) ? newData : [newData];
+                let rawOld = Array.isArray(oldData) ? oldData : [oldData];
+
+                const newArr = rawNew;
+                const oldArr = rawOld;
 
                 let toRender;
 
