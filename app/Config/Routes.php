@@ -60,8 +60,8 @@ $routes->group('store/', static function ($routes) {
     $routes->get('sales-overall-growth', 'StoreSalesPerfOverall::perfPerOverall');
     $routes->post('get-sales-overall-growth', 'StoreSalesPerfOverall::getPerfPerOverall');
     $routes->get('get-sales-overall-growth', 'StoreSalesPerfOverall::getPerfPerOverall');
-    $routes->get('overall-growth-generate-pdf', 'StoreSalesPerfOverall::generatePdf');
-    $routes->get('overall-growth-generate-excel', 'StoreSalesPerfOverall::generateExcel');
+    $routes->post('overall-growth-generate-pdf', 'StoreSalesPerfOverall::generatePdf');
+    $routes->post('overall-growth-generate-excel', 'StoreSalesPerfOverall::generateExcel');
 });
 
 //sample API 
