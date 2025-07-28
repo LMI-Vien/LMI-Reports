@@ -294,7 +294,6 @@
             });
         });
 
-        alert(action)
         let endpoint = (action === 'exportPdf') ? 'all-store-generate-pdf' : 'all-store-generate-excel';
         let url = `${base_url}stocks/${endpoint}`;
 
