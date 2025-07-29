@@ -383,6 +383,7 @@ class StocksAllStore extends BaseController
 			$lineHeight = 4;
 
 			foreach ($rows as $row) {
+				$row = (object) $row;
 				if ($singleType === 'hero') {
 					// HERO rows: no “Total Quantity” column
 					$pdf->Cell($colWidth, $rowHeight, $row->itmcde, 1, 0, 'C');
@@ -663,6 +664,7 @@ class StocksAllStore extends BaseController
 			// 6f) Write each row into Excel under the header we just created
 			//----------------------------------------------------------------
 			foreach ($rows as $row) {
+				$row = (object) $row;
 				$colIndex = 1; // 1==A, 2==B, etc.
 
 				// LMI/RGDI Code

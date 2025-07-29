@@ -7,129 +7,69 @@ use CodeIgniter\Model;
 class Dashboard_model extends Model
 {
 
-	public function dataPerStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null)
-	{
-		$baType = ($baType !== null) ? strval($baType) : null;
-	    $storeFilterConditions = [];
+	public function dataPerStore(
+	    $pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null) {
+	    $params = [];
+	    $where = "WHERE vmi.week = ? AND vmi.year = ?";
+	    $params[] = $week;
+	    $params[] = $year;
 
-	    $searchColumns = [
-	        'vmi.item',
-	        'vmi.itmdsc',
-	        'vmi.itmcde'
-	    ];
+	    // ✅ Filters
+	    if ($ascId !== null) {
+	        $where .= " AND vmi.asc_id = ?";
+	        $params[] = $ascId;
+	    }
 
-	    $searchHavingClause = '';
-	    $searchParams = [];
+	    if ($areaId !== null) {
+	        $where .= " AND vmi.area_id = ?";
+	        $params[] = $areaId;
+	    }
 
-	    if (!empty($searchValue)) {
-	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
-	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
-	        foreach ($searchColumns as $_) {
-	            $searchParams[] = '%' . $searchValue . '%';
+	    if ($itemCat !== null) {
+	        $where .= " AND vmi.itmclacde = ?";
+	        $params[] = $itemCat;
+	    }
+
+	    if ($storeId !== null) {
+	        $where .= " AND vmi.store_id = ?";
+	        $params[] = $storeId;
+	    }
+
+	    if ($baType !== null && $baType != 3) {
+	        $where .= " AND vmi.ba_types = ?";
+	        $params[] = $baType;
+	    }
+
+		if (!empty($baId)) {
+		    $baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
+		    $baConds = array_map(fn($id) => "FIND_IN_SET($id, vmi.ba_ids)", $baIds);
+		    $where .= ' AND (' . implode(' OR ', $baConds) . ')';
+		}
+
+	    if ($companyId !== null && $companyId != 3) {
+	        $where .= " AND vmi.company = ?";
+	        $params[] = $companyId;
+	    }
+
+	    if (!empty($brands)) {
+	        $brands = array_map('trim', $brands);
+	        $brandConditions = [];
+	        foreach ($brands as $brand) {
+	            $brandConditions[] = "FIND_IN_SET(" . db_connect()->escape($brand) . ", vmi.brncde)";
 	        }
+	        $where .= " AND (" . implode(' OR ', $brandConditions) . ")";
 	    }
 
-	    if (!empty($baId)) {
-	        $baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
-	        $baConds = array_map(fn($id) => "FIND_IN_SET($id, v.ba_ids)", $baIds);
-	        $storeFilterConditions[] = '(' . implode(' OR ', $baConds) . ')';
+	    if (!empty($ItemClasses)) {
+	        $ItemClasses = array_map('trim', $ItemClasses);
+	        $classConditions = [];
+	        foreach ($ItemClasses as $class) {
+	            $classConditions[] = "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)";
+	        }
+	        $where .= " AND (" . implode(' OR ', $classConditions) . ")";
 	    }
-
-		$storeFilterConditionsVmi = [];
-		if (!empty($brands)) {
-		    $brands = array_map('trim', $brands); // remove any leading/trailing spaces
-		    $brandsConds = array_map(fn($brand) => "FIND_IN_SET(" . db_connect()->escape($brand) . ", vmi.brncde)", $brands);
-		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $brandsConds) . ')';
-		}
-
-		if (!empty($ItemClasses)) {
-		    $ItemClasses = array_map('trim', $ItemClasses); // remove any leading/trailing spaces
-		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)", $ItemClasses);
-		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
-		}
-
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde', 'sum_ave_sales', 'swc'];
-	    $allowedOrderDirections = ['ASC', 'DESC'];
-
-	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
-	        $orderByColumn = 'sum_total_qty';
-	    }
-
-	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
-	        $orderDirection = 'DESC';
-	    }
-
-	    $storeFilterSQL = !empty($storeFilterConditions)
-	        ? 'WHERE ' . implode(' AND ', $storeFilterConditions)
-	        : '';
-
-	    $storeFilterSQLVmi = !empty($storeFilterConditionsVmi)
-		    ? ' AND ' . implode(' AND ', $storeFilterConditionsVmi)
-		    : '';
-
-	    $baTypeFilter = ($baType !== null && $baType != 3) ? ' AND v.ba_types = ?' : '';
-	    $baTypeParams = ($baType !== null && $baType != 3) ? [$baType] : [];
-
-	    $companyIdFilter = ($companyId !== null && $companyId != 3) ? ' AND v.company = ?' : '';
-	    $companyIdParams = ($companyId !== null && $companyId != 3) ? [$companyId] : [];
-
-	    $storeFilter = ($storeId !== null) ? ' AND v.store_id = ?' : '';
-	    $storeParams = ($storeId !== null) ? [$storeId] : [];
-
-	    $baTypeFilterVmi = str_replace('v.', 'vmi.', $baTypeFilter);
-		$companyIdFilterVmi = str_replace('v.', 'vmi.', $companyIdFilter);
-	    $storeFilterVmi = str_replace('v.', 'vmi.', $storeFilter);
-
-		$ascIdFilter = '';
-		$ascIdFilterVmi = '';
-		$ascIdParams = [];
-
-		if ($ascId !== null) {
-		    $ascIdFilter = ' AND v.asc_id = ?';
-		    $ascIdFilterVmi = ' AND vmi.asc_id = ?';
-		    $ascIdParams = [$ascId];
-		}
-
-		$itemCatFilter = '';
-		$itemCatFilterVmi = '';
-		$itemCatParams = [];
-
-		if ($itemCat !== null) {
-		    $itemCatFilter = ' AND v.itmclacde = ?';
-		    $itemCatFilterVmi = ' AND vmi.itmclacde = ?';
-		    $itemCatParams = [$itemCat];
-		}
-
-		$areaIdFilter = '';
-		$areaIdFilterVmi = '';
-		$areaIdParams = [];
-
-		if ($areaId !== null) {
-		    $areaIdFilter = ' AND v.area_id = ?';
-		    $areaIdFilterVmi = ' AND vmi.area_id = ?';
-		    $areaIdParams = [$areaId];
-		}
 
 	    $sql = "
-	        WITH filtered_stores AS (
-	            SELECT DISTINCT v.store_id
-	            FROM tbl_vmi_pre_aggregated_data v
-	            WHERE v.week = ?
-	              AND v.year = ?
-	              {$ascIdFilter}
-	              {$areaIdFilter}
-	              {$itemCatFilter}
-	              $baTypeFilter
-	              $companyIdFilter
-	              $storeFilter
-	        ),
-	        store_matches AS (
-	            SELECT fs.store_id
-	            FROM filtered_stores fs
-	            JOIN tbl_vmi_pre_aggregated_data v ON fs.store_id = v.store_id
-	            $storeFilterSQL
-	            GROUP BY fs.store_id
-	        )
 	        SELECT 
 	            vmi.item,
 	            COALESCE(vmi.itmdsc, vmi.item_name) AS item_name,
@@ -137,222 +77,142 @@ class Dashboard_model extends Model
 	            vmi.itmcde,
 	            vmi.item_class,
 	            ic.item_class_description AS item_class_name,
-	            vmi.brand_type_id, 
+	            vmi.brand_type_id,
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
-	            SUM(vmi.total_qty) AS sum_total_qty,
-	            CAST(SUM(vmi.average_sales_unit) AS INT) AS sum_ave_sales,
-	            FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
-	            ROUND(
-	                CASE 
-	                    WHEN SUM(vmi.average_sales_unit) > 0 
-	                    THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
-	                    ELSE 0 
-	                END, 2
-	            ) AS weeks,
-				GROUP_CONCAT(DISTINCT vmi.ba_ids) AS ba_ids,
-				GROUP_CONCAT(DISTINCT CASE WHEN vmi.ba_types IS NOT NULL AND vmi.ba_types != '' THEN vmi.ba_types END) AS ba_types,
-				GROUP_CONCAT(DISTINCT vmi.brand_ids) AS brand_ids,
-				GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
-				GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids,
-	            COUNT(*) OVER() AS total_records
+	            SUM(vmi.total_qty) AS total_qty,
+	            SUM(vmi.average_sales_unit) AS avg_sales,
+	            GROUP_CONCAT(DISTINCT vmi.ba_ids) AS ba_ids,
+	            GROUP_CONCAT(DISTINCT vmi.ba_types) AS ba_types,
+	            GROUP_CONCAT(DISTINCT vmi.brand_ids) AS brand_ids,
+	            GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
+	            GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids
 	        FROM tbl_vmi_pre_aggregated_data vmi
-	        JOIN store_matches sm ON vmi.store_id = sm.store_id
 	        LEFT JOIN tbl_item_class ic ON vmi.item_class_id = ic.id
-
-	        WHERE vmi.week = ?
-	          AND vmi.year = ?
-	          {$ascIdFilterVmi}
-	          {$areaIdFilterVmi}
-	          {$itemCatFilterVmi}
-	          $baTypeFilterVmi
-	          $companyIdFilterVmi
-	          $storeFilterVmi
-	          $storeFilterSQLVmi
+	        $where
 	        GROUP BY vmi.item
-	        HAVING weeks > ?
-	           AND (? IS NULL OR weeks <= ?)
-	           {$searchHavingClause}
-	        ORDER BY {$orderByColumn} {$orderDirection}
-	        LIMIT ? OFFSET ?
 	    ";
 
-		$params = [];
+	    $rawData = $this->db->query($sql, $params)->getResult();
 
-		$params[] = $week;
-		$params[] = $year;
-		if ($ascId !== null) $params[] = $ascId;
-		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCat !== null) $params[] = $itemCat;
-		$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
+	    $pivoted = [];
+	    foreach ($rawData as $row) {
+	        $swc = ($row->avg_sales > 0) ? round($row->total_qty / $row->avg_sales, 2) : 0;
+	        if ($swc > $minWeeks && ($maxWeeks === null || $swc <= $maxWeeks)) {
+	            $pivoted[] = [
+	                'item'            => $row->item,
+	                'item_name'       => $row->item_name,
+	                'itmcde'          => $row->itmcde,
+	                'item_class'      => $row->item_class,
+	                'item_class_name'      => $row->item_class_name,
+	                'sum_total_qty'       => (float)$row->total_qty,
+	                'sum_ave_sales'       => (float)$row->avg_sales,
+	                'swc'             => $swc,
+	                'ba_ids'          => $row->ba_ids,
+	                'ba_types'        => $row->ba_types,
+	                'brand_ids'       => $row->brand_ids,
+	                'asc_ids'         => $row->asc_ids,
+	                'store_ids'       => $row->store_ids
+	            ];
+	        }
+	    }
 
-		$params[] = $week;
-		$params[] = $year;
-		if ($ascId !== null) $params[] = $ascId;
-		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCat !== null) $params[] = $itemCat;
-		$params = array_merge($params, $baTypeParams, $companyIdParams, $storeParams);
+	    if (!empty($searchValue)) {
+	        $searchValue = strtolower($searchValue);
+	        $pivoted = array_filter($pivoted, function ($item) use ($searchValue) {
+	            return strpos(strtolower($item['item']), $searchValue) !== false
+	                || strpos(strtolower($item['item_name']), $searchValue) !== false
+	                || strpos(strtolower($item['itmcde']), $searchValue) !== false;
+	        });
+	    }
 
-	    // For HAVING filters
-	    $params[] = $minWeeks;
-	    $params[] = $maxWeeks;
-	    $params[] = $maxWeeks;
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
+	        $orderByColumn = 'sum_total_qty';
+	    }
+	    $orderDirection = strtoupper($orderDirection);
+	    if (!in_array($orderDirection, ['ASC', 'DESC'])) {
+	        $orderDirection = 'DESC';
+	    }
 
-	    // Add search placeholders
-	    $params = array_merge($params, $searchParams);
+	    usort($pivoted, function ($a, $b) use ($orderByColumn, $orderDirection) {
+	        if ($a[$orderByColumn] == $b[$orderByColumn]) return 0;
+	        return ($orderDirection === 'ASC')
+	            ? ($a[$orderByColumn] < $b[$orderByColumn] ? -1 : 1)
+	            : ($a[$orderByColumn] > $b[$orderByColumn] ? -1 : 1);
+	    });
 
-	    // Pagination
-	    $params[] = (int)$pageLimit;
-	    $params[] = (int)$pageOffset;
+	    $totalRecords = count($pivoted);
+	    $pagedData = array_slice(array_values($pivoted), (int)$pageOffset, (int)$pageLimit);
 
-	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResult();
-	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-		//$finalQuery = $this->interpolateQuery($sql, $params);
-		//echo $finalQuery; // Review it in your logs or browser
 	    return [
 	        'total_records' => $totalRecords,
-	        'data' => $data
+	        'data'          => $pagedData
 	    ];
 	}
 
-	public function getItemClassNPDHEROData($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null) {
+	public function getItemClassNPDHEROData(
+	    $pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null) {
+	    $params = [];
+	    $where = "WHERE vmi.week = ? AND vmi.year = ?";
+	    $params[] = $week;
+	    $params[] = $year;
 
-		$baType = ($baType !== null) ? strval($baType) : null;
-	    $storeFilterConditions = [];
+	    if ($ascId !== null) {
+	        $where .= " AND vmi.asc_id = ?";
+	        $params[] = $ascId;
+	    }
+	    if ($areaId !== null) {
+	        $where .= " AND vmi.area_id = ?";
+	        $params[] = $areaId;
+	    }
+	    if ($itemCat !== null) {
+	        $where .= " AND vmi.itmclacde = ?";
+	        $params[] = $itemCat;
+	    }
+	    if ($storeId !== null) {
+	        $where .= " AND vmi.store_id = ?";
+	        $params[] = $storeId;
+	    }
+	    if ($baType !== null && $baType != 3) {
+	        $where .= " AND vmi.ba_types = ?";
+	        $params[] = $baType;
+	    }
 
-	    $searchColumns = [
-	        'vmi.item',
-	        'vmi.itmdsc',
-	        'vmi.itmcde'
-	    ];
+		if (!empty($baId)) {
+		    $baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
+		    $baConds = array_map(fn($id) => "FIND_IN_SET($id, vmi.ba_ids)", $baIds);
+		    $where .= ' AND (' . implode(' OR ', $baConds) . ')';
+		}
 
-	    $searchHavingClause = '';
-	    $searchParams = [];
-
-	    if (!empty($searchValue)) {
-	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
-	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
-	        foreach ($searchColumns as $_) {
-	            $searchParams[] = '%' . $searchValue . '%';
+	    if ($companyId !== null && $companyId != 3) {
+	        $where .= " AND vmi.company = ?";
+	        $params[] = $companyId;
+	    }
+	    
+	    if (!empty($brands)) {
+	        $brands = array_map('trim', $brands);
+	        $brandConditions = [];
+	        foreach ($brands as $brand) {
+	            $brandConditions[] = "FIND_IN_SET(" . db_connect()->escape($brand) . ", vmi.brncde)";
 	        }
+	        $where .= " AND (" . implode(' OR ', $brandConditions) . ")";
 	    }
-
-	    if (!empty($baId)) {
-	        $baIds = array_map('intval', preg_split('/\s*or\s*/i', $baId));
-	        $baConds = array_map(fn($id) => "FIND_IN_SET($id, v.ba_ids)", $baIds);
-	        $storeFilterConditions[] = '(' . implode(' OR ', $baConds) . ')';
+	    if (!empty($ItemClasses)) {
+	        $ItemClasses = array_map('trim', $ItemClasses);
+	        $classConditions = [];
+	        foreach ($ItemClasses as $class) {
+	            $classConditions[] = "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)";
+	        }
+	        $where .= " AND (" . implode(' OR ', $classConditions) . ")";
 	    }
-
-		$storeFilterConditionsVmi = [];
-		if (!empty($brands)) {
-		    $brands = array_map('trim', $brands); // remove any leading/trailing spaces
-		    $brandsConds = array_map(fn($brand) => "FIND_IN_SET(" . db_connect()->escape($brand) . ", vmi.brncde)", $brands);
-		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $brandsConds) . ')';
-		}
-
-		//$storeFilterConditionsVmi = [];
-		if (!empty($ItemClasses)) {
-		    $ItemClasses = array_map('trim', $ItemClasses); // remove any leading/trailing spaces
-		    $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", vmi.item_class_id)", $ItemClasses);
-		    $storeFilterConditionsVmi[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
-		}
-
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde', 'sum_ave_sales', 'swc'];
-	    $allowedOrderDirections = ['ASC', 'DESC'];
-
-	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
-	        $orderByColumn = 'sum_total_qty';
-	    }
-
-	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
-	        $orderDirection = 'DESC';
-	    }
-
-	    $storeFilterSQL = !empty($storeFilterConditions)
-	        ? 'WHERE ' . implode(' AND ', $storeFilterConditions)
-	        : '';
-
-	    $storeFilterSQLVmi = !empty($storeFilterConditionsVmi)
-		    ? ' AND ' . implode(' AND ', $storeFilterConditionsVmi)
-		    : '';
-
-	    // $sort_field = 'sum_total_qty';
-	    // $sort = 'DESC';
-
-	    $ItemClassIdsPlaceholder = '';
-	    $ItemClassIdsParams = [];
 	    if (!empty($ItemClassIdsFilter)) {
-	        $ItemClassIdsPlaceholder = ' AND v.item_class_id IN (' . implode(',', array_fill(0, count($ItemClassIdsFilter), '?')) . ')';
-	        $ItemClassIdsParams = $ItemClassIdsFilter;
+	        $placeholders = implode(',', array_fill(0, count($ItemClassIdsFilter), '?'));
+	        $where .= " AND vmi.item_class_id IN ($placeholders)";
+	        $params = array_merge($params, $ItemClassIdsFilter);
 	    }
-
-	    $baTypeFilter = ($baType !== null && $baType != 3) ? ' AND v.ba_types = ?' : '';
-	    $baTypeParams = ($baType !== null && $baType != 3) ? [$baType] : [];
-
-	    $companyIdFilter = ($companyId !== null && $companyId != 3) ? ' AND v.company = ?' : '';
-	    $companyIdParams = ($companyId !== null && $companyId != 3) ? [$companyId] : [];
-
-	    $storeFilter = ($storeId !== null) ? ' AND v.store_id = ?' : '';
-	    $storeParams = ($storeId !== null) ? [$storeId] : [];
-
-	    $ItemClassIdsPlaceholderVmi = str_replace('v.', 'vmi.', $ItemClassIdsPlaceholder);
-		$companyIdFilterVmi = str_replace('v.', 'vmi.', $companyIdFilter);
-	    $baTypeFilterVmi = str_replace('v.', 'vmi.', $baTypeFilter);
-	    $storeFilterVmi = str_replace('v.', 'vmi.', $storeFilter);
-
-		$ascIdFilter = '';
-		$ascIdFilterVmi = '';
-		$ascIdParams = [];
-
-		if ($ascId !== null) {
-		    $ascIdFilter = ' AND v.asc_id = ?';
-		    $ascIdFilterVmi = ' AND vmi.asc_id = ?';
-		    $ascIdParams = [$ascId];
-		}
-
-		$itemCatFilter = '';
-		$itemCatFilterVmi = '';
-		$itemCatParams = [];
-
-		if ($itemCat !== null) {
-		    $itemCatFilter = ' AND v.itmclacde = ?';
-		    $itemCatFilterVmi = ' AND vmi.itmclacde = ?';
-		    $itemCatParams = [$itemCat];
-		}
-
-
-		$areaIdFilter = '';
-		$areaIdFilterVmi = '';
-		$areaIdParams = [];
-
-		if ($areaId !== null) {
-		    $areaIdFilter = ' AND v.area_id = ?';
-		    $areaIdFilterVmi = ' AND vmi.area_id = ?';
-		    $areaIdParams = [$areaId];
-		}
 
 	    $sql = "
-	        WITH filtered_stores AS (
-	            SELECT DISTINCT v.store_id
-	            FROM tbl_vmi_pre_aggregated_data v
-	            WHERE v.week = ?
-	              AND v.year = ?
-	              {$ascIdFilter}
-	              {$areaIdFilter}
-	              {$itemCatFilter}
-	              $ItemClassIdsPlaceholder
-	              $baTypeFilter
-	              $companyIdFilter
-	              $storeFilter
-	        ),
-	        store_matches AS (
-	            SELECT fs.store_id
-	            FROM filtered_stores fs
-	            JOIN tbl_vmi_pre_aggregated_data v ON fs.store_id = v.store_id
-	            $storeFilterSQL
-	            GROUP BY fs.store_id
-	        )
 	        SELECT 
 	            vmi.item,
 	            COALESCE(vmi.itmdsc, vmi.item_name) AS item_name,
@@ -363,71 +223,71 @@ class Dashboard_model extends Model
 	            vmi.brand_type_id, 
 	            GROUP_CONCAT(DISTINCT vmi.company) AS company,
 	            COALESCE(NULLIF(vmi.itmcde, ''), 'N / A') AS itmcde,
-	            SUM(vmi.total_qty) AS sum_total_qty,
-	            CAST(SUM(vmi.average_sales_unit) AS INT) AS sum_ave_sales,
-	            FORMAT( SUM(vmi.total_qty) / SUM(vmi.average_sales_unit), 2) AS swc,
-	            ROUND(
-	                CASE 
-	                    WHEN SUM(vmi.average_sales_unit) > 0 
-	                    THEN SUM(vmi.total_qty) / SUM(vmi.average_sales_unit) 
-	                    ELSE 0 
-	                END, 2
-	            ) AS weeks,
-				GROUP_CONCAT(DISTINCT vmi.ba_ids) AS ba_ids,
-				GROUP_CONCAT(DISTINCT CASE WHEN vmi.ba_types IS NOT NULL AND vmi.ba_types != '' THEN vmi.ba_types END) AS ba_types,
-				GROUP_CONCAT(DISTINCT vmi.brand_ids) AS brand_ids,
-				GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
-				GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids,
-	            COUNT(*) OVER() AS total_records
+	            SUM(vmi.total_qty) AS total_qty,
+	            SUM(vmi.average_sales_unit) AS avg_sales,
+	            GROUP_CONCAT(DISTINCT vmi.ba_ids) AS ba_ids,
+	            GROUP_CONCAT(DISTINCT vmi.ba_types) AS ba_types,
+	            GROUP_CONCAT(DISTINCT vmi.brand_ids) AS brand_ids,
+	            GROUP_CONCAT(DISTINCT vmi.asc_id) AS asc_ids,
+	            GROUP_CONCAT(DISTINCT vmi.store_id) AS store_ids
 	        FROM tbl_vmi_pre_aggregated_data vmi
-	        JOIN store_matches sm ON vmi.store_id = sm.store_id
 	        LEFT JOIN tbl_item_class ic ON vmi.item_class_id = ic.id
-	        WHERE vmi.week = ?
-	          AND vmi.year = ?
-	          {$ascIdFilterVmi}
-	          {$areaIdFilterVmi}
-	          {$itemCatFilterVmi}
-	          $ItemClassIdsPlaceholderVmi
-	          $baTypeFilterVmi
-	          $companyIdFilterVmi
-	          $storeFilterVmi
-	          $storeFilterSQLVmi
+	        $where
 	        GROUP BY vmi.item
-			HAVING 1=1
-			    {$searchHavingClause}
-	        ORDER BY {$orderByColumn} {$orderDirection}
-	        LIMIT ? OFFSET ?
 	    ";
 
-		$params = [];
+	    $rawData = $this->db->query($sql, $params)->getResult();
+	    $pivoted = [];
+	    foreach ($rawData as $row) {
+	        $swc = ($row->avg_sales > 0) ? round($row->total_qty / $row->avg_sales, 2) : 0;
+	        $pivoted[] = [
+	            'item'            => $row->item,
+	            'item_name'       => $row->item_name,
+	            'itmcde'          => $row->itmcde,
+                'item_class'      => $row->item_class,
+                'item_class_name'      => $row->item_class_name,
+                'sum_total_qty'       => (float)$row->total_qty,
+                'sum_ave_sales'       => (float)$row->avg_sales,
+                'swc'             => $swc,
+	            'ba_ids'          => $row->ba_ids,
+	            'ba_types'        => $row->ba_types,
+	            'brand_ids'       => $row->brand_ids,
+	            'asc_ids'         => $row->asc_ids,
+	            'store_ids'       => $row->store_ids
+	        ];
+	    }
 
-		$params[] = $week;
-		$params[] = $year;
-		if ($ascId !== null) $params[] = $ascId;
-		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCat !== null) $params[] = $itemCat;
-		$params = array_merge($params, $ItemClassIdsParams, $baTypeParams, $companyIdParams, $storeParams);
+	    if (!empty($searchValue)) {
+	        $searchValue = strtolower($searchValue);
+	        $pivoted = array_filter($pivoted, function ($item) use ($searchValue) {
+	            return strpos(strtolower($item['item']), $searchValue) !== false
+	                || strpos(strtolower($item['item_name']), $searchValue) !== false
+	                || strpos(strtolower($item['itmcde']), $searchValue) !== false;
+	        });
+	    }
 
-		# Params for main SELECT
-		$params[] = $week;
-		$params[] = $year;
-		if ($ascId !== null) $params[] = $ascId;
-		if ($areaId !== null) $params[] = $areaId;
-		if ($itemCat !== null) $params[] = $itemCat;
-		$params = array_merge($params, $ItemClassIdsParams, $baTypeParams, $companyIdParams, $storeParams);
+	    $allowedOrderColumns = ['sum_total_qty', 'item', 'item_name', 'itmcde', 'sum_ave_sales', 'swc'];
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
+	        $orderByColumn = 'sum_total_qty';
+	    }
+	    $orderDirection = strtoupper($orderDirection);
+	    if (!in_array($orderDirection, ['ASC', 'DESC'])) {
+	        $orderDirection = 'DESC';
+	    }
 
-		$params = array_merge($params, $searchParams);
-		# Pagination
-		$params[] = (int)$pageLimit;
-		$params[] = (int)$pageOffset;
+	    usort($pivoted, function ($a, $b) use ($orderByColumn, $orderDirection) {
+	        if ($a[$orderByColumn] == $b[$orderByColumn]) return 0;
+	        return ($orderDirection === 'ASC')
+	            ? ($a[$orderByColumn] < $b[$orderByColumn] ? -1 : 1)
+	            : ($a[$orderByColumn] > $b[$orderByColumn] ? -1 : 1);
+	    });
 
-	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResult();
-	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
+	    $totalRecords = count($pivoted);
+	    $pagedData = array_slice(array_values($pivoted), (int)$pageOffset, (int)$pageLimit);
 
 	    return [
 	        'total_records' => $totalRecords,
-	        'data' => $data
+	        'data'          => $pagedData
 	    ];
 	}
 
@@ -448,39 +308,6 @@ class Dashboard_model extends Model
 
 	    return $builder->get()->getRowArray();
 	}
-
-// public function getLatestVmi($year = null)
-// {
-//     // Subquery to get the max year and week (with optional year filtering)
-//     $subquery = $this->db->table('tbl_vmi')
-//         ->select('MAX(CONCAT(LPAD(year, 4, "0"), LPAD(week, 2, "0"))) AS max_key', false)
-//         ->where('status', 1);
-
-//     if (!empty($year)) {
-//         $subquery->where('year', $year);
-//     }
-
-//     $maxKey = $subquery->get()->getRow()->max_key;
-
-//     if (!$maxKey) return null;
-
-//     // Extract year and week from maxKey
-//     $yearPart = (int)substr($maxKey, 0, 4);
-//     $weekPart = (int)substr($maxKey, 4, 2);
-
-//     // Final query to get detailed info
-//     return $this->db->table('tbl_vmi v')
-//         ->select('y.id AS year_id, y.year, c.id AS company_id, c.name AS company_name, v.week AS week_id')
-//         ->join('tbl_company c', 'v.company = c.id')
-//         ->join('tbl_year y', 'v.year = y.id')
-//         ->where('v.status', 1)
-//         ->where('v.year', $yearPart)
-//         ->where('v.week', $weekPart)
-//         ->get()
-//         ->getRowArray();
-// }
-
-
 
    	public function getMonth($id){
         $results = $this->db->table('tbl_month')
@@ -504,18 +331,6 @@ class Dashboard_model extends Model
 
 	public function salesPerformancePerBa($limit, $offset, $orderByColumn, $orderDirection, $target_sales, $incentiveRate, $monthFrom = null, $monthTo = null, $lyYear = null, $tyYear = null, $yearId = null, $storeid = null, $areaid = null, $ascid = null, $baid = null, $baTypeId = null, $remainingDays = null, $brand_category = null, $brandIds = null, $searchValue = null)
 	{
-		// $roleId = session()->sess_site_role ?? null;
-		// $maskedLyScannedField = ($roleId == 7 || $roleId == 8)
-		//     ? "'-' AS ly_scanned_data"
-		//     : "FORMAT(
-		//         CASE 
-		//             WHEN t.ba_code IS NOT NULL AND t.ba_code != '' THEN 
-		//                 ROUND(COALESCE(ly.ly_scanned_data, 0) / 
-		//                      (LENGTH(t.ba_code) - LENGTH(REPLACE(t.ba_code, ',', '')) + 1), 2)
-		//             ELSE COALESCE(ly.ly_scanned_data, 0)
-		//         END, 2
-		//     ) AS ly_scanned_data";
-
 		$range = ($monthTo - $monthFrom) + 1;
 		$startDate = $tyYear .'-'. $monthFrom . '-01';
 		$endDate = $tyYear .'-'. $monthTo . '-31';
@@ -1687,6 +1502,109 @@ class Dashboard_model extends Model
 	    return ['data' => $query->getResult()];
 	}
 
+	public function getDataVmiAllStore5($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minSku, $maxSku, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null, $searchValue = null)
+	{
+
+	    $params = [];
+	    $where = "WHERE vmi.year = ? AND vmi.week BETWEEN ? AND ?";
+	    $params[] = $year;
+	    $params[] = $weekStart;
+	    $params[] = $weekEnd;
+
+	    if ($itemCat !== null) {
+	        $where .= " AND vmi.itmclacde = ?";
+	        $params[] = $itemCat;
+	    }
+
+	    if (!empty($ItemClasses)) {
+	        $placeholders = implode(',', array_fill(0, count($ItemClasses), '?'));
+	        $where .= " AND vmi.item_class_id IN ($placeholders)";
+	        $params = array_merge($params, $ItemClasses);
+	    }
+
+	    $sql = "
+	        SELECT 
+	            vmi.item,
+	            COALESCE(vmi.itmdsc, vmi.item_name) AS item_name,
+	            vmi.itmcde,
+	            vmi.week,
+	            SUM(vmi.total_qty) AS qty,
+	            SUM(vmi.average_sales_unit) AS avg_sales,
+	            MAX(ic.item_class_description) AS item_class
+	        FROM tbl_vmi_pre_aggregated_data vmi
+	        LEFT JOIN tbl_item_class ic ON vmi.item_class_id = ic.id
+	        $where
+	        GROUP BY vmi.item, vmi.week
+	        ORDER BY vmi.item ASC
+	    ";
+
+	    $rawData = $this->db->query($sql, $params)->getResult();
+
+	    $pivoted = [];
+	    foreach ($rawData as $row) {
+	        $key = $row->item;
+	        if (!isset($pivoted[$key])) {
+	            $flattenWeeks = [];
+	            $flattenItemClassWeeks = [];
+	            for ($w = $weekStart; $w <= $weekEnd; $w++) {
+	                $flattenWeeks["week_$w"] = 0;
+	                $flattenItemClassWeeks["item_class_week_$w"] = '-';
+	            }
+	            $pivoted[$key] = [
+	                'item'       => $row->item,
+	                'item_name'  => $row->item_name,
+	                'itmcde'     => $row->itmcde,
+	                'item_class' => $row->item_class,
+	                'total_qty'  => 0,
+	                'avg_sales'  => 0
+	            ] + $flattenWeeks + $flattenItemClassWeeks;
+	        }
+	        $pivoted[$key]["week_{$row->week}"] = (float)$row->qty;
+	        $pivoted[$key]["item_class_week_{$row->week}"] = $row->item_class;
+	        $pivoted[$key]['total_qty'] += (float)$row->qty;
+	        $pivoted[$key]['avg_sales'] += (float)$row->avg_sales;
+	    }
+
+	    foreach ($pivoted as &$item) {
+	        $item['weeks_ratio'] = $item['avg_sales'] > 0 
+	            ? round($item['total_qty'] / $item['avg_sales'], 2) 
+	            : 0;
+	    }
+
+	    $filtered = array_filter($pivoted, function ($item) use ($minSku, $maxSku) {
+	        return $item['weeks_ratio'] > $minSku && $item['weeks_ratio'] <= $maxSku;
+	    });
+
+	    if (!empty($searchValue)) {
+	        $searchValue = strtolower($searchValue);
+	        $filtered = array_filter($filtered, function ($item) use ($searchValue) {
+	            return strpos(strtolower($item['item']), $searchValue) !== false
+	                || strpos(strtolower($item['item_name']), $searchValue) !== false
+	                || strpos(strtolower($item['itmcde']), $searchValue) !== false;
+	        });
+	    }
+
+	    $orderDirection = strtoupper($orderDirection);
+	    $defaultSortColumn = "week_$weekEnd";
+	    $sortColumn = $orderByColumn ?: $defaultSortColumn;
+
+	    usort($filtered, function ($a, $b) use ($sortColumn, $orderDirection) {
+	        $valA = $a[$sortColumn] ?? null;
+	        $valB = $b[$sortColumn] ?? null;
+
+	        if ($valA == $valB) return 0;
+	        return ($orderDirection === 'ASC') ? ($valA < $valB ? -1 : 1) : ($valA > $valB ? -1 : 1);
+	    });
+
+	    $totalRecords = count($filtered);
+	    $pagedData = array_slice(array_values($filtered), (int)$pageOffset, (int)$pageLimit);
+
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $pagedData
+	    ];
+	}
+
 	public function getDataVmiAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null, $searchValue = null)
 	{
 	    $storeFilterConditionsVmi = [];
@@ -1796,122 +1714,9 @@ class Dashboard_model extends Model
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-
-	    return [
-	        'total_records' => $totalRecords,
-	        'data' => $data
-	    ];
-	}
-
-	public function getDataWeekAllStore($pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $weekStart, $weekEnd, $year, $ItemClasses = null, $itemCat = null, $searchValue = null)
-	{
-	    $storeFilterConditionsWow = [];
-
-	    $searchColumns = [
-	        'wow.item',
-	        'wow.itmdsc',
-	        'wow.itmcde'
-	    ];
-
-	    $searchHavingClause = '';
-	    $searchParams = [];
-
-	    if (!empty($searchValue)) {
-	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
-	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
-	        foreach ($searchColumns as $_) {
-	            $searchParams[] = '%' . $searchValue . '%';
-	        }
-	    }
-
-	    if (!empty($ItemClasses)) {
-	        $ItemClasses = array_map('trim', $ItemClasses);
-	        $ItemClassesConds = array_map(fn($class) => "FIND_IN_SET(" . db_connect()->escape($class) . ", wow.item_class)", $ItemClasses);
-	        $storeFilterConditionsWow[] = '(' . implode(' OR ', $ItemClassesConds) . ')';
-	    }
-
-	    $allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde', 'average_sales_unit', 'swc', 'week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'week_8', 'week_9', 'week_10', 'week_11', 'week_12', 'week_13', 'week_14', 'week_15', 'week_16', 'week_17', 'week_18', 'week_19', 'week_20', 'week_21', 'week_22', 'week_23', 'week_24', 'week_25', 'week_26', 'week_27', 'week_28', 'week_29', 'week_30', 'week_31', 'week_32', 'week_34', 'week_35', 'week_36', 'week_37', 'week_38', 'week_39', 'week_40', 'week_41', 'week_42', 'week_43', 'week_44', 'week_45', 'week_46', 'week_47', 'week_48', 'week_49', 'week_51', 'week_52', 'week_53'];
-	    $allowedOrderDirections = ['ASC', 'DESC'];
-
-	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
-	        $orderByColumn = 'week_' . $weekEnd;
-	    }
-
-	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
-	        $orderDirection = 'DESC';
-	    }
-
-	    $storeFilterSQLWow = !empty($storeFilterConditionsWow) ? ' AND ' . implode(' AND ', $storeFilterConditionsWow) : '';
-
-	    $itemCatFilterWow = '';
-	    $itemCatParams = [];
-
-	    if ($itemCat !== null) {
-	        $itemCatFilterWow = ' AND wow.itmclacde = ?';
-	        $itemCatParams = [$itemCat];
-	    }
-
-	    $weekColumns = '';
-	    $itemClassColumns = '';
-	    for ($w = $weekStart; $w <= $weekEnd; $w++) {
-	        $weekColumns .= ", SUM(CASE WHEN wow.week = $w THEN wow.quantity ELSE 0 END) AS week_$w\n";
-	        $itemClassColumns .= ", MAX(CASE WHEN wow.week = $w THEN ic.item_class_description ELSE NULL END) AS item_class_week_$w\n";
-	    }
-
-	    $sql = "
-	        SELECT 
-	            wow.item,
-	            COALESCE(wow.itmdsc, wow.item_name) AS item_name,
-	            wow.itmcde,
-	            ic.item_class_description AS item_class_name,
-	            wow.brand_type_id, 
-	            COALESCE(NULLIF(wow.itmcde, ''), 'N / A') AS itmcde,
-	            FORMAT(SUM(wow.quantity), 2) AS sum_total_qty,
-	            FORMAT(SUM(wow.quantity) / NULLIF(SUM(wow.ave_weekly_sales), 0), 2) AS swc,
-	            ROUND(
-	                CASE 
-	                    WHEN SUM(wow.ave_weekly_sales) > 0 
-	                    THEN SUM(wow.quantity) / SUM(wow.ave_weekly_sales) 
-	                    ELSE 0 
-	                END, 2
-	            ) AS weeks,
-	            COUNT(*) OVER() AS total_records
-	            {$weekColumns}
-	            {$itemClassColumns}	
-	        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-	        LEFT JOIN tbl_item_class ic ON wow.item_class = ic.id
-	        WHERE wow.week BETWEEN ? AND ?
-	          AND wow.year = ?
-	          {$itemCatFilterWow}
-	          $storeFilterSQLWow
-	        GROUP BY wow.item
-	        HAVING weeks > ?
-	           AND (? IS NULL OR weeks <= ?)
-	           {$searchHavingClause}
-	        ORDER BY {$orderByColumn} {$orderDirection}
-	        LIMIT ? OFFSET ?
-	    ";
-
-	    $params = [];
-
-	    // Filters
-	    $params[] = $weekStart;
-	    $params[] = $weekEnd;
-	    $params[] = $year;
-	    $params = array_merge($params, $itemCatParams);
-
-	    $params[] = $minWeeks;
-	    $params[] = $maxWeeks;
-	    $params[] = $maxWeeks;
-	    $params = array_merge($params, $searchParams);
-	    $params[] = (int)$pageLimit;
-	    $params[] = (int)$pageOffset;
-	    //$params = array_merge($params, [$minWeeks, $maxWeeks, $maxWeeks, (int)$pageLimit, (int)$pageOffset]);
-
-	    $query = $this->db->query($sql, $params);
-	    $data = $query->getResult();
-	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-
+	    $finalQuery = $this->interpolateQuery2($sql, $params);
+	    // echo $finalQuery;
+	    // die();
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data

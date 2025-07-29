@@ -87,9 +87,14 @@ class StocksWeekAllStore extends BaseController
 		$heroSku = [];
 		$skuMin = 20;
 		$skuMax = 30;
-	    //$ItemClasses = null;
-	    //$itemCat = null;
 
+		// $limit = 10;
+		// $source = 2;
+		// $type = 'slowMoving';
+		// // $weekStart = 1;
+		// // $weekEnd = 5;
+		// // $latestYear = 6;
+	   
 		if($sysPar){
 			$jsonStringHero = $sysPar[0]['hero_sku'];
 			$dataHero = json_decode($jsonStringHero, true);
@@ -140,20 +145,13 @@ class StocksWeekAllStore extends BaseController
 			            break;
 			        case 'hero':
 	        			$itemClassFilter = $heroSku;
-			            $data = $this->Dashboard_model->getDataVmiNPDHERO(
-							$limit, $offset, 
-							$orderByColumn, $orderDirection, 
-							$weekStart, $weekEnd, $latestYear, 
-							$itemClassFilter, $ItemClasses, $itemCat, 
-							$searchValue
-						);
+			            $data = $this->Dashboard_model->getDataVmiNPDHERO($limit, $offset, $orderByColumn, $orderDirection, $weekStart, $weekEnd, $latestYear, $itemClassFilter, $ItemClasses, $itemCat, $searchValue);
 			            break;
 			        default:
 			        	$data = $this->Dashboard_model->getDataVmiAllStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $weekStart, $weekEnd, $latestYear, $ItemClasses, $itemCat, $searchValue);
 			    }
 			}
-
-
+			
 		    return $this->response->setJSON([
 		        'draw' => intval($this->request->getVar('draw')),
 		        'recordsTotal' => $data['total_records'],

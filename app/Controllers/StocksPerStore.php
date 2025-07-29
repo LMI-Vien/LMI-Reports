@@ -130,11 +130,12 @@ class StocksPerStore extends BaseController
 		    // $ascId = null;
 		    // $baTypeId = 3;
 		    // $baId = null;
-		    // $storeId = '1001';
+		    // $storeId = 30;
 		    // $brands = null;
 		    // $limit = 10;
 		    // $offset = 0;
 		    // echo $offset;
+
 		    $orderDirection = strtoupper($orderDirection);
 		    switch ($type) {
 		        case 'slowMoving':
@@ -336,7 +337,7 @@ class StocksPerStore extends BaseController
 				gc_collect_cycles();
 			}
 	    }
-
+	    
 		$title = 'Stock_Data_per_Store_' . date('Ymd_His');
 		
 		$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
@@ -413,13 +414,16 @@ class StocksPerStore extends BaseController
 				$pdf->Cell(30, 6, 'SKU', 1, 0, 'C');
 				$pdf->Cell(95, 6, 'SKU Name', 1, 0, 'C');
 				$pdf->Cell(30, 6, 'SKU Type', 1, 1, 'C');
-
 				foreach ($section['rows'] as $row) {
-					$pdf->SetFont('helvetica', '', 10);
-					$pdf->Cell(35, 6, $row->itmcde, 1, 0, 'C');
-					$pdf->Cell(30, 6, $row->item, 1, 0, 'C');
-					$pdf->MultiCell(95, 6, $row->item_name, 1, 'L', 0, 0, null, null, true, 0, false, true, 6, 'M', true);
-					$pdf->MultiCell(30, 6, $section['label'], 1, 'L', 0, 1, null, null, true, 0, false, true, 6, 'M', true);
+					$row = (object) $row;
+				    $pdf->SetFont('helvetica', '', 10);
+				    $itemCode = (isset($row->itmcde) && !empty($row->itmcde)) ? $row->itmcde : '';
+				    $item = (isset($row->item) && !empty($row->item)) ? $row->item : '';
+				    $itemName = (isset($row->item_name) && !empty($row->item_name)) ? $row->item_name : '';
+				    $pdf->Cell(35, 6, $itemCode, 1, 0, 'C');
+				    $pdf->Cell(30, 6, $item, 1, 0, 'C');
+				    $pdf->MultiCell(95, 6, $itemName, 1, 'L', 0, 0, '', '', true, 0, false, true, 6, 'M', true);
+				    $pdf->MultiCell(30, 6, $section['label'], 1, 'L', 0, 1, '', '', true, 0, false, true, 6, 'M', true);
 				}
 			} else {
 				$pdf->SetFont('helvetica', 'B', 10);
@@ -430,12 +434,17 @@ class StocksPerStore extends BaseController
 				$pdf->Cell(20, 6, 'SKU Type', 1, 1, 'C');
 
 				foreach ($section['rows'] as $row) {
+					$row = (object) $row;
 					$pdf->SetFont('helvetica', '', 10);
-					$pdf->Cell(30, 6, $row->itmcde, 1, 0, 'C');
-					$pdf->Cell(25, 6, $row->item, 1, 0, 'C');
-					$pdf->MultiCell(95, 6, $row->item_name, 1, 'L', 0, 0, null, null, true, 0, false, true, 6, 'M', true);
-					$pdf->Cell(20, 6, intval($row->sum_total_qty), 1, 0, 'C');
-					$pdf->MultiCell(20, 6, $section['label'], 1, 'L', 0, 1, null, null, true, 0, false, true, 6, 'M', true);
+				    $itemCode = (isset($row->itmcde) && !empty($row->itmcde)) ? $row->itmcde : '';
+				    $item = (isset($row->item) && !empty($row->item)) ? $row->item : '';
+				    $itemName = (isset($row->item_name) && !empty($row->item_name)) ? $row->item_name : '';
+				    $sumTotal = (isset($row->sum_total_qty) && !empty($row->sum_total_qty)) ? $row->sum_total_qty : '';
+					$pdf->Cell(30, 6, $itemCode, 1, 0, 'C');
+					$pdf->Cell(25, 6, $item, 1, 0, 'C');
+					$pdf->MultiCell(95, 6, $itemName, 1, 'L', 0, 0, '', '', true, 0, false, true, 6, 'M', true);
+					$pdf->Cell(20, 6, intval($sumTotal), 1, 0, 'C');
+					$pdf->MultiCell(20, 6, $section['label'], 1, 'L', 0, 1, '', '', true, 0, false, true, 6, 'M', true);
 				}
 			}
 
@@ -656,6 +665,7 @@ class StocksPerStore extends BaseController
 
 			if ($section['label'] === "Hero SKUs") {
 				foreach ($section['rows'] as $row) {
+					$row = (object) $row;
 					$sheet->setCellValueExplicit('A' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 					$sheet->setCellValueExplicit('B' . $rowNum, $row->item, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 					$sheet->setCellValueExplicit('C' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -664,6 +674,7 @@ class StocksPerStore extends BaseController
 				}
 			} else {
 				foreach ($section['rows'] as $row) {
+					$row = (object) $row;
 					$sheet->setCellValueExplicit('A' . $rowNum, $row->itmcde, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 					$sheet->setCellValueExplicit('B' . $rowNum, $row->item, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 					$sheet->setCellValueExplicit('C' . $rowNum, $row->item_name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
