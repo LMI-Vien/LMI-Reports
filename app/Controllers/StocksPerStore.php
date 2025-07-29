@@ -174,25 +174,38 @@ class StocksPerStore extends BaseController
 
 	public function generatePdf()
 	{	
-		$areaId = trim($this->request->getGet('area') ?? '');
+		$json = $this->request->getJSON(true); 
+		$areaId = trim($json['area'] ?? '');
 		$areaId = $areaId === '' ? null : $areaId;
 
-		$ascId = trim($this->request->getGet('asc') ?? '');
+		$areaText = trim($json['areaText'] ?? '');
+		$areaText = $areaText === '' ? null : $areaText;
+
+		$ascId = trim($json['asc'] ?? '');
 		$ascId = $ascId === '' ? null : $ascId;
 
-		$baTypeId = trim($this->request->getGet('baType') ?? '');
+		$ascText = trim($json['ascText'] ?? '');
+		$ascText = $ascText === '' ? null : $ascText;
+
+		$baTypeId = trim($json['baType'] ?? '');
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
 
-		$baId = trim($this->request->getGet('ba') ?? '');
+		$baId = trim($json['ba'] ?? '');
 		$baId = $baId === '' ? null : $baId;
 
-		$storeId = trim($this->request->getGet('store') ?? '');
+		$baText = trim($json['baText'] ?? '');
+		$baText = $baText === '' ? null : $baText;
+
+		$storeId = trim($json['store'] ?? '');
 		$storeId = $storeId === '' ? null : $storeId;
 
-		$brands = $this->request->getGet('brands');
-		$brands = $brands === '' ? null : $brands;
+		$storeText = trim($json['storeText'] ?? '');
+		$storeText = $storeText === '' ? null : $storeText;
 
-		$types = json_decode($this->request->getGet('types'), true);
+		$brands = json_decode($json['brands']) ?? null;
+		$brands = $brands === [] ? null : $brands;
+		
+		$types = json_decode($json['types'], true);
 		if (!$types || !is_array($types)) {
 			$types = ['hero']; // fallback
 		}
@@ -200,22 +213,23 @@ class StocksPerStore extends BaseController
 		$limit = 99999; // use a really huge number to include everything
 		$offset = 0;
 
-		$orderColumnIndex = $this->request->getGet('orderIndex') ?? 0;
-	    $orderDirection = $this->request->getGet('orderDir') ?? 'desc';
-	    $columns = json_decode($this->request->getGet('columns'), true);
+		$orderColumnIndex = $json['orderIndex'] ?? 0;
+	    $orderDirection = $json['orderDir'] ?? 'desc';
+	    $columns = $json['columns'] ?? '';
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'sum_total_qty';
-
-	    $tableSlowMoving = trim($this->request->getGet('table_slowMoving') ?? '');
+		
+	    $tableSlowMoving = trim($json['table_slowMoving'] ?? '');
 		$tableSlowMoving = $tableSlowMoving === '' ? null : $tableSlowMoving;
-
-		$tableHero = trim($this->request->getGet('table_hero') ?? '');
+		
+		$tableHero = trim($json['table_hero'] ?? '');
 		$tableHero = $tableHero === '' ? null : $tableHero;
-
-		$tableNpd = trim($this->request->getGet('table_npd') ?? '');
+		
+		$tableNpd = trim($json['table_npd'] ?? '');
 		$tableNpd = $tableNpd === '' ? null : $tableNpd;
-
-		$tableOverStock = trim($this->request->getGet('table_overStock') ?? '');
+		
+		$tableOverStock = trim($json['table_overStock'] ?? '');
 		$tableOverStock = $tableOverStock === '' ? null : $tableOverStock;
+
 
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar = $this->Global_model->getSysPar();
@@ -236,6 +250,8 @@ class StocksPerStore extends BaseController
 		    $skuMin = $sysPar[0]['sm_sku_min'];
 		    $skuMax = $sysPar[0]['sm_sku_max'];
 		}
+
+
 
 	    if($latestVmiData){
 	    	$latestYear = $latestVmiData['year_id'];
@@ -343,10 +359,7 @@ class StocksPerStore extends BaseController
 		} elseif ($baId == -6) {
 			$brand_ambassador = 'Non BA';
 		} else {
-			$brand_ambassador_data = $this->Global_model->dynamic_search(
-				"'tbl_brand_ambassador'", "''", "'code, name'", 1, 0, "'id:EQ=$baId'", "''", "''"
-			);
-			$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] . ' - ' . $brand_ambassador_data[0]['name'] : null;
+			$brand_ambassador = $baText;
 		}
 		$pdf->Cell(63, 6, 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'), 0, 0, 'L');
 		$selectedBrands = '';
@@ -364,15 +377,11 @@ class StocksPerStore extends BaseController
 		$baLabels = isset($baTypeLabels[$baTypeId]) ? $baTypeLabels[$baTypeId] : 'All';
 		$pdf->Cell(63, 6, 'Outright/Consignment: '.$baLabels, 0, 1, 'L');
 
-		$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'code, description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
-		$store = isset($store_data[0]['description']) ? $store_data[0]['code'] . ' - ' . $store_data[0]['description'] : null;
-		$pdf->Cell(63, 6, 'Store Name: ' . ($store ?: 'ALL'), 0, 0, 'L');
+		$pdf->Cell(63, 6, 'Store Name: ' . ($storeText ?: 'ALL'), 0, 0, 'L');
 
-		$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'code, description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
-		$asc = isset($asc_data[0]['description']) ? $asc_data[0]['code'] . ' - ' . $asc_data[0]['description'] : null;
+		$asc = isset($ascText) ? $ascText . ' - ' . $ascText : null;
 
-        $area_data = $this->Global_model->dynamic_search("'tbl_area'", "''", "'code, description'", 1, 0, "'id:EQ=$areaId'", "''", "''");
-		$area = isset($area_data[0]['description']) ? $area_data[0]['code'] . ' - ' . $area_data[0]['description'] : null;
+		$area = isset($areaText) ? $areaText . ' - ' . $areaText : null;
 		
 
 		if(strlen($area . '/' . $asc) > 40) {
@@ -409,8 +418,8 @@ class StocksPerStore extends BaseController
 					$pdf->SetFont('helvetica', '', 10);
 					$pdf->Cell(35, 6, $row->itmcde, 1, 0, 'C');
 					$pdf->Cell(30, 6, $row->item, 1, 0, 'C');
-					$pdf->MultiCell(95, 6, $row->item_name, 1, 'L', 0, 0, '', '', true, 0, false, true, 6, 'M', true);
-					$pdf->MultiCell(30, 6, $section['label'], 1, 'L', 0, 1, '', '', true, 0, false, true, 6, 'M', true);
+					$pdf->MultiCell(95, 6, $row->item_name, 1, 'L', 0, 0, null, null, true, 0, false, true, 6, 'M', true);
+					$pdf->MultiCell(30, 6, $section['label'], 1, 'L', 0, 1, null, null, true, 0, false, true, 6, 'M', true);
 				}
 			} else {
 				$pdf->SetFont('helvetica', 'B', 10);
@@ -424,9 +433,9 @@ class StocksPerStore extends BaseController
 					$pdf->SetFont('helvetica', '', 10);
 					$pdf->Cell(30, 6, $row->itmcde, 1, 0, 'C');
 					$pdf->Cell(25, 6, $row->item, 1, 0, 'C');
-					$pdf->MultiCell(95, 6, $row->item_name, 1, 'L', 0, 0, '', '', true, 0, false, true, 6, 'M', true);
+					$pdf->MultiCell(95, 6, $row->item_name, 1, 'L', 0, 0, null, null, true, 0, false, true, 6, 'M', true);
 					$pdf->Cell(20, 6, intval($row->sum_total_qty), 1, 0, 'C');
-					$pdf->MultiCell(20, 6, $section['label'], 1, 'L', 0, 1, '', '', true, 0, false, true, 6, 'M', true);
+					$pdf->MultiCell(20, 6, $section['label'], 1, 'L', 0, 1, null, null, true, 0, false, true, 6, 'M', true);
 				}
 			}
 
@@ -439,25 +448,38 @@ class StocksPerStore extends BaseController
 
 	public function generateExcel()
 	{
-		$areaId = trim($this->request->getGet('area') ?? '');
+		$json = $this->request->getJSON(true); 
+		$areaId = trim($json['area'] ?? '');
 		$areaId = $areaId === '' ? null : $areaId;
 
-		$ascId = trim($this->request->getGet('asc') ?? '');
+		$areaText = trim($json['areaText'] ?? '');
+		$areaText = $areaText === '' ? null : $areaText;
+
+		$ascId = trim($json['asc'] ?? '');
 		$ascId = $ascId === '' ? null : $ascId;
 
-		$baTypeId = trim($this->request->getGet('baType') ?? '');
+		$ascText = trim($json['ascText'] ?? '');
+		$ascText = $ascText === '' ? null : $ascText;
+
+		$baTypeId = trim($json['baType'] ?? '');
 		$baTypeId = $baTypeId === '' ? null : $baTypeId;
 
-		$baId = trim($this->request->getGet('ba') ?? '');
+		$baId = trim($json['ba'] ?? '');
 		$baId = $baId === '' ? null : $baId;
 
-		$storeId = trim($this->request->getGet('store') ?? '');
+		$baText = trim($json['baText'] ?? '');
+		$baText = $baText === '' ? null : $baText;
+
+		$storeId = trim($json['store'] ?? '');
 		$storeId = $storeId === '' ? null : $storeId;
 
-		$brands = $this->request->getGet('brands');
-		$brands = $brands === '' ? null : $brands;
+		$storeText = trim($json['storeText'] ?? '');
+		$storeText = $storeText === '' ? null : $storeText;
 
-		$types = json_decode($this->request->getGet('types'), true);
+		$brands = json_decode($json['brands']) ?? null;
+		$brands = $brands === [] ? null : $brands;
+		
+		$types = json_decode($json['types'], true);
 		if (!$types || !is_array($types)) {
 			$types = ['hero']; // fallback
 		}
@@ -465,21 +487,21 @@ class StocksPerStore extends BaseController
 		$limit = 99999; // use a really huge number to include everything
 		$offset = 0;
 
-		$orderColumnIndex = $this->request->getGet('orderIndex') ?? 0;
-	    $orderDirection = $this->request->getGet('orderDir') ?? 'desc';
-	    $columns = json_decode($this->request->getGet('columns'), true);
+		$orderColumnIndex = $json['orderIndex'] ?? 0;
+	    $orderDirection = $json['orderDir'] ?? 'desc';
+	    $columns = $json['columns'] ?? '';
 	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'sum_total_qty';
-
-	    $tableSlowMoving = trim($this->request->getGet('table_slowMoving') ?? '');
+		
+	    $tableSlowMoving = trim($json['table_slowMoving'] ?? '');
 		$tableSlowMoving = $tableSlowMoving === '' ? null : $tableSlowMoving;
-
-		$tableHero = trim($this->request->getGet('table_hero') ?? '');
+		
+		$tableHero = trim($json['table_hero'] ?? '');
 		$tableHero = $tableHero === '' ? null : $tableHero;
-
-		$tableNpd = trim($this->request->getGet('table_npd') ?? '');
+		
+		$tableNpd = trim($json['table_npd'] ?? '');
 		$tableNpd = $tableNpd === '' ? null : $tableNpd;
-
-		$tableOverStock = trim($this->request->getGet('table_overStock') ?? '');
+		
+		$tableOverStock = trim($json['table_overStock'] ?? '');
 		$tableOverStock = $tableOverStock === '' ? null : $tableOverStock;
 
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
@@ -605,10 +627,7 @@ class StocksPerStore extends BaseController
 			} elseif ($baId == -6) {
 				$brand_ambassador = 'Non BA';
 			} else {
-				$brand_ambassador_data = $this->Global_model->dynamic_search(
-					"'tbl_brand_ambassador'", "''", "'name'", 1, 0, "'id:EQ=$baId'", "''", "''"
-				);
-				$brand_ambassador = isset($brand_ambassador_data[0]['name']) ? $brand_ambassador_data[0]['name'] : null;
+				$brand_ambassador = $baText;
 			}
 			$sheet->setCellValue('A4', 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'));
 			$selectedBrands = '';
@@ -628,15 +647,9 @@ class StocksPerStore extends BaseController
 			$baLabels = isset($baTypeLabels[$baTypeId]) ? $baTypeLabels[$baTypeId] : 'All';
 			$sheet->setCellValue('C4', 'Outright/Consignment: '.$baTypeLabels[$baTypeId]);
 
-			$store_data = $this->Global_model->dynamic_search("'tbl_store'", "''", "'code, description'", 1, 0, "'id:EQ=$storeId'", "''", "''");
-			$store = isset($store_data[0]['description']) ? $store_data[0]['code'] .' - '. $store_data[0]['description'] : null;
-			$sheet->setCellValue('A5', 'Store Name: ' . ($store ?: 'ALL'));
-
-			$asc_data = $this->Global_model->dynamic_search("'tbl_area_sales_coordinator'", "''", "'code, description'", 1, 0, "'id:EQ=$ascId'", "''", "''");
-			$asc = isset($asc_data[0]['description']) ? $asc_data[0]['description'] .' - '. $asc_data[0]['description'] : null;
-
-			$area_data = $this->Global_model->dynamic_search("'tbl_area'", "''", "'code, description'", 1, 0, "'id:EQ=$areaId'", "''", "''");
-			$area = isset($area_data[0]['description']) ? $area_data[0]['code'] .' - '. $area_data[0]['description'] : null;
+			$sheet->setCellValue('A5', 'Store Name: ' . ($storeText ?: 'ALL'));
+			$asc = isset($ascText) ? $ascText . ' - ' . $ascText : null;
+			$area = isset($areaText) ? $areaText . ' - ' . $areaText : null;
 
 			$sheet->setCellValue('B5', 'Area / ASC Name: ' . ($area . '/'. $asc ?: ''));
 			$sheet->setCellValue('C5', 'Date Generated: ' . date('M d, Y, h:i:s A'));

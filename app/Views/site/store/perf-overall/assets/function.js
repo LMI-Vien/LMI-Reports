@@ -268,24 +268,81 @@
         let selectedMonthStart = $('#month').val();
         let selectedMonthEnd = $('#monthTo').val();
         let searchValue = $('#top_performing_stores').DataTable().search();
-
-        let qs = [
-            'area='             + encodeURIComponent(selectedArea),
-            'asc='              + encodeURIComponent(selectedAsc),
-            'baType='           + encodeURIComponent(selectedBaType),
-            'ba='               + encodeURIComponent(selectedBa),
-            'store='            + encodeURIComponent(selectedStore),
-            'brandCategories='  + encodeURIComponent(selectedBrandCategories),
-            'brands='           + encodeURIComponent(selectedBrands),
-            'year='             + encodeURIComponent(selectedYear),
-            'monthStart='       + encodeURIComponent(selectedMonthStart),
-            'monthEnd='         + encodeURIComponent(selectedMonthEnd),
-            'searchValue='      + encodeURIComponent(searchValue),
-        ].join('&');
+        let textArea = $('#area').val();
+        let textAsc = $('#ascName').val();
+        let textBa = $('#brandAmbassador').val();
+        let textStore = $('#storeName').val();
+        let textBrandCategories = $('#itemLabel').select2('data').map((item) => {
+            return item.text
+        });
+        let textBrands = $('#brands').select2('data').map((item) => {
+            return item.text
+        });
+        let textMonthStart = $('#month option:selected').text();
+        let textMonthEnd = $('#monthTo option:selected').text();
+        
+        let postData = {
+            area : selectedArea,
+            asc : selectedAsc,
+            baType : selectedBaType,
+            ba : selectedBa,
+            store : selectedStore,
+            brandCategories : selectedBrandCategories,
+            brands : selectedBrands,
+            year : selectedYear,
+            monthStart : selectedMonthStart,
+            monthEnd : selectedMonthEnd,
+            searchValue : searchValue,
+            textArea : textArea,
+            textAsc : textAsc,
+            textBa : textBa,
+            textStore : textStore,
+            textBrandCategories : textBrandCategories,
+            textBrands : textBrands,
+            textMonthStart : textMonthStart,
+            textMonthEnd : textMonthEnd
+        }
+        console.log(postData, 'post data'); 
+        // return;
 
         let endpoint = action === 'exportPdf' ? 'overall-growth-generate-pdf' : 'overall-growth-generate-excel';
 
-        let url = `${base_url}store/${endpoint}?${qs}`;
+        // let url = `${base_url}store/${endpoint}?${qs}`;
+        let url = `${base_url}store/${endpoint}`;
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Overall Stores Sales Growth.pdf'
+                        : 'Overall Stores Sales Growth.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
 
         const end_time = new Date();
         const duration = formatDuration(start_time, end_time);
@@ -296,45 +353,7 @@
             <br>End Time: ${formatReadableDate(end_time)}
             <br>Duration: ${duration}
         `;
-        logActivity('Overall Store Sales Growth', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
-
-        let fetchedResponse;
-        fetch(url, {
-            method: 'GET',
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server returned ${response.status}`);
-            }
-            fetchedResponse = response;
-            return response.blob();
-        })
-        .then(blob => {
-            const cd = fetchedResponse.headers.get('Content-Disposition');
-            const match = cd && /filename="?([^"]+)"/.exec(cd);
-            let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
-            const filename = rawName
-                || (action === 'exportPdf'
-                    ? 'Overall Stores Sales Growth.pdf'
-                    : 'Overall Stores Sales Growth.xlsx');
-
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(blobUrl);
-        })
-        .catch(err => {
-            console.error("Download failed:", err);
-            modal.alert("Failed to generate file. Please try again.", "error");
-        })
-        .finally(() => {
-            modal.loading(false);
-        });
+        logActivity('Overall Store Sales Growth', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null)
 
     }
 

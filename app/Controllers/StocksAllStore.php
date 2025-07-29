@@ -173,6 +173,8 @@ class StocksAllStore extends BaseController
 	}
 
 	public function generatePdf() {
+		$json = $this->request->getJSON(true); 
+		// echo json_encode($json); die();
 		$areaId    = null;
 		$ascId     = null;
 		$baTypeId  = null;
@@ -181,7 +183,7 @@ class StocksAllStore extends BaseController
 		$brands    = null;
 
 		// 1) Parse itemClass to array
-		$itemClassParam = $this->getParam('itemClass');
+		$itemClassParam = $json['itemClass'];
 		if (is_string($itemClassParam) && strpos($itemClassParam, ',') !== false) {
 			$itemClassList = array_map('trim', explode(',', $itemClassParam));
 		} elseif (is_array($itemClassParam) && count($itemClassParam) > 0) {
@@ -192,14 +194,20 @@ class StocksAllStore extends BaseController
 			$itemClassList = [];
 		}
 
-		$itemCatId = trim($this->getParam('itemLabelCat') ?? '');
+		$itemCatId = trim($json['itemLabelCat'] ?? '');
 		$itemCatId = $itemCatId === '' ? null : $itemCatId;
 
-		$companyId = trim($this->getParam('vendorName') ?? '');
+		$companyId = trim($json['vendorName'] ?? '');
 		$companyId = $companyId === '' ? null : $companyId;
 
+		$itmclstxt = ($json['itmclstxt'] ?? '');
+		$itmclstxt = $itmclstxt === '' ? null : $itmclstxt;
+
+		$vendorText = trim($json['vendorText'] ?? '');
+		$vendorText = $vendorText === '' ? null : $vendorText;
+
 		// 2) Parse inventoryStatus to array
-		$typeParamRaw = $this->getParam('inventoryStatus');
+		$typeParamRaw = $json['inventoryStatus'];
 		if (is_string($typeParamRaw) && strpos($typeParamRaw, ',') !== false) {
 			$typeList = array_map('trim', explode(',', $typeParamRaw));
 		} elseif (is_array($typeParamRaw) && count($typeParamRaw) > 0) {
@@ -210,7 +218,7 @@ class StocksAllStore extends BaseController
 			$typeList = [];
 		}
 
-		$searchParams = $this->getParam('search') ?? [];
+		$searchParams = $json['search'] ?? [];
 		$searchValue = [];
 		if (is_array($searchParams)) {
 			foreach ($searchParams as $key => $value) {
@@ -250,28 +258,17 @@ class StocksAllStore extends BaseController
 		$pdf->setPrintFooter(false);
 		$pdf->AddPage();
 
-		$result  = $this->Global_model->dynamic_search("'tbl_company'", "''", "'name'", 0, 0, "'id:EQ=$companyId'", "''", "''");
-		$vendorMap = !empty($result) ? $result[0]['name'] : '';
-
-		$itemClassCodes = [];
-		foreach ($itemClassList as $oneClassId) {
-			$result  = $this->Global_model->dynamic_search("'tbl_item_class'", "''", "'item_class_code'", 0, 0, "'id:EQ={$oneClassId}'", "''", "''");
-			if (!empty($result) && isset($result[0]['item_class_code'])) {
-				$itemClassCodes[] = $result[0]['item_class_code'];
-			}
-		}
-
-		if (empty($itemClassCodes)) {
-			$itemClassMap = '';  
+		if (empty($itmclstxt)) {
+			$itmclstxt = '';  
 		} else {
-			$itemClassMap = implode(', ', $itemClassCodes);
+			$itmclstxt = implode(', ', $itmclstxt);
 		}
 
 		$filterData = [
-			'Item Classes'     => empty($itemClassMap) ? 'None' : $itemClassMap,
+			'Item Classes'     => empty($itmclstxt) ? 'None' : $itmclstxt,
 			'Item Category'    => $itemCatId      ?? 'None',
 			'Inventory Status' => empty($typeList) ? 'None' : implode(', ', $typeList),
-			'Vendor'           => $vendorMap      ?? 'None',
+			'Vendor'           => $vendorText      ?? 'None',
 		];
 
 		$this->printHeader($pdf, $title);
@@ -312,21 +309,9 @@ class StocksAllStore extends BaseController
 					'Ave Sales Unit',
 					'SWC',
 				];
-			}
+			} 
 
-			// 3c) Fetch data for exactly this one status
-			// $orderColumnIndex = $this->request->getVar("order")[$sectionIndex]['column'] ?? 0;
-			// $orderDirection   = $this->request->getVar("order")[$sectionIndex]['dir']    ?? 'desc';
-
-			// $columnsParam = $this->request->getVar('columns') ?? [];
-			// if (isset($columnsParam[$orderColumnIndex]['data'])) {
-			// 	$orderByColumn = $columnsParam[$orderColumnIndex]['data'];
-			// } else {
-			// 	// fallback if JS did not send a matching index
-			// 	$orderByColumn = 'sum_total_qty';
-			// }
-
-			$ord     = $this->request->getVar("order")[$sectionIndex] ?? [];
+			$ord     = $json["order"][$sectionIndex] ?? [];
 			$orderColumnIndex = $ord['column'] ?? 0;
 			$orderDirection   = strtoupper($ord['dir'] ?? 'desc');
 
@@ -335,7 +320,7 @@ class StocksAllStore extends BaseController
 				$orderByColumn = $ord['colData'];
 			} else {
 				// Otherwise fall back to the old columns[…] array
-				$columnsParam = $this->request->getVar('columns') ?? [];
+				$columnsParam = $json['columns'] ?? [];
 				if (isset($columnsParam[$orderColumnIndex]['data'])) {
 					$orderByColumn = $columnsParam[$orderColumnIndex]['data'];
 				} else {
@@ -446,6 +431,8 @@ class StocksAllStore extends BaseController
 	}
 
 	public function generateExcel() {
+		$json = $this->request->getJSON(true); 
+		// echo json_encode($json); die();
 		$areaId    = null;
 		$ascId     = null;
 		$baTypeId  = null;
@@ -454,7 +441,7 @@ class StocksAllStore extends BaseController
 		$brands    = null;
 
 
-		$itemClassParam = $this->getParam('itemClass');
+		$itemClassParam = $json['itemClass'];
 		if (is_string($itemClassParam) && strpos($itemClassParam, ',') !== false) {
 			$itemClassList = array_map('trim', explode(',', $itemClassParam));
 		}
@@ -468,13 +455,13 @@ class StocksAllStore extends BaseController
 			$itemClassList = [];
 		}
 
-		$itemCatId = trim($this->getParam('itemLabelCat') ?? '');
+		$itemCatId = trim($json['itemLabelCat'] ?? '');
 		$itemCatId = ($itemCatId === '') ? null : $itemCatId;
 
-		$companyId = trim($this->getParam('vendorName') ?? '');
+		$companyId = trim($json['vendorName'] ?? '');
 		$companyId = ($companyId === '') ? null : $companyId;
 
-		$typeParamRaw = $this->getParam('inventoryStatus');
+		$typeParamRaw = $json['inventoryStatus'];
 		if (is_string($typeParamRaw) && strpos($typeParamRaw, ',') !== false) {
 			$typeList = array_map('trim', explode(',', $typeParamRaw));
 		}
@@ -488,7 +475,7 @@ class StocksAllStore extends BaseController
 			$typeList = [];
 		}
 
-		$searchParams = $this->getParam('search') ?? [];
+		$searchParams = $json['search'] ?? [];
 		$searchValue = [];
 		if (is_array($searchParams)) {
 			foreach ($searchParams as $key => $value) {
@@ -505,6 +492,12 @@ class StocksAllStore extends BaseController
 		$heroSku       = [];
 		$skuMin        = 20;
 		$skuMax        = 30;
+
+		$itmclstxt = ($json['itmclstxt'] ?? '');
+		$itmclstxt = $itmclstxt === '' ? null : $itmclstxt;
+
+		$vendorText = trim($json['vendorText'] ?? '');
+		$vendorText = $vendorText === '' ? null : $vendorText;
 
 		if ($sysPar) {
 			$jsonStringHero = $sysPar[0]['hero_sku'];
@@ -611,7 +604,7 @@ class StocksAllStore extends BaseController
 			// 6d) Determine the requested sort column & direction for this status
 			//----------------------------------------------------------------
 			// “order” comes from JS as: order[sectionIndex][column], order[sectionIndex][dir], order[sectionIndex][colData]
-			$ord = $this->request->getVar('order')[$sectionIndex] ?? [];
+			$ord = $json['order'][$sectionIndex] ?? [];
 			$orderColumnIndex = $ord['column'] ?? 0;
 			$orderDirection   = strtoupper($ord['dir'] ?? 'desc');
 
@@ -620,7 +613,7 @@ class StocksAllStore extends BaseController
 				$orderByColumn = $ord['colData'];
 			} else {
 				// fallback to the old “columns[…]” method
-				$columnsParam = $this->request->getVar('columns') ?? [];
+				$columnsParam = $json['columns'] ?? [];
 				if (isset($columnsParam[$orderColumnIndex]['data'])) {
 					$orderByColumn = $columnsParam[$orderColumnIndex]['data'];
 				} else {

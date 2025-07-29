@@ -337,20 +337,72 @@
         let selectedStore = $('#storeNameId').val();
         let selectedBrands = $('#brands').val();   
         let selectedBrandCategories = $('#itemLabel').val();
+        let areaMap = $('#area').val();
+        let ascMap = $('#ascName').val();
+        let baMap = $('#brandAmbassador').val();
+        let storeMap = $('#storeName').val();
+        let itemBrandMap = $('#brands').select2('data').map((item) => {
+            return item.text
+        });
+        let brandLabelTypeMap = $('#itemLabel').select2('data').map((item) => {
+            return item.text
+        });
 
-        let qs = [
-            `area=`             + encodeURIComponent(selectedArea),
-            `asc=`              + encodeURIComponent(selectedAsc),
-            `baType=`           + encodeURIComponent(selectedBaType),
-            `ba=`               + encodeURIComponent(selectedBa),
-            `store=`            + encodeURIComponent(selectedStore),
-            `brands=`           + encodeURIComponent(selectedBrands),
-            `brandCategories=`  + encodeURIComponent(selectedBrandCategories),
-        ].join('&');
+        postData = {
+            area: selectedArea,
+            asc: selectedAsc,
+            baType: selectedBaType,
+            ba: selectedBa,
+            store: selectedStore,
+            brands: selectedBrands,
+            brandCategories: selectedBrandCategories,
+            areaMap: areaMap,
+            ascMap: ascMap,
+            baMap: baMap,
+            storeMap: storeMap,
+            itemBrandMap: itemBrandMap,
+            brandLabelTypeMap: brandLabelTypeMap
+        }
 
         let endpoint = action === 'exportPdf' ? 'per-month-generate-pdf' : 'per-month-generate-excel';
 
-        let url = `${base_url}store/${endpoint}?${qs}`;
+        // let url = `${base_url}store/${endpoint}?${qs}`;
+        let url = `${base_url}store/${endpoint}`;
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Store Sales Performance per Month.pdf'
+                        : 'Store Sales Performance per Month.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
 
         const end_time = new Date();
         const duration = formatDuration(start_time, end_time);
@@ -362,44 +414,6 @@
             <br>Duration: ${duration}
         `;
         logActivity('Store Sales Performance per Month', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
-
-        let fetchedResponse;
-        fetch(url, {
-            method: 'GET',
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server returned ${response.status}`);
-            }
-            fetchedResponse = response;
-            return response.blob();
-        })
-        .then(blob => {
-            const cd = fetchedResponse.headers.get('Content-Disposition');
-            const match = cd && /filename="?([^"]+)"/.exec(cd);
-            let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
-            const filename = rawName
-                || (action === 'exportPdf'
-                    ? 'Store Sales Performance per Month.pdf'
-                    : 'Store Sales Performance per Month.xlsx');
-
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(blobUrl);
-        })
-        .catch(err => {
-            console.error("Download failed:", err);
-            modal.alert("Failed to generate file. Please try again.", "error");
-        })
-        .finally(() => {
-            modal.loading(false);
-        });
     }
 
     function getCalendarWeeks(year) {

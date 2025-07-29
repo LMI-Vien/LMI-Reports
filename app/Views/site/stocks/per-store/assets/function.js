@@ -390,7 +390,36 @@
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
+    function paramsToJSON(params) {
+        const json = {};
+
+        for (const [key, value] of params.entries()) {
+            const keys = key.match(/[^\[\]]+/g); 
+
+            if (keys.length === 1) {
+                json[keys[0]] = value;
+            } else {
+                let temp = json;
+                for (let i = 0; i < keys.length; i++) {
+                    const k = keys[i];
+ 
+                    if (i === keys.length - 1) {
+                        temp[k] = value;
+                    } else { 
+                        if (!temp[k]) {
+                            temp[k] = /^\d+$/.test(keys[i + 1]) ? [] : {};
+                        }
+                        temp = temp[k];
+                    }
+                }
+            }
+        }
+
+        return json;
+    }
+
     function handleAction(action) {
+        modal.loading(true);
         const selectedInventoryStatus = $('#inventoryStatus').val();
         var tableSlowMoving = $('input[aria-controls="table_slowMoving"]').val() || '';
         var tableHero = $('input[aria-controls="table_hero"]').val() || '';
@@ -399,13 +428,14 @@
 
         const params = new URLSearchParams();
         params.append('area', $('#areaId').val() || '');
-
-area = $('#areaId').text()
-
+        params.append('areaText', $('#area').val() || '');
         params.append('asc', $('#ascNameId').val() || '');
+        params.append('ascText', $('#ascName').val() || '');
         params.append('baType', $('input[name="filterType"]:checked').val() || '');
         params.append('ba', $('#brandAmbassadorId').val() || '');
+        params.append('baText', $('#brandAmbassador').val() || '');
         params.append('store', $('#storeNameId').val() || '');
+        params.append('storeText', $('#storeName').val() || '');
         params.append('types', JSON.stringify(selectedInventoryStatus));
         params.append('table_slowMoving', tableSlowMoving);
         params.append('table_hero', tableHero);
@@ -413,17 +443,49 @@ area = $('#areaId').text()
         params.append('table_overStock', tableOverStock);
 
         const brands = $('#brands').val();
-        if (Array.isArray(brands)) {
-            brands.forEach(b => params.append('brands[]', b));
-        } else {
-            params.append('brands', brands || '');
-        }
+        params.append('brands', JSON.stringify(brands));
+        console.log(brands, 'progress 2')
 
         const linkto = action === 'export_pdf'
             ? "stocks/per-store-generate-pdf?"
             : "stocks/per-store-generate-excel-ba?";
 
-        window.open(base_url + linkto + params.toString(), '_blank');
+        let url = `${base_url}${linkto}`;
+        const jsonData = paramsToJSON(params);
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(jsonData),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Week by Week Stock Data of All Stores.pdf'
+                        : 'Week by Week Stock Data of All Stores.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        })
     }
 
     function getCalendarWeeks(year) {
