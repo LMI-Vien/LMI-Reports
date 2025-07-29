@@ -486,35 +486,65 @@
     }
 
     function delete_data(id) {
-        get_field_values("tbl_company", "name", "id", [id], (res) => {
-            let code = res[id];
-            let message = is_json(confirm_delete_message);
-            message.message = `Delete Company <b><i>${code}</i></b> from Company Masterfile?`;
+        var url = "<?= base_url('cms/global_controller'); ?>";
+        var data = {
+            event: "getCompanyCounts"
+        };
 
-            modal.confirm(JSON.stringify(message),function(result){
-                if(result){ 
-                    var url = "<?= base_url('cms/global_controller');?>";
-                    var data = {
-                        event : "update",
-                        table : "tbl_company",
-                        field : "id",
-                        where : id, 
-                        data : {
-                                updated_date : formatDate(new Date()),
-                                updated_by : user_id,
-                                status : -2
-                        }  
-                    }
-                    aJax.post(url,data,function(result){
-                        var obj = is_json(result);
-                        modal.alert(success_delete_message, 'success', function() {
-                            location.reload();
-                        });
-                    });
+        aJax.post(url, data, function(response) {
+            try {
+                var obj = JSON.parse(response);
+                let company = obj.find(row => row.id == id);
+
+                if (!company) {
+                    modal.alert("Company not found in count list.", "error");
+                    return;
                 }
-    
+
+                if (Number(company.vmi_comp_count) > 0 || Number(company.so_comp_count) > 0) {
+                    modal.alert("This company is in use and cannot be deleted.", "error");
+                    return;
+                }
+
+                get_field_values("tbl_company", "name", "id", [id], (res) => {
+                    let company_name = res[id];
+                    let message = is_json(confirm_delete_message);
+                    message.message = `Delete <b><i>${company_name}</i></b> from Company Masterfile?`;
+
+                    modal.confirm(JSON.stringify(message), function(result) {
+                        if (result) {
+                            proceedDelete(id);
+                        }
+                    });
+                });
+
+            } catch (e) {
+                console.error("Failed to parse response:", response);
+                modal.alert("Invalid server response. Please contact administrator.", "error");
+            }
+        });
+    }
+
+
+    function proceedDelete(id) {
+        var url = "<?= base_url('cms/global_controller');?>";
+        var data = {
+            event : "update",
+            table : "tbl_company",
+            field : "id",
+            where : id, 
+            data : {
+                    updated_date : formatDate(new Date()),
+                    updated_by : user_id,
+                    status : -2
+            }  
+        }
+        aJax.post(url,data,function(result){
+            var obj = is_json(result);
+            modal.alert(success_delete_message, 'success', function() {
+                location.reload();
             });
-        })
+        });
     }
 
     function formatDate(date) {
@@ -547,11 +577,103 @@
         }
     }
 
+    // $(document).on('click', '.btn_status', function (e) {
+    //     var status = $(this).attr("data-status");
+    //     var modal_obj = "";
+    //     var modal_alert_success = "";
+    //     var hasExecuted = false; // Prevents multiple executions
+
+    //     let id = $("input.select:checked");
+    //     let code = [];
+    //     let code_string = "selected data";
+
+    //     id.each(function () {
+    //         code.push($(this).attr("data-id"));
+    //     })
+
+    //     get_field_values("tbl_company", "name", "id", code, (res) => {
+    //         if(code.length == 1) {
+    //             code_string = `Company <b><i>${res[code[0]]}</i></b>`;
+    //         }
+    //     })
+
+    //     if (parseInt(status) === -2) {
+    //         message = is_json(confirm_delete_message);
+    //         message.message = `Delete ${code_string} from Company Masterfile?`;
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_delete_message;
+    //     } else if (parseInt(status) === 1) {
+    //         message = is_json(confirm_publish_message);
+    //         message.message = `Publish ${code_string} from Company Masterfile?`;
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_publish_message;
+    //     } else {
+    //         message = is_json(confirm_unpublish_message);
+    //         message.message = `Unpublish ${code_string} from Company Masterile?`;
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_unpublish_message;
+    //     }
+    //     // var counter = 0; 
+    //     // $('.select:checked').each(function () {
+    //     //     var id = $(this).attr('data-id');
+    //     //     if(id){
+    //     //         counter++;
+    //     //     }
+    //     //  });
+    //     modal.confirm(modal_obj, function (result) {
+    //         if (result) {
+    //             var url = "<?= base_url('cms/global_controller');?>";
+    //             var dataList = [];
+                
+    //             $('.select:checked').each(function () {
+    //                 var id = $(this).attr('data-id');
+    //                 dataList.push({
+    //                     event: "update",
+    //                     table: "tbl_company",
+    //                     field: "id",
+    //                     where: id,
+    //                     data: {
+    //                         status: status,
+    //                         updated_date: formatDate(new Date())
+    //                     }
+    //                 });
+    //             });
+
+    //             if (dataList.length === 0) return;
+
+    //             var processed = 0;
+    //             dataList.forEach(function (data, index) {
+    //                 aJax.post(url, data, function (result) {
+    //                     if (hasExecuted) return; // Prevents multiple executions
+
+    //                     modal.loading(false);
+    //                     processed++;
+
+    //                     if (result === "success") {
+    //                         if (!hasExecuted) {
+    //                             hasExecuted = true;
+    //                             $('.btn_status').hide();
+    //                             modal.alert(modal_alert_success, 'success', function () {
+    //                                 location.reload();
+    //                             });
+    //                         }
+    //                     } else {
+    //                         if (!hasExecuted) {
+    //                             hasExecuted = true;
+    //                             modal.alert(failed_transaction_message, function () {});
+    //                         }
+    //                     }
+    //                 });
+    //             });
+    //         }
+    //     });
+    // });
+
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
         var modal_obj = "";
         var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
+        var hasExecuted = false;
 
         let id = $("input.select:checked");
         let code = [];
@@ -559,44 +681,79 @@
 
         id.each(function () {
             code.push($(this).attr("data-id"));
-        })
+        });
 
         get_field_values("tbl_company", "name", "id", code, (res) => {
-            if(code.length == 1) {
+            if (code.length === 1) {
                 code_string = `Company <b><i>${res[code[0]]}</i></b>`;
             }
-        })
 
-        if (parseInt(status) === -2) {
-            message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Company Masterfile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_delete_message;
-        } else if (parseInt(status) === 1) {
-            message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Company Masterfile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_publish_message;
-        } else {
-            message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Company Masterile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_unpublish_message;
-        }
-        // var counter = 0; 
-        // $('.select:checked').each(function () {
-        //     var id = $(this).attr('data-id');
-        //     if(id){
-        //         counter++;
-        //     }
-        //  });
-        modal.confirm(modal_obj, function (result) {
-            if (result) {
+            // === DELETE logic with usage check ===
+            if (parseInt(status) === -2) {
+                var url = "<?= base_url('cms/global_controller'); ?>";
+                var usageCheck = { event: "getCompanyCounts" };
+
+                aJax.post(url, usageCheck, function (response) {
+                    try {
+                        var usageData = JSON.parse(response);
+                        let blocked = [];
+
+                        code.forEach(function (cid) {
+                            let company = usageData.find(row => row.id == cid);
+                            if (company && (Number(company.vmi_comp_count) > 0 || Number(company.so_comp_count) > 0)) {
+                                blocked.push(res[cid]);
+                            }
+                        });
+
+                        if (blocked.length > 0) {
+                            if (blocked.length === 1) {
+                                modal.alert(`The company <b>${blocked[0]}</b> is in use and cannot be deleted.`, "error");
+                            } else {
+                                modal.alert(`Some selected companies are in use and cannot be deleted.`, "error");
+                            }
+                            return;
+                        }
+
+                        // Safe to delete
+                        let message = is_json(confirm_delete_message);
+                        message.message = `Delete ${code_string} from Company Masterfile?`;
+                        modal_obj = JSON.stringify(message);
+                        modal_alert_success = success_delete_message;
+
+                        handleConfirmAndUpdate(code, status, modal_obj, modal_alert_success);
+                    } catch (e) {
+                        console.error("Usage check failed:", response);
+                        modal.alert("Error validating company usage.", "error");
+                    }
+                });
+
+            } else {
+                // === Publish / Unpublish logic ===
+                let message;
+                if (parseInt(status) === 1) {
+                    message = is_json(confirm_publish_message);
+                    message.message = `Publish ${code_string} from Company Masterfile?`;
+                    modal_alert_success = success_publish_message;
+                } else {
+                    message = is_json(confirm_unpublish_message);
+                    message.message = `Unpublish ${code_string} from Company Masterfile?`;
+                    modal_alert_success = success_unpublish_message;
+                }
+
+                modal_obj = JSON.stringify(message);
+                handleConfirmAndUpdate(code, status, modal_obj, modal_alert_success);
+            }
+        });
+
+        // Centralized handler
+        function handleConfirmAndUpdate(code, status, modal_obj, modal_alert_success) {
+            modal.confirm(modal_obj, function (result) {
+                if (!result) return;
+
                 var url = "<?= base_url('cms/global_controller');?>";
                 var dataList = [];
-                
-                $('.select:checked').each(function () {
-                    var id = $(this).attr('data-id');
+
+                code.forEach(function (id) {
                     dataList.push({
                         event: "update",
                         table: "tbl_company",
@@ -612,10 +769,11 @@
                 if (dataList.length === 0) return;
 
                 var processed = 0;
-                dataList.forEach(function (data, index) {
-                    aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; // Prevents multiple executions
 
+                dataList.forEach(function (data) {
+                    if (hasExecuted) return;
+
+                    aJax.post(url, data, function (result) {
                         modal.loading(false);
                         processed++;
 
@@ -635,8 +793,8 @@
                         }
                     });
                 });
-            }
-        });
+            });
+        }
     });
 
     function ViewDateformat(dateString) {

@@ -912,6 +912,22 @@ class GlobalController extends BaseController
 					]);
 			    }
 			    break;
+			case 'getYearCounts':
+				try{
+					$result_data = $this->Global_model->getYearCounts();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+			break;
+			case 'getCompanyCounts':
+				try{
+					$result_data = $this->Global_model->getCompanyCounts();
+					echo json_encode($result_data);
+				} catch (Error $e) {
+					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
+				}
+			break;
 		}
 		
 	}
