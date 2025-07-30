@@ -9,6 +9,8 @@ $routes->get('/', 'Login::login');
 $routes->get('/dashboard', 'Dashboard::index');
 $routes->get('/dashboard/get-counts', 'Dashboard::getCounts');
 $routes->post('/dashboard/get-ba-asc-name', 'Dashboard::get_ba_asc_name');
+$routes->post('/dashboard/export-announcement-pdf', 'Dashboard::exportAnnouncementPdf');
+$routes->post('/dashboard/export-announcement-excel', 'Dashboard::exportAnnouncementExcel');
 
 $routes->group('stocks/', static function ($routes) {
     //per store
