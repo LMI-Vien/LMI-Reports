@@ -3,6 +3,9 @@
 namespace App\Controllers;
 
 use Config\Database;
+use TCPDF;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Dashboard extends BaseController
 {
@@ -140,5 +143,107 @@ class Dashboard extends BaseController
 	    return $this->response->setJSON($response);
 	}
 
+	// ================================= Header for pdf export =================================
+	private function printHeader($pdf, $title) {
+		$pdf->SetFont('helvetica', '', 12);
+		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
+		$pdf->SetFont('helvetica', '', 10);
+		$pdf->Cell(0, 5, $title, 0, 1, 'C');
+		$pdf->Ln(5);
+	}
+
+	public function exportAnnouncementPdf() {
+		$request = $this->request->getJSON();
+		$id = $request->id ?? null;
+
+		if (!$id) {
+			http_response_code(400);
+			echo 'Missing ID';
+			exit;
+		}
+
+		$announcement = $this->db->table('tbl_announcements')->where('id', $id)->get()->getRow();
+		if (!$announcement) {
+			http_response_code(404);
+			echo 'Announcement not found';
+			exit;
+		}
+
+		$title = "Announcement";
+		$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf->SetCreator('LMI SFA');
+		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
+		$pdf->SetTitle($title);
+		$pdf->setPrintHeader(false);
+		$pdf->setPrintFooter(false);
+		$pdf->AddPage();
+
+		$this->printHeader($pdf, $title);
+
+		$html = "<h2>{$announcement->title}</h2>
+				<p><strong>Type:</strong> {$announcement->description_1}</p>
+				<p><strong>Active From:</strong> " . date('F j, Y', strtotime($announcement->start_date)) . " to " . date('F j, Y', strtotime($announcement->end_date)) . "</p>
+				<hr>
+				<p>{$announcement->description_2}</p>
+				<p>{$announcement->description_3}</p>";
+
+		$pdf->writeHTML($html, true, false, true, false, '');
+
+		$pdf->Output($title . '.pdf', 'D');
+		exit;
+	}
+
+	public function exportAnnouncementExcel() {
+		$request = $this->request->getJSON();
+		$id = $request->id ?? null;
+
+		$announcement = $this->db->table('tbl_announcements')
+			->where('id', $id)
+			->get()
+			->getRow();
+
+		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
+		$sheet->setCellValue('A2', 'Announcement Details');
+		$sheet->mergeCells('A1:B1');
+		$sheet->mergeCells('A2:B2');
+
+		$sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(14);
+		$sheet->getStyle('A1:A2')->getAlignment()->setHorizontal('center');
+
+		$sheet->setCellValue('A4', 'Title');
+		$sheet->setCellValue('B4', $announcement->title);
+
+		$sheet->setCellValue('A5', 'Type');
+		$sheet->setCellValue('B5', $announcement->description_1);
+
+		$sheet->setCellValue('A6', 'Start Date');
+		$sheet->setCellValue('B6', date('F j, Y', strtotime($announcement->start_date)));
+
+		$sheet->setCellValue('A7', 'End Date');
+		$sheet->setCellValue('B7', date('F j, Y', strtotime($announcement->end_date)));
+
+		$sheet->setCellValue('A9', 'Description');
+		$sheet->setCellValue('B9', $announcement->description_2);
+
+		// $sheet->setCellValue('A9', 'Description');
+		$sheet->setCellValue('B10', $announcement->description_3);
+
+		// Auto size columns
+		foreach (range('A', 'B') as $col) {
+			$sheet->getColumnDimension($col)->setAutoSize(true);
+		}
+
+		$filename = 'Announcement.xlsx';
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Disposition: attachment; filename="' . $filename . '"');
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
 
 }

@@ -56,6 +56,10 @@
   color: #fff !important;
 }
 
+.btn-spacing {
+    margin-right: 5px;
+  }
+
 </style>
 
 <div class="content-wrapper p-3" style="display: block;">
@@ -135,6 +139,21 @@
                     to <strong><?= date('F j, Y', strtotime($announcement->end_date)) ?></strong>
                   </div>
                 </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button 
+                      class="btn btn-sm btn-outline-danger rounded-pill btn-spacing" 
+                      onclick="handleAction('exportPdf', <?= $announcement->id ?>)"
+                    >
+                      PDF
+                    </button>
+                    <button 
+                      class="btn btn-sm btn-outline-success rounded-pill" 
+                      onclick="handleAction('exportExcel', <?= $announcement->id ?>)"
+                    >
+                      Excel
+                    </button>
+                </div>
                 
                 <!-- <div class="d-flex mb-2">
                   <?php if (!empty($announcement->description_3)): ?>
@@ -205,6 +224,7 @@
 <script>
   var url = "<?= base_url("cms/global_controller");?>";
   var announcementTypes = <?= json_encode($announcementTypes) ?>;
+  const START_TIME = new Date();  
   
   $(document).ready(function () {
   })
@@ -288,5 +308,58 @@
         getDetails(res)
       }
   )
+  }
+
+  function handleAction(action, id) {
+      modal.loading(true);
+      const baseUrl = "<?= base_url('dashboard') ?>";
+      const url = action === 'exportPdf' ? `${baseUrl}/export-announcement-pdf` : `${baseUrl}/export-announcement-excel`;
+
+      $.ajax({
+          url: url,
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ id: id }),
+          xhrFields: {
+              responseType: 'blob' // This handles the binary PDF/Excel file
+          },
+          success: function(blob, status, xhr) {
+              const cd = xhr.getResponseHeader('Content-Disposition');
+              const match = cd && /filename="?([^"]+)"/.exec(cd);
+              let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+              const filename = rawName
+                  || (action === 'exportPdf'
+                      ? 'Announcement.pdf'
+                      : 'Announcement.xlsx');
+
+              const blobUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = blobUrl;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(blobUrl);
+          },
+          error: function(xhr, status, error) {
+              alert(xhr+' - '+status+' - '+error);
+              modal.loading(false);
+          },
+          complete: function() {
+              modal.loading(false);
+          }
+      });
+
+      const END_TIME = new Date();
+      const DURATION = formatDuration(START_TIME, END_TIME);
+
+      const REMARKS = `
+          Exported Successfully!
+          <br>Start Time: ${formatReadableDate(START_TIME)}
+          <br>End Time: ${formatReadableDate(END_TIME)}
+          <br>Duration: ${DURATION}
+      `;
+      logActivity('Announcement', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', REMARKS, '-', null, null)
+
   }
 </script>
