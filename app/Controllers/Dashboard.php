@@ -156,18 +156,7 @@ class Dashboard extends BaseController
 		$request = $this->request->getJSON();
 		$id = $request->id ?? null;
 
-		if (!$id) {
-			http_response_code(400);
-			echo 'Missing ID';
-			exit;
-		}
-
 		$announcement = $this->db->table('tbl_announcements')->where('id', $id)->get()->getRow();
-		if (!$announcement) {
-			http_response_code(404);
-			echo 'Announcement not found';
-			exit;
-		}
 
 		$title = "Announcement";
 		$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
