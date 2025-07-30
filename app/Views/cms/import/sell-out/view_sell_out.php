@@ -117,15 +117,6 @@
             }
         )
     }
-    
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
-    }
 
     function renderDetails(new_query) {
         query = 'data_header_id = '+new_query;

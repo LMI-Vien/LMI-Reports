@@ -255,9 +255,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and s.code like \'%'+search_input+'%\' or '+query+' and s.description like \'%'+search_input+'%\' or '+query+' and ba.code like \'%'+search_input+'%\' or '+query+' and ba.name like \'%'+search_input+'%\'';
+            new_query += ' and (s.code like \'%'+escaped_keyword+'%\' or s.description like \'%'+escaped_keyword+'%\' or ba.code like \'%'+escaped_keyword+'%\' or '+query+' and ba.name like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -343,9 +344,11 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
+
         offset = 1;
         new_query = query;
-        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(query);
     });
@@ -436,9 +439,8 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.code) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.description) + "</td>";
-                        // html += "<td scope=\"col\">" + (y.brand_ambassador) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.code, 15) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.description, 15) + "</td>";
                         html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -598,18 +600,16 @@
                 minLength: 0,
                 select: function(event, ui) {
                     // Store selected value in data attribute
-                    $(this).val(ui.item.label);
-                    
-                    // Format the value as "ID - Name" for both BA and special cases
+                    $(this).val(ui.item.label);                    
                     if (ui.item.value === "-5") {
-                        $(this).data("value", "-5 - Vacant");  // Format Vacant as "ID - Name"
+                        $(this).data("value", "-5 - Vacant");
                     } else if (ui.item.value === "-6") {
-                        $(this).data("value", "-6 - Non BA");  // Format Non BA as "ID - Name"
+                        $(this).data("value", "-6 - Non BA");
                     } else {
-                        $(this).data("value", ui.item.value);  // Regular BA (already formatted correctly)
+                        $(this).data("value", ui.item.value);
                     }
                     
-                    return false;  // prevent default behavior
+                    return false;
                 }
             }).focus(function () {
                 $(this).autocomplete("search", "");
@@ -624,26 +624,19 @@
             $footer.append(buttons.edit);
             $('.add_line').attr('disabled', false)
             $('.add_line').attr('readonly', false)
-            //set_field_state('.add_line', false);
         }
         if (actions === 'view') {
             set_field_state('.add_line', true);
         }
         $footer.append(buttons.close);
-
-        // Disable background content interaction
         $contentWrapper.attr('inert', '');
-
-        // Move focus inside modal when opened
         $modal.on('shown.bs.modal', function () {
             $(this).find('input, textarea, button, select').filter(':visible:first').focus();
         });
 
         $modal.modal('show');
-
-        // Fix focus issue when modal is hidden
         $modal.on('hidden.bs.modal', function () {
-            $contentWrapper.removeAttr('inert');  // Re-enable background interaction
+            $contentWrapper.removeAttr('inert');
             if (window.lastFocusedElement) {
                 window.lastFocusedElement.focus();
             }
@@ -671,89 +664,6 @@
         return new_btn;
     };
 
-    // function populate_modal(inp_id, actions) {
-    //     var query = "status >= 0 and id = " + inp_id;
-    //     var url = "<?= base_url('cms/global_controller');?>";
-    //     var data = {
-    //         event : "list", 
-    //         select : "id, code, description, status",
-    //         query : query, 
-    //         table : "tbl_store"
-    //     };
-
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result);
-    //         if(obj){
-    //             $.each(obj, function(index,asc) {
-    //                 $('#id').val(asc.id);
-    //                 $('#code').val(asc.code);
-    //                 $('#description').val(asc.description);
-    //                 if(asc.status == 1) {
-    //                     $('#status').prop('checked', true)
-    //                 } else {
-    //                     $('#status').prop('checked', false)
-    //                 }
-
-    //                 let line = 0;
-    //                 var readonly = '';
-    //                 var disabled = '';
-
-    //                 let $baName_list = $('#baName_list');
-
-    //                 $.each(get_store_ba(asc.id), (x, y) => {
-    //                     if (actions === 'view') {
-    //                         readonly = 'readonly';
-    //                         disabled = 'disabled';
-    //                     } else {
-    //                         readonly = '';
-    //                         disabled = '';
-    //                     }
-    //                     get_field_values('tbl_brand_ambassador', 'name', 'id', [y.brand_ambassador_id], (res) => {
-    //                         for (let key in res) {
-    //                             get_field_values('tbl_brand_ambassador', 'code', 'id', [key], (res1) => {
-    //                                 for (let key1 in res1) {
-    //                                     if (actions === 'edit') {
-    //                                         if (line === 0) {
-    //                                             readonly = '';
-    //                                             disabled = 'disabled';
-    //                                         } else {
-    //                                             readonly = 'readonly';
-    //                                             disabled = '';
-    //                                         }
-    //                                     }
-
-    //                                     let html = `
-    //                                     <div id="line_${line}" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
-    //                                         <input id='baName_${line}' class='form-control' placeholder='Select Brand Ambassador' value='${res1[key]} - ${res[key]}' ${actions === 'view' ? 'readonly' : ''}>
-    //                                         <button type="button" class="rmv-btn" onclick="remove_line(${line})" ${disabled} ${readonly}>
-    //                                             <i class="fa fa-minus" aria-hidden="true"></i>
-    //                                         </button>
-    //                                     </div>
-    //                                     `;
-
-    //                                     $baName_list.append(html); 
-
-    //                                     $(`#baName_${line}`).autocomplete({
-    //                                         source: function(request, response) {
-    //                                             var results = $.ui.autocomplete.filter(brandAmbassadorName, request.term);
-    //                                             var uniqueResults = [...new Set(results)];
-    //                                             response(uniqueResults.slice(0, 10));
-    //                                         },
-    //                                     });
-
-    //                                     get_baName(x, `baName_${line}`); 
-
-    //                                     line++; 
-    //                                 }
-    //                             });
-    //                         }
-    //                     });
-    //                 });
-    //             }); 
-    //         }
-    //     });
-    // };
-
     function populate_modal(inp_id, actions) {
         var query = "status >= 0 and id = " + inp_id;
         var url   = "<?= base_url('cms/global_controller');?>";
@@ -780,7 +690,6 @@
 
                 $.each(get_store_ba(asc.id), (x, y) => {
                     var baId = y.brand_ambassador_id;
-                    // determine readonly/disabled for the remove-button + input
                     var inputReadonly = '';
                     var btnDisabled   = '';
                     if (actions === 'view') {
@@ -909,16 +818,12 @@
         var status_val  = chk_status ? 1 : 0;
         var linenum     = 0;
         var unique_brandAmba = [];
-        // var unique_brandAmbs = [];
         var brandAmba_list   = $('#baName_list');
 
         let modal_alert_success = actions === 'update' ? success_update_message : success_save_message;
-
-        // 1) parse + dedupe into unique string codes
         brandAmba_list.find('input').each(function() {
-            var raw = $(this).val().trim(); // e.g. "141-41-2 - John Doe"
+            var raw = $(this).val().trim();
             var baCode;
-            // var baDesc;
 
             if (raw === "Vacant") {
                 baCode = "-5";
@@ -929,60 +834,17 @@
             } else {
                 var parts = raw.split(' - ');
                 if (parts.length === 2) {
-                    baCode = parts[0].trim(); // allow codes like "141-41-2"
-                    // baDesc = parts[1].trim();
+                    baCode = parts[0].trim();
                 } else {
-                    return; // invalid format
+                    return;
                 }
             }
 
             if (!unique_brandAmba.includes(baCode)) {
                 unique_brandAmba.push(baCode);
             }
-
-            // if (!unique_brandAmbs.includes(baDesc)) {
-            //     unique_brandAmbs.push(baDesc);
-            // }
-
             linenum++;
         });
-
-        // let search_string = unique_brandAmbs.join('|');
-        // dynamic_search(
-        //     "'tbl_brand_ambassador_group a'", 
-        //     "'left join tbl_brand_ambassador b on a.brand_ambassador_id = b.id'", 
-        //     "'*'", 
-        //     0, 
-        //     0, 
-        //     `'b.name:IN=${search_string}'`,
-        //     `''`, 
-        //     `''`,
-        //     (res) => {
-        //         console.clear();
-        //         let err_msg = 'These Brand Ambassadors have already been added to a different Store.';
-
-        //         let invalidItems = res.filter(item => item.store_id !== id);
-
-        //         if (invalidItems.length !== 0) {
-        //             $.each(invalidItems, function(index, item) {
-        //             });
-
-        //             modal.loading(false);
-        //             modal.alert(err_msg, 'error', function() {});
-        //             return;
-        //         } else {
-        //             proceedWithRestOfLogic();
-        //         }
-        //     }
-        // );
-
-        // function proceedWithRestOfLogic() {
-        //     let err_msg = 'Continue.';
-        //     modal.loading(false);
-        //     modal.alert(err_msg, 'success', function() {});
-        //     return;
-        // }
-        // return;
 
         if (unique_brandAmba.length === 0) {
             return modal.alert('Please select at least one Brand Ambassador before saving.', 'warning');
@@ -1056,13 +918,11 @@
                 get_field_values('tbl_brand_ambassador', 'code', 'code', normal, function(res) {
                     // res is { 1: '2025-05-001', 2: '123-45-6', ... }
 
-                    // build code → id map
                     var codeToId = {};
                     Object.entries(res).forEach(function([idStr, codeStr]) {
                         codeToId[codeStr] = parseInt(idStr, 10);
                     });
 
-                    // find missing codes
                     var missing = normal.filter(function(code) {
                         return !(code in codeToId);
                     });
@@ -1072,7 +932,6 @@
                         return modal.alert('The following Brand Ambassador codes were not found in the masterfile: ' + missing.join(', '),'error');
                     }
 
-                    // build your batch using the mapped IDs
                     Object.entries(codeToId).forEach(function([codeStr, id]) {
                         batch.push({
                         store_id:            storeId,
@@ -1185,13 +1044,11 @@
                         try {
                             var obj = JSON.parse(response);
 
-                            // Handle empty or invalid response more gracefully
                             if (!Array.isArray(obj)) { 
                                 modal.alert("Error processing response data.", "error", ()=>{});
                                 return;
                             }
 
-                            // If the response is empty, proceed to deletion (no related data)
                             if (obj.length === 0) {
                                 proceed_delete(id); 
                                 return;
@@ -1265,20 +1122,14 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = e.target.result;
-
-            // Read as binary instead of plain text
             const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-            // Ensure special characters like "ñ" are correctly preserved
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
                     let value = row[key];
-
-                    // Convert numbers to text while keeping dates unchanged
                     if (typeof value === "number") {
                         value = String(value);
                     }
@@ -1293,7 +1144,6 @@
             });
         };
 
-        // Use readAsBinaryString instead of readAsText
         reader.readAsBinaryString(file);
     }
 
@@ -1457,157 +1307,6 @@
         };
     };
 
-    //backup
-    // function saveValidatedData(valid_data, ba_per_store) {
-    //     let batch_size = 5000;
-    //     let total_batches = Math.ceil(valid_data.length / batch_size);
-    //     let batch_index = 0;
-    //     let retry_count = 0;
-    //     let max_retries = 5; 
-    //     let errorLogs = [];
-    //     let url = "<?= base_url('cms/global_controller');?>";
-    //     let table = 'tbl_store';
-    //     let selected_fields = ['id', 'code', 'description'];
-
-    //     //for lookup of duplicate recors
-    //     const matchFields = ["code", "description"];  
-    //     const matchType = "OR";  //use OR/AND depending on the condition
-    //     modal.loading_progress(true, "Validating and Saving data...");
-
-    //     // Fetch existing records to determine insert vs. update
-    //     aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-    //         let result = JSON.parse(response);
-    //         let existingMap = new Map(); // Stores records using composite keys
-
-    //         if (result.existing) {
-    //             result.existing.forEach(record => {
-    //                 let key = matchFields.map(field => record[field] || "").join("|"); 
-    //                 existingMap.set(key, record.id);
-    //             });
-    //         }
-
-    //         function updateOverallProgress(stepName, completed, total) {
-    //             let progress = Math.round((completed / total) * 100);
-    //             updateSwalProgress(stepName, progress);
-    //         }
-
-    //         function processNextBatch() {
-    //             if (batch_index >= total_batches) {
-    //                 modal.loading_progress(false);
-    //                 if (errorLogs.length > 0) {
-    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-    //                     modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-    //                 } else {
-    //                     modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-    //                 }
-    //                 return;
-    //             }
-
-    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-    //             let newRecords = [];
-    //             let updateRecords = [];
-
-    //             batch.forEach(row => {
-    //                 let matchedId = null;
-
-    //                 if (matchType === "AND") {
-    //                     let key = matchFields.map(field => row[field] || "").join("|");
-    //                     if (existingMap.has(key)) {
-    //                         matchedId = existingMap.get(key);
-    //                     }
-    //                 } else {
-    //                     for (let [key, id] of existingMap.entries()) {
-    //                         let keyParts = key.split("|");
-
-    //                         // for (let field of matchFields) {
-    //                         //     if (keyParts.includes(row[field])) {
-    //                         //         matchedId = id;
-    //                         //     }
-    //                         // }
-
-    //                         if (keyParts[0] === row["code"]) {
-    //                             matchedId = id;
-    //                             break; // Stop looping once a match is found
-    //                         }
-
-    //                         // if (matchedId) break; // Stop looping if we found a match
-    //                     }
-    //                 }
-
-    //                 if (matchedId) {
-    //                     row.id = matchedId;
-    //                     row.updated_date = formatDate(new Date());
-    //                     delete row.created_date;
-    //                     updateRecords.push(row);
-    //                 } else {
-    //                     row.created_by = user_id;
-    //                     row.created_date = formatDate(new Date());
-    //                     newRecords.push(row);
-    //                 }
-    //             });
-
-    //             function processUpdates() {
-    //                 return new Promise((resolve) => {
-    //                     if (updateRecords.length > 0) {
-    //                         batch_update(url, updateRecords, "tbl_store", "id", false, (response) => {
-    //                             if (response.message !== 'success') {
-    //                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             function processInserts() {
-    //                 return new Promise((resolve) => {
-    //                     if (newRecords.length > 0) {
-    //                         batch_insert(url, newRecords, "tbl_store", false, (response) => {
-    //                             if (response.message === 'success') {
-    //                                 updateOverallProgress("Saving Store...", batch_index + 1, total_batches);
-    //                             } else {
-    //                                 errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             function handleSaveError() {
-    //                 if (retry_count < max_retries) {
-    //                     retry_count++;
-    //                     let wait_time = Math.pow(2, retry_count) * 1000;
-    //                     setTimeout(() => {
-    //                         processInserts().then(() => {
-    //                             batch_index++;
-    //                             retry_count = 0;
-    //                             processNextBatch();
-    //                         }).catch(handleSaveError);
-    //                     }, wait_time);
-    //                 } else {
-    //                     modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-    //                 }
-    //             }
-
-    //             // Execute updates first, then inserts, then proceed to next batch
-    //             processUpdates()
-    //                 .then(processInserts)
-    //                 .then(() => {
-    //                     batch_index++;
-    //                     setTimeout(processNextBatch, 300);
-    //                 })
-    //                 .catch(handleSaveError);
-    //         }
-
-    //         setTimeout(processNextBatch, 1000);
-    //     });
-    // }
-
     function saveValidatedData(valid_data, ba_per_store) {
         const overallStart = new Date();
         let batch_size = 5000;
@@ -1619,12 +1318,11 @@
         let selected_fields = ['id', 'code', 'description'];
 
         const existingMapByCode = new Map(), existingMapByDescription = new Map();
-        const matchType = "OR";  //use OR/AND depending on the condition
+        const matchType = "OR"; 
 
         modal.loading_progress(true, "Validating and Saving data...");
 
         aJax.post(url, { table: table, event: "fetch_existing", status: true, selected_fields: selected_fields }, function(response) {
-            // let result = JSON.parse(response);
             const result = JSON.parse(response);
             const allEntries = result.existing || [];
 
@@ -1752,73 +1450,6 @@
         });
     }
 
-    // backup
-    // function processBaPerStore(inserted_ids, ba_per_store, callback) {
-    //     let batch_size = 5000;
-    //     let baBatchIndex = 0;
-    //     let baDataKeys = Object.keys(ba_per_store);
-    //     let total_ba_batches = Math.ceil(baDataKeys.length / batch_size);
-    //     let insertedMap = {};
-
-    //     inserted_ids.forEach(({ id, code }) => {
-    //         insertedMap[code] = id;
-    //     });
-
-    //     function processNextStoreBatch() {
-    //         if (baBatchIndex >= total_ba_batches) {
-    //             callback();
-    //             return;
-    //         }
-
-    //         let chunkKeys = baDataKeys.slice(baBatchIndex * batch_size, (baBatchIndex + 1) * batch_size);
-    //         let chunkData = [];
-    //         let storeIdsToDelete = [];
-
-    //         chunkKeys.forEach(code => {
-    //             if (insertedMap[code]) {
-    //                 let store_id = insertedMap[code];
-    //                 let ba_ids = ba_per_store[code];
-    //                 storeIdsToDelete.push(store_id);
-    //                 ba_ids.forEach(ba_id => {
-    //                     chunkData.push({
-    //                         store_id: store_id,
-    //                         brand_ambassador_id: ba_id,
-    //                         created_by: user_id,
-    //                         created_date: formatDate(new Date()),
-    //                         updated_date: formatDate(new Date())
-    //                     });
-    //                 });
-    //             }
-    //         });
-
-    //         function insertNewStoreRecords(chunkData) {
-    //             if (chunkData.length > 0) {
-    //                 batch_insert(url, chunkData, "tbl_brand_ambassador_group", false, function(response) {
-    //                     baBatchIndex++;
-    //                     setTimeout(processNextStoreBatch, 100);
-    //                 });
-    //             } else {
-    //                 baBatchIndex++;
-    //                 setTimeout(processNextStoreBatch, 100);
-    //             }
-    //         }
-
-    //         if (storeIdsToDelete.length > 0) {
-    //             batch_delete(url, "tbl_brand_ambassador_group", "store_id", storeIdsToDelete, 'brand_ambassador_id', function(resp) {
-    //                 insertNewStoreRecords(chunkData);
-    //             });
-    //         } else {
-    //             insertNewStoreRecords(chunkData);
-    //         }
-    //     }
-
-    //     if (baDataKeys.length > 0) {
-    //         processNextStoreBatch();
-    //     } else {
-    //         callback();
-    //     }
-    // }
-
     function processBaPerStore(inserted_ids, ba_per_store, callback) {
         const url               = "<?= base_url('cms/global_controller');?>";
         const overallStart      = new Date();
@@ -1827,15 +1458,13 @@
         let baDataKeys          = Object.keys(ba_per_store);
         let total_ba_batches    = Math.ceil(baDataKeys.length / batch_size);
 
-        let allNewEntries       = [];    // accumulate for final log
+        let allNewEntries       = [];
 
-        // build map of store_code → store_id
         let insertedMap = {};
         inserted_ids.forEach(({ id, code }) => {
             insertedMap[code] = id;
         });
 
-        // ——— 1) Early exit if nothing to do ———
         if (baDataKeys.length === 0) {
             const overallEnd = new Date();
             const duration   = formatDuration(overallStart, overallEnd);
@@ -1850,7 +1479,6 @@
             return callback();
         }
 
-        // ——— 2) Process in batches ———
         function processNextStoreBatch() {
             // 2a) All done?
             if (baBatchIndex >= total_ba_batches) {
@@ -1866,8 +1494,6 @@
                 logActivity("ba-per-store-module-import", "Import BA-Per-Store Batch", remarks, "-", JSON.stringify(allNewEntries), JSON.stringify([]));
                 return callback();
             }
-
-            // 2b) Build this chunk’s payload
            
             const chunkKeys      = baDataKeys.slice(baBatchIndex * batch_size,(baBatchIndex + 1) * batch_size);
             let chunkData        = [];
@@ -1890,10 +1516,8 @@
                 }
             });
 
-            // accumulate for final summary
             allNewEntries = allNewEntries.concat(chunkData);
 
-            // helper to insert after delete
             function insertNewStoreRecords() {
                 if (chunkData.length > 0) {
                     batch_insert(url, chunkData, "tbl_brand_ambassador_group", false, function(response) {
@@ -1906,7 +1530,6 @@
                 }
             }
 
-            // 2c) Delete old then insert new (with logging)
             if (storeIdsToDelete.length > 0) {
                 batch_delete(url, "tbl_brand_ambassador_group", "store_id", storeIdsToDelete, "brand_ambassador_id", () => insertNewStoreRecords());
             } else {
@@ -1914,7 +1537,6 @@
             }
         }
 
-        // kick it off
         processNextStoreBatch();
     }
 
@@ -1946,41 +1568,6 @@
         });
 
         $(".import_buttons").append($downloadBtn);
-    };
-
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    };
-
-    // addNbsp()™: A Truly Revolutionary Function
-    // This function is the epitome of laziness and brilliance combined. 
-    // Why manually type `&nbsp;` repeatedly when you can let JavaScript do the heavy lifting?
-    // With `addNbsp`, you can transform every character in a string into a spaced-out masterpiece,
-    // replacing regular spaces with double `&nbsp;&nbsp;` and adding `&nbsp;` after every other character. 
-    // It’s elegant. It’s lazy. It’s genius.
-    // Honestly, this function is not just a tool—it’s a lifestyle.
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
-    };
-
-    function trimText(str) {
-        if (str.length > 15) {
-            return str.substring(0, 15) + "...";
-        } else {
-            return str;
-        }
     };
 
     $(document).on('click', '.btn_status', function (e) {
@@ -2124,33 +1711,12 @@
     }
 
     function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
+
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
         const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        // Trigger file download
         saveAs(blob, filename + ".csv");
     }
-
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
-    };
 
 </script>

@@ -1198,7 +1198,6 @@
             return callback();
             }
 
-            // build this chunk
             const chunkKeys       = storeDataKeys.slice(storeBatchIndex * batch_size, (storeBatchIndex + 1) * batch_size);
             const chunkData       = [];
             const areaIdsToDelete = [];
@@ -1218,10 +1217,7 @@
                 });
             });
 
-            // accumulate for log
             allNewEntries = allNewEntries.concat(chunkData);
-
-            // helper to insert after delete
             function insertNew() {
                 if (chunkData.length) {
                     batch_insert(url, chunkData, "tbl_store_group", false, () => {
@@ -1233,8 +1229,6 @@
                     setTimeout(processNextStoreBatch, 100);
                 }
             }
-
-            // delete old then insert new
             if (areaIdsToDelete.length) {
                 batch_delete(url, "tbl_store_group", "area_id", areaIdsToDelete, "store_id", () => insertNew());
             } else {
@@ -1284,9 +1278,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\' OR ascr.description like \'%'+search_input+'%\' OR ascr.code like \'%'+search_input+'%\' OR s.code like \'%'+search_input+'%\'';
+            new_query += ' and (a.code like \'%'+escaped_keyword+'%\' OR a.description like \'%'+escaped_keyword+'%\' OR s.description like \'%'+escaped_keyword+'%\' OR ascr.description like \'%'+escaped_keyword+'%\' OR ascr.code like \'%'+escaped_keyword+'%\' OR s.code like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -1296,9 +1291,10 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and a.code like \'%'+search_input+'%\' OR a.description like \'%'+search_input+'%\' OR s.description like \'%'+search_input+'%\' OR s.code like \'%'+search_input+'%\'';
+        new_query += ' and (a.code like \'%'+escaped_keyword+'%\' OR a.description like \'%'+escaped_keyword+'%\' OR s.description like \'%'+escaped_keyword+'%\' OR s.code like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -1587,8 +1583,6 @@
                                             }
                                         )
         
-                                        // save area and stores of that area
-                                        // plus activity logs
                                         if(valid) {
                                             save_to_db(code, description, store, status_val, id, (obj) => {
                                                 const batchStart = new Date();
@@ -1678,7 +1672,6 @@
                                             }
                                         )
         
-                                        // delete from db all user deleted stores
                                         dynamic_search(
                                             "'tbl_store_group a'", 
                                             "'left join tbl_store b on a.store_id = b.id'", 
@@ -1926,17 +1919,9 @@
         }); 
     }
 
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
 
-    function get_data(query, field = "code, updated_date", order = "asc, desc") {
+
+    function get_data(query, field = ["code", "updated_date"], order = ["asc", "desc"]) {
         var data = {
             event : "list_pagination",
             select : `a.id, a.code, a.description, a.status, a.created_date, a.updated_date, 
@@ -2159,11 +2144,4 @@
         });
     });
         
-    function trimText(str, length) {
-        if (str.length > length) {
-            return str.substring(0, length) + "...";
-        } else {
-            return str;
-        }
-    }
 </script>

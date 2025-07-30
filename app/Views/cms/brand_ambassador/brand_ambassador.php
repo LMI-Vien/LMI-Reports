@@ -397,9 +397,10 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%')";
+        new_query += " AND (ba.code LIKE '%" + escaped_keyword + "%' OR ba.name LIKE '%" + escaped_keyword + "%' OR a.agency LIKE '%" + escaped_keyword + "%' OR t.team_description LIKE '%" + escaped_keyword + "%')";
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -409,9 +410,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += " AND (ba.code LIKE '%" + search_input + "%' OR ba.name LIKE '%" + search_input + "%' OR a.agency LIKE '%" + search_input + "%' OR t.team_description LIKE '%" + search_input + "%')";
+            new_query += " AND (ba.code LIKE '%" + escaped_keyword + "%' OR ba.name LIKE '%" + escaped_keyword + "%' OR a.agency LIKE '%" + escaped_keyword + "%' OR t.team_description LIKE '%" + escaped_keyword + "%')";
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -1767,14 +1769,6 @@ function saveValidatedData(valid_data, brand_per_ba) {
                 }
             }
         });
-    }
-
-    function trimText(str) {
-        if (str.length > 15) {
-            return str.substring(0, 15) + "...";
-        } else {
-            return str;
-        }
     }
 
     $(document).on('click', '.btn_status', function (e) {

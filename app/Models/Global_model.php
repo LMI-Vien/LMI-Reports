@@ -248,25 +248,36 @@ class Global_model extends Model
         return $q->getResult();
     }
     
-    function get_data_list($table, $query = null, $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = asc, $join = null, $group = null)
+    function get_data_list($table, $query = null, $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = null, $join = null, $group = null)
     {
         $builder = $this->db->table($table);
         $builder->select($select);
-        if($query != null){
+
+        if ($query != null) {
             $builder->where($query);
         }
-        if($join != null){
-            foreach ($join as $key => $vl) {
-                $builder->join($vl['table'],$vl['query'],$vl['type']);
-            };
-        }
-        if($order_field != null){
-            $builder->orderBy($order_field, $order_type);
+
+        if ($join != null) {
+            foreach ($join as $vl) {
+                $builder->join($vl['table'], $vl['query'], $vl['type']);
+            }
         }
 
-        if($group != null){
+        if ($order_field != null) {
+            if (is_array($order_field)) {
+                foreach ($order_field as $index => $field) {
+                    $direction = isset($order_type[$index]) ? $order_type[$index] : 'asc';
+                    $builder->orderBy($field, $direction);
+                }
+            } else {
+                $builder->orderBy($order_field, $order_type);
+            }
+        }
+
+        if ($group != null) {
             $builder->groupBy($group);
         }
+
         $builder->limit($limit, $start);
         $q = $builder->get();
         return $q->getResult();

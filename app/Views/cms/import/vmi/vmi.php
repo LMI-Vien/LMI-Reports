@@ -245,8 +245,6 @@
     let dataset = [];
 
     $(document).ready(function() {
-
-    //const filename = "vmi_export.xlsx";
         const checkInterval = 120000;
 
         const pollInterval = setInterval(function () {
@@ -266,11 +264,11 @@
             });
         }, checkInterval);
 
-      get_data();
+        modal.loading(true);  
+        get_data();
     });
 
     function get_data() {
-        modal.loading(true);
         var data = {
             event : "list_pagination",
             select : "vmih.id, vmih.year AS filter_year, vmih.week, vmih.week AS filter_week, vmih.company AS filter_company, c.name AS company, y.year, vmih.status, vmih.created_by, vmih.created_date, vmih.updated_date, cu.name AS imported_by",
@@ -294,18 +292,16 @@
                 type : "left"
             }],
             order : {
-                field : "vmih.year",
-                order : "asc" 
+                field : ["vmih.year", "vmih.week", "vmih.company"],
+                order : ["desc", "desc", "asc"] 
             }
 
         }
 
         aJax.post(url,data,function(result){
-        //aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
             var list = result.list;
-            //console.log(list);
             if(list) {
                 if (list.length > 0) {
                     $.each(list, function(x,y) {
@@ -376,7 +372,6 @@
       modal.loading(true);
       get_data();
       $("#search_query").val("");
-      modal.loading(false);
     });
 
     $(document).on('keydown', '#search_query', function(event) {
@@ -387,7 +382,7 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             if(search_input){
-                query = 'vmih.status >= 0 and c.name like \'%'+escaped_keyword+'%\' or y.year like \'%'+escaped_keyword+'%\' or cu.name like \'%'+escaped_keyword+'%\'';
+                query = 'vmih.status >= 0 and (c.name like \'%'+escaped_keyword+'%\' or y.year like \'%'+escaped_keyword+'%\' or cu.name like \'%'+escaped_keyword+'%\')';
             }else{
                 query = 'vmih.status >= 0';
             }
@@ -405,7 +400,6 @@
         offset = 1;
         modal.loading(true); 
         get_data();
-        //modal.loading(false);
     });
 
     function clear_import_table() {
@@ -479,17 +473,6 @@
         $('#' + selected_class).html(html);
     };
 
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
     function addNbsp(inputString) {
         return inputString.split('').map(char => {
             if (char === ' ') {
@@ -511,10 +494,8 @@
         }
 
         var inp_year = $('#yearSelect').val()?.trim();
-        // var inp_month = $('#monthSelect').val()?.trim();
         var inp_week = $('#weekSelect').val()?.trim();
         var inp_company = $('#companySelect').val()?.trim();
-        // const fields = { inp_year, inp_month, inp_week, inp_company };
         const fields = { inp_year, inp_week, inp_company };
         for (const [key, value] of Object.entries(fields)) {
             if (!value) {
@@ -629,15 +610,13 @@
                 url: "<?= base_url('cms/import-vmi/fetch-temp-vmi-data'); ?>",
                 method: "GET",
 
-                // data: { page, limit: 5000, inp_year, inp_month, inp_week, inp_company}, // Fetch in larger chunks
-                data: { page, limit: 5000, inp_year, inp_week, inp_company}, // Fetch in larger chunks
+                data: { page, limit: 5000, inp_year, inp_week, inp_company},
                 success: function(response) {
                     if (response.success && response.data.length > 0) {
                         allData = allData.concat(response.data);
                         if (response.data.length === 5000) {
                             fetchAllPages(page + 1);
                         } else {
-                            // validate_temp_data(allData, inp_year, inp_month, inp_week, inp_company);
                             validate_temp_data(allData, inp_year, inp_week, inp_company);
                         }
                     } else {
@@ -655,7 +634,6 @@
         fetchAllPages();
     }
 
-    // function validate_temp_data(data, inp_year, inp_month, inp_week, inp_company) 
     var counter = 0;
     function validate_temp_data(data, inp_year, inp_week, inp_company) 
     {
@@ -824,9 +802,6 @@
             }
 
             const vmi_header_id = headerResult.id;
-            // console.log(vmi_header_id);
-            // return;
-            // Add vmi_header_id to each row
             valid_data.forEach(row => {
                 row.vmi_header_id = vmi_header_id;
             });
@@ -895,7 +870,6 @@
 
                     batch_index++;
 
-                    // Update overall progress
                     const progress = Math.round((batch_index / total_batches) * 100);
 
                     updateSwalProgress(`Saving Data...`, progress);
@@ -952,91 +926,6 @@
             });
         });
     }
-
-    //for optimization
-    // function saveValidatedData(valid_data) {
-    //     let batch_size = 5000;
-    //     let batch_index = 0;
-    //     let errorLogs = [];
-    //     let url = "<?= base_url('cms/global_controller');?>";
-    //     let table = 'tbl_vmi';
-
-    //     let matchFields = ['store', 'item', 'item_name', 'vmi_status', 'item_class', 'supplier', 'group', 'dept', 'class', 'sub_class', 'on_hand', 'in_transit', 'year', 'month', 'week', 'company'];
-    //     let matchType = "AND";
-
-    //     modal.loading_progress(true, "Validating and Saving data...");
-
-    //     let existingMap = new Map();
-
-    //     async function fetchExistingData() {
-    //         return new Promise((resolve, reject) => {
-    //             aJax.post(url, { table: table, event: "fetch_existing2", selected_fields: matchFields, valid_data: valid_data }, function(response) {
-    //                 let result = JSON.parse(response);
-    //                 if (result.existing) {
-    //                     result.existing.forEach(record => {
-    //                         let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
-    //                         existingMap.set(key, record.id);
-    //                     });
-    //                 }
-    //                 resolve();
-    //             });
-    //         });
-    //     }
-
-    //     async function processNextBatch() {
-    //         if (batch_index * batch_size >= valid_data.length) {
-    //             modal.loading_progress(false);
-    //             if (errorLogs.length > 0) {
-    //                 createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-    //                 modal.alert("Some records encountered errors. Check the log.", 'info');
-    //             } else {
-    //                 modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-    //             }
-    //             return;
-    //         }
-
-    //         let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-    //         let newRecords = [];
-    //         let updateRecords = [];
-
-    //         batch.forEach(row => {
-    //             let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
-    //             let matchedId = existingMap.get(key);
-
-    //             if (matchedId) {
-    //                 row.id = matchedId;
-    //                 row.updated_by = user_id;
-    //                 row.updated_date = formatDate(new Date());
-    //                 delete row.created_by;
-    //                 delete row.created_date;
-    //                 updateRecords.push(row);
-    //             } else {
-    //                 row.created_by = user_id;
-    //                 row.created_date = formatDate(new Date());
-    //                 newRecords.push(row);
-    //             }
-    //         });
-
-    //         try {
-    //             if (updateRecords.length > 0) {
-    //                 let updateResponse = await batch_update(url, updateRecords, table, "id", false);
-    //                 if (updateResponse.message !== 'success') errorLogs.push(`Failed to update: ${JSON.stringify(updateResponse.error)}`);
-    //             }
-
-    //             if (newRecords.length > 0) {
-    //                 let insertResponse = await batch_insert(url, newRecords, table, false);
-    //                 if (insertResponse.message !== 'success') errorLogs.push(`Batch insert failed: ${JSON.stringify(insertResponse.error)}`);
-    //             }
-    //         } catch (error) {
-    //             errorLogs.push(`Unexpected error: ${error}`);
-    //         }
-
-    //         batch_index++;
-    //         requestIdleCallback(processNextBatch);
-    //     }
-
-    //     fetchExistingData().then(processNextBatch);
-    // }
 
     function delete_temp_data(){
         $.ajax({
@@ -1336,9 +1225,7 @@
         if(year) {
             filterArr.push(`a.year:EQ=${year}`);
         }
-        // if(month) {
-        //     filterArr.push(`month:EQ=${month}`);
-        // }
+
         if(week) {
             filterArr.push(`week:EQ=${week}`);
         }
@@ -1607,112 +1494,7 @@
         }
     }
 
-    // function export_data(company, year, month, week) 
-    // function export_data(company, year, week) 
-    // {
-    //     var formattedData = [];
-    //     let filterArr = []
-    //     filterArr.push(`v.company:EQ=${company}`);
-    //     filterArr.push(`v.year:EQ=${year}`);
-    //     // filterArr.push(`m.month:EQ=${month}`);
-    //     filterArr.push(`week:EQ=${week}`);
 
-    //     let filter = filterArr.join(',')
-
-    //     dynamic_search(
-    //             "'tbl_vmi v'", 
-    //             "'left join tbl_company c on v.company = c.id "+
-    //             "left join tbl_year y on v.year = y.id'",
-    //             "'COUNT(v.id) as total_records'",
-    //             0, 
-    //             0, 
-    //             `'${filter}'`,  
-    //             `''`, 
-    //             `''`,
-    //             (res) => {
-    //                 if (res && res.length > 0) {
-    //                     let total_records = res[0].total_records;
-
-    //                     for (let index = 0; index < total_records; index += 100000) {
-    //                         dynamic_search(
-    //                             "'tbl_vmi v'", 
-
-    //                             "'left join tbl_company c on v.company = c.id "+
-    //                             "left join tbl_year y on v.year = y.id'",
-
-    //                             "'store, item, item_name, item_class, supplier, `c_group`, dept, c_class as classification, "+
-    //                             "sub_class, on_hand, in_transit, average_sales_unit, company, vmi_status, v.year, week'", 
-
-    //                             100000, 
-    //                             index, 
-    //                             `'${filter}'`,  
-    //                             `''`, 
-    //                             `''`,
-    //                             (res) => {
-    //                                 let store_ids = []
-    //                                 let store_map = {}
-                            
-    //                                 const storeSet = new Set(store_ids); // convert existing array to a Set
-    //                                 res.forEach(stores => {
-    //                                     storeSet.add(`${stores.store}`);
-    //                                 });
-    //                                 store_ids = Array.from(storeSet); // convert back to array
-                            
-    //                                 dynamic_search(
-    //                                     "'tbl_store'", 
-    //                                     "''", 
-    //                                     "'id, code, description'", 
-    //                                     0, 
-    //                                     0, 
-    //                                     `'id:IN=${store_ids.join('|')}'`,  
-    //                                     `''`, 
-    //                                     `''`,
-    //                                     (result) => {
-    //                                         result.forEach(store => {
-    //                                             if (!store_map[store.id]) {
-    //                                                 store_map[store.id] = {}; // Initialize as an object
-    //                                             }
-    //                                             store_map[store.id].description = store.description;
-    //                                             store_map[store.id].code = store.code;
-    //                                         });
-    //                                     }
-    //                                 );
-
-    //                                 res.forEach(det => {
-    //                                     let newData = {
-    //                                         "Store":store_map[`${det.store}`].code, 
-    //                                         "Item":det.item, 
-    //                                         "Item Name":det.item_name, 
-    //                                         "VMI Status":det.vmi_status, 
-    //                                         "Item Class":det.item_class, 
-    //                                         "Supplier":det.supplier, 
-    //                                         "Group":det.c_group, 
-    //                                         "Dept":det.dept, 
-    //                                         "Class":det.classification, 
-    //                                         "Sub Class":det.sub_class, 
-    //                                         "On Hand":det.on_hand, 
-    //                                         "In Transit":det.in_transit, 
-    //                                         "Ave Sales Unit":det.average_sales_unit, 
-    //                                     }
-
-    //                                     formattedData.push(newData)
-    //                                 })
-    //                             }
-    //                         )
-    //                     }
-    //                 }
-    //             }
-    //     )
-
-    //     const headerData = [
-    //         ["Company Name: Lifestrong Marketing Inc."],
-    //         ["VMI"],
-    //         ["Date Printed: " + formatDate(new Date())],
-    //         [""],
-    //     ];
-    
-    //     exportArrayToCSV(formattedData, `VMI - ${formatDate(new Date())}`, headerData);
-    // }
     function export_data(company, year, week) 
     {
         modal.loading(true);
@@ -1734,8 +1516,6 @@
                         $.getJSON('<?= base_url('cms/import-vmi/pending');?>', function (response) {
                             if (response.ready) {
                                 clearInterval(pollInterval);
-
-                                // Trigger download via iframe
                                 $('<iframe>', {
                                     src: `<?= base_url('cms/import-vmi/download/');?>${response.filename}`,
                                     style: 'display: none;'
@@ -1752,8 +1532,6 @@
         });
     }
 
-
-    // function delete_data(company, year, month, week) 
     function delete_data(company, year, week){   
         modal.confirm(confirm_delete_message,function(result){
             if(result){ 
@@ -1779,19 +1557,10 @@
     }
 
     function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
         const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        // Trigger file download
         saveAs(blob, filename + ".csv");
     }
     

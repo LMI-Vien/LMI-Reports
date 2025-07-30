@@ -263,11 +263,12 @@
     $(document).on('keydown', '#search_query', function(event) {
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''");
             offset = 1;
             new_query = '';
-            new_query += query+' and menu_name like \'%'+search_input+'%\' or '
-            new_query += query+' and menu_url like \'%'+search_input+'%\' or '
-            new_query += query+' and menu_parent_id like \'%'+search_input+'%\'';
+            new_query += query+' and menu_name like \'%'+escaped_keyword+'%\' or '
+            new_query += query+' and menu_url like \'%'+escaped_keyword+'%\' or '
+            new_query += query+' and menu_parent_id like \'%'+escaped_keyword+'%\'';
             get_data(new_query);
             get_pagination();
         }
@@ -588,53 +589,6 @@
             var obj = is_json(result);
             location.reload();
         });
-    }
-
-    function formatDate(date) {
-        // Get components of the date
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-    
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
-    function formatReadableDate(dateStr, datetime) {
-        const date = new Date(dateStr);
-        if (datetime) {
-            return date.toLocaleDateString("en-US", { 
-                year: "numeric", 
-                month: "short", 
-                day: "numeric",
-                hour:"2-digit",
-                minute:"2-digit",
-                second:"2-digit",
-                hour12:true
-            });
-        } else {
-            return date.toLocaleDateString("en-US", { 
-                year: "numeric", 
-                month: "short", 
-                day: "numeric",
-            });
-        }
-    }
-
-    function encodeHtmlEntities(str) {
-        return $('<div/>').text(str).html();
-    }
-
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
     }
 
 </script>

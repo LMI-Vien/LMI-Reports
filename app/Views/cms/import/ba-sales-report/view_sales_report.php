@@ -253,27 +253,15 @@
                             brandAmbassadorName = 'Non Ba';
                         }
                         html += "<tr class='" + rowClass + "'>";
-                        // html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        // html += "<td scope=\"col\">" + trimText(brandAmbassadorName) + "</td>"
-                        html += "<td scope=\"col\"><a href='#' class='clickable-link' onclick='handleBrandAmbassadorClick(\"" + y.id + "\", \"" + y.date + "\", \"" + brandAmbassadorName + "\")'>" + trimText(brandAmbassadorName) + "</a></td>";
-                        html += "<td scope=\"col\">" + trimText(areaDescription) + "</td>"
-                        html += "<td scope=\"col\">" + trimText(storeDescription) + "</td>"
-                        html += "<td scope=\"col\">" + trimText(brandDescription) + "</td>"
+                        html += "<td scope=\"col\"><a href='#' class='clickable-link' onclick='handleBrandAmbassadorClick(\"" + y.id + "\", \"" + y.date + "\", \"" + brandAmbassadorName + "\")'>" + trimText(brandAmbassadorName, 15) + "</a></td>";
+                        html += "<td scope=\"col\">" + trimText(areaDescription, 15) + "</td>"
+                        html += "<td scope=\"col\">" + trimText(storeDescription, 15) + "</td>"
+                        html += "<td scope=\"col\">" + trimText(brandDescription, 15) + "</td>"
                         html += "<td scope=\"col\">" + ViewDateOnly(y.date) + "</td>";
                         html += "<td scope=\"col\">" + (y.amount.toLocaleString()) + "</td>";
                         html += "<td scope=\"col\">" + status + "</td>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
-                        // if (y.id == 0) {
-                        //     html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-                        // } else {
-                        //     html+="<td class='center-content' style='width: 25%; min-width: 300px'>";
-                        //     html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                        //     html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-                        //     html+="</td>";
-                        // }
-                        
                         html += "</tr>";   
                     });
                 } else {
@@ -386,69 +374,6 @@
 
     function set_field_state(selector, isReadOnly) {
         $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
-    }
-
-    // function get_pagination() {
-    //     var url = "<?= base_url("cms/global_controller");?>";
-    //     var data = {
-    //       event : "pagination",
-    //         select : "basr.id, basr.status",
-    //         query : query,
-    //         offset : offset,
-    //         limit : limit,
-    //         table : "tbl_ba_sales_report as basr"
-    //     }
-
-    //     aJax.post(url,data,function(result){
-    //         var obj = is_json(result); //check if result is valid JSON format, Format to JSON if not
-    //         modal.loading(false);
-    //         pagination.generate(obj.total_page, ".list_pagination", get_data);
-    //     });
-    // }
-
-    // pagination.onchange(function(){
-    //     offset = $(this).val();
-    //     get_data(query);
-    //     $('.selectall').prop('checked', false);
-    //     $('.btn_status').hide();
-    //     $("#search_query").val("");
-    // });
-
-    // $(document).on('keypress', '#search_query', function(e) {               
-    //     if (e.keyCode === 13) {
-    //         var keyword = $(this).val().trim();
-    //         offset = 1;
-    //         var new_query = "(" + query + " AND ar.description LIKE '%" + keyword + "%') OR " +
-    //             "(" + query + " AND s.description LIKE '%" + keyword + "%') OR " +
-    //             "(" + query + " AND b.brand_description LIKE '%" + keyword + "%') OR " +
-    //             "(" + query + " AND ba.name LIKE '%" + keyword + "%') OR " +
-    //             "(" + query + " AND basr.date LIKE '%" + keyword + "%')"; 
-                
-    //         get_data(new_query);
-    //         get_pagination();
-    //     }
-    // });
-
-    // $(document).on("change", ".record-entries", function(e) {
-    //     $(".record-entries option").removeAttr("selected");
-    //     $(".record-entries").val($(this).val());
-    //     $(".record-entries option:selected").attr("selected","selected");
-    //     var record_entries = $(this).prop( "selected",true ).val();
-    //     limit = parseInt(record_entries);
-    //     offset = 1;
-    //     modal.loading(true); 
-    //     get_data(query);
-    //     get_pagination(query);
-    //     modal.loading(false);
-    // });
-
-    function ViewDateOnly(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric'
-        });
     }
 
     function get_pagination(new_query) {

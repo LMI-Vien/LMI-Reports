@@ -367,7 +367,7 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.imported_by) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.imported_by, 15) + "</td>";
                         html += "<td scope=\"col\">" + (y.date ? formatReadableDate(y.date, false) : "N/A") + "</td>";
                         html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
@@ -476,14 +476,15 @@
 
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
+            var escaped_keyword = keyword.replace(/'/g, "''");
             // alert(keyword == 0);
             offset = 1;
 
             if(keyword == 0) {
                 query = " basr.status >= 0 ";
             } else {
-                query = "(u.name like '%" + keyword + "%') OR "
-                        + "(basr.date like '%" + months[keyword] + "%')";
+                query = "(u.name like '%" + escaped_keyword + "%') OR "
+                        + "(basr.date like '%" + months[escaped_keyword] + "%')";
             }
             get_data(query);
             get_pagination(query);
@@ -544,89 +545,6 @@
         });
     }
 
-    function formatDate(date) {
-        // Get components of the date
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
-    }
-
-    function trimText(str) {
-        if (str.length > 15) {
-            return str.substring(0, 15) + "...";
-        } else {
-            return str;
-        }
-    }
-
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
-    }
-
-    function ViewDateOnly(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric'
-        });
-    }
-
-    // function read_xl_file() {
-    //     let btn = $(".btn.save");
-    //     btn.prop("disabled", false); 
-    //     clear_import_table();
-        
-    //     dataset = [];
-
-    //     const file = $("#file")[0].files[0];
-    //     if (!file) {
-    //         modal.loading_progress(false);
-    //         modal.alert('Please select a file to upload', 'error', ()=>{});
-    //         return;
-    //     }
-    //     modal.loading_progress(true, "Reviewing Data...");
-
-    //     const reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         const data = new Uint8Array(e.target.result);
-    //         const workbook = XLSX.read(data, { type: "array" });
-    //         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    //         const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false });
-
-    //         processInChunks(jsonData, 5000, () => {
-    //             paginateData(rowsPerPage);
-    //         });
-    //     };
-    //     reader.readAsArrayBuffer(file);
-    // }
-
-    // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -653,20 +571,14 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = e.target.result;
-
-            // Read as binary instead of plain text
             const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-            // Ensure special characters like "ñ" are correctly preserved
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
                     let value = row[key];
-
-                    // Convert numbers to text while keeping dates unchanged
                     if (typeof value === "number") {
                         value = String(value);
                     }
@@ -681,13 +593,12 @@
             });
         };
 
-        // Use readAsBinaryString instead of readAsText
         reader.readAsBinaryString(file);
     }
 
     function process_xl_file() {
         let btn = $(".btn.save");
-        if (btn.prop("disabled")) return; // Prevent multiple clicks
+        if (btn.prop("disabled")) return;
 
         btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
@@ -1124,7 +1035,6 @@
     }
 
     function exportFilter() {
-        // Get user input from form fields
         let area = $('#area_input').val();  // Get the selected area from the input field
         let store = $('#store_input').val();  // Get the selected store from the input field
         let brand = $('#brand_input').val();  // Get the selected brand from the input field
@@ -1132,17 +1042,12 @@
         let date_from = $('#date_from').val();  // Get the selected start date
         let date_to = $('#date_to').val();  // Get the selected end date
 
-        // Initialize ID variables to store database IDs of selected values
         let area_id = 0;
         let store_id = 0;
         let brand_id = 0;
         let ba_id = 0;
-
-        // Arrays to store filtering conditions
         var filterArr = [];  // Stores filter conditions for search queries
         var formattedData = [];  // Stores formatted data (not used in this snippet)
-
-        // Search for table IDs based on user input
         if (area) {
             // Search for area ID in 'tbl_area' based on area description
             dynamic_search("'tbl_area'", "''", "'id'", 1, 0, `'status:IN=1|0, description:EQ=${area}'`, `''`, `''`,
@@ -1170,16 +1075,16 @@
 
         // Construct filter conditions for querying the database
         if (area_id != 0) {
-            filterArr.push(`area_id:EQ=${area_id}`);  // Add area filter if a valid area ID was found
+            filterArr.push(`area_id:EQ=${area_id}`);
         }
         if (store_id != 0) {
-            filterArr.push(`store_id:EQ=${store_id}`);  // Add store filter if a valid store ID was found
+            filterArr.push(`store_id:EQ=${store_id}`); 
         }
         if (brand_id != 0) {
-            filterArr.push(`brand:EQ=${brand_id}`);  // Add brand filter if a valid brand ID was found
+            filterArr.push(`brand:EQ=${brand_id}`);
         }
         if (ba_id != 0) {
-            filterArr.push(`ba_id:EQ=${ba_id}`);  // Add brand ambassador filter if a valid BA ID was found
+            filterArr.push(`ba_id:EQ=${ba_id}`);
         }
 
         modal.confirm(confirm_export_message,function(result){
@@ -1469,12 +1374,9 @@
                                         };
 
                                         res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }, index) => {
-                                            // Convert amount to number safely
                                             const numericAmount = parseFloat(amount) || 0;
 
-                                            // If date changes and not the first row, push total and spacing
                                             if (previousDate !== null && previousDate !== date) {
-                                                // Push total row
                                                 formattedData.push({
                                                     "BA Code": "",
                                                     "Area Code": "",
@@ -1484,15 +1386,9 @@
                                                     "Amount": totalAmount,
                                                     "Status": "Total",
                                                 });
-
-                                                // Push spacing row
                                                 formattedData.push({ ...spacing });
-
-                                                // Reset total
                                                 totalAmount = 0;
                                             }
-
-                                            // Push the current row
                                             formattedData.push({
                                                 "BA Code": temp_baArr[ba_id],
                                                 "Area Code": temp_area[area_id],
@@ -1505,8 +1401,6 @@
 
                                             totalAmount += numericAmount;
                                             previousDate = date;
-
-                                            // Final iteration: push total and spacing
                                             if (index === res.length - 1) {
                                                 formattedData.push({
                                                     "BA Code": "",
@@ -1615,19 +1509,10 @@
     }
 
     function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
         const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        // Trigger file download
         saveAs(blob, filename + ".csv");
     }
     

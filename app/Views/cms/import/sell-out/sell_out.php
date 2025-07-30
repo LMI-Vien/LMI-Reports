@@ -414,9 +414,24 @@
             offset : offset,
             limit : limit,
             table : "tbl_sell_out_data_header as so",
+            join : [{
+                table : "tbl_month as m",
+                query : "m.id = so.month",
+                type : "left"
+            },
+            {
+                table : "tbl_company as c",
+                query : "c.id = so.company",
+                type : "left"
+            },
+            {
+                table : "cms_users as cu",
+                query : "cu.id = so.created_by",
+                type : "left"
+            }],
             order : {
-                field : "so.id", //field to order
-                order : "asc" //asc or desc
+                field : "so.id",
+                order : "asc" 
             }
 
         }
@@ -439,13 +454,14 @@
     $(document).on('keypress', '#search_query', function(e) {               
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
+            var escaped_keyword = keyword.replace(/'/g, "''"); 
             offset = 1;
-            var new_query = "("+query+" AND so.customer_payment_group like '%" + keyword + "%') OR "+
-            "("+query+" AND so.template_id like '%" + keyword + "%') OR "+
-            "("+query+" AND so.created_by like '%" + keyword + "%') OR "+
-            "("+query+" AND so.file_type like '%" + keyword + "%') OR "+
-            "("+query+" AND m.month like '%" + keyword+ "%') OR "+
-            "("+query+" AND so.remarks like '%" + keyword + "%')"
+            var new_query = "("+query+" AND so.customer_payment_group like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND so.template_id like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND so.created_by like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND so.file_type like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND m.month like '%" + escaped_keyword+ "%') OR "+
+            "("+query+" AND so.remarks like '%" + escaped_keyword + "%')"
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -494,7 +510,7 @@
                     var rowClass = x % 2 === 0 ? "even-row" : "odd-row";
 
                     html += "<tr class='" + rowClass + "'>";
-                    html += "<td scope=\"col\">" + trimText(y.store_code, 10) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(y.store_code, 15) + "</td>";
                     html += "<td scope=\"col\">" + trimText(y.store_description, 25) + "</td>";
                     html += "<td scope=\"col\">" + trimText(y.file_name, 50) + "</td>";
                     html += "</tr>";
@@ -873,41 +889,12 @@
     }
 
     function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
         const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
-        // Trigger file download
         saveAs(blob, filename + ".csv");
-    }
-
-    function trimText(str, length) {
-        if (str.length > length) {
-            return str.substring(0, length) + "...";
-        } else {
-            return str;
-        }
-    }
-
-    function formatDate(date) {
-        // Get components of the date
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
     function list_template() {

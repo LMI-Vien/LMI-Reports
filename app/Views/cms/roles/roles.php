@@ -1601,9 +1601,10 @@ ul.child_menu {
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' AND name like \'%'+search_input+'%\'';
+            new_query += ' AND (name like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -1851,17 +1852,5 @@ ul.child_menu {
 
     function set_field_state(selector, isReadOnly) {
         $(selector).prop({ readonly: isReadOnly, disabled: isReadOnly });
-    }
-
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 </script>

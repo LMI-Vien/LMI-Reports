@@ -657,10 +657,11 @@
     $(document).on('keypress', '#search_query', function(e) {               
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
+            var escaped_keyword = keyword.replace(/'/g, "''"); 
             offset = 1;
             // a.created_date, u.name imported_by, b.year, a.updated_date
-            var new_query = "(" + query + " AND u.name LIKE '%" + keyword + "%') OR " +
-                "(" + query + " AND b.year LIKE '%" + keyword + "%')";
+            var new_query = "(" + query + " AND u.name LIKE '%" + escaped_keyword + "%') OR " +
+                "(" + query + " AND b.year LIKE '%" + escaped_keyword + "%')";
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -1512,16 +1513,6 @@
         });
     }
 
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
         var modal_obj = "";
@@ -1587,14 +1578,6 @@
             }
         });
     });
-        
-    function trimText(str, length) {
-        if (str.length > length) {
-            return str.substring(0, length) + "...";
-        } else {
-            return str;
-        }
-    }
 
     function get_year(selected_class) {
         var url = "<?= base_url('cms/global_controller');?>";

@@ -313,13 +313,14 @@
     $(document).on('keypress', '#search_query', function(e) {               
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
+            var escaped_keyword = keyword.replace(/'/g, "''"); 
             offset = 1;
             var new_query = `${query} AND (
-                b.year LIKE '%${keyword}%' OR 
-                c.username LIKE '%${keyword}%' OR 
-                a.created_date LIKE '%${keyword}%' OR 
-                a.week LIKE '%${keyword}%' OR 
-                a.file_name LIKE '%${keyword}%'
+                b.year LIKE '%${escaped_keyword}%' OR 
+                c.username LIKE '%${escaped_keyword}%' OR 
+                a.created_date LIKE '%${escaped_keyword}%' OR 
+                a.week LIKE '%${escaped_keyword}%' OR 
+                a.file_name LIKE '%${escaped_keyword}%'
             )`
             get_data(new_query);
             get_pagination(new_query);

@@ -316,7 +316,7 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and code like \'%'+escaped_keyword+'%\' or '+query+' and agency like \'%'+escaped_keyword+'%\'';
+            new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' and agency like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -326,9 +326,10 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and agency like \'%'+search_input+'%\'';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' and agency like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -582,24 +583,10 @@
             const obj = is_json(result);
             const end_time = new Date();
             const duration = formatDuration(start_time, end_time);
-            //const headers = ['module', 'action', 'remarks', 'new_data', 'old_data'];
-
-            //saveImportDetailsToServer(valid_data, headers, 'agency_logs', function(filePath) {
-                // const remarks = `
-                //     Action: ${valid_data[0].action}
-                //     <br>${valid_data[0].remarks}
-                //     <br>Start Time: ${formatReadableDate(start_time)}
-                //     <br>End Time: ${formatReadableDate(end_time)}
-                //     <br>Duration: ${duration}
-                // `;
-                // const link = '-';
-                // logActivity("agency-module", valid_data[0].action, remarks, link, valid_data[0].new_data, valid_data[0].old_data);
-                
-                modal.loading(false);
-                modal.alert(modal_alert_success, 'success', function () {
-                    location.reload();
-                });
-            //});
+            modal.loading(false);
+            modal.alert(modal_alert_success, 'success', function () {
+                location.reload();
+            });
         });
     }
 
@@ -704,27 +691,6 @@
                 }); 
             }
         });
-    }
-
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
-    }
-
-    function formatDate(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-
-      // Combine into the desired format
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
     function clear_import_table() {
@@ -864,29 +830,20 @@
                     let matchedId = null;
 
                     if (matchType === "AND") {
-                        // AND Condition: Both fields must match exactly
                         let key = matchFields.map(field => row[field] || "").join("|");
                         if (existingMap.has(key)) {
                             matchedId = existingMap.get(key);
                         }
                     } else {
-                        // OR Condition: At least one field should match
                         for (let [key, id] of existingMap.entries()) {
                             let keyParts = key.split("|"); // ["AJK 530", "Marsden F. Hoffman"]
 
-                            // for (let field of matchFields) {
-                            //     if (keyParts.includes(row[field])) {  // Check if any field value matches
-                            //         matchedId = id;
-                            //         break; // Stop as soon as we find a match
-                            //     }
-                            // }
+    
 
                             if (keyParts[0] === row["code"]) {
                                 matchedId = id;
                                 break; // Stop looping once a match is found
                             }
-
-                            // if (matchedId) break; // Stop looping if we found a match
                         }
                     }
 
@@ -950,7 +907,6 @@
                     }
                 }
 
-                // Execute updates first, then inserts, then proceed to next batch
                 processUpdates()
                     .then(processInserts)
                     .then(() => {
@@ -990,20 +946,15 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = e.target.result;
-
-            // Read as binary instead of plain text
             const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-            // Ensure special characters like "ñ" are correctly preserved
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
                     let value = row[key];
-
-                    // Convert numbers to text while keeping dates unchanged
                     if (typeof value === "number") {
                         value = String(value);
                     }
@@ -1018,7 +969,6 @@
             });
         };
 
-        // Use readAsBinaryString instead of readAsText
         reader.readAsBinaryString(file);
     }
 
@@ -1132,14 +1082,6 @@
         });
 
         $(".import_buttons").append($downloadBtn);
-    }
-
-    function trimText(str, length) {
-        if (str.length > length) {
-            return str.substring(0, length) + "...";
-        } else {
-            return str;
-        }
     }
 
     $(document).on('click', '.btn_status', function (e) {
@@ -1276,19 +1218,10 @@
    }
    
    function exportArrayToCSV(data, filename, headerData) {
-       // Create a new worksheet
        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-       // Add header rows manually
        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-       // Convert worksheet to CSV format
        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-       // Convert CSV string to Blob
        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-       // Trigger file download
        saveAs(blob, filename + ".csv");
    }
 

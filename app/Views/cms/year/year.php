@@ -165,8 +165,8 @@
             limit : limit,
             table : "tbl_year",
             order : {
-                field : field, //field to order
-                order : order //asc or desc
+                field : field,
+                order : order 
             }
         }
 
@@ -190,9 +190,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and year like \'%'+search_input+'%\'';
+            new_query += ' and (year like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -250,7 +251,7 @@
         search_input = $('#search_query').val();
         offset = 1;
         new_query = query;
-        new_query += ' and year like \'%'+search_input+'%\'';
+        new_query += ' and (year like \'%'+search_input+'%\')';
         get_data(new_query);
         get_pagination(query);
     });
@@ -316,20 +317,16 @@
         if (actions === 'add') $footer.append(buttons.save);
         if (actions === 'edit') $footer.append(buttons.edit);
         $footer.append(buttons.close);
-
-        // Disable background content interaction
         $contentWrapper.attr('inert', '');
 
-        // Move focus inside modal when opened
         $modal.on('shown.bs.modal', function () {
             $(this).find('input, textarea, button, select').filter(':visible:first').focus();
         });
 
         $modal.modal('show');
 
-        // Fix focus issue when modal is hidden
         $modal.on('hidden.bs.modal', function () {
-            $contentWrapper.removeAttr('inert');  // Re-enable background interaction
+            $contentWrapper.removeAttr('inert'); 
             if (window.lastFocusedElement) {
                 window.lastFocusedElement.focus();
             }
@@ -548,120 +545,6 @@
         });
     }
 
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
-    }
-
-    function trimText(str) {
-        if (str.length > 15) {
-            return str.substring(0, 15) + "...";
-        } else {
-            return str;
-        }
-    }
-
-    // $(document).on('click', '.btn_status', function (e) {
-    //     var status = $(this).attr("data-status");
-    //     var modal_obj = "";
-    //     var modal_alert_success = "";
-    //     var hasExecuted = false;
-
-    //     let id = $("input.select:checked");
-    //     let code = [];
-    //     let code_string = "selected data";
-
-    //     id.each(function() {
-    //         code.push($(this).attr("data-id"));
-    //     });
-
-    //     get_field_values("tbl_year", "year", "id", code, (res) => {
-    //         if(code.length == 1) {
-    //             code_string = `year <b><i>${res[code[0]]}</i></b>`;
-    //         }
-    //     })
-
-    //     if (parseInt(status) === -2) {
-    //         message = is_json(confirm_delete_message);
-    //         message.message = `Delete ${code_string} from Year Masterfile?`;
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_delete_message;
-    //     } else if (parseInt(status) === 1) {
-    //         message = is_json(confirm_publish_message);
-    //         message.message = `Publish ${code_string} from Year Masterfile?`;
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_publish_message;
-    //     } else {
-    //         message = is_json(confirm_unpublish_message);
-    //         message.message = `Unpublish ${code_string} from Year Masterfile?`;
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_unpublish_message;
-    //     }
-
-    //     modal.confirm(modal_obj, function (result) {
-    //         if (result) {
-    //             var url = "<?= base_url('cms/global_controller');?>";
-    //             var dataList = [];
-                
-    //             $('.select:checked').each(function () {
-    //                 var id = $(this).attr('data-id');
-    //                 dataList.push({
-    //                     event: "update",
-    //                     table: "tbl_year",
-    //                     field: "id",
-    //                     where: id,
-    //                     data: {
-    //                         status: status,
-    //                         updated_date: formatDate(new Date())
-    //                     }
-    //                 });
-    //             });
-
-    //             if (dataList.length === 0) return;
-
-    //             var processed = 0;
-    //             dataList.forEach(function (data, index) {
-    //                 aJax.post(url, data, function (result) {
-    //                     if (hasExecuted) return; 
-
-    //                     modal.loading(false);
-    //                     processed++;
-
-    //                     if (result === "success") {
-    //                         if (!hasExecuted) {
-    //                             hasExecuted = true;
-    //                             $('.btn_status').hide();
-    //                             modal.alert(modal_alert_success, 'success', function () {
-    //                                 location.reload();
-    //                             });
-    //                         }
-    //                     } else {
-    //                         if (!hasExecuted) {
-    //                             hasExecuted = true;
-    //                             modal.alert(failed_transaction_message, function () {});
-    //                         }
-    //                     }
-    //                 });
-    //             });
-    //         }
-    //     });
-    // });
-
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
         var modal_obj = "";
@@ -726,7 +609,6 @@
                 return; 
             }
 
-            // For publish/unpublish
             let message;
             if (parseInt(status) === 1) {
                 message = is_json(confirm_publish_message);
@@ -787,19 +669,6 @@
         }
     });
 
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
-    }
-
     function display_imported_data() {
         let start = (currentPage - 1) * rowsPerPage;
         let end = start + rowsPerPage;
@@ -844,7 +713,6 @@
         }
 
         aJax.post(url, data, function(result) {
-            // return;
             var obj = is_json(result);
             if (obj && obj.length > 0 && obj[0].last_sort_order !== null) {
                 callback(parseInt(obj[0].last_sort_order, 10) + 1);

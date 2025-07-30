@@ -522,8 +522,9 @@
     $(document).on('keypress', '#search_query', function(e) {               
         if (e.keyCode === 13) {
             var keyword = $(this).val().trim();
+            var escaped_keyword = keyword.replace(/'/g, "''");
             offset = 1;
-            var new_query = "(" + query + " AND b.year LIKE '%" + keyword + "%')";
+            var new_query = "(" + query + " AND b.year LIKE '%" + escaped_keyword + "%')";
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -829,19 +830,6 @@
         });
     }
 
-    function formatDate(date) {
-        // Get components of the date
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
     function addNbsp(inputString) {
         return inputString.split('').map(char => {
             if (char === ' ') {
@@ -849,14 +837,6 @@
             }
             return char + '&nbsp;';
         }).join('');
-    }
-
-    function trimText(str) {
-        if (str.length > 15) {
-            return str.substring(0, 15) + "...";
-        } else {
-            return str;
-        }
     }
 
     $(document).on('click', '.btn_status', function (e) {
@@ -925,19 +905,6 @@
         });
     });
 
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
-    }
-
     // with special characters
     function read_xl_file() {
         let btn = $(".btn.save");
@@ -965,20 +932,14 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = e.target.result;
-
-            // Read as binary instead of plain text
             const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-            // Ensure special characters like "ñ" are correctly preserved
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
                     let value = row[key];
-
-                    // Convert numbers to text while keeping dates unchanged
                     if (typeof value === "number") {
                         value = String(value);
                     }
@@ -993,13 +954,12 @@
             });
         };
 
-        // Use readAsBinaryString instead of readAsText
         reader.readAsBinaryString(file);
     }
 
     function process_xl_file() {
         let btn = $(".btn.save");
-        if (btn.prop("disabled")) return; // Prevent multiple clicks
+        if (btn.prop("disabled")) return;
 
         btn.prop("disabled", true);
         $(".import_buttons").find("a.download-error-log").remove();
@@ -1042,7 +1002,6 @@
             };
         });
 
-      //  modal.loading_progress(true, "Validating and Saving data...");
         let worker = new Worker(base_url + "assets/cms/js/validator_target_sales_ps.js");
         worker.postMessage({ data: jsonData, base_url });
 
@@ -1308,7 +1267,7 @@
                         let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
 
                         logActivity('Import Target Sales Per Store', 'Import Data', remarks, link, null, null);
-                        // location.reload();
+                        
                     });
                 }
 
@@ -1728,19 +1687,10 @@
     }
 
     function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
         const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        // Trigger file download
         saveAs(blob, filename + ".csv");
     }
     

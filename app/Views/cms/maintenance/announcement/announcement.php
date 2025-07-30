@@ -224,8 +224,6 @@
                         html += "<td style='width: 20%'>" + trimText(y.description_1, 50) + "</td>";
                         html += "<td style='width: 20%'>" + trimText(y.description_2, 50) + "</td>";
                         html += "<td style='width: 20%'>" + trimText(y.description_3, 50) + "</td>";
-                        // html += "<td style='width: 10%'>" + y.banner_1 + "</td>";
-                        // html += "<td style='width: 10%'>" + y.banner_2 + "</td>";
                         html += "<td class='center-content' style='width: 10%'>" + (y.start_date ? ViewDateformat(y.start_date) : "N/A") + "</td>";
                         html += "<td class='center-content' style='width: 10%'>" + (y.end_date ? ViewDateformat(y.end_date) : "N/A") + "</td>";
                         html += "<td style='width: 10%'>" +status+ "</td>";
@@ -241,8 +239,6 @@
                           html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"+y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                           html+="</td>";
                         }
-                        
-                        
                         html += "</tr>";   
                     });
                 } else {
@@ -289,20 +285,14 @@
         if (actions === 'add') $footer.append(buttons.save);
         if (actions === 'edit') $footer.append(buttons.edit);
         $footer.append(buttons.close);
-
-        // Disable background content interaction
         $contentWrapper.attr('inert', '');
-
-        // Move focus inside modal when opened
         $modal.on('shown.bs.modal', function () {
             $(this).find('input, textarea, button, select').filter(':visible:first').focus();
         });
 
         $modal.modal('show');
-
-        // Fix focus issue when modal is hidden
         $modal.on('hidden.bs.modal', function () {
-            $contentWrapper.removeAttr('inert');  // Re-enable background interaction
+            $contentWrapper.removeAttr('inert');
             if (window.lastFocusedElement) {
                 window.lastFocusedElement.focus();
             }
@@ -322,7 +312,6 @@
     }
 
     function reset_modal_fields() {
-        // $('#popup_modal #title, #popup_modal #desc_1, #popup_modal #desc_2, #popup_modal #desc_3, #popup_modal #start_date, #popup_modal #end_date, #popup_modal').val('');
         $('#popup_modal').find('#title, #desc_1, #description_2, #desc_3, #start_date, #end_date').val('');
     }
 
@@ -533,9 +522,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and title like \'%'+search_input+'%\'';
+            new_query += ' and (title like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -545,9 +535,10 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and title like \'%'+search_input+'%\'';
+        new_query += ' and (title like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -696,20 +687,5 @@
             }
         });
     });
-
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
-    }
-
-
 
 </script>

@@ -166,9 +166,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and user like \'%'+search_input+'%\' or '+query+' and module like \'%'+search_input+'%\' or '+query+' and action like \'%'+search_input+'%\'';
+            new_query += ' and (user like \'%'+escaped_keyword+'%\' or module like \'%'+escaped_keyword+'%\' or action like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -178,9 +179,10 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and user like \'%'+search_input+'%\' or '+query+' and module like \'%'+search_input+'%\' or '+query+' and action like \'%'+search_input+'%\'';
+        new_query += ' and (user like \'%'+escaped_keyword+'%\' or module like \'%'+escaped_keyword+'%\' or action like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });

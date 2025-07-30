@@ -452,9 +452,10 @@
     $(document).on('keydown', '#search_query', function(event) {
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+            new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -464,9 +465,10 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and description like \'%'+search_input+'%\'';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -800,8 +802,8 @@
     
             html += "<tbody class='table_body word_break'>"
             html += "<tr>"
-            html += "<td style='width:20%'>"+trimText(code, 10)+"</td>"
-            html += "<td style='width:20%'>"+trimText(description, 10)+"</td>"
+            html += "<td style='width:20%'>"+trimText(code, 15)+"</td>"
+            html += "<td style='width:20%'>"+trimText(description, 15)+"</td>"
             html += "<td style='width:20%'>"+formatReadableDate(date, false)+"</td>"
             html += "<td style='width:20%'>"+chk_val+"</td>"
             html += "<td style='width:20%'>"+area_code_array[area]+"</td>"
@@ -877,12 +879,6 @@
                     });
                 });
             });
-
-    
-        // aJax.post_async(url,data,function(result){
-        //     var obj = is_json(result);
-        //     callback();
-        // });
     }
 
     function confirm_edit(id, code, description, status, date, area) {
@@ -939,8 +935,8 @@
 
             html += "<tr>"
             html += "<td style='width:10%'><b>From</b></td>"
-            html += "<td style='width:20%'>"+trimText(old.code, 10)+"</td>"
-            html += "<td style='width:20%'>"+trimText(old.description, 10)+"</td>"
+            html += "<td style='width:20%'>"+trimText(old.code, 15)+"</td>"
+            html += "<td style='width:20%'>"+trimText(old.description, 15)+"</td>"
             html += "<td style='width:20%'>"+formatReadableDate(old.deployment_date, false)+"</td>"
             html += "<td style='width:20%'>"+old.status+"</td>"
             html += "<td style='width:10%'>"+area_code_array[old.area_id]+"</td>"
@@ -957,8 +953,8 @@
     
             html += "<tr>"
             html += "<td><b>To</b></td>"
-            html += "<td>"+trimText(code, 10)+"</td>"
-            html += "<td>"+trimText(description, 10)+"</td>"
+            html += "<td>"+trimText(code, 15)+"</td>"
+            html += "<td>"+trimText(description, 15)+"</td>"
             html += "<td>"+formatReadableDate(date , false)+"</td>"
             html += "<td>"+chk_val+"</td>"
             html += "<td>"+area_code_array[area]+"</td>"

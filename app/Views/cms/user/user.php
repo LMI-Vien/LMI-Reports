@@ -299,38 +299,15 @@
         modal.loading(false);
     });
 
-    // $(document).on('click', '#saveBtn', function() {
-    //     save_data();
-    // });
-
-    // $(document).on('click', '#updateBtn', function() {
-    //     var id = $(this).attr('data-id');
-    //     update_data(id);
-    // });
-
-    // $(document).on('click', '.delete_data', function() {
-    //     var id = $(this).attr('id');
-    //     delete_data(id); 
-    // });
-
-    // $(document).on('click', '.edit', function() {
-    //     id = $(this).attr('id');
-    //     get_data_by_id(id);
-    // });
-
-    // $(document).on('click', '.view', function() {
-    //     id = $(this).attr('id');
-    //     get_data_by_id_view(id);
-    // });
-
     $(document).on('keydown', '#search_query', function(event) {
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = '';
-            new_query += '(u.name like \'%'+search_input+'%\' OR u.email like \'%'+search_input+'%\') AND ';
+            new_query += '(u.name like \'%'+escaped_keyword+'%\' OR u.email like \'%'+escaped_keyword+'%\') AND ';
             new_query += query;
             console.log(new_query);
             get_data(new_query);
@@ -821,22 +798,6 @@
         });
     }
 
-    function formatDate(date) {
-        // Get components of the date
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        // Combine into the desired format
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
-
-    //password js
-
     $(document).on("keypress", "#password1, #password2", function(e) {                          
         if (e.keyCode == 13) {
             $("#reset_password").click();
@@ -913,14 +874,12 @@
     });
 
     $('#user_modal').on('show.bs.modal', function () {
-        $(this).removeAttr('aria-hidden'); // Remove aria-hidden when modal opens
+        $(this).removeAttr('aria-hidden');
     });
 
     $('#user_modal').on('hidden.bs.modal', function () {
-        $(this).attr('aria-hidden', 'true'); // Restore aria-hidden when modal closes
+        $(this).attr('aria-hidden', 'true'); 
     });
-
-    //dito
 
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");

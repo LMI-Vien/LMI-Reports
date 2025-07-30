@@ -211,7 +211,7 @@
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td style='width: 10%'>" + y.code + "</td>";
-                        html += "<td style='width: 20%'>" + trimText(y.team_description) + "</td>";
+                        html += "<td style='width: 20%'>" + trimText(y.team_description, 15) + "</td>";
                         html += "<td style='width: 10%'>" +status+ "</td>";
                         html += "<td class='center-content' style='width: 10%'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td class='center-content' style='width: 10%'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -272,9 +272,10 @@
         $(".selectall").prop("checked", false);
         if (event.key == 'Enter') {
             search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
+            new_query += ' and (code like \'%'+escaped_keyword+'%\' or team_description like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(query);
         }
@@ -284,9 +285,10 @@
         $('.btn_status').hide();
         $(".selectall").prop("checked", false);
         search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and code like \'%'+search_input+'%\' or '+query+' and team_description like \'%'+search_input+'%\'';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or team_description like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(query);
     });
@@ -408,10 +410,8 @@
         });
 
         $modal.modal('show');
-
-        // Fix focus issue when modal is hidden
         $modal.on('hidden.bs.modal', function () {
-            $contentWrapper.removeAttr('inert');  // Re-enable background interaction
+            $contentWrapper.removeAttr('inert'); 
             if (window.lastFocusedElement) {
                 window.lastFocusedElement.focus();
             }
@@ -700,34 +700,6 @@
         }); 
     }
 
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
-    function addNbsp(inputString) {
-        return inputString.split('').map(char => {
-            if (char === ' ') {
-            return '&nbsp;&nbsp;';
-            }
-            return char + '&nbsp;';
-        }).join('');
-    }
-
-    function trimText(str) {
-        if (str.length > 15) {
-            return str.substring(0, 15) + "...";
-        } else {
-            return str;
-        }
-    }
-
     $(document).on('click', '.btn_status', function (e) {
         var status = $(this).attr("data-status");
         var modal_obj = "";
@@ -814,19 +786,6 @@
         });
     });
 
-    function ViewDateformat(dateString) {
-        let date = new Date(dateString);
-        return date.toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit', 
-            hour12: true 
-        });
-    }
-
     function read_xl_file() {
         let btn = $(".btn.save");
         btn.prop("disabled", false);
@@ -853,20 +812,14 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = e.target.result;
-
-            // Read as binary instead of plain text
             const workbook = XLSX.read(data, { type: "binary", raw: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-            // Ensure special characters like "ñ" are correctly preserved
             jsonData = jsonData.map(row => {
                 let fixedRow = {};
                 Object.keys(row).forEach(key => {
                     let value = row[key];
-
-                    // Convert numbers to text while keeping dates unchanged
                     if (typeof value === "number") {
                         value = String(value);
                     }
@@ -1285,9 +1238,6 @@
             var id = $(this).attr('data-id');
             ids.push(`'${id}'`);
         });
-
-        console.log(ids, 'ids');
-
         const params = new URLSearchParams();
         ids.length > 0 ? 
             params.append('selectedids', ids.join(',')) :
@@ -1298,19 +1248,10 @@
     }
 
     function exportArrayToCSV(data, filename, headerData) {
-        // Create a new worksheet
         const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-
-        // Add header rows manually
         XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-
-        // Convert worksheet to CSV format
         const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-
-        // Convert CSV string to Blob
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        // Trigger file download
         saveAs(blob, filename + ".csv");
     }
 

@@ -283,9 +283,9 @@
                         BAName = names.join(', ');
                     }
                     html += "<tr class='" + rowClass + "'>";
-                    html += "<td scope=\"col\">" + trimText(BAName) + "</td>";
-                    html += "<td scope=\"col\">" + trimText(storeCode) + "</td>";
-                    html += "<td scope=\"col\">" + trimText(storeDesc) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(BAName, 15) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(storeCode, 15) + "</td>";
+                    html += "<td scope=\"col\">" + trimText(storeDesc, 15) + "</td>";
                     html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                     html += "<td scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
                     $('#year').val(yearValue);

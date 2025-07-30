@@ -1471,6 +1471,15 @@ function ViewDateformat(dateString) {
     });
 }
 
+function ViewDateOnly(dateString) {
+    let date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric'
+    });
+}
+
 function trimText(str, length) {
     if (typeof str !== 'string') {
         str = '';
@@ -1493,6 +1502,10 @@ function formatDate(date) {
 
     // Combine into the desired format
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function encodeHtmlEntities(str) {
+    return $('<div/>').text(str).html();
 }
 
 function formatReadableDate(dateStr, datetime) {
