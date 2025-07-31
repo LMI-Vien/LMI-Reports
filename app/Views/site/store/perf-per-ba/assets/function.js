@@ -351,8 +351,8 @@
         let textAsc = $('#ascName').val();
         let textBa = $('#brandAmbassador').val();
         let textStore = $('#storeName').val();
-        let monthStart = $('#month').val();
-        let monthEnd = $('#monthTo').val();
+        let textMonthStart = $('#month option:selected').text();
+        let textMonthEnd = $('#monthTo option:selected').text();
         let brandList = $('#brands').select2('data').map((item) => {
             return item.text
         });
@@ -390,8 +390,8 @@
             textBa: textBa,
             textStore: textStore,
             brandList: JSON.stringify(brandList),
-            monthStart: monthStart,
-            monthEnd: monthEnd
+            monthStart: textMonthStart,
+            monthEnd: textMonthEnd
         };
 
         let endpoint = action === 'export_pdf' ? 'per-ba-generate-pdf' : 'per-ba-generate-excel-ba';

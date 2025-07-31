@@ -324,12 +324,12 @@ class StoreSalesPerfPerBa extends BaseController
 		];
 
 		$title = "Store Sales Performance per Brand Ambassador";
-		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf = new \App\Libraries\TCPDFLib('L','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
 		$pdf->SetTitle($title);
 		$pdf->setPrintHeader(false);
-		$pdf->setPrintFooter(false);
+		$pdf->setPrintFooter(true);
 		$pdf->AddPage();
 
 		$this->printHeader($pdf, $title);
@@ -373,6 +373,7 @@ class StoreSalesPerfPerBa extends BaseController
 		$pdf->SetFont('helvetica','',9);
 
 		$lineH = 4;  // mm per text line
+		$fixedRowHeight = 12; 
 		foreach ($rows as $row) {
 			$cells = [
 				$row->rank,
@@ -406,16 +407,37 @@ class StoreSalesPerfPerBa extends BaseController
 				$pdf->AddPage();
 			}
 
-			foreach ($cells as $index => $text) {
-				$isLast = $index === count($cells) - 1;
+			// foreach ($cells as $index => $text) {
+			// 	$isLast = $index === count($cells) - 1;
+			// 	$pdf->MultiCell(
+			// 		$colWidth,
+			// 		$rowHeight,
+			// 		$text,
+			// 		1,
+			// 		'C',
+			// 		0,
+			// 		$isLast ? 1 : 0
+			// 	);
+			// }
+			foreach ($cells as $colIndex => $text) {
+				$isLastCol = ($colIndex === count($cells) - 1);
 				$pdf->MultiCell(
-					$colWidth,
-					$rowHeight,
-					$text,
-					1,
-					'C',
-					0,
-					$isLast ? 1 : 0
+					$colWidth,          // width of the cell
+					$fixedRowHeight,    // *fixed* height
+					$text,              // content
+					1,                  // border
+					'C',                // horizontal align (C=center)
+					0,                  // fill?
+					$isLastCol ? 1 : 0, // ln: move to next line only at end of row
+					'',                 // x (auto)
+					'',                 // y (auto)
+					true,               // reset height (reseth)
+					0,                  // stretch mode (0 = disabled)
+					false,              // isHTML
+					true,               // auto padding
+					$fixedRowHeight,    // **maxh** = same as height
+					'M',                // **valign** middle
+					true                // **fitcell**: shrink text to fit
 				);
 			}
 		}
@@ -426,7 +448,12 @@ class StoreSalesPerfPerBa extends BaseController
 
 	// ================================= Header for pdf export =================================
 	private function printHeader($pdf, $title) {
-		$pdf->SetFont('helvetica', '', 12);
+		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
+		if (file_exists($logoPath)) {
+			$pdf->Image($logoPath, 15, 5, 50); // (file, x, y, width), adjust position if needed
+		}
+
+		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
 		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
@@ -443,40 +470,60 @@ class StoreSalesPerfPerBa extends BaseController
 		$pdf->Ln(2);
 
 		$pageWidth  = $pdf->getPageWidth();
-		$pageMargin = $pdf->getMargins();
-		$perRow   = ceil(count($filters) / 2);
-		$colWidth = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $perRow;
+		$margins    = $pdf->getMargins();
+		$perRow     = ceil(count($filters) / 2);
+		$colWidth   = ($pageWidth - $margins['left'] - $margins['right']) / $perRow;
 
-		// split into two “rows”
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek()['display'] : 'Unknown Week';
+		$generatedAt = date('M d, Y, h:i:s A');
+
+		// print filters in two rows, with bold keys via HTML 
+		$lineHeight = 5; 
 		$rows = array_chunk($filters, $perRow, true);
-
 		foreach ($rows as $rowFilters) {
+			// 1) find max lines needed
+			$maxLines = 0;
 			foreach ($rowFilters as $key => $value) {
-				// $pdf->Cell($colWidth, 8, "{$key}: {$value}", 0, 0, 'L');
+				$num = $pdf->getNumLines("<b>{$key}:</b> {$value}", $colWidth);
+				$maxLines = max($maxLines, $num);
+			}
+
+			// 2) render each cell as HTML
+			foreach ($rowFilters as $key => $value) {
 				$pdf->MultiCell(
-					$colWidth,   
-					8,       
-					"{$key}: {$value}",
-					0,            // border
-					'L',          // align center
-					0,            // no fill
-					0,            // stay to the right after (we'll end the row on the last cell)
-					'', '', true  // reset height
+					$colWidth,
+					$lineHeight,
+					"<b>{$key}:</b> {$value}",
+					0,    // no border
+					'L',  // left align
+					0,    // no fill
+					0,    // stay on same line
+					'', '',  // x/y
+					true, // reset height
+					0,    // stretch
+					true  // isHTML!
 				);
 			}
-			$pdf->Ln(8);
+
+			// 3) drop down by full height
+			$pdf->Ln($maxLines * $lineHeight);
 		}
 
-		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
-		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
-
-		$currentWeekText = 'Current Week: ' . $currentWeekDisplay;
-		$generatedText   = 'Generated Date: ' . date('M d, Y, h:i:s A');
-
-		// Adjust spacing manually between them
-		$pdf->Cell(100, 6, $currentWeekText, 0, 0, 'L');  // Width ~100mm for week
-		$pdf->Cell(38, 6, '', 0, 0);                      // Spacer ~10mm
-		$pdf->Cell(0, 6, $generatedText, 0, 1, 'L');      // Remaining width for date
+		// change number in order to change the space between the second row and third row
+		$pdf->SetY($pdf->GetY() - 3);
+		
+		// now print Current Week & Generated Date, with bold labels 
+		$pdf->writeHTMLCell(
+			100, 6, '', '',
+			"<b>Current Week:</b> {$currentWeek}",
+			0, 0, false, true, 'L', true
+		);
+		$pdf->Cell(38, 6, '', 0, 0); // spacer
+		$pdf->writeHTMLCell(
+			0, 6, '', '',
+			"<b>Generated Date:</b> {$generatedAt}",
+			0, 1, false, true, 'L', true
+		);
 
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');

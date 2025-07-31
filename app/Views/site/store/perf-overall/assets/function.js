@@ -302,8 +302,6 @@
             textMonthStart : textMonthStart,
             textMonthEnd : textMonthEnd
         }
-        console.log(postData, 'post data'); 
-        // return;
 
         let endpoint = action === 'exportPdf' ? 'overall-growth-generate-pdf' : 'overall-growth-generate-excel';
 
