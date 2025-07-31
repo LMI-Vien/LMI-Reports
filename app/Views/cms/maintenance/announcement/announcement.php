@@ -525,7 +525,7 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (title like \'%'+escaped_keyword+'%\')';
+            new_query += ' and (title like \'%'+escaped_keyword+'%\' or description_1 like \'%'+escaped_keyword+'%\' or description_2 like \'%'+escaped_keyword+'%\' or description_3 like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -538,7 +538,7 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (title like \'%'+escaped_keyword+'%\')';
+        new_query += ' and (title like \'%'+escaped_keyword+'%\' or description_1 like \'%'+escaped_keyword+'%\' or description_2 like \'%'+escaped_keyword+'%\' or description_3 like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });

@@ -1714,7 +1714,7 @@ class Dashboard_model extends Model
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
-	    $finalQuery = $this->interpolateQuery2($sql, $params);
+	    //$finalQuery = $this->interpolateQuery2($sql, $params);
 	    // echo $finalQuery;
 	    // die();
 	    return [

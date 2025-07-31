@@ -316,7 +316,7 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' and agency like \'%'+escaped_keyword+'%\')';
+            new_query += ' and (code like \'%'+escaped_keyword+'%\' or agency like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -329,7 +329,7 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' and agency like \'%'+escaped_keyword+'%\')';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
