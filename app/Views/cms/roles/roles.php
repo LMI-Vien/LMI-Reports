@@ -833,14 +833,14 @@ ul.child_menu {
     function get_sub_menu(id, table, module_name, action, counter)
     {
         if(action == "add"){
-            query = "menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
+            query2 = "menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
             
             var url = "<?= base_url('cms/global_controller');?>";
             var data = {
                 event:"list",
                 select:"id,menu_name,menu_type,menu_parent_id,menu_level,status,sort_order",
                 table: table,
-                query: query,
+                query: query2,
                 group:"menu_name",
                 sort_order:{
                     field: "sort_order",
@@ -906,11 +906,11 @@ ul.child_menu {
             });
         }else{
             roles_menu_id = roles_menu_id;
-            if(role == 1){
-              query = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
-            }else{
-               query = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1 AND menu_id != 14 AND menu_id != 15 AND menu_id != 22";
-            } 
+            // if(role == 1){
+               query2 = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
+            // }else{
+            //    query = "role_id = "+roles_menu_id+" AND menu_parent_id = "+id+" AND menu_level = 2 AND status = 1";
+            // } 
 
             var url = "<?= base_url('cms/global_controller');?>";
             var select = "";
@@ -935,7 +935,7 @@ ul.child_menu {
                 event:"list",
                 select:select,
                 table: table,
-                query: query,
+                query: query2,
                 join : join,
                 sort_order:{
                     field: "sort_order",
@@ -1803,12 +1803,12 @@ ul.child_menu {
         //modal.loading(true);
         
 
-        var query = "status >= 0 and id = " + inp_id;
+        var query2 = "status >= 0 and id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
             select : "id, name, status",
-            query : query, 
+            query : query2, 
             table : "cms_user_roles"
         }
         aJax.post(url,data,function(result){
@@ -1824,14 +1824,15 @@ ul.child_menu {
                     }
 
                     roles_menu_id = d.id;
-                    if(role === 1){
-                      query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 and role_id != 0";
-                    }else{
-                       query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 AND `menu_id` != 8 AND `menu_id` != 6 and role_id != 0";
-                    }
+                    query2 = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 and role_id != 0";
+                    // if(role === 1){
+                    //   query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 and role_id != 0";
+                    // }else{
+                    //    query = "`role_id` = "+roles_menu_id+" AND `menu_level` = 1 AND `status` = 1 AND `menu_id` != 8 AND `menu_id` != 6 and role_id != 0";
+                    // }
 
-                    get_data_modules(query, "edit");
-                    get_data_site_menu(query, "edit");                        
+                    get_data_modules(query2, "edit");
+                    get_data_site_menu(query2, "edit");                        
                     setTimeout(() => { 
                         modal.loading(false);
                     }, 3500);  
