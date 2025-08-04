@@ -145,7 +145,12 @@ class Dashboard extends BaseController
 
 	// ================================= Header for pdf export =================================
 	private function printHeader($pdf, $title) {
-		$pdf->SetFont('helvetica', '', 12);
+		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
+		if (file_exists($logoPath)) {
+			$pdf->Image($logoPath, 15, 5, 50);
+		}
+
+		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
 		$pdf->Cell(0, 5, $title, 0, 1, 'C');
@@ -159,12 +164,12 @@ class Dashboard extends BaseController
 		$announcement = $this->db->table('tbl_announcements')->where('id', $id)->get()->getRow();
 
 		$title = "Announcement";
-		$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf = new \App\Libraries\TCPDFLib('L','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
 		$pdf->SetTitle($title);
 		$pdf->setPrintHeader(false);
-		$pdf->setPrintFooter(false);
+		$pdf->setPrintFooter(true);
 		$pdf->AddPage();
 
 		$this->printHeader($pdf, $title);

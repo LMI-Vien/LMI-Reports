@@ -163,48 +163,91 @@ class StocksWeekAllStore extends BaseController
 	// ================================= Display filters for pdf export ================================
 	private function printFilter($pdf, $filters) {
 		$pdf->SetFont('helvetica', '', 9);
+		$source = "VMI (LMI/RGDI)";
+		$pdf->MultiCell(0, 8, "Source: " . $source, 0, 'C', 0, 1, '', '', true);
+
+		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Ln(2);
 
 		$pageWidth  = $pdf->getPageWidth();
 		$pageMargin = $pdf->getMargins();
+		$usableWidth 	= $pageWidth - $pageMargin['left'] - $pageMargin['right'];
+
 		$perRow   = ceil(count($filters) / 2);
-		$colWidth = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $perRow;
+		$colWidth = $usableWidth / $perRow;
 
 		// split into two “rows”
 		$rows = array_chunk($filters, $perRow, true);
 
+		$generatedAt = date('M d, Y, h:i:s A');
+
 		foreach ($rows as $rowFilters) {
+			$currentX = $pdf->GetX();
+			$currentY = $pdf->GetY();
+
+			$cellBaseHeight = 4;
+			$maxLines       = 1;
+
 			foreach ($rowFilters as $key => $value) {
-				// $pdf->Cell($colWidth, 8, "{$key}: {$value}", 0, 0, 'L');
-				$pdf->MultiCell(
-					$colWidth,
-					8,
-					"{$key}: {$value}",
-					1, 'L', 0, 0, '', '', true, 0, false, true, 5, 'M', true
-				);
+				$html     = "<b>{$key}:</b> {$value}";
+				$plainTxt = strip_tags($html);
+				$numLines = $pdf->getNumLines($plainTxt, $colWidth);
+				$maxLines = max($maxLines, $numLines);
 			}
-			$pdf->Ln(8);
+			$rowHeight = $cellBaseHeight * $maxLines;
+
+			$x = $currentX;
+			foreach ($rowFilters as $key => $value) {
+				$html = "<b>" . htmlspecialchars($key) . ":</b> " . htmlspecialchars($value);
+
+				$pdf->MultiCell(
+					$colWidth,        // width
+					$cellBaseHeight,  // nominal line height
+					$html,            // HTML text
+					0,                // no border
+					'L',              // left align
+					false,            // no fill
+					0,                // ln = stay on same line
+					$x,               // x position
+					$currentY,        // y position
+					true,             // reset height
+					0,                // stretch
+					true,             // **isHTML = true**  
+					true,             // autopadding
+					$rowHeight,       // max height
+					'T',              // valign = top
+					false             // fitcell
+				);
+
+				$x += $colWidth;
+			}
+			$pdf->Ln($rowHeight);
 		}
 
-		$pdf->Cell(0, 6, 'Generated Date: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
+		$pdf->Ln(2);
+		$pdf->writeHTMLCell(
+			0, 6, '', '',
+			"<b>Generated Date:</b> {$generatedAt}",
+			0, 1, false, true, 'L', true
+		);
+
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');
 		$pdf->Ln(4);
-	}
+	}	
 
 	// ================================= Header for pdf export =================================
 	private function printHeader($pdf, $title) {
-		$pdf->SetFont('helvetica', '', 12);
+		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
+		if (file_exists($logoPath)) {
+			$pdf->Image($logoPath, 15, 5, 50);
+		}
+
+		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
 		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
 		$pdf->Ln(5);
-	}
-
-	private function getParam(string $key) {
-		$v = $this->request->getVar($key);       // accepts GET or POST
-		if (is_null($v)) return null;
-		$v = trim((string)$v);
-		return $v === '' ? null : $v;
 	}
 
 	private function formatComma($value): string {
@@ -308,12 +351,12 @@ class StocksWeekAllStore extends BaseController
 		}
 		
 		$title = "Week by Week Stock Data of all Stores";
-		$pdf   = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf = new \App\Libraries\TCPDFLib('L','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
 		$pdf->SetTitle($title);
 		$pdf->setPrintHeader(false);
-		$pdf->setPrintFooter(false);
+		$pdf->setPrintFooter(true);
 		$pdf->AddPage();
 
 		if ($source == 2) {

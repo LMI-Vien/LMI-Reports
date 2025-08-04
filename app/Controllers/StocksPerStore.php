@@ -340,21 +340,26 @@ class StocksPerStore extends BaseController
 	    
 		$title = 'Stock_Data_per_Store_' . date('Ymd_His');
 		
-		$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf = new \App\Libraries\TCPDFLib('P','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
 		$pdf->SetTitle('BA Dashboard Report');
 		$pdf->setPrintHeader(false);
-		$pdf->setPrintFooter(false);
+		$pdf->setPrintFooter(true);
 		$pdf->AddPage();
+
+		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
+		if (file_exists($logoPath)) {
+			// (x, y, width)
+			$pdf->Image($logoPath, 15, 5, 45);
+		}
 		
-		$pdf->SetFont('helvetica', '', 12);
+		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
 		$pdf->Cell(0, 5, 'Report: Stock Data per Area or Store', 0, 1, 'C');
 		$pdf->Ln(5);
 
-		$pdf->SetFont('helvetica', '', 9);
 		if ($baId == -5) {
 			$brand_ambassador = 'Vacant';
 		} elseif ($baId == -6) {
@@ -362,42 +367,87 @@ class StocksPerStore extends BaseController
 		} else {
 			$brand_ambassador = $baText;
 		}
-		$pdf->Cell(63, 6, 'Brand Ambassador: ' . ($brand_ambassador ?: 'ALL'), 0, 0, 'L');
-		$selectedBrands = '';
-		if($brands){
-			$selectedBrands = implode(", ", $brands);
-			
-		}
-		$pdf->Cell(63, 6, 'Brand: ' . ($selectedBrands ?: 'ALL'), 0, 0, 'L');
+
+		$selectedBrands = $brands ? implode(', ', $brands) : 'ALL';
 
 		$baTypeLabels = [
 			'0' => 'Consignment',
 			'1' => 'Outright',
 			'3' => 'All',
 		];
-		$baLabels = isset($baTypeLabels[$baTypeId]) ? $baTypeLabels[$baTypeId] : 'All';
-		$pdf->Cell(63, 6, 'Outright/Consignment: '.$baLabels, 0, 1, 'L');
 
-		$pdf->Cell(63, 6, 'Store Name: ' . ($storeText ?: 'ALL'), 0, 0, 'L');
+		$baLabels = $baTypeLabels[$baTypeId] ?? 'All';
 
-		$asc = isset($ascText) ? $ascText . ' - ' . $ascText : null;
+		$asc  = $ascText  ?: '';
+		$area = $areaText ?: '';
 
-		$area = isset($areaText) ? $areaText . ' - ' . $areaText : null;
-		
+		// build a simple key→value array for our two rows of filters
+		$filters = [
+			'Brand Ambassador'     => $brand_ambassador ?: 'ALL',
+			'Brand'                => $selectedBrands,
+			'Outright/Consignment' => $baLabels,
+			'Store Name'           => $storeText ?: 'ALL',
+			'Area / ASC Name'      => trim("{$area} / {$asc}") ?: 'ALL',
+		];
 
-		if(strlen($area . '/' . $asc) > 40) {
-		    // Move to the next line
-		    $pdf->Ln(6); // Line break
-		    $pdf->Cell(63, 6, 'Area / ASC Name: ', 0, 0, 'L');
-		    $pdf->MultiCell(0, 6, $area . ' / ' . $asc, 0, 'L');
-		} else {
-		    // If it fits in one line, place it alongside Store Name
-		    $pdf->Cell(63, 6, 'Area / ASC Name: ' . ($area . ' / ' . $asc ?: ''), 0, 0, 'L');
+		$pdf->SetFont('helvetica', '', 9);
+
+		$pageWidth   = $pdf->getPageWidth();
+		$margins     = $pdf->getMargins();
+		$usableWidth = $pageWidth - $margins['left'] - $margins['right'];
+		$perRow       = ceil(count($filters) / 2);
+		$colWidth     = $usableWidth / $perRow;
+		$rows         = array_chunk($filters, $perRow, true);
+
+		$cellBaseHeight = 4;
+		foreach ($rows as $rowFilters) {
+			$currentX = $pdf->GetX();
+			$currentY = $pdf->GetY();
+
+			$maxLines = 1;
+			foreach ($rowFilters as $key => $value) {
+				$plain    = strip_tags("<b>{$key}:</b> {$value}");
+				$lines    = $pdf->getNumLines($plain, $colWidth);
+				$maxLines = max($maxLines, $lines);
+			}
+			$rowHeight = $maxLines * $cellBaseHeight;
+
+			$x = $currentX;
+			foreach ($rowFilters as $key => $value) {
+				$html = '<b>' . htmlspecialchars($key) . ':</b> '
+					. htmlspecialchars($value);
+
+				$pdf->MultiCell(
+					$colWidth,        // width
+					$cellBaseHeight,  // nominal line height
+					$html,            // HTML text
+					0,                // no border
+					'L',              // left align
+					false,            // no fill
+					0,                // stay on same line
+					$x,               // x
+					$currentY,        // y
+					true,             // reset height
+					0,                // stretch
+					true,             // isHTML = true
+					true,             // autopadding
+					$rowHeight,       // max height
+					'T',              // valign: top
+					false             // fitcell
+				);
+				$x += $colWidth;
+			}
+
+			$pdf->Ln($rowHeight);
 		}
 
-		//$pdf->Cell(63, 6, 'Area / ASC Name: ' . ($area .'/'. $asc ?: ''), 0, 0, 'L');
-		$pdf->Cell(63, 6, 'Date Generated: ' . date('M d, Y, h:i:s A'), 0, 1, 'L');
-		
+		$generatedAt = date('M d, Y, h:i:s A');
+		$pdf->Ln(2);
+		$pdf->writeHTMLCell(
+			0, 6, '', '',
+			'<b>Generated Date:</b> ' . $generatedAt,
+			0, 1, false, true, 'L', true
+		);
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');
 		$pdf->Ln(4);
