@@ -60,10 +60,12 @@ class StocksAllStore extends BaseController
 		$data['month'] = $this->Global_model->getMonths();
 		$data['session'] = session();
 		$data['js'] = array(
-			"assets/site/bundle/js/bundle.min.js"
+			"assets/site/bundle/js/bundle.min.js",
+			"assets/site/js/common.js"
                     );
         $data['css'] = array(
-        	"assets/site/bundle/css/bundle.min.css"
+        	"assets/site/bundle/css/bundle.min.css",
+        	"assets/site/css/common.css"
                     );
 		return view("site/layout/template", $data);
 	}

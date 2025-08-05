@@ -53,10 +53,12 @@ class StocksPerStore extends BaseController
 		$data['content'] = "site/stocks/per-store/data_per_store";
 		$data['session'] = session();
 		$data['js'] = array(
-			"assets/site/bundle/js/bundle.min.js"
+			"assets/site/bundle/js/bundle.min.js",
+			"assets/site/js/common.js"
                     );
         $data['css'] = array(
-        	"assets/site/bundle/css/bundle.min.css"
+        	"assets/site/bundle/css/bundle.min.css",
+        	"assets/site/css/common.css"
                     );
 		return view("site/layout/template", $data);
 	}
@@ -135,6 +137,8 @@ class StocksPerStore extends BaseController
 		    // $limit = 10;
 		    // $offset = 0;
 		    // echo $offset;
+		    //$latestYear = 6;
+	    	//$latestWeek = 4;
 
 		    $orderDirection = strtoupper($orderDirection);
 		    switch ($type) {

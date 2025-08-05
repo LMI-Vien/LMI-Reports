@@ -123,8 +123,6 @@
         });
 
         const area = $('#area').val();
-        //const storeName = $('#storeName').val();
-
 
         if (!area) {
             modal.alert('Please select "Area" before filtering.', "warning");
@@ -132,7 +130,6 @@
         }
 
         if (counter >= 1) {
-           // modal.loading(true);
             fetchData();
             $('.table-empty').hide();
             $('.data-graph').show();
@@ -141,7 +138,6 @@
         
     });     
 
-    // Define months
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     const dataValues = {
@@ -321,13 +317,6 @@
         }
     }
 
-    function formatTwoDecimals(data) {
-        if(data == "N/A"){
-            return data;
-        }
-        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
-    }
-
     function handleAction(action) {
         modal.loading(true);
         let selectedArea = $('#areaId').val();
@@ -366,7 +355,6 @@
 
         let endpoint = action === 'exportPdf' ? 'per-month-generate-pdf' : 'per-month-generate-excel';
 
-        // let url = `${base_url}store/${endpoint}?${qs}`;
         let url = `${base_url}store/${endpoint}`;
 
         $.ajax({
@@ -415,49 +403,3 @@
         `;
         logActivity('Store Sales Performance per Month', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
     }
-
-    function getCalendarWeeks(year) {
-        const weeks = [];
-
-        // Start from the first Monday of the ISO week 1
-        let date = new Date(year, 0, 4); // Jan 4 is always in the first ISO week
-        const day = date.getDay();
-        const diff = (day === 0 ? -6 : 1 - day); // move to Monday
-        date.setDate(date.getDate() + diff);
-
-        let weekNumber = 1;
-
-        while (date.getFullYear() <= year || (date.getFullYear() === year + 1 && weekNumber < 54)) {
-            const weekStart = new Date(date);
-            const weekEnd = new Date(date);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-
-            if (weekStart.getFullYear() > year && weekEnd.getFullYear() > year) break;
-
-            weeks.push({
-                id: weekNumber,
-                display: `Week ${weekNumber} (${weekStart.toISOString().slice(0, 10)} - ${weekEnd.toISOString().slice(0, 10)})`,
-                week: weekNumber++,
-                start: weekStart.toISOString().slice(0, 10),
-                end: weekEnd.toISOString().slice(0, 10),
-            });
-
-            date.setDate(date.getDate() + 7); // move to next Monday
-        }
-
-        return weeks;
-    }
-
-    function getCurrentWeek(year = new Date().getFullYear()) {
-        const weeks = getCalendarWeeks(year);
-        const today = new Date().toISOString().slice(0, 10);
-
-        for (const week of weeks) {
-            if (today >= week.start && today <= week.end) {
-                return week;
-            }
-        }
-
-        return null;
-    }
-

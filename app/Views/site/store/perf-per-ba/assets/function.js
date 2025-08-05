@@ -278,37 +278,6 @@
         addColumnToggle(table);
     }
 
-
-    function formatDateToMMDDYYYY(dateString) {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        if (isNaN(date)) return ''; // Handle invalid dates
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-        const year = date.getFullYear();
-        return `${month}/${day}/${year}`;
-    }
-
-    function formatNoDecimals(data) {
-        return data ? Number(data).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '0';
-    }
-
-    function formatTwoDecimals(data) {
-        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
-    }
-
-    function formatFourDecimals(data) {
-        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) : '0.0000';
-    }
-
-    function formattedDate(data) {
-        if (!data) return ''; 
-
-        let date = new Date(data);
-        let options = { month: 'short', day: '2-digit', year: 'numeric' };
-        return date.toLocaleDateString('en-US', options).replace(',', '');
-    }
-
     function addColumnToggle(table) {
         $('.mx-2').remove();
         table.columns().every(function(index) {
@@ -357,21 +326,6 @@
             return item.text
         });
 
-        // let qs = [
-        //     'area='             + encodeURIComponent(selectedArea),
-        //     'asc='              + encodeURIComponent(selectedAsc),
-        //     'baType='           + encodeURIComponent(selectedBaType),
-        //     'ba='               + encodeURIComponent(selectedBa),
-        //     'store='            + encodeURIComponent(selectedStore),
-        //     'brands='           + encodeURIComponent(selectedBrands),
-        //     'year='             + encodeURIComponent(selectedYear),
-        //     'month_start='      + encodeURIComponent(selectedMonthStart),
-        //     'month_end='        + encodeURIComponent(selectedMonthEnd),
-        //     'searchValue='      + encodeURIComponent(searchValue),
-        //     'limit='            + encodeURIComponent(99999),
-        //     'offset='           + encodeURIComponent(0),
-        // ].join('&');
-
         let postData = {
             area: selectedArea,
             asc: selectedAsc,
@@ -395,8 +349,6 @@
         };
 
         let endpoint = action === 'export_pdf' ? 'per-ba-generate-pdf' : 'per-ba-generate-excel-ba';
-
-        // let url = `${base_url}store/${endpoint}?${qs}`;
         let url = `${base_url}store/${endpoint}`;
 
         $.ajax({
@@ -404,14 +356,7 @@
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(postData),
-            // success : (res) => {
-            //     console.log(res, "response")
-            //     modal.loading(false)
-            // },
-            // error: () => {
-            //     alert('alert')
-            //     modal.loading(false)
-            // }
+
             xhrFields: {
                 responseType: 'blob'
             },
@@ -459,49 +404,4 @@
             null, 
             null
         );
-    }
-
-    function getCalendarWeeks(year) {
-        const weeks = [];
-
-        // Start from the first Monday of the ISO week 1
-        let date = new Date(year, 0, 4); // Jan 4 is always in the first ISO week
-        const day = date.getDay();
-        const diff = (day === 0 ? -6 : 1 - day); // move to Monday
-        date.setDate(date.getDate() + diff);
-
-        let weekNumber = 1;
-
-        while (date.getFullYear() <= year || (date.getFullYear() === year + 1 && weekNumber < 54)) {
-            const weekStart = new Date(date);
-            const weekEnd = new Date(date);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-
-            if (weekStart.getFullYear() > year && weekEnd.getFullYear() > year) break;
-
-            weeks.push({
-                id: weekNumber,
-                display: `Week ${weekNumber} (${weekStart.toISOString().slice(0, 10)} - ${weekEnd.toISOString().slice(0, 10)})`,
-                week: weekNumber++,
-                start: weekStart.toISOString().slice(0, 10),
-                end: weekEnd.toISOString().slice(0, 10),
-            });
-
-            date.setDate(date.getDate() + 7); // move to next Monday
-        }
-
-        return weeks;
-    }
-
-    function getCurrentWeek(year = new Date().getFullYear()) {
-        const weeks = getCalendarWeeks(year);
-        const today = new Date().toISOString().slice(0, 10);
-
-        for (const week of weeks) {
-            if (today >= week.start && today <= week.end) {
-                return week;
-            }
-        }
-
-        return null;
     }

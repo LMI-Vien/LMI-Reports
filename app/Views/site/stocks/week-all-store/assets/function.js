@@ -256,14 +256,6 @@
         });
     }
 
-    function formatTwoDecimals(data) {
-        return data ? Number(data).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
-    }
-
-    function formatNumberWithCommas(number) {
-        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-
     function paramsToJSON(params) {
         const json = {};
 
@@ -436,38 +428,6 @@
         populateDropdown(id, getCalendarWeeks(selectedYear), 'display', 'id');
     }
 
-    function getCalendarWeeks(year) {
-        const weeks = [];
-
-        // Start from the first Monday of the ISO week 1
-        let date = new Date(year, 0, 4); // Jan 4 is always in the first ISO week
-        const day = date.getDay();
-        const diff = (day === 0 ? -6 : 1 - day); // move to Monday
-        date.setDate(date.getDate() + diff);
-
-        let weekNumber = 1;
-
-        while (date.getFullYear() <= year || (date.getFullYear() === year + 1 && weekNumber < 54)) {
-            const weekStart = new Date(date);
-            const weekEnd = new Date(date);
-            weekEnd.setDate(weekEnd.getDate() + 6);
-
-            if (weekStart.getFullYear() > year && weekEnd.getFullYear() > year) break;
-
-            weeks.push({
-                id: weekNumber,
-                display: `Week ${weekNumber} (${weekStart.toISOString().slice(0, 10)} - ${weekEnd.toISOString().slice(0, 10)})`,
-                week: weekNumber++,
-                start: weekStart.toISOString().slice(0, 10),
-                end: weekEnd.toISOString().slice(0, 10),
-            });
-
-            date.setDate(date.getDate() + 7); // move to next Monday
-        }
-
-        return weeks;
-    }
-
     const populateDropdown = (selected_class, result, textKey = 'name', valueKey = 'id') => {
         let html = '<option id="default_val" value="">Select</option>';
         
@@ -479,16 +439,3 @@
         
         $('#' + selected_class).html(html);
     };
-
-    function getCurrentWeek(year = new Date().getFullYear()) {
-        const weeks = getCalendarWeeks(year);
-        const today = new Date().toISOString().slice(0, 10);
-
-        for (const week of weeks) {
-            if (today >= week.start && today <= week.end) {
-                return week;
-            }
-        }
-
-        return null;
-    }

@@ -43,10 +43,12 @@ class StoreSalesPerfPerArea extends BaseController
 		$data['content'] = "site/store/perf-per-area/sales_performance_per_area";
 		$data['session'] = session();
 		$data['js'] = array(
-			"assets/site/bundle/js/bundle.min.js"
+			"assets/site/bundle/js/bundle.min.js",
+			"assets/site/js/common.js"
                     );
         $data['css'] = array(
-        	"assets/site/bundle/css/bundle.min.css"
+        	"assets/site/bundle/css/bundle.min.css",
+        	"assets/site/css/common.css"
                     );
 		return view("site/layout/template", $data);
 	}
