@@ -252,12 +252,12 @@ class StocksAllStore extends BaseController
 		}
 
 		$title = "Overall Stock Data of All Stores";
-		$pdf   = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf = new \App\Libraries\TCPDFLib('L','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
 		$pdf->SetTitle($title);
 		$pdf->setPrintHeader(false);
-		$pdf->setPrintFooter(false);
+		$pdf->setPrintFooter(true);
 		$pdf->AddPage();
 
 		if (empty($itmclstxt)) {
@@ -722,53 +722,54 @@ class StocksAllStore extends BaseController
 		$pdf->SetFont('helvetica', '', 9);
 		$pdf->Ln(2);
 
-		$pageWidth  = $pdf->getPageWidth();
-		$pageMargin = $pdf->getMargins();
-		$usableWidth = $pageWidth - $pageMargin['left'] - $pageMargin['right'];
+		$pageWidth  	= $pdf->getPageWidth();
+		$pageMargin 	= $pdf->getMargins();
+		$usableWidth 	= $pageWidth - $pageMargin['left'] - $pageMargin['right'];
 
 		$perRow   = ceil(count($filters) / 2);
-		$colWidth = $usableWidth / $perRow; 
+		$colWidth = $usableWidth / $perRow;
 
 		$rows = array_chunk($filters, $perRow, true);
+
+		$currentWeek        = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek()['display'] : 'Unknown Week';
+		$generatedAt = date('M d, Y, h:i:s A');
 
 		foreach ($rows as $rowFilters) {
 			$currentX = $pdf->GetX();
 			$currentY = $pdf->GetY();
 
-			$cellBaseHeight = 5;  
+			$cellBaseHeight = 5;
 			$maxLines       = 1;
 
 			foreach ($rowFilters as $key => $value) {
-				$txt = "{$key}: {$value}";
-				$numLines = $pdf->getNumLines($txt, $colWidth);
-				if ($numLines > $maxLines) {
-					$maxLines = $numLines;
-				}
+				$html     = "<b>{$key}:</b> {$value}";
+				$plainTxt = strip_tags($html);
+				$numLines = $pdf->getNumLines($plainTxt, $colWidth);
+				$maxLines = max($maxLines, $numLines);
 			}
-
 			$rowHeight = $cellBaseHeight * $maxLines;
 
 			$x = $currentX;
 			foreach ($rowFilters as $key => $value) {
-				$txt = "{$key}: {$value}";
+				$html = "<b>" . htmlspecialchars($key) . ":</b> " . htmlspecialchars($value);
 
 				$pdf->MultiCell(
-					$colWidth,        
-					$cellBaseHeight,  
-					$txt,             
-					0,               
-					'L',              
-					false,            
-					0,                
-					$x,               
-					$currentY,        
-					true,             
-					0,                
-					false,           
-					true,             
-					$rowHeight,      
-					'T',              
-					false             
+					$colWidth,        // width
+					$cellBaseHeight,  // nominal line height
+					$html,            // HTML text
+					0,                // no border
+					'L',              // left align
+					false,            // no fill
+					0,                // ln = stay on same line
+					$x,               // x position
+					$currentY,        // y position
+					true,             // reset height
+					0,                // stretch
+					true,             // **isHTML = true**  
+					true,             // autopadding
+					$rowHeight,       // max height
+					'T',              // valign = top
+					false             // fitcell
 				);
 
 				$x += $colWidth;
@@ -777,15 +778,17 @@ class StocksAllStore extends BaseController
 			$pdf->Ln($rowHeight);
 		}
 
-		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
-		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
-
-		$currentWeekText = 'Current Week: ' . $currentWeekDisplay;
-		$generatedText   = 'Generated Date: ' . date('M d, Y, h:i:s A');
-
-		$pdf->Cell(100, 6, $currentWeekText, 0, 0, 'L');  
-		$pdf->Cell(38, 6, '', 0, 0);                      
-		$pdf->Cell(0, 6, $generatedText, 0, 1, 'L');
+		$pdf->writeHTMLCell(
+			100, 6, '', '',
+			"<b>Current Week:</b> {$currentWeek}",
+			0, 0, false, true, 'L', true
+		);
+		$pdf->Cell(38, 6, '', 0, 0);
+		$pdf->writeHTMLCell(
+			0, 6, '', '',
+			"<b>Generated Date:</b> {$generatedAt}",
+			0, 1, false, true, 'L', true
+		);
 
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');
@@ -794,7 +797,12 @@ class StocksAllStore extends BaseController
 
 	// ================================= Header for pdf export =================================
 	private function printHeader($pdf, $title) {
-		$pdf->SetFont('helvetica', '', 12);
+		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
+		if (file_exists($logoPath)) {
+			$pdf->Image($logoPath, 15, 5, 50);
+		}
+
+		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
 		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');

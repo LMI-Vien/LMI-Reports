@@ -173,44 +173,69 @@ class StoreSalesPerfPerMonth extends BaseController
 		$pdf->Ln(2);
 
 		$pageWidth  = $pdf->getPageWidth();
-		$pageMargin = $pdf->getMargins();
-		$totalCols  = 3; // 3 columns layout
-		$colWidth   = ($pageWidth - $pageMargin['left'] - $pageMargin['right']) / $totalCols;
-		$labelWidth = 30; // static width for label text
+		$margins    = $pdf->getMargins();
+		$perRow     = ceil(count($filters) / 2);
+		$colWidth   = ($pageWidth - $margins['left'] - $margins['right']) / $perRow;
 
-		// Split filters into chunks of 3 (3 per row)
-		$rows = array_chunk($filters, $totalCols, true);
+		// — compute bottom‐line values —
+		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek()['display'] : 'Unknown Week';
+		$generatedAt = date('M d, Y, h:i:s A');
 
-		foreach ($rows as $row) {
-			foreach ($row as $label => $value) {
-				$pdf->SetFont('helvetica', 'B', 9);
-				$pdf->Cell($labelWidth, 8, $label . ':', 0, 0, 'L');
-
-				$pdf->SetFont('helvetica', '', 9);
-				$pdf->Cell($colWidth - $labelWidth, 8, $value, 0, 0, 'L');
+		// — print filters in two rows, with bold keys via HTML —
+		$lineHeight = 7; 
+		$rows = array_chunk($filters, $perRow, true);
+		foreach ($rows as $rowFilters) {
+			// 1) figure out tallest cell
+			$maxLines = 0;
+			foreach ($rowFilters as $k => $v) {
+				$maxLines = max(
+					$maxLines,
+					$pdf->getNumLines("<b>{$k}:</b> {$v}", $colWidth)
+				);
 			}
-			$pdf->Ln(8);
+
+			// 2) render each as HTML (bold key, normal value)
+			foreach ($rowFilters as $k => $v) {
+				$pdf->MultiCell(
+					$colWidth,
+					$lineHeight,
+					"<b>{$k}:</b> {$v}",
+					0,    // no border
+					'L',  // left align
+					0,    // no fill
+					0,    // stay on same line
+					'', '',  // x/y
+					true, // reset height
+					0,    // stretch
+					true  // isHTML!
+				);
+			}
+
+			// 3) drop down by full height
+			$pdf->Ln($maxLines * $lineHeight);
 		}
 
-		// Align "Item Brand" to column 1, and "Generated Date" to column 3
-		$labelWidth = 30;
-		$currentWeek = method_exists($this, 'getCurrentWeek') ? $this->getCurrentWeek() : null;
-		$currentWeekDisplay = $currentWeek ? $currentWeek['display'] : 'Unknown Week';
+		// — pull the bottom line up a bit if you like —
+		$pdf->SetY($pdf->GetY() - 7);
 
-		$pdf->SetFont('helvetica', 'B', 9);
-		$pdf->Cell($labelWidth, 8, 'Item Brand:', 0, 0, 'L');
-		$pdf->SetFont('helvetica', '', 9);
-		$pdf->Cell($colWidth - $labelWidth, 8, $itemBrandMap ?: 'None', 0, 0, 'L');
-
-		$pdf->SetFont('helvetica', 'B', 9);
-		$pdf->Cell($labelWidth, 8, 'Current Week:', 0, 0, 'L');
-		$pdf->SetFont('helvetica', '', 9);
-		$pdf->Cell($colWidth - $labelWidth, 8, $currentWeekDisplay, 0, 0, 'L');
-
-		$pdf->SetFont('helvetica', 'B', 9);
-		$pdf->Cell($labelWidth, 8, 'Generated Date:', 0, 0, 'L');
-		$pdf->SetFont('helvetica', '', 9);
-		$pdf->Cell($colWidth - $labelWidth, 8, date('M d, Y, h:i:s A'), 0, 1, 'L');
+		// — now print Item Brand / Current Week / Generated Date in one row —
+		$pdf->writeHTMLCell(
+			60, 6, '', '',
+			"<b>Item Brand:</b> " . ($itemBrandMap ?: 'None'),
+			0, 0, false, true, 'L', true
+		);
+		$pdf->Cell(32, 6, '', 0, 0); // small spacer
+		$pdf->writeHTMLCell(
+			60, 6, '', '',
+			"<b>Current Week:</b> {$currentWeek}",
+			0, 0, false, true, 'L', true
+		);
+		$pdf->Cell(33, 6, '', 0, 0); // small spacer
+		$pdf->writeHTMLCell(
+			0, 6, '', '',
+			"<b>Generated Date:</b> {$generatedAt}",
+			0, 1, false, true, 'L', true
+		);
 
 		$pdf->Ln(2);
 		$pdf->Cell(0, 0, '', 'T');
@@ -219,7 +244,12 @@ class StoreSalesPerfPerMonth extends BaseController
 
 	// ================================= Header for pdf export =================================
 	private function printHeader($pdf, $title) {
-		$pdf->SetFont('helvetica', '', 12);
+		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
+		if (file_exists($logoPath)) {
+			$pdf->Image($logoPath, 15, 5, 50); // (file, x, y, width), adjust position if needed
+		}
+		
+		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
 		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
@@ -372,12 +402,12 @@ class StoreSalesPerfPerMonth extends BaseController
 		];
 
 		$title = "Store Sales Performance per Month";
-		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf = new \App\Libraries\TCPDFLib('L','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
 		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
 		$pdf->SetTitle($title);
 		$pdf->setPrintHeader(false);
-		$pdf->setPrintFooter(false);
+		$pdf->setPrintFooter(true);
 		$pdf->AddPage();
 
 		$this->printHeader($pdf, $title);
@@ -902,23 +932,6 @@ class StoreSalesPerfPerMonth extends BaseController
 		$writer = new Xlsx($spreadsheet);
 		$writer->save('php://output');
 		exit;
-	}
-
-	private function getParam(string $key) {
-		$v = $this->request->getVar($key);       // accepts GET or POST
-		if (is_null($v)) return null;
-		$v = trim((string)$v);
-		return $v === '' ? null : $v;
-	}
-
-	private function parseCsvParam(?string $csv): array {
-		if ($csv === null || trim($csv) === '') {
-			return [];
-		}
-		return array_filter(
-			array_map('intval', explode(',', $csv)),
-			fn($i) => $i > 0
-		);
 	}
 
 	private function formatTwoDecimals($value): string {
