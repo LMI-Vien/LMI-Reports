@@ -113,6 +113,8 @@ $routes->group('cms/', static function ($routes) {
         $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\ImportSellOut::import_temp_scan_data');
         $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\ImportSellOut::fetch_temp_scan_data');
         $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\ImportSellOut::delete_temp_scan_data');
+        $routes->match(['GET', 'POST'], 'export', 'Cms\ImportSellOut::exportSpecific');
+        $routes->match(['GET', 'POST'], 'batch-export', 'Cms\ImportSellOut::exportBatch');
     });
 
     $routes->group('import-week-on-week', static function ($routes) {
@@ -123,11 +125,15 @@ $routes->group('cms/', static function ($routes) {
         $routes->post('update-aggregated-week-vmi-data', 'Cms\ImportWeekOnWeek::updateAggregatedWoWData');
         $routes->match(['GET', 'POST'], 'print-temp-wkonwk-data', 'Cms\ImportWeekOnWeek::printWeekOnWeekData');
         $routes->match(['GET', 'POST'], 'delete-wkonwk-data', 'Cms\ImportWeekOnWeek::deleteWeekOnWeekData');
+        $routes->match(['GET', 'POST'], 'export', 'Cms\ImportWeekOnWeek::exportSpecific');
     });
 
     $routes->group('import-target-sell-out-pa', static function ($routes) {
         $routes->get('/', 'Cms\ImportTargetSellOutPa::index');
         $routes->get('view/(:any)', 'Cms\ImportTargetSellOutPa::view');
+        $routes->match(['GET', 'POST'], 'export', 'Cms\ImportTargetSellOutPa::exportSpecific');
+        $routes->match(['GET', 'POST'], 'batch-export', 'Cms\ImportTargetSellOutPa::exportBatch');
+        $routes->match(['GET', 'POST'], 'all-export', 'Cms\ImportTargetSellOutPa::exportAll');
     });
 
     $routes->group('import-vmi', static function ($routes) {
@@ -143,16 +149,24 @@ $routes->group('cms/', static function ($routes) {
 
         $routes->get('download/(:any)', 'Cms\ImportVmi::download/$1');
         $routes->get('pending', 'Cms\ImportVmi::checkPendingDownload');
+
+        $routes->match(['GET', 'POST'], 'export', 'Cms\ImportVmi::exportSpecific');
     });
 
     $routes->group('import-ba-sales-report', static function ($routes) {
         $routes->get('/', 'Cms\ImportBaSalesReport::index');
         $routes->get('view/(:any)', 'Cms\ImportBaSalesReport::view');
+        $routes->match(['GET', 'POST'], 'export', 'Cms\ImportBaSalesReport::exportSpecific');
+        $routes->match(['GET', 'POST'], 'filter-export', 'Cms\ImportBaSalesReport::exportFilter');
+        $routes->match(['GET', 'POST'], 'export-all', 'Cms\ImportBaSalesReport::exportAll');
     });
 
     $routes->group('import-target-sales-ps', static function ($routes) {
         $routes->get('/', 'Cms\ImportTargetSalesPs::index');
         $routes->get('view/(:any)', 'Cms\ImportTargetSalesPs::view');
+        $routes->match(['GET', 'POST'], 'export', 'Cms\ImportTargetSalesPs::exportSpecific');
+        $routes->match(['GET', 'POST'], 'filter-export', 'Cms\ImportTargetSalesPs::exportFilter');
+        $routes->match(['GET', 'POST'], 'export-all', 'Cms\ImportTargetSalesPs::exportAll');
     });
 
     $routes->group('cms-preference/', static function ($routes) {
@@ -256,7 +270,6 @@ $routes->group('cms/', static function ($routes) {
             $routes->get('/', 'Cms\ErrorLogs::index');
         });
 	});
-
 });
 
 $routes->set404Override('App\Controllers\ErrorHandler::show404');

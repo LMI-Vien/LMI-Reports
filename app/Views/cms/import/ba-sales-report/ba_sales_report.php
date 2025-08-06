@@ -1132,63 +1132,12 @@
         let date_from = $('#date_from').val();  // Get the selected start date
         let date_to = $('#date_to').val();  // Get the selected end date
 
-        // Initialize ID variables to store database IDs of selected values
-        let area_id = 0;
-        let store_id = 0;
-        let brand_id = 0;
-        let ba_id = 0;
-
-        // Arrays to store filtering conditions
-        var filterArr = [];  // Stores filter conditions for search queries
-        var formattedData = [];  // Stores formatted data (not used in this snippet)
-
-        // Search for table IDs based on user input
-        if (area) {
-            // Search for area ID in 'tbl_area' based on area description
-            dynamic_search("'tbl_area'", "''", "'id'", 1, 0, `'status:IN=1|0, description:EQ=${area}'`, `''`, `''`,
-                (res) => { area_id = res[0].id; }  // Assign the found area ID
-            );
-        }
-        if (store) {
-            // Search for store ID in 'tbl_store' based on store description
-            dynamic_search("'tbl_store'", "''", "'id'", 1, 0, `'status:IN=1|0, description:EQ=${store}'`, `''`, `''`,
-                (res) => { store_id = res[0].id; }  // Assign the found store ID
-            );
-        }
-        if (brand) {
-            // Search for brand ID in 'tbl_brand' based on brand description
-            dynamic_search("'tbl_brand'", "''", "'id'", 1, 0, `'status:IN=1|0, brand_description:EQ=${brand}'`, `''`, `''`,
-                (res) => { brand_id = res[0].id; }  // Assign the found brand ID
-            );
-        }
-        if (ba) {
-            // Search for brand ambassador ID in 'tbl_brand_ambassador' based on name
-            dynamic_search("'tbl_brand_ambassador'", "''", "'id'", 1, 0, `'status:IN=1|0, name:EQ=${ba}'`, `''`, `''`,
-                (res) => { ba_id = res[0].id; }  // Assign the found brand ambassador ID
-            );
-        }
-
-        // Construct filter conditions for querying the database
-        if (area_id != 0) {
-            filterArr.push(`area_id:EQ=${area_id}`);  // Add area filter if a valid area ID was found
-        }
-        if (store_id != 0) {
-            filterArr.push(`store_id:EQ=${store_id}`);  // Add store filter if a valid store ID was found
-        }
-        if (brand_id != 0) {
-            filterArr.push(`brand:EQ=${brand_id}`);  // Add brand filter if a valid brand ID was found
-        }
-        if (ba_id != 0) {
-            filterArr.push(`ba_id:EQ=${ba_id}`);  // Add brand ambassador filter if a valid BA ID was found
-        }
-
         modal.confirm(confirm_export_message,function(result){
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
                     if (date_from && date_to) {
                         // Add date range filter if both start and end dates are provided
-                        filterArr.push(`date:BETWEEN=${date_from}|${date_to}`);
                         if (date_from > date_to) {
                             modal.loading_progress(false);
                             modal.alert("Date FROM should not be later than Date TO!", 'info');
@@ -1203,164 +1152,43 @@
         })
 
         const startExport = () => {
-            dynamic_search(
-                "'tbl_ba_sales_report'", "''", "'COUNT(id) as total_records'", 0, 0, 
-                `'${filterArr.join(',')}'`,`''`, `''`,
-                (res) => {
-                    if (res && res.length > 0) {
-                        let total_records = res[0].total_records;
-    
-                        for (let index = 0; index < total_records; index += 100000) {
-                            dynamic_search(
-                                "'tbl_ba_sales_report'", "''", "'id, area_id, store_id, brand, ba_id, date, amount, status'", 100000, index, 
-                                `'${filterArr.join(',')}'`,`'date asc, id asc'`, `''`,
-                                (res) => {
-                                    var areaArr = [];
-                                    var storeArr = [];
-                                    var brandArr = [];
-                                    var baArr = [];
-                                    res.forEach(item => {
-                                        if (!areaArr.includes(`${item.area_id}`)) {
-                                            areaArr.push(`${item.area_id}`);
-                                        }
-
-                                        if (!storeArr.includes(`${item.store_id}`)) {
-                                            storeArr.push(`${item.store_id}`);
-                                        }
-
-                                        if (!brandArr.includes(`${item.brand}`)) {
-                                            brandArr.push(`${item.brand}`);
-                                        }
-
-                                        if (!baArr.includes(`${item.ba_id}`)) {
-                                            baArr.push(`${item.ba_id}`);
-                                        }
-                                    });
-
-                                    temp_area = {};
-                                    dynamic_search("'tbl_area'", "''", "'id, code, description, status'", 100000, 0, `"status:IN=1|0,id:IN=${areaArr.join('|')}"`,  `''`, `''`, (res) => {
-                                        res.forEach(item => {
-                                            temp_area[item.id] = item.description.trim();
-                                        });
-                                    });
-
-                                    temp_store = {};
-                                    dynamic_search("'tbl_store'", "''", "'id, code, description, status'", 100000, 0, `"status:IN=1|0,id:IN=${storeArr.join('|')}"`,  `''`, `''`, (res) => {
-                                        res.forEach(item => {
-                                            temp_store[item.id] = item.description.trim();
-                                        });
-                                    });
-
-                                    temp_brand = {};
-                                    dynamic_search("'tbl_brand'", "''", "'id, brand_code, brand_description, status'", 100000, 0, `"status:IN=1|0,id:IN=${brandArr.join('|')}"`,  `''`, `''`, (res) => {
-                                        res.forEach(item => {
-                                            temp_brand[item.id] = item.brand_description.trim();
-                                        });
-                                    });
-
-                                    temp_baArr = {};
-                                    dynamic_search("'tbl_brand_ambassador'", "''", "'id, code, name, status'", 100000, 0, `"status:IN=1|0,id:IN=${baArr.join('|')}"`,  `''`, `''`, (res) => {
-                                        res.forEach(item => {
-                                            temp_baArr[item.id] = item.name.trim();
-                                        });
-                                    });
-
-                                    let previousDate = null;
-                                    let totalAmount = 0;
-
-                                    let spacing = {
-                                        "BA Code": "",
-                                        "Area Code": "",
-                                        "Store Code": "",
-                                        "Brand": "",
-                                        "Date": "",
-                                        "Amount": "",
-                                        "Status": "",
-                                    };
-
-                                    res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }, index) => {
-                                        // Convert amount to number safely
-                                        const numericAmount = parseFloat(amount) || 0;
-
-                                        // If date changes and not the first row, push total and spacing
-                                        if (previousDate !== null && previousDate !== date) {
-                                            // Push total row
-                                            formattedData.push({
-                                                "BA Code": "",
-                                                "Area Code": "",
-                                                "Store Code": "",
-                                                "Brand": "",
-                                                "Date": previousDate,
-                                                "Amount": totalAmount,
-                                                "Status": "Total",
-                                            });
-
-                                            // Push spacing row
-                                            formattedData.push({ ...spacing });
-
-                                            // Reset total
-                                            totalAmount = 0;
-                                        }
-
-                                        // Push the current row
-                                        formattedData.push({
-                                            "BA Code": temp_baArr[ba_id],
-                                            "Area Code": temp_area[area_id],
-                                            "Store Code": temp_store[store_id],
-                                            "Brand": temp_brand[brand],
-                                            "Date": date,
-                                            "Amount": amount,
-                                            "Status": parseInt(status) === 1 ? "Active" : "Inactive",
-                                        });
-
-                                        totalAmount += numericAmount;
-                                        previousDate = date;
-
-                                        // Final iteration: push total and spacing
-                                        if (index === res.length - 1) {
-                                            formattedData.push({
-                                                "BA Code": "",
-                                                "Area Code": "",
-                                                "Store Code": "",
-                                                "Brand": "",
-                                                "Date": date,
-                                                "Amount": totalAmount,
-                                                "Status": "Total",
-                                            });
-
-                                            formattedData.push({ ...spacing });
-                                        }
-                                    });
-                                }
-                            );
-                        }
-                    }
+            let expurl = "<?= base_url()?>"+`cms/import-ba-sales-report/filter-export`;
+            $.ajax({
+                url: expurl,
+                method: 'POST',
+                data: {
+                    area : area,
+                    store : store,
+                    brand : brand,
+                    ba : ba,
+                    date_from : date_from,
+                    date_to : date_to
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(blob, status, xhr) {
+                    const cd = xhr.getResponseHeader('Content-Disposition');
+                    const match = cd && /filename="?([^"]+)"/.exec(cd);
+                    const filename = 'BA Sales Report '+formatDate(new Date())+'.xlsx';
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(blobUrl);
+                },
+                error: function(xhr, status, error) {
+                    alert(xhr+' - '+status+' - '+error);
+                    console.log(xhr)
+                    modal.loading(false);
+                },
+                complete: function() {
+                    modal.loading(false);
                 }
-            )
-            
-            if (!formattedData || formattedData.length === 0) {
-                formattedData = [
-                    {
-                        "BA Code":"",
-                        "Area Code":"",
-                        "Store Code":"",
-                        "Brand":"",
-                        "Date":"",
-                        "Amount":"",
-                        "Status":"",
-                    },
-                ]
-            }
-    
-            const headerData = [
-                ["Company Name: Lifestrong Marketing Inc."],
-                ["BA Sales Report"],
-                ["Date Printed: " + formatDate(new Date())],
-                [""],
-            ];
-    
-            exportArrayToCSV(formattedData, `BA Sales Report - ${formatDate(new Date())}`, headerData);
-            modal.loading_progress(false);
+            })
         }
 
     }
@@ -1378,240 +1206,73 @@
         })
 
         const startExport = () => {
-            const batch_export = () => {
-                dynamic_search(
-                    `'tbl_ba_sales_report'`,
-                    `''`,
-                    `'COUNT(id) as total_records'`,
-                    0,
-                    0,
-                    `''`, 
-                    `''`, 
-                    `''`,
-                    (res) => {
-                        if (res && res.length > 0) {
-                            let total_records = res[0].total_records;
-
-                            for (let index = 0; index < total_records; index += 100000) {
-                                dynamic_search(
-                                    `'tbl_ba_sales_report'`,
-                                    `''`,
-                                    `'area_id, store_id, brand, ba_id, date, amount, status'`,
-                                    100000,
-                                    index,
-                                    `''`, 
-                                    `'date asc, id asc'`, 
-                                    `''`,
-                                    (res) => {
-                                        var areaArr = [];
-                                        var storeArr = [];
-                                        var brandArr = [];
-                                        var baArr = [];
-                                        res.forEach(item => {
-                                            if (!areaArr.includes(`${item.area_id}`)) {
-                                                areaArr.push(`${item.area_id}`);
-                                            }
-
-                                            if (!storeArr.includes(`${item.store_id}`)) {
-                                                storeArr.push(`${item.store_id}`);
-                                            }
-
-                                            if (!brandArr.includes(`${item.brand}`)) {
-                                                brandArr.push(`${item.brand}`);
-                                            }
-
-                                            if (!baArr.includes(`${item.ba_id}`)) {
-                                                baArr.push(`${item.ba_id}`);
-                                            }
-                                        });
-
-                                        temp_area = {};
-                                        dynamic_search("'tbl_area'", "''", "'id, code, description, status'", 100000, 0, `"status:IN=1|0,id:IN=${areaArr.join('|')}"`,  `''`, `''`, (res) => {
-                                            res.forEach(item => {
-                                                temp_area[item.id] = item.description.trim();
-                                            });
-                                        });
-
-                                        temp_store = {};
-                                        dynamic_search("'tbl_store'", "''", "'id, code, description, status'", 100000, 0, `"status:IN=1|0,id:IN=${storeArr.join('|')}"`,  `''`, `''`, (res) => {
-                                            res.forEach(item => {
-                                                temp_store[item.id] = item.description.trim();
-                                            });
-                                        });
-
-                                        temp_brand = {};
-                                        dynamic_search("'tbl_brand'", "''", "'id, brand_code, brand_description, status'", 100000, 0, `"status:IN=1|0,id:IN=${brandArr.join('|')}"`,  `''`, `''`,
-                                            (res) => {
-                                                res.forEach(item => {
-                                                    temp_brand[item.id] = item.brand_description.trim();
-                                                });
-                                            }
-                                        );
-
-                                        temp_baArr = {};
-                                        dynamic_search("'tbl_brand_ambassador'", "''", "'id, code, name, status'", 100000, 0, `"status:IN=1|0,id:IN=${baArr.join('|')}"`,  `''`, `''`, (res) => {
-                                            res.forEach(item => {
-                                                temp_baArr[item.id] = item.name.trim();
-                                            });
-                                        });
-
-                                        let previousDate = null;
-                                        let totalAmount = 0;
-
-                                        let spacing = {
-                                            "BA Code": "",
-                                            "Area Code": "",
-                                            "Store Code": "",
-                                            "Brand": "",
-                                            "Date": "",
-                                            "Amount": "",
-                                            "Status": "",
-                                        };
-
-                                        res.forEach(({ area_id, store_id, brand, ba_id, date, amount, status }, index) => {
-                                            // Convert amount to number safely
-                                            const numericAmount = parseFloat(amount) || 0;
-
-                                            // If date changes and not the first row, push total and spacing
-                                            if (previousDate !== null && previousDate !== date) {
-                                                // Push total row
-                                                formattedData.push({
-                                                    "BA Code": "",
-                                                    "Area Code": "",
-                                                    "Store Code": "",
-                                                    "Brand": "",
-                                                    "Date": previousDate,
-                                                    "Amount": totalAmount,
-                                                    "Status": "Total",
-                                                });
-
-                                                // Push spacing row
-                                                formattedData.push({ ...spacing });
-
-                                                // Reset total
-                                                totalAmount = 0;
-                                            }
-
-                                            // Push the current row
-                                            formattedData.push({
-                                                "BA Code": temp_baArr[ba_id],
-                                                "Area Code": temp_area[area_id],
-                                                "Store Code": temp_store[store_id],
-                                                "Brand": temp_brand[brand],
-                                                "Date": date,
-                                                "Amount": amount,
-                                                "Status": parseInt(status) === 1 ? "Active" : "Inactive",
-                                            });
-
-                                            totalAmount += numericAmount;
-                                            previousDate = date;
-
-                                            // Final iteration: push total and spacing
-                                            if (index === res.length - 1) {
-                                                formattedData.push({
-                                                    "BA Code": "",
-                                                    "Area Code": "",
-                                                    "Store Code": "",
-                                                    "Brand": "",
-                                                    "Date": date,
-                                                    "Amount": totalAmount,
-                                                    "Status": "Total",
-                                                });
-
-                                                formattedData.push({ ...spacing });
-                                            }
-                                        });
-                                    }
-                                )
-                            }
-                        } else {
-                            //console.log('No data received');
-                        }
-                    }
-                )
-            };
-
-            batch_export()
-
-            const headerData = [
-                ["Company Name: Lifestrong Marketing Inc."],
-                ["BA Sales Report"],
-                ["Date Printed: " + formatDate(new Date())],
-                [""],
-            ];
-
-            exportArrayToCSV(formattedData, `BA Sales Report - ${formatDate(new Date())}`, headerData);
-            modal.loading_progress(false);
+            let expurl = "<?= base_url()?>"+`cms/import-ba-sales-report/export-all`;
+            $.ajax({
+                url: expurl,
+                method: 'POST',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(blob, status, xhr) {
+                    const cd = xhr.getResponseHeader('Content-Disposition');
+                    const match = cd && /filename="?([^"]+)"/.exec(cd);
+                    const filename = 'BA Sales Report '+formatDate(new Date())+'.xlsx';
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(blobUrl);
+                },
+                error: function(xhr, status, error) {
+                    alert(xhr+' - '+status+' - '+error);
+                    console.log(xhr)
+                    modal.loading(false);
+                },
+                complete: function() {
+                    modal.loading(false);
+                }
+            })
         }
 
     }
 
     function export_ba_date_group(date) {
-        var formattedData = [];
-        dynamic_search(
-            "'tbl_ba_sales_report basr'", 
-
-            "'left join tbl_brand b on b.id = basr.brand"+
-            " left join tbl_store s on s.id = basr.store_id"+
-            " left join tbl_brand_ambassador ba on ba.id = basr.ba_id"+
-            " left join tbl_area ar on ar.id = basr.area_id'", 
-
-            "'basr.id, ar.description as area, s.description as store_name, b.brand_description as brand, ba.name as ba_name,"+
-            "basr.date, basr.amount, basr.status, basr.created_date, basr.updated_date, basr.status'", 
-
-            0, 
-            0, 
-
-            `"basr.date:EQ=${date}"`,  
-            `'basr.id asc'`, 
-            `''`, 
-            (res) => {
-                let newData = res.map(({ 
-                    area, store_name, brand, ba_name, date, amount, status,
-                }) => ({
-                    "BA Code":ba_name,
-                    "Area Code":area,
-                    "Store Code":store_name,
-                    "Brand":brand,
-                    "Date":date,
-                    "Amount":amount,
-                    "Status": parseInt(status) === 1 ? "Active" : "Inactive",
-                }));
-
-                const totalAmountPerDate = res.reduce((acc, row) => {
-                    const date = row.date;
-                    const amount = parseFloat(row.amount) || 0;
-                    if (!acc[date]) {
-                        acc[date] = 0;
-                    }
-                    acc[date] += amount;
-                    return acc;
-                }, {});
-    
-                Object.entries(totalAmountPerDate).forEach(([date, amount]) => {
-                    newData.push({
-                        "BA Code": "",
-                        "Area Code": "",
-                        "Store Code": "",
-                        "Brand": "",
-                        "Date": date,
-                        "Amount": amount,
-                        "Status": "Total"
-                    });
-                });
-
-                formattedData.push(...newData); 
+        modal.loading(true);
+        let expurl = "<?= base_url()?>"+`cms/import-ba-sales-report/export`;
+        $.ajax({
+            url: expurl,
+            method: 'POST',
+            data: {
+                date : date
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                const filename = 'BA Sales Report '+formatDate(new Date())+'.xlsx';
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                console.log(xhr)
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
             }
-        );
-
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["BA Sales Report"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
-    
-        exportArrayToCSV(formattedData, `BA Sales Report - ${formatDate(new Date())}`, headerData);
+        })
     }
 
     function exportArrayToCSV(data, filename, headerData) {

@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Libraries\TCPDFLib;
 use App\Models\Sync_model;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ImportWeekOnWeek extends BaseController
 {
@@ -402,6 +403,71 @@ class ImportWeekOnWeek extends BaseController
 
 		$currentDateTime = date('Y-m-d H:i:s');
 		$pdf->Output("Sales File - {$headerTitle} - {$currentDateTime}.pdf", 'D');
+		exit;
+	}
+
+	public function exportSpecific() {
+		$id = $this->request->getPost('id') ?? '12';
+
+		$select = '';
+		$select .= 'item, item_class, label_type, status, item_class, pog_store,';
+		$select .= 'quantity, soh, ave_weekly_sales, weeks_cover';
+
+		$result = $this->Global_model->get_data_list(
+			'tbl_week_on_week_details', "header_id = '$id'", 999999999, 0, 
+			$select, '', '', '', ''
+		);
+
+		$result1 = $this->Global_model->get_data_list(
+			'tbl_week_on_week_header a', "a.id = '$id'", 1, 0, 
+			'a.id, b.year, c.username, a.created_date, a.week, a.file_name', '', '', 
+			[
+				[ 'table' => 'tbl_year b', 'query' => 'a.year = b.id', 'type' => 'left' ],
+				[ 'table' => 'cms_users c', 'query' => 'a.created_by = c.id', 'type' => 'left' ]
+			], ''
+		);
+
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Year');
+		$sheet->setCellValue('B2', $result1[0]->year);
+		$sheet->setCellValue('A2', 'Week');
+		$sheet->setCellValue('B2', $result1[0]->week);
+		$sheet->setCellValue('A3', 'Import Date: ');
+		$sheet->setCellValue('B3', $result1[0]->created_date);
+		$sheet->setCellValue('A4', 'Import File Name: ');
+		$sheet->setCellValue('B4', $result1[0]->file_name);
+		$sheet->setCellValue('A5', 'Date Printed: ');
+		$sheet->setCellValue('B5', (new \DateTime())->format('Y-m-d h:i A'));
+
+		function setHeaderCellValue(array $headers, \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, int $row = 7): void {
+			foreach ($headers as $index => $header) {
+				$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+				$sheet->setCellValue($colLetter . $row, $header);
+			}
+		}
+
+		$headers = [ "Item", "Item Class", "Label Type", "Status", "POG Store", "Quantity", "SOH", "Ave Weekly Sales", "Weeks Cover" ];
+		setHeaderCellValue($headers, $sheet);
+
+		$currentRow = 8;
+		foreach ($result as $value) {
+			$headers = [
+				$value->item, $value->item_class, $value->label_type, $value->status, $value->pog_store,
+				$value->quantity, $value->soh, $value->ave_weekly_sales, $value->weeks_cover
+			];
+			setHeaderCellValue($headers, $sheet, $currentRow);
+			$currentRow++;
+		}
+
+		$title = "Sales File";
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
 		exit;
 	}
 }

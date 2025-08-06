@@ -339,75 +339,40 @@
 
     function handleExport(id, output) {
         if (output == 'xlsx') {
-            let formattedData = [];
-            const processResponse = (res) => {
-    
-                table = 'tbl_week_on_week_details';
-                join = '';
-                fields = 'COUNT(id) checker';
-                limit = 0;
-                offset = 0;
-                filter = `header_id:EQ=${id}`;
-                order = '';
-                group = '';
-                dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
-                    (res1) => {
-                        for (let index = 0; index < res1[0].checker; index += 100000) {
-                            table = 'tbl_week_on_week_details';
-                            join = '';
-                            fields = 'item, item_class, label_type, status, item_class, pog_store, quantity, soh, ave_weekly_sales, weeks_cover';
-                            limit = 100000;
-                            offset = index;
-                            filter = `header_id:EQ=${id}`;
-                            order = '';
-                            group = '';
-                            dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
-                                (res2) => {
-                                    res2.forEach(item => {
-                                        let newData = {
-                                            "Item": item.item,
-                                            "Item Class": item.item_class,
-                                            "Label Type": item.label_type,
-                                            "Status": item.status,
-                                            "Item Class": item.item_class,
-                                            "POG Store": item.pog_store,
-                                            "Quantity": item.quantity,
-                                            "SOH": item.soh,
-                                            "Ave Weekly Sales": item.ave_weekly_sales,
-                                            "Weeks Cover": item.weeks_cover,
-                                        }
-                                        formattedData.push(newData);
-                                    })
-                                }
-                            )
-                        }
-                    }
-                )
-    
-                const headerData = [
-                    ["Year: ", res[0].year],
-                    ["Week: ", res[0].week],
-                    ["Import Date: ", res[0].created_date],
-                    ["Import File Name: ", res[0].file_name],
-                    ["Date Printed: ", formatDate(new Date())],
-                    [""],
-                ];
-            
-                exportArrayToCSV(formattedData, `Sales File (${res[0].file_name})- ${formatDate(new Date())}`, headerData);
-                modal.loading_progress(false);
-            }
-    
-            table = 'tbl_week_on_week_header a';
-            join = 'LEFT JOIN tbl_year b on a.year = b.id left join cms_users c on a.created_by = c.id';
-            fields = 'a.id, b.year, c.username, a.created_date, a.week, a.file_name';
-            limit = 1;
-            offset = 0;
-            filter = `a.id:EQ=${id}`;
-            order = '';
-            group = '';
-            dynamic_search(`'${table}'`,`'${join}'`,`'${fields}'`,`${limit}`,`${offset}`,`'${filter}'`, `'${order}'`,`'${group}'`,
-                processResponse
-            )
+            modal.loading(true);
+            let expurl = "<?= base_url()?>"+`cms/import-week-on-week/export`;
+            $.ajax({
+                url: expurl,
+                method: 'POST',
+                data: {
+                    id : id
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(blob, status, xhr) {
+                    const cd = xhr.getResponseHeader('Content-Disposition');
+                    const match = cd && /filename="?([^"]+)"/.exec(cd);
+                    const filename = 'Sales Files '+formatDate(new Date())+'.xlsx';
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(blobUrl);
+                },
+                error: function(xhr, status, error) {
+                    alert(xhr+' - '+status+' - '+error);
+                    console.log(xhr)
+                    modal.loading(false);
+                },
+                complete: function() {
+                    modal.loading(false);
+                }
+            })
+            return;
         } else {
             window.location.href = "<?= base_url('cms/import-week-on-week/print-temp-wkonwk-data'); ?>?selected_id=" + id;
             modal.loading_progress(false);
@@ -425,34 +390,6 @@
         })
     }
     
-    // function delete_data(id, year_id, week) {
-    //     modal.confirm(confirm_delete_message,function(result){
-    //         if (result) {
-    //             modal.loading_progress(true, "Reviewing Data...");
-    //             setTimeout(() => {
-    //                 var url = "<?= base_url('cms/global_controller');?>";
-    //                 var data = {
-    //                     event : "update",
-    //                     table : "tbl_week_on_week_header",
-    //                     field : "id",
-    //                     where : id, 
-    //                     data : {
-    //                             updated_date : formatDate(new Date()),
-    //                             updated_by : user_id,
-    //                             status : -2
-    //                     }  
-    //                 }
-    //                 aJax.post(url,data,function(result){
-    //                     var obj = is_json(result);
-    //                     modal.alert(success_delete_message, 'success', function() {
-    //                         location.reload();
-    //                     });
-    //                 });                     
-    //             }, 500);
-    //         }
-    //     })
-    // }
-
     function delete_data(id, year_id, week){   
         modal.confirm(confirm_delete_message,function(result){
             if(result){ 
@@ -1039,163 +976,6 @@
         };
         aJax.post(update_url, data, function (result) {});
     }
-
-    // const saveValidatedData = (valid_data, data_header_id) => {
-    //     let batch_size = 5000;
-    //     let total_batches = Math.ceil(valid_data.length / batch_size);
-    //     let batch_index = 0;
-    //     let errorLogs = [];
-    //     let url = "<?= base_url('cms/global_controller');?>";
-    //     let table = 'tbl_week_on_week_details';
-    //     const start_time = new Date();
-
-    //     let selected_fields = [
-    //         'id', 'header_id', 'file_name', 'line_number', 'item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'
-    //     ];
-
-    //     const matchFields = [
-    //         'header_id', 'file_name', 'line_number', 'item', 'item_name', 'label_type', 'status', 'item_class', 'pog_store', 'quantity'
-    //     ];  
-
-    //     const filters = [
-    //         '2025',
-    //         '3'
-    //     ];  
-
-    //     const matchType = "AND";  // Use "AND" or "OR" for matching logic
-
-    //     modal.loading_progress(true, "Validating and Saving data...");
-    //     let existingMap = new Map();
-    //     aJax.post(url, { table: table, event: "fetch_existing_new", selected_fields: selected_fields, filters:filters}, function(response) {
-    //         let result = JSON.parse(response);
-    //         let existingMap = new Map();
-
-    //         if (result.existing) {
-    //             result.existing.forEach(record => {
-    //                 let key = matchFields.map(field => String(record[field] || "").trim().toLowerCase()).join("|");
-    //                 existingMap.set(key, record.id);
-    //             });
-    //         }
-
-    //         function processNextBatch() {
-    //             if (batch_index >= total_batches) {
-    //                 modal.loading_progress(false);
-    //                 if (errorLogs.length > 0) {
-    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-    //                     modal.alert("Some records encountered errors. Check the log.", 'info');
-    //                 } else {
-    //                     modal.loading_progress(true, "Finishing data...");
-    //                     delete_temp_data();
-    //                     setTimeout(function(){
-    //                         modal.alert("All records saved/updated successfully!", 'success', function() {
-    //                             let logData = [];
-    //                             logData = valid_data.map(record => ({
-    //                                 ...record,
-    //                                 header_id: data_header_id,
-    //                                 created_date: formatDate(new Date()),
-    //                                 created_by: '<?=$session->sess_uid;?>',
-    //                                 week: $("#week").val(),
-    //                                 year: $("#year").val()
-    //                             }));
-    //                             logAll(start_time, logData)
-    //                             // let href = "<?= base_url() ?>" + "cms/import-week-on-week/";
-    //                             // window.location.href = href;
-    //                             window.location.href = "<?= base_url('cms/import-week-on-week') ?>";
-    //                         });
-    //                     }, 1000);
-    //                 }
-    //                 return;
-    //             }
-
-    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-    //             let newRecords = [];
-    //             let updateRecords = [];
-
-    //             batch.forEach(row => {
-    //                 let matchedId = null;
-
-    //                 if (matchType === "AND") {
-    //                     let key = matchFields.map(field => String(row[field] || "").trim().toLowerCase()).join("|");
-    //                     if (existingMap.has(key)) {
-    //                         matchedId = existingMap.get(key);
-    //                     }
-    //                 } else if (matchType === "OR") {
-    //                     for (let [key, id] of existingMap.entries()) {
-    //                         let keyParts = key.split("|");
-    //                         for (let field of matchFields) {
-    //                             if (keyParts.includes(String(row[field] || "").trim().toLowerCase())) {
-    //                                 matchedId = id;
-    //                                 break; 
-    //                             }
-    //                         }
-    //                         if (matchedId) break;
-    //                     }
-    //                 }
-
-    //                 if (matchedId) {
-    //                     row.id = matchedId;
-    //                     updateRecords.push(row);
-    //                 } else {
-    //                     newRecords.push(row);
-    //                 }
-    //             });
-
-    //             function processUpdates() {
-    //                 return new Promise((resolve) => {
-    //                     if (updateRecords.length > 0) {
-    //                         batch_update(url, updateRecords, table, "id", false, (response) => {
-    //                             if (response.message !== 'success') {
-    //                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             updateSwalProgress("Updating Records...", batch_index + 1, total_batches);
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             function processInserts() {
-    //                 return new Promise((resolve) => {
-    //                     if (newRecords.length > 0) {
-    //                         newRecords = batch.map(record => ({
-    //                             ...record,
-    //                             header_id: data_header_id,
-    //                             created_date: formatDate(new Date()),
-    //                             created_by: '<?=$session->sess_uid;?>',
-    //                             week: $("#week").val(),
-    //                             year: $("#year").val()
-    //                         }));
-    //                         batch_insert(url, newRecords, table, false, (response) => {
-    //                             if (response.message === 'success') {
-    //                                 updateSwalProgress("Inserting Records...", batch_index + 1, total_batches);
-    //                             } else {
-    //                                 errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             processUpdates()
-    //                 .then(processInserts)
-    //                 .then(() => {
-    //                     batch_index++;
-    //                     setTimeout(processNextBatch, 300);
-    //                 })
-    //                 .catch(error => {
-    //                     errorLogs.push(`Unexpected error: ${error}`);
-    //                     processNextBatch();
-    //                 });
-    //         }
-
-    //         setTimeout(processNextBatch, 1000);
-    //     });
-    // }
 
     function logAll(start_time, valid_data) {
         const headers = 

@@ -3,6 +3,7 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ImportTargetSalesPs extends BaseController
 {
@@ -108,4 +109,152 @@ class ImportTargetSalesPs extends BaseController
 		return view("cms/layout/template", $data);		
 	}
 
+	public function setHeaderCellValue(array $headers, \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, int $row = 1): void {
+		foreach ($headers as $index => $header) {
+			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+			$sheet->setCellValue($colLetter . $row, $header);
+		}
+	}
+	public function exportSpecific() {
+		$year = $this->request->getPost('year') ?? '6';
+
+		$select = '';
+		$select .= 's1.description location, a.ba_code,';
+		$select .= 'a.january, a.february, a.march, a.april, a.may, a.june,';
+		$select .= 'a.july, a.august, a.september, a.october, a.november, a.december';
+
+		$result = $this->Global_model->get_data_list(
+			'tbl_target_sales_per_store a', "a.year = '$year'", 999999999, 0, $select, '',
+			'', [ [ 'table' => 'tbl_store s1', 'query' => 's1.id = a.location', 'type' => 'left' ] ], ''
+		);
+
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Target Sales per Store');
+		$sheet->setCellValue('A3', 'Date Printed: ' . (new \DateTime())->format('Y-m-d h:i A'));
+
+		$header = [
+			"BA Code","Store",
+			"January","February","March","April","May","June",
+			"July","August","September","October","November","December"
+		];
+		$this->setHeaderCellValue($header, $sheet, 5);
+
+		$currentRow = 6;
+
+		foreach ($result as $value) {
+			$header = [
+				$value->ba_code, $value->location,
+				$value->january, $value->february, $value->march, $value->april, $value->may, $value->june,
+				$value->july, $value->august, $value->september, $value->october, $value->november, $value->december
+			];
+			$this->setHeaderCellValue($header, $sheet, $currentRow);
+			$currentRow++;
+		}
+
+		$title = "Target Sales per Store";
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
+	public function exportAll() {
+		$select = '';
+		$select .= 's1.description location, a.ba_code,';
+		$select .= 'a.january, a.february, a.march, a.april, a.may, a.june,';
+		$select .= 'a.july, a.august, a.september, a.october, a.november, a.december';
+
+		$result = $this->Global_model->get_data_list(
+			'tbl_target_sales_per_store a', "", 999999999, 0, $select, '',
+			'', [ [ 'table' => 'tbl_store s1', 'query' => 's1.id = a.location', 'type' => 'left' ] ], ''
+		);
+
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Target Sales per Store');
+		$sheet->setCellValue('A3', 'Date Printed: ' . (new \DateTime())->format('Y-m-d h:i A'));
+
+		$header = [
+			"BA Code","Store",
+			"January","February","March","April","May","June",
+			"July","August","September","October","November","December"
+		];
+		$this->setHeaderCellValue($header, $sheet, 5);
+
+		$currentRow = 6;
+
+		foreach ($result as $value) {
+			$header = [
+				$value->ba_code, $value->location,
+				$value->january, $value->february, $value->march, $value->april, $value->may, $value->june,
+				$value->july, $value->august, $value->september, $value->october, $value->november, $value->december
+			];
+			$this->setHeaderCellValue($header, $sheet, $currentRow);
+			$currentRow++;
+		}
+
+		$title = "Target Sales per Store";
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
+	public function exportFilter() {
+		$year = $this->request->getPost('year') ?? '6';
+
+		$select = '';
+		$select .= 's1.description location, a.ba_code,';
+		$select .= 'a.january, a.february, a.march, a.april, a.may, a.june,';
+		$select .= 'a.july, a.august, a.september, a.october, a.november, a.december';
+
+		$result = $this->Global_model->get_data_list(
+			'tbl_target_sales_per_store a', "a.year = '$year'", 999999999, 0, $select, '',
+			'', [ [ 'table' => 'tbl_store s1', 'query' => 's1.id = a.location', 'type' => 'left' ] ], ''
+		);
+
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Target Sales per Store');
+		$sheet->setCellValue('A3', 'Date Printed: ' . (new \DateTime())->format('Y-m-d h:i A'));
+
+		$header = [
+			"BA Code","Store",
+			"January","February","March","April","May","June",
+			"July","August","September","October","November","December"
+		];
+		$this->setHeaderCellValue($header, $sheet, 5);
+
+		$currentRow = 6;
+
+		foreach ($result as $value) {
+			$header = [
+				$value->ba_code, $value->location,
+				$value->january, $value->february, $value->march, $value->april, $value->may, $value->june,
+				$value->july, $value->august, $value->september, $value->october, $value->november, $value->december
+			];
+			$this->setHeaderCellValue($header, $sheet, $currentRow);
+			$currentRow++;
+		}
+
+		$title = "Target Sales per Store";
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
 }
