@@ -1494,42 +1494,43 @@
         }
     }
 
-
     function export_data(company, year, week) 
     {
         modal.loading(true);
+        let expurl = "<?= base_url()?>"+`cms/import-vmi/export`;
         $.ajax({
-            url: '<?= base_url('cms/import-vmi/generate-excel');?>',
+            url: expurl,
             method: 'POST',
             data: {
-                company: company,
-                year: year,
-                week: week
+                company : company,
+                year : year,
+                week : week
             },
-            success: function (res) {
-                if (res.status === 'started') {
-                    modal.loading(false);
-                    logActivity('VMI Module', 'Export Data', null, null, null, null);
-                    modal.alert("Excel generation has started. Please wait 5–10 minutes for the VMI file to download automatically.", "success");
-
-                    let pollInterval = setInterval(function () {
-                        $.getJSON('<?= base_url('cms/import-vmi/pending');?>', function (response) {
-                            if (response.ready) {
-                                clearInterval(pollInterval);
-                                $('<iframe>', {
-                                    src: `<?= base_url('cms/import-vmi/download/');?>${response.filename}`,
-                                    style: 'display: none;'
-                                }).appendTo('body');
-                            }
-                        });
-                    }, 120000);
-                }
+            xhrFields: {
+                responseType: 'blob'
             },
-            error: function (xhr) {
-                modal.alert("Failed to start export.", "error");
-                console.error(xhr.responseText);
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                const filename = 'VMI '+formatDate(new Date())+'.xlsx';
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                console.log(xhr)
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
             }
-        });
+        })
     }
 
     function delete_data(company, year, week){   

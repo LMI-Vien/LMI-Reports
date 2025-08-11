@@ -1430,8 +1430,6 @@
 
         const fields = { year };
 
-        var formattedData = [];
-
         for (const [key, value] of Object.entries(fields)) {
             if (!value) {
                 return modal.alert(`Please select a ${key.charAt(0).toUpperCase() + key.slice(1)}.`, 'error', () => {});
@@ -1448,242 +1446,109 @@
         })
 
         const startExport = () => {
-            dynamic_search(
-                "'tbl_target_sales_per_store a'", 
-                "'left join tbl_store s1 on s1.id = a.location'", 
-                "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
-                0, 
-                0, 
-                `"year:EQ=${year}"`,  
-                `''`, 
-                `''`,
-                (res) => {
-                    let store_ids = []
-                    let store_map = {}
-            
-                    let newData = res.map(({ 
-                        location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
-                    }) => ({
-                        "BA Code":ba_code,
-                        "Store":location,
-                        "January":january,
-                        "February":february,
-                        "March":march,
-                        "April":april,
-                        "May":may,
-                        "June":june,
-                        "July":july,
-                        "August":august,
-                        "September":september,
-                        "October":october,
-                        "November":november,
-                        "December":december,
-                    }));
-
-                    formattedData.push(...newData); // Append new data to formattedData array
+            let expurl = "<?= base_url()?>"+`cms/import-target-sales-ps/export-all`;
+            $.ajax({
+                url: expurl,
+                method: 'POST',
+                data: {
+                    year: $('#year_select option:selected').val()?.trim()
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(blob, status, xhr) {
+                    const cd = xhr.getResponseHeader('Content-Disposition');
+                    const match = cd && /filename="?([^"]+)"/.exec(cd);
+                    const filename = 'Target Sales per Store '+formatDate(new Date())+'.xlsx';
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(blobUrl);
+                },
+                error: function(xhr, status, error) {
+                    alert(xhr+' - '+status+' - '+error);
+                    console.log(xhr)
+                    modal.loading(false);
+                },
+                complete: function() {
+                    modal.loading(false);
                 }
-            )
-    
-            const headerData = [
-                ["Company Name: Lifestrong Marketing Inc."],
-                ["Target Sales per Store"],
-                ["Date Printed: " + formatDate(new Date())],
-                [""],
-            ];
-    
-            exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
-            modal.loading_progress(false);
+            })
         }
     }
 
     function handleExport() {
-        var formattedData = [];
-        var ids = [];
-
-        $('.select:checked').each(function () {
-            var id = $(this).attr('data-id');
-            ids.push(`${id}`); // Collect IDs in an array
-        });
-
-        modal.confirm(confirm_export_message,function(result){
-            if (result) {
-                modal.loading_progress(true, "Reviewing Data...");
-                setTimeout(() => {
-                    startExport()
-                }, 500);
+        modal.loading(true);
+        let expurl = "<?= base_url()?>"+`cms/import-target-sales-ps/export-all`;
+        $.ajax({
+            url: expurl,
+            method: 'POST',
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                const filename = 'Target Sales per Store '+formatDate(new Date())+'.xlsx';
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                console.log(xhr)
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
             }
         })
-
-        const startExport = () => {
-            const fetchStores = (callback) => {
-                function processResponse (res) {
-                    formattedData = res.map(({ 
-                        location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
-                    }) => ({
-                        "BA Code":ba_code,
-                        "Store":location,
-                        "January":january,
-                        "February":february,
-                        "March":march,
-                        "April":april,
-                        "May":may,
-                        "June":june,
-                        "July":july,
-                        "August":august,
-                        "September":september,
-                        "October":october,
-                        "November":november,
-                        "December":december,
-                    }));
-                };
-
-                ids.length > 0 
-                    ? dynamic_search(
-                        "'tbl_target_sales_per_store a'", 
-                        "'left join tbl_store s1 on s1.id = a.location'", 
-                        "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
-                        100000, 
-                        0, 
-                        `'id:IN=${ids.join('|')}'`,  
-                        `''`, 
-                        `''`,
-                        processResponse
-                    )
-                    : batch_export();
-            };
-
-            const batch_export = () => {
-                dynamic_search(
-                    "'tbl_target_sales_per_store'", 
-                    "''", 
-                    "'COUNT(id) as total_records'", 
-                    0, 
-                    0, 
-                    `''`,  
-                    `''`, 
-                    `''`,
-                    (res) => {
-                        if (res && res.length > 0) {
-                            let total_records = res[0].total_records;
-
-                            for (let index = 0; index < total_records; index += 100000) {
-                                dynamic_search(
-                                    "'tbl_target_sales_per_store a'", 
-                                    "'left join tbl_store s1 on s1.id = a.location'", 
-                                    "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
-                                    100000, 
-                                    index, 
-                                    `''`,  
-                                    `''`, 
-                                    `''`,
-                                    (res) => {
-                                        let newData = res.map(({ 
-                                            location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
-                                        }) => ({
-                                            "BA Code":ba_code,
-                                            "Store Code":location,
-                                            "January":january,
-                                            "February":february,
-                                            "March":march,
-                                            "April":april,
-                                            "May":may,
-                                            "June":june,
-                                            "July":july,
-                                            "August":august,
-                                            "September":september,
-                                            "October":october,
-                                            "November":november,
-                                            "December":december,
-                                        }));
-                                        formattedData.push(...newData); // Append new data to formattedData array
-                                    }
-                                )
-                            }
-                        }
-                    }
-                )
-            };
-
-            fetchStores();
-
-            const headerData = [
-                ["Company Name: Lifestrong Marketing Inc."],
-                ["Target Sales per Store"],
-                ["Date Printed: " + formatDate(new Date())],
-                [""],
-            ];
-
-            exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
-            modal.loading_progress(false);
-        }
     }
 
     function export_data(year) {
-        var formattedData = [];
-
-        const startExport = (res) => {
-            let newData = res.map(({ 
-                location, ba_code, january, february, march, april, may, june, july, august, september, october, november, december
-
-            }) => ({
-                "BA Code":ba_code,
-                "Store":location,
-                "January":january,
-                "February":february,
-                "March":march,
-                "April":april,
-                "May":may,
-                "June":june,
-                "July":july,
-                "August":august,
-                "September":september,
-                "October":october,
-                "November":november,
-                "December":december,
-            }));
-            formattedData.push(...newData);
-        }
-
-        const startCount = (res) => {
-            if (res && res.length > 0) {
-                let total_records = res[0].total_records;
-    
-                for (let index = 0; index < total_records; index += 100000) {
-                    dynamic_search(
-                        "'tbl_target_sales_per_store a'", 
-                        "'left join tbl_store s1 on s1.id = a.location'", 
-                        "'s1.description location, a.ba_code, a.january, a.february, a.march, a.april, a.may, a.june, a.july, a.august, a.september, a.october, a.november, a.december'",  
-                        100000, 
-                        index, 
-                        `'a.year:EQ=${year}'`, 
-                        `''`,  
-                        `''`,
-                        startExport
-                    )
-                }
+        modal.loading(true);
+        let expurl = "<?= base_url()?>"+`cms/import-target-sales-ps/export`;
+        $.ajax({
+            url: expurl,
+            method: 'POST',
+            data: {
+                year : year
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                const filename = 'Target Sales per Store '+formatDate(new Date())+'.xlsx';
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                console.log(xhr)
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
             }
-        }
-
-        dynamic_search(
-            "'tbl_target_sales_per_store'", 
-            "''", 
-            "'COUNT(id) as total_records'", 
-            0, 
-            0, 
-            `'year:EQ=${year}'`, 
-            `''`,  
-            `''`,
-            startCount
-        )
-
-        const headerData = [
-            ["Company Name: Lifestrong Marketing Inc."],
-            ["Target Sales per Store"],
-            ["Date Printed: " + formatDate(new Date())],
-            [""],
-        ];
-    
-        exportArrayToCSV(formattedData, `Target Sales per Store - ${formatDate(new Date())}`, headerData);
+        })
+        return;
     }
 
     function exportArrayToCSV(data, filename, headerData) {

@@ -374,4 +374,69 @@ class ImportVmi extends BaseController
 	    return $this->response->setJSON(['ready' => false]);
 	}
 
+	public function setHeaderCellValue(array $headers, \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, int $row = 1): void {
+		foreach ($headers as $index => $header) {
+			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+			$sheet->setCellValue($colLetter . $row, $header);
+		}
+	}
+	public function exportSpecific() {
+		$company = $this->request->getPost('company') ?? '1';
+		$year    = $this->request->getPost('year') ?? '1';
+		$week    = $this->request->getPost('week') ?? '1';
+
+		$select = '';
+		$select .= 's.description, v.item, v.item_name, v.item_class, v.supplier, v.`c_group`, v.dept, v.c_class as classification, ';
+		$select .= 'v.sub_class, v.on_hand, v.in_transit, v.average_sales_unit, v.company, v.vmi_status, v.year, v.week';
+		$result = $this->Global_model->get_data_list(
+			'tbl_vmi v', 
+			"v.company = $company AND v.year = $year AND week = $week",
+			999999999, 
+			// 9,
+			0, 
+			$select,
+			'', 
+			'', 
+			[
+				[ 'table' => 'tbl_company c', 'query' => 'v.company = c.id', 'type' => 'left' ],
+				[ 'table' => 'tbl_year y', 'query' => 'v.year = y.id', 'type' => 'left' ],
+				[ 'table' => 'tbl_store s', 'query' => 's.id = v.store', 'type' => 'left' ]
+			], 
+			''
+		);
+
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'VMI');
+		$sheet->setCellValue('A3', 'Date Printed: ' . (new \DateTime())->format('Y-m-d h:i A'));
+
+		$header = [
+			"Store", "Item", "Item Name", "VMI Status", "Item Class", "Supplier", "Group", "Dept",
+			"Class", "Sub Class", "On Hand", "In Transit", "Ave Sales Unit"
+		];
+		$this->setHeaderCellValue($header, $sheet, 5);
+
+		$currentRow = 6;
+
+		foreach ($result as $value) {
+			$header = [
+				$value->description, $value->item, $value->item_name, $value->vmi_status, $value->item_class,
+				$value->supplier, $value->c_group, $value->dept, $value->classification,
+				$value->sub_class, $value->on_hand, $value->in_transit, $value->average_sales_unit
+			];
+			$this->setHeaderCellValue($header, $sheet, $currentRow);
+			$currentRow++;
+		}
+
+		$title = "VMI";
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
 }

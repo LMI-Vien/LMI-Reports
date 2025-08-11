@@ -5,6 +5,7 @@ namespace App\Controllers\Cms;
 use App\Controllers\BaseController;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Models\Sync_model;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class ImportSellOut extends BaseController
 {
@@ -361,6 +362,185 @@ class ImportSellOut extends BaseController
 	        'message' => 'Missing parameters: data_header_id, month, or year',
 	        'results' => []
 	    ]);
+	}
+
+	public function setHeaderCellValue(array $headers, \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, int $row = 1): void {
+		foreach ($headers as $index => $header) {
+			$colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+			$sheet->setCellValue($colLetter . $row, $header);
+		}
+	}
+	public function exportSpecific() {
+		$id = $this->request->getPost('id') ?? '1';
+		$result = $this->Global_model->get_data_list(
+			'tbl_sell_out_data_details', 
+			"data_header_id = '$id'",
+			999999999, 
+			// 9,
+			0, 
+			'data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales, gross_sales', 
+			'', 
+			'', 
+			'', 
+			''
+		);
+
+		$result1 = $this->Global_model->get_data_list(
+			'`tbl_sell_out_data_header` a', 
+			"a.id = '$id'",
+			1, 
+			0, 
+			'b.`month`, a.`year`, a.customer_payment_group, a.created_date, c.username, a.file_type, a.remarks', 
+			'', 
+			'', 
+			[
+				[ 'table' => 'tbl_month b', 'query' => 'a.`month` = b.id', 'type' => 'left' ],
+				[ 'table' => 'cms_users c', 'query' => 'a.created_by = c.id', 'type' => 'left' ]
+			], 
+			''
+		);
+
+		$dateStr = $result1[0]->created_date;
+		$date = new \DateTime($dateStr);
+		$created_date = $date->format('F j, Y g:i A');
+
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Sell Out');
+		$sheet->setCellValue('A3', 'Date Printed: ' . (new \DateTime())->format('Y-m-d h:i A'));
+
+		$headers = [
+			'File Name', 'Store Code', 'Store Description', 'SKU Code',
+			'SKU Description', 'Gross Sales', 'Quantity', 'Net Sales'
+		];
+		$this->setHeaderCellValue($headers,$sheet,5);
+
+		$headers = [
+			$result1[0]->month, $result1[0]->year, $result1[0]->customer_payment_group, $created_date,
+			$result1[0]->username, $result1[0]->file_type, $result1[0]->remarks
+		];
+		$this->setHeaderCellValue($headers,$sheet,6);
+
+		$currentRow = 7;
+
+		foreach ($result as $value) {
+			$headers = [
+				$value->file_name, $value->store_code, $value->store_description,
+				$value->sku_code, $value->sku_description,
+				$value->gross_sales, $value->quantity, $value->net_sales
+			];
+			$this->setHeaderCellValue($headers,$sheet,$currentRow);
+			$currentRow++;
+		}
+
+		$title = "Sell Out";
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
+	public function exportBatch() {
+		$ids = $this->request->getPost('ids') ?? ['1', '6', '7'];
+		
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Sell Out');
+		$sheet->setCellValue('A3', 'Date Printed: ' . (new \DateTime())->format('Y-m-d h:i A'));
+		
+		$headers = [
+			'File Name',
+			'Store Code',
+			'Store Description',
+			'SKU Code',
+			'SKU Description',
+			'Gross Sales',
+			'Quantity',
+			'Net Sales'
+		];
+		$this->setHeaderCellValue($headers,$sheet,5);
+
+		$currentRow = 6;
+
+		foreach ($ids as $id) {
+			$select = '';
+			$select .= 'data_header_id, id, file_name, line_number, store_code, store_description, ';
+			$select .= 'sku_code, sku_description, quantity, net_sales, gross_sales';
+			$result = $this->Global_model->get_data_list(
+				'tbl_sell_out_data_details', 
+				"data_header_id = '$id'",
+				999999999, 
+				// 10,
+				0, 
+				$select, 
+				'', 
+				'', 
+				'', 
+				''
+			);
+	
+			$result1 = $this->Global_model->get_data_list(
+				'`tbl_sell_out_data_header` a', 
+				"a.id = '$id'",
+				1, 
+				0, 
+				'b.`month`, a.`year`, a.customer_payment_group, a.created_date, c.username, a.file_type, a.remarks', 
+				'', 
+				'', 
+				[
+					[ 'table' => 'tbl_month b', 'query' => 'a.`month` = b.id', 'type' => 'left' ],
+					[ 'table' => 'cms_users c', 'query' => 'a.created_by = c.id', 'type' => 'left' ]
+				], 
+				''
+			);
+
+			$dateStr = $result1[0]->created_date;
+			$date = new \DateTime($dateStr);
+			$created_date = $date->format('F j, Y g:i A');
+
+			$headers = [
+				$result1[0]->month,
+				$result1[0]->year,
+				$result1[0]->customer_payment_group,
+				$created_date,
+				$result1[0]->username,
+				$result1[0]->file_type,
+				$result1[0]->remarks
+			];
+			$this->setHeaderCellValue($headers,$sheet,$currentRow);
+			$currentRow++;
+			
+			foreach ($result as $value) {
+				$headers = [
+					$value->file_name,
+					$value->store_code,
+					$value->store_description,
+					$value->sku_code,
+					$value->sku_description,
+					$value->gross_sales,
+					$value->quantity,
+					$value->net_sales
+				];
+				$this->setHeaderCellValue($headers,$sheet,$currentRow);
+				$currentRow++;
+			}
+		}
+		
+		$title = "Sell Out";
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
 	}
 
 }
