@@ -189,6 +189,33 @@ $routes->group('cms/', static function ($routes) {
         $routes->match(['GET', 'POST'], 'export-agency', 'Cms\Agency::export_agency');
     });
 
+    $routes->group('label-category', static function ($routes) {
+        $routes->get('/', 'Cms\LabelCategory::index');
+        $routes->match(['GET', 'POST'], 'export-category', 'Cms\LabelCategory::export_category');
+    });
+
+    $routes->group('pricelist-masterfile', static function ($routes) {
+        $routes->get('/', 'Cms\PricelistMasterfile::index');
+    });
+
+    $routes->group('pricelist-details', static function ($routes) {
+        $routes->get('/', 'Cms\PricelistDetails::index');
+    });
+
+    $routes->group('customer-details', static function ($routes) {
+        $routes->get('/', 'Cms\CustomerDetails::index');
+    });
+
+    $routes->group('customer-pricelist-details', static function ($routes) {
+        $routes->get('/', 'Cms\CustomerPricelistDetails::index');
+    });
+
+    $routes->group('store-segment', static function ($routes) {
+        $routes->get('/', 'Cms\StoreSegment::index');
+    });
+
+
+
     $routes->group('brand-ambassador', static function ($routes) {
         $routes->get('/', 'Cms\BrandAmbassador::index');
         $routes->match(['GET', 'POST'], 'export-ba', 'Cms\BrandAmbassador::export_ba');

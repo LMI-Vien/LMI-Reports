@@ -44,7 +44,7 @@
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center md-center">
-                <b>A G E N C Y</b>
+                <b>L A B E L - C A T E G O R Y</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -61,8 +61,8 @@
                               <thead>
                                   <tr>
                                       <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                      <th class='center-content'>Agency Code</th>
-                                      <th class='center-content'>Agency Description</th>
+                                      <th class='center-content'>Code</th>
+                                      <th class='center-content'>Description</th>
                                       <th class='center-content'>Status</th>
                                       <th class='center-content'>Date Created</th>
                                       <th class='center-content'>Date Modified</th>
@@ -101,15 +101,14 @@
                 <div class="modal-body">
                     <form id="form-modal">
                     <div class="mb-3">
-                            <label for="code" class="form-label">Agency Code</label>
+                            <label for="code" class="form-label">Code</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
-                            <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
-                            <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
+                            <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code" disabled>
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label">Agency Description</label>
-                            <input type="text" class="form-control required" id="agency" maxlength="50" aria-describedby="description">
-                            <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                            <label for="description" class="form-label">Description</label>
+                            <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
+                            <small id="description" class="form-text text-muted">* required, must be unique, max 100 characters</small>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -177,8 +176,8 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' style='width: 5%'>Line #</th>
-                                        <th class='center-content' style='width: 10%'>Agency Code</th>
-                                        <th class='center-content' style='width: 20%'>Agency Description</th>
+                                        <th class='center-content' style='width: 10%'>Code</th>
+                                        <th class='center-content' style='width: 20%'>Description</th>
                                         <th class='center-content' style='width: 10%'>Status</th>
                                     </tr>
                                 </thead>
@@ -201,8 +200,8 @@
 
 <script>
     var query = "status >= 0";
-    var column_filter = '';
-    var order_filter = '';
+    var column_filter = 'code';
+    var order_filter = 'asc';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
@@ -216,89 +215,167 @@
 
     $(document).ready(function() {
       get_data(query);
-      get_pagination(query);
     });
 
-    function get_data(query, field = "code", order = "asc") {
-      var url = "<?= base_url("cms/global_controller");?>";
-        var data = {
-            event : "list",
-            select : "id, code, agency, status, updated_date, created_date",
-            query : query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_agency",
-            order : {
-                field : field,
-                order : order 
-            }
+    // function get_data(query, column_filter, order_filter) {
+    //   var url = "<?= base_url("cms/global_controller");?>";
+    //     var data = {
+    //         event : "list_pagination",
+    //         select : "id, code, description, status, updated_date, created_date",
+    //         query : query,
+    //         offset : offset,
+    //         limit : limit,
+    //         table : "tbl_label_category_list",
+    //         order : {
+    //             field : column_filter,
+    //             order : order_filter 
+    //         }
 
-        }
+    //     }
 
-        aJax.post(url,data,function(result){
-            var result = JSON.parse(result);
-            var html = '';
+    //     aJax.post(url,data,function(result){
+    //         var result = JSON.parse(result);
+    //         var html = '';
+    //         var list = result.list;
+    //         if(list) {
+    //             if (list.length > 0) {
+    //                 $.each(list, function(x,y) {
+    //                     var escape_code = y.code; 
+    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+    //                     html += "<tr class='" + rowClass + "'>";
+    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+    //                     html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
+    //                     html += "<td scope=\"col\">" + trimText(y.description, 20) + "</td>";
+    //                     html += "<td scope=\"col\">" +status+ "</td>";
+    //                     html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+    //                     html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
 
-            if(result) {
-                if (result.length > 0) {
-                    $.each(result, function(x,y) {
-                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
-                        html += "<tr class='" + rowClass + "'>";
-                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.agency, 10) + "</td>";
-                        html += "<td scope=\"col\">" +status+ "</td>";
-                        html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
-                        if (y.id == 0) {
-                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-                        } else {
-                          html+="<td class='center-content' scope=\"col\">";
-                          html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
-                            +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
-                            +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                          html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
-                            +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-                          html+="</td>";
-                        }
+    //                     if (y.id == 0) {
+    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+    //                     } else {
+    //                       html+="<td class='center-content' scope=\"col\">";
+    //                       html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
+    //                         +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+    //                       html+="<a class='btn-sm btn delete' onclick=\"delete_data('" + y.id + "','" + encodeURIComponent(escape_code) + "')\" data-status='"
+    //                         +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+    //                       html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
+    //                         +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+    //                       html+="</td>";
+    //                     }
                         
                         
-                        html += "</tr>";   
-                    });
-                } else {
-                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-                }
-            }
-            $('.table_body').html(html);
-        });
-    }
+    //                     html += "</tr>";   
+    //                 });
+    //             } else {
+    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+    //             }
+    //         }
+    //         $('.table_body').html(html);
+    //         modal.loading(false);
+    //         if(result.pagination){
+    //           if(result.pagination.total_page > 1){
+    //               pagination.generate(result.pagination.total_page, ".list_pagination", get_data);
+    //                 currentPage = offset;
+    //                 $(".pager_number option[value="+currentPage+"]").prop("selected", false)
+    //                 $('.pager_number').val(currentPage);
+    //                 $('.pager_no').html("Page " + numeral(currentPage).format('0,0'));
+    //           }
+    //           else if(result.total_data < limit) {
+    //           $('.list_pagination').empty();
+    //           } 
+    //         }
+    //     });
+    // }
 
-    function get_pagination(query, field = "agency", order = "asc") {
-        var url = "<?= base_url("cms/global_controller");?>";
-        var data = {
-          event : "pagination",
-            select : "id, agency",
-            query : query,
-            offset : offset,
-            limit : limit,
-            table : "tbl_agency",
-            order : {
-                field : field, //field to order
-                order : order //asc or desc
+async function get_data(query, column_filter, order_filter) {
+    var url = "<?= base_url('cms/global_controller'); ?>";
+    var data = {
+        event: "list_pagination",
+        select: "id, code, description, status, updated_date, created_date",
+        query: query,
+        offset: offset,
+        limit: limit,
+        table: "tbl_label_category_list",
+        order: {
+            field: column_filter,
+            order: order_filter
+        }
+    };
+
+    try {
+        const response = await aJax.post(url, data);
+        const result = JSON.parse(response);
+        let html = '';
+        let list = result.list;
+
+        if (list) {
+            if (list.length > 0) {
+                $.each(list, function (x, y) {
+                    // Only encode once here using encodeURIComponent
+                    var escape_code = encodeURIComponent(y.code);  // Encoding only once
+                    var escape_desc = escapeHtml(y.description);  // Escape description as before
+
+                    var status = (parseInt(y.status) === 1) ? "Active" : "Inactive";
+                    var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
+
+                    html += "<tr class='" + rowClass + "'>";
+                    html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
+                    html += "<td scope='col'>" + trimText(escape_code, 10) + "</td>";  // Trim and use the encoded code
+                    html += "<td scope='col'>" + trimText(escape_desc, 20) + "</td>";  // Trim description
+                    html += "<td scope='col'>" + status + "</td>";
+                    html += "<td class='center-content' scope='col'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                    html += "<td class='center-content' scope='col'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+                    if (y.id == 0) {
+                        html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+                    } else {
+                        html += "<td class='center-content' scope='col'>";
+                        html += "<a class='btn-sm btn save' onclick=\"edit_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span></a>";
+                        // Properly encode the code and pass to delete_data function
+                        html += "<a class='btn-sm btn delete' onclick=\"delete_data('" + y.id + "','" + escape_code + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span></a>";
+                        html += "<a class='btn-sm btn view' onclick=\"view_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span></a>";
+                        html += "</td>";
+                    }
+                    html += "</tr>";
+                });
+            } else {
+                html = '<tr><td colspan="12" class="center-align-format">' + no_records + '</td></tr>';
             }
         }
 
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            modal.loading(false);
-            pagination.generate(obj.total_page, ".list_pagination", get_data);
-        });
-    }
+        // Insert HTML into table body
+        $('.table_body').html(html);
 
+        modal.loading(false);
+
+        // Handle pagination if present
+        if (result.pagination) {
+            if (result.pagination.total_page > 1) {
+                pagination.generate(result.pagination.total_page, ".list_pagination", get_data);
+                currentPage = offset;
+                $(".pager_number option[value=" + currentPage + "]").prop("selected", false);
+                $('.pager_number').val(currentPage);
+                $('.pager_no').html("Page " + numeral(currentPage).format('0,0'));
+            } else if (result.total_data < limit) {
+                $('.list_pagination').empty();
+            }
+        }
+    } catch (error) {
+        console.error("Error while fetching data:", error);
+        modal.alert("Error fetching data.", "error");
+    }
+}
+
+
+    function escapeHtml(str) {
+        var element = document.createElement('div');
+        if (str) {
+            element.innerText = str;
+            element.textContent = str;
+        }
+        return element.innerHTML;
+    }
 
     pagination.onchange(function(){
         offset = $(this).val();
@@ -306,7 +383,6 @@
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
     });
-
 
     $(document).on('keydown', '#search_query', function(event) {
         $('.btn_status').hide();
@@ -316,9 +392,8 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (code like \'%'+escaped_keyword+'%\' or agency like \'%'+escaped_keyword+'%\')';
+            new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
-            get_pagination(new_query);
         }
     });
 
@@ -329,9 +404,8 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (code like \'%'+escaped_keyword+'%\' or agency like \'%'+escaped_keyword+'%\')';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
-        get_pagination(new_query);
     });
 
     $('#btn_filter').on('click', function(event) {
@@ -358,7 +432,6 @@
         query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
         
         get_data(query, column_filter, order_filter);
-        get_pagination(query, column_filter, order_filter);
         $('#filter_modal').modal('hide');
     })
     
@@ -367,7 +440,6 @@
         column_filter = '';
         query = "status >= 0";
         get_data(query);
-        get_pagination(query);
         
         $("input[name='status_f']").prop('checked', false);
         $("#created_date_from").val('');
@@ -389,27 +461,26 @@
         offset = 1;
         modal.loading(true); 
         get_data(query);
-        get_pagination(query);
         modal.loading(false);
     });
 
     $('#btn_add').on('click', function() {
-        open_modal('Add New Agency', 'add', '');
+        open_modal('Add New Label Category', 'add', '');
     });
 
     $('#btn_import').on('click', function() {
-        title = addNbsp('IMPORT AGENCY')
-        $("#import_modal").find('.modal-title').find('b').html(title)
-        $("#import_modal").modal('show')
-        clear_import_table()
+        title = addNbsp('IMPORT Label Category');
+        $("#import_modal").find('.modal-title').find('b').html(title);
+        $("#import_modal").modal('show');
+        clear_import_table();
     });
 
     function edit_data(id) {
-        open_modal('Edit Agency', 'edit', id);
+        open_modal('Edit Label Category', 'edit', id);
     }
 
     function view_data(id) {
-        open_modal('View Agency', 'view', id);
+        open_modal('View Label Category', 'view', id);
     }
 
     function open_modal(msg, actions, id) {
@@ -442,7 +513,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#code, #agency, #status', isReadOnly);
+        set_field_state('#code, #description, #status', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -452,7 +523,6 @@
         $modal.modal('show');
 
         $modal.off('shown.bs.modal').on('shown.bs.modal', function () {
-        // Disable background interaction
         $contentWrapper.attr('inert', '');
 
         // Now it's safe to focus inside the modal
@@ -466,7 +536,7 @@
     }
 
     function reset_modal_fields() {
-        $('#popup_modal #code, #popup_modal #agency, #popup_modal').val('');
+        $('#popup_modal #code, #popup_modal #description, #popup_modal').val('');
         $('#popup_modal #status').prop('checked', true);
     }
 
@@ -486,96 +556,91 @@
     }
 
     function save_data(action, id) {
-        var code = $('#code').val().trim();
-        var agency = $('#agency').val().trim();
-        var chk_status = $('#status').prop('checked');
-        if (chk_status) {
-            status_val = 1;
-        } else {
-            status_val = 0;
-        }
-        if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_agency", ["code", "agency"], [code, agency], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_update_message, function(result){
-                        if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, agency, status_val, id)
-                        }
-                    });
+        const code = $('#code').val().trim();
+        const description = $('#description').val().trim();
+        const isActive = $('#status').prop('checked') ? 1 : 0;
 
-                }             
-            });
-        }else{
-            check_current_db("tbl_agency", ["code", "agency"], [code, agency], "status" , null, null, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_add_message, function(result){
-                        if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, agency, status_val, null)
-                        }
-                    });
+        const tableName = "tbl_label_category_list";
+        const uniqueFields = ["code", "description"];
+        const fieldValues = [code, description];
+        const statusField = "status";
 
-                }                  
+        const isEdit = id !== undefined && id !== null && id !== '';
+
+        const confirmMessage = isEdit ? confirm_update_message : confirm_add_message;
+
+        function handleSave() {
+            modal.confirm(confirmMessage, function (result) {
+                if (result) {
+                    modal.loading(true);
+                    save_to_db(code, description, isActive, isEdit ? id : null);
+                }
             });
         }
+
+        check_current_db(
+            tableName,
+            uniqueFields,
+            fieldValues,
+            statusField,
+            isEdit ? "id" : null,
+            isEdit ? id : null,
+            true,
+            function (exists, duplicateFields) {
+                if (!exists) {
+                    handleSave();
+                }
+            }
+        );
     }
 
-    function save_to_db(inp_code, inp_agency, status_val, id) {
+    function save_to_db(inp_code, inp_desc, status_val, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
-        let data = {}; 
-        let modal_alert_success;
         const now = new Date();
         const start_time = now;
-        let valid_data = []; // to log into file
+        const isEdit = id !== undefined && id !== null && id !== '';
+        const userData = {
+            code: inp_code,
+            description: inp_desc,
+            status: status_val,
+        };
 
-        if (id !== undefined && id !== null && id !== '') {
-            modal_alert_success = success_update_message;
-            const updated_data = {
-                code: inp_code,
-                agency: inp_agency,
-                updated_date: formatDate(now),
-                updated_by: user_id,
-                status: status_val
-            };
+        const valid_data = [{
+            module: "Label Category Module",
+            action: isEdit ? "Update" : "Insert",
+            remarks: isEdit ? "Updated Label Category information" : "Inserted new Label Category",
+            new_data: JSON.stringify(userData),
+            old_data: '',
+        }];
 
-            valid_data.push({
-                module: "Agency Module",
-                action: "Update",
-                remarks: "Updated agency information",
-                new_data: JSON.stringify(updated_data),
-                old_data: ''
-            });
+        const commonData = {
+            code: inp_code,
+            description: inp_desc,
+            status: status_val,
+        };
+
+        let modal_alert_success = isEdit ? success_update_message : success_save_message;
+        let data;
+
+        if (isEdit) {
+            commonData.updated_date = formatDate(now);
+            commonData.updated_by = user_id;
 
             data = {
                 event: "update",
-                table: "tbl_agency",
+                table: "tbl_label_category_list",
                 field: "id",
                 where: id,
-                data: updated_data
+                data: commonData
             };
         } else {
-            modal_alert_success = success_save_message;
-            const inserted_data = {
-                code: inp_code,
-                agency: inp_agency,
-                created_date: formatDate(now),
-                created_by: user_id,
-                status: status_val
-            };
-
-            valid_data.push({
-                module: "Agency Module",
-                action: "Insert",
-                remarks: "Inserted new agency",
-                new_data: JSON.stringify(inserted_data),
-                old_data: ""
-            });
+            commonData.created_date = formatDate(now);
+            commonData.created_by = user_id;
 
             data = {
                 event: "insert",
-                table: "tbl_agency",
-                data: inserted_data
+                table: "tbl_label_category_list",
+                data: commonData
             };
         }
 
@@ -590,67 +655,81 @@
         });
     }
 
+    async function delete_data(id, code) {
+        var decodedCode = decodeURIComponent(code);
+        const message = {
+            ...JSON.parse(confirm_delete_message),
+            message: `Delete Label Category Code <b><i>${decodedCode}</i></b> from Label Category Masterfile?`
+        };
 
-    function delete_data(id) {
-        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-            let code = res[id];
-            message = is_json(confirm_delete_message);
-            message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
-
-            modal.confirm(JSON.stringify(message), function(result){
-                if (result) {
-                    var url = "<?= base_url('cms/global_controller');?>"; 
-                    var data = {
-                        event: "list",
-                        select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
-                        query: "a.id = " + id, 
-                        offset: offset,  
-                        limit: limit,   
-                        table: "tbl_agency a",
-                        join: [
-                            {
-                                table: "tbl_brand_ambassador bra",
-                                query: "bra.agency = a.id",
-                                type: "left"
-                            }
-                        ],
-                        group: "a.id, a.code, a.agency"  
-                    };
-
-                    aJax.post(url, data, function(response) {
-                        try {
-                            var obj = JSON.parse(response);
-                            if (!Array.isArray(obj)) { 
-                                modal.alert("Error processing response data.", "error", ()=>{});
-                                return;
-                            }
-
-                            if (obj.length === 0) {
-                                proceed_delete(id); 
-                                return;
-                            }
-
-                            var Count = Number(obj[0].agency_count) || 0;
-
-                            if (Count > 0) { 
-                                modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-                            } else {
-                                proceed_delete(id); 
-                            }
-                        } catch (e) {
-                            modal.alert("Error processing response data.", "error", ()=>{});
-                        }
-                    });
-                }
+        const confirmed = await new Promise((resolve) => {
+            modal.confirm(JSON.stringify(message), function (result) {
+                resolve(result);
             });
         });
+
+        if (!confirmed) return;
+
+        const url = "<?= base_url('cms/global_controller');?>";
+        const query = `lc.id = ${id}`;
+
+        const data = {
+            event: "list",
+            select: "lc.id, lc.code, lc.description, " +
+                "COUNT(mp.category_1_id) AS cat_count",
+            query,
+            offset: 1,
+            limit: 1,
+            table: "tbl_label_category_list lc",
+            join: [
+                { table: "tbl_main_pricelist mp", query: "mp.category_1_id = lc.id", type: "left" }
+            ],
+            group: "lc.id, lc.code, lc.description"
+        };
+
+        function ajaxPostPromise(url, data) {
+            return new Promise((resolve, reject) => {
+                aJax.post(url, data, function (result) {
+                    resolve(result);
+                }, function (error) {
+                    reject(error);
+                });
+            });
+        }
+
+        try {
+            const response = await ajaxPostPromise(url, data);
+            let obj;
+            try {
+                obj = JSON.parse(response);
+            } catch (e) {
+                throw new Error("Invalid JSON: " + response);
+            }
+
+            if (!Array.isArray(obj) || obj.length === 0) {
+                proceed_delete(id);
+                return;
+            }
+
+            const counts = [
+                Number(obj[0].cat_count) || 0 // fixed field name (was cat_count_1)
+            ];
+
+            if (counts.some(count => count > 0)) {
+                modal.alert("This item is in use and cannot be deleted.", "error");
+            } else {
+                proceed_delete(id);
+            }
+        } catch (error) {
+            modal.alert("Error processing response data.", "error");
+        }
     }
 
     function proceed_delete(id) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "update",
-            table : "tbl_agency",
+            table : "tbl_label_category_list",
             field : "id",
             where : id, 
             data : {
@@ -672,17 +751,17 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, code, agency, status",
+            select : "id, code, description, status",
             query : query, 
-            table : "tbl_agency"
+            table : "tbl_label_category_list"
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
-                $.each(obj, function(index,asc) {
-                    $('#id').val(asc.id);
-                    $('#code').val(asc.code);
-                    $('#agency').val(asc.agency);
+                $.each(obj, function(i,j) {
+                    $('#id').val(j.id);
+                    $('#code').val(j.code);
+                    $('#description').val(j.description);
                     if(asc.status == 1) {
                         $('#status').prop('checked', true)
                     } else {
@@ -713,15 +792,15 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Agency Code": row["Agency Code"] || "",
-                "Agency Description": row["Agency Description"] || "",
+                "Label Category Code": row["Label Category Code"] || "",
+                "Label Category Description": row["Label Category Description"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
                 "Created Date": formatDate(new Date()) || ""
             };
         });
 
-        let worker = new Worker(base_url + "assets/cms/js/validator_agency.js");
+        let worker = new Worker(base_url + "assets/cms/js/validator_label_category.js");
         worker.postMessage({ data: jsonData, base_url: base_url });
 
         worker.onmessage = function(e) {
@@ -761,27 +840,20 @@
         let max_retries = 5; 
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_agency';
-        let selected_fields = ['id', 'code', 'agency'];
+        let table = 'tbl_label_category_list';
+        let selected_fields = ['id', 'code', 'description'];
 
-        //for lookup of duplicate recors
-        const matchFields = ["code", "agency"];  
-        const matchType = "OR";  //use OR/AND depending on the condition
+        const matchFields = ["code", "description"];  
+        const matchType = "OR"; 
         modal.loading_progress(true, "Validating and Saving data...");
 
-        // Fetch existing records
         aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-            // let result = JSON.parse(response);
             const result = JSON.parse(response);
             const allEntries = result.existing || [];
-
-            // Build a Set of codes you're importing:
             const codeSet = new Set(valid_data.map(r => r.code));
-
-            // Keep only the rows whose code matches:
             const originalEntries = allEntries.filter(rec => codeSet.has(rec.code));
 
-            let existingMap = new Map(); // Stores records using composite keys
+            let existingMap = new Map();
 
             if (result.existing) {
                 result.existing.forEach(record => {
@@ -803,7 +875,7 @@
                     const duration = formatDuration(overallStart, overallEnd);
 
                     const remarks = `
-                        Action: Import/Update Agency Batch
+                        Action: Import/Update Label Category Batch
                         <br>Processed ${valid_data.length} records
                         <br>Errors: ${errorLogs.length}
                         <br>Start: ${formatReadableDate(overallStart)}
@@ -811,7 +883,7 @@
                         <br>Duration: ${duration}
                     `;
 
-                    logActivity("import-agency-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+                    logActivity("import-label-category-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
 
                     if (errorLogs.length > 0) {
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
@@ -836,13 +908,13 @@
                         }
                     } else {
                         for (let [key, id] of existingMap.entries()) {
-                            let keyParts = key.split("|"); // ["AJK 530", "Marsden F. Hoffman"]
+                            let keyParts = key.split("|");
 
     
 
                             if (keyParts[0] === row["code"]) {
                                 matchedId = id;
-                                break; // Stop looping once a match is found
+                                break;
                             }
                         }
                     }
@@ -862,7 +934,7 @@
                 function processUpdates() {
                     return new Promise((resolve) => {
                         if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_agency", "id", false, (response) => {
+                            batch_update(url, updateRecords, "tbl_label_category_list", "id", false, (response) => {
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
                                 }
@@ -877,9 +949,9 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_agency", false, (response) => {
+                            batch_insert(url, newRecords, "tbl_label_category_list", false, (response) => {
                                 if (response.message === 'success') {
-                                    updateOverallProgress("Saving Agency...", batch_index + 1, total_batches);
+                                    updateOverallProgress("Saving Label Category...", batch_index + 1, total_batches);
                                 } else {
                                     errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
                                 }
@@ -972,7 +1044,6 @@
         reader.readAsBinaryString(file);
     }
 
-
     function processInChunks(data, chunkSize, callback) {
         let index = 0;
         let totalRecords = data.length;
@@ -1021,8 +1092,7 @@
                 return acc;
             }, {});
 
-            // 
-            let td_validator = ['agency code', 'agency description', 'status'];
+            let td_validator = ['label category code', 'label category description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -1099,7 +1169,7 @@
             code.push(parseInt($(this).attr('data-id')));
         });
 
-        get_field_values('tbl_agency', 'code', 'id', code, function(res) {
+        get_field_values('tbl_label_category_list', 'code', 'id', code, function(res) {
             if(code.length == 1) {
                 code_string = `Code <i><b>${res[code[0]]}</b></i>`;
             } else {
@@ -1109,17 +1179,17 @@
 
         if (parseInt(status) === -2) {
             message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Agency Masterfile?`;  
+            message.message = `Delete ${code_string} from Label Category Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
             message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Agency Masterfile?`;
+            message.message = `Publish ${code_string} from Label Category Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
             message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
+            message.message = `Unpublish ${code_string} from Label Category Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
@@ -1132,7 +1202,7 @@
                     var id = $(this).attr('data-id');
                     dataList.push({
                         event: "update",
-                        table: "tbl_agency",
+                        table: "tbl_label_category_list",
                         field: "id",
                         where: id,
                         data: {
@@ -1177,14 +1247,14 @@
 
         formattedData = [
             {
-                "Agency Code": "",
-                "Agency Description": "",
+                "Label Category Code": "",
+                "Label Category Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
         ]
 
-        exportArrayToCSV(formattedData, `Masterfile: Agency - ${formatDate(new Date())}`, headerData);
+        exportArrayToCSV(formattedData, `Masterfile: Label Category - ${formatDate(new Date())}`, headerData);
     }
 
     $(document).on('click', '#btn_export', function () {
@@ -1192,13 +1262,13 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    exportAgency()
+                    exportLabelCategory()
                 }, 500);
             }
         })
     })
 
-    const exportAgency = () => {
+    const exportLabelCategory = () => {
         var ids = [];
 
         $('.select:checked').each(function () {
@@ -1206,14 +1276,12 @@
             ids.push(`'${id}'`);
         });
 
-        console.log(ids, 'ids');
-
         const params = new URLSearchParams();
         ids.length > 0 ? 
             params.append('selectedids', ids.join(',')) :
             params.append('selectedids', '0');
 
-        window.open("<?= base_url('cms/');?>" + 'agency/export-agency?'+ params.toString(), '_blank');
+        window.open("<?= base_url('cms/');?>" + 'label-category/export-label-category?'+ params.toString(), '_blank');
         modal.loading_progress(false);
    }
    

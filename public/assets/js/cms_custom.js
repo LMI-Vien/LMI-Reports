@@ -1850,3 +1850,12 @@ function cleanUpModule(raw) {
 	}
 	return decoded;
 }
+
+function escapeHtml(str) {
+    var element = document.createElement('div');
+    if (str) {
+        element.innerText = str;
+        element.textContent = str;
+    }
+    return element.innerHTML;
+}

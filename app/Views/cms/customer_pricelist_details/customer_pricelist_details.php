@@ -329,7 +329,7 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (code like \'%'+escaped_keyword+'%\' or agency like \'%'+escaped_keyword+'%\')';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -507,7 +507,7 @@
                 }             
             });
         }else{
-            check_current_db("tbl_agency", ["code", "agency"], [code, agency], "status" , null, null, true, function(exists, duplicateFields) {
+            check_current_db("tbl_agency", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
                 if (!exists) {
                     modal.confirm(confirm_add_message, function(result){
                         if(result){ 
