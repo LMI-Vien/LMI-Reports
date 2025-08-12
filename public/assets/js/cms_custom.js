@@ -1852,10 +1852,21 @@ function cleanUpModule(raw) {
 }
 
 function escapeHtml(str) {
-    var element = document.createElement('div');
     if (str) {
+        var element = document.createElement('div');
         element.innerText = str;
         element.textContent = str;
+        return element.innerHTML;
     }
-    return element.innerHTML;
+    return str;
+}
+
+function escapeHtmlAttr(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }

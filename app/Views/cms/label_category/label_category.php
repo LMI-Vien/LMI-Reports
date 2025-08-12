@@ -217,164 +217,75 @@
       get_data(query);
     });
 
-    // function get_data(query, column_filter, order_filter) {
-    //   var url = "<?= base_url("cms/global_controller");?>";
-    //     var data = {
-    //         event : "list_pagination",
-    //         select : "id, code, description, status, updated_date, created_date",
-    //         query : query,
-    //         offset : offset,
-    //         limit : limit,
-    //         table : "tbl_label_category_list",
-    //         order : {
-    //             field : column_filter,
-    //             order : order_filter 
-    //         }
+    function get_data(query, column_filter, order_filter) {
+      var url = "<?= base_url("cms/global_controller");?>";
+        var data = {
+            event : "list_pagination",
+            select : "id, code, description, status, updated_date, created_date",
+            query : query,
+            offset : offset,
+            limit : limit,
+            table : "tbl_label_category_list",
+            order : {
+                field : column_filter,
+                order : order_filter 
+            }
 
-    //     }
+        }
 
-    //     aJax.post(url,data,function(result){
-    //         var result = JSON.parse(result);
-    //         var html = '';
-    //         var list = result.list;
-    //         if(list) {
-    //             if (list.length > 0) {
-    //                 $.each(list, function(x,y) {
-    //                     var escape_code = y.code; 
-    //                     var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
-    //                     var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-    //                     html += "<tr class='" + rowClass + "'>";
-    //                     html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-    //                     html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
-    //                     html += "<td scope=\"col\">" + trimText(y.description, 20) + "</td>";
-    //                     html += "<td scope=\"col\">" +status+ "</td>";
-    //                     html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-    //                     html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+        aJax.post(url,data,function(result){
+            var result = JSON.parse(result);
+            var html = '';
+            var list = result.list;
+            if(list) {
+                if (list.length > 0) {
+                    $.each(list, function(x,y) {
+                        var status = ( parseInt(y.status) === 1 ) ? status = "Active" : status = "Inactive";
+                        var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
-    //                     if (y.id == 0) {
-    //                         html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-    //                     } else {
-    //                       html+="<td class='center-content' scope=\"col\">";
-    //                       html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
-    //                         +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-    //                       html+="<a class='btn-sm btn delete' onclick=\"delete_data('" + y.id + "','" + encodeURIComponent(escape_code) + "')\" data-status='"
-    //                         +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-    //                       html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
-    //                         +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
-    //                       html+="</td>";
-    //                     }
+                        html += "<tr class='" + rowClass + "'>";
+                        html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
+                        html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.description, 20) + "</td>";
+                        html += "<td scope=\"col\">" +status+ "</td>";
+                        html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
+                        html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
+
+                        if (y.id == 0) {
+                            html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
+                        } else {
+                          html+="<td class='center-content' scope=\"col\">";
+                          html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                          html+="<a class='btn-sm btn delete' data-code='" + escapeHtmlAttr(y.code) + "' data-id='"+y.id+"' data-status='"
+                            +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                          html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                          html+="</td>";
+                        }
                         
                         
-    //                     html += "</tr>";   
-    //                 });
-    //             } else {
-    //                 html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
-    //             }
-    //         }
-    //         $('.table_body').html(html);
-    //         modal.loading(false);
-    //         if(result.pagination){
-    //           if(result.pagination.total_page > 1){
-    //               pagination.generate(result.pagination.total_page, ".list_pagination", get_data);
-    //                 currentPage = offset;
-    //                 $(".pager_number option[value="+currentPage+"]").prop("selected", false)
-    //                 $('.pager_number').val(currentPage);
-    //                 $('.pager_no').html("Page " + numeral(currentPage).format('0,0'));
-    //           }
-    //           else if(result.total_data < limit) {
-    //           $('.list_pagination').empty();
-    //           } 
-    //         }
-    //     });
-    // }
-
-async function get_data(query, column_filter, order_filter) {
-    var url = "<?= base_url('cms/global_controller'); ?>";
-    var data = {
-        event: "list_pagination",
-        select: "id, code, description, status, updated_date, created_date",
-        query: query,
-        offset: offset,
-        limit: limit,
-        table: "tbl_label_category_list",
-        order: {
-            field: column_filter,
-            order: order_filter
-        }
-    };
-
-    try {
-        const response = await aJax.post(url, data);
-        const result = JSON.parse(response);
-        let html = '';
-        let list = result.list;
-
-        if (list) {
-            if (list.length > 0) {
-                $.each(list, function (x, y) {
-                    // Only encode once here using encodeURIComponent
-                    var escape_code = encodeURIComponent(y.code);  // Encoding only once
-                    var escape_desc = escapeHtml(y.description);  // Escape description as before
-
-                    var status = (parseInt(y.status) === 1) ? "Active" : "Inactive";
-                    var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
-
-                    html += "<tr class='" + rowClass + "'>";
-                    html += "<td class='center-content' style='width: 5%'><input class='select' type='checkbox' data-id='" + y.id + "' onchange='checkbox_check()'></td>";
-                    html += "<td scope='col'>" + trimText(escape_code, 10) + "</td>";  // Trim and use the encoded code
-                    html += "<td scope='col'>" + trimText(escape_desc, 20) + "</td>";  // Trim description
-                    html += "<td scope='col'>" + status + "</td>";
-                    html += "<td class='center-content' scope='col'>" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                    html += "<td class='center-content' scope='col'>" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
-
-                    if (y.id == 0) {
-                        html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
-                    } else {
-                        html += "<td class='center-content' scope='col'>";
-                        html += "<a class='btn-sm btn save' onclick=\"edit_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span></a>";
-                        // Properly encode the code and pass to delete_data function
-                        html += "<a class='btn-sm btn delete' onclick=\"delete_data('" + y.id + "','" + escape_code + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span></a>";
-                        html += "<a class='btn-sm btn view' onclick=\"view_data('" + y.id + "')\" data-status='" + y.status + "' id='" + y.id + "' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span></a>";
-                        html += "</td>";
-                    }
-                    html += "</tr>";
-                });
-            } else {
-                html = '<tr><td colspan="12" class="center-align-format">' + no_records + '</td></tr>';
+                        html += "</tr>";   
+                    });
+                } else {
+                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+                }
             }
-        }
-
-        // Insert HTML into table body
-        $('.table_body').html(html);
-
-        modal.loading(false);
-
-        // Handle pagination if present
-        if (result.pagination) {
-            if (result.pagination.total_page > 1) {
-                pagination.generate(result.pagination.total_page, ".list_pagination", get_data);
-                currentPage = offset;
-                $(".pager_number option[value=" + currentPage + "]").prop("selected", false);
-                $('.pager_number').val(currentPage);
-                $('.pager_no').html("Page " + numeral(currentPage).format('0,0'));
-            } else if (result.total_data < limit) {
-                $('.list_pagination').empty();
+            $('.table_body').html(html);
+            modal.loading(false);
+            if(result.pagination){
+              if(result.pagination.total_page > 1){
+                  pagination.generate(result.pagination.total_page, ".list_pagination", get_data);
+                    currentPage = offset;
+                    $(".pager_number option[value="+currentPage+"]").prop("selected", false)
+                    $('.pager_number').val(currentPage);
+                    $('.pager_no').html("Page " + numeral(currentPage).format('0,0'));
+              }
+              else if(result.total_data < limit) {
+              $('.list_pagination').empty();
+              } 
             }
-        }
-    } catch (error) {
-        console.error("Error while fetching data:", error);
-        modal.alert("Error fetching data.", "error");
-    }
-}
-
-
-    function escapeHtml(str) {
-        var element = document.createElement('div');
-        if (str) {
-            element.innerText = str;
-            element.textContent = str;
-        }
-        return element.innerHTML;
+        });
     }
 
     pagination.onchange(function(){
@@ -655,11 +566,14 @@ async function get_data(query, column_filter, order_filter) {
         });
     }
 
-    async function delete_data(id, code) {
-        var decodedCode = decodeURIComponent(code);
+    $(document).on("click", ".btn.delete", async function () {
+        const code = $(this).attr('data-code');
+        const id = $(this).attr('data-id');    
+        console.log(code);
+
         const message = {
             ...JSON.parse(confirm_delete_message),
-            message: `Delete Label Category Code <b><i>${decodedCode}</i></b> from Label Category Masterfile?`
+            message: `Delete Label Category Code <b><i>${code}</i></b> from Label Category Masterfile?`
         };
 
         const confirmed = await new Promise((resolve) => {
@@ -675,8 +589,7 @@ async function get_data(query, column_filter, order_filter) {
 
         const data = {
             event: "list",
-            select: "lc.id, lc.code, lc.description, " +
-                "COUNT(mp.category_1_id) AS cat_count",
+            select: "lc.id, lc.code, lc.description, COUNT(mp.category_1_id) AS cat_count",
             query,
             offset: 1,
             limit: 1,
@@ -712,7 +625,7 @@ async function get_data(query, column_filter, order_filter) {
             }
 
             const counts = [
-                Number(obj[0].cat_count) || 0 // fixed field name (was cat_count_1)
+                Number(obj[0].cat_count) || 0
             ];
 
             if (counts.some(count => count > 0)) {
@@ -723,7 +636,8 @@ async function get_data(query, column_filter, order_filter) {
         } catch (error) {
             modal.alert("Error processing response data.", "error");
         }
-    }
+    });
+
 
     function proceed_delete(id) {
         var url = "<?= base_url('cms/global_controller');?>";
