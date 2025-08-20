@@ -462,6 +462,28 @@ var validate = {
 	}
 }
 
+// validation outside required field
+validate.numbersonly_optional = function(elementSelector) {
+    var isValid = true;
+
+    // clear old messages
+    $(".validate_error_message").remove();
+
+    $(elementSelector).each(function(){
+        var value = $(this).val().trim();
+
+        if (value !== '' && !/^\d+(\.\d+)?$/.test(value)) {
+            isValid = false;
+            $(this).css('border-color','red');
+            $("<span class='validate_error_message' style='color: red;'>Numbers only (e.g. 12)<br></span>").insertAfter(this);
+        } else {
+            $(this).css('border-color','#ccc');
+        }
+    });
+
+    return isValid;
+};
+
 //modals
 var modal = {
 	confirm : function(data,cb){
@@ -1596,6 +1618,41 @@ function total_delete(url, delete_table, conditions) {
         	location.reload();
         }
     })
+}
+
+function totalDeleteOnClick(url, delete_table, conditions, done) {
+    const data = {
+        event: "total_delete",
+        table: delete_table,
+        conditions: conditions
+    };
+
+    aJax.post(url, data, function (result) {
+        // Do NOT reload here
+        let ok = false;
+        try {
+            const r = typeof result === 'string' ? JSON.parse(result) : result;
+            ok = !!(r && (r.success === true || r.affected_rows >= 0));
+        } catch (e) {
+            // If backend returns non-JSON truthy string, still treat as ok
+            ok = !!result;
+        }
+        if (typeof done === 'function') done(ok, result);
+    });
+}
+
+function batchUpdateCustom(url, table, field, where_in, data, get_code, callback) {
+    aJax.post(url, {
+        event: "batchUpdateCustom",
+        table,
+        field,          // primary key (ex: "id")
+        where_in,       // array of ids
+        data,           // array of objects
+        get_code
+    }, response => {
+        const parsed = typeof response === 'string' ? JSON.parse(response) : response;
+        callback(parsed);
+    });
 }
 
 function group_update(url, update_table, conditions, update_data, isHistorical = false, year = null, action = null, remarks = null) {

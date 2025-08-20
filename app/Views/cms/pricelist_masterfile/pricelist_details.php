@@ -34,17 +34,16 @@
     }
 
     #list-data {
-        overflow: visible !important;
+        overflow: auto !important;
         max-height: none !important;
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
     }
 </style>
+
 
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center md-center">
-                <b>A G E N C Y</b>
+                <b>P R I C E L I S T &nbsp; D E T A I L S</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -58,17 +57,30 @@
                     <div class="box-body">
                         <div class="col-md-12 list-data tbl-content" id="list-data">
                             <table class="table table-bordered listdata">
-                              <thead>
-                                  <tr>
-                                      <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                      <th class='center-content'>Agency Code</th>
-                                      <th class='center-content'>Agency Description</th>
-                                      <th class='center-content'>Status</th>
-                                      <th class='center-content'>Date Created</th>
-                                      <th class='center-content'>Date Modified</th>
-                                      <th class='center-content'>Action</th>
-                                  </tr>
-                              </thead>
+                                <thead>
+                                    <tr>
+                                        <th class='center-content'><input class ="selectall" type ="checkbox"></th>
+                                        <th class='center-content'>Brand</th>
+                                        <th class='center-content'>Brand Label Type</th>
+                                        <th class='center-content'>Label Type Category</th>
+                                        <th class='center-content'>Category 1</th>
+                                        <th class='center-content'>Category 2</th>
+                                        <th class='center-content'>Category 3</th>
+                                        <th class='center-content'>Category 4</th>
+                                        <th class='center-content'>Item Code</th>
+                                        <th class='center-content'>Item Description</th>
+                                        <th class='center-content'>Customer Item Code</th>
+                                        <th class='center-content'>UOM</th>
+                                        <th class='center-content'>Selling Price</th>
+                                        <th class='center-content'>Discount in Percent</th>
+                                        <th class='center-content'>Net Price</th>
+                                        <th class='center-content'>Effectivity Date</th>
+                                        <th class='center-content'>Status</th>
+                                        <th class='center-content'>Date Created</th>
+                                        <th class='center-content'>Date Modified</th>
+                                        <!-- <th class='center-content'>Action</th> -->
+                                    </tr>
+                                </thead>
                                 <tbody class="table_body word_break"></tbody>
                             </table>
                         </div>
@@ -100,17 +112,117 @@
                 </div>
                 <div class="modal-body">
                     <form id="form-modal">
-                    <div class="mb-3">
-                            <label for="code" class="form-label">Agency Code</label>
-                            <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
-                            <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
-                            <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
+                        <input type="hidden" id="pricelistId" value="<?= esc($pricelistId) ?>">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="brand" class="col-form-label">Brand</label>
+                                <input type="text" id="brand" name="brand" class="form-control required"></input>
+                                <input type="hidden" id="brandId" name="brandId">
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Agency Description</label>
-                            <input type="text" class="form-control required" id="agency" maxlength="50" aria-describedby="description">
-                            <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                    
+                    
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="brandLabelType" class="col-form-label">Brand Label Type</label>
+                                <input type="text" id="brandLabelType" name="brandLabelType" class="form-control required"></input>
+                            </div>
                         </div>
+                    
+                    
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="labelTypeCat" class="col-form-label">Label Type Category</label>
+                                <input type="text" id="labelTypeCat" name="labelTypeCat" class="form-control required"></input>
+                                <input type="hidden" id="labelTypeCatId" name="labelTypeCatId">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="catOne" class="col-form-label">Category 1 (Item Class MF)</label>
+                                <input type="text" id="catOne" name="catOne" class="form-control required"></input>
+                                <input type="hidden" id="catOneId" name="catOneId">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="catTwo" class="col-form-label">Category 2 (Sub Class MF)</label>
+                                <input type="text" id="catTwo" name="catTwo" class="form-control required"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="catThree" class="col-form-label">Category 3 (Department MF)</label>
+                                <input type="text" id="catThree" name="catThree" class="form-control required"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="catFour" class="col-form-label">Category 4 (March. Category MF)</label>
+                                <input type="text" id="catFour" name="catFour" class="form-control required"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="itemCode" class="col-form-label">Item Code</label>
+                                <input type="text" id="itemCode" name="itemCode" class="form-control required"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="itemDescription" class="col-form-label">Item Description</label>
+                                <input type="text" id="itemDescription" name="itemDescription" class="form-control required"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="customerItemCode" class="col-form-label">Customer Item Code</label>
+                                <input type="text" id="customerItemCode" name="customerItemCode" class="form-control"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="uom" class="col-form-label">UOM</label>
+                                <input type="text" id="uom" name="uom" class="form-control required"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="sellingPrice" class="col-form-label">Selling Price</label>
+                                <input type="text" id="sellingPrice" name="sellingPrice" class="form-control required numbersdecimalonly"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="discountInPercent" class="col-form-label">Discount in Percent</label>
+                                <input type="text" id="discountInPercent" name="discountInPercent" class="form-control numbersonly"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="netPrice" class="col-form-label">Net Price</label>
+                                <input type="text" id="netPrice" name="netPrice" class="form-control required"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="effectDate" class="col-form-label">Effectivity Date</label>
+                                <input type="date" id="effectDate" name="effectDate" class="form-control required"></input>
+                            </div>
+                        </div>
+                      
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
                             <label class="form-check-label" for="status">Active</label>
@@ -123,84 +235,8 @@
     </div>
 
 
-    <!-- IMPORT MODAL -->
-    <div class="modal" tabindex="-1" id="import_modal">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title">
-                        <b></b>
-                    </h1>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="card">
-                        <div class="mb-3" style="overflow-x: auto; height: 450px; padding: 0px;">
-                            <div class="text-center"
-                            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
-                            >
-                                <b>Extracted Data</b>
-                            </div>
-
-                            <div class="row">
-                                <div class="import_buttons col-6">
-                                    <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
-                                        <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
-                                    </label>
-                                    <input
-                                        type="file"
-                                        style="padding-left: 10px;"
-                                        id="file"
-                                        accept=".xls,.xlsx,.csv"
-                                        aria-describedby="import_files"
-                                        onclick="clear_import_table()"
-                                    >
-                
-                                    <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px; margin-bottom: 10px" onclick="read_xl_file()">
-                                        <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
-                                    </label>
-                                </div>
-        
-                                <div class="col"></div>
-        
-                                <div class="col-3">
-                                    <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
-                                        <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
-                                    </label>
-                                </div>
-                            </div>
-
-                            <table class= "table table-bordered listdata">
-                                <thead>
-                                    <tr>
-                                        <th class='center-content' style='width: 5%'>Line #</th>
-                                        <th class='center-content' style='width: 10%'>Agency Code</th>
-                                        <th class='center-content' style='width: 20%'>Agency Description</th>
-                                        <th class='center-content' style='width: 10%'>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="word_break import_table"></tbody>
-                            </table>
-                        </div>
-                        <center style="margin-bottom: 5px">
-                            <div class="import_pagination btn-group"></div>
-                        </center>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
-                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>        
-                </div>
-            </div>
-        </div>
-    </div>
-
 <script>
-    var query = "status >= 0";
+    var query = "pl.status >= 0";
     var column_filter = '';
     var order_filter = '';
     var limit = 10; 
@@ -215,24 +251,108 @@
     let dataset = [];
 
     $(document).ready(function() {
-      get_data(query);
-      get_pagination(query);
+        var parentId = parseInt($('#pricelistId').val(), 10) || 0;
+        var query = "pl.status >= 0 AND pl.pricelist_id = " + parentId;
+        get_data(query);
+        get_pagination(query);
+
+        let brands = <?= json_encode($brands); ?>;
+        let labelCategory  = <?= json_encode($labelCategory); ?>;
+        let itemClass = <?= json_encode($itemClass); ?>;
+
+        let brandOptions = brands.map(b => ({
+            id: b.id,
+            display: (b.brand_code ? b.brand_code + ' - ' : '') + (b.brand_description || '')
+        }));
+
+        let labelCategoryOptions = labelCategory.map(lc => ({
+            id: lc.id,
+            display: (lc.code ? lc.code + ' - ' : '') + (lc.description || '')
+        }));
+
+        let catOneCategoryOptions = itemClass.map(ic => ({
+            id: ic.id,
+            display: (ic.item_class_code ? ic.item_class_code : '')
+        }));
+
+        let brandLabelToId    = new Map(brandOptions.map(o => [o.display, String(o.id)]));
+        let labelCatLabelToId = new Map(labelCategoryOptions.map(o => [o.display, String(o.id)]));
+        let catOneLabelToId   = new Map(catOneCategoryOptions.map(o => [o.display, String(o.id)]));
+        
+
+        initAuto($('#brand'),        $('#brandId'),        brandOptions,         'display', 'id', row => { $('#brandId').val(row.id); });
+        initAuto($('#labelTypeCat'), $('#labelTypeCatId'), labelCategoryOptions, 'display', 'id', row => { $('#labelTypeCatId').val(row.id); });
+        initAuto($('#catOne'),       $('#catOneId'),       catOneCategoryOptions,'display', 'id', row => { $('#catOneId').val(row.id); });
+
+        // apply per field
+        enforceValidPick($('#brand'),        $('#brandId'),        brandLabelToId);
+        enforceValidPick($('#labelTypeCat'), $('#labelTypeCatId'), labelCatLabelToId);
+        enforceValidPick($('#catOne'),       $('#catOneId'),       catOneLabelToId);
     });
 
-    function get_data(query, field = "code", order = "asc") {
-      var url = "<?= base_url("cms/global_controller");?>";
+    function initAuto($input, $hidden, options, labelKey, idKey, onPick) {
+        if (!$input.length || $input.data('ui-autocomplete')) return;
+
+        // call your existing helper as-is
+        autocomplete_field($input, $hidden, options, labelKey, idKey, function(row){
+            if (typeof onPick === 'function') onPick(row);
+        });
+
+        // put the menu inside the modal so it isn't clipped
+        try { $input.autocomplete('option', 'appendTo', '#popup_modal'); } catch (e) {}
+
+        // open suggestions on focus
+        $input.on('focus', function(){ $(this).autocomplete('search', ''); });
+
+        // clear stale id if user types
+        $input.on('input', function(){ $hidden.val(''); });
+    }
+
+    function enforceValidPick($input, $hidden, labelToIdMap) {
+        $input.on('blur', function () {
+            const label = $input.val().trim();
+            const id = $hidden.val();
+            // if label doesn't map to a known id OR id is empty/mismatched, clear both
+            if (!labelToIdMap.has(label) || String(labelToIdMap.get(label)) !== String(id)) {
+                $input.val('');
+                $hidden.val('');
+            }
+        });
+    }
+
+    
+    function get_data(query, field = "pl.pricelist_id", order = "asc") {
+        var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "id, code, agency, status, updated_date, created_date",
+            select : `pl.id, pl.pricelist_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, catlist.code AS catlist_code, pl.label_type_category_id, lbltyp.item_class_code AS labeltype_code,
+            pl.category_1_id, pl.category_2_id, pl.category_3_id, pl.category_4_id, pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
+            pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_agency",
+            table : "tbl_main_pricelist pl",
             order : {
                 field : field,
                 order : order 
-            }
-
+            },
+            join : [
+                {
+                    table: "tbl_brand brnd",
+                    query: "brnd.id = pl.brand_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_label_category_list catlist",
+                    query: "catlist.id = pl.label_type_category_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_class lbltyp",
+                    query: "lbltyp.id = pl.label_type_category_id",
+                    type: "left"
+                }
+            ]
         }
 
         aJax.post(url,data,function(result){
@@ -247,8 +367,21 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.agency, 10) + "</td>";
+                        html += "<td scope=\"col\">" + y.brand_code + "</td>";
+                        html += "<td scope=\"col\">" + y.brand_label_type_id, 10 + "</td>";
+                        html += "<td scope=\"col\">" + y.catlist_code + "</td>";
+                        html += "<td scope=\"col\">" + y.labeltype_code + "</td>";
+                        html += "<td scope=\"col\">" + y.category_2_id + "</td>";
+                        html += "<td scope=\"col\">" + y.category_3_id + "</td>";
+                        html += "<td scope=\"col\">" + y.category_4_id + "</td>";
+                        html += "<td scope=\"col\">" + y.item_code + "</td>";
+                        html += "<td scope=\"col\">" + y.item_description + "</td>";
+                        html += "<td scope=\"col\">" + y.cust_item_code + "</td>";
+                        html += "<td scope=\"col\">" + y.uom + "</td>";
+                        html += "<td scope=\"col\">" + y.selling_price + "</td>";
+                        html += "<td scope=\"col\">" + y.disc_in_percent + "</td>";
+                        html += "<td scope=\"col\">" + y.net_price + "</td>";
+                        html += "<td scope=\"col\">" + y.effectivity_date + "</td>";
                         html += "<td scope=\"col\">" +status+ "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -257,12 +390,12 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' scope=\"col\">";
-                          html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
-                            +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
-                            +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                          html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
-                            +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                        //   html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
+                        //     +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                        //   html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
+                        //     +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                        //   html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
+                        //     +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                           html+="</td>";
                         }
                         
@@ -277,19 +410,38 @@
         });
     }
 
-    function get_pagination(query, field = "agency", order = "asc") {
+    function get_pagination(query, field = "pl.pricelist_id", order = "asc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
-          event : "pagination",
-            select : "id, agency",
+            event : "pagination",
+            select : `pl.id, pl.pricelist_id, pl.brand_id, brnd.brand_code, pl.brand_label_type_id, catlist.code, pl.label_type_category_id, lbltyp.item_class_code,
+            pl.category_1_id, pl.category_2_id, pl.category_3_id, pl.category_4_id, pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
+            pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_agency",
+            table : "tbl_main_pricelist pl",
             order : {
-                field : field, //field to order
-                order : order //asc or desc
-            }
+                field : field,
+                order : order 
+            },
+            join : [
+                {
+                    table: "tbl_brand brnd",
+                    query: "brnd.id = pl.brand_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_label_category_list catlist",
+                    query: "catlist.id = pl.label_type_category_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_class lbltyp",
+                    query: "lbltyp.id = pl.label_type_category_id",
+                    type: "left"
+                }
+            ]
         }
 
         aJax.post(url,data,function(result){
@@ -316,7 +468,7 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (code like \'%'+escaped_keyword+'%\' or agency like \'%'+escaped_keyword+'%\')';
+            new_query += ' and (brnd.brand_code LIKE \'%'+escaped_keyword+'%\' or catlist.code LIKE \'%'+escaped_keyword+'%\' or lbltyp.item_class_code LIKE \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -329,7 +481,7 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' like \'%'+escaped_keyword+'%\')';
+        new_query += ' and (brnd.brand_code LIKE \'%'+escaped_keyword+'%\' or catlist.code LIKE \'%'+escaped_keyword+'%\' or lbltyp.item_class_code LIKE \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -394,7 +546,7 @@
     });
 
     $('#btn_add').on('click', function() {
-        open_modal('Add New Agency', 'add', '');
+        open_modal('Add Pricelist Details', 'add', '');
     });
 
     $('#btn_import').on('click', function() {
@@ -426,6 +578,9 @@
         let buttons = {
             save: create_button('Save', 'save_data', 'btn save', function () {
                 if (validate.standard("form-modal")) {
+                    if (!validate.numbersonly_optional(".numbersonly")) {
+                        return; // stop saving
+                    }
                     save_data('save', null);
                 }
             }),
@@ -486,42 +641,46 @@
     }
 
     function save_data(action, id) {
-        var code = $('#code').val().trim();
-        var agency = $('#agency').val().trim();
+        var pricelistId = $('#pricelistId').val();
+        var brand = $('#brandId').val().trim();
+        var brandLabelType = $('#brandLabelType').val().trim();
+        var labelTypeCat = $('#labelTypeCatId').val().trim();
+        var catOneId = $('#catOneId').val().trim();
+        var catTwo = $('#catTwo').val().trim();
+        var catThree = $('#catThree').val().trim();
+        var catFour = $('#catFour').val().trim();
+        var itemCode = $('#itemCode').val().trim();
+        var itemDescription = $('#itemDescription').val().trim();
+        var customerItemCode = $('#customerItemCode').val().trim();
+        var uom = $('#uom').val().trim();
+        var sellingPrice = $('#sellingPrice').val().trim();
+        var discountInPercent = $('#discountInPercent').val().trim();
+        var netPrice = $('#netPrice').val().trim();
+        var effectDate = $('#effectDate').val().trim();
         var chk_status = $('#status').prop('checked');
         if (chk_status) {
             status_val = 1;
         } else {
             status_val = 0;
         }
-        if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_agency", ["code", "agency"], [code, agency], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_update_message, function(result){
-                        if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, agency, status_val, id)
-                        }
-                    });
-
-                }             
+        if (id !== undefined && id !== null && id !== '') { 
+            modal.confirm(confirm_update_message, function(result){
+                if(result){ 
+                        modal.loading(true);
+                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
+                }
             });
         }else{
-            check_current_db("tbl_agency", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_add_message, function(result){
-                        if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, agency, status_val, null)
-                        }
-                    });
-
-                }                  
-            });
+            modal.confirm(confirm_add_message, function(result){
+                if(result){ 
+                        modal.loading(true);
+                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
+                }
+            }); 
         }
     }
 
-    function save_to_db(inp_code, inp_agency, status_val, id) {
+    function save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -532,24 +691,38 @@
         if (id !== undefined && id !== null && id !== '') {
             modal_alert_success = success_update_message;
             const updated_data = {
-                code: inp_code,
-                agency: inp_agency,
+                pricelist_id: pricelistId,
+                brand_id: brand,
+                brand_label_type_id: brandLabelType,
+                label_type_category_id: labelTypeCat,
+                category_1_id: catOneId,
+                category_2_id: catTwo,
+                category_3_id: catThree,
+                category_4_id: catFour,
+                item_code: itemCode,
+                item_description: itemDescription,
+                cust_item_code: customerItemCode,
+                uom: uom,
+                selling_price: sellingPrice,
+                disc_in_percent: discountInPercent,
+                net_price: netPrice,
+                effectivity_date: effectDate,
                 updated_date: formatDate(now),
                 updated_by: user_id,
                 status: status_val
             };
 
             valid_data.push({
-                module: "Agency Module",
+                module: "Pricelist Details",
                 action: "Update",
-                remarks: "Updated agency information",
+                remarks: "Updated Pricelist Details",
                 new_data: JSON.stringify(updated_data),
                 old_data: ''
             });
 
             data = {
                 event: "update",
-                table: "tbl_agency",
+                table: "tbl_main_pricelist",
                 field: "id",
                 where: id,
                 data: updated_data
@@ -557,24 +730,38 @@
         } else {
             modal_alert_success = success_save_message;
             const inserted_data = {
-                code: inp_code,
-                agency: inp_agency,
+                pricelist_id: pricelistId,
+                brand_id: brand,
+                brand_label_type_id: brandLabelType,
+                label_type_category_id: labelTypeCat,
+                category_1_id: catOneId,
+                category_2_id: catTwo,
+                category_3_id: catThree,
+                category_4_id: catFour,
+                item_code: itemCode,
+                item_description: itemDescription,
+                cust_item_code: customerItemCode,
+                uom: uom,
+                selling_price: sellingPrice,
+                disc_in_percent: discountInPercent,
+                net_price: netPrice,
+                effectivity_date: effectDate,
                 created_date: formatDate(now),
                 created_by: user_id,
                 status: status_val
             };
 
             valid_data.push({
-                module: "Agency Module",
+                module: "Pricelist Details",
                 action: "Insert",
-                remarks: "Inserted new agency",
+                remarks: "Inserted new Pricelist Details",
                 new_data: JSON.stringify(inserted_data),
                 old_data: ""
             });
 
             data = {
                 event: "insert",
-                table: "tbl_agency",
+                table: "tbl_main_pricelist",
                 data: inserted_data
             };
         }
@@ -1084,93 +1271,94 @@
         $(".import_buttons").append($downloadBtn);
     }
 
-    $(document).on('click', '.btn_status', function (e) {
-        var status = $(this).attr("data-status");
-        var modal_obj = "";
-        var modal_alert_success = "";
-        var hasExecuted = false; // Prevents multiple executions
+    // button beside add functions
+    // $(document).on('click', '.btn_status', function (e) {
+    //     var status = $(this).attr("data-status");
+    //     var modal_obj = "";
+    //     var modal_alert_success = "";
+    //     var hasExecuted = false; // Prevents multiple executions
 
-        var id = '';
-        id = $("input.select:checked");
-        var code = [];
-        var code_string = '';
+    //     var id = '';
+    //     id = $("input.select:checked");
+    //     var code = [];
+    //     var code_string = '';
 
-        id.each(function() {
-            code.push(parseInt($(this).attr('data-id')));
-        });
+    //     id.each(function() {
+    //         code.push(parseInt($(this).attr('data-id')));
+    //     });
 
-        get_field_values('tbl_agency', 'code', 'id', code, function(res) {
-            if(code.length == 1) {
-                code_string = `Code <i><b>${res[code[0]]}</b></i>`;
-            } else {
-                code_string = 'selected data'
-            }
-        })
+    //     get_field_values('tbl_agency', 'code', 'id', code, function(res) {
+    //         if(code.length == 1) {
+    //             code_string = `Code <i><b>${res[code[0]]}</b></i>`;
+    //         } else {
+    //             code_string = 'selected data'
+    //         }
+    //     })
 
-        if (parseInt(status) === -2) {
-            message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Agency Masterfile?`;  
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_delete_message;
-        } else if (parseInt(status) === 1) {
-            message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Agency Masterfile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_publish_message;
-        } else {
-            message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_unpublish_message;
-        }
-        modal.confirm(modal_obj, function (result) {
-            if (result) {
-                var url = "<?= base_url('cms/global_controller');?>";
-                var dataList = [];
+    //     if (parseInt(status) === -2) {
+    //         message = is_json(confirm_delete_message);
+    //         message.message = `Delete ${code_string} from Agency Masterfile?`;  
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_delete_message;
+    //     } else if (parseInt(status) === 1) {
+    //         message = is_json(confirm_publish_message);
+    //         message.message = `Publish ${code_string} from Agency Masterfile?`;
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_publish_message;
+    //     } else {
+    //         message = is_json(confirm_unpublish_message);
+    //         message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
+    //         modal_obj = JSON.stringify(message);
+    //         modal_alert_success = success_unpublish_message;
+    //     }
+    //     modal.confirm(modal_obj, function (result) {
+    //         if (result) {
+    //             var url = "<?= base_url('cms/global_controller');?>";
+    //             var dataList = [];
                 
-                $('.select:checked').each(function () {
-                    var id = $(this).attr('data-id');
-                    dataList.push({
-                        event: "update",
-                        table: "tbl_agency",
-                        field: "id",
-                        where: id,
-                        data: {
-                            status: status,
-                            updated_date: formatDate(new Date())
-                        }
-                    });
-                }); 
+    //             $('.select:checked').each(function () {
+    //                 var id = $(this).attr('data-id');
+    //                 dataList.push({
+    //                     event: "update",
+    //                     table: "tbl_agency",
+    //                     field: "id",
+    //                     where: id,
+    //                     data: {
+    //                         status: status,
+    //                         updated_date: formatDate(new Date())
+    //                     }
+    //                 });
+    //             }); 
 
-                if (dataList.length === 0) return;
+    //             if (dataList.length === 0) return;
 
-                var processed = 0;
-                dataList.forEach(function (data, index) {
-                    aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; 
+    //             var processed = 0;
+    //             dataList.forEach(function (data, index) {
+    //                 aJax.post(url, data, function (result) {
+    //                     if (hasExecuted) return; 
 
-                        modal.loading(false);
-                        processed++;
+    //                     modal.loading(false);
+    //                     processed++;
 
-                        if (result === "success") {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                $('.btn_status').hide();
-                                modal.alert(modal_alert_success, 'success', function () {
-                                    location.reload();
-                                });
-                            }
-                        } else {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                modal.alert(failed_transaction_message, function () {});
-                            }
-                        }
-                    });
-                });
-            }
-        });
-    });
+    //                     if (result === "success") {
+    //                         if (!hasExecuted) {
+    //                             hasExecuted = true;
+    //                             $('.btn_status').hide();
+    //                             modal.alert(modal_alert_success, 'success', function () {
+    //                                 location.reload();
+    //                             });
+    //                         }
+    //                     } else {
+    //                         if (!hasExecuted) {
+    //                             hasExecuted = true;
+    //                             modal.alert(failed_transaction_message, function () {});
+    //                         }
+    //                     }
+    //                 });
+    //             });
+    //         }
+    //     });
+    // });
 
     function download_template() {
         const headerData = [];

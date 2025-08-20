@@ -1029,6 +1029,35 @@ class Global_model extends Model
         return $query->getResultArray();
     }
 
+    public function batchUpdateCustom($table, $data, $primaryKey, $get_code = false, $where_in = [])
+    {
+        if (empty($table) || empty($data) || empty($primaryKey) || empty($where_in)) {
+            return "failed";
+        }
+
+        try {
+            $this->db->transStart();
+
+            // Loop through data and update each record
+            foreach ($data as $row) {
+                if (!isset($row[$primaryKey])) continue;
+                $this->db->table($table)
+                        ->where($primaryKey, $row[$primaryKey])
+                        ->update($row);
+            }
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                return "failed";
+            }
+
+            return $where_in; // return ids that were updated
+        } catch (\Exception $e) {
+            return "failed";
+        }
+    }
+
 
     // ---------------------------------------------------- EXPORT DATA TO EXCEL ----------------------------------------------------
     // ----------------------------------------------------------- Agency -----------------------------------------------------------

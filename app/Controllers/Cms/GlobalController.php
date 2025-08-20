@@ -928,6 +928,30 @@ class GlobalController extends BaseController
 					echo json_encode(["error" => "Error getting a data from database: " . $e->getMessage()]);
 				}
 			break;
+			case 'batchUpdateCustom':
+				try { 
+					$table      = $this->request->getPost('table');
+					$primaryKey = $this->request->getPost('field');
+					$where_in   = $this->request->getPost('where_in');
+					$data       = $this->request->getPost('data');
+					$get_code   = $this->request->getPost('get_code');
+
+					if (empty($table) || empty($primaryKey) || empty($where_in) || empty($data)) {
+						return $this->response->setJSON(['message' => 'error', 'error' => 'Invalid request data']);
+					}
+
+					// use your custom model method
+					$status = $this->Global_model->batch_update_custom($table, $data, $primaryKey, $get_code, $where_in);
+					
+					if ($status !== "failed" && $status !== null) {
+						echo json_encode(['message' => 'success', 'updated_ids' => $status]);
+					} else {
+						echo json_encode(['message' => 'error', 'error' => 'Update failed']);
+					}
+				} catch (Exception $e) {
+					echo json_encode(['message' => 'error', 'error' => $e->getMessage()]);
+				}
+				break;
 		}
 		
 	}

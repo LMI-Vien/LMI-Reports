@@ -39,12 +39,16 @@
         overflow-x: hidden !important;
         overflow-y: hidden !important;
     }
+
+    .ui-widget {
+        z-index: 1051 !important;
+    }
 </style>
 
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center md-center">
-                <b>L A B E L - C A T E G O R Y</b>
+                <b>S F A &nbsp; P R I C E L I S T</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -62,6 +66,7 @@
                                   <tr>
                                       <th class='center-content'><input class ="selectall" type ="checkbox"></th>
                                       <th class='center-content'>Description</th>
+                                      <th class='center-content'>Remarks</th>
                                       <th class='center-content'>Status</th>
                                       <th class='center-content'>Date Created</th>
                                       <th class='center-content'>Date Modified</th>
@@ -100,18 +105,52 @@
                 <div class="modal-body">
                     <form id="form-modal">
                     <div class="mb-3">
-                            <label for="code" class="form-label">Code</label>
+                            <label for="priceListDesc" class="form-label">Pricelist Description</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
-                            <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code" disabled>
+                            <input type="text" class="form-control required" id="priceListDesc" maxlength="50" aria-describedby="priceListDesc">
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
-                            <small id="description" class="form-text text-muted">* required, must be unique, max 100 characters</small>
+                            <label for="remarks" class="form-label">Remarks</label>
+                            <input type="text" class="form-control required" id="remarks" maxlength="50" aria-describedby="remarks">
+                            <small id="remarks" class="form-text text-muted">* required, must be unique, max 100 characters</small>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
                             <label class="form-check-label" for="status">Active</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER DETAILS MODAL -->
+    <div class="modal" tabindex="-1" id="modalCusDets" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b>C U S T O M E R &nbsp; D E T A I L S</b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formModalCusDets">
+                        <div class="form-group">
+                            <div class="row" >
+                                <label class="col" >Store</label>
+                                <input
+                                    type="button"
+                                    value="Add Store"
+                                    class="row add_line"
+                                    onclick="addLine()"
+                                >
+                            </div>
+                            <div id="customer_list"></div>
+                            <div id="customers"></div>
                         </div>
                     </form>
                 </div>
@@ -199,7 +238,7 @@
 
 <script>
     var query = "status >= 0";
-    var column_filter = 'code';
+    var column_filter = '';
     var order_filter = 'asc';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
@@ -220,7 +259,7 @@
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list_pagination",
-            select : "id, description, status, updated_date, created_date",
+            select : "id, description, remarks, status, updated_date, created_date",
             query : query,
             offset : offset,
             limit : limit,
@@ -244,8 +283,8 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
                         html += "<td scope=\"col\">" + trimText(y.description, 20) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.remarks, 10) + "</td>";
                         html += "<td scope=\"col\">" +status+ "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -256,10 +295,19 @@
                           html+="<td class='center-content' scope=\"col\">";
                           html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"','"+y.code+"')\" data-status='"
+                          html+="<a class='btn-sm btn delete' data-code='" + escapeHtmlAttr(y.description) + "' data-id='"+y.id+"' data-status='"
                             +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                           html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+
+                          let href = "<?= base_url('cms/pricelist-masterfile/pricelist-details') ?>/" + encodeURIComponent(y.id);
+                          let href2 = "<?= base_url('cms/pricelist-masterfile/customer-pricelist-details') ?>/" + encodeURIComponent(y.id);
+
+                          html+="<a class='btn-sm btn price-details' href='"+ href +"' data-status='"
+                            +y.status+"' target='_blank' id='"+y.id+"' title='Price Details'><span class='glyphicon glyphicon-pencil'>Price Details</span>";
+                            
+                          html+="<a class='btn-sm btn customer-details' onclick=\"customerDets('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Customer Details'><span class='glyphicon glyphicon-pencil'>Customer Details</span>";
                           html+="</td>";
                         }
                         
@@ -393,6 +441,409 @@
         open_modal('View Label Category', 'view', id);
     }
 
+    function customerDets(id, customerId = null) {
+        let $modal = $('#modalCusDets');
+        let $customer_list = $('#customer_list')
+        let $footer = $modal.find('.modal-footer');
+
+        $modal.data('pricelistId', id);
+        $modal.data('customerId', customerId);
+
+        customerDescriptions = [];   
+        getCustomer('customer');
+
+        $customer_list.empty();
+        $footer.empty();
+
+        let buttons = {
+           save: create_button('Save', 'save_customer', 'btn save', function () {
+                if (validate.standard('form-customer')) {
+                    saveCustomer($('#modalCusDets').data('customerId') || null)
+                }
+            }),
+            close: create_button('Close', 'close_data', 'btn caution', function () {
+                $modal.modal('hide');
+            })
+        };
+
+        let html = `
+        <div id="line" class="ui-widget" style="display: flex; align-items: center; gap: 5px; margin-top: 3px;">
+            <input id="customer" class="form-control" placeholder="Select customer">
+        </div>
+        `;
+
+        $('#customer_list').append(html);
+
+        $(`#customer`).autocomplete({
+            appendTo: $('#modalCusDets'),
+            source: function(request, response) {
+                const labels = customerDescriptions.map(s => s.label);
+                const results = $.ui.autocomplete.filter(labels, request.term);
+                response([...new Set(results)].slice(0, 10));
+            },
+            minLength: 0,
+        }).focus(function () {
+            $(this).autocomplete("search", "");
+        });
+
+        loadExistingStores(id, function(existing){
+            console.log('[customerDets] loaded existing count:', existing.length);
+        });
+
+        $('.add_line').attr('disabled', false)
+        $('.add_line').attr('readonly', false)
+        $footer.append(buttons.save);
+        $footer.append(buttons.close);
+
+        $modal.modal('show');
+        $modal
+            .off('hidden.bs.modal.customerDets')
+            .on('hidden.bs.modal.customerDets', function () {
+                // 1) Destroy autocomplete on the main input (if it exists)
+                const $storeInput = $('#store');
+                if ($storeInput.length && ($storeInput.data('ui-autocomplete') || $storeInput.data('autocomplete'))) {
+                try { $storeInput.autocomplete('destroy'); } catch (e) {}
+                }
+
+                // 2) Reset the form (won’t clear disabled/readonly fields, so we also remove rows below)
+                const form = document.getElementById('formModalCusDets');
+                if (form) form.reset();
+
+                // 3) Remove dynamically added table/rows and containers
+                $('#stores_list').remove();     // the table of added stores
+                $('#customers').empty();           // its container
+                $('#customer_list').empty();       // removes #line and the input itself
+
+                // 4) Remove any jQuery UI menu appended to the modal
+                $modal.find('.ui-autocomplete').remove();
+
+                // 5) Clear footer buttons
+                $footer.empty();
+        });
+    }
+
+    function ensureCustomersTable() {
+        if (!$('#customers_list').length) {
+            $('#customers').append(`
+            <table class="table table-bordered mt-2" id="customers_list" border="1">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Customer Code</th>
+                    <th>Customer Name</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody class="table-body word_break"></tbody>
+            </table>
+            `);
+        }
+    }
+
+    function renderStoreRow(line, id, code, name) {
+        const display = `${name}`;
+        return `
+            <tr id="line_${line}">
+                <td class="text-center">
+                    <button type="button" class="rmv-btn btn btn-sm btn-danger" onclick="removeLine(${line})">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </td>
+                <td>${code}</td>
+                <td>
+                    <input
+                        id="customer_${line}"
+                        class="form-control"
+                        value="${display}"
+                        readonly disabled
+                    >
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="showCustomerPriceDetails('${id}')">
+                        Price Details
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    function showCustomerPriceDetails(id) {
+        const href2 = "<?= base_url('cms/pricelist-masterfile/customer-details-pricelist') ?>/" + encodeURIComponent(id);
+        window.open(href2, '_blank');
+    }
+
+    // fetch existing rows and render them
+    function loadExistingStores(pricelistId, done) {
+        const url = "<?= base_url('cms/global_controller');?>";
+
+        const data = {
+            event  : "list",
+            select : "id, code, description, status",
+            query  : `pricelist_id = '${pricelistId}' AND status >= 0`,
+            offset : 0,
+            limit  : 0,
+            table  : "tbl_customer_list",
+            order  : { field: "code", order: "asc" }
+        };
+
+        aJax.post(url, data, function(res){
+            let rows = [];
+            try { rows = JSON.parse(res) || []; } catch(e) { rows = []; }
+                console.log('[customerDets] existing rows:', rows);
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+            if (typeof done === 'function') done([]);
+                return;
+            }
+
+            ensureCustomersTable();
+            const $tbody = $('#customers_list tbody');
+            let line = $tbody.children('tr').length;
+
+            rows.forEach(r => {
+                const id   = r.id;
+                const code = (r.code ?? '').toString().trim();
+                const name = (r.description ?? '').toString().trim();
+                if (!code) return;
+                line += 1;
+                $tbody.append(renderStoreRow(line, id, code, name));
+
+                $(`#customer_${line}`).autocomplete({
+                    source(request, response) {
+                    const results = $.ui.autocomplete.filter(customerDescriptions, request.term);
+                    response([...new Set(results)].slice(0, 10));
+                    }
+                });
+            });
+
+            if (typeof done === 'function') done(rows);
+        });
+    }
+
+    function saveCustomer(id) {
+        const $modal = $('#modalCusDets');
+        const pricelistId = $modal.data('pricelistId'); 
+        if (!pricelistId) return modal.alert('Missing pricelist id.', 'error');
+
+        const url = "<?= base_url('cms/global_controller/'); ?>";
+        const table = "tbl_customer_list";
+
+        // Collect rows from DOM
+        const desired = [];
+        $('#customers_list tbody tr').each(function () {
+            const rowId = ($(this).find('input[name="customer_row_id[]"]').val() || '').trim();
+            const code  = ($(this).find('input[name="customer_code[]"]').val() || '').trim();
+            const desc  = ($(this).find('input[name="customer_description[]"]').val() || '').trim();
+            if (code) {
+                desired.push({
+                    id: rowId || null,
+                    pricelist_id: pricelistId,
+                    code,
+                    description: desc,
+                    status: 1
+                });
+            }
+        });
+
+        if (!desired.length) return modal.alert('Please add at least one customer.', 'warning');
+
+        modal.loading(true);
+
+        aJax.post(url, {
+            event  : "list",
+            select : "id, code, description, status",
+            table  : table,
+            query  : `pricelist_id = '${pricelistId}' AND status >= 0`,
+            offset : 0, limit : 0
+        }, function(res) {
+            let existing = [];
+            try { 
+                existing = JSON.parse(res) || []; 
+            } catch(e) {
+                
+            }
+
+            const exByCode = new Map(existing.map(r => [String(r.code).trim().toUpperCase(), r]));
+
+            const toInsert = [];
+            const toUpdate = [];
+            const toUpdateIds = [];
+
+            desired.forEach(d => {
+                const key = d.code.trim().toUpperCase();
+                const ex = exByCode.get(key);
+
+                if (ex) {
+                    const idToUse = d.id || ex.id;
+                    if (ex.description !== d.description) {
+                        toUpdate.push({
+                            id: idToUse,
+                            description: d.description,
+                            status: d.status,
+                            updated_by: user_id,
+                            updated_date: formatDate(new Date()),
+                        });
+                        toUpdateIds.push(idToUse);
+                    }
+                } else {
+                    toInsert.push({
+                        pricelist_id: d.pricelist_id,
+                        code: d.code,
+                        description: d.description,
+                        status: d.status,
+                        created_by: user_id,
+                        created_date: formatDate(new Date()),
+                    });
+                }
+            });
+
+            // perform updates, then inserts
+            function doInserts() {
+                if (toInsert.length) {
+                    batch_insert(url, JSON.stringify(toInsert), table, false, (resp) => {
+                        modal.loading(false);
+                        if (resp && resp.message === 'success') {
+                            modal.alert(success_save_message, 'success', function () { location.reload(); });
+                        } else {
+                            modal.alert("Insert failed.", 'error');
+                        }
+                    });
+                } else {
+                    modal.loading(false);
+                    modal.alert(success_save_message, 'success', function () { location.reload(); });
+                }
+            }
+
+            if (toUpdate.length) {
+                batchUpdateCustom(url, table, 'id', toUpdateIds, toUpdate, false, (resp) => {
+                    if (resp && resp.message === 'success') {
+                        doInserts();
+                    } else {
+                        modal.loading(false);
+                        modal.alert("Update failed.", 'error');
+                    }
+                });
+            } else {
+                doInserts();
+            }
+        });
+    }
+
+    function addLine() {
+        const customerText = ($('#customer').val() || '').trim();
+        if (!customerText) {
+            modal.alert('Please select a customer first.', 'warning');
+            return;
+        }
+
+        const customerCode = customerText.split(' - ')[0].trim();
+        const selected = customerDescriptions.find(c => c.customer_code === customerCode);
+        if (!selected) {
+            modal.alert('Selected customer not found.', 'warning');
+            return;
+        }
+
+        if (hasCustomerCode(selected.customer_code)) {
+            modal.alert('That customer is already in the list.', 'warning');
+            $('#customer').val('').focus();
+            return;
+        }
+
+        ensureCustomersTable();
+
+        const $tbody = $('#customers_list tbody');
+        const line = $tbody.children('tr').length + 1;
+
+        const newRow = `
+            <tr id="line_${line}">
+                <td class="text-center">
+                    <button type="button" class="rmv-btn btn btn-sm btn-danger" onclick="removeLine(${line})">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </td>
+                <td>${selected.customer_code}</td>
+                <td>
+                    <input id="customer_${line}" class="form-control" value="${selected.customer_description}" readonly disabled>
+                    <input type="hidden" name="customer_code[]" value="${selected.customer_code}">
+                    <input type="hidden" name="customer_description[]" value="${selected.customer_description}">
+                </td>
+            </tr>
+        `;
+
+        $tbody.append(newRow);
+        $('#customer').val('');
+        console.log('Added customer:', selected);
+    }
+
+
+    function hasCustomerCode(code) {
+        if (code == null) return false;
+
+        const target = String(code).trim().toUpperCase();
+        let exists = false;
+
+        $('#customers_list tbody tr').each(function () {
+            const cell = $(this).find('td').eq(1).text();
+            const cellCode = String(cell).trim().toUpperCase();
+            if (cellCode === target) { exists = true; return false; }
+        });
+
+        return exists;
+    }
+
+    let customerDescriptions = [];
+    function getCustomer(dropdown_id) {
+        const url = "<?= base_url('cms/pricelist-masterfile/merged-customers'); ?>";
+
+        aJax.post(url, { status: 1, limit: 0, offset: 0 }, function (res) {
+            let result = [];
+            try {
+                result = (typeof res === 'string') ? JSON.parse(res) : res;
+            } catch (e) {
+                console.error('merged-customers JSON parse failed:', e, res);
+                result = [];
+            }
+
+            customerDescriptions = (result || []).map(y => ({
+                id: y.id,
+                customer_code: y.customer_code,
+                customer_description: y.customer_description,
+                source: y.source,
+                label: `${y.customer_code} - ${y.customer_description}`
+            }));
+
+            if (!dropdown_id) return;
+
+            const $input = $(`#${dropdown_id}`);
+            if (!$input.length) return;
+
+            const labels = customerDescriptions.map(s => s.label);
+
+            // Destroy any old instance to be safe
+            if ($input.data('ui-autocomplete') || $input.data('autocomplete')) {
+                try { 
+                    $input.autocomplete('destroy'); 
+                } catch(_) {
+
+                }
+            }
+
+            $input.autocomplete({
+                appendTo: '#modalCusDets',
+                minLength: 0,
+                source(request, response) {
+                    const matches = $.ui.autocomplete.filter(labels, request.term);
+                    response([...new Set(matches)].slice(0, 10));
+                }
+            });
+
+        });
+    }
+
+    function removeLine(lineId) {
+        $(`#line_${lineId}`).remove();
+    }
+
     function open_modal(msg, actions, id) {
         window.lastFocusedElement = document.activeElement;
         $(".form-control").css('border-color','#ccc');
@@ -405,7 +856,7 @@
         reset_modal_fields();
 
         let buttons = {
-            save: create_button('Save', 'save_data', 'btn save', function () {
+            save: create_button('Save', 'saveData', 'btn save', function () {
                 if (validate.standard("form-modal")) {
                     save_data('save', null);
                 }
@@ -423,7 +874,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#code, #description, #status', isReadOnly);
+        set_field_state('#priceListDesc, #remarks, #status', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -446,7 +897,7 @@
     }
 
     function reset_modal_fields() {
-        $('#popup_modal #code, #popup_modal #description, #popup_modal').val('');
+        $('#popup_modal #priceListDesc, #popup_modal #remarks, #popup_modal').val('');
         $('#popup_modal #status').prop('checked', true);
     }
 
@@ -466,13 +917,13 @@
     }
 
     function save_data(action, id) {
-        const code = $('#code').val().trim();
-        const description = $('#description').val().trim();
+        const priceListDesc = $('#priceListDesc').val().trim();
+        const remarks = $('#remarks').val().trim();
         const isActive = $('#status').prop('checked') ? 1 : 0;
 
-        const tableName = "tbl_label_category_list";
-        const uniqueFields = ["code", "description"];
-        const fieldValues = [code, description];
+        const tableName = "tbl_pricelist_masterfile";
+        const uniqueFields = ["description"];
+        const fieldValues = [priceListDesc];
         const statusField = "status";
 
         const isEdit = id !== undefined && id !== null && id !== '';
@@ -483,7 +934,7 @@
             modal.confirm(confirmMessage, function (result) {
                 if (result) {
                     modal.loading(true);
-                    save_to_db(code, description, isActive, isEdit ? id : null);
+                    save_to_db(priceListDesc, priceListDesc, isActive, isEdit ? id : null);
                 }
             });
         }
@@ -504,19 +955,19 @@
         );
     }
 
-    function save_to_db(inp_code, inp_desc, status_val, id) {
+    function save_to_db(inpDesc, inpRemarks, statusVal, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         const now = new Date();
         const start_time = now;
         const isEdit = id !== undefined && id !== null && id !== '';
         const userData = {
-            code: inp_code,
-            description: inp_desc,
-            status: status_val,
+            description: inpDesc,
+            remarks: inpRemarks,
+            status: statusVal,
         };
 
         const valid_data = [{
-            module: "Label Category Module",
+            module: "Pricelist Masterfile Module",
             action: isEdit ? "Update" : "Insert",
             remarks: isEdit ? "Updated Label Category information" : "Inserted new Label Category",
             new_data: JSON.stringify(userData),
@@ -524,9 +975,9 @@
         }];
 
         const commonData = {
-            code: inp_code,
-            description: inp_desc,
-            status: status_val,
+            description: inpDesc,
+            remarks: inpRemarks,
+            status: statusVal,
         };
 
         let modal_alert_success = isEdit ? success_update_message : success_save_message;
@@ -538,7 +989,7 @@
 
             data = {
                 event: "update",
-                table: "tbl_label_category_list",
+                table: "tbl_pricelist_masterfile",
                 field: "id",
                 where: id,
                 data: commonData
@@ -549,7 +1000,7 @@
 
             data = {
                 event: "insert",
-                table: "tbl_label_category_list",
+                table: "tbl_pricelist_masterfile",
                 data: commonData
             };
         }
@@ -565,10 +1016,14 @@
         });
     }
 
-    async function delete_data(id, code) {
+    $(document).on("click", ".btn.delete", async function () {
+        const code = $(this).attr('data-code');
+        const id = $(this).attr('data-id');    
+        console.log(code);
+
         const message = {
             ...JSON.parse(confirm_delete_message),
-            message: `Delete Label Category Code <b><i>${code}</i></b> from Label Category Masterfile?`
+            message: `Delete Pricelist <b><i>${code}</i></b> from Pricelist Masterfile?`
         };
 
         const confirmed = await new Promise((resolve) => {
@@ -584,8 +1039,7 @@
 
         const data = {
             event: "list",
-            select: "lc.id, lc.code, lc.description, " +
-                "COUNT(mp.category_1_id) AS cat_count",
+            select: "lc.id, lc.code, lc.description, COUNT(mp.category_1_id) AS cat_count",
             query,
             offset: 1,
             limit: 1,
@@ -621,7 +1075,7 @@
             }
 
             const counts = [
-                Number(obj[0].cat_count) || 0 // fixed field name (was cat_count_1)
+                Number(obj[0].cat_count) || 0
             ];
 
             if (counts.some(count => count > 0)) {
@@ -632,13 +1086,13 @@
         } catch (error) {
             modal.alert("Error processing response data.", "error");
         }
-    }
+    });
 
     function proceed_delete(id) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "update",
-            table : "tbl_label_category_list",
+            table : "tbl_pricelist_masterfile",
             field : "id",
             where : id, 
             data : {
@@ -660,17 +1114,17 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, code, description, status",
+            select : "id, description, remarks, status",
             query : query, 
-            table : "tbl_label_category_list"
+            table : "tbl_pricelist_masterfile"
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(i,j) {
                     $('#id').val(j.id);
-                    $('#code').val(j.code);
-                    $('#description').val(j.description);
+                    $('#priceListDesc').val(j.description);
+                    $('#remarks').val(j.remarks);
                     if(asc.status == 1) {
                         $('#status').prop('checked', true)
                     } else {
