@@ -100,7 +100,7 @@
 
     <!-- MODAL -->
     <div class="modal" tabindex="-1" id="popup_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title">
@@ -113,119 +113,148 @@
                 <div class="modal-body">
                     <form id="form-modal">
                         <input type="hidden" id="pricelistId" value="<?= esc($pricelistId) ?>">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="brand" class="col-form-label">Brand</label>
-                                <input type="text" id="brand" name="brand" class="form-control required"></input>
-                                <input type="hidden" id="brandId" name="brandId">
+
+                        <!-- Row 1: Brand / Brand Label Type -->
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="brand" class="col-form-label">Brand</label>
+                                    <input type="text" id="brand" name="brand" class="form-control required">
+                                    <input type="hidden" id="brandId" name="brandId">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="brandLabelType" class="col-form-label">Brand Label Type</label>
+                                    <input type="text" id="brandLabelType" name="brandLabelType" class="form-control required">
+                                </div>
                             </div>
                         </div>
                     
                     
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="brandLabelType" class="col-form-label">Brand Label Type</label>
-                                <input type="text" id="brandLabelType" name="brandLabelType" class="form-control required"></input>
+                        <!-- Row 2: Label Type Category / Category 1 -->
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="labelTypeCat" class="col-form-label">Label Type Category</label>
+                                    <input type="text" id="labelTypeCat" name="labelTypeCat" class="form-control required">
+                                    <input type="hidden" id="labelTypeCatId" name="labelTypeCatId">
+                                </div>
                             </div>
-                        </div>
-                    
-                    
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="labelTypeCat" class="col-form-label">Label Type Category</label>
-                                <input type="text" id="labelTypeCat" name="labelTypeCat" class="form-control required"></input>
-                                <input type="hidden" id="labelTypeCatId" name="labelTypeCatId">
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catOne" class="col-form-label">Category 1 (Item Class MF)</label>
+                                    <input type="text" id="catOne" name="catOne" class="form-control required">
+                                    <input type="hidden" id="catOneId" name="catOneId">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="catOne" class="col-form-label">Category 1 (Item Class MF)</label>
-                                <input type="text" id="catOne" name="catOne" class="form-control required"></input>
-                                <input type="hidden" id="catOneId" name="catOneId">
+                        <!-- Row 3: Category 2 / Category 3 -->
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catTwo" class="col-form-label">Category 2 (Sub Class MF)</label>
+                                    <input type="text" id="catTwo" name="catTwo" class="form-control required">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catThree" class="col-form-label">Category 3 (Department MF)</label>
+                                    <input type="text" id="catThree" name="catThree" class="form-control required">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="catTwo" class="col-form-label">Category 2 (Sub Class MF)</label>
-                                <input type="text" id="catTwo" name="catTwo" class="form-control required"></input>
+                        <!-- Row 4: Category 4 / Item Code -->
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="catFour" class="col-form-label">Category 4 (Merch. Category MF)</label>
+                                    <input type="text" id="catFour" name="catFour" class="form-control required">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="itemCode" class="col-form-label">Item Code</label>
+                                    <input type="text" id="itemCode" name="itemCode" class="form-control required">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="catThree" class="col-form-label">Category 3 (Department MF)</label>
-                                <input type="text" id="catThree" name="catThree" class="form-control required"></input>
+                        <!-- Row 5: Item Description -->
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="itemDescription" class="col-form-label">Item Description</label>
+                                    <input type="text" id="itemDescription" name="itemDescription" class="form-control required">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="catFour" class="col-form-label">Category 4 (March. Category MF)</label>
-                                <input type="text" id="catFour" name="catFour" class="form-control required"></input>
+                        <!-- Row 6: Customer Item Code / UOM -->
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="customerItemCode" class="col-form-label">Customer Item Code</label>
+                                    <input type="text" id="customerItemCode" name="customerItemCode" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="uom" class="col-form-label">UOM</label>
+                                    <input type="text" id="uom" name="uom" class="form-control required">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="itemCode" class="col-form-label">Item Code</label>
-                                <input type="text" id="itemCode" name="itemCode" class="form-control required"></input>
+                        <!-- Row 7: Selling Price / Discount % -->
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="sellingPrice" class="col-form-label">Selling Price</label>
+                                    <input type="text" id="sellingPrice" name="sellingPrice" class="form-control required numbersdecimalonly">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="discountInPercent" class="col-form-label">Discount in Percent</label>
+                                    <input type="text" id="discountInPercent" name="discountInPercent" class="form-control numbersonly">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="itemDescription" class="col-form-label">Item Description</label>
-                                <input type="text" id="itemDescription" name="itemDescription" class="form-control required"></input>
+                         <!-- Row 8: Net Price / Effectivity Date -->
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="netPrice" class="col-form-label">Net Price</label>
+                                    <input type="text" id="netPrice" name="netPrice" class="form-control required" disabled>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="customerItemCode" class="col-form-label">Customer Item Code</label>
-                                <input type="text" id="customerItemCode" name="customerItemCode" class="form-control"></input>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="uom" class="col-form-label">UOM</label>
-                                <input type="text" id="uom" name="uom" class="form-control required"></input>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="sellingPrice" class="col-form-label">Selling Price</label>
-                                <input type="text" id="sellingPrice" name="sellingPrice" class="form-control required numbersdecimalonly"></input>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="discountInPercent" class="col-form-label">Discount in Percent</label>
-                                <input type="text" id="discountInPercent" name="discountInPercent" class="form-control numbersonly"></input>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="netPrice" class="col-form-label">Net Price</label>
-                                <input type="text" id="netPrice" name="netPrice" class="form-control required"></input>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="effectDate" class="col-form-label">Effectivity Date</label>
-                                <input type="date" id="effectDate" name="effectDate" class="form-control required"></input>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="effectDate" class="col-form-label">Effectivity Date</label>
+                                    <input type="date" id="effectDate" name="effectDate" class="form-control required">
+                                </div>
                             </div>
                         </div>
                       
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="status" checked>
-                            <label class="form-check-label" for="status">Active</label>
+                        <!-- Row 9: Status -->
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="form-check mb-0">
+                                    <input type="checkbox" class="form-check-input" id="status" checked>
+                                    <label class="form-check-label" for="status">Active</label>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -291,8 +320,25 @@
         enforceValidPick($('#labelTypeCat'), $('#labelTypeCatId'), labelCatLabelToId);
         enforceValidPick($('#catOne'),       $('#catOneId'),       catOneLabelToId);
 
-        console.log("catOne input value:", $('#catOne').val());
-        console.log("catOneId hidden value:", $('#catOneId').val());
+        function calculateNetPrice() {
+            let sellingPrice = parseFloat($("#sellingPrice").val()) || 0;
+            let discountPercent = parseFloat($("#discountInPercent").val()) || 0;
+
+            if (discountPercent < 0) discountPercent = 0;
+            if (discountPercent > 100) discountPercent = 100;
+
+            // formula: Net Price = Selling Price × (1 - Discount/100)
+            let netPrice = sellingPrice * (1 - discountPercent / 100);
+
+            $("#netPrice").val(netPrice.toFixed(2));
+        }
+        
+        $("#sellingPrice, #discountInPercent").on("input", calculateNetPrice);
+
+        $("#uom").on("input", function () {
+            let val = $(this).val();
+            $(this).val(val.toUpperCase());
+        });
     });
 
     function initAuto($input, $hidden, options, labelKey, idKey, onPick) {
@@ -579,6 +625,13 @@
 
         $modal.find('.modal-title b').html(addNbsp(msg));
         reset_modal_fields();
+
+        if (actions === 'add') {
+            const $uom = $("#uom");
+            if ($uom.length && !$uom.val().trim()) {
+                $uom.val("PCS").trigger("change");
+            }
+        }
 
         let buttons = {
             save: create_button('Save', 'save_data', 'btn save', function () {

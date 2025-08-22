@@ -141,10 +141,10 @@
                     <form id="formModalCusDets">
                         <div class="form-group">
                             <div class="row" >
-                                <label class="col" >Store</label>
+                                <label class="col" >Customer Details</label>
                                 <input
                                     type="button"
-                                    value="Add Store"
+                                    value="Add Customer"
                                     class="row add_line"
                                     onclick="addLine()"
                                 >
