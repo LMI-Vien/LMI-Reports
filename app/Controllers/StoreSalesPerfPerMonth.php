@@ -184,39 +184,44 @@ class StoreSalesPerfPerMonth extends BaseController
 		// — print filters in two rows, with bold keys via HTML —
 		$lineHeight = 7; 
 		$rows = array_chunk($filters, $perRow, true);
+
 		foreach ($rows as $rowFilters) {
-			// 1) figure out tallest cell
-			$maxLines = 0;
+			$x0 = $pdf->GetX();
+			$y0 = $pdf->GetY();
+
+			// measure each cell's required height (with HTML)
+			$maxH = 0;
+			$htmls = [];
 			foreach ($rowFilters as $k => $v) {
-				$maxLines = max(
-					$maxLines,
-					$pdf->getNumLines("<b>{$k}:</b> {$v}", $colWidth)
-				);
+				$html = "<b>{$k}:</b> {$v}";
+				$htmls[] = $html;
+				// measure height needed for this column width
+				$h = $pdf->getStringHeight($colWidth, $html, true, true, '', 0); // reseth+autopadding
+				if ($h > $maxH) $maxH = $h;
 			}
 
-			// 2) render each as HTML (bold key, normal value)
+			// render each cell at the same Y, advancing X manually
+			$i = 0;
 			foreach ($rowFilters as $k => $v) {
-				$pdf->MultiCell(
+				$pdf->SetXY($x0 + ($i * $colWidth), $y0);
+				$pdf->writeHTMLCell(
 					$colWidth,
-					$lineHeight,
+					$maxH,     // give each cell the same measured row height
+					'', '',
 					"<b>{$k}:</b> {$v}",
-					0,    // no border
-					'L',  // left align
-					0,    // no fill
-					0,    // stay on same line
-					'', '',  // x/y
-					true, // reset height
-					0,    // stretch
-					true  // isHTML!
+					0,         // no border
+					0,         // don't move to next line
+					false,     // fill
+					true,      // reset height
+					'L',       // align left
+					true       // isHTML
 				);
+				$i++;
 			}
 
-			// 3) drop down by full height
-			$pdf->Ln($maxLines * $lineHeight);
+			// move the cursor exactly below the tallest cell (plus tiny spacing)
+			$pdf->SetXY($x0, $y0 + $maxH + 2.5); // adjust if you want more/less breathing room
 		}
-
-		// — pull the bottom line up a bit if you like —
-		$pdf->SetY($pdf->GetY() - 7);
 
 		// — now print Item Brand / Current Week / Generated Date in one row —
 		$pdf->writeHTMLCell(
