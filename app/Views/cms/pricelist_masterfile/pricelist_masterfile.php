@@ -486,9 +486,7 @@
             $(this).autocomplete("search", "");
         });
 
-        loadExistingStores(id, function(existing){
-            console.log('[customerDets] loaded existing count:', existing.length);
-        });
+        runCustomers('', id);
 
         $('.add_line').attr('disabled', false)
         $('.add_line').attr('readonly', false)
@@ -510,9 +508,10 @@
                 if (form) form.reset();
 
                 // 3) Remove dynamically added table/rows and containers
-                $('#stores_list').remove();     // the table of added stores
+                $('#customers_list').remove();     // the table of added stores
                 $('#customers').empty();           // its container
                 $('#customer_list').empty();       // removes #line and the input itself
+                $('#customers_pagination').remove();
 
                 // 4) Remove any jQuery UI menu appended to the modal
                 $modal.find('.ui-autocomplete').remove();
@@ -557,6 +556,8 @@
                         value="${display}"
                         readonly disabled
                     >
+                    <input type="hidden" name="customer_code[]" value="${code}">
+                    <input type="hidden" name="customer_description[]" value="${display}">
                 </td>
                 <td class="text-center">
                     <button type="button" class="btn btn-sm btn-primary" onclick="showCustomerPriceDetails('${id}')">
@@ -572,52 +573,132 @@
         window.open(href2, '_blank');
     }
 
-    // fetch existing rows and render them
-    function loadExistingStores(pricelistId, done) {
-        const url = "<?= base_url('cms/global_controller');?>";
+    let customerCurrentPage = 1;
+    const BASE_PAGE_SIZE = 10;
+    let customerLimit = BASE_PAGE_SIZE;
+    let customerTotalRecords = 0;
+    let customerTotalPages = 1;
+
+    function runCustomers(action, pricelistId) {
+        const customerOffset = customerCurrentPage; 
+        renderCustomers(pricelistId, customerOffset, customerLimit, action);
+    }
+
+    function renderCustomers(pricelistId, customerOffset, customerLimit, action) {
+        const url   = "<?= base_url('cms/global_controller');?>";
+        const query = `pricelist_id = '${pricelistId}' AND status >= 0`;
 
         const data = {
-            event  : "list",
-            select : "id, code, description, status",
-            query  : `pricelist_id = '${pricelistId}' AND status >= 0`,
-            offset : 0,
-            limit  : 0,
-            table  : "tbl_customer_list",
-            order  : { field: "code", order: "asc" }
+            event : "list_pagination",
+            select: "id, code, description, status",
+            query : query,
+            offset: customerOffset,       
+            limit : customerLimit,
+            table : "tbl_customer_list",
+            order : { 
+                field: "code", 
+                order: "asc" 
+            }
         };
 
-        aJax.post(url, data, function(res){
-            let rows = [];
-            try { rows = JSON.parse(res) || []; } catch(e) { rows = []; }
-                console.log('[customerDets] existing rows:', rows);
+        aJax.post(url, data, function (result) {
+            let parsed = {};
+            try { 
+                parsed = JSON.parse(result) || {}; 
+            } catch(e) {
 
-            if (!Array.isArray(rows) || rows.length === 0) {
-            if (typeof done === 'function') done([]);
-                return;
+            }
+            const rows = parsed.list || [];
+
+            // compute totals from server; fallback keeps UI working
+            customerTotalRecords = parsed.pagination?.total_record ?? (rows.length || 0);
+            customerTotalPages   = Math.max(1, Math.ceil(customerTotalRecords / customerLimit));
+
+            let html = `
+            <table class="table table-bordered mt-2" id="customers_list" border="1">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Customer Code</th>
+                        <th>Customer Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="table-body word_break">
+            `;
+
+            if (rows.length) {
+                rows.forEach((r, idx) => {
+                    const line = idx + 1;
+                    const code = (r.code ?? '').toString().trim();
+                    const name = (r.description ?? '').toString().trim();
+                    if (!code) return;
+                    html += renderStoreRow(line, r.id, code, name);
+                });
+            } else {
+            html += `
+                <tr>
+                    <td colspan="4" class="center-align-format">
+                        ${typeof no_records !== 'undefined' ? no_records : 'No records found.'}
+                    </td>
+                </tr>
+            `;
             }
 
-            ensureCustomersTable();
-            const $tbody = $('#customers_list tbody');
-            let line = $tbody.children('tr').length;
+            html += `</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" align="right">
+                            Page ${customerCurrentPage} of ${customerTotalPages}
+                            <button type="button" class="btn btn-warning" onclick="firstCustomerPage('${action}', '${pricelistId}')" ${customerCurrentPage === 1 ? "disabled" : ""}>&laquo; First</button>
+                            <button type="button" class="btn btn-warning" onclick="backCustomerPage('${action}', '${pricelistId}')" ${customerCurrentPage <= 1 ? "disabled" : ""}>&lsaquo; Prev</button>
+                            <button type="button" class="btn btn-warning" onclick="nextCustomerPage('${action}', '${pricelistId}')" ${customerCurrentPage >= customerTotalPages ? "disabled" : ""}>Next &rsaquo;</button>
+                            <button type="button" class="btn btn-warning" onclick="lastCustomerPage('${action}', '${pricelistId}')" ${customerCurrentPage === customerTotalPages ? "disabled" : ""}>Last &raquo;</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            `;
 
-            rows.forEach(r => {
-                const id   = r.id;
-                const code = (r.code ?? '').toString().trim();
-                const name = (r.description ?? '').toString().trim();
-                if (!code) return;
-                line += 1;
-                $tbody.append(renderStoreRow(line, id, code, name));
+            $('#customers').html(html);
 
+            // (optional) reattach autocomplete for visible inputs on this page
+            rows.forEach((_, idx) => {
+                const line = idx + 1;
                 $(`#customer_${line}`).autocomplete({
                     source(request, response) {
-                    const results = $.ui.autocomplete.filter(customerDescriptions, request.term);
+                    const labels = (window.customerDescriptions || []).map(s => s.label || s);
+                    const results = $.ui.autocomplete.filter(labels, request.term);
                     response([...new Set(results)].slice(0, 10));
-                    }
+                    },
+                    minLength: 0
                 });
             });
-
-            if (typeof done === 'function') done(rows);
         });
+    }
+
+    function backCustomerPage(action = "", pricelistId) {
+        if (customerCurrentPage > 1) {
+            customerCurrentPage--;
+            runCustomers(action, pricelistId);
+        }
+    }
+
+    function nextCustomerPage(action = "", pricelistId) {
+        if (customerCurrentPage < customerTotalPages) {
+            customerCurrentPage++;
+            runCustomers(action, pricelistId);
+        }
+    }
+
+    function firstCustomerPage(action = "", pricelistId) {
+        customerCurrentPage = 1;
+        runCustomers(action, pricelistId);
+    }
+
+    function lastCustomerPage(action = "", pricelistId) {
+        customerCurrentPage = customerTotalPages;
+        runCustomers(action, pricelistId);
     }
 
     function saveCustomer(id) {
@@ -700,9 +781,23 @@
             // perform updates, then inserts
             function doInserts() {
                 if (toInsert.length) {
+                    const insertStart = new Date();
+
                     batch_insert(url, JSON.stringify(toInsert), table, false, (resp) => {
                         modal.loading(false);
                         if (resp && resp.message === 'success') {
+                            const insertEnd = new Date();
+                            const duration = formatDuration(insertStart, insertEnd);
+
+                            const remarks = `
+                                Action: Insert Customer Pricelist
+                                <br>Success: inserted ${toInsert.length}, updated ${toUpdate.length} (pricelist ${pricelistId})
+                                <br>Start Time: ${formatReadableDate(insertStart)}
+                                <br>End Time: ${formatReadableDate(insertEnd)}
+                                <br>Duration: ${duration}
+                            `;
+
+                            logActivity('Pricelist - Customers', 'Save', remarks, "-", JSON.stringify(toInsert), "");  
                             modal.alert(success_save_message, 'success', function () { location.reload(); });
                         } else {
                             modal.alert("Insert failed.", 'error');
@@ -715,8 +810,23 @@
             }
 
             if (toUpdate.length) {
+                const updateStart = new Date();
+
                 batchUpdateCustom(url, table, 'id', toUpdateIds, toUpdate, false, (resp) => {
                     if (resp && resp.message === 'success') {
+                            const updateEnd = new Date();
+                            const duration = formatDuration(updateStart, updateEnd);
+
+                            const remarks = `
+                                Action: Update Customer Pricelist
+                                <br>Success: inserted ${toInsert.length}, updated ${toUpdate.length} (pricelist ${pricelistId})
+                                <br>Start Time: ${formatReadableDate(updateStart)}
+                                <br>End Time: ${formatReadableDate(updateEnd)}
+                                <br>Duration: ${duration}
+                            `;
+
+                            logActivity('Pricelist - Customers', 'Save', remarks, "-", JSON.stringify(toUpdate), "");
+
                         doInserts();
                     } else {
                         modal.loading(false);
@@ -1125,7 +1235,7 @@
                     $('#id').val(j.id);
                     $('#priceListDesc').val(j.description);
                     $('#remarks').val(j.remarks);
-                    if(asc.status == 1) {
+                    if(j.status == 1) {
                         $('#status').prop('checked', true)
                     } else {
                         $('#status').prop('checked', false)
