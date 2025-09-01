@@ -7,6 +7,15 @@ use App\Controllers\BaseController;
 class CmsPreference extends BaseController
 {
 
+    public function __construct()
+	{
+	    $this->session = session();
+	    if (!$this->session->get('sess_uid')) {
+	        redirect()->to(base_url('cms/login'))->send();
+	        exit;
+	    }
+	}
+
     public function get_title()
 	{
 		$result = $this->Global_model->get_by_id("cms_preference",1);
@@ -30,7 +39,11 @@ class CmsPreference extends BaseController
 
 	    $session = session();
 	    $currentUrl = base_url(uri_string()); 
-	    //temp
+	    
+	    if (empty($session->sess_role)) {
+		    return []; 
+		}
+		
 	    $select = 'cms_menu.id, menu_url, menu_name, menu_icon, menu_type, menu_parent_id, menu_level, sort_order, status, role_id, menu_id, menu_role_read, menu_role_write, menu_role_delete';
 	    $query = 'status = 1 AND role_id = ' . $session->sess_role . ' AND menu_level = 1 AND menu_role_read = 1';
 	    $result = $this->Custom_model->get_menu_list('cms_menu', $select, $query);
