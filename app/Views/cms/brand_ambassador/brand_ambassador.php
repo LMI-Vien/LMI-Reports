@@ -227,11 +227,9 @@
                                             <th class='center-content' scope="col">Line #</th>
                                             <th class='center-content' scope="col">BA Name</th>
                                             <th class='center-content' scope="col">Deployment Date</th>
-                                            <th class='center-content' scope="col">Agency</th>
+                                            <th class='center-content' scope="col">Agency Code</th>
                                             <th class='center-content' scope="col">Brand</th>
-                                            <!-- <th class='center-content' scope="col">Store</th> -->
-                                            <th class='center-content' scope="col">Team</th>
-                                            <!-- <th class='center-content' scope="col">Area</th> -->
+                                            <th class='center-content' scope="col">Team Code</th>
                                             <th class='center-content' scope="col">Type</th>
                                             <th class='center-content' scope="col">Status</th>
                                         </tr>
@@ -635,7 +633,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['ba name', 'deployment date', 'agency', 'brand', 'team', 'type' ,'status'];
+            let td_validator = ['ba name', 'deployment date', 'agency code', 'brand', 'team code', 'type' ,'status'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -1905,9 +1903,9 @@ function saveValidatedData(valid_data, brand_per_ba) {
             {
                 "BA Name": "",
                 "Deployment Date": "",
-                "Agency": "",
+                "Agency Code": "",
                 "Brand": "",
-                "Team": "",
+                "Team Code": "",
                 "Type": "",
                 "Status": "",
                 "NOTE:":"Please do not change the column headers."
