@@ -180,6 +180,7 @@
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
     var ba_lookup = {};
+    var ba_lookup_ci = {};
     let yearMap = <?= json_encode ($yearMap) ?>;
 
     $(document).ready(function() {
@@ -206,18 +207,36 @@
 
         aJax.post(url, data, function(result) {
 
-            var result = JSON.parse(result);
-            var html = '';
-            if (result && result.length > 0) {
-                $.each(result, function(x, y) {
-                    if (y.code && y.name) {
-                        ba_lookup[y.code.trim()] = y.name.trim();
-                    }
-                });
-            }
+            var list = JSON.parse(result) || [];
+            list.forEach(r => {
+                if (r.code && r.name) {
+                    const codeExact = (r.code).trim();
+                    const codeCI = codeExact.toLowerCase();
+                    const name = (r.name).trim();
+                    ba_lookup[codeExact] = name;     // exact key
+                    ba_lookup_ci[codeCI] = name;     // case-insensitive key
+                }
+            });
             get_data(query);
             get_pagination(query);
         });
+    }
+
+    function mapCodeToBAName(raw) {
+        const code = (raw || '').trim();
+
+        if (code === '-5') return 'Vacant';
+        if (code === '-6') return 'Non Ba';
+
+        // First try exact key
+        if (ba_lookup[code]) return ba_lookup[code];
+
+        // Then try case-insensitive
+        if (ba_lookup_ci[code.toLowerCase()]) return ba_lookup_ci[code.toLowerCase()];
+
+        // Fallback: show raw code so you notice missing data
+        console.log('Missing BA mapping for code:', code);
+        return code;
     }
 
     function get_data(new_query) {
@@ -274,12 +293,8 @@
                     var storeDesc = y.location_desc || 'N/A';
                     var BAName = 'N/A';
                     if (y.custom_code) {
-                        let codes = y.custom_code.split(',').map(c => c.trim());
-                        let names = codes.map(code => {
-                            if (code == '-5') return 'Vacant';
-                            if (code == '-6') return 'Non Ba';
-                            return ba_lookup[code] || `Unknown (${code})`;
-                        });
+                        const codes = y.custom_code.split(',').map(c => c.trim());
+                        const names = codes.map(mapCodeToBAName);
                         BAName = names.join(', ');
                     }
                     html += "<tr class='" + rowClass + "'>";
@@ -395,12 +410,8 @@
                 $.each(obj, function(index,d) {
                     var BAName = 'N/A';
                     if (d.code_ire) {
-                        let codes = d.code_ire.split(',').map(c => c.trim());
-                        let names = codes.map(code => {
-                            if (code == '-5') return 'Vacant';
-                            if (code == '-6') return 'Non Ba';
-                            return ba_lookup[code] || `Unknown (${code})`;
-                        });
+                        const codes = d.code_ire.split(',').map(c => c.trim());
+                        const names = codes.map(mapCodeToBAName);
                         BAName = names.join(', ');
                     }
 

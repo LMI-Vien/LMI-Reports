@@ -124,8 +124,8 @@ class ImportTargetSalesPs extends BaseController
 		$select .= 'a.july, a.august, a.september, a.october, a.november, a.december';
 
 		$result = $this->Global_model->get_data_list(
-			'tbl_target_sales_per_store a', "a.year = '$year'", 999999999, 0, $select, '',
-			'', [ [ 'table' => 'tbl_store s1', 'query' => 's1.id = a.location', 'type' => 'left' ] ], ''
+			'tbl_target_sales_per_store a', "a.year = '$year'", 999999999, 0, $select, 'a.id',
+			'ASC', [ [ 'table' => 'tbl_store s1', 'query' => 's1.code = a.location', 'type' => 'left' ] ], ''
 		);
 
 		$spreadsheet = new Spreadsheet();
@@ -145,6 +145,12 @@ class ImportTargetSalesPs extends BaseController
 		$currentRow = 6;
 
 		foreach ($result as $value) {
+			if($value->ba_code == '-5'){
+				$value->ba_code = 'Vacant';
+			}
+			if($value->ba_code == '-6'){
+				$value->ba_code = 'Non Ba';
+			}
 			$header = [
 				$value->ba_code, $value->location,
 				$value->january, $value->february, $value->march, $value->april, $value->may, $value->june,
@@ -170,8 +176,8 @@ class ImportTargetSalesPs extends BaseController
 		$select .= 'a.july, a.august, a.september, a.october, a.november, a.december';
 
 		$result = $this->Global_model->get_data_list(
-			'tbl_target_sales_per_store a', "", 999999999, 0, $select, '',
-			'', [ [ 'table' => 'tbl_store s1', 'query' => 's1.id = a.location', 'type' => 'left' ] ], ''
+			'tbl_target_sales_per_store a', "", 999999999, 0, $select, 'a.id',
+			'ASC', [ [ 'table' => 'tbl_store s1', 'query' => 's1.code = a.location', 'type' => 'left' ] ], ''
 		);
 
 		$spreadsheet = new Spreadsheet();
@@ -191,6 +197,12 @@ class ImportTargetSalesPs extends BaseController
 		$currentRow = 6;
 
 		foreach ($result as $value) {
+			if($value->ba_code == '-5'){
+				$value->ba_code = 'Vacant';
+			}
+			if($value->ba_code == '-6'){
+				$value->ba_code = 'Non Ba';
+			}
 			$header = [
 				$value->ba_code, $value->location,
 				$value->january, $value->february, $value->march, $value->april, $value->may, $value->june,
@@ -218,8 +230,8 @@ class ImportTargetSalesPs extends BaseController
 		$select .= 'a.july, a.august, a.september, a.october, a.november, a.december';
 
 		$result = $this->Global_model->get_data_list(
-			'tbl_target_sales_per_store a', "a.year = '$year'", 999999999, 0, $select, '',
-			'', [ [ 'table' => 'tbl_store s1', 'query' => 's1.id = a.location', 'type' => 'left' ] ], ''
+			'tbl_target_sales_per_store a', "a.year = '$year'", 999999999, 0, $select, 'a.id',
+			'ASC', [ [ 'table' => 'tbl_store s1', 'query' => 's1.code = a.location', 'type' => 'left' ] ], ''
 		);
 
 		$spreadsheet = new Spreadsheet();
@@ -239,6 +251,12 @@ class ImportTargetSalesPs extends BaseController
 		$currentRow = 6;
 
 		foreach ($result as $value) {
+			if($value->ba_code == '-5'){
+				$value->ba_code = 'Vacant';
+			}
+			if($value->ba_code == '-6'){
+				$value->ba_code = 'Non Ba';
+			}
 			$header = [
 				$value->ba_code, $value->location,
 				$value->january, $value->february, $value->march, $value->april, $value->may, $value->june,
