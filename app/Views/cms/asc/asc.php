@@ -175,7 +175,7 @@
                                     <th style="width: 20%;" class='center-content'>ASC Name</th>
                                     <th style="width: 10%;" class='center-content'>Status</th>
                                     <th style="width: 20%;" class='center-content'>Deployment Date</th>
-                                    <th style="width: 10%;" class='center-content'>Area</th>
+                                    <th style="width: 10%;" class='center-content'>Area Code</th>
                                 </tr>
                             </thead>
                             <tbody class="word_break import_table"></tbody>
@@ -1031,7 +1031,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['asc name', 'status', 'deployment date', 'area'];
+            let td_validator = ['asc name', 'status', 'deployment date', 'area code'];
             td_validator.forEach(column => {
                 if (column === 'deployment date') {
                     lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
@@ -1531,7 +1531,7 @@
                 "ASC Name": "",
                 "Status": "",
                 "Deployment Date": "",
-                "Area": "",
+                "Area Code": "",
                 "NOTE:": "Please do not change the column headers."
             }
         ]
