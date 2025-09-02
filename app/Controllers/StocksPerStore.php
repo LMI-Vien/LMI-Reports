@@ -50,6 +50,7 @@ class StocksPerStore extends BaseController
 		$data["source"] = "VMI (LMI/RGDI)";
 		$data["source_date"] = '<span id="sourceDate">N / A</span>';
 		$data["date"] = $sourceDate;	
+		$data["latestWeek"] = $latestWeek;
 		$data['content'] = "site/stocks/per-store/data_per_store";
 		$data['session'] = session();
 		$data['js'] = array(

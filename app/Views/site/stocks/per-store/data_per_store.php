@@ -49,10 +49,22 @@
                                 <i class="fas fa-database text-dark mr-1"></i> 
                                 <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
                             </div>
+                            <div class="mb-2">
+                                <i class="fas fa-file-import text-dark mr-1"></i> 
+                                <strong>Most Recent Import:</strong> Week: <?= !empty($latestWeek) ? $latestWeek : 'N/A'; ?> - 
+                                <span id="mostRecentImportWeekRange"
+                                    data-latest-week="<?= (int) $latestWeek ?>">
+                                </span>
+                            </div>
                             <div>
                                 <i class="fas fa-calendar-week text-dark mr-1"></i>
                                 <strong>Current Week:</strong> 
                                 <span id="currentWeek" class="text-dark font-weight-medium"></span>
+                            </div>
+                            <div class="mt-2">
+                                <i class="fas fa-calendar-check text-dark mr-1"></i>
+                                <strong>Filtered Date:</strong>
+                                <span id="filteredDate" class="text-dark font-weight-medium"></span>
                             </div>
                         </div>
                     </div>

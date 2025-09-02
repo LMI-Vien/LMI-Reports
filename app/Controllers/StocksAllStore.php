@@ -59,6 +59,7 @@ class StocksAllStore extends BaseController
 		$data['traccItemClassi'] = $this->Global_model->getTraccItemClassification();
 		$data['month'] = $this->Global_model->getMonths();
 		$data['session'] = session();
+		$data["latestWeek"] = $latestWeek;
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",
 			"assets/site/js/common.js"
