@@ -174,6 +174,19 @@
         } else {
             $('#popup_modal').modal('hide');
         }
+
+        $('#filteredDate').text('N/A');
+
+        const latestWeekAttr = $('#mostRecentImportWeekRange').data('latest-week');
+        const latestWeek = latestWeekAttr ? parseInt(latestWeekAttr, 10) : null;
+        if (latestWeek) {
+            const wk = getImportWeekDisplay(latestWeek);
+            $('#mostRecentImportWeekRange').text(
+                wk ? `(${wk.start} - ${wk.end})` : 'N/A'
+            );
+        } else {
+            $('#mostRecentImportWeekRange').text('N/A');
+        }
     });
 
     $(document).on('click', '#clearButton', function () {
@@ -263,8 +276,13 @@
 
         $('#sourceDate').text(calendarWeek);
         if (counter >= 1) {
+            const filteredDate = getTodayDateTime();
+            $('#filteredDate').text(filteredDate.display);
+
             fetchData();
             $('.table-empty').hide();
+        } else {
+            $('#filteredDate').text('N/A');
         }
     });
 

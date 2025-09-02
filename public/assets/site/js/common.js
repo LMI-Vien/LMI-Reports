@@ -41,6 +41,46 @@
         return null;
     }
 
+    function getTodayDateTime() {
+        const now = new Date();
+
+        const date = now.toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        const time = now.toLocaleTimeString(undefined, {
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+
+        return {
+            date,
+            time,
+            display: `${date} - ${time}`
+        };
+    }
+
+    function getImportWeekDisplay(weekNumber) {
+        const current = getCurrentWeek();
+        const baseYear = current ? Number(current.start.slice(0, 4)) : new Date().getFullYear();
+
+        // Try base year first
+        let wk = getCalendarWeeks(baseYear).find(w => Number(w.week) === Number(weekNumber));
+        if (wk) return wk;
+
+        // Fallback: previous year
+        wk = getCalendarWeeks(baseYear - 1).find(w => Number(w.week) === Number(weekNumber));
+        if (wk) return wk;
+
+        // Fallback: next year
+        wk = getCalendarWeeks(baseYear + 1).find(w => Number(w.week) === Number(weekNumber));
+        return wk || null;
+    }
+
     function formatNumberWithCommas(number) {
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
