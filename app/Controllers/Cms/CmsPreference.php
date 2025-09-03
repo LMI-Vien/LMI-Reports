@@ -9,10 +9,15 @@ class CmsPreference extends BaseController
 
     public function __construct()
 	{
-	    $this->session = session();
-	    if (!($this->session->get('sess_uid') || $this->session->get('sess_site_uid'))) {
-			redirect()->to(base_url('cms/login'))->send();
-			exit;
+		$this->session = session();
+		if ($this->session->get('sess_uid') === null) {
+		    return redirect()->to(base_url('cms/login'))->send();
+		    exit;
+		}
+
+		if ($this->session->get('sess_site_uid') === null) {
+		    return redirect()->to(base_url('login'))->send();
+		    exit;
 		}
 	}
 
