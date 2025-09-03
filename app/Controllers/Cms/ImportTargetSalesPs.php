@@ -89,7 +89,7 @@ class ImportTargetSalesPs extends BaseController
 		$data['yearMap'] = $this->Global_model->dynamic_search("'tbl_year'", "''", "'id, year'", 0, 0, "''", "''", "''");
 
 
-		$data['buttons'] = [];
+		$data['buttons'] = ['search'];
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['standard'] = config('Standard');
 		$data['js'] = array(

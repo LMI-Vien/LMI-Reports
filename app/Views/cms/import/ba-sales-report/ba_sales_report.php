@@ -198,7 +198,7 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content'>Line #</th>
-                                        <th class='center-content'>BA Name</th>
+                                        <th class='center-content'>Brand Ambassador Code</th>
                                         <th class='center-content'>Area</th>
                                         <th class='center-content'>Store</th>
                                         <th class='center-content'>Brand</th>
@@ -704,6 +704,9 @@
 
             let td_validator = ['ba code', 'area code', 'store code', 'brand', 'date', 'amount'];
             td_validator.forEach(column => {
+                if (column === 'date') {
+                    lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
+                }
                 let value = lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""; 
 
                 if (column === 'status' && typeof value === 'string') {
