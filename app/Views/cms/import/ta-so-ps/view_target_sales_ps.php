@@ -8,13 +8,6 @@
 
 <div class="content-wrapper p-4">
     <div class="card">
-        <?php
-            echo view("cms/layout/buttons",$buttons);
-            $optionSet = '';
-            foreach($pageOption as $pageOptionLoop) {
-                $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
-            }
-        ?>
         <div class="text-center page-title md-center">
             <b id="sell_out_title"></b>
         </div>
@@ -61,6 +54,14 @@
                 </table>
             </div>
             <div class="box">
+                <?php
+                    echo view("cms/layout/buttons",$buttons);
+                    $optionSet = '';
+                    foreach($pageOption as $pageOptionLoop) {
+                        $optionSet .= "<option value='".$pageOptionLoop."'>".$pageOptionLoop."</option>";
+                    }
+                ?>
+                <br>
                 <table class="table table-bordered listdata">
                     <thead>
                         <tr>
@@ -271,7 +272,8 @@
                 },
                 {
                     table: "tbl_brand_ambassador ba",
-                    query: "ba.code = a.ba_code",
+                    // query: "ba.code = a.ba_code",
+                    query: "FIND_IN_SET(ba.code, a.ba_code)",
                     type: "left"
                 },
             ]
@@ -569,7 +571,13 @@
                     table: "cms_users u",
                     query: "u.id = a.created_by",
                     type: "left"
-                }
+                },
+                {
+                    table: "tbl_brand_ambassador ba",
+                    // query: "ba.code = a.ba_code",
+                    query: "FIND_IN_SET(ba.code, a.ba_code)",
+                    type: "left"
+                },
             ],
             order : {
                 field : "a.id",
@@ -591,6 +599,32 @@
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
+    });
+
+    $(document).on('keydown', '#search_query', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        if (event.key == 'Enter') {
+            search_input = $('#search_query').val();
+            var escaped_keyword = search_input.replace(/'/g, "''"); 
+            offset = 1;
+            new_query = query;
+            new_query += ' and (s1.description like \'%'+escaped_keyword+'%\' OR a.location like \'%'+escaped_keyword+'%\' OR ba.name like \'%'+escaped_keyword+'%\')';
+            get_data(new_query);
+            get_pagination(new_query);
+        }
+    });
+
+    $(document).on('click', '#search_button', function(event) {
+        $('.btn_status').hide();
+        $(".selectall").prop("checked", false);
+        search_input = $('#search_query').val();
+        var escaped_keyword = search_input.replace(/'/g, "''"); 
+        offset = 1;
+        new_query = query;
+        new_query += ' and (s1.description like \'%'+escaped_keyword+'%\' OR a.location like \'%'+escaped_keyword+'%\' OR ba.name like \'%'+escaped_keyword+'%\')';
+        get_data(new_query);
+        get_pagination(new_query);
     });
 
     $(document).on("change", ".record-entries", function(e) {
