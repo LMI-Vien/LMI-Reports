@@ -309,18 +309,18 @@ class Dashboard_model extends Model
 	    return $builder->get()->getRowArray();
 	}
 
-	public function getLatestWeekOnWeek($year = null){
-		$builder = $this->db->table('tbl_sell_out_data_header sh')
-			->select('sh.id, sh.year, sh.month AS month_id, sh.company AS company_id, m.month AS month_label, c.name AS company_name')
-			->join('tbl_month m', 'sh.month = m.id')
-			->join('tbl_company c', 'sh.company = c.id');
+	public function getLatestWeekOnWeek($year = null) {
+		$builder = $this->db->table('tbl_week_on_week_header wh')
+			->select('wh.id, wh.year, wh.week, y.year as year')
+			->join('tbl_year y', 'wh.year = y.id');
 
 		if ($year !== null) {
-			$builder->where('sh.year', $year);
+			$builder->where('wh.year', $year)
+					->orderBy('wh.week', 'DESC');
+		} else {
+			$builder->orderBy('wh.year', 'DESC')
+					->orderBy('wh.week', 'DESC');
 		}
-
-		$builder->orderBy('sh.year', 'DESC');
-		$builder->orderBy('sh.month', 'DESC');
 		$builder->limit(1);
 
 		return $builder->get()->getRowArray();
