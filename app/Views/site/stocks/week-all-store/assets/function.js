@@ -28,15 +28,26 @@
 
         $('#filteredDate').text('N/A');
 
-        const latestWeekAttr = $('#mostRecentImportWeekRange').data('latest-week');
-        const latestWeek = latestWeekAttr ? parseInt(latestWeekAttr, 10) : null;
-        if (latestWeek) {
-            const wk = getImportWeekDisplay(latestWeek);
-            $('#mostRecentImportWeekRange').text(
+        const latestWeekAttrVMI = $('#mostRecentImportWeekRangeVMI').data('latest-week-vmi');
+        const latestWeekVMI = latestWeekAttrVMI ? parseInt(latestWeekAttrVMI, 10) : null;
+        if (latestWeekVMI) {
+            const wk = getImportWeekDisplay(latestWeekVMI);
+            $('#mostRecentImportWeekRangeVMI').text(
                 wk ? `(${wk.start} - ${wk.end})` : 'N/A'
             );
         } else {
-            $('#mostRecentImportWeekRange').text('N/A');
+            $('#mostRecentImportWeekRangeVMI').text('N/A');
+        }
+
+        const latestWeekAttrWoW = $('#mostRecentImportWeekRangeWeekOnWeek').data('latest-week');
+        const latestWeekWoW = latestWeekAttrWoW ? parseInt(latestWeekAttrWoW, 10) : null;
+        if (latestWeekWoW) {
+            const wk = getImportWeekDisplay(latestWeekWoW);
+            $('#mostRecentImportWeekRangeWeekOnWeek').text(
+                wk ? `(${wk.start} - ${wk.end})` : 'N/A'
+            );
+        } else {
+            $('#mostRecentImportWeekRangeWeekOnWeek').text('N/A');
         }
     });
 

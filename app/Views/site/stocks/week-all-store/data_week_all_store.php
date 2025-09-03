@@ -50,13 +50,16 @@
                             <div class="mb-2">
                                 <i class="fas fa-file-import text-dark mr-1"></i> 
                                 <strong>Most Recent Import VMI:</strong> Week: <?= !empty($latestWeek) ? $latestWeek : 'N/A'; ?>
-                                <span id="mostRecentImportWeekRange"
-                                    data-latest-week="<?= (int) $latestWeek ?>">
+                                <span id="mostRecentImportWeekRangeVMI"
+                                    data-latest-week-vmi="<?= (int) $latestWeek ?>">
                                 </span>
                             </div>
                             <div class="mb-2">
                                 <i class="fas fa-file-import text-dark mr-1"></i> 
-                                <strong>Most Recent Import Week by Week:</strong> Year: <?= !empty($latestMonthWeekByWeek) ? $latestMonthWeekByWeek : 'N/A'; ?> - <?= !empty($latestYearWeekByWeek) ? $latestYearWeekByWeek : 'N/A'; ?>
+                                <strong>Most Recent Import Week by Week:</strong> Week: <?= !empty($latestWeekWeekByWeek) ? $latestWeekWeekByWeek : 'N/A'; ?> - Year: <?= !empty($latestYearWeekByWeek) ? $latestYearWeekByWeek : 'N/A'; ?>
+                                <span id="mostRecentImportWeekRangeWeekOnWeek"
+                                    data-latest-week="<?= !empty($latestWeekWeekByWeek) ? (int)$latestWeekWeekByWeek : 'N/A' ?>">
+                                </span>
                             </div>
                             <div>
                                 <i class="fas fa-calendar-week text-dark mr-1"></i>

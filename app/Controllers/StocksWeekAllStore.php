@@ -35,7 +35,7 @@ class StocksWeekAllStore extends BaseController
 
 		$getLatestWeekOnWeek =$this->Dashboard_model->getLatestWeekOnWeek();
 		$latestYear = $getLatestWeekOnWeek['year'];
-		$latestMonth = $getLatestWeekOnWeek['month_label'];
+		$latestWeek = $getLatestWeekOnWeek['week'];
 
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
@@ -48,7 +48,7 @@ class StocksWeekAllStore extends BaseController
 		$data['year'] = $this->Global_model->getYears();
 		$data["latestWeek"] = $latestWeek;
 		$data["latestYearWeekByWeek"] = $latestYear;
-		$data["latestMonthWeekByWeek"] = $latestMonth;
+		$data["latestWeekWeekByWeek"] = $latestWeek;
 		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",
