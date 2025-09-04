@@ -37,7 +37,7 @@ self.onmessage = async function(e) {
                 let status = row["Status"] ? row["Status"].toLowerCase() : "";
                 let deployment_date = row["Deployment Date"] ? row["Deployment Date"].trim() : "";
                 let user_id = row["Created By"] ? row["Created By"].trim() : "";
-                let area_id = row["Area"] ? row["Area"].trim() : "";
+                let area_id = row["Area Code"] ? row["Area Code"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
 
                 if (unique_description.has(description)) {
@@ -75,7 +75,7 @@ self.onmessage = async function(e) {
                     area_id = normalized_area_lookup[area_lower];
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Area at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Area Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 

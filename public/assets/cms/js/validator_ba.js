@@ -44,9 +44,9 @@ self.onmessage = async function(e) {
                 let row = data[index];
                 let tr_count = index + 1;
                 let name = row["BA Name"] ? row["BA Name"].trim() : "";
-                let agency = row["Agency"] ? row["Agency"].trim() : "";
+                let agency = row["Agency Code"] ? row["Agency Code"].trim() : "";
                 let brand = row["Brand"] ? row["Brand"] : "";
-                let team = row["Team"] ? row["Team"].trim() : "";
+                let team = row["Team Code"] ? row["Team Code"].trim() : "";
                 let status = row["Status"] ? row["Status"].toLowerCase() : "";
                 let type = row["Type"] ? row["Type"].toLowerCase() : "";
                 let deployment_date = row["Deployment Date"] ? row["Deployment Date"].trim() : "";
@@ -123,7 +123,7 @@ self.onmessage = async function(e) {
                     agency = normalized_agency_lookup[agency_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Agency at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Agency Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -137,7 +137,7 @@ self.onmessage = async function(e) {
                     team = normalized_team_lookup[team_lower];
                 }else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Team at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Team Code at line #: ${tr_count}`);
                     err_counter++;
                 }
 
