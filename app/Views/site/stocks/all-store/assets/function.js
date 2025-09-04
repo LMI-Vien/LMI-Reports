@@ -23,7 +23,7 @@
         autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), traccItemClassi, "item_class_code");
         autocomplete_field($("#vendorName"), $("#vendorNameId"), company, "name");
 
-        $('#filteredDate').text('N/A');
+        $('#generationPeriod').text('N/A');
 
         const latestWeekAttr = $('#mostRecentImportWeekRange').data('latest-week');
         const latestWeek = latestWeekAttr ? parseInt(latestWeekAttr, 10) : null;
@@ -90,13 +90,13 @@
         }
         $('#sourceDate').text(calendarWeek);
         if (counter >= 1) {
-            const filteredDate = getTodayDateTime();
-            $('#filteredDate').text(filteredDate.display);
+            const generationPeriod = getTodayDateTime();
+            $('#generationPeriod').text(generationPeriod.display);
             
             fetchData();
             $('.table-empty').hide();
             } else {
-                $('#filteredDate').text('N/A');
+                $('#generationPeriod').text('N/A');
             }
     });
 

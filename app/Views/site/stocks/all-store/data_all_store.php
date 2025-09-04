@@ -49,9 +49,10 @@
                             </div>
                             <div class="mb-2">
                                 <i class="fas fa-file-import text-dark mr-1"></i> 
-                                <strong>Most Recent Import:</strong> Week: <?= !empty($latestWeek) ? $latestWeek : 'N/A'; ?> - 
+                                <strong>CMS Most Recent Import:</strong> Week: <?= !empty($latestWeek) ? $latestWeek : 'N/A'; ?> - 
                                 <span id="mostRecentImportWeekRange"
-                                    data-latest-week="<?= (int) $latestWeek ?>">
+                                    data-latest-week="<?= (int) $latestWeek ?>"
+                                    data-latest-year="<?= (int) $latestYear ?>">
                                 </span>
                             </div>
                             <div>
@@ -61,8 +62,8 @@
                             </div>
                             <div class="mt-2">
                                 <i class="fas fa-calendar-check text-dark mr-1"></i>
-                                <strong>Filtered Date:</strong>
-                                <span id="filteredDate" class="text-dark font-weight-medium"></span>
+                                <strong>Generation Period:</strong>
+                                <span id="generationPeriod" class="text-dark font-weight-medium"></span>
                             </div>
                         </div>
                     </div>

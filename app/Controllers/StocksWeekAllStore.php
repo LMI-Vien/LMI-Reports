@@ -31,11 +31,12 @@ class StocksWeekAllStore extends BaseController
 		$latestWeek = '';
 		if($latestVmiData){
 			$latestWeek = $latestVmiData['week_id'];
+			$latestYear = $latestVmiData['year'];
 		}
 
 		$getLatestWeekOnWeek =$this->Dashboard_model->getLatestWeekOnWeek();
-		$latestYear = $getLatestWeekOnWeek['year'];
-		$latestWeek = $getLatestWeekOnWeek['week'];
+		$latestYearWoW = $getLatestWeekOnWeek['year'];
+		$latestWeekWoW = $getLatestWeekOnWeek['week'];
 
 		$data['title'] = "Trade Dashboard";
 		$data['PageName'] = 'Trade Dashboard';
@@ -47,8 +48,9 @@ class StocksWeekAllStore extends BaseController
 		$data['traccItemClassi'] = $this->Global_model->getTraccItemClassification();
 		$data['year'] = $this->Global_model->getYears();
 		$data["latestWeek"] = $latestWeek;
-		$data["latestYearWeekByWeek"] = $latestYear;
-		$data["latestWeekWeekByWeek"] = $latestWeek;
+		$data["latestYear"] = $latestYear;
+		$data["latestYearWeekByWeek"] = $latestYearWoW;
+		$data["latestWeekWeekByWeek"] = $latestWeekWoW;
 		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",

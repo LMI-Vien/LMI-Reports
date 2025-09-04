@@ -49,14 +49,15 @@
                             </div>
                             <div class="mb-2">
                                 <i class="fas fa-file-import text-dark mr-1"></i> 
-                                <strong>Most Recent Import VMI:</strong> Week: <?= !empty($latestWeek) ? $latestWeek : 'N/A'; ?>
-                                <span id="mostRecentImportWeekRangeVMI"
-                                    data-latest-week-vmi="<?= (int) $latestWeek ?>">
+                                <strong>CMS Most Recent Import VMI:</strong> Week: <?= !empty($latestWeek) ? $latestWeek : 'N/A'; ?>
+                                <span id="mostRecentImportWeekRange"
+                                    data-latest-week="<?= (int) $latestWeek ?>"
+                                    data-latest-year="<?= (int) $latestYear ?>">
                                 </span>
                             </div>
                             <div class="mb-2">
                                 <i class="fas fa-file-import text-dark mr-1"></i> 
-                                <strong>Most Recent Import Week by Week:</strong> Week: <?= !empty($latestWeekWeekByWeek) ? $latestWeekWeekByWeek : 'N/A'; ?> - Year: <?= !empty($latestYearWeekByWeek) ? $latestYearWeekByWeek : 'N/A'; ?>
+                                <strong>CMS Most Recent Import Week by Week:</strong> Week: <?= !empty($latestWeekWeekByWeek) ? $latestWeekWeekByWeek : 'N/A'; ?> - Year: <?= !empty($latestYearWeekByWeek) ? $latestYearWeekByWeek : 'N/A'; ?>
                                 <span id="mostRecentImportWeekRangeWeekOnWeek"
                                     data-latest-week="<?= !empty($latestWeekWeekByWeek) ? (int)$latestWeekWeekByWeek : 'N/A' ?>">
                                 </span>
@@ -67,9 +68,14 @@
                                 <span id="currentWeek" class="text-dark font-weight-medium"></span>
                             </div>
                             <div class="mt-2">
-                                <i class="fas fa-calendar-check text-dark mr-1"></i>
+                                <i class="fas fa-calendar-alt text-dark mr-1"></i>
                                 <strong>Filtered Date:</strong>
                                 <span id="filteredDate" class="text-dark font-weight-medium"></span>
+                            </div>
+                            <div class="mt-2">
+                                <i class="fas fa-calendar-check text-dark mr-1"></i>
+                                <strong>Generation Period:</strong>
+                                <span id="generationPeriod" class="text-dark font-weight-medium"></span>
                             </div>
                         </div>
                     </div>

@@ -68,17 +68,25 @@
         const current = getCurrentWeek();
         const baseYear = current ? Number(current.start.slice(0, 4)) : new Date().getFullYear();
 
-        // Try base year first
-        let wk = getCalendarWeeks(baseYear).find(w => Number(w.week) === Number(weekNumber));
-        if (wk) return wk;
+        const $el = $('#mostRecentImportWeekRange');
+        const preferredYear = $el.length ? Number($el.data('latest-year')) : NaN;
 
-        // Fallback: previous year
-        wk = getCalendarWeeks(baseYear - 1).find(w => Number(w.week) === Number(weekNumber));
-        if (wk) return wk;
+        const yearsToTry = [
+            preferredYear,        
+            baseYear,             
+            baseYear - 1,         
+            baseYear + 1          
+        ].filter(function(y) { return !isNaN(y); });
 
-        // Fallback: next year
-        wk = getCalendarWeeks(baseYear + 1).find(w => Number(w.week) === Number(weekNumber));
-        return wk || null;
+        for (let i = 0; i < yearsToTry.length; i++) {
+            const y = yearsToTry[i];
+            const wk = getCalendarWeeks(y).find(function(w) {
+                return Number(w.week) === Number(weekNumber);
+            });
+            if (wk) return wk;
+        }
+        
+        return null;
     }
 
     function formatNumberWithCommas(number) {

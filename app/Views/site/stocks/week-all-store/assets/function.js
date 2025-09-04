@@ -26,17 +26,18 @@
         autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), traccItemClassi, "item_class_code");
         $('#inventoryStatus').select2({ placeholder: 'Please Select...' });
 
+        $('#generationPeriod').text('N/A');
         $('#filteredDate').text('N/A');
 
-        const latestWeekAttrVMI = $('#mostRecentImportWeekRangeVMI').data('latest-week-vmi');
+        const latestWeekAttrVMI = $('#mostRecentImportWeekRange').data('latest-week');
         const latestWeekVMI = latestWeekAttrVMI ? parseInt(latestWeekAttrVMI, 10) : null;
         if (latestWeekVMI) {
             const wk = getImportWeekDisplay(latestWeekVMI);
-            $('#mostRecentImportWeekRangeVMI').text(
+            $('#mostRecentImportWeekRange').text(
                 wk ? `(${wk.start} - ${wk.end})` : 'N/A'
             );
         } else {
-            $('#mostRecentImportWeekRangeVMI').text('N/A');
+            $('#mostRecentImportWeekRange').text('N/A');
         }
 
         const latestWeekAttrWoW = $('#mostRecentImportWeekRangeWeekOnWeek').data('latest-week');
@@ -145,15 +146,16 @@
         const dataSourceText = $('#dataSource').find('option:selected').text();
         const yearFilterText = $('#year').find('option:selected').text();
         $('#sourceDate').text(dataSourceText + ' - ' + yearFilterText + ' week: ' + weekFromFilter + ' - ' + weekToFilter);
+        $('#filteredDate').text('Company: ' + dataSourceText + ' - Year: ' + yearFilterText + ' - Week From: ' + weekFromFilter + ' Week To: ' + weekToFilter);
 
         if (counter >= 1) {
-            const filteredDate = getTodayDateTime();
-            $('#filteredDate').text(filteredDate.display);
+            const generationPeriod = getTodayDateTime();
+            $('#generationPeriod').text(generationPeriod.display);
 
             fetchData();
             $('.table-empty').hide();
         } else {
-            $('#filteredDate').text('N/A');
+            $('#generationPeriod').text('N/A');
         }
     });
 
