@@ -112,7 +112,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="form-modal">
-                        <input type="hidden" id="pricelistId" value="<?= esc($pricelistId) ?>">
+                        <input type="hidden" id="customerId" value="<?= esc($customerId) ?>">
 
                         <!-- Row 1: Brand / Brand Label Type -->
                         <div class="form-row">
@@ -263,6 +263,95 @@
         </div>
     </div>
 
+    <!-- IMPORT MODAL -->
+    <div class="modal" tabindex="-1" id="import_modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b></b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="mb-3">
+                            <div class="text-center"
+                            style="padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: large; background-color: #fdb92a; color: #333333; border: 1px solid #ffffff; border-radius: 10px;"                            
+                            >
+                                <b>Extracted Data</b>
+                            </div>
+
+                            <div class="row">
+                                <div class="import_buttons col-6">
+                                    <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
+                                        <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
+                                    </label>
+                                    <input
+                                        type="file"
+                                        style="padding-left: 10px;"
+                                        id="file"
+                                        accept=".xls,.xlsx,.csv"
+                                        aria-describedby="import_files"
+                                        onclick="clear_import_table()"
+                                    >
+                
+                                    <label class="custom-file-upload save" id="preview_xl_file" style="margin-top: 10px; margin-bottom: 10px" onclick="read_xl_file()">
+                                        <i class="fa fa-sync" style="margin-right: 5px;"></i>Preview Data
+                                    </label>
+                                </div>
+        
+                                <div class="col"></div>
+        
+                                <div class="col-3">
+                                    <label class="custom-file-upload save" id="download_template" style="margin-top: 10px; margin-bottom: 10px" onclick="download_template()">
+                                        <i class="fa fa-file-download" style="margin-right: 5px;"></i>Download Import Template
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style="overflow-x: auto; max-height: 400px;">
+                                <table class= "table table-bordered listdata">
+                                    <thead>
+                                        <tr>
+                                            <th class='center-content'>Line #</th>
+                                            <th class='center-content'>Brand</th>
+                                            <th class='center-content'>Brand Label Type</th>
+                                            <th class='center-content'>Label Type Category</th>
+                                            <th class='center-content'>Category 1 (Item Class MF)</th>
+                                            <th class='center-content'>Category 2 (Sub Class MF)</th>
+                                            <th class='center-content'>Category 3 (Department MF)</th>
+                                            <th class='center-content'>Category 4 (Merch. Category MF)</th>
+                                            <th class='center-content'>Item Code</th>
+                                            <th class='center-content'>Item Description</th>
+                                            <th class='center-content'>Customer Item Code</th>
+                                            <th class='center-content'>UOM</th>
+                                            <th class='center-content'>Selling Price</th>
+                                            <th class='center-content'>Discount in Percent</th>
+                                            <th class='center-content'>Effectivity Date</th>
+                                            <th class='center-content'>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="word_break import_table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <center style="margin-bottom: 5px">
+                            <div class="import_pagination btn-group"></div>
+                        </center>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn save" onclick="process_xl_file()">Validate and Save</button>
+                    <button type="button" class="btn caution" data-dismiss="modal">Close</button>        
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script>
     var query = "pl.status >= 0";
@@ -280,7 +369,7 @@
     let dataset = [];
 
     $(document).ready(function() {
-        var parentId = parseInt($('#pricelistId').val(), 10) || 0;
+        var parentId = parseInt($('#customerId').val(), 10) || 0;
         var query = "pl.status >= 0 AND pl.customer_id = " + parentId;
         get_data(query);
         get_pagination(query);
@@ -303,8 +392,6 @@
             id: ic.id,
             display: (ic.item_class_code ? ic.item_class_code : '')
         }));
-
-        console.log(catOneCategoryOptions);
 
         let brandLabelToId    = new Map(brandOptions.map(o => [o.display, String(o.id)]));
         let labelCatLabelToId = new Map(labelCategoryOptions.map(o => [o.display, String(o.id)]));
@@ -601,7 +688,7 @@
     });
 
     $('#btn_import').on('click', function() {
-        title = addNbsp('IMPORT AGENCY')
+        title = addNbsp('IMPORT CUSTOMER DETAILS PRICELIST')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $("#import_modal").modal('show')
         clear_import_table()
@@ -699,7 +786,7 @@
     }
 
     function save_data(action, id) {
-        var pricelistId = $('#pricelistId').val();
+        var customerId = $('#customerId').val();
         var brand = $('#brandId').val().trim();
         var brandLabelType = $('#brandLabelType').val().trim();
         var labelTypeCat = $('#labelTypeCatId').val().trim();
@@ -726,20 +813,20 @@
             modal.confirm(confirm_update_message, function(result){
                 if(result){ 
                         modal.loading(true);
-                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
+                    save_to_db(customerId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
                 }
             });
         }else{
             modal.confirm(confirm_add_message, function(result){
                 if(result){ 
                         modal.loading(true);
-                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
+                    save_to_db(customerId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
                 }
             }); 
         }
     }
 
-    function save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
+    function save_to_db(customerId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -750,7 +837,7 @@
         if (id !== undefined && id !== null && id !== '') {
             modal_alert_success = success_update_message;
             const updated_data = {
-                customer_id: pricelistId,
+                customer_id: customerId,
                 brand_id: brand,
                 brand_label_type_id: brandLabelType,
                 label_type_category_id: labelTypeCat,
@@ -789,7 +876,7 @@
         } else {
             modal_alert_success = success_save_message;
             const inserted_data = {
-                customer_id: pricelistId,
+                customer_id: customerId,
                 brand_id: brand,
                 brand_label_type_id: brandLabelType,
                 label_type_category_id: labelTypeCat,
@@ -955,20 +1042,34 @@
             return;
         }
 
+        const parentId = parseInt($('#customerId').val(), 10) || 0;
+
         modal.loading(true);
 
         let jsonData = dataset.map(row => {
             return {
-                "Agency Code": row["Agency Code"] || "",
-                "Agency Description": row["Agency Description"] || "",
+                "Brand": row["Brand"] || "",
+                "Brand Label Type": row["Brand Label Type"] || "",
+                "Label Type Category": row["Label Type Category"] || "",
+                "Category 1 (Item Class MF)": row["Category 1 (Item Class MF)"] || "",
+                "Category 2 (Sub Class MF)": row["Category 2 (Sub Class MF)"] || "",
+                "Category 3 (Department MF)": row["Category 3 (Department MF)"] || "",
+                "Category 4 (Merch. Category MF)": row["Category 4 (Merch. Category MF)"] || "",
+                "Item Code": row["Item Code"] || "",
+                "Item Description": row["Item Description"] || "",
+                "Customer Item Code": row["Customer Item Code"] || "",
+                "UOM": row["UOM"] || "",
+                "Selling Price": row["Selling Price"] || "",
+                "Discount in Percent": row["Discount in Percent"] || "",
+                "Effectivity Date": row["Effectivity Date"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
                 "Created Date": formatDate(new Date()) || ""
             };
         });
 
-        let worker = new Worker(base_url + "assets/cms/js/validator_agency.js");
-        worker.postMessage({ data: jsonData, base_url: base_url });
+        let worker = new Worker(base_url + "assets/cms/js/validator_customer_details_pricelist.js");
+        worker.postMessage({ data: jsonData, base_url: base_url, parentId, });
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
@@ -1000,6 +1101,7 @@
 
     function saveValidatedData(valid_data) {
         const overallStart = new Date();
+        const parentId = parseInt($('#customerId').val(), 10) || 0;
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
@@ -1007,12 +1109,12 @@
         let max_retries = 5; 
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_agency';
-        let selected_fields = ['id', 'code', 'agency'];
+        let table = 'tbl_customer_pricelist';
+        let selected_fields = ['id', 'customer_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];
 
         //for lookup of duplicate recors
-        const matchFields = ["code", "agency"];  
-        const matchType = "OR";  //use OR/AND depending on the condition
+        const matchFields = ['customer_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];  
+        const matchType = "AND";  //use OR/AND depending on the condition
         modal.loading_progress(true, "Validating and Saving data...");
 
         // Fetch existing records
@@ -1022,19 +1124,18 @@
             const allEntries = result.existing || [];
 
             // Build a Set of codes you're importing:
-            const codeSet = new Set(valid_data.map(r => r.code));
+            // const codeSet = new Set(valid_data.map(r => r.code));
 
             // Keep only the rows whose code matches:
-            const originalEntries = allEntries.filter(rec => codeSet.has(rec.code));
+           const originalEntries = allEntries.filter(rec => rec.customer_id == parentId);
 
             let existingMap = new Map(); // Stores records using composite keys
 
-            if (result.existing) {
-                result.existing.forEach(record => {
-                    let key = matchFields.map(field => record[field] || "").join("|"); 
-                    existingMap.set(key, record.id);
-                });
-            }
+            (allEntries || []).forEach(record => {
+                // Normalize to string to avoid undefined/null/number mismatches
+                const key = matchFields.map(f => (record[f] ?? '') + '').join('|');
+                existingMap.set(key, record.id);
+            });
 
             function updateOverallProgress(stepName, completed, total) {
                 let progress = Math.round((completed / total) * 100);
@@ -1049,7 +1150,7 @@
                     const duration = formatDuration(overallStart, overallEnd);
 
                     const remarks = `
-                        Action: Import/Update Agency Batch
+                       Action: Import Customer Details Pricelist
                         <br>Processed ${valid_data.length} records
                         <br>Errors: ${errorLogs.length}
                         <br>Start: ${formatReadableDate(overallStart)}
@@ -1057,7 +1158,7 @@
                         <br>Duration: ${duration}
                     `;
 
-                    logActivity("import-agency-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+                    logActivity("import-customer-details-pricelist-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
 
                     if (errorLogs.length > 0) {
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
@@ -1073,25 +1174,9 @@
                 let updateRecords = [];
 
                 batch.forEach(row => {
-                    let matchedId = null;
-
-                    if (matchType === "AND") {
-                        let key = matchFields.map(field => row[field] || "").join("|");
-                        if (existingMap.has(key)) {
-                            matchedId = existingMap.get(key);
-                        }
-                    } else {
-                        for (let [key, id] of existingMap.entries()) {
-                            let keyParts = key.split("|"); // ["AJK 530", "Marsden F. Hoffman"]
-
-    
-
-                            if (keyParts[0] === row["code"]) {
-                                matchedId = id;
-                                break; // Stop looping once a match is found
-                            }
-                        }
-                    }
+                    row.customer_id = parentId; // enforce the context list
+                    const rowKey = matchFields.map(f => (row[f] ?? '') + '').join('|');
+                    const matchedId = existingMap.get(rowKey) || null;
 
                     if (matchedId) {
                         row.id = matchedId;
@@ -1108,7 +1193,7 @@
                 function processUpdates() {
                     return new Promise((resolve) => {
                         if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_agency", "id", false, (response) => {
+                            batch_update(url, updateRecords, "tbl_customer_pricelist", "id", false, (response) => {
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
                                 }
@@ -1123,9 +1208,9 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_agency", false, (response) => {
+                            batch_insert(url, newRecords, "tbl_customer_pricelist", false, (response) => {
                                 if (response.message === 'success') {
-                                    updateOverallProgress("Saving Agency...", batch_index + 1, total_batches);
+                                    updateOverallProgress("Saving Customer Details Pricelist..", batch_index + 1, total_batches);
                                 } else {
                                     errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
                                 }
@@ -1268,8 +1353,13 @@
             }, {});
 
             // 
-            let td_validator = ['agency code', 'agency description', 'status'];
+            let td_validator = ['brand', 'brand label type', 'label type category', 'category 1 (item class mf)',
+            'category 2 (sub class mf)', 'category 3 (department mf)', 'category 4 (merch. category mf)',
+            'item code', 'item description', 'customer item code', 'uom', 'selling price', 'discount in percent', 'effectivity date', 'status'];
             td_validator.forEach(column => {
+                if (column === 'effectivity date') {
+                    lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
+                }
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
 
@@ -1424,14 +1514,26 @@
 
         formattedData = [
             {
-                "Agency Code": "",
-                "Agency Description": "",
+                "Brand": "",
+                "Brand Label Type": "",
+                "Label Type Category": "",
+                "Category 1 (Item Class MF)": "",
+                "Category 2 (Sub Class MF)": "",
+                "Category 3 (Department MF)": "",
+                "Category 4 (Merch. Category MF)": "",
+                "Item Code": "",
+                "Item Description": "",
+                "Customer Item Code": "",
+                "UOM": "",
+                "Selling Price": "",
+                "Discount in Percent": "",
+                "Effectivity Date": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
         ]
 
-        exportArrayToCSV(formattedData, `Masterfile: Agency - ${formatDate(new Date())}`, headerData);
+        exportArrayToCSV(formattedData, `Customer Details Pricelist - ${formatDate(new Date())}`, headerData);
     }
 
     $(document).on('click', '#btn_export', function () {

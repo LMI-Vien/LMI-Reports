@@ -1927,3 +1927,23 @@ function escapeHtmlAttr(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }
+
+function excel_date_to_readable_date(excel_date) {
+	var dateStr = excel_date.split('/').map((part, index) => {
+		if (index === 2 && part.length === 2) {
+		}
+		return part;
+	}).join('/');
+
+	var date = new Date(dateStr);
+	
+	if (isNaN(date)) {
+		return "Invalid Date";
+	}
+	
+	return date.toLocaleDateString("en-US", { 
+		year: "numeric", 
+		month: "long", 
+		day: "numeric" 
+	});
+}

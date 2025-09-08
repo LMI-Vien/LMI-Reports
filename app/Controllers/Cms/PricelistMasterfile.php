@@ -27,7 +27,7 @@ class PricelistMasterfile extends BaseController
 		$data['title'] = "Pricelist Masterfile";
 		$data['PageName'] = 'Pricelist Masterfile';
 		$data['PageUrl'] = 'Pricelist Masterfile';
-		$data['buttons'] = ['add', 'search', 'filter'];
+		$data['buttons'] = ['add', 'search', 'import', 'filter'];
 		$data['content'] = "cms/pricelist_masterfile/pricelist_masterfile.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
@@ -66,7 +66,7 @@ class PricelistMasterfile extends BaseController
 		$data['PageName'] = 'Pricelist Details';
 		$data['PageUrl'] = 'Pricelist Details';
 		$data['content'] = "cms/pricelist_masterfile/pricelist_details.php";
-		$data['buttons'] = ['add', 'search'];
+		$data['buttons'] = ['add', 'import', 'search'];
 		$data['session'] = session();
 		$query = [
 		    'status' => 1
@@ -102,7 +102,7 @@ class PricelistMasterfile extends BaseController
 		if ($id === null) {
             $id = $this->request->uri->getSegment(4);
         }
-		$data['pricelistId'] = $id;
+		$data['customerId'] = $id;
 
 		$data['meta'] = array(
 			"title"         =>  "Customer Details Pricelist",
@@ -113,7 +113,7 @@ class PricelistMasterfile extends BaseController
 		$data['PageName'] = 'Customer Details Pricelist';
 		$data['PageUrl'] = 'Customer Details Pricelist';
 		$data['content'] = "cms/pricelist_masterfile/customer_details_pricelist.php";
-		$data['buttons'] = ['add', 'search'];
+		$data['buttons'] = ['add', 'import', 'search'];
 		$data['session'] = session();
 		$query = [
 		    'status' => 1

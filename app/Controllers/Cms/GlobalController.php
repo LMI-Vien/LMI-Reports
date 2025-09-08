@@ -1076,6 +1076,9 @@ class GlobalController extends BaseController
 	    if (!empty($request['item_classification'])) {
 	        $responseData['item_classification'] = $this->Global_model->get_valid_records("tbl_item_class", 'item_class_code');
 	    }
+		if (!empty($request['label_category'])){
+			$responseData['label_category'] = $this->Global_model->get_valid_records("tbl_label_category_list", 'code', 'description');
+		}
  	    return $this->response->setJSON($responseData);
 	}
 

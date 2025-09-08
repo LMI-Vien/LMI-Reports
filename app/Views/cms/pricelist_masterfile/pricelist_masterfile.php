@@ -104,15 +104,16 @@
                 </div>
                 <div class="modal-body">
                     <form id="form-modal">
-                    <div class="mb-3">
-                            <label for="priceListDesc" class="form-label">Pricelist Description</label>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Pricelist Description</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
-                            <input type="text" class="form-control required" id="priceListDesc" maxlength="50" aria-describedby="priceListDesc">
+                            <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
+                            <small id="remarks" class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
                         <div class="mb-3">
                             <label for="remarks" class="form-label">Remarks</label>
                             <input type="text" class="form-control required" id="remarks" maxlength="50" aria-describedby="remarks">
-                            <small id="remarks" class="form-text text-muted">* required, must be unique, max 100 characters</small>
+                            <small id="remarks" class="form-text text-muted">* required, max 50 characters</small>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -214,8 +215,8 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' style='width: 5%'>Line #</th>
-                                        <th class='center-content' style='width: 10%'>Code</th>
                                         <th class='center-content' style='width: 20%'>Description</th>
+                                        <th class='center-content' style='width: 20%'>Remarks</th>
                                         <th class='center-content' style='width: 10%'>Status</th>
                                     </tr>
                                 </thead>
@@ -423,22 +424,22 @@
     });
 
     $('#btn_add').on('click', function() {
-        open_modal('Add New Label Category', 'add', '');
+        open_modal('Add New Pricelist', 'add', '');
     });
 
     $('#btn_import').on('click', function() {
-        title = addNbsp('IMPORT Label Category');
+        title = addNbsp('IMPORT Pricelist');
         $("#import_modal").find('.modal-title').find('b').html(title);
         $("#import_modal").modal('show');
         clear_import_table();
     });
 
     function edit_data(id) {
-        open_modal('Edit Label Category', 'edit', id);
+        open_modal('Edit Pricelist', 'edit', id);
     }
 
     function view_data(id) {
-        open_modal('View Label Category', 'view', id);
+        open_modal('View Pricelist', 'view', id);
     }
 
     function customerDets(id, customerId = null) {
@@ -984,7 +985,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#priceListDesc, #remarks, #status', isReadOnly);
+        set_field_state('#description, #remarks, #status', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -1007,7 +1008,7 @@
     }
 
     function reset_modal_fields() {
-        $('#popup_modal #priceListDesc, #popup_modal #remarks, #popup_modal').val('');
+        $('#popup_modal #description, #popup_modal #remarks, #popup_modal').val('');
         $('#popup_modal #status').prop('checked', true);
     }
 
@@ -1027,13 +1028,13 @@
     }
 
     function save_data(action, id) {
-        const priceListDesc = $('#priceListDesc').val().trim();
+        const description = $('#description').val().trim();
         const remarks = $('#remarks').val().trim();
         const isActive = $('#status').prop('checked') ? 1 : 0;
 
         const tableName = "tbl_pricelist_masterfile";
         const uniqueFields = ["description"];
-        const fieldValues = [priceListDesc];
+        const fieldValues = [description];
         const statusField = "status";
 
         const isEdit = id !== undefined && id !== null && id !== '';
@@ -1044,7 +1045,7 @@
             modal.confirm(confirmMessage, function (result) {
                 if (result) {
                     modal.loading(true);
-                    save_to_db(priceListDesc, priceListDesc, isActive, isEdit ? id : null);
+                    save_to_db(description, description, isActive, isEdit ? id : null);
                 }
             });
         }
@@ -1233,7 +1234,7 @@
             if(obj){
                 $.each(obj, function(i,j) {
                     $('#id').val(j.id);
-                    $('#priceListDesc').val(j.description);
+                    $('#description').val(j.description);
                     $('#remarks').val(j.remarks);
                     if(j.status == 1) {
                         $('#status').prop('checked', true)
@@ -1265,15 +1266,15 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Label Category Code": row["Label Category Code"] || "",
-                "Label Category Description": row["Label Category Description"] || "",
+                "Description": row["Description"] || "",
+                "Remarks": row["Remarks"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
                 "Created Date": formatDate(new Date()) || ""
             };
         });
 
-        let worker = new Worker(base_url + "assets/cms/js/validator_label_category.js");
+        let worker = new Worker(base_url + "assets/cms/js/validator_pricelist.js");
         worker.postMessage({ data: jsonData, base_url: base_url });
 
         worker.onmessage = function(e) {
@@ -1313,18 +1314,18 @@
         let max_retries = 5; 
         let errorLogs = [];
         let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_label_category_list';
-        let selected_fields = ['id', 'code', 'description'];
+        let table = 'tbl_pricelist_masterfile';
+        let selected_fields = ['id', 'description', 'remarks'];
 
-        const matchFields = ["code", "description"];  
+        const matchFields = ["description", "remarks"];  
         const matchType = "OR"; 
         modal.loading_progress(true, "Validating and Saving data...");
 
         aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
             const result = JSON.parse(response);
             const allEntries = result.existing || [];
-            const codeSet = new Set(valid_data.map(r => r.code));
-            const originalEntries = allEntries.filter(rec => codeSet.has(rec.code));
+            const descriptionSet = new Set(valid_data.map(r => r.description));
+            const originalEntries = allEntries.filter(rec => descriptionSet.has(rec.description));
 
             let existingMap = new Map();
 
@@ -1348,7 +1349,7 @@
                     const duration = formatDuration(overallStart, overallEnd);
 
                     const remarks = `
-                        Action: Import/Update Label Category Batch
+                        Action: Import/Update Pricelist Masterfile Batch
                         <br>Processed ${valid_data.length} records
                         <br>Errors: ${errorLogs.length}
                         <br>Start: ${formatReadableDate(overallStart)}
@@ -1356,7 +1357,7 @@
                         <br>Duration: ${duration}
                     `;
 
-                    logActivity("import-label-category-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+                    logActivity("import-pricelist-masterfile-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
 
                     if (errorLogs.length > 0) {
                         createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
@@ -1385,7 +1386,7 @@
 
     
 
-                            if (keyParts[0] === row["code"]) {
+                            if (keyParts[0] === row["description"]) {
                                 matchedId = id;
                                 break;
                             }
@@ -1407,7 +1408,7 @@
                 function processUpdates() {
                     return new Promise((resolve) => {
                         if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_label_category_list", "id", false, (response) => {
+                            batch_update(url, updateRecords, "tbl_pricelist_masterfile", "id", false, (response) => {
                                 if (response.message !== 'success') {
                                     errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
                                 }
@@ -1422,9 +1423,9 @@
                 function processInserts() {
                     return new Promise((resolve) => {
                         if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_label_category_list", false, (response) => {
+                            batch_insert(url, newRecords, "tbl_pricelist_masterfile", false, (response) => {
                                 if (response.message === 'success') {
-                                    updateOverallProgress("Saving Label Category...", batch_index + 1, total_batches);
+                                    updateOverallProgress("Saving Pricelist...", batch_index + 1, total_batches);
                                 } else {
                                     errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
                                 }
@@ -1565,7 +1566,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['label category code', 'label category description', 'status'];
+            let td_validator = ['description', 'remarks', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -1720,14 +1721,14 @@
 
         formattedData = [
             {
-                "Label Category Code": "",
-                "Label Category Description": "",
+                "Description": "",
+                "Remarks": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
         ]
 
-        exportArrayToCSV(formattedData, `Masterfile: Label Category - ${formatDate(new Date())}`, headerData);
+        exportArrayToCSV(formattedData, `Masterfile: Pricelist - ${formatDate(new Date())}`, headerData);
     }
 
     $(document).on('click', '#btn_export', function () {
