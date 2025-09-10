@@ -874,6 +874,181 @@ class Sync_model extends Model
         return $status === 'success' ? "Data sync completed for Classification with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
     }
 
+    public function syncSubClassificationData($batchSize = 5000)
+    {
+        $offset = 0;
+        $totalRecordsSynced = 0;
+        $errorMessage = null;
+        $status = 'success';
+        try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_sub_classification");
+            while (true) {
+                $sourceData = $this->traccLmiDB->table('itemsubclassfile')
+                                               ->limit($batchSize, $offset)
+                                               ->get()
+                                               ->getResultArray();
+
+                if (empty($sourceData)) {
+                    break;
+                }
+
+                $values = [];
+                foreach ($sourceData as $row) {
+                    $values[] = "(
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['itmclacde']) . "',
+                        '" . $this->esc($row['itmcladsc']) . "',
+                        '" . $this->esc($row['itmsubclacde']) . "',
+                        '" . $this->esc($row['itmsubcladsc']) . "',
+                        1, 
+                        NULL,
+                        NULL, 
+                        1, 
+                        NULL
+                    )";
+                }
+
+                if (!empty($values)) {
+                    $sql = "INSERT INTO tbl_sub_classification (id, item_class_code, item_class_description, item_sub_class_code, item_sub_class_description, status, created_date, updated_date, created_by, updated_by) 
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                              item_class_code = VALUES(item_class_code), 
+                              item_class_description = VALUES(item_class_description), 
+                              item_sub_class_code = VALUES(item_sub_class_code), 
+                              item_sub_class_description = VALUES(item_sub_class_description), 
+                              status = 1,
+                              created_date = created_date,
+                              updated_date = updated_date,
+                              created_by = created_by,
+                              updated_by = 1;";
+
+                    $this->sfaDB->query($sql);
+                    $totalRecordsSynced += count($sourceData);
+                }
+
+                $offset += $batchSize;
+            }
+        } catch (\Exception $e) {
+            $status = 'error';
+            $errorMessage = $e->getMessage();
+        }    
+        return $status === 'success' ? "Data sync completed for Sub Classification with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    }
+
+    public function syncDeptData($batchSize = 5000)
+    {
+        $offset = 0;
+        $totalRecordsSynced = 0;
+        $errorMessage = null;
+        $status = 'success';
+        try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_item_department");
+            while (true) {
+                $sourceData = $this->traccLmiDB->table('itemdeptfile')
+                                               ->limit($batchSize, $offset)
+                                               ->get()
+                                               ->getResultArray();
+
+                if (empty($sourceData)) {
+                    break;
+                }
+
+                $values = [];
+                foreach ($sourceData as $row) {
+                    $values[] = "(
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['itmdeptcde']) . "',
+                        '" . $this->esc($row['itmdeptdsc']) . "',
+                        1, 
+                        NULL,
+                        NULL, 
+                        1, 
+                        NULL
+                    )";
+                }
+
+                if (!empty($values)) {
+                    $sql = "INSERT INTO tbl_item_department (id, item_department_code, item_department_description, status, created_date, updated_date, created_by, updated_by) 
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                              item_department_code = VALUES(item_department_code), 
+                              item_department_description = VALUES(item_department_description), 
+                              status = 1,
+                              created_date = created_date,
+                              updated_date = updated_date,
+                              created_by = created_by,
+                              updated_by = 1;";
+
+                    $this->sfaDB->query($sql);
+                    $totalRecordsSynced += count($sourceData);
+                }
+
+                $offset += $batchSize;
+            }
+        } catch (\Exception $e) {
+            $status = 'error';
+            $errorMessage = $e->getMessage();
+        }    
+        return $status === 'success' ? "Data sync completed for Item Department with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    }
+
+    public function syncMerchData($batchSize = 5000)
+    {
+        $offset = 0;
+        $totalRecordsSynced = 0;
+        $errorMessage = null;
+        $status = 'success';
+        try {
+            $this->sfaDB->query("TRUNCATE TABLE tbl_item_merchandise_category");
+            while (true) {
+                $sourceData = $this->traccLmiDB->table('itemmerchandisecategoryfile')
+                                               ->limit($batchSize, $offset)
+                                               ->get()
+                                               ->getResultArray();
+
+                if (empty($sourceData)) {
+                    break;
+                }
+
+                $values = [];
+                foreach ($sourceData as $row) {
+                    $values[] = "(
+                        '" . $this->esc($row['recid']) . "',
+                        '" . $this->esc($row['itmmerchcatcde']) . "',
+                        '" . $this->esc($row['itmmerchcatdsc']) . "',
+                        1, 
+                        NULL,
+                        NULL, 
+                        1, 
+                        NULL
+                    )";
+                }
+
+                if (!empty($values)) {
+                    $sql = "INSERT INTO tbl_item_merchandise_category (id, item_mech_cat_code, item_merch_cat_description, status, created_date, updated_date, created_by, updated_by) 
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                              item_mech_cat_code = VALUES(item_mech_cat_code), 
+                              item_merch_cat_description = VALUES(item_merch_cat_description), 
+                              status = 1,
+                              created_date = created_date,
+                              updated_date = updated_date,
+                              created_by = created_by,
+                              updated_by = 1;";
+
+                    $this->sfaDB->query($sql);
+                    $totalRecordsSynced += count($sourceData);
+                }
+
+                $offset += $batchSize;
+            }
+        } catch (\Exception $e) {
+            $status = 'error';
+            $errorMessage = $e->getMessage();
+        }    
+        return $status === 'success' ? "Data sync completed for Item Merch Category with $totalRecordsSynced records." : "Sync failed. $errorMessage.";
+    }
+
     public function syncCusPaymentGroupLmiData($where, $batchSize = 5000)
     {
         $offset = 0;
