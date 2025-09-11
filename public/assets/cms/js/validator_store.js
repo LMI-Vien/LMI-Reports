@@ -10,14 +10,17 @@ self.onmessage = async function(e) {
     var ba_per_store = {};
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?ba=1&store_ba=1`);   
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?ba=1&store_ba=1&store_segment=1`);   
         let ba_data = await get_ba_valid_response.json();
 
         let ba_records = ba_data.ba;
         let store_ba_group_records = ba_data.store_ba;
+        let store_segment_records = ba_data.store_segment;
 
         let ba_lookup = {};
+        let store_segment_lookup = {};
         ba_records.forEach(ba => ba_lookup[ba.code.toLowerCase()] = ba.id);
+        store_segment_records.forEach(store_segment => store_segment_lookup[store_segment.code.toLowerCase()] = store_segment.id);
 
         let ba_id_to_code = {};
         let store_ba_global_tag_map = {};
@@ -45,6 +48,7 @@ self.onmessage = async function(e) {
             let description = row["Store/Branch Description"] ? row["Store/Branch Description"].trim() : "";
             let bas_raw = row["Store/Branch Brand Ambassador Code"];
             let bas = typeof bas_raw === 'string' ? bas_raw.trim() : String(bas_raw || '').trim();
+            let storeSegment = row["Store Segment Code"];
             let status = row["Status"] ? row["Status"].toLowerCase() : "";
             let user_id = row["Created By"] ? row["Created By"].trim() : "";
             let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
@@ -153,6 +157,17 @@ self.onmessage = async function(e) {
                 err_counter++;
             }
 
+            let storeSegmentId = store_segment_lookup[storeSegment?.toLowerCase()];
+            if(storeSegment === "") {
+                invalid = true;
+                errorLogs.push(`⚠️ Invalid Store Segment Code at line #: ${tr_count}`);
+                err_counter++;
+            } else if (!storeSegmentId) {
+                invalid = true;
+                errorLogs.push(`⚠️ Store Segment Code "${storeSegment}" at line #: ${tr_count} does not exist in master list`);
+                err_counter++;
+            }
+
             if (!["active", "inactive"].includes(status)) {
                 invalid = true;
                 errorLogs.push(`⚠️ Invalid Status at line #: ${tr_count}`);
@@ -163,6 +178,7 @@ self.onmessage = async function(e) {
                 valid_data.push({
                     code: code,
                     description: description,
+                    store_segment_id: storeSegmentId,
                     status: status === "active" ? 1 : 0,
                     created_by: user_id,
                     created_date: date_of_creation
