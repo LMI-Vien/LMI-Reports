@@ -1069,18 +1069,52 @@ class GlobalController extends BaseController
 	        $responseData['item_class'] = $this->Global_model->get_valid_records("tbl_item_class", 'item_class_description');
 	    }
 		if (!empty($request['label_type'])) {
-	        $responseData['label_type'] = $this->Global_model->dynamic_search(
-				"'tbl_brand_label_type'", "''", "'id, label'", 0, 0, "''", "''", "''"
-			);
+	        $responseData['label_type'] = $this->Global_model->get_valid_records("tbl_brand_label_type", ['id', 'label']);
 	    }
 	    if (!empty($request['item_classification'])) {
 	        $responseData['item_classification'] = $this->Global_model->get_valid_records("tbl_item_class", 'item_class_code');
 	    }
 		if (!empty($request['label_category'])){
-			$responseData['label_category'] = $this->Global_model->get_valid_records("tbl_label_category_list", 'code', 'description');
+			$responseData['label_category'] = $this->Global_model->get_valid_records("tbl_label_category_list", ['code', 'description']);
 		}
 		if (!empty($request['store_segment'])){
-			$responseData['store_segment'] = $this->Global_model->get_valid_records("tbl_store_segment_list", 'code', 'description');
+			$responseData['store_segment'] = $this->Global_model->get_valid_records("tbl_store_segment_list", ['code', 'description']);
+		}
+		if (!empty($request['classification'])) {
+			$responseData['classification'] = $this->Global_model->get_valid_records("tbl_classification", ['item_class_code', 'item_class_description']);
+		}
+		if (!empty($request['sub_classification'])) {
+			$responseData['sub_classification'] = $this->Global_model->get_valid_records("tbl_sub_classification", ['item_sub_class_code', 'item_sub_class_description']);
+		}
+		if (!empty($request['item_department'])) {
+			$responseData['item_department'] = $this->Global_model->get_valid_records("tbl_item_department", ['item_department_code']);
+		}
+		if (!empty($request['item_merchandise_category'])) {
+			$responseData['item_merchandise_category'] = $this->Global_model->get_valid_records("tbl_item_merchandise_category", ['item_mech_cat_code']);
+		}
+		if (!empty($request['itemfile_lmi'])) {
+			$responseData['itemfile_lmi'] = $this->Global_model->get_valid_records_tracc_data("tbl_itemfile_lmi", ['itmcde', 'itmdsc'], 'recid');
+		}
+		if (!empty($request['itemfile_rgdi'])) {
+			$responseData['itemfile_rgdi'] = $this->Global_model->get_valid_records_tracc_data("tbl_itemfile_rgdi", ['itmcde', 'itmdsc'], 'recid');
+		}
+		if (!empty($request['main_pricelist'])) {
+			$responseData['main_pricelist'] = 
+			$this->Global_model->get_valid_records(
+				"tbl_main_pricelist", 
+				[
+					'cust_item_code',
+					'brand_id',
+					'category_1_id',
+					'category_2_id',
+					'category_3_id',
+					'category_4_id',
+					'item_code',
+					'brand_label_type_id',
+					'net_price',
+					'label_type_category_id'
+				]
+			);
 		}
  	    return $this->response->setJSON($responseData);
 	}

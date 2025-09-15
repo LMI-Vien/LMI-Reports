@@ -199,6 +199,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('pricelist-details/(:any)', 'Cms\PricelistMasterfile::pricelistDetails/$1');
         $routes->get('customer-details-pricelist/(:any)', 'Cms\PricelistMasterfile::customerPricelistDetails/$1');
         $routes->match(['GET', 'POST'], 'merged-customers', 'Cms\PricelistMasterfile::getMergedCustomers');
+        $routes->match(['GET', 'POST'], 'merged-items', 'Cms\PricelistMasterfile::getMergedItemFile');
     });
 
     $routes->group('pricelist-details', static function ($routes) {
