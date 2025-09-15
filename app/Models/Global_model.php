@@ -1016,18 +1016,52 @@ class Global_model extends Model
         }, $results);
     }
 
-    function get_valid_records_tracc_data($table, $column_name, $where = null) {
-        $builder = $this->db->table($table)
-            ->select(['recid', $column_name, 'itmcde']);
-        if (!empty($where)) {
-            $builder->groupBy($where);
-        }else{
-            $builder->where('cusitmcde !=', '');
+    function get_valid_records_tracc_data($table, $columns, $groupBy = null) {
+        if (is_string($columns)) {
+            $columns = [$columns];
+        }
+        
+        $columns = (array) $columns;
+
+        $selectCols = array_values(array_unique(array_merge($columns, ['itmcde'])));
+        $builder = $this->db->table($table)->select($selectCols);
+
+        foreach ($selectCols as $col) {
+            $builder->where("$col !=", '');
         }
 
-        $query = $builder->get();
-        return $query->getResultArray();
+        if (!empty($groupBy)) {
+            $groupByCols = array_values(array_unique(array_merge((array) $groupBy, $selectCols)));
+            $builder->groupBy($groupByCols);
+        } else {
+            $builder->select('recid');
+        }
+
+        $rows = $builder->get()->getResultArray();
+
+        foreach ($rows as &$row) {
+            foreach ($row as $k => $v) {
+                if (is_string($v)) {
+                    $row[$k] = trim($v);
+                }
+            }
+        }
+
+        return $rows;
     }
+
+    // function get_valid_records_tracc_data($table, $column_name, $where = null) {
+    //     $builder = $this->db->table($table)
+    //         ->select(['recid', $column_name, 'itmcde']);
+    //     if (!empty($where)) {
+    //         $builder->groupBy($where);
+    //     }else{
+    //         $builder->where('cusitmcde !=', '');
+    //     }
+
+    //     $query = $builder->get();
+    //     return $query->getResultArray();
+    // }
 
     public function batchUpdateCustom($table, $data, $primaryKey, $get_code = false, $where_in = [])
     {

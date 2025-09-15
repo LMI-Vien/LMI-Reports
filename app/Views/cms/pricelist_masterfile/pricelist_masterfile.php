@@ -108,12 +108,12 @@
                             <label for="description" class="form-label">Pricelist Description</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                             <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
-                            <small id="remarks" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                            <small class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
                         <div class="mb-3">
                             <label for="remarks" class="form-label">Remarks</label>
                             <input type="text" class="form-control required" id="remarks" maxlength="50" aria-describedby="remarks">
-                            <small id="remarks" class="form-text text-muted">* required, max 50 characters</small>
+                            <small class="form-text text-muted">* required, max 50 characters</small>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>

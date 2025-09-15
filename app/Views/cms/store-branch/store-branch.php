@@ -135,6 +135,12 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="storeSegment" class="form-label">Store/Branch Segment</label>
+                        <input type="text" class="form-control required" id="storeSegment" placeholder="Select Store/Branch Segment">
+                        <input type="hidden" id="storeSegmentId" name="storeSegmentId">
+                    </div>
+
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="status" checked>
                         <label class="form-check-label" for="status">Active</label>
@@ -202,6 +208,7 @@
                                     <th class='center-content'>Store/Branch Code</th>
                                     <th class='center-content'>Store/Branch Description</th>
                                     <th class='center-content'>Store/Branch Brand Ambassador Code</th>
+                                    <th class='center-content'>Store Segment Code</th>
                                     <th class='center-content'>Status</th>
                                 </tr>
                             </thead>
@@ -235,7 +242,50 @@
     $(document).ready(function() {
         get_data(query);
         get_pagination(query);
+        let storeSegment = <?= json_encode($storeSegment); ?>
+
+        let storeSegmentOptions = storeSegment.map(ss => ({
+            id: ss.id,
+            display: (ss.code ? ss.code + ' - ' : '') + (ss.description || '')
+        }));
+
+        let storeSegmentToId = new Map(storeSegmentOptions.map(o => [o.display, String(o.id)]));
+
+        initAuto($('#storeSegment'),       $('#storeSegmentId'),       storeSegmentOptions,'display', 'id', row => { $('#storeSegmentId').val(row.id); });
+
+        enforceValidPick($('#storeSegment'),       $('#storeSegmentId'),       storeSegmentToId);
     });
+
+
+    function initAuto($input, $hidden, options, labelKey, idKey, onPick) {
+        if (!$input.length || $input.data('ui-autocomplete')) return;
+
+        // call your existing helper as-is
+        autocomplete_field($input, $hidden, options, labelKey, idKey, function(row){
+            if (typeof onPick === 'function') onPick(row);
+        });
+
+        // put the menu inside the modal so it isn't clipped
+        try { $input.autocomplete('option', 'appendTo', '#popup_modal'); } catch (e) {}
+
+        // open suggestions on focus
+        $input.on('focus', function(){ $(this).autocomplete('search', ''); });
+
+        // clear stale id if user types
+        $input.on('input', function(){ $hidden.val(''); });
+    }
+
+    function enforceValidPick($input, $hidden, labelToIdMap) {
+        $input.on('blur', function () {
+            const label = $input.val().trim();
+            const id = $hidden.val();
+            // if label doesn't map to a known id OR id is empty/mismatched, clear both
+            if (!labelToIdMap.has(label) || String(labelToIdMap.get(label)) !== String(id)) {
+                $input.val('');
+                $hidden.val('');
+            }
+        });
+    }
 
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
@@ -562,7 +612,7 @@
         }
 
         let isReadOnly = actions === 'view';
-        set_field_state('#code, #description, #status', isReadOnly);
+        set_field_state('#code, #description, #storeSegment, #status', isReadOnly);
 
         $baName_list.empty();        
         $footer.empty();
@@ -665,13 +715,20 @@
     };
 
     function populate_modal(inp_id, actions) {
-        var query = "status >= 0 and id = " + inp_id;
+        var query = "s.status >= 0 and s.id = " + inp_id;
         var url   = "<?= base_url('cms/global_controller');?>";
         var data  = {
             event:   "list",
-            select:  "id, code, description, status",
+            select:  "s.id, s.code, s.description, s.store_segment_id, seg.code AS segment_code, s.status",
             query:   query,
-            table:   "tbl_store"
+            table:   "tbl_store s",
+            join : [
+                {
+                    table: "tbl_store_segment_list seg", 
+                    query: "seg.id = s.store_segment_id",
+                    type: "left"
+                }
+            ],
         };
 
         aJax.post(url, data, function(result) {
@@ -682,6 +739,7 @@
                 $('#id').val(asc.id);
                 $('#code').val(asc.code);
                 $('#description').val(asc.description);
+                $('#storeSegment').val(asc.segment_code);
                 $('#status').prop('checked', asc.status == 1);
 
                 let line = 0;
@@ -810,10 +868,10 @@
         return result;
     }
 
-    // this is for the new code like 141-31-41 - John Doe
     function save_data(actions, id) {
         var code        = $('#code').val().trim();
         var description = $('#description').val().trim();
+        var storeSegment = $('#storeSegmentId').val().trim();
         var chk_status  = $('#status').prop('checked');
         var status_val  = chk_status ? 1 : 0;
         var linenum     = 0;
@@ -860,7 +918,7 @@
         }
 
         function finalize_and_insert(storeId, batch) {
-            save_to_db(code, description, unique_brandAmba, status_val, storeId, function(obj) {
+            save_to_db(code, description, storeSegment, unique_brandAmba, status_val, storeId, function(obj) {
                 var finalStoreId = storeId || obj.ID;
                 const batchStart = new Date();
                 if (storeId) {
@@ -971,7 +1029,7 @@
         }
     }
  
-    function save_to_db(inp_code, inp_description, inp_brandAmba, status_val, id, cb) {
+    function save_to_db(inp_code, inp_description, inp_storeSegment, inp_brandAmba, status_val, id, cb) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -986,6 +1044,7 @@
                 data: {
                     code: inp_code,
                     description: inp_description,
+                    store_segment_id : inp_storeSegment,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                     status: status_val
@@ -999,6 +1058,7 @@
                 data: {
                     code: inp_code,
                     description: inp_description,
+                    store_segment_id : inp_storeSegment,
                     created_date: formatDate(new Date()),
                     created_by: user_id,
                     status: status_val
@@ -1195,7 +1255,7 @@
                 return acc;
             }, {});
 
-            let td_validator = ['store/branch code', 'store/branch description', 'store/branch brand ambassador code', 'status'];
+            let td_validator = ['store/branch code', 'store/branch description', 'store/branch brand ambassador code', 'store segment code', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -1269,6 +1329,7 @@
                 "Store/Branch Code": row["Store/Branch Code"] || "",
                 "Store/Branch Description": row["Store/Branch Description"] || "",
                 "Store/Branch Brand Ambassador Code": row["Store/Branch Brand Ambassador Code"] || "",
+                "Store Segment Code": row["Store Segment Code"] || "",
                 "Status": row["Status"] || "",
                 "Created By": user_id || "",
                 "Created Date": formatDate(new Date()) || ""
@@ -1665,6 +1726,7 @@
                 "Store/Branch Code": "",
                 "Store/Branch Description": "",
                 "Store/Branch Brand Ambassador Code": "",
+                "Store Segment Code" : "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             },
@@ -1672,6 +1734,7 @@
                 "Store/Branch Code": "",
                 "Store/Branch Description": "",
                 "Store/Branch Brand Ambassador Code": "",
+                "Store Segment Code" : "",
                 "Status": "",
                 "NOTE:": "Brand Ambassadors should be separated by commas. eg(BA1, BA2, BA3)"
             }

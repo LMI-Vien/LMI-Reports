@@ -33,6 +33,11 @@ class StoreBranch extends BaseController
 		$data['content'] = "cms/store-branch/store-branch.php";
 		$data['buttons'] = ['add', 'search', 'import', 'export', 'filter'];
 		$data['session'] = session(); //for frontend accessing the session data
+		$query = [
+		    'status' => 1
+		];
+		$data['storeSegment'] = $this->Global_model->get_data_list('tbl_store_segment_list', $query, 99, 0, 'id, code, description', 'code', 'ASC', null, null);
+		
 		$data['js'] = array(
 				"assets/js/xlsx.full.min.js",
 				"assets/js/bootstrap.min.js",
@@ -43,7 +48,7 @@ class StoreBranch extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/cms/css/main_style.css",//css sa style ni master Vien
+        		"assets/cms/css/main_style.css",
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);		

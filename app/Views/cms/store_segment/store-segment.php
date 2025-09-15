@@ -44,7 +44,7 @@
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center md-center">
-                <b>A G E N C Y</b>
+                <b>S T O R E - S E G M E N T</b>
             </div>
             <div class="card-body text-center">
                 <div class="box">
@@ -61,8 +61,8 @@
                               <thead>
                                   <tr>
                                       <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                      <th class='center-content'>Agency Code</th>
-                                      <th class='center-content'>Agency Description</th>
+                                      <th class='center-content'>Segment Code</th>
+                                      <th class='center-content'>Segment Description</th>
                                       <th class='center-content'>Status</th>
                                       <th class='center-content'>Date Created</th>
                                       <th class='center-content'>Date Modified</th>
@@ -101,15 +101,14 @@
                 <div class="modal-body">
                     <form id="form-modal">
                     <div class="mb-3">
-                            <label for="code" class="form-label">Agency Code</label>
-                            <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
-                            <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code">
-                            <small id="code" class="form-text text-muted">* required, must be unique, max 25 characters</small>
+                            <label for="code" class="form-label">Segment Code</label>
+                            <input type="text" class="form-control" id="code" aria-describedby="code" disabled>
+                            <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label">Agency Description</label>
-                            <input type="text" class="form-control required" id="agency" maxlength="50" aria-describedby="description">
-                            <small id="description" class="form-text text-muted">* required, must be unique, max 50 characters</small>
+                            <label for="description" class="form-label">Segment Description</label>
+                            <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
+                            <small class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -177,8 +176,7 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' style='width: 5%'>Line #</th>
-                                        <th class='center-content' style='width: 10%'>Agency Code</th>
-                                        <th class='center-content' style='width: 20%'>Agency Description</th>
+                                        <th class='center-content' style='width: 20%'>Segment Description</th>
                                         <th class='center-content' style='width: 10%'>Status</th>
                                     </tr>
                                 </thead>
@@ -223,11 +221,11 @@
       var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : "id, code, agency, status, updated_date, created_date",
+            select : "id, code, description, status, updated_date, created_date",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_agency",
+            table : "tbl_store_segment_list",
             order : {
                 field : field,
                 order : order 
@@ -248,7 +246,7 @@
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.agency, 10) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.description, 10) + "</td>";
                         html += "<td scope=\"col\">" +status+ "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -277,15 +275,15 @@
         });
     }
 
-    function get_pagination(query, field = "agency", order = "asc") {
+    function get_pagination(query, field = "code", order = "asc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
           event : "pagination",
-            select : "id, agency",
+            select : "id, code",
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_agency",
+            table : "tbl_store_segment_list",
             order : {
                 field : field, //field to order
                 order : order //asc or desc
@@ -316,7 +314,7 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (code like \'%'+escaped_keyword+'%\' or agency like \'%'+escaped_keyword+'%\')';
+            new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -329,7 +327,7 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (code like \'%'+escaped_keyword+'%\' or '+query+' like \'%'+escaped_keyword+'%\')';
+        new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -394,22 +392,22 @@
     });
 
     $('#btn_add').on('click', function() {
-        open_modal('Add New Agency', 'add', '');
+        open_modal('Add New Store Segment', 'add', '');
     });
 
     $('#btn_import').on('click', function() {
-        title = addNbsp('IMPORT AGENCY')
+        title = addNbsp('IMPORT STORE SEGMENT')
         $("#import_modal").find('.modal-title').find('b').html(title)
         $("#import_modal").modal('show')
         clear_import_table()
     });
 
     function edit_data(id) {
-        open_modal('Edit Agency', 'edit', id);
+        open_modal('Edit Store Segment', 'edit', id);
     }
 
     function view_data(id) {
-        open_modal('View Agency', 'view', id);
+        open_modal('View Store Segment', 'view', id);
     }
 
     function open_modal(msg, actions, id) {
@@ -442,7 +440,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#code, #agency, #status', isReadOnly);
+        set_field_state('#code, #description, #status', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -466,8 +464,11 @@
     }
 
     function reset_modal_fields() {
-        $('#popup_modal #code, #popup_modal #agency, #popup_modal').val('');
+        $('#popup_modal #code, #popup_modal #description, #popup_modal').val('');
         $('#popup_modal #status').prop('checked', true);
+        setTimeout(() => {
+            $('#popup_modal #code').prop('disabled', true)
+        }, 500);
     }
 
     function set_field_state(selector, isReadOnly) {
@@ -486,44 +487,73 @@
     }
 
     function save_data(action, id) {
-        var code = $('#code').val().trim();
-        var agency = $('#agency').val().trim();
-        var chk_status = $('#status').prop('checked');
-        if (chk_status) {
-            status_val = 1;
-        } else {
-            status_val = 0;
-        }
-        if (id !== undefined && id !== null && id !== '') {
-            check_current_db("tbl_agency", ["code", "agency"], [code, agency], "status" , "id", id, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_update_message, function(result){
-                        if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, agency, status_val, id)
-                        }
-                    });
+        generateStoreSegmentCode(function (generatedCode) {
+            var code = $('#code').val().trim();
+            var description = $('#description').val().trim();
+            var chk_status = $('#status').prop('checked');
+            if (chk_status) {
+                status_val = 1;
+            } else {
+                status_val = 0;
+            }
 
-                }             
-            });
-        }else{
-            check_current_db("tbl_agency", ["code"], [code], "status" , null, null, true, function(exists, duplicateFields) {
-                if (!exists) {
-                    modal.confirm(confirm_add_message, function(result){
-                        if(result){ 
-                                modal.loading(true);
-                            save_to_db(code, agency, status_val, null)
-                        }
-                    });
+            if (id !== undefined && id !== null && id !== '') {
+                check_current_db("tbl_store_segment_list", ["description"], [description], "status" , "id", id, true, function(exists, duplicateFields) {
+                    if (!exists) {
+                        modal.confirm(confirm_update_message, function(result){
+                            if(result){ 
+                                    modal.loading(true);
+                                save_to_db(code, description, status_val, id)
+                            }
+                        });
 
-                }                  
-            });
-        }
+                    }             
+                });
+            }else{
+                code = generatedCode;
+                check_current_db("tbl_store_segment_list", ["description"], [description], "status" , null, null, true, function(exists, duplicateFields) {
+                    if (!exists) {
+                        modal.confirm(confirm_add_message, function(result){
+                            if(result){ 
+                                    modal.loading(true);
+                                save_to_db(code, description, status_val, null)
+                            }
+                        });
+
+                    }                  
+                });
+            }
+        });
     }
 
-    function save_to_db(inp_code, inp_agency, status_val, id) {
+    function generateStoreSegmentCode(callback) {
         const url = "<?= base_url('cms/global_controller'); ?>";
-        let data = {}; 
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = ('0' + (now.getMonth() + 1)).slice(-2);
+
+        aJax.post(url, {
+            event: "get_last_code",
+            table: "tbl_store_segment_list",
+            field: "code"
+        }, function (res) {
+            const lastCode = res.last_code || '';
+            const prefix = `${year}-${month}`;
+            let newCode = `${prefix}-001`;
+
+            if (lastCode.startsWith(prefix)) {
+                const lastSeq = parseInt(lastCode.split('-')[3]) || 0;
+                const newSeq = ('000' + (lastSeq + 1)).slice(-3);
+                newCode = `${prefix}-${newSeq}`;
+            }
+
+            callback(newCode);
+        });
+    }
+
+    function save_to_db(inp_code, inp_description, status_val, id) {
+        const url = "<?= base_url('cms/global_controller'); ?>";
+        let data = {};
         let modal_alert_success;
         const now = new Date();
         const start_time = now;
@@ -533,88 +563,126 @@
             modal_alert_success = success_update_message;
             const updated_data = {
                 code: inp_code,
-                agency: inp_agency,
+                description: inp_description,
                 updated_date: formatDate(now),
                 updated_by: user_id,
                 status: status_val
             };
 
             valid_data.push({
-                module: "Agency Module",
+                module: "Store Segment Module",
                 action: "Update",
-                remarks: "Updated agency information",
+                remarks: "Updated Store Segment information",
                 new_data: JSON.stringify(updated_data),
                 old_data: ''
             });
 
             data = {
                 event: "update",
-                table: "tbl_agency",
+                table: "tbl_store_segment_list",
                 field: "id",
                 where: id,
                 data: updated_data
             };
-        } else {
-            modal_alert_success = success_save_message;
+
+            aJax.post(url, data, function (result) {
+                const obj = is_json(result);
+                const end_time = new Date();
+                const duration = formatDuration(start_time, end_time);
+                modal.loading(false);
+                modal.alert(modal_alert_success, 'success', function () {
+                    location.reload();
+                });
+            });
+
+            return; 
+        }
+
+        modal_alert_success = success_save_message;
+        aJax.post(url, {
+            event: "get_last_code",
+            table: "tbl_store_segment_list",
+            field: "code"
+        }, function (res) {
+            const lastCode = (res && res.last_code) ? String(res.last_code) : '';
+
+            function generateNewCode(lastCodeStr) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const prefix = `${year}-${month}`;
+                let newSequence = 1;
+
+                if (lastCodeStr && lastCodeStr.startsWith(prefix)) {
+                    // take the part AFTER the last hyphen
+                    const tail = lastCodeStr.substring(lastCodeStr.lastIndexOf('-') + 1);
+                    const lastSequence = parseInt(tail, 10);
+                    if (!isNaN(lastSequence)) newSequence = lastSequence + 1;
+                }
+                return `${prefix}-${String(newSequence).padStart(3, '0')}`;
+            }
+
+            const newCode = generateNewCode(lastCode);
+
             const inserted_data = {
-                code: inp_code,
-                agency: inp_agency,
+                code: newCode,
+                description: inp_description,
                 created_date: formatDate(now),
                 created_by: user_id,
                 status: status_val
             };
 
             valid_data.push({
-                module: "Agency Module",
+                module: "Store Segment Module",
                 action: "Insert",
-                remarks: "Inserted new agency",
+                remarks: "Inserted new store segment",
                 new_data: JSON.stringify(inserted_data),
                 old_data: ""
             });
 
-            data = {
+            const data = {
                 event: "insert",
-                table: "tbl_agency",
+                table: "tbl_store_segment_list",
                 data: inserted_data
             };
-        }
 
-        aJax.post(url, data, function(result) {
-            const obj = is_json(result);
-            const end_time = new Date();
-            const duration = formatDuration(start_time, end_time);
-            modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function () {
-                location.reload();
+            aJax.post(url, data, function (result) {
+                const obj = is_json(result);
+                const end_time = new Date();
+                const duration = formatDuration(start_time, end_time);
+                modal.loading(false);
+                modal.alert(modal_alert_success, 'success', function () {
+                    location.reload();
+                });
             });
         });
     }
 
 
     function delete_data(id) {
-        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
+        get_field_values('tbl_store_segment_list', 'code', 'id', [id], function(res) {
             let code = res[id];
             message = is_json(confirm_delete_message);
-            message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
+            message.message = `Delete Store Segment Code <b><i>${code}</i></b> from Agency Masterfile?`;
 
             modal.confirm(JSON.stringify(message), function(result){
                 if (result) {
                     var url = "<?= base_url('cms/global_controller');?>"; 
                     var data = {
                         event: "list",
-                        select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
-                        query: "a.id = " + id, 
+                        select: "seg.id, seg.code, COUNT(s.store_segment_id) as store_seg_count",
+                        query: "seg.id = " + id, 
                         offset: offset,  
                         limit: limit,   
-                        table: "tbl_agency a",
+                        table: "tbl_store_segment_list seg",
                         join: [
                             {
-                                table: "tbl_brand_ambassador bra",
-                                query: "bra.agency = a.id",
+                                table: "tbl_store s",
+                                query: "s.store_segment_id = seg.id",
                                 type: "left"
                             }
                         ],
-                        group: "a.id, a.code, a.agency"  
+                        // group: "a.id, a.code, a.agency"  
                     };
 
                     aJax.post(url, data, function(response) {
@@ -630,7 +698,7 @@
                                 return;
                             }
 
-                            var Count = Number(obj[0].agency_count) || 0;
+                            var Count = Number(obj[0].store_seg_count) || 0;
 
                             if (Count > 0) { 
                                 modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
@@ -650,7 +718,7 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "update",
-            table : "tbl_agency",
+            table : "tbl_store_segment_list",
             field : "id",
             where : id, 
             data : {
@@ -672,9 +740,9 @@
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, code, agency, status",
+            select : "id, code, description, status",
             query : query, 
-            table : "tbl_agency"
+            table : "tbl_store_segment_list"
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
@@ -682,7 +750,7 @@
                 $.each(obj, function(index,asc) {
                     $('#id').val(asc.id);
                     $('#code').val(asc.code);
-                    $('#agency').val(asc.agency);
+                    $('#description').val(asc.description);
                     if(asc.status == 1) {
                         $('#status').prop('checked', true)
                     } else {
@@ -713,15 +781,14 @@
 
         let jsonData = dataset.map(row => {
             return {
-                "Agency Code": row["Agency Code"] || "",
-                "Agency Description": row["Agency Description"] || "",
+                "Segment Description": row["Segment Description"] || "",
                 "Status": row["Status"] || "",
                 "Created by": user_id || "", 
                 "Created Date": formatDate(new Date()) || ""
             };
         });
 
-        let worker = new Worker(base_url + "assets/cms/js/validator_agency.js");
+        let worker = new Worker(base_url + "assets/cms/js/validator_store_segment.js");
         worker.postMessage({ data: jsonData, base_url: base_url });
 
         worker.onmessage = function(e) {
@@ -754,169 +821,189 @@
 
     function saveValidatedData(valid_data) {
         const overallStart = new Date();
-        let batch_size = 5000;
-        let total_batches = Math.ceil(valid_data.length / batch_size);
+        const batch_size = 5000;
+        const total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
         let retry_count = 0;
-        let max_retries = 5; 
-        let errorLogs = [];
-        let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_agency';
-        let selected_fields = ['id', 'code', 'agency'];
+        const max_retries = 5;
+        const errorLogs = [];
 
-        //for lookup of duplicate recors
-        const matchFields = ["code", "agency"];  
-        const matchType = "OR";  //use OR/AND depending on the condition
+        const url = "<?= base_url('cms/global_controller');?>";
+        const table = 'tbl_store_segment_list';
+        const selected_fields = ['id', 'description'];
+        const matchFields = ['description'];
+        const matchType = 'OR';
+
         modal.loading_progress(true, "Validating and Saving data...");
 
-        // Fetch existing records
-        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-            // let result = JSON.parse(response);
+        aJax.post(url, { table, event: "fetch_existing", selected_fields }, function (response) {
             const result = JSON.parse(response);
             const allEntries = result.existing || [];
 
-            // Build a Set of codes you're importing:
-            const codeSet = new Set(valid_data.map(r => r.code));
+            const descSet = new Set(valid_data.map(r => r.description.trim().toLowerCase()));
 
-            // Keep only the rows whose code matches:
-            const originalEntries = allEntries.filter(rec => codeSet.has(rec.code));
+            const originalEntries = allEntries.filter(r =>
+                descSet.has(r.description)
+            );
+            let existingMap = new Map();
+            allEntries.forEach(record => {
+                const key = matchFields.map(field => (record[field] || "")).join("|");
+                existingMap.set(key, record.id);
+            });
 
-            let existingMap = new Map(); // Stores records using composite keys
-
-            if (result.existing) {
-                result.existing.forEach(record => {
-                    let key = matchFields.map(field => record[field] || "").join("|"); 
-                    existingMap.set(key, record.id);
-                });
-            }
-
-            function updateOverallProgress(stepName, completed, total) {
-                let progress = Math.round((completed / total) * 100);
-                updateSwalProgress(stepName, progress);
-            }
-
-            function processNextBatch() {
-                if (batch_index >= total_batches) {
-                    modal.loading_progress(false);
-
-                    const overallEnd = new Date();
-                    const duration = formatDuration(overallStart, overallEnd);
-
-                    const remarks = `
-                        Action: Import/Update Agency Batch
-                        <br>Processed ${valid_data.length} records
-                        <br>Errors: ${errorLogs.length}
-                        <br>Start: ${formatReadableDate(overallStart)}
-                        <br>End: ${formatReadableDate(overallEnd)}
-                        <br>Duration: ${duration}
-                    `;
-
-                    logActivity("import-agency-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
-
-                    if (errorLogs.length > 0) {
-                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-                    } else {
-                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-                    }
-                    return;
+            aJax.post(url, { table, event: "get_last_code", field: "code" }, function (codeResponse) {
+                let lastCode = '';
+                if (typeof codeResponse === 'string') {
+                    codeResponse = JSON.parse(codeResponse);
+                }
+                if (codeResponse.message === 'success' && codeResponse.last_code) {
+                    lastCode = codeResponse.last_code;
                 }
 
-                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-                let newRecords = [];
-                let updateRecords = [];
+                function generateNewCode() {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const prefix = `${year}-${month}`;
+                    let newSequence = 1;
 
-                batch.forEach(row => {
-                    let matchedId = null;
-
-                    if (matchType === "AND") {
-                        let key = matchFields.map(field => row[field] || "").join("|");
-                        if (existingMap.has(key)) {
-                            matchedId = existingMap.get(key);
+                    if (lastCode && String(lastCode).startsWith(prefix)) {
+                        const tail = String(lastCode).substring(String(lastCode).lastIndexOf('-') + 1);
+                        const lastSequence = parseInt(tail, 10);
+                        if (!isNaN(lastSequence)) {
+                            newSequence = lastSequence + 1;
                         }
-                    } else {
-                        for (let [key, id] of existingMap.entries()) {
-                            let keyParts = key.split("|"); // ["AJK 530", "Marsden F. Hoffman"]
+                    }
 
-    
+                    lastCode = `${prefix}-${String(newSequence).padStart(3, '0')}`;
+                    return lastCode;
+                }
 
-                            if (keyParts[0] === row["code"]) {
-                                matchedId = id;
-                                break; // Stop looping once a match is found
+                function updateOverallProgress(stepName, completed, total) {
+                    const progress = Math.round((completed / total) * 100);
+                    updateSwalProgress(stepName, progress);
+                }
+
+                function processNextBatch() {
+                    if (batch_index >= total_batches) {
+                        modal.loading_progress(false);
+
+                        const overallEnd = new Date();
+                        const duration = formatDuration(overallStart, overallEnd);
+
+                        const remarks = `
+                            Action: Import/Update Store Segment
+                            <br>Processed ${valid_data.length} records
+                            <br>Errors: ${errorLogs.length}
+                            <br>Start: ${formatReadableDate(overallStart)}
+                            <br>End: ${formatReadableDate(overallEnd)}
+                            <br>Duration: ${duration}
+                        `;
+
+                        logActivity("import-store-segment-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+                        if (errorLogs.length > 0) {
+                            createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+                            modal.alert("Some records encountered errors. Check the log.", 'info', () => { });
+                        } else {
+                            modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+                        }
+                        return;
+                    }
+
+                    const batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+                    const newRecords = [];
+                    const updateRecords = [];
+
+                    batch.forEach(row => {
+                        let matchedId = null;
+
+                        if (matchType === "AND") {
+                            const key = matchFields.map(field => row[field] || "").join("|");
+                            if (existingMap.has(key)) {
+                                matchedId = existingMap.get(key);
+                            }
+                        } else {
+                            for (let [key, id] of existingMap.entries()) {
+                                const keyParts = key.split("|");
+                                let match = matchFields.some((field, i) => keyParts[i] === row[field]);
+                                if (match) {
+                                    matchedId = id;
+                                    break;
+                                }
                             }
                         }
-                    }
 
-                    if (matchedId) {
-                        row.id = matchedId;
-                        row.updated_date = formatDate(new Date());
-                        delete row.created_date;
-                        updateRecords.push(row);
-                    } else {
-                        row.created_by = user_id;
-                        row.created_date = formatDate(new Date());
-                        newRecords.push(row);
-                    }
-                });
-
-                function processUpdates() {
-                    return new Promise((resolve) => {
-                        if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_agency", "id", false, (response) => {
-                                if (response.message !== 'success') {
-                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
+                        if (matchedId) {
+                            row.id = matchedId;
+                            row.updated_date = formatDate(new Date());
+                            delete row.created_date;
+                            updateRecords.push(row);
                         } else {
-                            resolve();
+                            row.code = generateNewCode();
+                            row.created_by = user_id;
+                            row.created_date = formatDate(new Date());
+                            newRecords.push(row);
                         }
                     });
-                }
 
-                function processInserts() {
-                    return new Promise((resolve) => {
-                        if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_agency", false, (response) => {
-                                if (response.message === 'success') {
-                                    updateOverallProgress("Saving Agency...", batch_index + 1, total_batches);
-                                } else {
-                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                                }
+                    function processUpdates() {
+                        return new Promise((resolve) => {
+                            if (updateRecords.length > 0) {
+                                batch_update(url, updateRecords, table, "id", false, (response) => {
+                                    if (response.message !== 'success') {
+                                        errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                                    }
+                                    resolve();
+                                });
+                            } else {
                                 resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function handleSaveError() {
-                    if (retry_count < max_retries) {
-                        retry_count++;
-                        let wait_time = Math.pow(2, retry_count) * 1000;
-                        setTimeout(() => {
-                            processInserts().then(() => {
-                                batch_index++;
-                                retry_count = 0;
-                                processNextBatch();
-                            }).catch(handleSaveError);
-                        }, wait_time);
-                    } else {
-                        modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+                            }
+                        });
                     }
+
+                    function processInserts() {
+                        return new Promise((resolve) => {
+                            if (newRecords.length > 0) {
+                                batch_insert(url, newRecords, table, false, (response) => {
+                                    if (response.message !== 'success') {
+                                        errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+                                    }
+                                    updateOverallProgress("Saving Team...", batch_index + 1, total_batches);
+                                    resolve();
+                                });
+                            } else {
+                                resolve();
+                            }
+                        });
+                    }
+
+                    function handleSaveError() {
+                        if (retry_count < max_retries) {
+                            retry_count++;
+                            const wait_time = Math.pow(2, retry_count) * 1000;
+                            setTimeout(() => {
+                                processInserts().then(() => {
+                                    batch_index++;
+                                    retry_count = 0;
+                                    processNextBatch();
+                                }).catch(handleSaveError);
+                            }, wait_time);
+                        } else {
+                            modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => { });
+                        }
+                    }
+
+                    processUpdates()
+                        .then(processInserts)
+                        .then(() => {
+                            batch_index++;
+                            setTimeout(processNextBatch, 300);
+                        })
+                        .catch(handleSaveError);
                 }
 
-                processUpdates()
-                    .then(processInserts)
-                    .then(() => {
-                        batch_index++;
-                        setTimeout(processNextBatch, 300);
-                    })
-                    .catch(handleSaveError);
-            }
-
-            setTimeout(processNextBatch, 1000);
+                processNextBatch();
+            });
         });
     }
 
@@ -1022,7 +1109,7 @@
             }, {});
 
             // 
-            let td_validator = ['agency code', 'agency description', 'status'];
+            let td_validator = ['segment description', 'status'];
             td_validator.forEach(column => {
                 html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
             });
@@ -1099,77 +1186,132 @@
             code.push(parseInt($(this).attr('data-id')));
         });
 
-        get_field_values('tbl_agency', 'code', 'id', code, function(res) {
+        get_field_values('tbl_store_segment_list', 'code', 'id', code, function(res) {
             if(code.length == 1) {
                 code_string = `Code <i><b>${res[code[0]]}</b></i>`;
             } else {
                 code_string = 'selected data'
             }
-        })
 
-        if (parseInt(status) === -2) {
-            message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Agency Masterfile?`;  
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_delete_message;
-        } else if (parseInt(status) === 1) {
-            message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Agency Masterfile?`;
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_publish_message;
-        } else {
-            message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
-            modal_obj = JSON.stringify(message);
-            modal_alert_success = success_unpublish_message;
-        }
-        modal.confirm(modal_obj, function (result) {
-            if (result) {
-                var url = "<?= base_url('cms/global_controller');?>";
-                var dataList = [];
-                
-                $('.select:checked').each(function () {
-                    var id = $(this).attr('data-id');
-                    dataList.push({
-                        event: "update",
-                        table: "tbl_agency",
-                        field: "id",
-                        where: id,
-                        data: {
-                            status: status,
-                            updated_date: formatDate(new Date())
-                        }
-                    });
-                }); 
-
-                if (dataList.length === 0) return;
-
-                var processed = 0;
-                dataList.forEach(function (data, index) {
-                    aJax.post(url, data, function (result) {
-                        if (hasExecuted) return; 
-
-                        modal.loading(false);
-                        processed++;
-
-                        if (result === "success") {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                $('.btn_status').hide();
-                                modal.alert(modal_alert_success, 'success', function () {
-                                    location.reload();
-                                });
-                            }
-                        } else {
-                            if (!hasExecuted) {
-                                hasExecuted = true;
-                                modal.alert(failed_transaction_message, function () {});
-                            }
-                        }
-                    });
-                });
+            if (parseInt(status) === -2) {
+                message = is_json(confirm_delete_message);
+                message.message = `Delete ${code_string} from Store Segment Masterfile?`;  
+                modal_obj = JSON.stringify(message);
+                modal_alert_success = success_delete_message;
+            } else if (parseInt(status) === 1) {
+                message = is_json(confirm_publish_message);
+                message.message = `Publish ${code_string} from Store Segment Masterfile?`;
+                modal_obj = JSON.stringify(message);
+                modal_alert_success = success_publish_message;
+            } else {
+                message = is_json(confirm_unpublish_message);
+                message.message = `Unpublish ${code_string} from Store Segment Masterfile?`;  
+                modal_obj = JSON.stringify(message);
+                modal_alert_success = success_unpublish_message;
             }
-        });
+        })
+        
+        if (parseInt(status) === -2) {
+            var url = "<?= base_url('cms/global_controller');?>";
+            var data = {
+                event: "list",
+                select: "seg.id, seg.code, COUNT(s.store_segment_id) as store_seg_count",
+                query: "seg.id IN (" + code.join(",") + ")",
+                table: "tbl_store_segment_list seg",
+                join: [
+                    { table: "tbl_store s", query: "s.store_segment_id = seg.id", type: "left" }
+                ],
+                group: "seg.id, seg.code"
+            };
+
+            aJax.post(url, data, function(response) {
+                try {
+                    var obj = JSON.parse(response);
+                    if (!Array.isArray(obj)) {
+                        modal.alert("Error processing response data.", "error", ()=>{});
+                        return;
+                    }
+                    var inUse = obj.filter(r => Number(r.store_seg_count) > 0);
+                    if (inUse.length > 0) {
+                        let blockingMsg = "";
+
+                        if (inUse.length <= 2) {
+                            // list them only if 1–2
+                            blockingMsg = inUse.map(r => r.code || r.id).join(", ");
+                            modal.alert(
+                                `The following Store Segment Code(s) are in use and cannot be deleted: <b>${blockingMsg}</b>`,
+                                "error",
+                                ()=>{}
+                            );
+                        } else {
+                            modal.alert(
+                                `Too many Store Segment Codes are in use and cannot be deleted.`,
+                                "error",
+                                ()=>{}
+                            );
+                        }
+
+                        return;
+                    }
+
+                    runConfirmAndUpdate();
+                } catch (e) {
+                    modal.alert("Error processing response data.", "error", ()=>{});
+                }
+            });
+        } else {
+            runConfirmAndUpdate();
+        }
+
+        function runConfirmAndUpdate() {
+            modal.confirm(modal_obj, function (result) {
+                if (result) {
+                    var url = "<?= base_url('cms/global_controller');?>";
+                    var dataList = [];
+                    
+                    $('.select:checked').each(function () {
+                        var id = $(this).attr('data-id');
+                        dataList.push({
+                            event: "update",
+                            table: "tbl_store_segment_list",
+                            field: "id",
+                            where: id,
+                            data: {
+                                status: status,
+                                updated_date: formatDate(new Date())
+                            }
+                        });
+                    }); 
+
+                    if (dataList.length === 0) return;
+
+                    var processed = 0;
+                    dataList.forEach(function (data, index) {
+                        aJax.post(url, data, function (result) {
+                            if (hasExecuted) return; 
+
+                            modal.loading(false);
+                            processed++;
+
+                            if (result === "success") {
+                                if (!hasExecuted) {
+                                    hasExecuted = true;
+                                    $('.btn_status').hide();
+                                    modal.alert(modal_alert_success, 'success', function () {
+                                        location.reload();
+                                    });
+                                }
+                            } else {
+                                if (!hasExecuted) {
+                                    hasExecuted = true;
+                                    modal.alert(failed_transaction_message, function () {});
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        }
     });
 
     function download_template() {
@@ -1177,14 +1319,13 @@
 
         formattedData = [
             {
-                "Agency Code": "",
-                "Agency Description": "",
+                "Segment Description": "",
                 "Status": "",
                 "NOTE:": "Please do not change the column headers."
             }
         ]
 
-        exportArrayToCSV(formattedData, `Masterfile: Agency - ${formatDate(new Date())}`, headerData);
+        exportArrayToCSV(formattedData, `Masterfile: Store Segment - ${formatDate(new Date())}`, headerData);
     }
 
     $(document).on('click', '#btn_export', function () {

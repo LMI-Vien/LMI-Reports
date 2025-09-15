@@ -63,10 +63,10 @@
                                         <th class='center-content'>Brand</th>
                                         <th class='center-content'>Brand Label Type</th>
                                         <th class='center-content'>Label Type Category</th>
-                                        <th class='center-content'>Category 1</th>
-                                        <th class='center-content'>Category 2</th>
-                                        <th class='center-content'>Category 3</th>
-                                        <th class='center-content'>Category 4</th>
+                                        <th class='center-content'>Category 1 (Item Classification MF)</th>
+                                        <th class='center-content'>Category 2 (Sub Classification MF)</th>
+                                        <th class='center-content'>Category 3 (Department MF)</th>
+                                        <th class='center-content'>Category 4 (Merch. Category MF)</th>
                                         <th class='center-content'>Item Code</th>
                                         <th class='center-content'>Item Description</th>
                                         <th class='center-content'>Customer Item Code</th>
@@ -128,6 +128,7 @@
                                 <div class="form-group">
                                     <label for="brandLabelType" class="col-form-label">Brand Label Type</label>
                                     <input type="text" id="brandLabelType" name="brandLabelType" class="form-control required">
+                                    <input type="hidden" id="brandLabelTypeId" name="brandLabelTypeId">
                                 </div>
                             </div>
                         </div>
@@ -158,6 +159,7 @@
                                 <div class="form-group">
                                     <label for="catTwo" class="col-form-label">Category 2 (Sub Class MF)</label>
                                     <input type="text" id="catTwo" name="catTwo" class="form-control required">
+                                    <input type="hidden" id="catTwoId" name="catTwoId">
                                 </div>
                             </div>
 
@@ -165,6 +167,7 @@
                                 <div class="form-group">
                                     <label for="catThree" class="col-form-label">Category 3 (Department MF)</label>
                                     <input type="text" id="catThree" name="catThree" class="form-control required">
+                                    <input type="hidden" id="catThreeId" name="catThreeId">
                                 </div>
                             </div>
                         </div>
@@ -175,6 +178,7 @@
                                 <div class="form-group">
                                     <label for="catFour" class="col-form-label">Category 4 (Merch. Category MF)</label>
                                     <input type="text" id="catFour" name="catFour" class="form-control required">
+                                    <input type="hidden" id="catFourId" name="catFourId">
                                 </div>
                             </div>
 
@@ -192,6 +196,7 @@
                                 <div class="form-group">
                                     <label for="itemDescription" class="col-form-label">Item Description</label>
                                     <input type="text" id="itemDescription" name="itemDescription" class="form-control required">
+                                    <input type="hidden" id="itemDescriptionId" name="itemCodeId">
                                 </div>
                             </div>
                         </div>
@@ -256,6 +261,10 @@
                                 </div>
                             </div>
                         </div>
+
+                        <input type="hidden" id="itemUid" name="itemUid">
+                        <input type="hidden" id="itemSource" name="itemSource">
+                        <input type="hidden" id="itemId" name="itemId">
                     </form>
                 </div>
                 <div class="modal-footer"></div>
@@ -321,8 +330,8 @@
                                             <th class='center-content'>Brand</th>
                                             <th class='center-content'>Brand Label Type</th>
                                             <th class='center-content'>Label Type Category</th>
-                                            <th class='center-content'>Category 1 (Item Class MF)</th>
-                                            <th class='center-content'>Category 2 (Sub Class MF)</th>
+                                            <th class='center-content'>Category 1 (Item Classification MF)</th>
+                                            <th class='center-content'>Category 2 (Sub Classification MF)</th>
                                             <th class='center-content'>Category 3 (Department MF)</th>
                                             <th class='center-content'>Category 4 (Merch. Category MF)</th>
                                             <th class='center-content'>Item Code</th>
@@ -375,12 +384,21 @@
         get_pagination(query);
 
         let brands = <?= json_encode($brands); ?>;
+        let brandLabelType = <?= json_encode($brandLabelType); ?>;
         let labelCategory  = <?= json_encode($labelCategory); ?>;
         let itemClass = <?= json_encode($itemClass); ?>;
+        let subClass = <?= json_encode($subClass); ?>;
+        let itemDepartment = <?= json_encode($itemDepartment); ?>;
+        let merchCategory = <?= json_encode($merchCategory); ?>;
 
         let brandOptions = brands.map(b => ({
             id: b.id,
-            display: (b.brand_code ? b.brand_code + ' - ' : '') + (b.brand_description || '')
+            display: (b.brand_code ? b.brand_code : '')
+        }));
+
+        let brandLabelTypeOptions = brandLabelType.map(bl => ({
+            id: bl.id,
+            display: (bl.label ? bl.label : '')
         }));
 
         let labelCategoryOptions = labelCategory.map(lc => ({
@@ -393,19 +411,47 @@
             display: (ic.item_class_code ? ic.item_class_code : '')
         }));
 
-        let brandLabelToId    = new Map(brandOptions.map(o => [o.display, String(o.id)]));
-        let labelCatLabelToId = new Map(labelCategoryOptions.map(o => [o.display, String(o.id)]));
-        let catOneLabelToId   = new Map(catOneCategoryOptions.map(o => [o.display, String(o.id)]));
+        let catTwoCategoryOptions = subClass.map(sc => ({
+            id: sc.id,
+            display: (sc.item_sub_class_code ? sc.item_sub_class_code : '')
+        }));
+
+        let catThreeCategoryOptions = itemDepartment.map(id => ({
+            id: id.id,
+            display: (id.item_department_code ? id.item_department_code : '') 
+        }));
+
+        let catFourCategoryOptions = merchCategory.map(mc => ({
+            id: mc.id,
+            display: (mc.item_mech_cat_code ? mc.item_mech_cat_code : '')
+        }));
         
 
-        initAuto($('#brand'),        $('#brandId'),        brandOptions,         'display', 'id', row => { $('#brandId').val(row.id); });
-        initAuto($('#labelTypeCat'), $('#labelTypeCatId'), labelCategoryOptions, 'display', 'id', row => { $('#labelTypeCatId').val(row.id); });
-        initAuto($('#catOne'),       $('#catOneId'),       catOneCategoryOptions,'display', 'id', row => { $('#catOneId').val(row.id); });
+        let brandLabelToId        = new Map(brandOptions.map(o => [o.display, String(o.id)]));
+        let brandLabelTypeToId    = new Map(brandLabelTypeOptions.map(o => [o.display, String(o.id)]));
+        let labelCatLabelToId     = new Map(labelCategoryOptions.map(o => [o.display, String(o.id)]));
+        let catOneLabelToId       = new Map(catOneCategoryOptions.map(o => [o.display, String(o.id)]));
+        let catTwoLabelToId       = new Map(catTwoCategoryOptions.map(o => [o.display, String(o.id)]));
+        let catThreeLabelToId     = new Map(catThreeCategoryOptions.map(o => [o.display, String(o.id)]));
+        let catFourLabelToId      = new Map(catFourCategoryOptions.map(o => [o.display, String(o.id)]));
+        
 
+        initAuto($('#brand'),           $('#brandId'),            brandOptions,             'display', 'id', row => { $('#brandId').val(row.id); });
+        initAuto($('#brandLabelType'),  $('#brandLabelTypeId'),   brandLabelTypeOptions,    'display', 'id', row => { $('#brandLabelTypeId').val(row.id); });
+        initAuto($('#labelTypeCat'),    $('#labelTypeCatId'),     labelCategoryOptions,     'display', 'id', row => { $('#labelTypeCatId').val(row.id); });
+        initAuto($('#catOne'),          $('#catOneId'),           catOneCategoryOptions,    'display', 'id', row => { $('#catOneId').val(row.id); });
+        initAuto($('#catTwo'),          $('#catTwoId'),           catTwoCategoryOptions,    'display', 'id', row => { $('#catTwoId').val(row.id); });
+        initAuto($('#catThree'),        $('#catThreeId'),         catThreeCategoryOptions,  'display', 'id', row => { $('#catThreeId').val(row.id); });
+        initAuto($('#catFour'),         $('#catFourId'),          catFourCategoryOptions,   'display', 'id', row => { $('#catFourId').val(row.id); });
+        
         // apply per field
-        enforceValidPick($('#brand'),        $('#brandId'),        brandLabelToId);
-        enforceValidPick($('#labelTypeCat'), $('#labelTypeCatId'), labelCatLabelToId);
-        enforceValidPick($('#catOne'),       $('#catOneId'),       catOneLabelToId);
+        enforceValidPick($('#brand'),           $('#brandId'),              brandLabelToId);
+        enforceValidPick($('#brandLabelType'),  $('#brandLabelTypeId'),     brandLabelTypeToId);
+        enforceValidPick($('#labelTypeCat'),    $('#labelTypeCatId'),       labelCatLabelToId);
+        enforceValidPick($('#catOne'),          $('#catOneId'),             catOneLabelToId);
+        enforceValidPick($('#catTwo'),          $('#catTwoId'),             catTwoLabelToId);
+        enforceValidPick($('#catThree'),        $('#catThreeId'),           catThreeLabelToId);
+        enforceValidPick($('#catFour'),         $('#catFourId'),            catFourLabelToId);
 
         function calculateNetPrice() {
             let sellingPrice = parseFloat($("#sellingPrice").val()) || 0;
@@ -425,6 +471,67 @@
         $("#uom").on("input", function () {
             let val = $(this).val();
             $(this).val(val.toUpperCase());
+        });
+
+        $.getJSON('<?= base_url('cms/pricelist-masterfile/merged-items'); ?>', function(items) {
+            items = items || [];
+
+            // Create a unique id per row so "lmi:288" ≠ "rgdi:288"
+            const rows = items.map(it => {
+                return {
+                    uid: (it.source + ':' + it.id),
+                    recid: it.id,
+                    source: it.source,
+                    itmcde: it.itmcde || '',
+                    itmdsc: it.itmdsc || ''
+                };
+            });
+
+            let byUid = new Map(rows.map(r => [r.uid, r]));
+
+            let codeOptions = rows.map(r => ({ 
+                id: r.uid,
+                display: r.itmcde
+            }));
+
+            let descOptions = rows.map(r => ({ 
+                id: r.uid, 
+                display: r.itmdsc 
+            }));
+
+            let codeLabelToId = new Map(codeOptions.map(o => [o.display, o.id]));
+            let descLabelToId = new Map(descOptions.map(o => [o.display, o.id]));
+
+            // Helper: when we know the uid, fill ALL related fields
+            function fillFrom(uid) {
+                const r = byUid.get(String(uid));
+                if (!r) return;
+
+                // hidden fields (for form submit)
+                $('#itemUid').val(r.uid);
+                $('#itemSource').val(r.source);
+                $('#itemId').val(r.recid);
+
+                // visible fields
+                $('#itemCode').val(r.itmcde);
+                $('#itemDescription').val(r.itmdsc);
+            }
+
+            initAuto($('#itemCode'), $('#itemUid'), codeOptions, 'display', 'id', (row) => {
+                fillFrom(row.id);
+            });
+
+            initAuto($('#itemDescription'), $('#itemDescriptionId'), descOptions, 'display', 'id', (row) => {
+                fillFrom(row.id);
+            });
+
+            enforceValidPick($('#itemCode'),        $('#itemUid'),            codeLabelToId);
+            enforceValidPick($('#itemDescription'), $('#itemDescriptionId'),  descLabelToId);
+
+            $('#itemUid, #itemDescriptionId').on('change', function () {
+                const uid = $(this).val();
+                if (uid) fillFrom(uid);
+            });
         });
     });
 
@@ -463,8 +570,11 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : `pl.id, pl.customer_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, catlist.code AS catlist_code, pl.label_type_category_id, lbltyp.item_class_code AS labeltype_code,
-            pl.category_1_id, pl.category_2_id, pl.category_3_id, pl.category_4_id, pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
+            select : `pl.id, pl.customer_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+            catlist.code AS catlist_code, pl.label_type_category_id, class.item_class_code AS labeltype_code, 
+            pl.category_1_id, pl.category_2_id, sclass.item_sub_class_code AS item_subclass, pl.category_3_id, idept.item_department_code AS item_department,
+            pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+            pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
             pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
@@ -486,8 +596,28 @@
                     type: "left"
                 },
                 {
-                    table: "tbl_item_class lbltyp",
-                    query: "lbltyp.id = pl.label_type_category_id",
+                    table: "tbl_classification class",
+                    query: "class.id = pl.label_type_category_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_label_type brlbltyp",
+                    query: "brlbltyp.id = pl.brand_label_type_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_sub_classification sclass",
+                    query: "sclass.id = pl.category_2_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_department idept",
+                    query: "idept.id = pl.category_3_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_merchandise_category mcat",
+                    query: "mcat.id = pl.category_4_id",
                     type: "left"
                 }
             ]
@@ -506,12 +636,12 @@
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + y.brand_code + "</td>";
-                        html += "<td scope=\"col\">" + y.brand_label_type_id, 10 + "</td>";
+                        html += "<td scope=\"col\">" + y.brand_label_type, 10 + "</td>";
                         html += "<td scope=\"col\">" + y.catlist_code + "</td>";
                         html += "<td scope=\"col\">" + y.labeltype_code + "</td>";
-                        html += "<td scope=\"col\">" + y.category_2_id + "</td>";
-                        html += "<td scope=\"col\">" + y.category_3_id + "</td>";
-                        html += "<td scope=\"col\">" + y.category_4_id + "</td>";
+                        html += "<td scope=\"col\">" + y.item_subclass + "</td>";
+                        html += "<td scope=\"col\">" + y.item_department + "</td>";
+                        html += "<td scope=\"col\">" + y.merchandise_cat + "</td>";
                         html += "<td scope=\"col\">" + y.item_code + "</td>";
                         html += "<td scope=\"col\">" + y.item_description + "</td>";
                         html += "<td scope=\"col\">" + y.cust_item_code + "</td>";
@@ -552,8 +682,11 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "pagination",
-            select : `pl.id, pl.customer_id, pl.brand_id, brnd.brand_code, pl.brand_label_type_id, catlist.code, pl.label_type_category_id, lbltyp.item_class_code,
-            pl.category_1_id, pl.category_2_id, pl.category_3_id, pl.category_4_id, pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
+            select : `pl.id, pl.customer_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+            catlist.code AS catlist_code, pl.label_type_category_id, class.item_class_code AS labeltype_code, 
+            pl.category_1_id, pl.category_2_id, sclass.item_sub_class_code AS item_subclass, pl.category_3_id, idept.item_department_code AS item_department,
+            pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+            pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
             pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
@@ -575,8 +708,28 @@
                     type: "left"
                 },
                 {
-                    table: "tbl_item_class lbltyp",
-                    query: "lbltyp.id = pl.label_type_category_id",
+                    table: "tbl_classification class",
+                    query: "class.id = pl.label_type_category_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_label_type brlbltyp",
+                    query: "brlbltyp.id = pl.brand_label_type_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_sub_classification sclass",
+                    query: "sclass.id = pl.category_2_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_department idept",
+                    query: "idept.id = pl.category_3_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_merchandise_category mcat",
+                    query: "mcat.id = pl.category_4_id",
                     type: "left"
                 }
             ]
@@ -788,12 +941,12 @@
     function save_data(action, id) {
         var customerId = $('#customerId').val();
         var brand = $('#brandId').val().trim();
-        var brandLabelType = $('#brandLabelType').val().trim();
+        var brandLabelType = $('#brandLabelTypeId').val().trim();
         var labelTypeCat = $('#labelTypeCatId').val().trim();
         var catOneId = $('#catOneId').val().trim();
-        var catTwo = $('#catTwo').val().trim();
-        var catThree = $('#catThree').val().trim();
-        var catFour = $('#catFour').val().trim();
+        var catTwo = $('#catTwoId').val().trim();
+        var catThree = $('#catThreeId').val().trim();
+        var catFour = $('#catFourId').val().trim();
         var itemCode = $('#itemCode').val().trim();
         var itemDescription = $('#itemDescription').val().trim();
         var customerItemCode = $('#customerItemCode').val().trim();
@@ -1051,8 +1204,8 @@
                 "Brand": row["Brand"] || "",
                 "Brand Label Type": row["Brand Label Type"] || "",
                 "Label Type Category": row["Label Type Category"] || "",
-                "Category 1 (Item Class MF)": row["Category 1 (Item Class MF)"] || "",
-                "Category 2 (Sub Class MF)": row["Category 2 (Sub Class MF)"] || "",
+                "Category 1 (Item Classification MF)": row["Category 1 (Item Classification MF)"] || "",
+                "Category 2 (Sub Classification MF)": row["Category 2 (Sub Classification MF)"] || "",
                 "Category 3 (Department MF)": row["Category 3 (Department MF)"] || "",
                 "Category 4 (Merch. Category MF)": row["Category 4 (Merch. Category MF)"] || "",
                 "Item Code": row["Item Code"] || "",
@@ -1353,8 +1506,8 @@
             }, {});
 
             // 
-            let td_validator = ['brand', 'brand label type', 'label type category', 'category 1 (item class mf)',
-            'category 2 (sub class mf)', 'category 3 (department mf)', 'category 4 (merch. category mf)',
+            let td_validator = ['brand', 'brand label type', 'label type category', 'category 1 (item classification mf)',
+            'category 2 (sub classification mf)', 'category 3 (department mf)', 'category 4 (merch. category mf)',
             'item code', 'item description', 'customer item code', 'uom', 'selling price', 'discount in percent', 'effectivity date', 'status'];
             td_validator.forEach(column => {
                 if (column === 'effectivity date') {
@@ -1517,8 +1670,8 @@
                 "Brand": "",
                 "Brand Label Type": "",
                 "Label Type Category": "",
-                "Category 1 (Item Class MF)": "",
-                "Category 2 (Sub Class MF)": "",
+                "Category 1 (Item Classification MF)": "",
+                "Category 2 (Sub Classification MF)": "",
                 "Category 3 (Department MF)": "",
                 "Category 4 (Merch. Category MF)": "",
                 "Item Code": "",
