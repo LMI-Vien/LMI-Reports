@@ -1,18 +1,24 @@
-        <style>
-            .nav-item .nav-link {
-                padding: 8px 10px; /* Adjust padding to fit */
-            }
+<style>
+    .nav-item .nav-link {
+        padding: 8px 10px;
+    }
 
-            .nav-item .nav-link span {
-                font-size: 10px; /* Reduce font size for date */
-                display: block;
-            }
-            .hide{
-                display: none;
-            }
-        </style>
+    .nav-item .nav-link span {
+        font-size: 10px;
+        display: block;
+    }
 
-        <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
+    .hide {
+        display: none;
+    }
+
+    @media (min-width: 1200px) {
+      .navbar-toggler {
+        display: none;
+      }
+</style>
+
+        <nav class="main-header navbar navbar-expand-lg navbar-light navbar-white">
           <div class="container-fluid">
 
             <?php if (service('uri')->getSegment(1) !== 'dashboard'): ?>
