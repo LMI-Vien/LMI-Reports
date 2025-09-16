@@ -169,6 +169,14 @@ $routes->group('cms/', static function ($routes) {
         $routes->match(['GET', 'POST'], 'export-all', 'Cms\ImportTargetSalesPs::exportAll');
     });
 
+    $routes->group('import-winsight', static function ($routes) {
+        $routes->get('/', 'Cms\ImportWinsight::index');
+        $routes->match(['GET', 'POST'], 'import-temp-winsight-data', 'Cms\ImportWinsight::importTempWinsight');
+        $routes->match(['GET', 'POST'], 'fetch-temp-winsight-data', 'Cms\ImportWinsight::fetchTempWinsight');
+        $routes->match(['GET', 'POST'], 'delete-temp-winsight-data', 'Cms\ImportWinsight::deleteTempWinsight');
+        $routes->match(['GET', 'POST'], 'export-winsight-data', 'Cms\ImportWinsight::exportWinsight');
+    }); 
+
     $routes->group('cms-preference/', static function ($routes) {
         $routes->get('get-logo', 'Cms\CmsPreference::get_logo');
         $routes->get('get-menu', 'Cms\CmsPreference::get_menu');
