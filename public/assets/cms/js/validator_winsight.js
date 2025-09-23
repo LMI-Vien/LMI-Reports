@@ -235,10 +235,12 @@ self.onmessage = async function(e) {
                         addErrorLog("Item Code not found in both Itemfile LMI and RGDI: "+ item_code);
                     }
 
-                    brand_label_type = sfa_pricelist["brand_label_type_id"]; 
+                    brand_label_type_id = sfa_pricelist["brand_label_type_id"]; 
                     // brand_label_type_id -> tbl_main_pricelist -> tbl_brand_label_type
-                    if (label_type_lookup[brand_label_type] == undefined) {
-                        addErrorLog("Label Type not found: "+ brand_label_type);
+                    if (label_type_lookup[brand_label_type_id] == undefined) {
+                        addErrorLog("Label Type not found: "+ brand_label_type_id);
+                    } else {
+                        brand_label_type = label_type_lookup[brand_label_type_id]
                     }
 
                     net_price_per_pcs = validateNumber(sfa_pricelist["net_price"], "Net Price");
@@ -251,10 +253,12 @@ self.onmessage = async function(e) {
                         addErrorLog("Cannot compute amount: missing Sales Qty or Net Price");
                     }
 
-                    label_type_category = sfa_pricelist["label_type_category_id"]; 
+                    label_type_category_id = sfa_pricelist["label_type_category_id"]; 
                     // label_type_category_id -> tbl_main_pricelist -> tbl_label_category_list
-                    if (label_category_lookup[label_type_category] == undefined) {
-                        addErrorLog("Label Category not found: "+ label_type_category);
+                    if (label_category_lookup[label_type_category_id] == undefined) {
+                        addErrorLog("Label Category not found: "+ label_type_category_id);
+                    } else {
+                        label_type_category = label_category_lookup[label_type_category_id]
                     }
                 }
 
@@ -268,6 +272,7 @@ self.onmessage = async function(e) {
                     store_segment, gross_sales, net_sales, sales_qty, barcode,
                     brand_id, store_segment_id, 
                     cat_1_id, cat_2_id, cat_3_id, cat_4_id,
+                    brand_label_type_id, label_type_category_id,
                     item_code, brand_label_type, net_price_per_pcs, amount, label_type_category
                 });
             }
