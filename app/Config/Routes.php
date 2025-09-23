@@ -66,6 +66,45 @@ $routes->group('store/', static function ($routes) {
     $routes->post('overall-growth-generate-excel', 'StoreSalesPerfOverall::generateExcel');
 });
 
+
+$routes->group('sell-through/', static function ($routes) {
+    //by brand
+    $routes->get('by-brand', 'SellThroughBrand::byBrand');
+    $routes->post('get-by-brand', 'SellThroughBrand::getByBrand');
+    $routes->get('get-by-brand', 'SellThroughBrand::getByBrand');
+    $routes->match(['GET', 'POST'], 'by-brand-generate-pdf', 'SellThroughBrand::generatePdf');
+    $routes->match(['GET', 'POST'], 'by-brand-generate-excel-ba', 'SellThroughBrand::generateExcel');
+
+    //by brand cat
+    $routes->get('by-brand-category', 'SellThroughBrandCategory::byBrandCategory');
+    $routes->post('get-by-brand-category', 'SellThroughBrandCategory::getByBrandCategory');
+    $routes->get('get-by-brand-category', 'SellThroughBrandCategory::getByBrandCategory');
+    $routes->match(['GET', 'POST'], 'by-brand-category-generate-pdf', 'SellThroughBrandCategory::generatePdf');
+    $routes->match(['GET', 'POST'], 'by-brand-category-generate-excel-ba', 'SellThroughBrandCategory::generateExcel');
+
+    //by sku
+    $routes->get('by-sku', 'SellThroughBySku::bySku');
+    $routes->post('get-by-sku', 'SellThroughBySku::getByku');
+    $routes->get('get-by-sku', 'SellThroughBySku::getByku');
+    $routes->match(['GET', 'POST'], 'by-sku-generate-pdf', 'SellThroughBySku::generatePdf');
+    $routes->match(['GET', 'POST'], 'by-sku-generate-excel-ba', 'SellThroughBySku::generateExcel');
+
+    //by brand label type
+    $routes->get('by-brand-label-type', 'SellThroughBrandLabelType::byBrandLabelType');
+    $routes->post('get-by-brand-label-type', 'SellThroughBrandLabelType::getByBrandLabelType');
+    $routes->get('get-by-brand-label-type', 'SellThroughBrandLabelType::getByBrandLabelType');
+    $routes->match(['GET', 'POST'], 'by-brand-label-type-generate-pdf', 'SellThroughBrandLabelType::generatePdf');
+    $routes->match(['GET', 'POST'], 'by-brand-label-type-generate-excel-ba', 'SellThroughBrandLabelType::generateExcel');
+
+    //by overall
+    $routes->get('overall', 'SellThroughOverall::overall');
+    $routes->post('get-overall', 'SellThroughOverall::getOverall');
+    $routes->get('get-overall', 'SellThroughOverall::getOverall');
+    $routes->match(['GET', 'POST'], 'by-sku-generate-pdf', 'SellThroughOverall::generatePdf');
+    $routes->match(['GET', 'POST'], 'by-sku-generate-excel-ba', 'SellThroughOverall::generateExcel');
+});
+
+
 //sample API 
 $routes->get('/api/send_system_info', 'Dashboard::send_system_info');
 $routes->get('/api/get_users', 'Dashboard::get_users');

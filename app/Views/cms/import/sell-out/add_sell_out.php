@@ -541,12 +541,11 @@
                     logAll(start_time, valid_data);
                     setTimeout(() => {
                         modal.loading(true);
-                        modal.alert(
-                            "All records inserted successfully!", 'success',
-                            () => {
+                        modal.alert("All records inserted successfully!", 'success',() => {
                                 window.location.href = "<?= base_url('cms/import-sell-out') ?>";
                             }
                         );
+                        //modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                     }, 1000);
                 }
                 return;

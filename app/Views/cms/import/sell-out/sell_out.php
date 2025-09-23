@@ -613,7 +613,7 @@
             success: function(blob, status, xhr) {
                 const cd = xhr.getResponseHeader('Content-Disposition');
                 const match = cd && /filename="?([^"]+)"/.exec(cd);
-                const filename = 'Sell Out '+formatDate(new Date())+'.xlsx';
+                const filename = 'Sell Out '+formatDate(new Date())+'.csv';
                 const blobUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = blobUrl;
@@ -648,7 +648,7 @@
             success: function(blob, status, xhr) {
                 const cd = xhr.getResponseHeader('Content-Disposition');
                 const match = cd && /filename="?([^"]+)"/.exec(cd);
-                const filename = 'Sell Out '+formatDate(new Date())+'.xlsx';
+                const filename = 'Sell Out '+formatDate(new Date())+'.csv';
                 const blobUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = blobUrl;
@@ -666,15 +666,6 @@
                 modal.loading(false);
             }
         })
-    }
-
-    function exportArrayToCSV(data, filename, headerData) {
-        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });
-        XLSX.utils.sheet_add_aoa(worksheet, headerData, { origin: "A1" });
-        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-        saveAs(blob, filename + ".csv");
     }
 
     function list_template() {
