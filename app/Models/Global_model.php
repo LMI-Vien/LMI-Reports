@@ -1554,6 +1554,50 @@ class Global_model extends Model
         }
     }
 
+    // ----------==========|| winsight scan data ||==========----------
+    public function fetch_winsight_data($limit, $page, $filename, $id, $uid)
+    {
+        $offset = ($page - 1) * $limit;
+
+        $builder = $this->db->table('tbl_winsight_temp_space')
+        ->where('file_name', $filename)
+        ->where('created_by', $id)
+        ->where('uid', $uid)
+        ->orderBy('id', 'ASC')
+        ->limit($limit, $offset)
+        ->get();
+
+        $data = $builder->getResultArray();
+
+        $totalRecords = $this->db->table('tbl_winsight_temp_space')
+        ->where('file_name', $filename)
+        ->where('created_by', $id)
+        ->where('uid', $uid)
+        ->countAllResults();
+
+        return [
+            "data" => $data,
+            "totalRecords" => $totalRecords,
+            "uid" => $uid
+        ];
+    }
+
+    public function delete_temp_winsight($id, $uid, $filename)
+    {
+        $builder = $this->db->table('tbl_winsight_temp_space');
+        $builder->where('file_name', $filename);
+        $builder->where('created_by', $id);
+        $builder->where('uid', $uid);
+        
+        $deleted = $builder->delete();
+
+        if ($deleted) {
+            return 'success';
+        } else {
+            return 'failed';
+        }
+    }
+
     function get_data(
         string $table,
         array $query = null,

@@ -1093,10 +1093,10 @@ class GlobalController extends BaseController
 			$responseData['item_merchandise_category'] = $this->Global_model->get_valid_records("tbl_item_merchandise_category", ['item_mech_cat_code']);
 		}
 		if (!empty($request['itemfile_lmi'])) {
-			$responseData['itemfile_lmi'] = $this->Global_model->get_valid_records_tracc_data("tbl_itemfile_lmi", ['itmcde', 'itmdsc'], 'recid');
+			$responseData['itemfile_lmi'] = $this->Global_model->get_valid_records_tracc_data("tbl_itemfile_lmi", ['itmcde', 'itmdsc', 'recid'], 'recid');
 		}
 		if (!empty($request['itemfile_rgdi'])) {
-			$responseData['itemfile_rgdi'] = $this->Global_model->get_valid_records_tracc_data("tbl_itemfile_rgdi", ['itmcde', 'itmdsc'], 'recid');
+			$responseData['itemfile_rgdi'] = $this->Global_model->get_valid_records_tracc_data("tbl_itemfile_rgdi", ['itmcde', 'itmdsc', 'recid'], 'recid');
 		}
 		if (!empty($request['main_pricelist'])) {
 			$responseData['main_pricelist'] = 
@@ -1115,6 +1115,12 @@ class GlobalController extends BaseController
 					'label_type_category_id'
 				]
 			);
+		}
+		if (!empty($request['years'])) {
+			$responseData['years'] = $this->Global_model->get_valid_records("tbl_year", ['year']);
+		}
+		if (!empty($request['months'])) {
+			$responseData['months'] = $this->Global_model->get_valid_records("tbl_month", ['month']);
 		}
  	    return $this->response->setJSON($responseData);
 	}
