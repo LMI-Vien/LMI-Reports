@@ -294,7 +294,51 @@ class ImportSellOut extends BaseController
 	                        $batchData = [];
 	                    }
 	                }
-	            } else {
+	            } 
+				elseif (str_ends_with($fileName, '.xml')) {
+					$xml = simplexml_load_file($finalFilePath);	
+					
+					if ($xml === false) {
+						return $this->response->setJSON(['message' => 'Unable to parse XML'])->setStatusCode(400);
+					}
+
+					$line_number = 0;
+					foreach ($xml->document as $document) {
+						foreach ($document->details->article as $article) {
+							$line_number++;
+							$batchData[] = [
+								'created_date' => date('Y-m-d H:i:s'),
+								'created_by' => $this->session->get('sess_uid'),
+								'stuff' => $line_number.'_stuff',
+								'month' => $month,
+								'year' => $year,
+								'customer_payment_group' => $customer_payment_group,
+								'template_id' => $template_id,
+								'file_name' => $fileName,
+								'line_number' => $line_number,
+								'store_code' => trim((string)$document->header->VendorCode ?? 'Empty - '.(string)$document->header->VendorCode), // look here
+								'store_description' => trim((string)$document->header->VendorName ?? ''),
+								'sku_code' => trim($row[$placeholder['sku_code'] - 1] ?? ''),
+								'sku_description' => trim($row[$placeholder['sku_description'] - 1] ?? ''),
+								'gross_sales' => trim($row[$placeholder['gross_sales'] - 1] ?? '0'),
+								'quantity' => trim($row[$placeholder['quantity'] - 1] ?? '0'),
+								'net_sales' => trim($row[$placeholder['net_sales'] - 1] ?? '0'),
+								'sku_code' => trim((string)$article->ArticleNumber ?? ''),
+								'sku_description' => trim((string)$article->BarcodeDescription ?? ''),
+								'gross_sales' => trim((string)$article->TOTAL ?? '0'),
+								'quantity' => trim((string)$article->Qty ?? '0'),
+								'net_sales' => trim((string)$article->VAT ?? '0'),
+							];
+
+							if (count($batchData) === $batchSize) {
+								$this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
+								$totalInserted += count($batchData);
+								$batchData = [];
+							}
+						}
+					}
+				}
+				else {
 	                return $this->response->setJSON(['message' => 'Unsupported file format'])->setStatusCode(400);
 	            }
 

@@ -41,7 +41,7 @@
                         type="file"
                         style="padding-left: 10px;"
                         id="file"
-                        accept=".xls,.xlsx,.csv"
+                        accept=".xls,.xlsx,.csv,.xml"
                         aria-describedby="import_files"
                     >
                 </div>
@@ -628,7 +628,7 @@
             let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
 
             logActivity('Add Sell Out Module', 'Import Data', remarks, link, null, null);
-            //window.location.href = "<?=base_url('cms/import-sell-out/');?>";
+            window.location.href = "<?=base_url('cms/import-sell-out/');?>";
         });
     }
 
