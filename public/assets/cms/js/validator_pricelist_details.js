@@ -71,9 +71,9 @@ self.onmessage = async function(e) {
         for (const item of itemsLmi) {
             const code = norm(item.itmcde);
             const description = norm(item.itmdsc);
-            if (code) lmiCodes.add(code);
-            if (description) lmiDescriptions.add(description);
-            if (code && description) lmiCodeDescriptionPairs.add(`${code}|${description}`);
+            if (code) lmiCodeSet.add(code);
+            if (description) lmiDescSet.add(description);
+            if (code && description) lmiPairSet.add(`${code}|${description}`);
         }
 
         // RGDI sets
@@ -83,9 +83,9 @@ self.onmessage = async function(e) {
         for (const item of itemsRgdi) {
             const code = norm(item.itmcde);
             const description = norm(item.itmdsc);
-            if (code) rgdiCodes.add(code);
-            if (description) rgdiDescriptions.add(description);
-            if (code && description) rgdiCodeDescriptionPairs.add(`${code}|${description}`);
+            if (code) rgdiCodeSet.add(code);
+            if (description) rgdiDescSet.add(description);
+            if (code && description) rgdiPairSet.add(`${code}|${description}`);
         }
 
         // Change this to true if the item must exist in BOTH sources
