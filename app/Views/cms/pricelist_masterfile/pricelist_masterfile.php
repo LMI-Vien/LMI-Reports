@@ -586,7 +586,6 @@
     }
 
     function renderCustomers(pricelistId, customerOffset, customerLimit, action) {
-        const url   = "<?= base_url('cms/global_controller');?>";
         const query = `pricelist_id = '${pricelistId}' AND status >= 0`;
 
         const data = {
@@ -707,7 +706,6 @@
         const pricelistId = $modal.data('pricelistId'); 
         if (!pricelistId) return modal.alert('Missing pricelist id.', 'error');
 
-        const url = "<?= base_url('cms/global_controller/'); ?>";
         const table = "tbl_customer_list";
 
         // Collect rows from DOM
@@ -904,9 +902,9 @@
 
     let customerDescriptions = [];
     function getCustomer(dropdown_id) {
-        const url = "<?= base_url('cms/pricelist-masterfile/merged-customers'); ?>";
+        const url2 = "<?= base_url('cms/pricelist-masterfile/merged-customers'); ?>";
 
-        aJax.post(url, { status: 1, limit: 0, offset: 0 }, function (res) {
+        aJax.post(url2, { status: 1, limit: 0, offset: 0 }, function (res) {
             let result = [];
             try {
                 result = (typeof res === 'string') ? JSON.parse(res) : res;
@@ -1067,7 +1065,6 @@
     }
 
     function save_to_db(inpDesc, inpRemarks, statusVal, id) {
-        const url = "<?= base_url('cms/global_controller'); ?>";
         const now = new Date();
         const start_time = now;
         const isEdit = id !== undefined && id !== null && id !== '';
@@ -1145,7 +1142,6 @@
 
         if (!confirmed) return;
 
-        const url = "<?= base_url('cms/global_controller');?>";
         const query = `lc.id = ${id}`;
 
         const data = {
@@ -1200,7 +1196,6 @@
     });
 
     function proceed_delete(id) {
-        var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "update",
             table : "tbl_pricelist_masterfile",
@@ -1222,7 +1217,6 @@
 
     function populate_modal(inp_id) {
         var query = "status >= 0 and id = " + inp_id;
-        var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
             select : "id, description, remarks, status",
@@ -1313,7 +1307,6 @@
         let retry_count = 0;
         let max_retries = 5; 
         let errorLogs = [];
-        let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_pricelist_masterfile';
         let selected_fields = ['id', 'description', 'remarks'];
 
@@ -1669,7 +1662,6 @@
         }
         modal.confirm(modal_obj, function (result) {
             if (result) {
-                var url = "<?= base_url('cms/global_controller');?>";
                 var dataList = [];
                 
                 $('.select:checked').each(function () {
