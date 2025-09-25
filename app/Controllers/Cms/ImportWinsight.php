@@ -311,7 +311,7 @@ class ImportWinsight extends BaseController
 
 		$headers = [ 
 			"BU Name", "Supplier", "Brand Name", "Product ID (Customer Item Code)", "Product Name",
-			"Category 1", "Category 2", "Category 3", "Category 4",
+			"Category 1 (Item Classification)", "Category 2 (Sub Classification)", "Category 3 (Department)", "Category 4 (Merch. Category)",
 			"Year", "Month", "Week", "Date",
 			"Online/ Offline", "Store Format", "Store Segment",
 			"Gross Sales", "Net Sales", "Sales Qty", "Barcode"
