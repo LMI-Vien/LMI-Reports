@@ -221,6 +221,7 @@ class PricelistMasterfile extends BaseController
 				if (!isset($merged[$key])) {
 					// keep trimmed originals in the output (same as getMergedItemFile)
 					$merged[$key] = [
+						'uid'    			   => $source . '|' . $id,
 						'id'                   => $id,
 						'customer_code'        => trim($code),
 						'customer_description' => trim($desc),

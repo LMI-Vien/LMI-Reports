@@ -265,6 +265,10 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('/', 'Cms\StoreSegment::index');
     });
 
+    $routes->group('customer-sellout-indicator', static function ($routes) {
+        $routes->get('/', 'Cms\CustomerSellOutIndicator::index');
+        $routes->match(['GET', 'POST'], 'merged-customers', 'Cms\CustomerSellOutIndicator::getMergedCustomers');
+    });
 
 
     $routes->group('brand-ambassador', static function ($routes) {
