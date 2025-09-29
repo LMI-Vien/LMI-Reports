@@ -281,8 +281,8 @@
                 fillFrom(row.id);
             });
 
-            enforceValidPick($('#cus_code'),        $('#itemUid'),            codeLabelToId);
-            enforceValidPick($('#cus_description'), $('#itemUid'),            descLabelToId);
+            enforceValidPick($('#cus_code'),        $('#itemUid'),            codeLabelToId, clearItemPair);
+            enforceValidPick($('#cus_description'), $('#itemUid'),            descLabelToId, clearItemPair);
 
             $('#itemUid').on('change', function () {
                 const uid = $(this).val();
@@ -290,6 +290,14 @@
             });
         });
     });
+
+    function clearItemPair(){
+        $('#cus_code').val('');
+        $('#cus_description').val('');
+        $('#itemUid').val('');
+        $('#customerSource').val('');
+        $('#cusId').val('');
+    }
 
     function initAuto($input, $hidden, options, labelKey, idKey, onPick) {
         if (!$input.length || $input.data('ui-autocomplete')) return;
@@ -309,14 +317,15 @@
         $input.on('input', function(){ $hidden.val(''); });
     }
 
-    function enforceValidPick($input, $hidden, labelToIdMap) {
+    function enforceValidPick($input, $hidden, labelToIdMap, onInvalid) {
         $input.on('blur', function () {
             const label = $input.val().trim();
             const id = $hidden.val();
-            // if label doesn't map to a known id OR id is empty/mismatched, clear both
-            if (!labelToIdMap.has(label) || String(labelToIdMap.get(label)) !== String(id)) {
+            const ok = labelToIdMap.has(label) && String(labelToIdMap.get(label)) === String(id);
+            if (!ok) {
                 $input.val('');
                 $hidden.val('');
+                if (typeof onInvalid === 'function') onInvalid(); 
             }
         });
     }

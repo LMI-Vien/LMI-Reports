@@ -108,6 +108,7 @@
                             <label for="description" class="form-label">Pricelist Description</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                             <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
+                            <input type="hidden" id="descriptionId" name="descriptionId">
                             <small class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
                         <div class="mb-3">
@@ -253,8 +254,57 @@
     let dataset = [];
 
     $(document).ready(function() {
-      get_data(query);
+        get_data(query);
+
+        let cusPayGroup = <?= json_encode($cusPayGroup); ?>;
+
+        var cusPayGroupOptions = [];
+        cusPayGroup.forEach(function (item) {
+            if (item && item.customer_group_code) {
+                cusPayGroupOptions.push({
+                    id: String(item.id),
+                    display: String(item.customer_group_code).trim()
+                });
+            }
+        });
+
+        let cusPayGroupToId        = new Map(cusPayGroupOptions.map(o => [o.display, String(o.id)]));
+
+        initAuto($('#description'),           $('#descriptionId'),            cusPayGroupOptions,             'display', 'id', row => { $('#descriptionId').val(row.id); });
+
+        enforceValidPick($('#description'),           $('#descriptionId'),              cusPayGroupToId);
     });
+
+    function initAuto($input, $hidden, options, labelKey, idKey, onPick) {
+        if (!$input.length || $input.data('ui-autocomplete')) return;
+
+        // call your existing helper as-is
+        autocomplete_field($input, $hidden, options, labelKey, idKey, function(row){
+            if (typeof onPick === 'function') onPick(row);
+        });
+
+        // put the menu inside the modal so it isn't clipped
+        try { $input.autocomplete('option', 'appendTo', '#popup_modal'); } catch (e) {}
+
+        // open suggestions on focus
+        $input.on('focus', function(){ $(this).autocomplete('search', ''); });
+
+        // clear stale id if user types
+        $input.on('input', function(){ $hidden.val(''); });
+    }
+
+    function enforceValidPick($input, $hidden, labelToIdMap, onInvalid) {
+        $input.on('blur', function () {
+            const label = $input.val().trim();
+            const id = $hidden.val();
+            const ok = labelToIdMap.has(label) && String(labelToIdMap.get(label)) === String(id);
+            if (!ok) {
+                $input.val('');
+                $hidden.val('');
+                if (typeof onInvalid === 'function') onInvalid(); 
+            }
+        });
+    }
 
     function get_data(query, column_filter, order_filter) {
       var url = "<?= base_url("cms/global_controller");?>";
@@ -351,7 +401,7 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
+            new_query += ' and (description like \'%'+escaped_keyword+'%\' or remarks like \'%'+escaped_keyword+'%\')';
             get_data(new_query);
         }
     });
@@ -363,7 +413,7 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (code like \'%'+escaped_keyword+'%\' or description like \'%'+escaped_keyword+'%\')';
+        new_query += ' and (description like \'%'+escaped_keyword+'%\' or remarks like \'%'+escaped_keyword+'%\')';
         get_data(new_query);
     });
 
@@ -540,7 +590,7 @@
         }
     }
 
-    function renderStoreRow(line, id, code, name) {
+    function renderStoreRow(line, id, code, name, cusPricelistId) {
         const display = `${name}`;
         return `
             <tr id="line_${line}">
@@ -561,7 +611,7 @@
                     <input type="hidden" name="customer_description[]" value="${display}">
                 </td>
                 <td class="text-center">
-                    <button type="button" class="btn btn-sm btn-primary" onclick="showCustomerPriceDetails('${id}')">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="showCustomerPriceDetails('${id}','${cusPricelistId}')">
                         Price Details
                     </button>
                 </td>
@@ -569,9 +619,22 @@
         `;
     }
 
-    function showCustomerPriceDetails(id) {
-        const href2 = "<?= base_url('cms/pricelist-masterfile/customer-details-pricelist') ?>/" + encodeURIComponent(id);
-        window.open(href2, '_blank');
+    function showCustomerPriceDetails(customerId, cusPricelistId) {
+        if (!customerId || !cusPricelistId) {
+            return (window.modal?.alert ? modal.alert('Missing customer/pricelist id', 'error') : alert('Missing ids'));
+        }
+
+        $.post(
+            "<?= base_url('cms/pricelist-masterfile/pull-from-main') ?>",
+            { customerId: customerId, cusPricelistId: cusPricelistId },
+            function (res) {
+                const href2 = "<?= base_url('cms/pricelist-masterfile/customer-details-pricelist') ?>/"
+                    + encodeURIComponent(customerId) + "/"
+                    + encodeURIComponent(cusPricelistId);
+                window.open(href2, '_blank');
+            },
+            'json'
+        )
     }
 
     let customerCurrentPage = 1;
@@ -633,7 +696,7 @@
                     const code = (r.code ?? '').toString().trim();
                     const name = (r.description ?? '').toString().trim();
                     if (!code) return;
-                    html += renderStoreRow(line, r.id, code, name);
+                    html += renderStoreRow(line, r.id, code, name, pricelistId);
                 });
             } else {
             html += `
@@ -1027,12 +1090,18 @@
 
     function save_data(action, id) {
         const description = $('#description').val().trim();
+        const descriptionId = $('#descriptionId').val().trim();
+
+        if (!descriptionId) {
+            modal.alert('Please pick a valid Pricelist Description from suggestions.', 'warning');
+            return;
+        }
         const remarks = $('#remarks').val().trim();
         const isActive = $('#status').prop('checked') ? 1 : 0;
 
         const tableName = "tbl_pricelist_masterfile";
-        const uniqueFields = ["description"];
-        const fieldValues = [description];
+        const uniqueFields = ["remarks"];
+        const fieldValues = [remarks];
         const statusField = "status";
 
         const isEdit = id !== undefined && id !== null && id !== '';
@@ -1043,7 +1112,7 @@
             modal.confirm(confirmMessage, function (result) {
                 if (result) {
                     modal.loading(true);
-                    save_to_db(description, description, isActive, isEdit ? id : null);
+                    save_to_db(descriptionId, description, remarks, isActive, isEdit ? id : null);
                 }
             });
         }
@@ -1064,11 +1133,12 @@
         );
     }
 
-    function save_to_db(inpDesc, inpRemarks, statusVal, id) {
+    function save_to_db(inpDescId, inpDesc, inpRemarks, statusVal, id) {
         const now = new Date();
         const start_time = now;
         const isEdit = id !== undefined && id !== null && id !== '';
         const userData = {
+            description_id: inpDescId,
             description: inpDesc,
             remarks: inpRemarks,
             status: statusVal,
@@ -1083,6 +1153,7 @@
         }];
 
         const commonData = {
+            description_id: inpDescId,
             description: inpDesc,
             remarks: inpRemarks,
             status: statusVal,

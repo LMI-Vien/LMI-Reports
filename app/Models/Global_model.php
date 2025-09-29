@@ -1709,6 +1709,116 @@ class Global_model extends Model
         return $query->getResultArray(); 
     }
 
+    public function pullFromMain($customerId, $cusPricelistId, $userId)
+    {
+        // If cus_pricelist_id actually stores mp.id (row id), change WHERE to: mp.id = :cusPricelistId:
+        $sql = "
+            INSERT INTO tbl_customer_pricelist
+            (
+                customer_id,
+                cus_pricelist_id,
+                brand_id,
+                brand_label_type_id,
+                label_type_category_id,
+                category_1_id,
+                category_2_id,
+                category_3_id,
+                category_4_id,
+                item_code,
+                item_description,
+                cust_item_code,
+                uom,
+                selling_price,
+                disc_in_percent,
+                net_price,
+                effectivity_date,
+                status,
+                created_by,
+                created_date
+            )
+            SELECT
+                :customerId:,
+                mp.pricelist_id,
+                mp.brand_id,
+                mp.brand_label_type_id,
+                mp.label_type_category_id,
+                mp.category_1_id,
+                mp.category_2_id,
+                mp.category_3_id,
+                mp.category_4_id,
+                mp.item_code,
+                mp.item_description,
+                mp.cust_item_code,
+                mp.uom,
+                mp.selling_price,
+                mp.disc_in_percent,
+                mp.net_price,
+                mp.effectivity_date,
+                mp.status,
+                :userId:,
+                NOW()
+            FROM tbl_main_pricelist mp
+            WHERE mp.pricelist_id = :cusPricelistId:
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM tbl_customer_pricelist cp
+                  WHERE cp.customer_id      = :customerId:
+                    AND cp.cus_pricelist_id = :cusPricelistId:
+              )
+        ";
+
+        $this->db->transStart();
+        $this->db->query($sql, [
+            'customerId'     => $customerId,
+            'cusPricelistId' => $cusPricelistId,
+            'userId'         => $userId,
+        ]);
+        $this->db->transComplete();
+
+        if (! $this->db->transStatus()) {
+            throw new DatabaseException('Failed to pull data from main pricelist.');
+        }
+
+        return $this->db->affectedRows();
+    }
+
+    public function refreshFromMain($customerId, $cusPricelistId, $userId)
+    {
+        // If cus_pricelist_id actually stores mp.id, change JOIN to: mp.id = cp.cus_pricelist_id
+        $sql = "
+            UPDATE tbl_customer_pricelist cp
+            JOIN   tbl_main_pricelist mp
+                   ON mp.pricelist_id = cp.cus_pricelist_id
+            SET
+                cp.brand_id               = mp.brand_id,
+                cp.brand_label_type_id    = mp.brand_label_type_id,
+                cp.label_type_category_id = mp.label_type_category_id,
+                cp.category_1_id          = mp.category_1_id,
+                cp.category_2_id          = mp.category_2_id,
+                cp.category_3_id          = mp.category_3_id,
+                cp.category_4_id          = mp.category_4_id,
+                cp.item_description       = mp.item_description,
+                cp.cust_item_code         = mp.cust_item_code,
+                cp.uom                    = mp.uom,
+                cp.selling_price          = mp.selling_price,
+                cp.net_price              = mp.selling_price,   -- adjust if you compute discounts
+                cp.effectivity_date       = mp.effectivity_date,
+                cp.updated_by             = :userId:,
+                cp.updated_date           = NOW()
+            WHERE cp.customer_id      = :customerId:
+              AND cp.cus_pricelist_id = :cusPricelistId:
+              AND cp.status >= 0
+        ";
+
+        $this->db->query($sql, [
+            'customerId'     => $customerId,
+            'cusPricelistId' => $cusPricelistId,
+            'userId'         => $userId,
+        ]);
+
+        return $this->db->affectedRows();
+    }
+
 }
 
 

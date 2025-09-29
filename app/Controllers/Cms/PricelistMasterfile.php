@@ -3,6 +3,7 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
+use App\Models\Global_model;
 
 class PricelistMasterfile extends BaseController
 {
@@ -30,6 +31,10 @@ class PricelistMasterfile extends BaseController
 		$data['buttons'] = ['add', 'search', 'import', 'filter'];
 		$data['content'] = "cms/pricelist_masterfile/pricelist_masterfile.php";
 		$data['session'] = session(); //for frontend accessing the session data
+		$query = [
+		    'status' => 1
+		];
+		$data['cusPayGroup'] = $this->Global_model->get_data_list('tbl_cus_payment_group_lmi', $query, 99, 0, 'id, customer_group_code', 'customer_group_code', 'ASC', null, null);
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
@@ -40,7 +45,7 @@ class PricelistMasterfile extends BaseController
         		"assets/css/bootstrap.min.css",
         		"assets/css/adminlte.min.css",
         		"assets/css/all.min.css",
-        		"assets/cms/css/main_style.css",//css sa style ni master Vien
+        		"assets/cms/css/main_style.css",
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);	
@@ -97,16 +102,17 @@ class PricelistMasterfile extends BaseController
 		return view("cms/layout/template", $data);		
 	}
 
-	public function customerPricelistDetails($id = null)
+	public function customerPricelistDetails($customerId = null, $cusPricelistId = null)
 	{
 
 		$uri = current_url(true);
 		$data['uri'] =$uri;
 
-		if ($id === null) {
-            $id = $this->request->uri->getSegment(4);
+		if ($customerId === null) {
+            $customerId = $this->request->uri->getSegment(4);
         }
-		$data['customerId'] = $id;
+		$data['customerId'] = $customerId;
+		$data['cusPricelistId'] = $cusPricelistId;
 
 		$data['meta'] = array(
 			"title"         =>  "Customer Details Pricelist",
@@ -117,7 +123,7 @@ class PricelistMasterfile extends BaseController
 		$data['PageName'] = 'Customer Details Pricelist';
 		$data['PageUrl'] = 'Customer Details Pricelist';
 		$data['content'] = "cms/pricelist_masterfile/customer_details_pricelist.php";
-		$data['buttons'] = ['add', 'import', 'search'];
+		$data['buttons'] = ['search'];
 		$data['session'] = session();
 		$query = [
 		    'status' => 1
@@ -125,7 +131,7 @@ class PricelistMasterfile extends BaseController
 		$data['brands'] = $this->Global_model->get_data_list('tbl_brand', $query, 99, 0, 'id, brand_code, brand_description', 'brand_code', 'ASC', null, null);
 		$data['brandLabelType'] = $this->Global_model->get_data_list('tbl_brand_label_type', null, 99, 0, 'id, label', 'label', 'ASC', null, null);
 		$data['labelCategory'] = $this->Global_model->get_data_list('tbl_label_category_list', $query, 99, 0, 'id, code, description', 'code', 'ASC', null, null);
-		$data['itemClass'] = $this->Global_model->get_data_list('tbl_item_class', $query, 99, 0, 'id, item_class_code, item_class_description', 'item_class_code', 'ASC', null, null);
+		$data['itemClass'] = $this->Global_model->get_data_list('tbl_classification', $query, 99, 0, 'id, item_class_code, item_class_description', 'item_class_code', 'ASC', null, null);
 		$data['subClass'] = $this->Global_model->get_data_list('tbl_sub_classification', $query, 99, 0, 'id, item_sub_class_code', 'item_sub_class_code', 'ASC', null, null);
 		$data['itemDepartment'] = $this->Global_model->get_data_list('tbl_item_department', $query, 99, 0, 'id, item_department_code', 'item_department_code', 'ASC', null, null);
 		$data['merchCategory'] = $this->Global_model->get_data_list('tbl_item_merchandise_category', $query, 99, 0, 'id, item_mech_cat_code', 'item_mech_cat_code', 'ASC', null, null);
@@ -239,6 +245,33 @@ class PricelistMasterfile extends BaseController
 		});
 
 		return $this->response->setJSON($out);
+	}
+
+	public function pullFromMain()
+	{
+		$customerId     = (int) ($this->request->getPost('customerId') ?? 0);
+		$cusPricelistId = (int) ($this->request->getPost('cusPricelistId') ?? $this->request->getPost('pricelistId') ?? 0);
+		$userId         = (int) ($this->session->get('sess_uid') ?? 0);
+
+		try {
+			$model    = new Global_model();
+			$inserted = $model->pullFromMain($customerId, $cusPricelistId, $userId);
+			return $this->response->setJSON(['ok' => true, 'inserted' => $inserted]);
+		} catch (\Throwable $e) {
+			return $this->response->setJSON(['ok' => false, 'msg' => $e->getMessage()])->setStatusCode(500);
+		}
+	}
+
+	public function refreshFromMain()
+	{
+		$customerId     = (int) ($this->request->getPost('customerId') ?? 0);
+		$cusPricelistId = (int) ($this->request->getPost('cusPricelistId') ?? $this->request->getPost('pricelistId') ?? 0);
+		$userId         = (int) ($this->session->get('sess_uid') ?? 0);
+
+		$model   = new Global_model();
+		$updated = $model->refreshFromMain($customerId, $cusPricelistId, $userId);
+
+		return $this->response->setJSON(['ok' => true, 'updated' => $updated]);
 	}
 
 

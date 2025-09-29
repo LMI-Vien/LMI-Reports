@@ -78,7 +78,7 @@
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
-                                        <!-- <th class='center-content'>Action</th> -->
+                                        <th class='center-content'>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="table_body word_break"></tbody>
@@ -197,7 +197,7 @@
                                 <div class="form-group">
                                     <label for="itemDescription" class="col-form-label">Item Description</label>
                                     <input type="text" id="itemDescription" name="itemDescription" class="form-control required">
-                                    <input type="hidden" id="itemDescriptionId" name="itemCodeId">
+                                    <input type="hidden" id="itemDescriptionId" name="itemDescriptionId">
                                 </div>
                             </div>
                         </div>
@@ -525,8 +525,8 @@
                 fillFrom(row.id);
             });
 
-            enforceValidPick($('#itemCode'),        $('#itemUid'),            codeLabelToId);
-            enforceValidPick($('#itemDescription'), $('#itemDescriptionId'),  descLabelToId);
+            enforceValidPick($('#itemCode'),        $('#itemUid'),            codeLabelToId, clearItemPair);
+            enforceValidPick($('#itemDescription'), $('#itemDescriptionId'),  descLabelToId, clearItemPair);
 
             $('#itemUid, #itemDescriptionId').on('change', function () {
                 const uid = $(this).val();
@@ -534,6 +534,15 @@
             });
         });
     });
+
+    function clearItemPair() {
+        $('#itemCode').val('');
+        $('#itemDescription').val('');
+        $('#itemUid').val('');
+        $('#itemDescriptionId').val('');
+        $('#itemSource').val('');
+        $('#itemId').val('');
+    }
 
     function initAuto($input, $hidden, options, labelKey, idKey, onPick) {
         if (!$input.length || $input.data('ui-autocomplete')) return;
@@ -553,14 +562,15 @@
         $input.on('input', function(){ $hidden.val(''); });
     }
 
-    function enforceValidPick($input, $hidden, labelToIdMap) {
+    function enforceValidPick($input, $hidden, labelToIdMap, onInvalid) {
         $input.on('blur', function () {
             const label = $input.val().trim();
             const id = $hidden.val();
-            // if label doesn't map to a known id OR id is empty/mismatched, clear both
-            if (!labelToIdMap.has(label) || String(labelToIdMap.get(label)) !== String(id)) {
+            const ok = labelToIdMap.has(label) && String(labelToIdMap.get(label)) === String(id);
+            if (!ok) {
                 $input.val('');
                 $hidden.val('');
+                if (typeof onInvalid === 'function') onInvalid(); 
             }
         });
     }
@@ -570,12 +580,19 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : `pl.id, pl.pricelist_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
-            catlist.code AS catlist_code, pl.label_type_category_id, class.item_class_code AS labeltype_code, 
-            pl.category_1_id, pl.category_2_id, sclass.item_sub_class_code AS item_subclass, pl.category_3_id, idept.item_department_code AS item_department,
-            pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
-            pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
-            pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
+            select : `pl.id, pl.pricelist_id, 
+                    pl.brand_id, brnd.brand_code AS brand_code, 
+                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    pl.label_type_category_id, catlist.code AS catlist_code, 
+                    pl.category_1_id, class.item_class_code AS labeltype_code,
+                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    pl.category_3_id, idept.item_department_code AS item_department,
+                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    pl.item_code, pl.item_description, 
+                    pl.cust_item_code, pl.uom, 
+                    pl.selling_price, pl.disc_in_percent, 
+                    pl.net_price, pl.effectivity_date, 
+                    pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
             limit : limit,
@@ -597,7 +614,7 @@
                 },
                 {
                     table: "tbl_classification class",
-                    query: "class.id = pl.label_type_category_id",
+                    query: "class.id = pl.category_1_id",
                     type: "left"
                 },
                 {
@@ -636,7 +653,7 @@
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
                         html += "<td scope=\"col\">" + y.brand_code + "</td>";
-                        html += "<td scope=\"col\">" + y.brand_label_type, 10 + "</td>";
+                        html += "<td scope=\"col\">" + y.brand_label_type + "</td>";
                         html += "<td scope=\"col\">" + y.catlist_code + "</td>";
                         html += "<td scope=\"col\">" + y.labeltype_code + "</td>";
                         html += "<td scope=\"col\">" + y.item_subclass + "</td>";
@@ -658,12 +675,12 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' scope=\"col\">";
-                        //   html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
-                        //     +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                        //   html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
-                        //     +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                        //   html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
-                        //     +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                          html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                          html+="<a class='btn-sm btn delete' onclick=\"proceed_delete('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                          html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                           html+="</td>";
                         }
                         
@@ -682,12 +699,19 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "pagination",
-            select : `pl.id, pl.pricelist_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
-            catlist.code AS catlist_code, pl.label_type_category_id, class.item_class_code AS labeltype_code, 
-            pl.category_1_id, pl.category_2_id, sclass.item_sub_class_code AS item_subclass, pl.category_3_id, idept.item_department_code AS item_department,
-            pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
-            pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
-            pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
+            select : `pl.id, pl.pricelist_id, 
+                    pl.brand_id, brnd.brand_code AS brand_code, 
+                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    pl.label_type_category_id, catlist.code AS catlist_code, 
+                    pl.category_1_id, class.item_class_code AS labeltype_code,
+                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    pl.category_3_id, idept.item_department_code AS item_department,
+                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    pl.item_code, pl.item_description, 
+                    pl.cust_item_code, pl.uom, 
+                    pl.selling_price, pl.disc_in_percent, 
+                    pl.net_price, pl.effectivity_date, 
+                    pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
             limit : limit,
@@ -709,7 +733,7 @@
                 },
                 {
                     table: "tbl_classification class",
-                    query: "class.id = pl.label_type_category_id",
+                    query: "class.id = pl.category_1_id",
                     type: "left"
                 },
                 {
@@ -759,7 +783,18 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (brnd.brand_code LIKE \'%'+escaped_keyword+'%\' or catlist.code LIKE \'%'+escaped_keyword+'%\' or lbltyp.item_class_code LIKE \'%'+escaped_keyword+'%\')';
+            new_query += " AND (" +
+                "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
+                "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
+                "catlist.code LIKE '%" + escaped_keyword + "%' OR " +
+                "class.item_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "sclass.item_sub_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "idept.item_department_code LIKE '%" + escaped_keyword + "%' OR " +
+                "mcat.item_mech_cat_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_description LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.cust_item_code LIKE '%" + escaped_keyword + "%'" +
+                ")";
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -772,7 +807,18 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (brnd.brand_code LIKE \'%'+escaped_keyword+'%\' or catlist.code LIKE \'%'+escaped_keyword+'%\' or lbltyp.item_class_code LIKE \'%'+escaped_keyword+'%\')';
+        new_query += " AND (" +
+                "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
+                "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
+                "catlist.code LIKE '%" + escaped_keyword + "%' OR " +
+                "class.item_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "sclass.item_sub_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "idept.item_department_code LIKE '%" + escaped_keyword + "%' OR " +
+                "mcat.item_mech_cat_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_description LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.cust_item_code LIKE '%" + escaped_keyword + "%'" +
+                ")";
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -848,11 +894,11 @@
     });
 
     function edit_data(id) {
-        open_modal('Edit Agency', 'edit', id);
+        open_modal('Edit Pricelist Details', 'edit', id);
     }
 
     function view_data(id) {
-        open_modal('View Agency', 'view', id);
+        open_modal('View Pricelist Details', 'view', id);
     }
 
     function open_modal(msg, actions, id) {
@@ -895,7 +941,7 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#code, #agency, #status', isReadOnly);
+        set_field_state('#brand, #brandLabelType, #labelTypeCat, #catOne, #catTwo, #catThree, #catFour, #itemCode, #itemDescription, #customerItemCode, #uom, #sellingPrice, #discountInPercent, #netPrice, #effectDate, #status', isReadOnly);
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -1076,66 +1122,67 @@
     }
 
 
-    function delete_data(id) {
-        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-            let code = res[id];
-            message = is_json(confirm_delete_message);
-            message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
+    // wait natin kung ano san naka sangay
+    // function delete_data(id) {
+    //     get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
+    //         let code = res[id];
+    //         message = is_json(confirm_delete_message);
+    //         message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
 
-            modal.confirm(JSON.stringify(message), function(result){
-                if (result) {
-                    var url = "<?= base_url('cms/global_controller');?>"; 
-                    var data = {
-                        event: "list",
-                        select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
-                        query: "a.id = " + id, 
-                        offset: offset,  
-                        limit: limit,   
-                        table: "tbl_agency a",
-                        join: [
-                            {
-                                table: "tbl_brand_ambassador bra",
-                                query: "bra.agency = a.id",
-                                type: "left"
-                            }
-                        ],
-                        group: "a.id, a.code, a.agency"  
-                    };
+    //         modal.confirm(JSON.stringify(message), function(result){
+    //             if (result) {
+    //                 var url = "<?= base_url('cms/global_controller');?>"; 
+    //                 var data = {
+    //                     event: "list",
+    //                     select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
+    //                     query: "a.id = " + id, 
+    //                     offset: offset,  
+    //                     limit: limit,   
+    //                     table: "tbl_agency a",
+    //                     join: [
+    //                         {
+    //                             table: "tbl_brand_ambassador bra",
+    //                             query: "bra.agency = a.id",
+    //                             type: "left"
+    //                         }
+    //                     ],
+    //                     group: "a.id, a.code, a.agency"  
+    //                 };
 
-                    aJax.post(url, data, function(response) {
-                        try {
-                            var obj = JSON.parse(response);
-                            if (!Array.isArray(obj)) { 
-                                modal.alert("Error processing response data.", "error", ()=>{});
-                                return;
-                            }
+    //                 aJax.post(url, data, function(response) {
+    //                     try {
+    //                         var obj = JSON.parse(response);
+    //                         if (!Array.isArray(obj)) { 
+    //                             modal.alert("Error processing response data.", "error", ()=>{});
+    //                             return;
+    //                         }
 
-                            if (obj.length === 0) {
-                                proceed_delete(id); 
-                                return;
-                            }
+    //                         if (obj.length === 0) {
+    //                             proceed_delete(id); 
+    //                             return;
+    //                         }
 
-                            var Count = Number(obj[0].agency_count) || 0;
+    //                         var Count = Number(obj[0].agency_count) || 0;
 
-                            if (Count > 0) { 
-                                modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-                            } else {
-                                proceed_delete(id); 
-                            }
-                        } catch (e) {
-                            modal.alert("Error processing response data.", "error", ()=>{});
-                        }
-                    });
-                }
-            });
-        });
-    }
+    //                         if (Count > 0) { 
+    //                             modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
+    //                         } else {
+    //                             proceed_delete(id); 
+    //                         }
+    //                     } catch (e) {
+    //                         modal.alert("Error processing response data.", "error", ()=>{});
+    //                     }
+    //                 });
+    //             }
+    //         });
+    //     });
+    // }
 
     function proceed_delete(id) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "update",
-            table : "tbl_agency",
+            table : "tbl_main_pricelist",
             field : "id",
             where : id, 
             data : {
@@ -1153,21 +1200,104 @@
     }
 
     function populate_modal(inp_id) {
-        var query = "status >= 0 and id = " + inp_id;
+        var query = "pl.status >= 0 and pl.id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, code, agency, status",
+            select : `pl.id, pl.pricelist_id, 
+                    pl.brand_id, brnd.brand_code AS brand_code, 
+                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    pl.label_type_category_id, catlist.code AS catlist_code, 
+                    pl.category_1_id, class.item_class_code AS labeltype_code,
+                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    pl.category_3_id, idept.item_department_code AS item_department,
+                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    pl.item_code, pl.item_description, 
+                    pl.cust_item_code, pl.uom, 
+                    pl.selling_price, pl.disc_in_percent, 
+                    pl.net_price, pl.effectivity_date, 
+                    pl.status, pl.updated_date, pl.created_date`,
             query : query, 
-            table : "tbl_agency"
+            table : "tbl_main_pricelist pl",
+            order : {
+                field : "pl.pricelist_id",
+                order : "asc", 
+            },
+            join : [
+                {
+                    table: "tbl_brand brnd",
+                    query: "brnd.id = pl.brand_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_label_category_list catlist",
+                    query: "catlist.id = pl.label_type_category_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_classification class",
+                    query: "class.id = pl.category_1_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_label_type brlbltyp",
+                    query: "brlbltyp.id = pl.brand_label_type_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_sub_classification sclass",
+                    query: "sclass.id = pl.category_2_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_department idept",
+                    query: "idept.id = pl.category_3_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_merchandise_category mcat",
+                    query: "mcat.id = pl.category_4_id",
+                    type: "left"
+                }
+            ]
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,asc) {
                     $('#id').val(asc.id);
-                    $('#code').val(asc.code);
-                    $('#agency').val(asc.agency);
+                    $('#pricelistId').val(asc.pricelist_id);
+
+                    $('#brand').val(asc.brand_code);
+                    $('#brandId').val(asc.brand_id);
+
+                    $('#brandLabelType').val(asc.brand_label_type);
+                    $('#brandLabelTypeId').val(asc.brand_label_type_id);
+
+                    $('#labelTypeCat').val(asc.catlist_code);
+                    $('#labelTypeCatId').val(asc.label_type_category_id);
+
+                    $('#catOne').val(asc.labeltype_code);
+                    $('#catOneId').val(asc.category_1_id);
+
+                    $('#catTwo').val(asc.item_subclass);
+                    $('#catTwoId').val(asc.category_2_id);
+
+                    $('#catThree').val(asc.item_department);
+                    $('#catThreeId').val(asc.category_3_id);
+
+                    $('#catFour').val(asc.merchandise_cat);
+                    $('#catFourId').val(asc.category_4_id);
+
+                    $('#itemCode').val(asc.item_code);
+                    $('#itemDescription').val(asc.item_description);
+                    $('#customerItemCode').val(asc.cust_item_code);
+                    $('#uom').val(asc.uom);
+                    $('#sellingPrice').val(asc.selling_price);
+                    $('#discountInPercent').val(asc.disc_in_percent);
+                    $('#netPrice').val(asc.net_price);
+                    $('#effectDate').val(asc.effectivity_date);
+
                     if(asc.status == 1) {
                         $('#status').prop('checked', true)
                     } else {
