@@ -103,10 +103,10 @@
                                         <th>Brand Name</th>
                                         <th>Product ID</th>
                                         <th>Product Name</th>
-                                        <th>Category 1</th>
-                                        <th>Category 2</th>
-                                        <th>Category 3</th>
-                                        <th>Category 4</th>
+                                        <th>Category 1 (Item Classification)</th>
+                                        <th>Category 2 (Sub Classification)</th>
+                                        <th>Category 3 (Department)</th>
+                                        <th>Category 4 (Merch. Category)</th>
                                         <th>Year</th>
                                         <th>Year Month</th>
                                         <th>Year Week</th>
