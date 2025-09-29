@@ -1139,7 +1139,6 @@
         );
     }
 
-    // galaw rito for monday haha tapos tapos na
     let pay_group = [];
     function getpaygroup() {
         var url = "<?= base_url('cms/global_controller');?>"; 
