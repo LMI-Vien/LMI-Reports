@@ -78,7 +78,7 @@
                                         <th class='center-content'>Status</th>
                                         <th class='center-content'>Date Created</th>
                                         <th class='center-content'>Date Modified</th>
-                                        <!-- <th class='center-content'>Action</th> -->
+                                        <th class='center-content'>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="table_body word_break"></tbody>
@@ -113,6 +113,7 @@
                 <div class="modal-body">
                     <form id="form-modal">
                         <input type="hidden" id="customerId" value="<?= esc($customerId) ?>">
+                        <input type="hidden" id="cusPricelistId" value="<?= esc($cusPricelistId) ?>">
 
                         <!-- Row 1: Brand / Brand Label Type -->
                         <div class="form-row">
@@ -570,12 +571,19 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : `pl.id, pl.customer_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
-            catlist.code AS catlist_code, pl.label_type_category_id, class.item_class_code AS labeltype_code, 
-            pl.category_1_id, pl.category_2_id, sclass.item_sub_class_code AS item_subclass, pl.category_3_id, idept.item_department_code AS item_department,
-            pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
-            pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
-            pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
+            select : `pl.id, pl.customer_id, pl.cus_pricelist_id,
+                    pl.brand_id, brnd.brand_code AS brand_code, 
+                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    pl.label_type_category_id, catlist.code AS catlist_code, 
+                    pl.category_1_id, class.item_class_code AS labeltype_code,
+                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    pl.category_3_id, idept.item_department_code AS item_department,
+                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    pl.item_code, pl.item_description, 
+                    pl.cust_item_code, pl.uom, 
+                    pl.selling_price, pl.disc_in_percent, 
+                    pl.net_price, pl.effectivity_date, 
+                    pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
             limit : limit,
@@ -597,7 +605,7 @@
                 },
                 {
                     table: "tbl_classification class",
-                    query: "class.id = pl.label_type_category_id",
+                    query: "class.id = pl.category_1_id",
                     type: "left"
                 },
                 {
@@ -658,12 +666,12 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' scope=\"col\">";
-                        //   html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
-                        //     +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
+                          html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
                         //   html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
                         //     +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
-                        //   html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
-                        //     +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                          html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
+                            +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                           html+="</td>";
                         }
                         
@@ -682,12 +690,19 @@
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "pagination",
-            select : `pl.id, pl.customer_id, pl.brand_id, brnd.brand_code AS brand_code, pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
-            catlist.code AS catlist_code, pl.label_type_category_id, class.item_class_code AS labeltype_code, 
-            pl.category_1_id, pl.category_2_id, sclass.item_sub_class_code AS item_subclass, pl.category_3_id, idept.item_department_code AS item_department,
-            pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
-            pl.item_code, pl.item_description, pl.cust_item_code, pl.uom, pl.selling_price, pl.disc_in_percent, 
-            pl.net_price, pl.effectivity_date, pl.status, pl.updated_date, pl.created_date`,
+            select : `pl.id, pl.customer_id, 
+                    pl.brand_id, brnd.brand_code AS brand_code, 
+                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    pl.label_type_category_id, catlist.code AS catlist_code, 
+                    pl.category_1_id, class.item_class_code AS labeltype_code,
+                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    pl.category_3_id, idept.item_department_code AS item_department,
+                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    pl.item_code, pl.item_description, 
+                    pl.cust_item_code, pl.uom, 
+                    pl.selling_price, pl.disc_in_percent, 
+                    pl.net_price, pl.effectivity_date, 
+                    pl.status, pl.updated_date, pl.created_date`,
             query : query,
             offset : offset,
             limit : limit,
@@ -709,7 +724,7 @@
                 },
                 {
                     table: "tbl_classification class",
-                    query: "class.id = pl.label_type_category_id",
+                    query: "class.id = pl.category_1_id",
                     type: "left"
                 },
                 {
@@ -759,7 +774,19 @@
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
             new_query = query;
-            new_query += ' and (brnd.brand_code LIKE \'%'+escaped_keyword+'%\' or catlist.code LIKE \'%'+escaped_keyword+'%\' or lbltyp.item_class_code LIKE \'%'+escaped_keyword+'%\')';
+            new_query += " AND (" +
+                "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
+                "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
+                "catlist.code LIKE '%" + escaped_keyword + "%' OR " +
+                "class.item_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "sclass.item_sub_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "idept.item_department_code LIKE '%" + escaped_keyword + "%' OR " +
+                "mcat.item_mech_cat_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_description LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.cust_item_code LIKE '%" + escaped_keyword + "%'" +
+                ")";
+
             get_data(new_query);
             get_pagination(new_query);
         }
@@ -772,7 +799,18 @@
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
         new_query = query;
-        new_query += ' and (brnd.brand_code LIKE \'%'+escaped_keyword+'%\' or catlist.code LIKE \'%'+escaped_keyword+'%\' or lbltyp.item_class_code LIKE \'%'+escaped_keyword+'%\')';
+        new_query += " AND (" +
+                "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
+                "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
+                "catlist.code LIKE '%" + escaped_keyword + "%' OR " +
+                "class.item_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "sclass.item_sub_class_code LIKE '%" + escaped_keyword + "%' OR " +
+                "idept.item_department_code LIKE '%" + escaped_keyword + "%' OR " +
+                "mcat.item_mech_cat_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_code LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.item_description LIKE '%" + escaped_keyword + "%' OR " +
+                "pl.cust_item_code LIKE '%" + escaped_keyword + "%'" +
+                ")";
         get_data(new_query);
         get_pagination(new_query);
     });
@@ -848,11 +886,11 @@
     });
 
     function edit_data(id) {
-        open_modal('Edit Agency', 'edit', id);
+        open_modal('Edit Customer Details Pricelist', 'edit', id);
     }
 
     function view_data(id) {
-        open_modal('View Agency', 'view', id);
+        open_modal('View Customer Details Pricelist', 'view', id);
     }
 
     function open_modal(msg, actions, id) {
@@ -893,9 +931,33 @@
         };
 
         if (['edit', 'view'].includes(actions)) populate_modal(id);
-        
-        let isReadOnly = actions === 'view';
-        set_field_state('#code, #agency, #status', isReadOnly);
+
+        const viewLock = [
+            '#brand', '#brandLabelType', '#labelTypeCat',
+            '#catOne', '#catTwo', '#catThree', '#catFour',
+            '#itemCode', '#itemDescription', '#customerItemCode',
+            '#uom', '#sellingPrice', '#discountInPercent',
+            '#netPrice', '#effectDate', '#status'
+        ];
+
+        const editLock = [
+            '#brand', '#brandLabelType', '#labelTypeCat',
+            '#catOne', '#catTwo', '#catThree', '#catFour',
+            '#itemCode', '#itemDescription', '#customerItemCode',
+            '#uom', '#sellingPrice', '#netPrice', '#status'
+        ];
+
+        const allFields = Array.from(new Set([...viewLock, ...editLock]));
+        set_field_state(allFields.join(','), false);
+
+        if (actions === 'view') {
+            set_field_state(viewLock.join(','), true);
+        } else if (actions === 'edit') {
+            set_field_state(editLock.join(','), true);
+        } else {
+        // 'add' or anything else → ensure everything is enabled
+            set_field_state(viewLock.join(','), false);
+        }
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -919,7 +981,25 @@
     }
 
     function reset_modal_fields() {
-        $('#popup_modal #code, #popup_modal #agency, #popup_modal').val('');
+        const idsToClear = [
+            'brand','brandId',
+            'brandLabelType','brandLabelTypeId',
+            'labelTypeCat','labelTypeCatId',
+            'catOne','catOneId',
+            'catTwo','catTwoId',
+            'catThree','catThreeId',
+            'catFour','catFourId',
+            'itemCode','itemDescription','itemDescriptionId',
+            'customerItemCode','uom',
+            'sellingPrice','discountInPercent','netPrice',
+            'effectDate',
+            'itemUid','itemSource','itemId'
+            // NOTE: intentionally NOT clearing 'customerId' and 'cusPricelistId'
+        ];
+
+        const sel = idsToClear.map(id => `#popup_modal #${id}`).join(', ');
+        $(sel).val('');
+
         $('#popup_modal #status').prop('checked', true);
     }
 
@@ -940,6 +1020,7 @@
 
     function save_data(action, id) {
         var customerId = $('#customerId').val();
+        var cusPricelistId = $('#cusPricelistId').val();
         var brand = $('#brandId').val().trim();
         var brandLabelType = $('#brandLabelTypeId').val().trim();
         var labelTypeCat = $('#labelTypeCatId').val().trim();
@@ -966,20 +1047,20 @@
             modal.confirm(confirm_update_message, function(result){
                 if(result){ 
                         modal.loading(true);
-                    save_to_db(customerId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
+                    save_to_db(customerId, cusPricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
                 }
             });
         }else{
             modal.confirm(confirm_add_message, function(result){
                 if(result){ 
                         modal.loading(true);
-                    save_to_db(customerId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
+                    save_to_db(customerId, cusPricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
                 }
             }); 
         }
     }
 
-    function save_to_db(customerId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
+    function save_to_db(customerId, cusPricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -991,6 +1072,7 @@
             modal_alert_success = success_update_message;
             const updated_data = {
                 customer_id: customerId,
+                cus_pricelist_id: cusPricelistId,
                 brand_id: brand,
                 brand_label_type_id: brandLabelType,
                 label_type_category_id: labelTypeCat,
@@ -1030,6 +1112,7 @@
             modal_alert_success = success_save_message;
             const inserted_data = {
                 customer_id: customerId,
+                cus_pricelist_id: cusPricelistId,
                 brand_id: brand,
                 brand_label_type_id: brandLabelType,
                 label_type_category_id: labelTypeCat,
@@ -1154,21 +1237,103 @@
     }
 
     function populate_modal(inp_id) {
-        var query = "status >= 0 and id = " + inp_id;
+        var query = "pl.status >= 0 and pl.id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
             event : "list", 
-            select : "id, code, agency, status",
+            select : `pl.id, pl.customer_id, 
+                    pl.brand_id, brnd.brand_code AS brand_code, 
+                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    pl.label_type_category_id, catlist.code AS catlist_code, 
+                    pl.category_1_id, class.item_class_code AS labeltype_code,
+                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    pl.category_3_id, idept.item_department_code AS item_department,
+                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    pl.item_code, pl.item_description, 
+                    pl.cust_item_code, pl.uom, 
+                    pl.selling_price, pl.disc_in_percent, 
+                    pl.net_price, pl.effectivity_date, 
+                    pl.status, pl.updated_date, pl.created_date`,
             query : query, 
-            table : "tbl_agency"
+            table : "tbl_customer_pricelist pl",
+            order : {
+                field : "pl.customer_id",
+                order : "asc",
+            },
+            join : [
+                {
+                    table: "tbl_brand brnd",
+                    query: "brnd.id = pl.brand_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_label_category_list catlist",
+                    query: "catlist.id = pl.label_type_category_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_classification class",
+                    query: "class.id = pl.category_1_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_brand_label_type brlbltyp",
+                    query: "brlbltyp.id = pl.brand_label_type_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_sub_classification sclass",
+                    query: "sclass.id = pl.category_2_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_department idept",
+                    query: "idept.id = pl.category_3_id",
+                    type: "left"
+                },
+                {
+                    table: "tbl_item_merchandise_category mcat",
+                    query: "mcat.id = pl.category_4_id",
+                    type: "left"
+                }
+            ]
         }
         aJax.post(url,data,function(result){
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,asc) {
-                    $('#id').val(asc.id);
-                    $('#code').val(asc.code);
-                    $('#agency').val(asc.agency);
+                    $('#customerId').val(asc.customer_id);
+                    $('#cusPricelistId').val(asc.cus_pricelist_id);
+                    
+                    $('#brand').val(asc.brand_code);
+                    $('#brandId').val(asc.brand_id);
+
+                    $('#brandLabelType').val(asc.brand_label_type);
+                    $('#brandLabelTypeId').val(asc.brand_label_type_id)
+
+                    $('#labelTypeCat').val(asc.catlist_code);
+                    $('#labelTypeCatId').val(asc.label_type_category_id);
+
+                    $('#catOne').val(asc.labeltype_code);
+                    $('#catOneId').val(asc.category_1_id);
+
+                    $('#catTwo').val(asc.item_subclass);
+                    $('#catTwoId').val(asc.category_2_id);
+
+                    $('#catThree').val(asc.item_department);
+                    $('#catThreeId').val(asc.category_3_id);
+
+                    $('#catFour').val(asc.merchandise_cat);
+                    $('#catFourId').val(asc.category_4_id);
+
+                    $('#itemCode').val(asc.item_code);
+                    $('#itemDescription').val(asc.item_description);
+                    $('#customerItemCode').val(asc.cust_item_code);
+                    $('#uom').val(asc.uom);
+                    $('#sellingPrice').val(asc.selling_price);
+                    $('#discountInPercent').val(asc.disc_in_percent);
+                    $('#netPrice').val(asc.net_price);
+                    $('#effectDate').val(asc.effectivity_date);
                     if(asc.status == 1) {
                         $('#status').prop('checked', true)
                     } else {
