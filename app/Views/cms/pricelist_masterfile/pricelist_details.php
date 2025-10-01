@@ -679,7 +679,7 @@
                           html+="<td class='center-content' scope=\"col\">";
                           html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                          html+="<a class='btn-sm btn delete' onclick=\"proceed_delete('"+y.id+"')\" data-status='"
+                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                           html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
@@ -1125,61 +1125,19 @@
     }
 
 
-    // wait natin kung ano san naka sangay
-    // function delete_data(id) {
-    //     get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-    //         let code = res[id];
-    //         message = is_json(confirm_delete_message);
-    //         message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
+    function delete_data(id) {
+        get_field_values('tbl_main_pricelist', 'pricelist_id', 'id', [id], function(res) {
+            let code = res[id];
+            message = is_json(confirm_delete_message);
+            message.message = `Delete this from Pricelist Details?`;
 
-    //         modal.confirm(JSON.stringify(message), function(result){
-    //             if (result) {
-    //                 var url = "<?= base_url('cms/global_controller');?>"; 
-    //                 var data = {
-    //                     event: "list",
-    //                     select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
-    //                     query: "a.id = " + id, 
-    //                     offset: offset,  
-    //                     limit: limit,   
-    //                     table: "tbl_agency a",
-    //                     join: [
-    //                         {
-    //                             table: "tbl_brand_ambassador bra",
-    //                             query: "bra.agency = a.id",
-    //                             type: "left"
-    //                         }
-    //                     ],
-    //                     group: "a.id, a.code, a.agency"  
-    //                 };
-
-    //                 aJax.post(url, data, function(response) {
-    //                     try {
-    //                         var obj = JSON.parse(response);
-    //                         if (!Array.isArray(obj)) { 
-    //                             modal.alert("Error processing response data.", "error", ()=>{});
-    //                             return;
-    //                         }
-
-    //                         if (obj.length === 0) {
-    //                             proceed_delete(id); 
-    //                             return;
-    //                         }
-
-    //                         var Count = Number(obj[0].agency_count) || 0;
-
-    //                         if (Count > 0) { 
-    //                             modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                         } else {
-    //                             proceed_delete(id); 
-    //                         }
-    //                     } catch (e) {
-    //                         modal.alert("Error processing response data.", "error", ()=>{});
-    //                     }
-    //                 });
-    //             }
-    //         });
-    //     });
-    // }
+            modal.confirm(JSON.stringify(message), function(result){
+                if (result) {
+                    proceed_delete(id);
+                }
+            });
+        });
+    }
 
     function proceed_delete(id) {
         var url = "<?= base_url('cms/global_controller');?>";

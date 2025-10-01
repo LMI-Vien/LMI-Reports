@@ -707,26 +707,14 @@
 
     function delete_data(id) {
         get_field_values('tbl_cus_sellout_indicator', 'cus_code', 'id', [id], function(res) {
-            var map = {};
-            if (Array.isArray(res)) {
-                res.forEach(function (row) {
-                    var k = String((row && (row.id || row.ID)) || '');
-                    var v = (row && (row.cus_code || row.CUS_CODE)) || '';
-                    if (k) map[k] = v;
-                });
-            } else if (res && typeof res === 'object') {
-                map = res;
-            }
+            let code = res[id];
+            message = is_json(confirm_delete_message);
+            message.message = `Delete <b><i>${code}</i></b> from Customer SellOut Indicator Masterfile?`;
 
-            var code = map[String(id)] || '';
-
-            var message = is_json(confirm_delete_message);
-            message.message = 'Delete SellOut Indicator Code <b><i>' + code + '</i></b> from SellOut Indicator Masterfile?';
             modal.confirm(JSON.stringify(message), function(result){
-                if (!result) return;
-
-                proceed_delete(id);
-                
+                if (result) {
+                    proceed_delete(id);
+                }
             });
         });
     }
