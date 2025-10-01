@@ -1707,7 +1707,7 @@
             code.push(parseInt($(this).attr('data-id')));
         });
 
-        get_field_values('tbl_label_category_list', 'code', 'id', code, function(res) {
+        get_field_values('tbl_pricelist_masterfile', 'description', 'id', code, function(res) {
             if(code.length == 1) {
                 code_string = `Code <i><b>${res[code[0]]}</b></i>`;
             } else {
@@ -1717,17 +1717,17 @@
 
         if (parseInt(status) === -2) {
             message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Label Category Masterfile?`;  
+            message.message = `Delete ${code_string} from Pricelist Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
             message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Label Category Masterfile?`;
+            message.message = `Publish ${code_string} from Pricelist Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
             message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Label Category Masterfile?`;  
+            message.message = `Unpublish ${code_string} from Pricelist Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
@@ -1739,7 +1739,7 @@
                     var id = $(this).attr('data-id');
                     dataList.push({
                         event: "update",
-                        table: "tbl_label_category_list",
+                        table: "tbl_pricelist_masterfile",
                         field: "id",
                         where: id,
                         data: {
@@ -1799,13 +1799,13 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    exportLabelCategory()
+                    exportPricelistMf()
                 }, 500);
             }
         })
     })
 
-    const exportLabelCategory = () => {
+    const exportPricelistMf = () => {
         var ids = [];
 
         $('.select:checked').each(function () {
@@ -1818,7 +1818,7 @@
             params.append('selectedids', ids.join(',')) :
             params.append('selectedids', '0');
 
-        window.open("<?= base_url('cms/');?>" + 'label-category/export-label-category?'+ params.toString(), '_blank');
+        window.open("<?= base_url('cms/');?>" + 'pricelist-masterfile/export-pricelist-mf?'+ params.toString(), '_blank');
         modal.loading_progress(false);
    }
    

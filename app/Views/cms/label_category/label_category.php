@@ -61,8 +61,8 @@
                               <thead>
                                   <tr>
                                       <th class='center-content'><input class ="selectall" type ="checkbox"></th>
-                                      <th class='center-content'>Code</th>
-                                      <th class='center-content'>Description</th>
+                                      <th class='center-content'>Label Category Code</th>
+                                      <th class='center-content'>Label Category Description</th>
                                       <th class='center-content'>Status</th>
                                       <th class='center-content'>Date Created</th>
                                       <th class='center-content'>Date Modified</th>
@@ -101,14 +101,15 @@
                 <div class="modal-body">
                     <form id="form-modal">
                     <div class="mb-3">
-                            <label for="code" class="form-label">Code</label>
+                            <label for="code" class="form-label">Label Category Code</label>
                             <input type="text" class="form-control" id="id" aria-describedby="id" hidden>
                             <input type="text" class="form-control required" id="code" maxlength="25" aria-describedby="code" disabled>
+                            <small class="form-text text-muted">* required, must be unique, max 25 characters</small>
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
+                            <label for="description" class="form-label">Label Category Description</label>
                             <input type="text" class="form-control required" id="description" maxlength="50" aria-describedby="description">
-                            <small id="description" class="form-text text-muted">* required, must be unique, max 100 characters</small>
+                            <small class="form-text text-muted">* required, must be unique, max 50 characters</small>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="status" checked>
@@ -176,8 +177,8 @@
                                 <thead>
                                     <tr>
                                         <th class='center-content' style='width: 5%'>Line #</th>
-                                        <th class='center-content' style='width: 10%'>Code</th>
-                                        <th class='center-content' style='width: 20%'>Description</th>
+                                        <th class='center-content' style='width: 10%'>Label Category Code</th>
+                                        <th class='center-content' style='width: 20%'>Label Category Description</th>
                                         <th class='center-content' style='width: 10%'>Status</th>
                                     </tr>
                                 </thead>
@@ -676,7 +677,7 @@
                     $('#id').val(j.id);
                     $('#code').val(j.code);
                     $('#description').val(j.description);
-                    if(asc.status == 1) {
+                    if(j.status == 1) {
                         $('#status').prop('checked', true)
                     } else {
                         $('#status').prop('checked', false)
@@ -1195,7 +1196,7 @@
             params.append('selectedids', ids.join(',')) :
             params.append('selectedids', '0');
 
-        window.open("<?= base_url('cms/');?>" + 'label-category/export-label-category?'+ params.toString(), '_blank');
+        window.open("<?= site_url('cms/label-category/export-label-category'); ?>?" + params.toString(), '_blank');
         modal.loading_progress(false);
    }
    

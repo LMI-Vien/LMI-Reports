@@ -56,7 +56,7 @@ self.onmessage = async function(e) {
 
                 let customerCode = row["Customer Code"] ? row["Customer Code"].trim() : "";
                 let customerDesc = row["Customer Description"] ? row["Customer Description"].trim() : "";
-                let status = row["Status"] ? row["Status"].trim() : "";
+                let status = row["Status"] ? row["Status"].trim().toLowerCase() : "";
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
 

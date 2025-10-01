@@ -358,8 +358,8 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.cus_code, 10) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.cus_description, 10) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.cus_code, 25) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.cus_description, 50) + "</td>";
                         html += "<td scope=\"col\">" +status+ "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -705,62 +705,31 @@
         });
     }
 
+    function delete_data(id) {
+        get_field_values('tbl_cus_sellout_indicator', 'cus_code', 'id', [id], function(res) {
+            var map = {};
+            if (Array.isArray(res)) {
+                res.forEach(function (row) {
+                    var k = String((row && (row.id || row.ID)) || '');
+                    var v = (row && (row.cus_code || row.CUS_CODE)) || '';
+                    if (k) map[k] = v;
+                });
+            } else if (res && typeof res === 'object') {
+                map = res;
+            }
 
-    // wait natin saan to malalagay
-    // function delete_data(id) {
-    //     get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-    //         let code = res[id];
-    //         message = is_json(confirm_delete_message);
-    //         message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
+            var code = map[String(id)] || '';
 
-    //         modal.confirm(JSON.stringify(message), function(result){
-    //             if (result) {
-    //                 var url = "<?= base_url('cms/global_controller');?>"; 
-    //                 var data = {
-    //                     event: "list",
-    //                     select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
-    //                     query: "a.id = " + id, 
-    //                     offset: offset,  
-    //                     limit: limit,   
-    //                     table: "tbl_agency a",
-    //                     join: [
-    //                         {
-    //                             table: "tbl_brand_ambassador bra",
-    //                             query: "bra.agency = a.id",
-    //                             type: "left"
-    //                         }
-    //                     ],
-    //                     group: "a.id, a.code, a.agency"  
-    //                 };
+            var message = is_json(confirm_delete_message);
+            message.message = 'Delete SellOut Indicator Code <b><i>' + code + '</i></b> from SellOut Indicator Masterfile?';
+            modal.confirm(JSON.stringify(message), function(result){
+                if (!result) return;
 
-    //                 aJax.post(url, data, function(response) {
-    //                     try {
-    //                         var obj = JSON.parse(response);
-    //                         if (!Array.isArray(obj)) { 
-    //                             modal.alert("Error processing response data.", "error", ()=>{});
-    //                             return;
-    //                         }
-
-    //                         if (obj.length === 0) {
-    //                             proceed_delete(id); 
-    //                             return;
-    //                         }
-
-    //                         var Count = Number(obj[0].agency_count) || 0;
-
-    //                         if (Count > 0) { 
-    //                             modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-    //                         } else {
-    //                             proceed_delete(id); 
-    //                         }
-    //                     } catch (e) {
-    //                         modal.alert("Error processing response data.", "error", ()=>{});
-    //                     }
-    //                 });
-    //             }
-    //         });
-    //     });
-    // }
+                proceed_delete(id);
+                
+            });
+        });
+    }
 
     function proceed_delete(id) {
         var url = "<?= base_url('cms/global_controller');?>";
@@ -1264,7 +1233,7 @@
             code.push(parseInt($(this).attr('data-id')));
         });
 
-        get_field_values('tbl_agency', 'code', 'id', code, function(res) {
+        get_field_values('tbl_cus_sellout_indicator', 'cus_code', 'id', code, function(res) {
             if(code.length == 1) {
                 code_string = `Code <i><b>${res[code[0]]}</b></i>`;
             } else {
@@ -1274,17 +1243,17 @@
 
         if (parseInt(status) === -2) {
             message = is_json(confirm_delete_message);
-            message.message = `Delete ${code_string} from Agency Masterfile?`;  
+            message.message = `Delete ${code_string} from Customer SellOut Indicator Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_delete_message;
         } else if (parseInt(status) === 1) {
             message = is_json(confirm_publish_message);
-            message.message = `Publish ${code_string} from Agency Masterfile?`;
+            message.message = `Publish ${code_string} from Customer SellOut Indicator Masterfile?`;
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_publish_message;
         } else {
             message = is_json(confirm_unpublish_message);
-            message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
+            message.message = `Unpublish ${code_string} from Customer SellOut Indicator Masterfile?`;  
             modal_obj = JSON.stringify(message);
             modal_alert_success = success_unpublish_message;
         }
@@ -1297,7 +1266,7 @@
                     var id = $(this).attr('data-id');
                     dataList.push({
                         event: "update",
-                        table: "tbl_agency",
+                        table: "tbl_cus_sellout_indicator",
                         field: "id",
                         where: id,
                         data: {
@@ -1357,13 +1326,13 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    exportAgency()
+                    exportCustomerSellOutIndicator()
                 }, 500);
             }
         })
     })
 
-    const exportAgency = () => {
+    const exportCustomerSellOutIndicator = () => {
         var ids = [];
 
         $('.select:checked').each(function () {
@@ -1378,7 +1347,8 @@
             params.append('selectedids', ids.join(',')) :
             params.append('selectedids', '0');
 
-        window.open("<?= base_url('cms/');?>" + 'agency/export-agency?'+ params.toString(), '_blank');
+        window.open("<?= base_url('cms/customer-sellout-indicator/export-customer-sellout-indicator'); ?>?" + params.toString(), '_blank');
+
         modal.loading_progress(false);
    }
    

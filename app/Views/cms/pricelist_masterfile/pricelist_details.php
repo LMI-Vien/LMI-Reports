@@ -241,7 +241,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="netPrice" class="col-form-label">Net Price</label>
-                                    <input type="text" id="netPrice" name="netPrice" class="form-control required" disabled>
+                                    <input type="text" id="netPrice" name="netPrice" class="form-control required">
                                 </div>
                             </div>
 
@@ -533,6 +533,8 @@
                 if (uid) fillFrom(uid);
             });
         });
+
+        enforceNumeric('#sellingPrice, #discountInPercent', { decimals: 2 });
     });
 
     function clearItemPair() {
@@ -941,7 +943,8 @@
         if (['edit', 'view'].includes(actions)) populate_modal(id);
         
         let isReadOnly = actions === 'view';
-        set_field_state('#brand, #brandLabelType, #labelTypeCat, #catOne, #catTwo, #catThree, #catFour, #itemCode, #itemDescription, #customerItemCode, #uom, #sellingPrice, #discountInPercent, #netPrice, #effectDate, #status', isReadOnly);
+        set_field_state('#brand, #brandLabelType, #labelTypeCat, #catOne, #catTwo, #catThree, #catFour, #itemCode, #itemDescription, #customerItemCode, #sellingPrice, #discountInPercent, #effectDate, #status', isReadOnly);
+        $('#netPrice, #uom').prop({ readonly: true, disabled: true });
 
         $footer.empty();
         if (actions === 'add') $footer.append(buttons.save);
@@ -1823,13 +1826,13 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    exportAgency()
+                    exportPricelistDetails()
                 }, 500);
             }
         })
     })
 
-    const exportAgency = () => {
+    const exportPricelistDetails = () => {
         var ids = [];
 
         $('.select:checked').each(function () {
@@ -1844,7 +1847,7 @@
             params.append('selectedids', ids.join(',')) :
             params.append('selectedids', '0');
 
-        window.open("<?= base_url('cms/');?>" + 'agency/export-agency?'+ params.toString(), '_blank');
+        window.open("<?= base_url('cms/');?>" + 'pricelist-masterfile/export-pricelist-details?'+ params.toString(), '_blank');
         modal.loading_progress(false);
    }
    

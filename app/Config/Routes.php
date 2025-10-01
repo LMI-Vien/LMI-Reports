@@ -238,7 +238,7 @@ $routes->group('cms/', static function ($routes) {
 
     $routes->group('label-category', static function ($routes) {
         $routes->get('/', 'Cms\LabelCategory::index');
-        $routes->match(['GET', 'POST'], 'export-category', 'Cms\LabelCategory::export_category');
+        $routes->match(['GET', 'POST'], 'export-label-category', 'Cms\LabelCategory::exportLabelCategory');
     });
 
     $routes->group('pricelist-masterfile', static function ($routes) {
@@ -249,27 +249,19 @@ $routes->group('cms/', static function ($routes) {
         $routes->post('refresh-from-main', 'Cms\PricelistMasterfile::refreshFromMain');
         $routes->match(['GET', 'POST'], 'merged-customers', 'Cms\PricelistMasterfile::getMergedCustomers');
         $routes->match(['GET', 'POST'], 'merged-items', 'Cms\PricelistMasterfile::getMergedItemFile');
-    });
-
-    $routes->group('pricelist-details', static function ($routes) {
-        $routes->get('/', 'Cms\PricelistDetails::index');
-    });
-
-    $routes->group('customer-details', static function ($routes) {
-        $routes->get('/', 'Cms\CustomerDetails::index');
-    });
-
-    $routes->group('customer-pricelist-details', static function ($routes) {
-        $routes->get('/', 'Cms\CustomerPricelistDetails::index');
+        $routes->match(['GET', 'POST'], 'export-pricelist-mf', 'Cms\PricelistMasterfile::exportMotherPricelist');
+        $routes->match(['GET', 'POST'], 'export-pricelist-details', 'Cms\PricelistMasterfile::exportPricelistDetails');
     });
 
     $routes->group('store-segment', static function ($routes) {
         $routes->get('/', 'Cms\StoreSegment::index');
+        $routes->match(['GET', 'POST'], 'export-store-segment', 'Cms\StoreSegment::exportStoreSegment');
     });
 
     $routes->group('customer-sellout-indicator', static function ($routes) {
         $routes->get('/', 'Cms\CustomerSellOutIndicator::index');
         $routes->match(['GET', 'POST'], 'merged-customers', 'Cms\CustomerSellOutIndicator::getMergedCustomers');
+        $routes->match(['GET', 'POST'], 'export-customer-sellout-indicator', 'Cms\CustomerSellOutIndicator::exportCustomerSellOutIndicator');
     });
 
 

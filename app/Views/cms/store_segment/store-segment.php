@@ -245,8 +245,8 @@
 
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td class='center-content' style='width: 5%'><input class='select' type=checkbox data-id="+y.id+" onchange=checkbox_check()></td>";
-                        html += "<td scope=\"col\">" + trimText(y.code, 10) + "</td>";
-                        html += "<td scope=\"col\">" + trimText(y.description, 10) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.code, 25) + "</td>";
+                        html += "<td scope=\"col\">" + trimText(y.description, 25) + "</td>";
                         html += "<td scope=\"col\">" +status+ "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
                         html += "<td class='center-content' scope=\"col\">" + (y.updated_date ? ViewDateformat(y.updated_date) : "N/A") + "</td>";
@@ -663,7 +663,7 @@
         get_field_values('tbl_store_segment_list', 'code', 'id', [id], function(res) {
             let code = res[id];
             message = is_json(confirm_delete_message);
-            message.message = `Delete Store Segment Code <b><i>${code}</i></b> from Agency Masterfile?`;
+            message.message = `Delete Store Segment Code <b><i>${code}</i></b> from Store Segment Masterfile?`;
 
             modal.confirm(JSON.stringify(message), function(result){
                 if (result) {
@@ -1333,13 +1333,13 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    exportAgency()
+                    exportStoreSegment()
                 }, 500);
             }
         })
     })
 
-    const exportAgency = () => {
+    const exportStoreSegment = () => {
         var ids = [];
 
         $('.select:checked').each(function () {
@@ -1354,7 +1354,7 @@
             params.append('selectedids', ids.join(',')) :
             params.append('selectedids', '0');
 
-        window.open("<?= base_url('cms/');?>" + 'agency/export-agency?'+ params.toString(), '_blank');
+        window.open("<?= base_url('cms/');?>" + 'store-segment/export-store-segment?'+ params.toString(), '_blank');
         modal.loading_progress(false);
    }
    

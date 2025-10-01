@@ -1947,3 +1947,35 @@ function excel_date_to_readable_date(excel_date) {
 		day: "numeric" 
 	});
 }
+
+
+// Enforce numeric-only input on text fields (works for typing & paste).
+// Set { decimals: 0 } for integers only; omit to allow unlimited decimals.
+function enforceNumeric(selector, opts = {}) {
+	const decimals = Number.isInteger(opts.decimals) ? opts.decimals : null;
+
+	$(document).on('keydown', selector, function (e) {
+		if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+	});
+
+	$(document).on('input', selector, function () {
+		let v = this.value;
+
+		v = v.replace(',', '.');
+
+		v = v.replace(/[^0-9.]/g, '');
+
+		const i = v.indexOf('.');
+		if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+
+		if (decimals !== null && v.includes('.')) {
+			const [int, frac] = v.split('.');
+			v = int + '.' + frac.slice(0, decimals);
+		}
+
+		if (v === '.') v = '';
+
+		this.value = v;
+	});
+	$(selector).attr('inputmode', 'decimal').attr('autocomplete', 'off');
+}

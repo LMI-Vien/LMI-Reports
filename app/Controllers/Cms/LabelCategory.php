@@ -3,6 +3,8 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class LabelCategory extends BaseController
 {
@@ -27,7 +29,7 @@ class LabelCategory extends BaseController
 		$data['title'] = "Label Category";
 		$data['PageName'] = 'Label Category';
 		$data['PageUrl'] = 'Label Category';
-		$data['buttons'] = ['add', 'search', 'filter'];
+		$data['buttons'] = ['add', 'search', 'import', 'export', 'filter'];
 		$data['content'] = "cms/label_category/label_category.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
@@ -44,6 +46,57 @@ class LabelCategory extends BaseController
         		"assets/css/style.css"
                     );
 		return view("cms/layout/template", $data);	
+	}
+
+	public function exportLabelCategory() {
+		$ids = $this->request->getGet('selectedids');
+		$ids = $ids === [] ? null : $ids;
+		$result_data = '';
+
+		if ($ids == 0) {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_label_category_list', 'status >= 0', 999999999, 0, 'code, description, status', '', '', '', ''
+			);
+		} 
+		else {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_label_category_list', 'status >= 0', 999999999, 0, 'code, description, status', '', '', '', ''
+			);
+		}
+		$currentDateTime = date('Y-m-d H:i:s');
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Masterfile: Label Category');
+		$sheet->setCellValue('A3', 'Date Printed: '.$currentDateTime);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
+		$sheet->mergeCells('A3:C3');
+
+		$rowNum = 6;
+		foreach ($result_data as $row) {
+			$headers = ['Description', 'Remarks', 'Status'];
+			$sheet->fromArray($headers, null, 'A5');
+			$sheet->getStyle('A5:E5')->getFont()->setBold(true);
+
+			$sheet->setCellValueExplicit('A' . $rowNum, $row->code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('B' . $rowNum, $row->description, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('C' . $rowNum, $row->status == 1 ? 'Active' : 'Inactive', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$rowNum+=1;
+			
+		}
+
+		$title = 'Label Category Masterfile_' . date('Ymd_His');
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
 	}
 
 }

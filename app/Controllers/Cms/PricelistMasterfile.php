@@ -4,6 +4,8 @@ namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
 use App\Models\Global_model;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PricelistMasterfile extends BaseController
 {
@@ -28,7 +30,7 @@ class PricelistMasterfile extends BaseController
 		$data['title'] = "Pricelist Masterfile";
 		$data['PageName'] = 'Pricelist Masterfile';
 		$data['PageUrl'] = 'Pricelist Masterfile';
-		$data['buttons'] = ['add', 'search', 'import', 'filter'];
+		$data['buttons'] = ['add', 'search', 'import', 'export', 'filter'];
 		$data['content'] = "cms/pricelist_masterfile/pricelist_masterfile.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$query = [
@@ -71,7 +73,7 @@ class PricelistMasterfile extends BaseController
 		$data['PageName'] = 'Pricelist Details';
 		$data['PageUrl'] = 'Pricelist Details';
 		$data['content'] = "cms/pricelist_masterfile/pricelist_details.php";
-		$data['buttons'] = ['add', 'import', 'search'];
+		$data['buttons'] = ['add', 'import', 'export', 'search'];
 		$data['session'] = session();
 		$query = [
 		    'status' => 1
@@ -272,6 +274,157 @@ class PricelistMasterfile extends BaseController
 		$updated = $model->refreshFromMain($customerId, $cusPricelistId, $userId);
 
 		return $this->response->setJSON(['ok' => true, 'updated' => $updated]);
+	}
+
+	public function exportMotherPricelist() {
+		$ids = $this->request->getGet('selectedids');
+		$ids = $ids === [] ? null : $ids;
+		$result_data = '';
+
+		if ($ids == 0) {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_pricelist_masterfile', 'status >= 0', 999999999, 0, 'description, remarks, status', '', '', '', ''
+			);
+		} 
+		else {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_pricelist_masterfile', 'status >= 0', 999999999, 0, 'description, remarks, status', '', '', '', ''
+			);
+		}
+		$currentDateTime = date('Y-m-d H:i:s');
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Masterfile: Pricelist');
+		$sheet->setCellValue('A3', 'Date Printed: '.$currentDateTime);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
+		$sheet->mergeCells('A3:C3');
+
+		$rowNum = 6;
+		foreach ($result_data as $row) {
+			$headers = ['Description', 'Remarks', 'Status'];
+			$sheet->fromArray($headers, null, 'A5');
+			$sheet->getStyle('A5:E5')->getFont()->setBold(true);
+
+			$sheet->setCellValueExplicit('A' . $rowNum, $row->description, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('B' . $rowNum, $row->remarks, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('C' . $rowNum, $row->status == 1 ? 'Active' : 'Inactive', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$rowNum+=1;
+			
+		}
+
+		$title = 'Pricelist Masterfile_' . date('Ymd_His');
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
+
+	
+	public function exportPricelistDetails() {
+		$ids = $this->request->getGet('selectedids');
+		$ids = $ids === [] ? null : $ids;
+		$result_data = '';
+
+		$select = "
+			pl.id, pl.pricelist_id,
+			pl.brand_id, brnd.brand_code AS brand_code,
+			pl.brand_label_type_id, brlbltyp.label AS brand_label_type,
+			pl.label_type_category_id, catlist.code AS catlist_code,
+			pl.category_1_id, class.item_class_code AS labeltype_code,
+			pl.category_2_id, sclass.item_sub_class_code AS item_subclass,
+			pl.category_3_id, idept.item_department_code AS item_department,
+			pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+			pl.item_code, pl.item_description,
+			pl.cust_item_code, pl.uom,
+			pl.selling_price, pl.disc_in_percent,
+			pl.net_price, pl.effectivity_date,
+			pl.status, pl.updated_date, pl.created_date
+		";
+
+		$joins = [
+			['table' => 'tbl_brand brnd',                         'query' => 'brnd.id = pl.brand_id',                   'type' => 'left'],
+			['table' => 'tbl_label_category_list catlist',        'query' => 'catlist.id = pl.label_type_category_id',  'type' => 'left'],
+			['table' => 'tbl_classification class',               'query' => 'class.id = pl.category_1_id',             'type' => 'left'],
+			['table' => 'tbl_brand_label_type brlbltyp',          'query' => 'brlbltyp.id = pl.brand_label_type_id',    'type' => 'left'],
+			['table' => 'tbl_sub_classification sclass',          'query' => 'sclass.id = pl.category_2_id',            'type' => 'left'],
+			['table' => 'tbl_item_department idept',              'query' => 'idept.id = pl.category_3_id',             'type' => 'left'],
+			['table' => 'tbl_item_merchandise_category mcat',     'query' => 'mcat.id = pl.category_4_id',              'type' => 'left'],
+		];
+
+
+		if ($ids == 0) {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_main_pricelist pl', 'pl.status >= 0', 999999999, 0, $select, '', '', $joins, ''
+			);
+		} 
+		else {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_main_pricelist pl', 'pl.status >= 0', 999999999, 0, $select, '', '', $joins, ''
+			);
+		}
+		$currentDateTime = date('Y-m-d H:i:s');
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Masterfile: Pricelist');
+		$sheet->setCellValue('A3', 'Date Printed: '.$currentDateTime);
+		$sheet->mergeCells('A1:G1');
+		$sheet->mergeCells('A2:G2');
+		$sheet->mergeCells('A3:G3');
+
+
+		$headers = [
+			'Brand Code','Brand Label Type','Label Type Cat','Cat 1','Cat 2','Cat 3','Cat 4',
+			'Item Code','Item Description','Customer Item Code','UOM',
+			'Selling Price','Discount %','Net Price','Effectivity Date','Status'
+		];
+		$sheet->fromArray($headers, null, 'A5');
+		$sheet->getStyle('A5:P5')->getFont()->setBold(true);
+
+		$rowNum = 6;
+		foreach ($result_data as $row) {
+			$sheet->setCellValueExplicit('A'.$rowNum, $row->brand_code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('B'.$rowNum, $row->brand_label_type, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('C'.$rowNum, $row->catlist_code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('D'.$rowNum, $row->labeltype_code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('E'.$rowNum, $row->item_subclass, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('F'.$rowNum, $row->item_department, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('G'.$rowNum, $row->merchandise_cat, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+			$sheet->setCellValueExplicit('H'.$rowNum, $row->item_code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('I'.$rowNum, $row->item_description, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('J'.$rowNum, $row->cust_item_code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('K'.$rowNum, $row->uom, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+			$sheet->setCellValue('L'.$rowNum, $row->selling_price);
+			$sheet->setCellValue('M'.$rowNum, $row->disc_in_percent);
+			$sheet->setCellValue('N'.$rowNum, $row->net_price);
+			$sheet->setCellValueExplicit('O'.$rowNum, $row->effectivity_date, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('P'.$rowNum, ((int)$row->status === 1 ? 'Active' : 'Inactive'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			
+			$rowNum+=1;
+			
+		}
+
+		$title = 'Pricelist Masterfile_' . date('Ymd_His');
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
 	}
 
 

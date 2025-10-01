@@ -29,7 +29,7 @@ class CustomerSellOutIndicator extends BaseController
 		$data['title'] = "Customer Sell Out Indicator";
 		$data['PageName'] = 'Customer Sell Out Indicator';
 		$data['PageUrl'] = 'Customer Sell Out Indicator';
-		$data['buttons'] = ['add', 'search', 'import', 'filter'];
+		$data['buttons'] = ['add', 'search', 'import', 'export', 'filter'];
 		$data['content'] = "cms/customer_sellout_indicator/customer_sellout_indicator.php";
 		$data['session'] = session(); //for frontend accessing the session data
 		$data['js'] = array(
@@ -103,6 +103,58 @@ class CustomerSellOutIndicator extends BaseController
 		});
 
 		return $this->response->setJSON($out);
+	}
+
+	public function exportCustomerSellOutIndicator() {
+		$ids = $this->request->getGet('selectedids');
+		$ids = $ids === [] ? null : $ids;
+		$result_data = '';
+
+		if ($ids == 0) {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_cus_sellout_indicator', 'status >= 0', 999999999, 0, 'cus_code, cus_description, source, status', '', '', '', ''
+			);
+		} 
+		else {
+			$result_data = $this->Global_model->get_data_list(
+				'tbl_cus_sellout_indicator', "id IN ($ids)", 999999999, 0, 'cus_code, cus_description, source, status', '', '', '', ''
+			);
+		}
+		$currentDateTime = date('Y-m-d H:i:s');
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
+		$sheet->setCellValue('A2', 'Masterfile: Customer SellOut Indicator');
+		$sheet->setCellValue('A3', 'Date Printed: '.$currentDateTime);
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
+		$sheet->mergeCells('A3:C3');
+
+		$rowNum = 6;
+		foreach ($result_data as $row) {
+			$headers = ['Customer Code', 'Customer Description', 'Source', 'Status'];
+			$sheet->fromArray($headers, null, 'A5');
+			$sheet->getStyle('A5:E5')->getFont()->setBold(true);
+
+			$sheet->setCellValueExplicit('A' . $rowNum, $row->cus_code, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('B' . $rowNum, $row->cus_description, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('C' . $rowNum, $row->source, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$sheet->setCellValueExplicit('D' . $rowNum, $row->status == 1 ? 'Active' : 'Inactive', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+			$rowNum+=1;
+			
+		}
+
+		$title = 'Customer SellOut Indicator Masterfile_' . date('Ymd_His');
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
 	}
 
 }

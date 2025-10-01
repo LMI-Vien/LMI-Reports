@@ -124,7 +124,7 @@ self.onmessage = async function(e) {
                 let sellingPrice = row["Selling Price"] ? row["Selling Price"].trim() : "";
                 let discountInPercent = row["Discount in Percent"] ? row["Discount in Percent"].trim() : "";
                 let effectivityDate = row["Effectivity Date"] ? row["Effectivity Date"].trim() : "";
-                let status = row["Status"] ? row["Status"].trim() : "";
+                let status = row["Status"] ? row["Status"].trim().toLowerCase() : "";
                 let user_id = row["Created by"] ? row["Created by"].trim() : "";
                 let date_of_creation = row["Created Date"] ? row["Created Date"].trim() : "";
 
