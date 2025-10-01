@@ -208,7 +208,7 @@ self.onmessage = async function(e) {
                     category1 = normalize_category1_records[category1_lower];
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Item Classification at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Category 1 (Item Classification) at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -222,7 +222,7 @@ self.onmessage = async function(e) {
                     category2 = normalize_category2_records[category2_lower];
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Sub Classification at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Category 2 (Sub Classification) at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -236,7 +236,7 @@ self.onmessage = async function(e) {
                     category3 = normalize_category3_records[category3_lower];
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Department at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Category 3 (Department) at line #: ${tr_count}`);
                     err_counter++;
                 }
 
@@ -250,7 +250,7 @@ self.onmessage = async function(e) {
                     category4 = normalize_category4_records[normalize4_lower];
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Merch. Category at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Category 4 (Merch. Category) at line #: ${tr_count}`);
                     err_counter++;
                 }
 
