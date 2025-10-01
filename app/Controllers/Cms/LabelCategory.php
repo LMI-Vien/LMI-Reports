@@ -60,7 +60,7 @@ class LabelCategory extends BaseController
 		} 
 		else {
 			$result_data = $this->Global_model->get_data_list(
-				'tbl_label_category_list', 'status >= 0', 999999999, 0, 'code, description, status', '', '', '', ''
+				'tbl_label_category_list', "id IN ($ids) AND status >= 0", 999999999, 0, 'code, description, status', '', '', '', ''
 			);
 		}
 		$currentDateTime = date('Y-m-d H:i:s');

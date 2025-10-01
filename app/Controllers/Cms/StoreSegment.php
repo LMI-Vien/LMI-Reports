@@ -60,7 +60,7 @@ class StoreSegment extends BaseController
 		} 
 		else {
 			$result_data = $this->Global_model->get_data_list(
-				'tbl_store_segment_list', "id IN ($ids)", 999999999, 0, 'code, description, status', '', '', '', ''
+				'tbl_store_segment_list', "id IN ($ids) AND status >= 0", 999999999, 0, 'code, description, status', '', '', '', ''
 			);
 		}
 		$currentDateTime = date('Y-m-d H:i:s');

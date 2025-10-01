@@ -288,7 +288,7 @@ class PricelistMasterfile extends BaseController
 		} 
 		else {
 			$result_data = $this->Global_model->get_data_list(
-				'tbl_pricelist_masterfile', 'status >= 0', 999999999, 0, 'description, remarks, status', '', '', '', ''
+				'tbl_pricelist_masterfile', "id IN ($ids) status >= 0", 999999999, 0, 'description, remarks, status', '', '', '', ''
 			);
 		}
 		$currentDateTime = date('Y-m-d H:i:s');
@@ -367,7 +367,7 @@ class PricelistMasterfile extends BaseController
 		} 
 		else {
 			$result_data = $this->Global_model->get_data_list(
-				'tbl_main_pricelist pl', 'pl.status >= 0', 999999999, 0, $select, '', '', $joins, ''
+				'tbl_main_pricelist pl', "id IN ($ids) pl.status >= 0", 999999999, 0, $select, '', '', $joins, ''
 			);
 		}
 		$currentDateTime = date('Y-m-d H:i:s');
