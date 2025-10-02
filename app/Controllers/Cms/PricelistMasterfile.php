@@ -376,7 +376,7 @@ class PricelistMasterfile extends BaseController
 		$sheet = $spreadsheet->getActiveSheet();
 
 		$sheet->setCellValue('A1', 'Company Name: Lifestrong Marketing Inc.');
-		$sheet->setCellValue('A2', 'Masterfile: Pricelist');
+		$sheet->setCellValue('A2', 'Masterfile: Pricelist Details');
 		$sheet->setCellValue('A3', 'Date Printed: '.$currentDateTime);
 		$sheet->mergeCells('A1:G1');
 		$sheet->mergeCells('A2:G2');
@@ -384,7 +384,7 @@ class PricelistMasterfile extends BaseController
 
 
 		$headers = [
-			'Brand Code','Brand Label Type','Label Type Cat','Cat 1','Cat 2','Cat 3','Cat 4',
+			'Brand Code','Brand Label Type','Label Type Cat','Category 1 (Item Classification MF)','Category 2 (Sub Classification MF)','Category 3 (Department Category MF)','Category 4 (Merch. Category MF)',
 			'Item Code','Item Description','Customer Item Code','UOM',
 			'Selling Price','Discount %','Net Price','Effectivity Date','Status'
 		];
