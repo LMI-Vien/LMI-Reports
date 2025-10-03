@@ -213,7 +213,7 @@ self.onmessage = async function(e) {
                 // i sasave to pero hindi ito yung pagbabasehan sa calculation ng amount
                 // yung net sales per pcs galing sa SFA pricelist
                 let sales_qty = row["sales_qty"];
-                let qty = Number(sales_qty);
+                let qty = Number(sales_qty.replace(/,/g, ""));
                 if (!Number.isInteger(qty)) {
                     addErrorLog("Sales Quantity must be a whole number: " + sales_qty);
                 }
@@ -287,6 +287,10 @@ self.onmessage = async function(e) {
         }
 
         function validateNumber(value, fieldName) {
+            if (typeof value === "string") {
+                value = value.replace(/,/g, "");
+            }
+
             let num = Number(value);
 
             if (isNaN(num)) {
