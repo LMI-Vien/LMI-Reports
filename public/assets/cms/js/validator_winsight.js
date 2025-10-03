@@ -224,6 +224,8 @@ self.onmessage = async function(e) {
                 let net_price_per_pcs= null;
                 let amount = null;
                 let label_type_category = null;
+                let brand_label_type_id = null;
+                let label_type_category_id = null;
 
                 if (sfa_pricelist !== null) {
                     item_code = sfa_pricelist["item_code"]; 
