@@ -371,6 +371,7 @@
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
     var base_url = '<?= base_url();?>';
+    var parentId = parseInt($('#pricelistId').val(), 10) || 0;
 
     //for importing
     let currentPage = 1;
@@ -379,7 +380,6 @@
     let dataset = [];
 
     $(document).ready(function() {
-        var parentId = parseInt($('#pricelistId').val(), 10) || 0;
         var query = "pl.status >= 0 AND pl.pricelist_id = " + parentId;
         get_data(query);
         get_pagination(query);
@@ -784,7 +784,7 @@
             search_input = $('#search_query').val();
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
-            new_query = query;
+            new_query = "pl.status >= 0 AND pl.pricelist_id = " + parentId;
             new_query += " AND (" +
                 "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
                 "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
@@ -808,7 +808,7 @@
         search_input = $('#search_query').val();
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
-        new_query = query;
+        new_query = "pl.status >= 0 AND pl.pricelist_id = " + parentId;
         new_query += " AND (" +
                 "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
                 "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
