@@ -1100,8 +1100,8 @@
         const isActive = $('#status').prop('checked') ? 1 : 0;
 
         const tableName = "tbl_pricelist_masterfile";
-        const uniqueFields = ["remarks"];
-        const fieldValues = [remarks];
+        const uniqueFields = ["description", "remarks"];
+        const fieldValues = [description, remarks];
         const statusField = "status";
 
         const isEdit = id !== undefined && id !== null && id !== '';
