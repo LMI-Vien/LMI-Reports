@@ -1010,21 +1010,38 @@
         } else {
             status_val = 0;
         }
-        if (id !== undefined && id !== null && id !== '') { 
-            modal.confirm(confirm_update_message, function(result){
-                if(result){ 
-                        modal.loading(true);
-                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
+        check_current_db("tbl_main_pricelist", ["pricelist_id", "item_code"], [pricelistId, itemCode], "status", "id", id, true,
+            function (exists) {
+                if (exists) {
+                    modal.alert('Item Code already exists in this Pricelist.', 'warning');
+                    return; 
                 }
-            });
-        }else{
-            modal.confirm(confirm_add_message, function(result){
-                if(result){ 
-                        modal.loading(true);
-                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
+
+                if (id !== undefined && id !== null && id !== '') { 
+                    modal.confirm(confirm_update_message, function(result){
+                        if(result){ 
+                            modal.loading(true);
+                            save_to_db(
+                                pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
+                                itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
+                                netPrice, effectDate, status_val, id
+                            );
+                        }
+                    });
+                } else {
+                    modal.confirm(confirm_add_message, function(result){
+                        if(result){ 
+                            modal.loading(true);
+                            save_to_db(
+                                pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
+                                itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
+                                netPrice, effectDate, status_val, null
+                            );
+                        }
+                    }); 
                 }
-            }); 
-        }
+            }
+        );
     }
 
     function save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
