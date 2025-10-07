@@ -3,7 +3,6 @@
 namespace App\Controllers\Cms;
 
 use App\Controllers\BaseController;
-use App\Models\Global_model;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -256,8 +255,7 @@ class PricelistMasterfile extends BaseController
 		$userId         = (int) ($this->session->get('sess_uid') ?? 0);
 
 		try {
-			$model    = new Global_model();
-			$inserted = $model->pullFromMain($customerId, $cusPricelistId, $userId);
+			$inserted = $this->Global_model->pullFromMain($customerId, $cusPricelistId, $userId);
 			return $this->response->setJSON(['ok' => true, 'inserted' => $inserted]);
 		} catch (\Throwable $e) {
 			return $this->response->setJSON(['ok' => false, 'msg' => $e->getMessage()])->setStatusCode(500);
@@ -270,8 +268,7 @@ class PricelistMasterfile extends BaseController
 		$cusPricelistId = (int) ($this->request->getPost('cusPricelistId') ?? $this->request->getPost('pricelistId') ?? 0);
 		$userId         = (int) ($this->session->get('sess_uid') ?? 0);
 
-		$model   = new Global_model();
-		$updated = $model->refreshFromMain($customerId, $cusPricelistId, $userId);
+		$updated = $this->Global_model->refreshFromMain($customerId, $cusPricelistId, $userId);
 
 		return $this->response->setJSON(['ok' => true, 'updated' => $updated]);
 	}
