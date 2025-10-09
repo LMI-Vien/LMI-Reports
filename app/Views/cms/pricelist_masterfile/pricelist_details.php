@@ -1010,21 +1010,38 @@
         } else {
             status_val = 0;
         }
-        if (id !== undefined && id !== null && id !== '') { 
-            modal.confirm(confirm_update_message, function(result){
-                if(result){ 
-                        modal.loading(true);
-                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
+        check_current_db("tbl_main_pricelist", ["pricelist_id", "item_code"], [pricelistId, itemCode], "status", "id", id, true,
+            function (exists) {
+                if (exists) {
+                    modal.alert('Item Code already exists in this Pricelist.', 'warning');
+                    return; 
                 }
-            });
-        }else{
-            modal.confirm(confirm_add_message, function(result){
-                if(result){ 
-                        modal.loading(true);
-                    save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
+
+                if (id !== undefined && id !== null && id !== '') { 
+                    modal.confirm(confirm_update_message, function(result){
+                        if(result){ 
+                            modal.loading(true);
+                            save_to_db(
+                                pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
+                                itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
+                                netPrice, effectDate, status_val, id
+                            );
+                        }
+                    });
+                } else {
+                    modal.confirm(confirm_add_message, function(result){
+                        if(result){ 
+                            modal.loading(true);
+                            save_to_db(
+                                pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
+                                itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
+                                netPrice, effectDate, status_val, null
+                            );
+                        }
+                    }); 
                 }
-            }); 
-        }
+            }
+        );
     }
 
     function save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
@@ -1342,6 +1359,158 @@
         };
     }
 
+    // function saveValidatedData(valid_data) {
+    //     const overallStart = new Date();
+    //     const parentId = parseInt($('#pricelistId').val(), 10) || 0;
+    //     let batch_size = 5000;
+    //     let total_batches = Math.ceil(valid_data.length / batch_size);
+    //     let batch_index = 0;
+    //     let retry_count = 0;
+    //     let max_retries = 5; 
+    //     let errorLogs = [];
+    //     let url = "<?= base_url('cms/global_controller');?>";
+    //     let table = 'tbl_main_pricelist';
+    //     let selected_fields = ['id', 'pricelist_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];
+
+    //     //for lookup of duplicate recors
+    //     const matchFields = ['pricelist_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];  
+    //     const matchType = "AND";  //use OR/AND depending on the condition
+    //     modal.loading_progress(true, "Validating and Saving data...");
+
+    //     // Fetch existing records
+    //     aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
+    //         // let result = JSON.parse(response);
+    //         const result = JSON.parse(response);
+    //         const allEntries = result.existing || [];
+
+    //         // Build a Set of codes you're importing:
+    //         // const codeSet = new Set(valid_data.map(r => r.code));
+
+    //         // Keep only the rows whose code matches:
+    //         const originalEntries = allEntries.filter(rec => rec.pricelist_id == parentId);
+
+    //         let existingMap = new Map(); // Stores records using composite keys
+
+    //         (allEntries || []).forEach(record => {
+    //             // Normalize to string to avoid undefined/null/number mismatches
+    //             const key = matchFields.map(f => (record[f] ?? '') + '').join('|');
+    //             existingMap.set(key, record.id);
+    //         });
+
+    //         function updateOverallProgress(stepName, completed, total) {
+    //             let progress = Math.round((completed / total) * 100);
+    //             updateSwalProgress(stepName, progress);
+    //         }
+
+    //         function processNextBatch() {
+    //             if (batch_index >= total_batches) {
+    //                 modal.loading_progress(false);
+
+    //                 const overallEnd = new Date();
+    //                 const duration = formatDuration(overallStart, overallEnd);
+
+    //                 const remarks = `
+    //                     Action: Import Pricelist Details
+    //                     <br>Processed ${valid_data.length} records
+    //                     <br>Errors: ${errorLogs.length}
+    //                     <br>Start: ${formatReadableDate(overallStart)}
+    //                     <br>End: ${formatReadableDate(overallEnd)}
+    //                     <br>Duration: ${duration}
+    //                 `;
+
+    //                 logActivity("import-pricelist-details-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+
+    //                 if (errorLogs.length > 0) {
+    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
+    //                     modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
+    //                 } else {
+    //                     modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
+    //                 }
+    //                 return;
+    //             }
+
+    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
+    //             let newRecords = [];
+    //             let updateRecords = [];
+
+    //             batch.forEach(row => {
+    //                 row.pricelist_id = parentId; // enforce the context list
+    //                 const rowKey = matchFields.map(f => (row[f] ?? '') + '').join('|');
+    //                 const matchedId = existingMap.get(rowKey) || null;
+
+    //                 if (matchedId) {
+    //                     row.id = matchedId;
+    //                     row.updated_date = formatDate(new Date());
+    //                     delete row.created_date;
+    //                     updateRecords.push(row);
+    //                 } else {
+    //                     row.created_by = user_id;
+    //                     row.created_date = formatDate(new Date());
+    //                     newRecords.push(row);
+    //                 }
+    //             });
+
+    //             function processUpdates() {
+    //                 return new Promise((resolve) => {
+    //                     if (updateRecords.length > 0) {
+    //                         batch_update(url, updateRecords, "tbl_main_pricelist", "id", false, (response) => {
+    //                             if (response.message !== 'success') {
+    //                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+    //                             }
+    //                             resolve();
+    //                         });
+    //                     } else {
+    //                         resolve();
+    //                     }
+    //                 });
+    //             }
+
+    //             function processInserts() {
+    //                 return new Promise((resolve) => {
+    //                     if (newRecords.length > 0) {
+    //                         batch_insert(url, newRecords, "tbl_main_pricelist", false, (response) => {
+    //                             if (response.message === 'success') {
+    //                                 updateOverallProgress("Saving Pricelist Details...", batch_index + 1, total_batches);
+    //                             } else {
+    //                                 errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
+    //                             }
+    //                             resolve();
+    //                         });
+    //                     } else {
+    //                         resolve();
+    //                     }
+    //                 });
+    //             }
+
+    //             function handleSaveError() {
+    //                 if (retry_count < max_retries) {
+    //                     retry_count++;
+    //                     let wait_time = Math.pow(2, retry_count) * 1000;
+    //                     setTimeout(() => {
+    //                         processInserts().then(() => {
+    //                             batch_index++;
+    //                             retry_count = 0;
+    //                             processNextBatch();
+    //                         }).catch(handleSaveError);
+    //                     }, wait_time);
+    //                 } else {
+    //                     modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+    //                 }
+    //             }
+
+    //             processUpdates()
+    //                 .then(processInserts)
+    //                 .then(() => {
+    //                     batch_index++;
+    //                     setTimeout(processNextBatch, 300);
+    //                 })
+    //                 .catch(handleSaveError);
+    //         }
+
+    //         setTimeout(processNextBatch, 1000);
+    //     });
+    // }
+
     function saveValidatedData(valid_data) {
         const overallStart = new Date();
         const parentId = parseInt($('#pricelistId').val(), 10) || 0;
@@ -1351,143 +1520,243 @@
         let retry_count = 0;
         let max_retries = 5; 
         let errorLogs = [];
+        let skipLogs = [];
+
         let url = "<?= base_url('cms/global_controller');?>";
         let table = 'tbl_main_pricelist';
-        let selected_fields = ['id', 'pricelist_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];
 
-        //for lookup of duplicate recors
-        const matchFields = ['pricelist_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];  
-        const matchType = "AND";  //use OR/AND depending on the condition
+        // IMPORTANT: we must fetch all fields needed to compare “identical”
+        let selected_fields = [
+            'id',
+            'pricelist_id',
+            'brand_id',
+            'brand_label_type_id',
+            'label_type_category_id',
+            'category_1_id',
+            'category_2_id',
+            'category_3_id',
+            'category_4_id',
+            'item_code',
+            'item_description',
+            'cust_item_code',
+            'uom',
+            'selling_price',
+            'disc_in_percent',
+            'effectivity_date',
+            'status'
+        ];
+
+        // Business fields we compare for “identical”
+        const compareFields = [
+            'brand_id',
+            'brand_label_type_id',
+            'label_type_category_id',
+            'category_1_id',
+            'category_2_id',
+            'category_3_id',
+            'category_4_id',
+            'item_code',
+            'item_description',
+            'cust_item_code',
+            'uom',
+            'disc_in_percent',
+            'effectivity_date',
+            'status',
+            'pricelist_id'
+        ];
+
+        function norm(v) {
+            if (v === null || v === undefined) return '';
+            return String(v).trim();
+        }
+
+        function isIdentical(a, b) {
+            return compareFields.every(f => norm(a[f]) === norm(b[f]));
+        }
+
+        function updateOverallProgress(stepName, completed, total) {
+            let progress = total > 0 ? Math.round((completed / total) * 100) : 100;
+            updateSwalProgress(stepName, progress);
+        }
+
         modal.loading_progress(true, "Validating and Saving data...");
 
-        // Fetch existing records
-        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-            // let result = JSON.parse(response);
+        // Fetch existing records to build a map by pricelist_id|item_code
+        aJax.post(url, {
+            table: table,
+            event: "fetch_existing",
+            selected_fields: selected_fields
+        }, function(response) {
+
             const result = JSON.parse(response);
             const allEntries = result.existing || [];
 
-            // Build a Set of codes you're importing:
-            // const codeSet = new Set(valid_data.map(r => r.code));
-
-            // Keep only the rows whose code matches:
+            // Keep only the same pricelist context
             const originalEntries = allEntries.filter(rec => rec.pricelist_id == parentId);
 
-            let existingMap = new Map(); // Stores records using composite keys
-
-            (allEntries || []).forEach(record => {
-                // Normalize to string to avoid undefined/null/number mismatches
-                const key = matchFields.map(f => (record[f] ?? '') + '').join('|');
-                existingMap.set(key, record.id);
+            // Map: key = `${pricelist_id}|${ITEMCODE}`
+            const existingByCode = new Map();
+            originalEntries.forEach(r => {
+            const key = `${r.pricelist_id}|${(r.item_code ?? '').toString().trim().toUpperCase()}`;
+            existingByCode.set(key, r);
             });
 
-            function updateOverallProgress(stepName, completed, total) {
-                let progress = Math.round((completed / total) * 100);
-                updateSwalProgress(stepName, progress);
+            function processNextBatch() {
+            if (batch_index >= total_batches) {
+                modal.loading_progress(false);
+
+                const overallEnd = new Date();
+                const remarks = `Action: Import Pricelist Details
+                    <br>Processed ${valid_data.length} records
+                    <br>Errors: ${errorLogs.length}
+                    <br>Skipped: ${skipLogs.length}
+                    <br>Start: ${formatReadableDate(overallStart)}
+                    <br>End: ${formatReadableDate(overallEnd)}
+                    <br>Duration: ${formatDuration(overallStart, overallEnd)}`;
+
+                    logActivity(
+                    "import-pricelist-details-module",
+                    "Import Batch",
+                    remarks,
+                    "-",
+                    JSON.stringify(valid_data),
+                    JSON.stringify(originalEntries)
+                );
+
+                if (errorLogs.length > 0 || skipLogs.length > 0) {
+                    // Attach skip logs to error log file for user visibility
+                    const combined = [...errorLogs, ...skipLogs];
+                    createErrorLogFile(combined, "Update_Skip_Log_" + formatReadableDate(new Date(), true));
+                    modal.alert("Some rows were skipped or encountered errors. Check the log.", 'info', () => {});
+                } else {
+                    modal.alert("All records processed successfully!", 'success', () => location.reload());
+                }
+                return;
             }
 
-            function processNextBatch() {
-                if (batch_index >= total_batches) {
-                    modal.loading_progress(false);
+            let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
 
-                    const overallEnd = new Date();
-                    const duration = formatDuration(overallStart, overallEnd);
+            let newRecords = [];
+            let updateRecords = [];
 
-                    const remarks = `
-                        Action: Import Pricelist Details
-                        <br>Processed ${valid_data.length} records
-                        <br>Errors: ${errorLogs.length}
-                        <br>Start: ${formatReadableDate(overallStart)}
-                        <br>End: ${formatReadableDate(overallEnd)}
-                        <br>Duration: ${duration}
-                    `;
+            batch.forEach(row => {
+                // Ensure pricelist context
+                row.pricelist_id = parentId;
 
-                    logActivity("import-pricelist-details-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
+                // Normalize incoming to DB-shape for comparison
+                const itemCodeRaw = row.item_code ?? row["Item Code"] ?? '';
+                const itemCode = itemCodeRaw.toString().trim();
 
-                    if (errorLogs.length > 0) {
-                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-                    } else {
-                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-                    }
-                    return;
+                if (!itemCode) {
+                skipLogs.push(`Skipped (no Item Code): ${JSON.stringify(row).slice(0, 200)}...`);
+                return;
                 }
 
-                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-                let newRecords = [];
-                let updateRecords = [];
+                const incomingDB = {
+                    brand_id: row.brand_id,
+                    brand_label_type_id: row.brand_label_type_id,
+                    label_type_category_id: row.label_type_category_id,
+                    category_1_id: row.category_1_id,
+                    category_2_id: row.category_2_id,
+                    category_3_id: row.category_3_id,
+                    category_4_id: row.category_4_id,
+                    item_code: itemCode,
+                    item_description: row.item_description ?? row["Item Description"],
+                    cust_item_code: row.cust_item_code ?? row["Customer Item Code"],
+                    uom: row.uom ?? row["UOM"],
+                    selling_price: row.selling_price ?? row["Selling Price"],
+                    disc_in_percent: row.disc_in_percent ?? row["Discount in Percent"],
+                    effectivity_date: row.effectivity_date ?? row["Effectivity Date"],
+                    status: row.status ?? row["Status"],
+                    pricelist_id: parentId
+                };
 
-                batch.forEach(row => {
-                    row.pricelist_id = parentId; // enforce the context list
-                    const rowKey = matchFields.map(f => (row[f] ?? '') + '').join('|');
-                    const matchedId = existingMap.get(rowKey) || null;
+                const key = `${parentId}|${itemCode.toUpperCase()}`;
+                const existing = existingByCode.get(key);
 
-                    if (matchedId) {
-                        row.id = matchedId;
-                        row.updated_date = formatDate(new Date());
-                        delete row.created_date;
-                        updateRecords.push(row);
+                if (existing) {
+                // NEW RULE:
+                // identical  -> UPDATE
+                // different  -> SKIP
+                if (isIdentical(existing, incomingDB)) {
+                    const upd = {
+                        ...incomingDB,
+                        id: existing.id,
+                        updated_date: formatDate(new Date())
+                        // NOTE: do NOT set created_* here; preserve DB originals
+                    };
+                        updateRecords.push(upd);
+                } else {
+                    skipLogs.push(`Skipped (differs from existing): Item Code ${itemCode}`);
+                }
+                } else {
+                // Not found -> INSERT
+                const ins = {
+                    ...incomingDB,
+                    created_by: user_id,
+                    created_date: formatDate(new Date())
+                };
+                    newRecords.push(ins);
+                }
+            });
+
+            function processUpdates() {
+                return new Promise((resolve) => {
+                    if (updateRecords.length > 0) {
+                        batch_update(url, updateRecords, "tbl_main_pricelist", "id", false, (response) => {
+                        if (response.message !== 'success') {
+                            errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
+                        }
+                        resolve();
+                        });
                     } else {
-                        row.created_by = user_id;
-                        row.created_date = formatDate(new Date());
-                        newRecords.push(row);
+                        resolve();
                     }
                 });
+            }
 
-                function processUpdates() {
-                    return new Promise((resolve) => {
-                        if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_main_pricelist", "id", false, (response) => {
-                                if (response.message !== 'success') {
-                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
+            function processInserts() {
+                return new Promise((resolve) => {
+                    if (newRecords.length > 0) {
+                        batch_insert(url, newRecords, "tbl_main_pricelist", false, (response) => {
+                        if (response.message === 'success') {
+                            updateOverallProgress("Saving Pricelist Details...", batch_index + 1, total_batches);
                         } else {
-                            resolve();
+                            errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
                         }
-                    });
-                }
-
-                function processInserts() {
-                    return new Promise((resolve) => {
-                        if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_main_pricelist", false, (response) => {
-                                if (response.message === 'success') {
-                                    updateOverallProgress("Saving Pricelist Details...", batch_index + 1, total_batches);
-                                } else {
-                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function handleSaveError() {
-                    if (retry_count < max_retries) {
-                        retry_count++;
-                        let wait_time = Math.pow(2, retry_count) * 1000;
-                        setTimeout(() => {
-                            processInserts().then(() => {
-                                batch_index++;
-                                retry_count = 0;
-                                processNextBatch();
-                            }).catch(handleSaveError);
-                        }, wait_time);
+                        resolve();
+                        });
                     } else {
-                        modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+                        resolve();
                     }
-                }
+                });
+            }
 
-                processUpdates()
-                    .then(processInserts)
+            function handleSaveError() {
+                if (retry_count < max_retries) {
+                retry_count++;
+                let wait_time = Math.pow(2, retry_count) * 1000;
+                setTimeout(() => {
+                    processInserts()
                     .then(() => {
                         batch_index++;
-                        setTimeout(processNextBatch, 300);
+                        retry_count = 0;
+                        processNextBatch();
                     })
                     .catch(handleSaveError);
+                }, wait_time);
+                } else {
+                modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
+                }
+            }
+
+            processUpdates()
+                .then(processInserts)
+                .then(() => {
+                batch_index++;
+                setTimeout(processNextBatch, 300);
+                })
+                .catch(handleSaveError);
             }
 
             setTimeout(processNextBatch, 1000);
