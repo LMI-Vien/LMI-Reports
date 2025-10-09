@@ -1103,6 +1103,7 @@ class GlobalController extends BaseController
 			$this->Global_model->get_valid_records(
 				"tbl_main_pricelist", 
 				[
+					'pricelist_id',
 					'cust_item_code',
 					'brand_id',
 					'category_1_id',
@@ -1114,6 +1115,12 @@ class GlobalController extends BaseController
 					'net_price',
 					'label_type_category_id'
 				]
+			);
+		}
+		if (!empty($request['pricelist_masterfile'])) {
+			$responseData['pricelist_masterfile'] = 
+			$this->Global_model->get_valid_records(
+				"tbl_pricelist_masterfile",  [ 'description_id', 'description', ]
 			);
 		}
 		if (!empty($request['years'])) {
