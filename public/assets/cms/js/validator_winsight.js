@@ -18,6 +18,8 @@ self.onmessage = async function(e) {
         let get_ba_valid_response = await fetch(
             `${BASE_URL}cms/global_controller/get_valid_ba_data?`
             +`main_pricelist=1`
+            +`&pricelist_masterfile=1`
+            +`&payment_group_lmi=1`
             +`&store_segment=1`
             +`&brands=1`
             +`&classification=1`
@@ -33,15 +35,27 @@ self.onmessage = async function(e) {
         );
         let ba_data = await get_ba_valid_response.json();
 
+        const watsonsId = ba_data.payment_group_lmi.find(
+            g => g.customer_group_code.toLowerCase() === 'watsons personal care stores'
+        )?.id;
+
+        const watsonPricelist = ba_data.pricelist_masterfile.find(
+        p =>
+            p.description.toLowerCase() === 'watsons personal care stores' &&
+            p.description_id === watsonsId
+        );
+
         let main_pricelist_lookup = {};
         ba_data.main_pricelist.forEach(
             main_pricelist => main_pricelist_lookup[main_pricelist.cust_item_code.toLowerCase()] = main_pricelist.id
         ); 
         // kukuhain yung SFA Pricelist ID (mother pricelist)
         let reverse_main_pricelist_lookup = {};
-        ba_data.main_pricelist.forEach(
-            main_pricelist => reverse_main_pricelist_lookup[main_pricelist.id] = main_pricelist
-        ); 
+        ba_data.main_pricelist.forEach(main_pricelist => {
+            if (main_pricelist.pricelist_id === watsonPricelist['id']) {
+                reverse_main_pricelist_lookup[main_pricelist.id] = main_pricelist;
+            }
+        });
         // kukuhain yung SFA Pricelist details based sa ID
         // para ma check kung existing ba sa SFA Pricelist yung user input
 
