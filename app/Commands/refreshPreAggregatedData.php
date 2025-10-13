@@ -17,21 +17,20 @@ class refreshPreAggregatedData extends BaseCommand
         $type = $params[0] ?? 'all';
         $refresher = new Sync_model();
         set_time_limit(0);
-
-        if ($type === 'scan') {
+        if ($type === 'scan') { //php spark refresh:preaggregated scan
             CLI::write('Refreshing Scan Data...', 'yellow');
             $scan = $refresher->refreshScanData();
             CLI::write('Scan records inserted: ' . $scan['total_inserted'], 'green');
-        } elseif ($type === 'vmi') {
+        } elseif ($type === 'vmi') { //php spark refresh:preaggregated vmi
             CLI::write('Refreshing VMI Data...', 'yellow');
             $vmi = $refresher->refreshVmiData();
             CLI::write('VMI records inserted: ' . $vmi['total_inserted'], 'green');
-        } elseif($type === 'weekvmi'){
+        } elseif($type === 'weekvmi'){ //php spark refresh:preaggregated weekvmi
             CLI::write('Refreshing Week on Week VMI Data...', 'yellow');
             $vmi = $refresher->refreshVmiWoWData();
             CLI::write('Week on Week VMI records inserted: ' . $vmi['total_inserted'], 'green');
-        }else {
-            CLI::write('Refreshing All Data...', 'yellow');
+        }else { //php spark refresh:preaggregated
+            CLI::write('Refreshing All Data...', 'yellow'); 
             $all = $refresher->refreshAll();
             CLI::write('Scan records inserted: ' . $all['scan']['total_inserted'], 'green');
             CLI::write('VMI records inserted: ' . $all['vmi']['total_inserted'], 'green');
