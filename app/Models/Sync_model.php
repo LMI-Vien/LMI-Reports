@@ -1183,8 +1183,8 @@ class Sync_model extends Model
                     CASE WHEN aso.company = '2' THEN pitmlmi.itmclacde ELSE itmrgdi.itmclacde END AS itmclacde,
                     CONCAT(MIN(aso.store_code), ' - ', s.description) AS store_name,
                     MIN(DISTINCT aso.sku_code) AS sku_codes,
-                    CASE WHEN aso.company = '2' THEN itmunitlmi.untprc ELSE itmunitrgdi.untprc END AS unit_price,
-                    (CASE WHEN aso.company = '2' THEN itmunitlmi.untprc ELSE itmunitrgdi.untprc END) * SUM(aso.quantity) AS amount
+                    CASE WHEN aso.company = '2' THEN itmunitall.untprc ELSE itmunitrgdi.untprc END AS unit_price,
+                    (CASE WHEN aso.company = '2' THEN itmunitall.untprc ELSE itmunitrgdi.untprc END) * SUM(aso.quantity) AS amount
                 FROM aggregated_so aso
                 LEFT JOIN tbl_store s ON aso.store_code = s.code
 
@@ -1194,7 +1194,7 @@ class Sync_model extends Model
                 LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde AND aso.company = '2'
                 LEFT JOIN dedup_itmrgdi itmrgdi ON pcrgdi.itmcde = itmrgdi.itmcde AND aso.company != '2'
 
-                LEFT JOIN tbl_item_unit_file_lmi itmunitlmi ON pclmi.itmcde = itmunitlmi.itmcde AND itmunitlmi.untmea = 'PCS' AND aso.company = '2'
+                LEFT JOIN tbl_item_unit_file_all itmunitall ON pclmi.itmcde = itmunitall.itmcde AND itmunitall.untmea = 'PCS' AND aso.company = '2'
                 LEFT JOIN tbl_item_unit_file_rgdi itmunitrgdi ON pcrgdi.itmcde = itmunitrgdi.itmcde AND itmunitrgdi.untmea = 'PCS' AND aso.company != '2'
 
                 LEFT JOIN tbl_brand b ON 
