@@ -248,7 +248,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="effectDate" class="col-form-label">Effectivity Date</label>
-                                    <input type="date" id="effectDate" name="effectDate" class="form-control required">
+                                    <input type="date" id="effectDate" name="effectDate" class="form-control required no-past-date">
                                 </div>
                             </div>
                         </div>
@@ -968,7 +968,25 @@
     }
 
     function reset_modal_fields() {
-        $('#popup_modal #code, #popup_modal #agency, #popup_modal').val('');
+        const idsToClear = [
+            'pricelistId', 'brand', 'brandId',
+            'brandLabelType', 'brandLabelTypeId', 
+            'labelTypeCat', 'labelTypeCatId',
+            'catOne', 'catOneId',
+            'catTwo', 'catTwoId',
+            'catThree', 'catThreeId',
+            'catFour', 'catFourId',
+            'itemCode', 'itemCodeId',
+            'itemDescription', 'itemDescriptionId',
+            'customerItemCode', 'uom',
+            'sellingPrice', 'discountInPercent',
+            'netPrice', 'effectDate',
+            'itemUid', 'itemSource', 'itemId'
+        ];
+
+        const sel = idsToClear.map(id => `#popup_modal #${id}`).join(', ');
+        $(sel).val('');
+
         $('#popup_modal #status').prop('checked', true);
     }
 
@@ -1010,7 +1028,7 @@
         } else {
             status_val = 0;
         }
-        check_current_db("tbl_main_pricelist", ["pricelist_id", "item_code"], [pricelistId, itemCode], "status", "id", id, true,
+        check_current_db("tbl_main_pricelist", ["pricelist_id", "item_code"], [pricelistId, itemCode], "status", "id", id, false,
             function (exists) {
                 if (exists) {
                     modal.alert('Item Code already exists in this Pricelist.', 'warning');
@@ -1045,7 +1063,6 @@
     }
 
     function save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
-        const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
         const now = new Date();
@@ -1542,6 +1559,7 @@
             'uom',
             'selling_price',
             'disc_in_percent',
+            'net_price',
             'effectivity_date',
             'status'
         ];
@@ -1560,6 +1578,8 @@
             'cust_item_code',
             'uom',
             'disc_in_percent',
+            'selling_price',
+            'net_price',
             'effectivity_date',
             'status',
             'pricelist_id'
@@ -1597,8 +1617,9 @@
             // Map: key = `${pricelist_id}|${ITEMCODE}`
             const existingByCode = new Map();
             originalEntries.forEach(r => {
-            const key = `${r.pricelist_id}|${(r.item_code ?? '').toString().trim().toUpperCase()}`;
-            existingByCode.set(key, r);
+                if (r.status < 0) return;
+                const key = `${r.pricelist_id}|${(r.item_code ?? '').toString().trim().toUpperCase()}`;
+                existingByCode.set(key, r);
             });
 
             function processNextBatch() {
@@ -1666,6 +1687,7 @@
                     uom: row.uom ?? row["UOM"],
                     selling_price: row.selling_price ?? row["Selling Price"],
                     disc_in_percent: row.disc_in_percent ?? row["Discount in Percent"],
+                    net_price: row.net_price ?? row["Net Price"],
                     effectivity_date: row.effectivity_date ?? row["Effectivity Date"],
                     status: row.status ?? row["Status"],
                     pricelist_id: parentId

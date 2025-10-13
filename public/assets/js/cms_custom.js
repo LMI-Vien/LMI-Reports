@@ -257,6 +257,47 @@ var validate = {
 	    }
 
 
+		// passing no previous date 
+
+		if ($(element).hasClass("no-past-date")) {
+			$(".no-past-date").each(function(){
+				var val = ($(this).val() || "").trim();
+
+				// allow empty here; let your "required" rule handle empties
+				if (val === "") return;
+
+				// normalize "today" to local midnight
+				var now = new Date();
+				var today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+				// parse common HTML date (YYYY-MM-DD) or fallback to Date()
+				var d;
+				if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+					var parts = val.split("-");
+					d = new Date(+parts[0], +parts[1]-1, +parts[2]);
+				} else {
+					d = new Date(val);
+				}
+
+				if (isNaN(d.getTime())) {
+					counter++;
+					$(this).css('border-color','red');
+					$("<span class='validate_error_message' style='color: red;'>Invalid date format.<br></span>").insertAfter(this);
+					return;
+				}
+
+				var cand = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+				if (cand < today) {
+					counter++;
+					$(this).css('border-color','red');
+					$("<span class='validate_error_message' style='color: red;'>Date cannot be in the past.<br></span>").insertAfter(this);
+				} else {
+					$(this).css('border-color','#ccc');
+				}
+			});
+		}
+
 
 		//validate script tags
 
