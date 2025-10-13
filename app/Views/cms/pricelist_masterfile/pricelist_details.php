@@ -577,7 +577,7 @@
         });
     }
 
-    
+
     function get_data(query, field = "pl.pricelist_id", order = "asc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
@@ -1005,6 +1005,73 @@
         return new_btn;
     }
 
+    function fetchCurrentPricelistRow(id, cb) {
+        const done = (typeof cb === 'function') ? cb : function () {};
+        const safeId = parseInt(id, 10);
+        if (isNaN(safeId)) return done(null);
+
+        aJax.post(url, {
+            event: "list",
+            table: "tbl_main_pricelist",
+            select: "id, selling_price, disc_in_percent, net_price, effectivity_date",
+            query: `id = ${safeId}`,
+            limit: 1
+        }, function (res) {
+            const obj = is_json(res);
+            if (!obj || obj.error) return done(null);
+
+            const rows = Array.isArray(obj) ? obj : (Array.isArray(obj.data) ? obj.data : []);
+            const row  = rows.length ? rows[0] : null;
+            done(row);
+        });
+    }
+
+    function stashHistoryIfNeeded(id, newVals, next) {
+        const proceed = (typeof next === 'function') ? next : function(){};
+        fetchCurrentPricelistRow(id, function (currentRow) {
+            if (!currentRow) return proceed();
+
+            const oldVals = {
+                selling_price: currentRow.selling_price,
+                disc_in_percent: currentRow.disc_in_percent,
+                net_price: currentRow.net_price,
+                effectivity_date: currentRow.effectivity_date
+            };
+
+            const compareVals = {
+                selling_price: newVals.selling_price,
+                disc_in_percent: newVals.disc_in_percent,
+                net_price: newVals.net_price,
+                effectivity_date: newVals.effectivity_date
+            };
+
+            const changed = ['selling_price','disc_in_percent','net_price','effectivity_date']
+                .some(k => oldVals[k] !== compareVals[k]);
+
+            if (!changed) return proceed();
+
+            const historyRow = {
+                main_pricelist_id: id,
+                selling_price: oldVals.selling_price,
+                disc_in_percent: oldVals.disc_in_percent,
+                net_price: oldVals.net_price,
+                effectivity_date: oldVals.effectivity_date,
+                created_date: formatDate(new Date()),
+                created_by: user_id
+            };
+
+            aJax.post(url, {
+                event: "insert",
+                table: "tbl_historical_main_pricelist",
+                data: historyRow
+            }, function (insRes) {
+                const ins = is_json(insRes);
+                if (!ins || ins.error) console.error('History insert failed:', insRes);
+                proceed();
+            });
+        });
+    }
+
     function save_data(action, id) {
         var pricelistId = $('#pricelistId').val();
         var brand = $('#brandId').val().trim();
@@ -1039,11 +1106,21 @@
                     modal.confirm(confirm_update_message, function(result){
                         if(result){ 
                             modal.loading(true);
+
+                            const newValsForCompare = {
+                                selling_price: sellingPrice,
+                                disc_in_percent: discountInPercent,
+                                net_price: netPrice,
+                                effectivity_date: effectDate
+                            };
+                            
+                            stashHistoryIfNeeded(id, newValsForCompare, function () {
                             save_to_db(
                                 pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
                                 itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
                                 netPrice, effectDate, status_val, id
                             );
+                            });
                         }
                     });
                 } else {
