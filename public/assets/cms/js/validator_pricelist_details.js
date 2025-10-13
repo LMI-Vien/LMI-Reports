@@ -151,6 +151,19 @@ self.onmessage = async function(e) {
                     err_counter++;
                 }
 
+                if (!isNaN(dateObj.getTime())) {
+                    const today = new Date();
+                    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+                    const candMidnight  = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+
+                    if (candMidnight < todayMidnight) {
+                        rowInvalid = true;
+                        invalid = true;        
+                        err_counter++;
+                        errorLogs.push(`⚠️ Effectivity Date cannot be in the past at line #: ${tr_count}`);
+                    }
+                }
+
                 if (effectivityDate) {
                     effectivityDate = formatDateForDB(effectivityDate);
                 }
