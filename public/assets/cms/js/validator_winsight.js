@@ -223,6 +223,24 @@ self.onmessage = async function(e) {
                 } else if (week !== firstWeek) {
                     addErrorLog(`Week mismatch: expected ${firstWeek} but got ${week}`);
                 }
+
+                if (date) {
+                    const datePattern = /^(0?[1-9]|1[0-2])[\/\-\s](0?[1-9]|[12]\d|3[01])[\/\-\s]\d{4}$/;
+
+                    if (!datePattern.test(date)) {
+                        addErrorLog(`Invalid date format "${date}". Please use MM DD YYYY.`);
+                    } else {
+                        const normalized = date.replace(/[-/]/g, " ").trim();
+                        const [month, day, year] = normalized.split(/\s+/);
+
+                        if (month && day && year) {
+                            date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+                            console.log(date, 'formattedDate')
+                        } else {
+                            addErrorLog(`Invalid date format "${date}". Please use MM DD YYYY.`);
+                        }
+                    }
+                }
                 
                 let online_offline = row["online_offline"];
                 let store_format = row["store_format"];
