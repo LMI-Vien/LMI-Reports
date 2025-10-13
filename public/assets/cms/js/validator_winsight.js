@@ -32,16 +32,29 @@ self.onmessage = async function(e) {
             +`&label_category=1`
             +`&years=1`
             +`&months=1`
+            +`&system_parameter=1`
         );
         let ba_data = await get_ba_valid_response.json();
 
-        const watsonsId = ba_data.payment_group_lmi.find(
-            g => g.customer_group_code.toLowerCase() === 'watsons personal care stores'
-        )?.id;
+        const watsons_payment_group = ba_data?.system_parameter?.[0]?.watsons_payment_group;
+
+        if (!watsons_payment_group || !Array.isArray(ba_data?.payment_group_lmi)) {
+            throw new Error("Missing or invalid data: System Parameter or Payment Group");
+        }
+
+        const foundGroup = ba_data.payment_group_lmi.find(
+            g => g?.customer_group_code?.toLowerCase() === watsons_payment_group.toLowerCase()
+        );
+
+        if (!foundGroup) {
+            throw new Error(`No payment group found for ${watsons_payment_group}. Please check in System Parameter or Payment Group`);
+        }
+
+        const watsonsId = foundGroup.id;
 
         const watsonPricelist = ba_data.pricelist_masterfile.find(
         p =>
-            p.description.toLowerCase() === 'watsons personal care stores' &&
+            p.description.toLowerCase() === watsons_payment_group.toLowerCase() &&
             p.description_id === watsonsId
         );
 

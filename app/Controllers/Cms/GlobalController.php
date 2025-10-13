@@ -1123,6 +1123,9 @@ class GlobalController extends BaseController
 				"tbl_pricelist_masterfile",  [ 'description_id', 'description', ]
 			);
 		}
+		if (!empty($request['system_parameter'])) {
+			$responseData['system_parameter'] = $this->Global_model->get_valid_records("tbl_system_parameter", ['watsons_payment_group']);
+		}
 		if (!empty($request['years'])) {
 			$responseData['years'] = $this->Global_model->get_valid_records("tbl_year", ['year']);
 		}
