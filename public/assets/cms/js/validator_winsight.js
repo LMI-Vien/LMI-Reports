@@ -32,16 +32,29 @@ self.onmessage = async function(e) {
             +`&label_category=1`
             +`&years=1`
             +`&months=1`
+            +`&system_parameter=1`
         );
         let ba_data = await get_ba_valid_response.json();
 
-        const watsonsId = ba_data.payment_group_lmi.find(
-            g => g.customer_group_code.toLowerCase() === 'watsons personal care stores'
-        )?.id;
+        const watsons_payment_group = ba_data?.system_parameter?.[0]?.watsons_payment_group;
+
+        if (!watsons_payment_group || !Array.isArray(ba_data?.payment_group_lmi)) {
+            throw new Error("Missing or invalid data: System Parameter or Payment Group");
+        }
+
+        const foundGroup = ba_data.payment_group_lmi.find(
+            g => g?.customer_group_code?.toLowerCase() === watsons_payment_group.toLowerCase()
+        );
+
+        if (!foundGroup) {
+            throw new Error(`No payment group found for ${watsons_payment_group}. Please check in System Parameter or Payment Group`);
+        }
+
+        const watsonsId = foundGroup.id;
 
         const watsonPricelist = ba_data.pricelist_masterfile.find(
         p =>
-            p.description.toLowerCase() === 'watsons personal care stores' &&
+            p.description.toLowerCase() === watsons_payment_group.toLowerCase() &&
             p.description_id === watsonsId
         );
 
@@ -209,6 +222,24 @@ self.onmessage = async function(e) {
                     firstWeek = week;
                 } else if (week !== firstWeek) {
                     addErrorLog(`Week mismatch: expected ${firstWeek} but got ${week}`);
+                }
+
+                if (date) {
+                    const datePattern = /^(0?[1-9]|1[0-2])[\/\-\s](0?[1-9]|[12]\d|3[01])[\/\-\s]\d{4}$/;
+
+                    if (!datePattern.test(date)) {
+                        addErrorLog(`Invalid date format "${date}". Please use MM DD YYYY.`);
+                    } else {
+                        const normalized = date.replace(/[-/]/g, " ").trim();
+                        const [month, day, year] = normalized.split(/\s+/);
+
+                        if (month && day && year) {
+                            date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+                            console.log(date, 'formattedDate')
+                        } else {
+                            addErrorLog(`Invalid date format "${date}". Please use MM DD YYYY.`);
+                        }
+                    }
                 }
                 
                 let online_offline = row["online_offline"];

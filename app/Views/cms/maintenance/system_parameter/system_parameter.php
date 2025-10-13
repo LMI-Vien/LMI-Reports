@@ -278,6 +278,27 @@
                     </div>
                 </div>
 
+                <h4 class="form-title-two">System Parameters - Import Winsight Validation</h4>
+                <div class="box">
+                    <div class="container">
+                        <h5 class="syspar-label">Watsons Pricelist</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="watsons_payment_group" class="col-form-label">Description</label>
+                                    <input 
+                                        type="text" 
+                                        id="watsons_payment_group" 
+                                        name="watsons_payment_group" 
+                                        class="form-control required"   
+                                        placeholder="Watsons Personal Care Stores"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <input type="hidden" id="id" name="id" value="">
                 
 
@@ -556,7 +577,7 @@
             var data = {
                 event : "list",
                 select : `id, sm_sku_min, sm_sku_max, overstock_sku, new_item_sku, hero_sku, sales_incentives, cus_grp_code_lmi, 
-                cus_grp_code_rgdi, brand_code_included, brand_code_excluded, brand_label_type, tba_amount_per_ba, tba_num_days,
+                cus_grp_code_rgdi, brand_code_included, brand_code_excluded, brand_label_type, tba_amount_per_ba, tba_num_days, watsons_payment_group,
                 status, created_by, updated_by, created_date, updated_date`,
                 query : query,
                 offset : offset,
@@ -696,6 +717,8 @@
                             console.warn("Invalid brand_label_type JSON:", row.brand_label_type);
                         }
                     }
+
+                    $('#watsons_payment_group').val(row.watsons_payment_group);
                 }
             });
     }
@@ -735,38 +758,79 @@
             
         let rgdi_json = JSON.stringify(rgdi_array);
 
-
+        let watsons_payment_group = $('#watsons_payment_group').val()
 
         if(validate.standard("system-parameter-form")){
             if (id !== undefined && id !== null && id !== '') {
-                check_current_db("tbl_system_parameter", ["sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded", "brand_label_type", "tba_amount_per_ba", "tba_num_days"], [minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays], "status" , "id", id, true, function(exists, duplicateFields) {
-                    if (!exists) {
-                        modal.confirm(confirm_update_message, function(result){
-                            if(result){ 
-                                    modal.loading(true);
-                                save_to_db(minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json,  brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays, id)
-                            }
-                        });
-    
-                    }             
-                });
+                check_current_db(
+                    "tbl_system_parameter", 
+                    [
+                        "sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", 
+                        "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded",
+                        "brand_label_type", "tba_amount_per_ba", "tba_num_days", "watsons_payment_group"
+                    ], 
+                    [
+                        minimum, maximum, overstock, newItem_json, hero_json, 
+                        sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, 
+                        brandLabelTypeJson, amountPerBa, numOfDays, watsons_payment_group
+                    ], 
+                    "status" , "id", id, true, 
+                    function(exists, duplicateFields) {
+                        if (!exists) {
+                            modal.confirm(confirm_update_message, function(result){
+                                if(result){ 
+                                        modal.loading(true);
+                                    save_to_db(
+                                        minimum, maximum, overstock, newItem_json, hero_json, 
+                                        sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, 
+                                        brandLabelTypeJson, amountPerBa, numOfDays, watsons_payment_group, id
+                                    )
+                                }
+                            });
+        
+                        }             
+                    }
+                );
             }else{
-                check_current_db("tbl_system_parameter", ["sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded", "brand_label_type", "tba_amount_per_ba", "tba_num_days"], [minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays], "status", null, null, true, function(exists, duplicateFields) {
-                    if (!exists) {
-                        modal.confirm(confirm_add_message, function(result){
-                            if(result){ 
-                                    modal.loading(true);
-                                save_to_db(minimum, maximum, overstock, newItem_json, hero_json, sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, brandLabelTypeJson, amountPerBa, numOfDays, null)
-                            }
-                        });
-    
-                    }                  
-                });
+                check_current_db(
+                    "tbl_system_parameter", 
+                    [
+                        "sm_sku_min", "sm_sku_max", "overstock_sku", "new_item_sku", "hero_sku", 
+                        "sales_incentives", "cus_grp_code_lmi", "cus_grp_code_rgdi", "brand_code_included", "brand_code_excluded", 
+                        "brand_label_type", "tba_amount_per_ba", "tba_num_days", "watsons_payment_group"
+                    ], 
+                    [
+                        minimum, maximum, overstock, newItem_json, hero_json, 
+                        sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, 
+                        brandLabelTypeJson, amountPerBa, numOfDays, watsons_payment_group
+                    ], 
+                    "status", null, null, true, 
+                    function(exists, duplicateFields) {
+                        if (!exists) {
+                            modal.confirm(confirm_add_message, function(result){
+                                if(result){ 
+                                        modal.loading(true);
+                                    save_to_db(
+                                        minimum, maximum, overstock, newItem_json, hero_json, 
+                                        sales_incentives, lmi_json, rgdi_json, brand_included_json, brand_excluded_json, 
+                                        brandLabelTypeJson, amountPerBa, numOfDays, watsons_payment_group, null
+                                    )
+                                }
+                            });
+        
+                        }                  
+                    }
+                );
             }
         }
     }
 
-    function save_to_db(inp_min, inp_max, inp_os, inp_nI_json, inp_hero_json, inp_sI, inp_lmi_json, inp_rgdi_json, inp_bi_json, inp_be_json, inp_blt_json, inp_amnt_ba, inp_numdays, id) {
+    function save_to_db(
+            inp_min, inp_max, inp_os, inp_nI_json, inp_hero_json, 
+            inp_sI, inp_lmi_json, inp_rgdi_json, inp_bi_json, inp_be_json, 
+            inp_blt_json, inp_amnt_ba, inp_numdays, watsons_payment_group, id
+        ) 
+    {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
@@ -792,6 +856,7 @@
                     brand_label_type: inp_blt_json,
                     tba_amount_per_ba: inp_amnt_ba,
                     tba_num_days: inp_numdays,
+                    watsons_payment_group, watsons_payment_group,
                     updated_date: formatDate(new Date()),
                     updated_by: user_id,
                     status: '1'
@@ -816,6 +881,7 @@
                     brand_label_type: inp_blt_json,
                     tba_amount_per_ba: inp_amnt_ba,
                     tba_num_days: inp_numdays,
+                    watsons_payment_group: watsons_payment_group,
                     created_date: formatDate(new Date()),
                     created_by: user_id,
                     status: '1'
