@@ -84,8 +84,11 @@ $routes->group('sell-through/', static function ($routes) {
 
     //by sku
     $routes->get('by-sku', 'SellThroughBySku::bySku');
-    $routes->post('get-by-sku', 'SellThroughBySku::getByku');
-    $routes->get('get-by-sku', 'SellThroughBySku::getByku');
+    $routes->post('get-by-sku', 'SellThroughBySku::getBysku');
+    $routes->get('get-by-sku', 'SellThroughBySku::getBysku');
+    $routes->post('get-sub-sales-group', 'SellThroughBySku::getSubSalesGroup');
+    $routes->get('get-sub-sales-group', 'SellThroughBySku::getSubSalesGroup');
+    
     $routes->match(['GET', 'POST'], 'by-sku-generate-pdf', 'SellThroughBySku::generatePdf');
     $routes->match(['GET', 'POST'], 'by-sku-generate-excel-ba', 'SellThroughBySku::generateExcel');
 

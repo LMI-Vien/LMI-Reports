@@ -6,7 +6,7 @@
     echo $minify->js($dir . '/assets/function.js', 'App Functions JS');
 ?>
 
-<?= view("site/sell_through/by_brand/by_brand_filter"); ?> 
+<?= view("site/sell_through/by_sku/by_sku_filter"); ?> 
 
 <div class="wrapper">
     <div class="content-wrapper">
@@ -45,209 +45,85 @@
                         <div class="ml-auto p-3 rounded bg-light border shadow-sm small text-secondary" style="max-width: 550px;">
                             <div class="mb-2">
                                 <i class="fas fa-database text-dark mr-1"></i> 
-                                <strong>Source:</strong> <?= !empty($source) ? $source : 'N/A'; ?> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
-                            </div>
-                            <div class="mb-2">
-                                <i class="fas fa-file-import text-dark mr-1"></i> 
-                                <strong>CMS Most Recent Import:</strong> Week:  - 
-                                <span id="mostRecentImportWeekRange"
-                                    data-latest-week=""
-                                    data-latest-year="">
-                                </span>
+                                <strong>Source:</strong><span id="source"> <?= !empty($source) ? $source : 'N/A'; ?></span> - <?= !empty($source_date) ? $source_date : 'N/A'; ?>
                             </div>
                             <div>
                                 <i class="fas fa-calendar-week text-dark mr-1"></i>
                                 <strong>Current Week:</strong> 
                                 <span id="currentWeek" class="text-dark font-weight-medium"></span>
                             </div>
-                            <div class="mt-2">
-                                <i class="fas fa-calendar-check text-dark mr-1"></i>
-                                <strong>Generation Period:</strong>
-                                <span id="generationPeriod" class="text-dark font-weight-medium"></span>
-                            </div>
                         </div>
                     </div>
                 <?php endif; ?>
                 <div class="row mt-4">
                     <div class="col-md-12">
-                      <div class="card p-4 shadow-lg text-center text-muted table-empty">
+
+                        <div class="card p-4 shadow-lg text-center text-muted table-empty">
                           <i class="fas fa-filter mr-2"></i> Please select a filter
-                      </div>
-                        <div class="hide-div">
-                        <div class="hide-div card">
-                            <table id="table_slowMoving" class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th 
-                                            colspan="7"
-                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                            class="tbl-title-header"
-                                        >
-                                            SLOW MOVING SKU'S
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field text-center">SKU</th>
-                                        <th class="tbl-title-field text-center">SKU Name</th>
-                                        <th class="tbl-title-field text-center">Item Class</th>
-                                        <th class="tbl-title-field text-center">Total Qty</th>
-                                        <th class="tbl-title-field text-center">Ave Sales Unit</th>
-                                        <th class="tbl-title-field text-center">SWC</th>
-                                    </tr>
-                                </thead>
-                                  <tbody>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                              No data available
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                  </tbody>
-                            </table>
                         </div>
 
-                        <div class="hide-div card">
-                            <table id="table_overStock" class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th 
-                                            colspan="7"
-                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                            class="tbl-title-header"
-                                        >
-                                            OVERSTOCK SKU'S
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field text-center">SKU</th>
-                                        <th class="tbl-title-field text-center">SKU Name</th>
-                                        <th class="tbl-title-field text-center">Item Class</th>
-                                        <th class="tbl-title-field text-center">Total Qty</th>
-                                        <th class="tbl-title-field text-center">Ave Sales Unit</th>
-                                        <th class="tbl-title-field text-center">SWC</th>
-                                    </tr>
-                                </thead>
-                                  <tbody>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                              No data available
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                  </tbody>
-                            </table>
-                        </div>
-
-                        <div class="hide-div card">
-                            <table id="table_npd" class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th 
-                                            colspan="7"
-                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                            class="tbl-title-header"
-                                        >
-                                            NPD SKU'S
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field text-center">SKU</th>
-                                        <th class="tbl-title-field text-center">SKU Name</th>
-                                        <th class="tbl-title-field text-center">Item Class</th>
-                                        <th class="tbl-title-field text-center">Total Qty</th>
-                                        <th class="tbl-title-field text-center">Ave Sales Unit</th>
-                                        <th class="tbl-title-field text-center">SWC</th>
-                                    </tr>
-                                </thead>
-                                  <tbody>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                              No data available
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="7" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                  </tbody>
-                            </table>
-                        </div>
-
-                        <div class="hide-div card">
-                            <table id="table_hero" class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th 
-                                            colspan="6"
-                                            style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
-                                            class="tbl-title-header"
-                                        >
-                                            HERO SKU'S
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th class="tbl-title-field text-center">LMI/RGDI Code</th>
-                                        <th class="tbl-title-field text-center">SKU</th>
-                                        <th class="tbl-title-field text-center">SKU Name</th>
-                                        <th class="tbl-title-field text-center">Item Class</th>
-                                        <th class="tbl-title-field text-center">Ave Sales Unit</th>
-                                        <th class="tbl-title-field text-center">SWC</th>
-                                    </tr>
-                                </thead>
-                                  <tbody>
-                                      <tr>
-                                          <td colspan="6" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="6" class="text-center py-4 text-muted">
-                                              No data available
-                                          </td>
-                                      </tr>
-                                      <tr>
-                                          <td colspan="6" class="text-center py-4 text-muted">
-                                          </td>
-                                      </tr>
-                                  </tbody>
-                            </table>
-                        </div>
-                        <div class="d-flex justify-content-end mt-3" id="step7">
-                            <button 
-                                class="btn btn-primary mr-2" 
-                                id="ExportPDF"
-                                onclick="handleAction('exportPdf')"
-                            >
-                                <i class="fas fa-file-export"></i> PDF
-                            </button>
-                            <button 
-                                class="btn btn-success" 
-                                id="exportButton"
-                                onclick="handleAction('exportExcel')"
-                            >
-                                <i class="fas fa-file-export"></i> Excel
-                            </button>
-                        </div>
+                        <div class="card mt-4 p-4 shadow-sm hide-div">
+                            <div class="mb-3" style="overflow-x: auto; height: 600px; padding: 0px;">
+                                <table id="sellThroughBySku" class="table table-bordered" style="width: 100% !important;">
+                                    <thead>
+                                        <tr>
+                                            <th 
+                                                colspan="7"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                class="static-header"
+                                            >
+                                                SELL THROUGH BY SKU
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th class="tbl-title-field text-center">Rank</th>
+                                            <th class="tbl-title-field text-center">LMI/RGDI Code</th>
+                                            <th class="tbl-title-field text-center">Customer SKU</th>
+                                            <th class="tbl-title-field text-center">Item Description</th>
+                                            <th class="tbl-title-field text-center">Sell In</th>
+                                            <th class="tbl-title-field text-center">Sell Out</th>
+                                            <th class="tbl-title-field text-center">Sell Out Ratio
+                                                <span class="tooltip-text">
+                                                    FORMULA:
+                                                    <br>
+                                                    (Sell Out / Sell In) * 100 %
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                      <tbody>
+                                          <tr>
+                                              <td colspan="7" class="text-center py-4 text-muted">
+                                              </td>
+                                          </tr>
+                                          <tr>
+                                              <td colspan="7" class="text-center py-4 text-muted">
+                                                  No data available
+                                              </td>
+                                          </tr>
+                                          <tr>
+                                              <td colspan="7" class="text-center py-4 text-muted">
+                                              </td>
+                                          </tr>
+                                      </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-end mt-3">
+                                <button 
+                                    class="btn btn-primary mr-2" 
+                                    id="ExportPDF"
+                                    onclick="handleAction('exportPdf')"
+                                >
+                                    <i class="fas fa-file-export"></i> PDF
+                                </button>
+                                <button 
+                                    class="btn btn-success" 
+                                    id="exportExcel"
+                                    onclick="handleAction('exportExcel')"
+                                >
+                                    <i class="fas fa-file-export"></i> Excel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -259,4 +135,5 @@
 <script>
     let year = <?= json_encode($year); ?>;
     let months = <?= json_encode($months); ?>;
+    let sales_group = <?= json_encode($sales_group); ?>;
 </script>

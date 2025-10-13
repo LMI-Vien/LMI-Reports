@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use CodeIgniter\Database\Exceptions\DatabaseException;
 
 class Global_model extends Model
 {
@@ -248,7 +249,7 @@ class Global_model extends Model
         return $q->getResult();
     }
     
-    function get_data_list($table, $query = null, $limit = 1, $start = 0, $select = "*", $order_field = null, $order_type = null, $join = null, $group = null)
+    function get_data_list($table, $query = null, $limit = 99999, $start = 0, $select = "*", $order_field = null, $order_type = null, $join = null, $group = null)
     {
         $builder = $this->db->table($table);
         $builder->select($select);

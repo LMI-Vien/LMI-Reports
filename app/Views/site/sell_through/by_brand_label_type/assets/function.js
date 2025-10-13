@@ -2,6 +2,25 @@
     
     $(document).ready(function() {
 
+        const $toggleBtn = $('#toggleAdditionalFilters');
+        const $filterPanel = $('#additionalFiltersPanel');
+
+        $toggleBtn.on('click', function () {
+          const isOpen = $filterPanel.hasClass('open');
+
+          if (isOpen) {
+            $filterPanel.removeClass('open');
+            $toggleBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
+          } else {
+            $filterPanel.addClass('open');
+            $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
+          }
+        });
+
+        $('#closeAdditionalFilters').on('click', function () {
+          $filterPanel.removeClass('open');
+          $toggleBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
+        });
         const currentWeek = getCurrentWeek();
         if (currentWeek) {
             $('#currentWeek').text(currentWeek.display);
@@ -9,21 +28,7 @@
             $('#currentWeek').text('N/A');
         }
 
-        itemClassi.forEach(function (item) {
-          $('#itemClass').append(
-            $('<option>', {
-              value: item.id,
-              text: item.item_class_description
-            })
-          );
-        });
-
-        $('#itemClass').select2({ placeholder: 'Please Select...' });
-        $('#inventoryStatus').select2({ placeholder: 'Please Select...' });
-        autocomplete_field($("#itemLabelCat"), $("#itemLabelCatId"), traccItemClassi, "item_class_code");
-        autocomplete_field($("#vendorName"), $("#vendorNameId"), company, "name");
-
-        $('#generationPeriod').text('N/A');
+    //    $('#generationPeriod').text('N/A');
 
         const latestWeekAttr = $('#mostRecentImportWeekRange').data('latest-week');
         const latestWeek = latestWeekAttr ? parseInt(latestWeekAttr, 10) : null;
@@ -35,28 +40,223 @@
         } else {
             $('#mostRecentImportWeekRange').text('N/A');
         }
+
+        $('#itemLabel').select2({ placeholder: 'Select Label Type' });
+
+        $("input[name='ytd']").on("change", function () {
+            const isYtd = $(this).val() === 'yes';
+
+            if (isYtd) {
+                const currentDate = new Date();
+                const currentYear = currentDate.getFullYear();
+                const currentMonth = currentDate.getMonth() + 1;
+
+                $("#year").val(currentYear);
+
+                const htmlFrom = buildMonthDropdown(1, currentMonth);
+                const htmlTo = buildMonthDropdown(1, currentMonth);
+
+                $("#monthFrom").html(htmlFrom).val(1);
+                $("#monthTo").html(htmlTo).val(currentMonth);
+
+                $('#sourceDate').text(
+                    getTextOrDash("#year") + " " +
+                    getTextOrDash("#monthFrom") +
+                    " to " +
+                    getTextOrDash("#monthTo")
+                );
+
+                updateWeeks('weekfrom', getCurrentWeek()); 
+                updateWeeks('weekto', getCurrentWeek()); 
+            }else {
+                const htmlFrom = buildMonthDropdown(1, 12);
+                const htmlTo = buildMonthDropdown(1, 12);
+
+                $('#weekto').val('');
+                $('#weekfrom').val('');
+
+                $("#monthFrom").html(htmlFrom).val('');
+                $("#monthTo").html(htmlTo).val('');
+                $("#year").val('');
+                $("#quarter").val('');
+                $('#sourceDate').text(" N / A");
+            }
+        });
+
+        $("#quarter").on("change", function () {
+            const quarter = $(this).val();
+            let from = 1;
+            let to = 12;
+
+            if (quarter === "Q1") {
+                from = 1; to = 3;
+            } else if (quarter === "Q2") {
+                from = 4; to = 6;
+            } else if (quarter === "Q3") {
+                from = 7; to = 9;
+            } else if (quarter === "Q4") {
+                from = 10; to = 12;
+            }
+
+            const html = buildMonthDropdown(from, to);
+            $("#monthFrom").html(html).val(from);
+            $("#monthTo").html(html).val(to);
+
+            $('#sourceDate').text(
+                getTextOrDash("#year") + " " +
+                getTextOrDash("#monthFrom") +
+                " to " +
+                getTextOrDash("#monthTo")
+            );
+        });
+
+        $("#quarter").on("change", function () {
+            const quarter = $(this).val();
+            let from = 1;
+            let to = 12;
+
+            if (quarter === "Q1") {
+                from = 1; to = 3;
+            } else if (quarter === "Q2") {
+                from = 4; to = 6;
+            } else if (quarter === "Q3") {
+                from = 7; to = 9;
+            } else if (quarter === "Q4") {
+                from = 10; to = 12;
+            }
+
+            const html = buildMonthDropdown(from, to);
+            $("#monthFrom").html(html).val(from);
+            $("#monthTo").html(html).val(to);
+
+            $('#sourceDate').text(
+                getTextOrDash("#year") + " " +
+                getTextOrDash("#monthFrom") +
+                " to " +
+                getTextOrDash("#monthTo")
+            );
+        });
+
+        $("#dataSource").on("change", function () {
+            const source = $(this).val();
+            $('#source').text(" "+ $("#dataSource option:selected").text());
+            if(source === "scann_data"){
+              $('#monthFilterSection').show();
+              $('#monthToSection').show();
+              $('#weekFilterSection').hide();
+              $('#weekToSection').hide();
+            }else{
+              $('#monthFilterSection').hide();
+              $('#monthToSection').hide();
+              $('#weekFilterSection').show();
+              $('#weekToSection').show();
+            }
+        });
+
+        $("#year").on("change", function () {
+            const year = $(this).val();
+            if(year){
+                $('#sourceDate').text(
+                    getTextOrDash("#year") + " " +
+                    getTextOrDash("#monthFrom") +
+                    " to " +
+                    getTextOrDash("#monthTo")
+                );
+            }
+        });
+
+        $("#monthFrom").on("change", function() {
+            let selected = $("#monthTo").val();
+            let start = $("#monthFrom").val();
+            let html = "<option value=''>Please select...</option>";
+
+            months.forEach(month => {
+                if (parseInt(month.id) >= start) {
+                    html += `<option value="${month.id}">${month.month}</option>`;
+                }
+            });
+
+            $("#monthTo").html(html);
+            $('#sourceDate').text(
+                getTextOrDash("#year") + " " +
+                getTextOrDash("#monthFrom") +
+                " to " +
+                getTextOrDash("#monthTo")
+            );
+        });
+
+        $("#monthTo").on("change", function() {
+            let selected = $("#monthFrom").val();
+            let end = $("#monthTo").val();
+            let html = "<option value=''>Please select...</option>";
+
+            months.forEach(month => {
+                if (parseInt(month.id) < end) {
+                    html += `<option value="${month.id}">${month.month}</option>`;
+                }
+            });
+
+            $('#sourceDate').text(
+                getTextOrDash("#year") + " " +
+                getTextOrDash("#monthFrom") +
+                " to " +
+                getTextOrDash("#monthTo")
+            );
+        });
+
+        function getTextOrDash(selector) {
+            const text = $(`${selector} option:selected`).text();
+            return text === "Please select..." || !text ? "-" : text;
+        }
+
+        function buildMonthDropdown(from = 1, to = 12) {
+            let html = "<option value=''>Please select...</option>";
+            months.forEach(month => {
+                if (month.id >= from && month.id <= to) {
+                    html += `<option value="${month.id}">${month.month}</option>`;
+                }
+            });
+            return html;
+        }
+
+        $('#salesGroup').on('change', function () {
+            const selected = $(this).find('option:selected').data('id');
+            //console.log(selected);
+            if (selected) {
+                get_sub_sales_group(selected);
+            } else {
+                $('#subGroupWrapper').slideUp();
+                $('#subGroup').val('');
+            }
+        });
     });
+
 
     $(document).on('click', '#clearButton', function () {
         $('input[type="text"], input[type="number"]').val('');
         $('input[type="checkbox"]').prop('checked', false);
         $('select').prop('selectedIndex', 0);
         $('.select2').val(null).trigger('change');
+        $('.btn-outline-light').removeClass('active');
+        $('.main_all').addClass('active');
+        $('input[name="filterType"][value="3"]').prop('checked', true);
+        $('input[name="ytd"][value="no"]').prop('checked', true);
+        $('input[name="measure"][value="qty"]').prop('checked', true);
+        $('#subGroupWrapper').slideUp();
+        $('#subGroup').val('');
+        $('#additionalFiltersPanel').removeClass('open');
+        $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
+        $('#source').text(" "+ $("#dataSource option:selected").text());
+        $('#sourceDate').text(" N / A");
         $('.hide-div').hide();
         $('.table-empty').show();
     });
 
     $(document).on('click', '#refreshButton', function () {
         const fields = [
-            { input: '#inventoryStatus', target: '#inventoryStatus' },
-            { input: '#itemClass', target: '#itemClass' },
-            { input: '#ascName', target: '#ascNameId' },
-            { input: '#vendorName', target: '#vendorNameId' }
+            { input: '#itemLabel', target: '#itemLabel' }
         ];
 
-        if($('#itemLabelCat').val() == ""){
-            $('#itemLabelCatId').val('');
-        }
         let counter = 0;
 
         fields.forEach(({ input, target }) => {
@@ -71,117 +271,157 @@
             }
         });
 
-        const vendorFilter = $('#vendorName').val();
-        const invStatusFilter = $('#inventoryStatus').val();
+        const weekFromOption = $("#weekfrom option:selected");
+        const startDateFrom = weekFromOption.data("start-date");
+        const weekToOption = $("#weekto option:selected");
+        const endDateTo = weekToOption.data("end-date"); 
+        const weekFromFilter = $('#weekfrom').val();
+        const weekToFilter = $('#weekto').val();
 
-        if (!vendorFilter && invStatusFilter.length === 0) {
-            modal.alert('Please select both "Vendor Name" and "Inventory Status" before filtering.', "warning");
+        const sourceFilter = $('#dataSource').val();
+        const monthFromFilter = $('#monthFrom').val();
+        const monthToFilter = $('#monthTo').val();
+        const yearFilter = $('#year').val();
+        const SalesGroupFilter = $('#salesGroup').val();
+
+        if (!sourceFilter) {
+            modal.alert('Please select "Data Source" before filtering.', "warning");
             return;
         }
 
-        if (!vendorFilter) {
-            modal.alert('Please select "Vendor Name" before filtering.', "warning");
+        const $toggleBtn = $('#toggleAdditionalFilters');
+        const $filterPanel = $('#additionalFiltersPanel');
+
+        if (!yearFilter) {
+            modal.alert('Please select "Year" before filtering.', "warning");
+            $filterPanel.addClass('open');
+            $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
             return;
+        }
+ 
+        if(sourceFilter === "scann_data"){
+            if (!sourceFilter && !monthFromFilter && !monthToFilter) {
+                modal.alert('Please select both "Data Source" and "Month" selection before filtering.', "warning");
+                return;
+            }
+
+            if (!monthFromFilter) {
+                modal.alert('Please select "Month From" before filtering.', "warning");
+                $filterPanel.addClass('open');
+                $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
+                return;
+            }
+
+            if (!monthToFilter) {
+                modal.alert('Please select "Month To" before filtering.', "warning");
+                $filterPanel.addClass('open');
+                $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
+                return;
+            } 
+        }else{
+            if (!sourceFilter && !weekFromFilter && !weekToFilter) {
+                modal.alert('Please select both "Data Source" and "Weeks" selection before filtering.', "warning");
+                return;
+            }
+
+            if (!weekFromFilter) {
+                modal.alert('Please select "Week From" before filtering.', "warning");
+                $filterPanel.addClass('open');
+                $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
+                return;
+            }
+
+            if (!weekToFilter) {
+                modal.alert('Please select "Week To" before filtering.', "warning");
+                $filterPanel.addClass('open');
+                $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
+                return;
+            }  
         }
 
-        if (invStatusFilter.length === 0) {
-            modal.alert('Please select "Inventory Status" before filtering.', "warning");
+        if (!SalesGroupFilter) {
+            modal.alert('Please select "Sales Group" before filtering.', "warning");
+            $filterPanel.removeClass('open');
+            $toggleBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
             return;
+        }  
+
+        $('#source').text(" " + $("#dataSource option:selected").text() );
+        if(sourceFilter === "scann_data"){
+            $('#sourceDate').text($("#year option:selected").text() + " - " + $("#monthFrom option:selected").text() + " to " + $("#monthTo option:selected").text());
+        }else{
+            $('#sourceDate').text($("#year option:selected").text() + " - " + startDateFrom + " to " + endDateTo);
         }
-        $('#sourceDate').text(calendarWeek);
+
         if (counter >= 1) {
             const generationPeriod = getTodayDateTime();
-            $('#generationPeriod').text(generationPeriod.display);
-            
+            //$('#generationPeriod').text(generationPeriod.display);
             fetchData();
             $('.table-empty').hide();
-            } else {
-                $('#generationPeriod').text('N/A');
-            }
+            $('.hide-div').show();
+            $('#additionalFiltersPanel').removeClass('open');
+            $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
+        }
+        // else {
+        //     $('#generationPeriod').text('N/A');
+        // }
     });
 
     function fetchData() {
-        let selectedItemClass = $('#itemClass').val();
-        let selectedItemCat = $('#itemLabelCatId').val();
-        let selectedInventoryStatus = $('#inventoryStatus').val();
-        let selectedVendor = $('#vendorNameId').val();
-        if (!selectedInventoryStatus || selectedInventoryStatus.length === 0) {
+        let selectedSource = $('#dataSource').val();
+        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedYear = $('#year').val();
+        let yearOption = $("#year option:selected");
+        let selectedYearId = yearOption.data("year");
+        let selectedMonthStart = $('#monthFrom').val();
+        let selectedMonthEnd = $('#monthTo').val();
+        let selectedSalesGroup = $('#salesGroup').val();
+        let selectedSubSalesGroup = $('#subGroup').val();
+        let selectedType = $('input[name="filterType"]:checked').val();
+        let selectedMeasure = $('input[name="measure"]:checked').val();
+        let weekFromOption = $("#weekfrom option:selected");
+        let selectedWeekStartDate = weekFromOption.data("start-date");
+        let selectedWeekStart =  $('#weekfrom').val();
+        let weekToOption = $("#weekto option:selected");
+        let selectedWeekEndDate = weekToOption.data("end-date"); 
+        let selectedWeekEnd =  $('#weekto').val();
+
+        if (!selectedSource || !selectedSalesGroup) {
             $('.table-empty').show();
             $('.hide-div.card').hide();
             return;
         }
 
-        $('.table-empty').hide();
-
-        $('.hide-div').first().show();
-
-        let tables = [
-            { id: "#table_slowMoving", type: "slowMoving" },
-            { id: "#table_overStock", type: "overStock" },
-            { id: "#table_npd", type: "npd" },
-            { id: "#table_hero", type: "hero" }
-        ];
-
-        $('.hide-div.card').hide();
-        tables.forEach(table => {
-            if (selectedInventoryStatus.includes(table.type)) {
-                $(table.id).closest('.hide-div.card').show();
-                initializeTable(
-                    table.id,
-                    table.type,
-                    selectedItemClass,
-                    selectedItemCat,
-                    selectedVendor
-                );
-            }
-        });
-    }
-
-    function initializeTable(tableId, type, selectedItemClass, selectedItemCat, selectedVendor) {
-        $(tableId).closest('.table-responsive').show();
-
-        const columns = [
-            { data: 'itmcde' },             
-            { data: 'item' },                
-            { data: 'item_name' },          
-            { data: 'item_class_name' }      
-        ];
-
-        if (type !== 'hero') {
-            columns.push({ data: 'sum_total_qty', render: formatNumberWithCommas }); 
+        if ($.fn.DataTable.isDataTable('#sellThroughByBrandType')) {
+            let existingTable = $('#sellThroughByBrandType').DataTable();
+            existingTable.clear().destroy();
         }
 
-        columns.push(
-            { data: 'sum_ave_sales', render: formatNumberWithCommas },
-            { data: 'swc' }                                        
-        );
-
-        let defaultSortColumn = type === 'hero' ? 0 : 4;
-
-        let columnDefs;
-        if (type === 'hero') {
-            columnDefs = [{
-                targets: Array.from({ length: columns.length }, (_, i) => i).filter(i => i !== 0),
-                orderable: false
-            }];
-        } else {
-            const lastColumnIndex = columns.length - 3;
-            columnDefs = [{
-                targets: Array.from({ length: columns.length }, (_, i) => i).filter(i => i !== 0 && i !== lastColumnIndex),
-                orderable: false
-            }];
-        }
-
-        $(tableId).DataTable({
-            destroy: true,
+        let table = $('#sellThroughByBrandType').DataTable({
+            paging: true,
+            searching: false,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            colReorder: true, 
             ajax: {
-                url: base_url + 'stocks/get-data-all-store',
+                url: base_url + 'sell-through/get-by-brand-label-type',
                 type: 'POST',
-                data: function (d) {
-                    d.itemClass = selectedItemClass === "" ? null : selectedItemClass;
-                    d.itemCategory = selectedItemCat === "" ? null : selectedItemCat;
-                    d.company = selectedVendor === "" ? null : selectedVendor;
-                    d.type = type;
+                data: function(d) {
+                    d.source = selectedSource === "" ? null : selectedSource;
+                    d.brand_labels = selectedBrandLabel === "" ? null : selectedBrandLabel;
+                    d.year = selectedYear === "0" ? null : selectedYear;
+                    d.year_id = selectedYearId === "0" ? null : selectedYearId;
+                    d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
+                    d.month_end = selectedMonthEnd === "0" ? null : selectedMonthEnd;
+                    d.week_start = selectedWeekStart === "0" ? null : selectedWeekStart;
+                    d.week_end = selectedWeekEnd === "0" ? null : selectedWeekEnd;
+                    d.week_start_date = selectedWeekStartDate === "0" ? null : selectedWeekStartDate;
+                    d.week_end_date = selectedWeekEndDate === "0" ? null : selectedWeekEndDate;
+                    d.sales_group = selectedSalesGroup === "" ? null : selectedSalesGroup;
+                    d.sub_sales_group = selectedSubSalesGroup === "" ? null : selectedSubSalesGroup;
+                    d.type = selectedType === "" ? null : selectedType;
+                    d.measure = selectedMeasure === "" ? null : selectedMeasure;
                     d.limit = d.length;
                     d.offset = d.start;
                 },
@@ -189,167 +429,80 @@
                     return json.data.length ? json.data : [];
                 }
             },
-            columns: columns,
-            order: [[defaultSortColumn, 'desc']],
-            columnDefs: columnDefs,
+            columns: [
+                { data: 'rank' },
+                { data: 'brand_type' },
+                { data: 'sell_in', render: formatNumberWithCommas},
+                { data: 'sell_out', render: formatNumberWithCommas},
+                { data: 'sell_out_ratio', render: formatNumberWithCommas}
+            ].filter(Boolean),
+            columnDefs: [
+                {
+                    targets: [0, 1, 2, 3, 4],
+                    orderable: true
+                }
+            ],
             pagingType: "full_numbers",
             pageLength: 10,
             processing: true,
             serverSide: true,
             searching: true,
-            colReorder: true,
+            // colReorder: true,
             lengthChange: false
         });
-    }
- 
-    function get_data(id, table, parameter) {
-        return new Promise((resolve, reject) => {
-            let query = id ? " id = " + id : ""
-            let data = {
-                event: "list",
-                select: parameter,
-                query: query,
-                limit: 0,
-                offset: 0,
-                table: table,
-                order: {}
-            };
-    
-            aJax.post(url, data, function(result) {
-                try {
-                    if(id) {
-                        resolve(JSON.parse(result)[0][parameter]);
-                    } else {
-                        resolve(null);
-                    }
-                } catch (error) {
-                    reject(error);
-                }
-            })
-        })
-    }
-
-    function handleAction(action) {
-        modal.loading(true);
-        let selectedItemClass       = $('#itemClass').val();       
-        let selectedItemCat         = $('#itemLabelCatId').val();    
-        let selectedInventoryStatus = $('#inventoryStatus').val();  
-        let selectedVendor          = $('#vendorNameId').val();
-        let selectedItemClassText   = $('#itemClass').select2('data').map(function(item) {
-            return item.text;
-        });
-        let selectedVendorText      = $('#vendorNameId').text();
-
-        // Table searches
-        let searchValueSlowMoving = $.fn.dataTable.isDataTable('#table_slowMoving') 
-            ? $('#table_slowMoving').DataTable().search() 
-            : '';
-
-        let searchValueOverstock = $.fn.dataTable.isDataTable('#table_overStock') 
-            ? $('#table_overStock').DataTable().search() 
-            : '';
-
-        let searchValueNpd = $.fn.dataTable.isDataTable('#table_npd') 
-            ? $('#table_npd').DataTable().search() 
-            : '';
-
-        let searchValueHero = $.fn.dataTable.isDataTable('#table_hero') 
-            ? $('#table_hero').DataTable().search() 
-            : '';
-
-        // Normalize arrays
-        let itemClasses = Array.isArray(selectedItemClass) ? selectedItemClass : (selectedItemClass ? [selectedItemClass] : []);
-        let statuses = Array.isArray(selectedInventoryStatus) ? selectedInventoryStatus : (selectedInventoryStatus ? [selectedInventoryStatus] : []);
-
-        // Create the payload object
-        let postData = {
-            itemClass: itemClasses,
-            itemLabelCat: selectedItemCat || null,
-            inventoryStatus: statuses,
-            vendorName: selectedVendor || null,
-            vendorText: selectedVendorText,
-            itmclstxt: selectedItemClassText,
-            search: {
-                slowmoving: searchValueSlowMoving || null,
-                overstock: searchValueOverstock || null,
-                npd: searchValueNpd || null,
-                hero: searchValueHero || null
-            },
-            order: [],
-            columns: []
-        };
-        //console.log(postData)
-
-        // Loop through each status table to capture order info
-        statuses.forEach((statusType, idx) => {
-            let tableId  = `#table_${statusType}`;
-            let dt       = $(tableId).DataTable();
-            let orderArr = dt.order() || [[0, 'desc']];
-            
-            let colIdx   = orderArr[0][0];
-            let dir      = orderArr[0][1];
-            let dtCols   = dt.settings().init().columns;
-            let colName  = dtCols[colIdx].data;
-
-            postData.order.push({
-                index: idx,
-                column: colIdx,
-                dir: dir,
-                colData: colName
-            });
-
-            postData.columns.push({
-                index: idx,
-                data: colName
-            });
-        });
-
-        let endpoint = (action === 'exportPdf') ? 'all-store-generate-pdf' : 'all-store-generate-excel';
-        let url = `${base_url}stocks/${endpoint}`;
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(postData),
-            xhrFields: {
-                responseType: 'blob'
-            },
-            success: function(blob, status, xhr) {
-                const cd = xhr.getResponseHeader('Content-Disposition');
-                const match = cd && /filename="?([^"]+)"/.exec(cd);
-                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
-                const filename = rawName
-                    || (action === 'exportPdf'
-                        ? 'Overall Stock Data of All Stores.pdf'
-                        : 'Overall Stock Data of All Stores.xlsx');
-
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                URL.revokeObjectURL(blobUrl);
-            },
-            error: function(xhr, status, error) {
-                alert(xhr+' - '+status+' - '+error);
-                modal.loading(false);
-            },
-            complete: function() {
-                modal.loading(false);
-            }
-        });
-        const end_time = new Date();
-        const duration = formatDuration(start_time, end_time);
-        const remarks = `
-        Exported Successfully!
-            <br>Start Time: ${formatReadableDate(start_time)}
-            <br>End Time: ${formatReadableDate(end_time)}
-            <br>Duration: ${duration}
-        `;
-        logActivity('Overall Stock Data of all Stores', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null);
         
-        return;
     }
+
+    function get_sub_sales_group(sub_group){
+        $.ajax({
+          type: 'Post',
+          url: base_url + 'sell-through/get-sub-sales-group',
+          data: { sales_group: sub_group },
+        }).done( function(data){
+          var obj = JSON.parse(data);
+          var htm = '';
+          htm += '<option value="">--Select--</option>';
+          $.each(obj, function(index, row){
+              htm += '<option value="'+row.code+'">'+row.description+'</option>';
+          });
+          $('#subGroup').html(htm);
+          $('#subGroupWrapper').slideDown();
+        });
+    }    
+
+    function updateWeeks(id, targetWeek) {
+        let selectedYear = $('#year option:selected').text();
+        let weeks = getCalendarWeeks(selectedYear);
+
+        if(targetWeek){
+            //console.log(targetWeek);
+            if(targetWeek.week){
+                populateDropdown(id, weeks, 'display', 'id');
+                if(id === 'weekfrom'){
+                    let firstWeek = getCalendarWeeks(selectedYear)[0].week;
+                    $("#" + id).val(firstWeek);
+                }else{
+                    $("#" + id).val(targetWeek.week);
+                }
+
+            }
+        }else{
+            let selectedYtd = $('input[name="ytd"]:checked').val();
+            if(selectedYtd === "no"){
+                populateDropdown(id, getCalendarWeeks(selectedYear), 'display', 'id');
+            }
+        }
+    }
+
+    const populateDropdown = (selected_class, result, textKey = 'name', valueKey = 'id') => {
+        let html = '<option id="default_val" value="">Select</option>';
+        
+        if (result && result.length > 0) {
+            //console.log(result);
+            result.forEach((item) => {
+                html += `<option value="${item[valueKey]}" data-start-date="${item['start']}" data-end-date="${item['end']}">${item[textKey]}</option>`;
+            });
+        }
+        
+        $('#' + selected_class).html(html);
+    };
