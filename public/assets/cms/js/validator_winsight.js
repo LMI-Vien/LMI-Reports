@@ -33,6 +33,7 @@ self.onmessage = async function(e) {
             +`&years=1`
             +`&months=1`
             +`&system_parameter=1`
+            +`&historical_main_pricelist=1`
         );
         let ba_data = await get_ba_valid_response.json();
 
@@ -123,6 +124,13 @@ self.onmessage = async function(e) {
             label_category => label_category_lookup[label_category.id] = label_category.description.toLowerCase()
         );
 
+        let historical_main_pricelist_lookup = {};
+        ba_data.historical_main_pricelist.forEach(
+            historical_main_pricelist => 
+                historical_main_pricelist_lookup[historical_main_pricelist.main_pricelist_id] = 
+                historical_main_pricelist.net_price
+        );
+
         let year_lookup = {};
         ba_data.years.forEach(
             years => year_lookup[years.year.toLowerCase()] = years.id 
@@ -151,7 +159,7 @@ self.onmessage = async function(e) {
 
                 let sfa_pricelist = null; 
                 // field_name -> from: table_name -> table_name na pinagkukuhaan ng field ID
-                let product_id = row["product_id"]; 
+                let product_id = row["product_id"].toLowerCase(); 
                 // cust_item_code -> tbl_main_pricelist
                 let product_name = row["product_name"];
                 if (!product_id) {
@@ -164,33 +172,41 @@ self.onmessage = async function(e) {
 
                 let brand_name = row["brand_name"]; 
                 // brand_id -> tbl_main_pricelist -> tbl_brand
-                let brand_id = validateField(
-                    row["brand_name"], "Brand Name", brands_lookup, sfa_pricelist, "brand_id", product_id
-                );
+                let brand_id = null
                 
                 let cat_1 = row["cat_1"]; 
                 // category_1_id -> tbl_main_pricelist -> tbl_classification
-                let cat_1_id = validateField(
-                    row["cat_1"], "Category 1 (Item Classification)", classification_lookup, sfa_pricelist, "category_1_id", product_id
-                );
+                let cat_1_id = null
 
                 let cat_2 = row["cat_2"];
                 // category_2_id -> tbl_main_pricelist -> tbl_sub_classification
-                let cat_2_id = validateField(
-                    row["cat_2"], "Category 2 (Item Sub Classification)", sub_classification_lookup, sfa_pricelist, "category_2_id", product_id
-                );
+                let cat_2_id = null
 
                 let cat_3 = row["cat_3"]; 
                 // category_3_id -> tbl_main_pricelist -> tbl_item_department
-                let cat_3_id = validateField(
-                    row["cat_3"], "Category 3 (Item Department)", item_department_lookup, sfa_pricelist, "category_3_id", product_id
-                );
+                let cat_3_id = null
 
                 let cat_4 = row["cat_4"]; 
                 // category_4_id -> tbl_main_pricelist -> tbl_item_merchandise_category
-                let cat_4_id = validateField(
-                    row["cat_4"], "Category 4 (Item Merchandise Category)", item_merchandise_category_lookup, sfa_pricelist, "category_4_id", product_id
-                );
+                let cat_4_id = null
+
+                if (sfa_pricelist !== null) {
+                    brand_id = validateField(
+                        row["brand_name"], "Brand Name", brands_lookup, sfa_pricelist, "brand_id", product_id
+                    );
+                    cat_1_id = validateField(
+                        row["cat_1"], "Category 1 (Item Classification)", classification_lookup, sfa_pricelist, "category_1_id", product_id
+                    );
+                    cat_2_id = validateField(
+                        row["cat_2"], "Category 2 (Item Sub Classification)", sub_classification_lookup, sfa_pricelist, "category_2_id", product_id
+                    );  
+                    cat_3_id = validateField(
+                        row["cat_3"], "Category 3 (Item Department)", item_department_lookup, sfa_pricelist, "category_3_id", product_id
+                    );
+                    cat_4_id = validateField(
+                        row["cat_4"], "Category 4 (Item Merchandise Category)", item_merchandise_category_lookup, sfa_pricelist, "category_4_id", product_id
+                    );
+                }
 
                 let year = parseInt(row["year"], 10);
                 let month = parseInt(row["month"], 10);
@@ -235,7 +251,6 @@ self.onmessage = async function(e) {
 
                         if (month && day && year) {
                             date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-                            console.log(date, 'formattedDate')
                         } else {
                             addErrorLog(`Invalid date format "${date}". Please use MM DD YYYY.`);
                         }
@@ -290,9 +305,35 @@ self.onmessage = async function(e) {
                         brand_label_type = label_type_lookup[brand_label_type_id]
                     }
 
-                    net_price_per_pcs = validateNumber(sfa_pricelist["net_price"], "Net Price");
+                    let effectivity_date = sfa_pricelist["effectivity_date"];
                     // net_price -> tbl_main_pricelist -> net_price = selling_price * (1 - disc_in_percent/100)
                     sales_qty         = validateNumber(sales_qty, "Sales Qty");
+
+                    if (effectivity_date) {
+                        const today = new Date();
+                        const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                        const startDate = parseYMD(effectivity_date);
+
+                        if (startDate) {
+                            if (todayDateOnly >= startDate) {
+                                // look main pricelist
+                                net_price_per_pcs = validateNumber(sfa_pricelist["net_price"], "Net Price");
+                            } else {
+                                // look closest historical
+                                let historical_value = historical_main_pricelist_lookup[main_pricelist_lookup[product_id]];
+                                if (historical_value === undefined) {
+                                    addErrorLog(
+                                        `No applicable historical price found for product ID "${row["product_id"]}". 
+                                        Please check the price list setup or effectivity dates.`
+                                    );
+                                } else {
+                                    net_price_per_pcs = validateNumber(historical_value, "Net Price");
+                                }
+                            }
+                        } else {
+                            addErrorLog(`Invalid effectivity date format: "${effectivity_date}". Use YYYY-MM-DD.`);
+                        }
+                    }
 
                     if (sales_qty !== null && net_price_per_pcs !== null) {
                         amount = validateNumber(sales_qty * net_price_per_pcs, "Amount");
@@ -436,6 +477,12 @@ self.onmessage = async function(e) {
             }
 
             return sfa_pricelist[pricelistField];
+        }
+
+        function parseYMD(dateStr) {
+            const [year, month, day] = dateStr.split("-");
+            if (!year || !month || !day) return null;
+            return new Date(Number(year), Number(month) - 1, Number(day)); // month is 0-based
         }
 
         processBatch();

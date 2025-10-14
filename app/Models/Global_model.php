@@ -1017,6 +1017,46 @@ class Global_model extends Model
         }, $results);
     }
 
+    function get_valid_records_as_of_today($table, $columns)
+    {
+        $columns = (array) $columns;
+        array_unshift($columns, 'id');
+
+        $currentDate = date('Y-m-d');
+
+        $row = $this->db->table($table)
+            ->selectMax('effectivity_date', 'latest_effectivity_date')
+            ->where('effectivity_date <=', $currentDate)
+            ->get()
+            ->getRow();
+
+        if (!$row || !$row->latest_effectivity_date) {
+            log_message('debug', 'No applicable effectivity_date found for ' . $currentDate);
+            return [];
+        }
+
+        $latest_effectivity = $row->latest_effectivity_date;
+
+        if (!$latest_effectivity) {
+            return [];
+        }
+
+        $results = $this->db->table($table)
+            ->select($columns)
+            ->where('effectivity_date', $latest_effectivity)
+            ->get()
+            ->getResultArray();
+
+        return array_map(function ($row) use ($columns) {
+            foreach ($columns as $column) {
+                if (isset($row[$column]) && is_string($row[$column])) {
+                    $row[$column] = trim($row[$column]);
+                }
+            }
+            return $row;
+        }, $results);
+    }
+
     function get_valid_records_tracc_data($table, $columns, $groupBy = null) {
         if (is_string($columns)) {
             $columns = [$columns];

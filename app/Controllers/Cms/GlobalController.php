@@ -1113,6 +1113,7 @@ class GlobalController extends BaseController
 					'item_code',
 					'brand_label_type_id',
 					'net_price',
+					'effectivity_date',
 					'label_type_category_id'
 				]
 			);
@@ -1125,6 +1126,18 @@ class GlobalController extends BaseController
 		}
 		if (!empty($request['system_parameter'])) {
 			$responseData['system_parameter'] = $this->Global_model->get_valid_records("tbl_system_parameter", ['watsons_payment_group']);
+		}
+		if (!empty($request['historical_main_pricelist'])) {
+			$responseData['historical_main_pricelist'] = 
+			// "hello?";
+			$this->Global_model->get_valid_records_as_of_today(
+				"tbl_historical_main_pricelist", 
+				[
+					'main_pricelist_id',
+					'net_price',
+					'effectivity_date'
+				]
+			);
 		}
 		if (!empty($request['years'])) {
 			$responseData['years'] = $this->Global_model->get_valid_records("tbl_year", ['year']);
