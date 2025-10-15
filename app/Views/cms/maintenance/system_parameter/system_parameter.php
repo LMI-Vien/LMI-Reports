@@ -286,13 +286,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="watsons_payment_group" class="col-form-label">Description</label>
-                                    <input 
-                                        type="text" 
-                                        id="watsons_payment_group" 
-                                        name="watsons_payment_group" 
-                                        class="form-control required"   
-                                        placeholder="Watsons Personal Care Stores"
-                                    >
+                                    <input type="text" id="watsons_payment_group" class="form-control" placeholder="Select Payment Group">
                                 </div>
                             </div>
                         </div>
@@ -326,6 +320,7 @@
     
     $(document).ready(function() {
         get_data(query);
+        get_merged_data();
 
         let hero = <?= json_encode($hero); ?>;
         let newItem = <?= json_encode($newItem); ?>;
@@ -719,10 +714,45 @@
                     }
 
                     $('#watsons_payment_group').val(row.watsons_payment_group);
+                    // dropdown
                 }
             });
     }
 
+    let watsons_payment_group_list = [];
+    function get_merged_data() {
+        modal.loading(true);
+        var url = "<?= base_url("cms/global_controller");?>";
+        var data = {
+            event : "mergeUnique",
+            tables : ["tbl_cus_payment_group_lmi", "tbl_cus_payment_group_rgdi"],
+            field : "customer_group_code"
+        };
+
+        aJax.post(url, data, function(result) {
+            let obj = is_json(result);
+            console.log(obj, 'get_merged_data');
+
+            watsons_payment_group_list = obj.unique_fields.map(item => item.customer_group_code || item.field || item);
+
+            if (!obj || obj.message !== 'success' || !obj.unique_fields) {
+                alert("Failed to load payment groups");
+                return;
+            }
+
+            let values = obj.unique_fields.map(item => item.customer_group_code || item.field || item);
+
+            $("#watsons_payment_group").autocomplete({
+                source: values,
+                minLength: 3,
+                select: function(event, ui) {
+                    console.log("Selected:", ui.item.value);
+                }
+            }).focus(function(){
+                $(this).autocomplete("search", "");
+            });
+        });
+    }
 
     function save_data() {
         var id = $('#id').val();
@@ -759,6 +789,16 @@
         let rgdi_json = JSON.stringify(rgdi_array);
 
         let watsons_payment_group = $('#watsons_payment_group').val()
+
+        const exists = watsons_payment_group_list.some(
+            item => item.toLowerCase() === watsons_payment_group.toLowerCase()
+        );
+
+        if (!exists) {
+            modal.alert("Invalid Payment Group. Please select from the list.", "error");
+            $("#watsons_payment_group").focus();
+            return false;
+        }
 
         if(validate.standard("system-parameter-form")){
             if (id !== undefined && id !== null && id !== '') {
