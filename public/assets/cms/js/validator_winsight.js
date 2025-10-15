@@ -322,10 +322,11 @@ self.onmessage = async function(e) {
                                 // look closest historical
                                 let historical_value = historical_main_pricelist_lookup[main_pricelist_lookup[product_id]];
                                 if (historical_value === undefined) {
-                                    addErrorLog(
-                                        `No applicable historical price found for product ID "${row["product_id"]}". 
-                                        Please check the price list setup or effectivity dates.`
-                                    );
+                                    net_price_per_pcs = 0;
+                                    // addErrorLog(
+                                    //     `No applicable historical price found for product ID "${row["product_id"]}". 
+                                    //     Please check the price list setup or effectivity dates.`
+                                    // );
                                 } else {
                                     net_price_per_pcs = validateNumber(historical_value, "Net Price");
                                 }
