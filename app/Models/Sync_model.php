@@ -1101,7 +1101,9 @@ class Sync_model extends Model
 
     public function refreshScanData($data_header_id = null, $month = null, $year = null)
     {
- 
+        // $data_header_id = 17;
+        // $month = 2;
+        // $year = 2025;
         //brand_ids brands handled by BA NOT the actual brand_id of the itmcde
 
         if ($data_header_id && $month && $year) {
@@ -1162,8 +1164,9 @@ class Sync_model extends Model
                     cl.id AS item_class_id,
                     CASE 
                       WHEN mp.effectivity_date <= CURRENT_DATE() THEN mp.net_price
-                      ELSE hmp.net_price
-                    END AS net_price,
+                      WHEN hmp.net_price IS NOT NULL THEN hmp.net_price
+                      ELSE 0
+                    END AS net_price
                     blt.id AS brand_type_id,
                     bbt.sfa_filter AS brand_term_id,
                     b.id AS brand_id,
@@ -1183,8 +1186,8 @@ class Sync_model extends Model
                     CASE WHEN aso.company = '2' THEN pitmlmi.itmclacde ELSE itmrgdi.itmclacde END AS itmclacde,
                     CONCAT(MIN(aso.store_code), ' - ', s.description) AS store_name,
                     MIN(DISTINCT aso.sku_code) AS sku_codes,
-                    CASE WHEN aso.company = '2' THEN itmunitall.untprc ELSE itmunitrgdi.untprc END AS unit_price,
-                    (CASE WHEN aso.company = '2' THEN itmunitall.untprc ELSE itmunitrgdi.untprc END) * SUM(aso.quantity) AS amount
+                    COALESCE(itmunitall.untprc, 0) AS unit_price,
+                    COALESCE(itmunitall.untprc, 0) * SUM(aso.quantity) AS amount
                 FROM aggregated_so aso
                 LEFT JOIN tbl_store s ON aso.store_code = s.code
 
@@ -1194,8 +1197,17 @@ class Sync_model extends Model
                 LEFT JOIN dedup_pitmlmi pitmlmi ON pclmi.itmcde = pitmlmi.itmcde AND aso.company = '2'
                 LEFT JOIN dedup_itmrgdi itmrgdi ON pcrgdi.itmcde = itmrgdi.itmcde AND aso.company != '2'
 
-                LEFT JOIN tbl_item_unit_file_all itmunitall ON pclmi.itmcde = itmunitall.itmcde AND itmunitall.untmea = 'PCS' AND aso.company = '2'
-                LEFT JOIN tbl_item_unit_file_rgdi itmunitrgdi ON pcrgdi.itmcde = itmunitrgdi.itmcde AND itmunitrgdi.untmea = 'PCS' AND aso.company != '2'
+                LEFT JOIN tbl_item_unit_file_all itmunitall 
+                  ON itmunitall.itmcde = CASE 
+                                             WHEN aso.company = '2' THEN pclmi.itmcde 
+                                             ELSE pcrgdi.itmcde 
+                                         END
+                  AND itmunitall.untmea = 'PCS'
+                  AND itmunitall.source_type = CASE 
+                                                   WHEN aso.company = '2' THEN 'lmi' 
+                                                   ELSE 'rgdi' 
+                                               END
+    
 
                 LEFT JOIN tbl_brand b ON 
                     (aso.company = '2' AND pitmlmi.brncde = b.brand_code) OR
@@ -1213,8 +1225,16 @@ class Sync_model extends Model
                     AND mp.item_code = (CASE WHEN aso.company = '2' THEN pclmi.itmcde ELSE pcrgdi.itmcde END)
                     AND mp.customer_payment_group = aso.customer_payment_group
 
-                LEFT JOIN tbl_historical_main_pricelist hmp 
-                    ON hmp.main_pricelist_id = mp.id
+                LEFT JOIN (
+                    SELECT h1.*
+                    FROM tbl_historical_main_pricelist h1
+                    INNER JOIN (
+                        SELECT pricelist_masterfile_id, MAX(effectivity_date) AS max_effectivity_date
+                        FROM tbl_historical_main_pricelist
+                        WHERE effectivity_date <= CURRENT_DATE()
+                        GROUP BY pricelist_masterfile_id
+                    ) h2 ON h1.pricelist_masterfile_id = h2.pricelist_masterfile_id AND h1.effectivity_date = h2.max_effectivity_date
+                ) hmp ON hmp.pricelist_masterfile_id = mp.id
                 GROUP BY
                     aso.id
             )
@@ -1587,8 +1607,9 @@ class Sync_model extends Model
                         blt.id AS brand_type_id,
                         bbt.sfa_filter AS brand_term_id,
                         CASE 
-                            WHEN mp.effectivity_date <= CURRENT_DATE() THEN mp.net_price
-                            ELSE hmp.net_price
+                          WHEN mp.effectivity_date <= CURRENT_DATE() THEN mp.net_price
+                          WHEN hmp.net_price IS NOT NULL THEN hmp.net_price
+                          ELSE 0
                         END AS net_price
                     FROM aggregated_week_vmi avmi
 
@@ -1619,8 +1640,16 @@ class Sync_model extends Model
                         AND mp.category_1_id = cl.id
                         AND mp.item_code = COALESCE(pclmi.itmcde, pcrgdi.itmcde)
 
-                    LEFT JOIN tbl_historical_main_pricelist hmp 
-                        ON hmp.main_pricelist_id = mp.id
+                    LEFT JOIN (
+                        SELECT h1.*
+                        FROM tbl_historical_main_pricelist h1
+                        INNER JOIN (
+                            SELECT pricelist_masterfile_id, MAX(effectivity_date) AS max_effectivity_date
+                            FROM tbl_historical_main_pricelist
+                            WHERE effectivity_date <= CURRENT_DATE()
+                            GROUP BY pricelist_masterfile_id
+                        ) h2 ON h1.pricelist_masterfile_id = h2.pricelist_masterfile_id AND h1.effectivity_date = h2.max_effectivity_date
+                    ) hmp ON hmp.pricelist_masterfile_id = mp.id
                 ),
                 final_data AS (
                     SELECT

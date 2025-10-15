@@ -62,6 +62,15 @@ class PricelistMasterfile extends BaseController
             $id = $this->request->uri->getSegment(4);
         }
 		$data['pricelistId'] = $id;
+		$query = "status > 0 AND id =".$id;
+		$paymentGroup = $this->Global_model->get_data_list(
+				'tbl_pricelist_masterfile', $query, 1, 0, 'description', '', '', '', ''
+			);
+		if($paymentGroup){
+			$data['paymentGroup'] = $paymentGroup[0]->description;
+		}else{
+			$data['paymentGroup'] = '';		
+		}
 
 		$data['meta'] = array(
 			"title"         =>  "Pricelist Details",
@@ -103,7 +112,7 @@ class PricelistMasterfile extends BaseController
 		return view("cms/layout/template", $data);		
 	}
 
-	public function customerPricelistDetails($customerId = null, $cusPricelistId = null)
+	public function customerPricelistDetails($customerId = null, $pricelistId = null)
 	{
 
 		$uri = current_url(true);
@@ -113,7 +122,7 @@ class PricelistMasterfile extends BaseController
             $customerId = $this->request->uri->getSegment(4);
         }
 		$data['customerId'] = $customerId;
-		$data['cusPricelistId'] = $cusPricelistId;
+		$data['pricelistId'] = $pricelistId;
 
 		$data['meta'] = array(
 			"title"         =>  "Customer Details Pricelist",
@@ -248,27 +257,13 @@ class PricelistMasterfile extends BaseController
 		return $this->response->setJSON($out);
 	}
 
-	public function pullFromMain()
-	{
-		$customerId     = (int) ($this->request->getPost('customerId') ?? 0);
-		$cusPricelistId = (int) ($this->request->getPost('cusPricelistId') ?? $this->request->getPost('pricelistId') ?? 0);
-		$userId         = (int) ($this->session->get('sess_uid') ?? 0);
-
-		try {
-			$inserted = $this->Global_model->pullFromMain($customerId, $cusPricelistId, $userId);
-			return $this->response->setJSON(['ok' => true, 'inserted' => $inserted]);
-		} catch (\Throwable $e) {
-			return $this->response->setJSON(['ok' => false, 'msg' => $e->getMessage()])->setStatusCode(500);
-		}
-	}
-
 	public function refreshFromMain()
 	{
 		$customerId     = (int) ($this->request->getPost('customerId') ?? 0);
-		$cusPricelistId = (int) ($this->request->getPost('cusPricelistId') ?? $this->request->getPost('pricelistId') ?? 0);
+		$pricelistId = (int) ($this->request->getPost('pricelistId') ?? $this->request->getPost('pricelistId') ?? 0);
 		$userId         = (int) ($this->session->get('sess_uid') ?? 0);
 
-		$updated = $this->Global_model->refreshFromMain($customerId, $cusPricelistId, $userId);
+		$updated = $this->Global_model->refreshFromMain($customerId, $pricelistId, $userId);
 
 		return $this->response->setJSON(['ok' => true, 'updated' => $updated]);
 	}

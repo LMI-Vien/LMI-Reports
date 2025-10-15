@@ -2890,7 +2890,7 @@ class Dashboard_model extends Model
 	    $brandCategoryParams = [];
 	    if (!empty($brandCategoryIds)) {
 	        $placeholders = implode(',', array_fill(0, count($brandCategoryIds), '?'));
-	        $brandCategoryFilter = "AND wd.cat_1_id IN ($placeholders)";
+	        $brandCategoryFilter = "AND wd.category_1_id IN ($placeholders)";
 	        $brandCategoryParams = $brandCategoryIds;
 	    }
 
@@ -2926,7 +2926,7 @@ class Dashboard_model extends Model
 	        
 	    }else{
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * wd.net_price_per_pcs), 2)"
+		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
 		        : "ROUND(SUM(wd.sales_qty), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
@@ -2968,7 +2968,7 @@ class Dashboard_model extends Model
 		            wd.brand_label_type AS brand_type_id,
 		            mp.item_description,
 		            mp.cust_item_code,
-		            wd.cat_1_id AS brand_category_id,
+		            wd.category_1_id AS brand_category_id,
 		            CASE
 		                WHEN mp.effectivity_date <= CURRENT_DATE()
 		                    THEN $sellOutExpr
@@ -3751,7 +3751,7 @@ class Dashboard_model extends Model
 	        
 	    }else{
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * wd.net_price_per_pcs), 2)"
+		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
 		        : "ROUND(SUM(wd.sales_qty), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
@@ -3790,7 +3790,7 @@ class Dashboard_model extends Model
 	            SELECT
 					wd.brand_id,
 		            wd.brand_label_type AS brand_type_id,
-	                wd.cat_1_id AS brand_category_id,
+	                wd.category_1_id AS brand_category_id,
 		            CASE
 		                WHEN mp.effectivity_date <= CURRENT_DATE()
 		                    THEN $sellOutExpr
@@ -4492,7 +4492,7 @@ class Dashboard_model extends Model
 	        
 	    }else{
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * wd.net_price_per_pcs), 2)"
+		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
 		        : "ROUND(SUM(wd.sales_qty), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
@@ -4530,7 +4530,7 @@ class Dashboard_model extends Model
 	        WITH aggregated AS (
 	            SELECT
 	                wd.brand_label_type AS brand_type_id,
-	                wd.cat_1_id AS brand_category_id,
+	                wd.category_1_id AS brand_category_id,
 		            CASE
 		                WHEN mp.effectivity_date <= CURRENT_DATE()
 		                    THEN $sellOutExpr

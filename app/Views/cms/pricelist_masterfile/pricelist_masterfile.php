@@ -624,17 +624,18 @@
             return (window.modal?.alert ? modal.alert('Missing customer/pricelist id', 'error') : alert('Missing ids'));
         }
 
-        $.post(
-            "<?= base_url('cms/pricelist-masterfile/pull-from-main') ?>",
-            { customerId: customerId, cusPricelistId: cusPricelistId },
-            function (res) {
-                const href2 = "<?= base_url('cms/pricelist-masterfile/customer-details-pricelist') ?>/"
-                    + encodeURIComponent(customerId) + "/"
-                    + encodeURIComponent(cusPricelistId);
-                window.open(href2, '_blank');
-            },
-            'json'
-        )
+        // $.post(
+        //     "<?= base_url('cms/pricelist-masterfile/pull-from-main') ?>",
+        //     { customerId: customerId, cusPricelistId: cusPricelistId },
+        //     function (res) {
+
+        //     },
+        //     'json'
+        // )
+        const href2 = "<?= base_url('cms/pricelist-masterfile/customer-details-pricelist') ?>/"
+            + encodeURIComponent(customerId) + "/"
+            + encodeURIComponent(cusPricelistId);
+        window.open(href2, '_blank');
     }
 
     let customerCurrentPage = 1;

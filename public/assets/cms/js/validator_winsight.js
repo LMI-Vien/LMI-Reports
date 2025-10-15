@@ -176,34 +176,34 @@ self.onmessage = async function(e) {
                 
                 let cat_1 = row["cat_1"]; 
                 // category_1_id -> tbl_main_pricelist -> tbl_classification
-                let cat_1_id = null
+                let category_1_id = null
 
                 let cat_2 = row["cat_2"];
                 // category_2_id -> tbl_main_pricelist -> tbl_sub_classification
-                let cat_2_id = null
+                let category_2_id = null
 
                 let cat_3 = row["cat_3"]; 
                 // category_3_id -> tbl_main_pricelist -> tbl_item_department
-                let cat_3_id = null
+                let category_3_id = null
 
                 let cat_4 = row["cat_4"]; 
                 // category_4_id -> tbl_main_pricelist -> tbl_item_merchandise_category
-                let cat_4_id = null
+                let category_4_id = null
 
                 if (sfa_pricelist !== null) {
                     brand_id = validateField(
                         row["brand_name"], "Brand Name", brands_lookup, sfa_pricelist, "brand_id", product_id
                     );
-                    cat_1_id = validateField(
+                    category_1_id = validateField(
                         row["cat_1"], "Category 1 (Item Classification)", classification_lookup, sfa_pricelist, "category_1_id", product_id
                     );
-                    cat_2_id = validateField(
+                    category_2_id = validateField(
                         row["cat_2"], "Category 2 (Item Sub Classification)", sub_classification_lookup, sfa_pricelist, "category_2_id", product_id
                     );  
-                    cat_3_id = validateField(
+                    category_3_id = validateField(
                         row["cat_3"], "Category 3 (Item Department)", item_department_lookup, sfa_pricelist, "category_3_id", product_id
                     );
-                    cat_4_id = validateField(
+                    category_4_id = validateField(
                         row["cat_4"], "Category 4 (Item Merchandise Category)", item_merchandise_category_lookup, sfa_pricelist, "category_4_id", product_id
                     );
                 }
@@ -281,7 +281,7 @@ self.onmessage = async function(e) {
 
                 let item_code = null;
                 let brand_label_type = null;
-                let net_price_per_pcs= null;
+                let net_price= null;
                 let amount = null;
                 let label_type_category = null;
                 let brand_label_type_id = null;
@@ -317,18 +317,18 @@ self.onmessage = async function(e) {
                         if (startDate) {
                             if (todayDateOnly >= startDate) {
                                 // look main pricelist
-                                net_price_per_pcs = validateNumber(sfa_pricelist["net_price"], "Net Price");
+                                net_price = validateNumber(sfa_pricelist["net_price"], "Net Price");
                             } else {
                                 // look closest historical
                                 let historical_value = historical_main_pricelist_lookup[main_pricelist_lookup[product_id]];
                                 if (historical_value === undefined) {
-                                    net_price_per_pcs = 0;
+                                    net_price = 0;
                                     // addErrorLog(
                                     //     `No applicable historical price found for product ID "${row["product_id"]}". 
                                     //     Please check the price list setup or effectivity dates.`
                                     // );
                                 } else {
-                                    net_price_per_pcs = validateNumber(historical_value, "Net Price");
+                                    net_price = validateNumber(historical_value, "Net Price");
                                 }
                             }
                         } else {
@@ -336,8 +336,8 @@ self.onmessage = async function(e) {
                         }
                     }
 
-                    if (sales_qty !== null && net_price_per_pcs !== null) {
-                        amount = validateNumber(sales_qty * net_price_per_pcs, "Amount");
+                    if (sales_qty !== null && net_price !== null) {
+                        amount = validateNumber(sales_qty * net_price, "Amount");
                     } else {
                         addErrorLog("Cannot compute amount: missing Sales Qty or Net Price");
                     }
@@ -360,9 +360,9 @@ self.onmessage = async function(e) {
                     online_offline, store_format,
                     store_segment, gross_sales, net_sales, sales_qty, barcode,
                     brand_id, store_segment_id, 
-                    cat_1_id, cat_2_id, cat_3_id, cat_4_id,
+                    category_1_id, category_2_id, category_3_id, category_4_id,
                     brand_label_type_id, label_type_category_id,
-                    item_code, brand_label_type, net_price_per_pcs, amount, label_type_category
+                    item_code, brand_label_type, net_price, amount, label_type_category
                 });
             }
 
