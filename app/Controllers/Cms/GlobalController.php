@@ -575,7 +575,6 @@ class GlobalController extends BaseController
 	        		echo "Error adding data: " . $e->getMessage();
 				}
 			break;
-
 			case 'update':
 				try { 
 					$table = $_POST['table'];
@@ -605,6 +604,45 @@ class GlobalController extends BaseController
 	        		echo "Error updating data: " . $e->getMessage();
 				}
 			break;
+	    case 'upsert':
+	        try {
+	            $table = $_POST['table'];
+	            $data = $_POST['data'];
+	            $key = $_POST['key'];
+	            
+	            $whereArr = [];
+	            foreach ($key as $k => $v) {
+	                if (is_numeric($v)) {
+	                    $whereArr[] = "$k = $v";
+	                } else {
+	                    $whereArr[] = "$k = '" . addslashes($v) . "'";
+	                }
+	            }
+	            $where = implode(' AND ', $whereArr);
+
+	            $existing = $this->Global_model->get_data_list($table, $where, 1, 0, "*", null, null, null);
+
+	            if ($existing && count($existing) > 0) {
+	                $existingRow = $existing[0];
+
+					$primaryKey = array_key_first($key);
+					$primaryKeyValue = $key[$primaryKey];
+
+					$status = $this->Global_model->update_data_custom_where($table, $data, $where);
+	                echo $status;
+
+	                $this->audit_trail_controller("Update", $data, $existingRow);
+
+	            } else {
+	                $id = $this->Global_model->save_data($table, $data);
+	                echo json_encode(["ID" => $id]);
+
+	                $this->audit_trail_controller("Create", $data);
+	            }
+	        } catch (Exception $e) {
+	            echo "Error in upsert operation: " . $e->getMessage();
+	        }
+	        break;
 			case 'total_delete':
 				try {
 				    $table = $_POST['table'];

@@ -39,7 +39,6 @@
     }
 </style>
 
-
     <div class="content-wrapper p-4">
         <div class="card">
             <div class="text-center md-center">
@@ -112,8 +111,8 @@
                 </div>
                 <div class="modal-body">
                     <form id="form-modal">
-                        <input type="hidden" id="pricelistId" value="<?= esc($pricelistId) ?>">
-                        
+                        <input type="hidden" id="pricelistId">
+                        <input type="hidden" id="paymentGroup">
                         <!-- Row 1: Brand / Brand Label Type -->
                         <div class="form-row">
                             <div class="col-md-6">
@@ -371,8 +370,9 @@
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
     var base_url = '<?= base_url();?>';
-    var parentId = parseInt($('#pricelistId').val(), 10) || 0;
-
+    var pricelistId = '<?= $pricelistId; ?>';
+    var paymentGroup = '<?= $paymentGroup; ?>';
+    console.log(paymentGroup);
     //for importing
     let currentPage = 1;
     let rowsPerPage = 1000;
@@ -380,10 +380,10 @@
     let dataset = [];
 
     $(document).ready(function() {
-        var query = "pl.status >= 0 AND pl.pricelist_id = " + parentId;
+        var query = "pl.status >= 0 AND pl.pricelist_id = " + pricelistId;
         get_data(query);
         get_pagination(query);
-
+        
         let brands = <?= json_encode($brands); ?>;
         let brandLabelType = <?= json_encode($brandLabelType); ?>;
         let labelCategory  = <?= json_encode($labelCategory); ?>;
@@ -690,7 +690,7 @@
                         html += "</tr>";   
                     });
                 } else {
-                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+                    html = '<tr><td colspan=20 class="center-align-format">'+ no_records +'</td></tr>';
                 }
             }
             $('.table_body').html(html);
@@ -784,7 +784,7 @@
             search_input = $('#search_query').val();
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
-            new_query = "pl.status >= 0 AND pl.pricelist_id = " + parentId;
+            new_query = "pl.status >= 0 AND pl.pricelist_id = " + pricelistId;
             new_query += " AND (" +
                 "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
                 "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
@@ -808,7 +808,7 @@
         search_input = $('#search_query').val();
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
-        new_query = "pl.status >= 0 AND pl.pricelist_id = " + parentId;
+        new_query = "pl.status >= 0 AND pl.pricelist_id = " + pricelistId;
         new_query += " AND (" +
                 "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
                 "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
@@ -941,6 +941,8 @@
         };
 
         if (['edit', 'view'].includes(actions)) populate_modal(id);
+        $('#pricelistId').val(pricelistId);
+        $('#paymentGroup').val(paymentGroup);
         
         let isReadOnly = actions === 'view';
         set_field_state('#brand, #brandLabelType, #labelTypeCat, #catOne, #catTwo, #catThree, #catFour, #itemCode, #itemDescription, #customerItemCode, #sellingPrice, #discountInPercent, #effectDate, #status', isReadOnly);
@@ -1049,9 +1051,11 @@
                 .some(k => oldVals[k] !== compareVals[k]);
 
             if (!changed) return proceed();
-
+            const paymentGroup = $('#paymentGroup').val();
             const historyRow = {
-                main_pricelist_id: id,
+                pricelist_id: pricelistId,
+                pricelist_masterfile_id: id,
+                customer_payment_group: paymentGroup,
                 selling_price: oldVals.selling_price,
                 disc_in_percent: oldVals.disc_in_percent,
                 net_price: oldVals.net_price,
@@ -1073,7 +1077,8 @@
     }
 
     function save_data(action, id) {
-        var pricelistId = $('#pricelistId').val();
+        //pricelistId = $('#pricelistId').val();
+       // var paymentGroup = $('#paymentGroup').val();
         var brand = $('#brandId').val().trim();
         var brandLabelType = $('#brandLabelTypeId').val().trim();
         var labelTypeCat = $('#labelTypeCatId').val().trim();
@@ -1150,6 +1155,7 @@
             modal_alert_success = success_update_message;
             const updated_data = {
                 pricelist_id: pricelistId,
+                customer_payment_group: paymentGroup,
                 brand_id: brand,
                 brand_label_type_id: brandLabelType,
                 label_type_category_id: labelTypeCat,
@@ -1189,6 +1195,7 @@
             modal_alert_success = success_save_message;
             const inserted_data = {
                 pricelist_id: pricelistId,
+                customer_payment_group: paymentGroup,
                 brand_id: brand,
                 brand_label_type_id: brandLabelType,
                 label_type_category_id: labelTypeCat,
@@ -1229,6 +1236,10 @@
             const end_time = new Date();
             const duration = formatDuration(start_time, end_time);
             modal.loading(false);
+            const conditions = {
+                main_pricelist_id: id
+            };
+            total_delete(url, 'tbl_customer_pricelist', conditions);
             modal.alert(modal_alert_success, 'success', function () {
                 location.reload();
             });
@@ -1287,7 +1298,8 @@
                     pl.item_code, pl.item_description, 
                     pl.cust_item_code, pl.uom, 
                     pl.selling_price, pl.disc_in_percent, 
-                    pl.net_price, pl.effectivity_date, 
+                    pl.net_price, pl.effectivity_date,
+                    pm.description AS customer_payment_group,
                     pl.status, pl.updated_date, pl.created_date`,
             query : query, 
             table : "tbl_main_pricelist pl",
@@ -1296,6 +1308,11 @@
                 order : "asc", 
             },
             join : [
+                {
+                    table: "tbl_pricelist_masterfile pm",
+                    query: "pl.customer_payment_group = pm.description",
+                    type: "inner"
+                },
                 {
                     table: "tbl_brand brnd",
                     query: "brnd.id = pl.brand_id",
@@ -1338,7 +1355,6 @@
             if(obj){
                 $.each(obj, function(index,asc) {
                     $('#id').val(asc.id);
-                    $('#pricelistId').val(asc.pricelist_id);
 
                     $('#brand').val(asc.brand_code);
                     $('#brandId').val(asc.brand_id);
@@ -1396,8 +1412,6 @@
             return;
         }
 
-        const parentId = parseInt($('#pricelistId').val(), 10) || 0;
-
         modal.loading(true);
 
         let jsonData = dataset.map(row => {
@@ -1423,7 +1437,7 @@
         });
 
         let worker = new Worker(base_url + "assets/cms/js/validator_pricelist_details.js");
-        worker.postMessage({ data: jsonData, base_url: base_url, parentId, });
+        worker.postMessage({ data: jsonData, base_url: base_url, pricelistId, });
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
@@ -1453,161 +1467,8 @@
         };
     }
 
-    // function saveValidatedData(valid_data) {
-    //     const overallStart = new Date();
-    //     const parentId = parseInt($('#pricelistId').val(), 10) || 0;
-    //     let batch_size = 5000;
-    //     let total_batches = Math.ceil(valid_data.length / batch_size);
-    //     let batch_index = 0;
-    //     let retry_count = 0;
-    //     let max_retries = 5; 
-    //     let errorLogs = [];
-    //     let url = "<?= base_url('cms/global_controller');?>";
-    //     let table = 'tbl_main_pricelist';
-    //     let selected_fields = ['id', 'pricelist_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];
-
-    //     //for lookup of duplicate recors
-    //     const matchFields = ['pricelist_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];  
-    //     const matchType = "AND";  //use OR/AND depending on the condition
-    //     modal.loading_progress(true, "Validating and Saving data...");
-
-    //     // Fetch existing records
-    //     aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-    //         // let result = JSON.parse(response);
-    //         const result = JSON.parse(response);
-    //         const allEntries = result.existing || [];
-
-    //         // Build a Set of codes you're importing:
-    //         // const codeSet = new Set(valid_data.map(r => r.code));
-
-    //         // Keep only the rows whose code matches:
-    //         const originalEntries = allEntries.filter(rec => rec.pricelist_id == parentId);
-
-    //         let existingMap = new Map(); // Stores records using composite keys
-
-    //         (allEntries || []).forEach(record => {
-    //             // Normalize to string to avoid undefined/null/number mismatches
-    //             const key = matchFields.map(f => (record[f] ?? '') + '').join('|');
-    //             existingMap.set(key, record.id);
-    //         });
-
-    //         function updateOverallProgress(stepName, completed, total) {
-    //             let progress = Math.round((completed / total) * 100);
-    //             updateSwalProgress(stepName, progress);
-    //         }
-
-    //         function processNextBatch() {
-    //             if (batch_index >= total_batches) {
-    //                 modal.loading_progress(false);
-
-    //                 const overallEnd = new Date();
-    //                 const duration = formatDuration(overallStart, overallEnd);
-
-    //                 const remarks = `
-    //                     Action: Import Pricelist Details
-    //                     <br>Processed ${valid_data.length} records
-    //                     <br>Errors: ${errorLogs.length}
-    //                     <br>Start: ${formatReadableDate(overallStart)}
-    //                     <br>End: ${formatReadableDate(overallEnd)}
-    //                     <br>Duration: ${duration}
-    //                 `;
-
-    //                 logActivity("import-pricelist-details-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
-
-    //                 if (errorLogs.length > 0) {
-    //                     createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-    //                     modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-    //                 } else {
-    //                     modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-    //                 }
-    //                 return;
-    //             }
-
-    //             let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-    //             let newRecords = [];
-    //             let updateRecords = [];
-
-    //             batch.forEach(row => {
-    //                 row.pricelist_id = parentId; // enforce the context list
-    //                 const rowKey = matchFields.map(f => (row[f] ?? '') + '').join('|');
-    //                 const matchedId = existingMap.get(rowKey) || null;
-
-    //                 if (matchedId) {
-    //                     row.id = matchedId;
-    //                     row.updated_date = formatDate(new Date());
-    //                     delete row.created_date;
-    //                     updateRecords.push(row);
-    //                 } else {
-    //                     row.created_by = user_id;
-    //                     row.created_date = formatDate(new Date());
-    //                     newRecords.push(row);
-    //                 }
-    //             });
-
-    //             function processUpdates() {
-    //                 return new Promise((resolve) => {
-    //                     if (updateRecords.length > 0) {
-    //                         batch_update(url, updateRecords, "tbl_main_pricelist", "id", false, (response) => {
-    //                             if (response.message !== 'success') {
-    //                                 errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             function processInserts() {
-    //                 return new Promise((resolve) => {
-    //                     if (newRecords.length > 0) {
-    //                         batch_insert(url, newRecords, "tbl_main_pricelist", false, (response) => {
-    //                             if (response.message === 'success') {
-    //                                 updateOverallProgress("Saving Pricelist Details...", batch_index + 1, total_batches);
-    //                             } else {
-    //                                 errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-    //                             }
-    //                             resolve();
-    //                         });
-    //                     } else {
-    //                         resolve();
-    //                     }
-    //                 });
-    //             }
-
-    //             function handleSaveError() {
-    //                 if (retry_count < max_retries) {
-    //                     retry_count++;
-    //                     let wait_time = Math.pow(2, retry_count) * 1000;
-    //                     setTimeout(() => {
-    //                         processInserts().then(() => {
-    //                             batch_index++;
-    //                             retry_count = 0;
-    //                             processNextBatch();
-    //                         }).catch(handleSaveError);
-    //                     }, wait_time);
-    //                 } else {
-    //                     modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-    //                 }
-    //             }
-
-    //             processUpdates()
-    //                 .then(processInserts)
-    //                 .then(() => {
-    //                     batch_index++;
-    //                     setTimeout(processNextBatch, 300);
-    //                 })
-    //                 .catch(handleSaveError);
-    //         }
-
-    //         setTimeout(processNextBatch, 1000);
-    //     });
-    // }
-
     function saveValidatedData(valid_data) {
         const overallStart = new Date();
-        const parentId = parseInt($('#pricelistId').val(), 10) || 0;
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
         let batch_index = 0;
@@ -1623,6 +1484,7 @@
         let selected_fields = [
             'id',
             'pricelist_id',
+            'customer_payment_group',
             'brand_id',
             'brand_label_type_id',
             'label_type_category_id',
@@ -1659,7 +1521,8 @@
             'net_price',
             'effectivity_date',
             'status',
-            'pricelist_id'
+            'pricelist_id',
+            'customer_payment_group'
         ];
 
         function norm(v) {
@@ -1689,8 +1552,8 @@
             const allEntries = result.existing || [];
 
             // Keep only the same pricelist context
-            const originalEntries = allEntries.filter(rec => rec.pricelist_id == parentId);
-
+            const originalEntries = allEntries.filter(rec => rec.pricelist_id == pricelistId);
+            const customerPaymentGroup = originalEntries.length > 0 ? originalEntries[0].customer_payment_group : null;
             // Map: key = `${pricelist_id}|${ITEMCODE}`
             const existingByCode = new Map();
             originalEntries.forEach(r => {
@@ -1739,7 +1602,7 @@
 
             batch.forEach(row => {
                 // Ensure pricelist context
-                row.pricelist_id = parentId;
+                row.pricelist_id = pricelistId;
 
                 // Normalize incoming to DB-shape for comparison
                 const itemCodeRaw = row.item_code ?? row["Item Code"] ?? '';
@@ -1767,10 +1630,11 @@
                     net_price: row.net_price ?? row["Net Price"],
                     effectivity_date: row.effectivity_date ?? row["Effectivity Date"],
                     status: row.status ?? row["Status"],
-                    pricelist_id: parentId
+                    pricelist_id: pricelistId,
+                    customer_payment_group: customerPaymentGroup
                 };
 
-                const key = `${parentId}|${itemCode.toUpperCase()}`;
+                const key = `${pricelistId}|${itemCode.toUpperCase()}`;
                 const existing = existingByCode.get(key);
 
                 if (existing) {
@@ -1912,6 +1776,7 @@
         };
 
         reader.readAsBinaryString(file);
+
     }
 
 
@@ -2030,95 +1895,6 @@
 
         $(".import_buttons").append($downloadBtn);
     }
-
-    // button beside add functions
-    // $(document).on('click', '.btn_status', function (e) {
-    //     var status = $(this).attr("data-status");
-    //     var modal_obj = "";
-    //     var modal_alert_success = "";
-    //     var hasExecuted = false; // Prevents multiple executions
-
-    //     var id = '';
-    //     id = $("input.select:checked");
-    //     var code = [];
-    //     var code_string = '';
-
-    //     id.each(function() {
-    //         code.push(parseInt($(this).attr('data-id')));
-    //     });
-
-    //     get_field_values('tbl_agency', 'code', 'id', code, function(res) {
-    //         if(code.length == 1) {
-    //             code_string = `Code <i><b>${res[code[0]]}</b></i>`;
-    //         } else {
-    //             code_string = 'selected data'
-    //         }
-    //     })
-
-    //     if (parseInt(status) === -2) {
-    //         message = is_json(confirm_delete_message);
-    //         message.message = `Delete ${code_string} from Agency Masterfile?`;  
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_delete_message;
-    //     } else if (parseInt(status) === 1) {
-    //         message = is_json(confirm_publish_message);
-    //         message.message = `Publish ${code_string} from Agency Masterfile?`;
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_publish_message;
-    //     } else {
-    //         message = is_json(confirm_unpublish_message);
-    //         message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_unpublish_message;
-    //     }
-    //     modal.confirm(modal_obj, function (result) {
-    //         if (result) {
-    //             var url = "<?= base_url('cms/global_controller');?>";
-    //             var dataList = [];
-                
-    //             $('.select:checked').each(function () {
-    //                 var id = $(this).attr('data-id');
-    //                 dataList.push({
-    //                     event: "update",
-    //                     table: "tbl_agency",
-    //                     field: "id",
-    //                     where: id,
-    //                     data: {
-    //                         status: status,
-    //                         updated_date: formatDate(new Date())
-    //                     }
-    //                 });
-    //             }); 
-
-    //             if (dataList.length === 0) return;
-
-    //             var processed = 0;
-    //             dataList.forEach(function (data, index) {
-    //                 aJax.post(url, data, function (result) {
-    //                     if (hasExecuted) return; 
-
-    //                     modal.loading(false);
-    //                     processed++;
-
-    //                     if (result === "success") {
-    //                         if (!hasExecuted) {
-    //                             hasExecuted = true;
-    //                             $('.btn_status').hide();
-    //                             modal.alert(modal_alert_success, 'success', function () {
-    //                                 location.reload();
-    //                             });
-    //                         }
-    //                     } else {
-    //                         if (!hasExecuted) {
-    //                             hasExecuted = true;
-    //                             modal.alert(failed_transaction_message, function () {});
-    //                         }
-    //                     }
-    //                 });
-    //             });
-    //         }
-    //     });
-    // });
 
     function download_template() {
         const headerData = [];

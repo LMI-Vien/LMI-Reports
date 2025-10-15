@@ -113,8 +113,10 @@
                 <div class="modal-body">
                     <form id="form-modal">
                         <input type="hidden" id="customerId" value="<?= esc($customerId) ?>">
-                        <input type="hidden" id="cusPricelistId" value="<?= esc($cusPricelistId) ?>">
-
+                        <input type="hidden" id="pricelistId" value="<?= esc($pricelistId) ?>">
+                        <input type="hidden" id="paymentGroup" >
+                        <input type="hidden" id="mainPricelistId" >
+                        
                         <!-- Row 1: Brand / Brand Label Type -->
                         <div class="form-row">
                             <div class="col-md-6">
@@ -364,25 +366,21 @@
     </div>
 
 <script>
-    var query = "pl.status >= 0";
+
     var column_filter = '';
     var order_filter = '';
     var limit = 10; 
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
     var base_url = '<?= base_url();?>';
-    var parentId = parseInt($('#customerId').val(), 10) || 0;
-
-    //for importing
-    let currentPage = 1;
-    let rowsPerPage = 1000;
-    let totalPages = 1;
-    let dataset = [];
-
+    var pricelistId = '<?=$uri->getSegment(4);?>';
+    var customerId = '<?=$uri->getSegment(5);?>';
+    var query = "mp.status > 0 AND cl.id = "+customerId+" AND mp.pricelist_id = "+pricelistId;
+    console.log(pricelistId);
     $(document).ready(function() {
-        var query = "pl.status >= 0 AND pl.customer_id = " + parentId;
+       // var query = "pl.status >= 0 AND pl.customer_id = " + pricelistId;
         get_data(query);
-        get_pagination(query);
+      //  get_pagination(query);
 
         let brands = <?= json_encode($brands); ?>;
         let brandLabelType = <?= json_encode($brandLabelType); ?>;
@@ -567,65 +565,80 @@
     }
 
     
-    function get_data(query, field = "pl.customer_id", order = "asc") {
+    function get_data(query, field = "cl.id", order = "asc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "list",
-            select : `pl.id, pl.customer_id, pl.cus_pricelist_id,
-                    pl.brand_id, brnd.brand_code AS brand_code, 
-                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
-                    pl.label_type_category_id, catlist.code AS catlist_code, 
-                    pl.category_1_id, class.item_class_code AS labeltype_code,
-                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
-                    pl.category_3_id, idept.item_department_code AS item_department,
-                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
-                    pl.item_code, pl.item_description, 
-                    pl.cust_item_code, pl.uom, 
-                    pl.selling_price, pl.disc_in_percent, 
-                    pl.net_price, pl.effectivity_date, 
-                    pl.status, pl.updated_date, pl.created_date`,
+            select : `mp.id, mp.id AS main_pricelist_id,
+                    mp.brand_id, brnd.brand_code AS brand_code, 
+                    mp.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    mp.label_type_category_id, catlist.code AS catlist_code, 
+                    mp.category_1_id, class.item_class_code AS labeltype_code,
+                    mp.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    mp.category_3_id, idept.item_department_code AS item_department,
+                    mp.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    mp.item_code, mp.item_description,
+                    mp.cust_item_code, mp.uom, 
+                    mp.item_code,
+                    mp.item_description,
+                    mp.status, mp.updated_date, mp.created_date,
+                    COALESCE(cp.selling_price, mp.selling_price) AS selling_price,
+                    COALESCE(cp.disc_in_percent, mp.disc_in_percent) AS disc_in_percent,
+                    COALESCE(cp.net_price, mp.net_price) AS net_price,
+                    COALESCE(cp.effectivity_date, mp.effectivity_date) AS effectivity_date,
+                    IF(cp.id IS NOT NULL, 1, 0) AS is_customer_override`,
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_customer_pricelist pl",
+            table : "tbl_main_pricelist mp",
             order : {
                 field : field,
                 order : order 
             },
             join : [
                 {
+                    table: "tbl_customer_list cl",
+                    query: "mp.pricelist_id = cl.pricelist_id",
+                    type: "inner"
+                },
+                {
+                    table: "tbl_customer_pricelist cp",
+                    query: "cp.customer_id = cl.id AND cp.main_pricelist_id = mp.id",
+                    type: "left"
+                },
+                {
                     table: "tbl_brand brnd",
-                    query: "brnd.id = pl.brand_id",
+                    query: "brnd.id = mp.brand_id",
                     type: "left"
                 },
                 {
                     table: "tbl_label_category_list catlist",
-                    query: "catlist.id = pl.label_type_category_id",
+                    query: "catlist.id = mp.label_type_category_id",
                     type: "left"
                 },
                 {
                     table: "tbl_classification class",
-                    query: "class.id = pl.category_1_id",
+                    query: "class.id = mp.category_1_id",
                     type: "left"
                 },
                 {
                     table: "tbl_brand_label_type brlbltyp",
-                    query: "brlbltyp.id = pl.brand_label_type_id",
+                    query: "brlbltyp.id = mp.brand_label_type_id",
                     type: "left"
                 },
                 {
                     table: "tbl_sub_classification sclass",
-                    query: "sclass.id = pl.category_2_id",
+                    query: "sclass.id = mp.category_2_id",
                     type: "left"
                 },
                 {
                     table: "tbl_item_department idept",
-                    query: "idept.id = pl.category_3_id",
+                    query: "idept.id = mp.category_3_id",
                     type: "left"
                 },
                 {
                     table: "tbl_item_merchandise_category mcat",
-                    query: "mcat.id = pl.category_4_id",
+                    query: "mcat.id = mp.category_4_id",
                     type: "left"
                 }
             ]
@@ -634,7 +647,7 @@
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
-
+            console.log(result);
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
@@ -668,8 +681,6 @@
                           html+="<td class='center-content' scope=\"col\">";
                           html+="<a class='btn-sm btn save' onclick=\"edit_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Edit Details'><span class='glyphicon glyphicon-pencil'>Edit</span>";
-                        //   html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"')\" data-status='"
-                        //     +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                           html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
                           html+="</td>";
@@ -773,7 +784,7 @@
             search_input = $('#search_query').val();
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
-            new_query = "pl.status >= 0 AND pl.customer_id = " + parentId;
+            new_query = "pl.status >= 0 AND pl.customer_id = " + pricelistId;
             new_query += " AND (" +
                 "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
                 "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
@@ -798,7 +809,7 @@
         search_input = $('#search_query').val();
         var escaped_keyword = search_input.replace(/'/g, "''"); 
         offset = 1;
-        new_query = "pl.status >= 0 AND pl.customer_id = " + parentId;
+        new_query = "pl.status >= 0 AND pl.customer_id = " + pricelistId;
         new_query += " AND (" +
                 "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
                 "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
@@ -814,53 +825,7 @@
         get_data(new_query);
         get_pagination(new_query);
     });
-
-    $('#btn_filter').on('click', function(event) {
-        title = addNbsp('FILTER DATA');
-        $('#filter_modal').find('.modal-title').find('b').html(title);
-        $('#filter_modal').modal('show');
-    })
-
-    $('#button_f').on('click', function(event) {
-        let status_f = $("input[name='status_f']:checked").val();
-        let c_date_from = $("#created_date_from").val();
-        let c_date_to = $("#created_date_to").val();
-        let m_date_from = $("#modified_date_from").val();
-        let m_date_to = $("#modified_date_to").val();
-        
-        order_filter = $("input[name='order']:checked").val();
-        column_filter = $("input[name='column']:checked").val();
-        query = "status >= 0";
-        
-        query += status_f ? ` AND status = ${status_f}` : '';
-        query += c_date_from ? ` AND created_date >= '${c_date_from} 00:00:00'` : '';
-        query += c_date_to ? ` AND created_date <= '${c_date_to} 23:59:59'` : '';
-        query += m_date_from ? ` AND updated_date >= '${m_date_from} 00:00:00'` : '';
-        query += m_date_to ? ` AND updated_date <= '${m_date_to} 23:59:59'` : '';
-        
-        get_data(query, column_filter, order_filter);
-        get_pagination(query, column_filter, order_filter);
-        $('#filter_modal').modal('hide');
-    })
     
-    $('#clear_f').on('click', function(event) {
-        order_filter = '';
-        column_filter = '';
-        query = "status >= 0";
-        get_data(query);
-        get_pagination(query);
-        
-        $("input[name='status_f']").prop('checked', false);
-        $("#created_date_from").val('');
-        $('#created_date_to').val('');
-        $('#modified_date_from').val('');
-        $('#modified_date_to').val('');
-        $("input[name='order']").prop('checked', false);
-        $("input[name='column']").prop('checked', false);
-
-        $('#filter_modal').modal('hide');
-    })
-
     $(document).on("change", ".record-entries", function(e) {
         $(".record-entries option").removeAttr("selected");
         $(".record-entries").val($(this).val());
@@ -876,13 +841,6 @@
 
     $('#btn_add').on('click', function() {
         open_modal('Add Customer Details Pricelist', 'add', '');
-    });
-
-    $('#btn_import').on('click', function() {
-        title = addNbsp('IMPORT CUSTOMER DETAILS PRICELIST')
-        $("#import_modal").find('.modal-title').find('b').html(title)
-        $("#import_modal").modal('show')
-        clear_import_table()
     });
 
     function edit_data(id) {
@@ -967,10 +925,7 @@
         $modal.modal('show');
 
         $modal.off('shown.bs.modal').on('shown.bs.modal', function () {
-        // Disable background interaction
         $contentWrapper.attr('inert', '');
-
-        // Now it's safe to focus inside the modal
         $(this).find('input, textarea, button, select').filter(':visible:first').focus();
         });
 
@@ -994,7 +949,7 @@
             'sellingPrice','discountInPercent','netPrice',
             'effectDate',
             'itemUid','itemSource','itemId'
-            // NOTE: intentionally NOT clearing 'customerId' and 'cusPricelistId'
+            // NOTE: intentionally NOT clearing 'customerId' and 'pricelistId'
         ];
 
         const sel = idsToClear.map(id => `#popup_modal #${id}`).join(', ');
@@ -1018,16 +973,17 @@
         return new_btn;
     }
 
-    function fetchCurrentPricelistRow(id, cb) {
+    function fetchCurrentPricelistRowByKey(customerId, mainPricelistId, itemCode, cb) {
         const done = (typeof cb === 'function') ? cb : function () {};
-        const safeId = parseInt(id, 10);
-        if (isNaN(safeId)) return done(null);
+        if (!customerId || !mainPricelistId || !itemCode) return done(null);
+
+        const query = `customer_id = '${customerId}' AND main_pricelist_id = '${mainPricelistId}' AND item_code = '${itemCode}'`;
 
         aJax.post(url, {
             event: "list",
             table: "tbl_customer_pricelist",
             select: "id, selling_price, disc_in_percent, net_price, effectivity_date",
-            query: `id = ${safeId}`,
+            query: query,
             limit: 1
         }, function (res) {
             const obj = is_json(res);
@@ -1039,10 +995,11 @@
         });
     }
 
-    function stashHistoryIfNeeded(id, newVals, next) {
-        const proceed = (typeof next === 'function') ? next : function(){};
-        fetchCurrentPricelistRow(id, function (currentRow) {
-            if (!currentRow) return proceed();
+    function stashHistoryIfNeeded(customerId, mainPricelistId, itemCode, newVals, next) {
+        const proceed = (typeof next === 'function') ? next : function() {};
+
+        fetchCurrentPricelistRowByKey(customerId, mainPricelistId, itemCode, function (currentRow) {
+            if (!currentRow) return proceed(true); // No current row, allow insert
 
             const oldVals = {
                 selling_price: currentRow.selling_price,
@@ -1058,13 +1015,16 @@
                 effectivity_date: newVals.effectivity_date
             };
 
-            const changed = ['selling_price','disc_in_percent','net_price','effectivity_date']
+            const changed = ['selling_price', 'disc_in_percent', 'net_price', 'effectivity_date']
                 .some(k => oldVals[k] !== compareVals[k]);
 
-            if (!changed) return proceed();
+            if (!changed) return proceed(false);
 
+            const paymentGroup = $('#paymentGroup').val();
             const historyRow = {
-                sub_pricelist_id: id,
+                pricelist_id: currentRow.id,
+                customer_id: customerId,
+                customer_payment_group: paymentGroup,
                 selling_price: oldVals.selling_price,
                 disc_in_percent: oldVals.disc_in_percent,
                 net_price: oldVals.net_price,
@@ -1080,14 +1040,17 @@
             }, function (insRes) {
                 const ins = is_json(insRes);
                 if (!ins || ins.error) console.error('History insert failed:', insRes);
-                proceed();
+                proceed(true);
             });
         });
     }
 
+
     function save_data(action, id) {
         var customerId = $('#customerId').val();
-        var cusPricelistId = $('#cusPricelistId').val();
+        var pricelistId = $('#pricelistId').val();
+        var paymentGroup = $('#paymentGroup').val();
+        var mainPricelistId = $('#mainPricelistId').val();
         var brand = $('#brandId').val().trim();
         var brandLabelType = $('#brandLabelTypeId').val().trim();
         var labelTypeCat = $('#labelTypeCatId').val().trim();
@@ -1110,120 +1073,89 @@
         } else {
             status_val = 0;
         }
-        if (id !== undefined && id !== null && id !== '') { 
-            modal.confirm(confirm_update_message, function(result){
-                if(result){ 
-                        modal.loading(true);
-                        
-                        const newValsForCompare = {
-                            selling_price: sellingPrice,
-                            disc_in_percent: discountInPercent,
-                            net_price: netPrice,
-                            effectivity_date: effectDate
-                        };
+        
+        modal.confirm(confirm_update_message, function(result){
+            if(result){ 
+                modal.loading(true);
+                
+                const newValsForCompare = {
+                    selling_price: sellingPrice,
+                    disc_in_percent: discountInPercent,
+                    net_price: netPrice,
+                    effectivity_date: effectDate
+                };
 
-                    stashHistoryIfNeeded(id, newValsForCompare, function () {
-                    save_to_db(customerId, cusPricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id)
-                    });
-                }
-            });
-        }else{
-            modal.confirm(confirm_add_message, function(result){
-                if(result){ 
-                        modal.loading(true);
-                    save_to_db(customerId, cusPricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, null)
-                }
-            }); 
-        }
+                stashHistoryIfNeeded(customerId, mainPricelistId, itemCode, newValsForCompare, function (shouldSave) {
+                    if (shouldSave) {
+                        save_to_db(customerId, pricelistId, paymentGroup, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate,status_val, id);
+                    } else {
+                        modal.loading(false);
+                        modal.alert('No changes detected, nothing to save.', 'info');
+                    }
+                });
+            }
+        });
     }
 
-    function save_to_db(customerId, cusPricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
+    function save_to_db(customerId, pricelistId, paymentGroup, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
         const url = "<?= base_url('cms/global_controller'); ?>";
         let data = {}; 
         let modal_alert_success;
         const now = new Date();
         const start_time = now;
-        let valid_data = []; // to log into file
+        let valid_data = [];
 
-        if (id !== undefined && id !== null && id !== '') {
-            modal_alert_success = success_update_message;
-            const updated_data = {
-                customer_id: customerId,
-                cus_pricelist_id: cusPricelistId,
-                brand_id: brand,
-                brand_label_type_id: brandLabelType,
-                label_type_category_id: labelTypeCat,
-                category_1_id: catOneId,
-                category_2_id: catTwo,
-                category_3_id: catThree,
-                category_4_id: catFour,
-                item_code: itemCode,
-                item_description: itemDescription,
-                cust_item_code: customerItemCode,
-                uom: uom,
-                selling_price: sellingPrice,
-                disc_in_percent: discountInPercent,
-                net_price: netPrice,
-                effectivity_date: effectDate,
-                updated_date: formatDate(now),
-                updated_by: user_id,
-                status: status_val
-            };
+        mainPricelistId = $('#mainPricelistId').val();
 
-            valid_data.push({
-                module: "Customer Details Pricelist",
-                action: "Update",
-                remarks: "Updated Customer Details Pricelist",
-                new_data: JSON.stringify(updated_data),
-                old_data: ''
-            });
+        modal_alert_success = success_update_message;
+        const updated_data = {
+            customer_id: customerId,
+            pricelist_id: pricelistId,
+            main_pricelist_id: mainPricelistId,
+            customer_payment_group: paymentGroup,
+            brand_id: brand,
+            brand_label_type_id: brandLabelType,
+            label_type_category_id: labelTypeCat,
+            category_1_id: catOneId,
+            category_2_id: catTwo,
+            category_3_id: catThree,
+            category_4_id: catFour,
+            item_code: itemCode,
+            item_description: itemDescription,
+            cust_item_code: customerItemCode,
+            uom: uom,
+            selling_price: sellingPrice,
+            disc_in_percent: discountInPercent,
+            net_price: netPrice,
+            effectivity_date: effectDate,
+            created_date: formatDate(now),
+            updated_date: formatDate(now),
+            updated_by: user_id,
+            created_by: user_id,
+            updated_by: user_id,
+            status: status_val
+        };
 
-            data = {
-                event: "update",
-                table: "tbl_customer_pricelist",
-                field: "id",
-                where: id,
-                data: updated_data
-            };
-        } else {
-            modal_alert_success = success_save_message;
-            const inserted_data = {
-                customer_id: customerId,
-                cus_pricelist_id: cusPricelistId,
-                brand_id: brand,
-                brand_label_type_id: brandLabelType,
-                label_type_category_id: labelTypeCat,
-                category_1_id: catOneId,
-                category_2_id: catTwo,
-                category_3_id: catThree,
-                category_4_id: catFour,
-                item_code: itemCode,
-                item_description: itemDescription,
-                cust_item_code: customerItemCode,
-                uom: uom,
-                selling_price: sellingPrice,
-                disc_in_percent: discountInPercent,
-                net_price: netPrice,
-                effectivity_date: effectDate,
-                created_date: formatDate(now),
-                created_by: user_id,
-                status: status_val
-            };
+        valid_data.push({
+            module: "Customer Details Pricelist",
+            action: "Update",
+            remarks: "Updated Customer Details Pricelist",
+            new_data: JSON.stringify(updated_data),
+            old_data: ''
+        });
 
-            valid_data.push({
-                module: "Pricelist Details",
-                action: "Insert",
-                remarks: "Inserted new Pricelist Details",
-                new_data: JSON.stringify(inserted_data),
-                old_data: ""
-            });
+        const key = {
+            customer_id: customerId,
+            main_pricelist_id: mainPricelistId,
+            item_code: itemCode
+        };
 
-            data = {
-                event: "insert",
-                table: "tbl_customer_pricelist",
-                data: inserted_data
-            };
-        }
+        data = {
+            event: "upsert",
+            table: "tbl_customer_pricelist",
+            key: key,
+            data: updated_data
+        };
 
         aJax.post(url, data, function(result) {
             const obj = is_json(result);
@@ -1236,141 +1168,96 @@
         });
     }
 
-
-    function delete_data(id) {
-        get_field_values('tbl_agency', 'code', 'id', [id], function(res) {
-            let code = res[id];
-            message = is_json(confirm_delete_message);
-            message.message = `Delete Agency Code <b><i>${code}</i></b> from Agency Masterfile?`;
-
-            modal.confirm(JSON.stringify(message), function(result){
-                if (result) {
-                    var url = "<?= base_url('cms/global_controller');?>"; 
-                    var data = {
-                        event: "list",
-                        select: "a.id, a.code, a.agency, COUNT(bra.agency) as agency_count",
-                        query: "a.id = " + id, 
-                        offset: offset,  
-                        limit: limit,   
-                        table: "tbl_agency a",
-                        join: [
-                            {
-                                table: "tbl_brand_ambassador bra",
-                                query: "bra.agency = a.id",
-                                type: "left"
-                            }
-                        ],
-                        group: "a.id, a.code, a.agency"  
-                    };
-
-                    aJax.post(url, data, function(response) {
-                        try {
-                            var obj = JSON.parse(response);
-                            if (!Array.isArray(obj)) { 
-                                modal.alert("Error processing response data.", "error", ()=>{});
-                                return;
-                            }
-
-                            if (obj.length === 0) {
-                                proceed_delete(id); 
-                                return;
-                            }
-
-                            var Count = Number(obj[0].agency_count) || 0;
-
-                            if (Count > 0) { 
-                                modal.alert("This item is in use and cannot be deleted.", "error", ()=>{});
-                            } else {
-                                proceed_delete(id); 
-                            }
-                        } catch (e) {
-                            modal.alert("Error processing response data.", "error", ()=>{});
-                        }
-                    });
-                }
-            });
-        });
-    }
-
-    function proceed_delete(id) {
-        var url = "<?= base_url('cms/global_controller');?>";
-        var data = {
-            event : "update",
-            table : "tbl_agency",
-            field : "id",
-            where : id, 
-            data : {
-                    updated_date : formatDate(new Date()),
-                    updated_by : user_id,
-                    status : -2
-            }  
-        }
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            modal.alert(success_delete_message, 'success', function() {
-                location.reload();
-            });
-        }); 
-    }
-
     function populate_modal(inp_id) {
-        var query = "pl.status >= 0 and pl.id = " + inp_id;
+        field = "cl.id";
+        order = "asc";
+        var query = "mp.status > 0 and mp.id = " + inp_id;
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
-            event : "list", 
-            select : `pl.id, pl.customer_id, 
-                    pl.brand_id, brnd.brand_code AS brand_code, 
-                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
-                    pl.label_type_category_id, catlist.code AS catlist_code, 
-                    pl.category_1_id, class.item_class_code AS labeltype_code,
-                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
-                    pl.category_3_id, idept.item_department_code AS item_department,
-                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
-                    pl.item_code, pl.item_description, 
-                    pl.cust_item_code, pl.uom, 
-                    pl.selling_price, pl.disc_in_percent, 
-                    pl.net_price, pl.effectivity_date, 
-                    pl.status, pl.updated_date, pl.created_date`,
-            query : query, 
-            table : "tbl_customer_pricelist pl",
+            event : "list",
+            select : `mp.id, mp.id AS main_pricelist_id,
+                    mp.brand_id, brnd.brand_code AS brand_code, 
+                    mp.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    mp.label_type_category_id, catlist.code AS catlist_code, 
+                    mp.category_1_id, class.item_class_code AS labeltype_code,
+                    mp.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    mp.category_3_id, idept.item_department_code AS item_department,
+                    mp.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    mp.item_code, mp.item_description,
+                    mp.cust_item_code, mp.uom, 
+                    mp.item_code,
+                    mp.item_description,
+                    mp.brand_id,
+                    mp.brand_label_type_id,
+                    mp.label_type_category_id,
+                    mp.category_1_id,
+                    mp.category_2_id,
+                    mp.category_3_id,
+                    mp.category_4_id,
+                    pm.description AS customer_payment_group,
+                    mp.status, mp.updated_date, mp.created_date,
+                    COALESCE(cp.selling_price, mp.selling_price) AS selling_price,
+                    COALESCE(cp.disc_in_percent, mp.disc_in_percent) AS disc_in_percent,
+                    COALESCE(cp.net_price, mp.net_price) AS net_price,
+                    COALESCE(cp.effectivity_date, mp.effectivity_date) AS effectivity_date,
+                    IF(cp.id IS NOT NULL, 1, 0) AS is_customer_override`,
+            query : query,
+            offset : offset,
+            limit : limit,
+            table : "tbl_main_pricelist mp",
             order : {
-                field : "pl.customer_id",
-                order : "asc",
+                field : field,
+                order : order 
             },
             join : [
                 {
+                    table: "tbl_customer_list cl",
+                    query: "mp.pricelist_id = cl.pricelist_id",
+                    type: "inner"
+                },
+                {
+                    table: "tbl_pricelist_masterfile pm",
+                    query: "mp.customer_payment_group = pm.description",
+                    type: "inner"
+                },
+                {
+                    table: "tbl_customer_pricelist cp",
+                    query: "cp.customer_id = cl.id AND cp.main_pricelist_id = mp.id",
+                    type: "left"
+                },
+                {
                     table: "tbl_brand brnd",
-                    query: "brnd.id = pl.brand_id",
+                    query: "brnd.id = mp.brand_id",
                     type: "left"
                 },
                 {
                     table: "tbl_label_category_list catlist",
-                    query: "catlist.id = pl.label_type_category_id",
+                    query: "catlist.id = mp.label_type_category_id",
                     type: "left"
                 },
                 {
                     table: "tbl_classification class",
-                    query: "class.id = pl.category_1_id",
+                    query: "class.id = mp.category_1_id",
                     type: "left"
                 },
                 {
                     table: "tbl_brand_label_type brlbltyp",
-                    query: "brlbltyp.id = pl.brand_label_type_id",
+                    query: "brlbltyp.id = mp.brand_label_type_id",
                     type: "left"
                 },
                 {
                     table: "tbl_sub_classification sclass",
-                    query: "sclass.id = pl.category_2_id",
+                    query: "sclass.id = mp.category_2_id",
                     type: "left"
                 },
                 {
                     table: "tbl_item_department idept",
-                    query: "idept.id = pl.category_3_id",
+                    query: "idept.id = mp.category_3_id",
                     type: "left"
                 },
                 {
                     table: "tbl_item_merchandise_category mcat",
-                    query: "mcat.id = pl.category_4_id",
+                    query: "mcat.id = mp.category_4_id",
                     type: "left"
                 }
             ]
@@ -1379,9 +1266,10 @@
             var obj = is_json(result);
             if(obj){
                 $.each(obj, function(index,asc) {
-                    $('#customerId').val(asc.customer_id);
-                    $('#cusPricelistId').val(asc.cus_pricelist_id);
-                    
+                    $('#customerId').val(customerId);
+                    $('#paymentGroup').val(asc.customer_payment_group);
+                    $('#mainPricelistId').val(asc.main_pricelist_id);
+
                     $('#brand').val(asc.brand_code);
                     $('#brandId').val(asc.brand_id);
 
@@ -1421,488 +1309,6 @@
         });
     }
 
-    function clear_import_table() {
-        $(".import_table").empty()
-    }
-
-    function process_xl_file() {
-        let btn = $(".btn.save");
-        if (btn.prop("disabled")) return; // Prevent multiple clicks
-
-        btn.prop("disabled", true);
-        $(".import_buttons").find("a.download-error-log").remove();
-
-        if (dataset.length === 0) {
-            modal.alert('No data to process. Please upload a file.', 'error', () => {});
-            return;
-        }
-
-        const parentId = parseInt($('#customerId').val(), 10) || 0;
-
-        modal.loading(true);
-
-        let jsonData = dataset.map(row => {
-            return {
-                "Brand": row["Brand"] || "",
-                "Brand Label Type": row["Brand Label Type"] || "",
-                "Label Type Category": row["Label Type Category"] || "",
-                "Category 1 (Item Classification MF)": row["Category 1 (Item Classification MF)"] || "",
-                "Category 2 (Sub Classification MF)": row["Category 2 (Sub Classification MF)"] || "",
-                "Category 3 (Department MF)": row["Category 3 (Department MF)"] || "",
-                "Category 4 (Merch. Category MF)": row["Category 4 (Merch. Category MF)"] || "",
-                "Item Code": row["Item Code"] || "",
-                "Item Description": row["Item Description"] || "",
-                "Customer Item Code": row["Customer Item Code"] || "",
-                "UOM": row["UOM"] || "",
-                "Selling Price": row["Selling Price"] || "",
-                "Discount in Percent": row["Discount in Percent"] || "",
-                "Effectivity Date": row["Effectivity Date"] || "",
-                "Status": row["Status"] || "",
-                "Created by": user_id || "", 
-                "Created Date": formatDate(new Date()) || ""
-            };
-        });
-
-        let worker = new Worker(base_url + "assets/cms/js/validator_customer_details_pricelist.js");
-        worker.postMessage({ data: jsonData, base_url: base_url, parentId, });
-
-        worker.onmessage = function(e) {
-            modal.loading_progress(false);
-
-            let { invalid, errorLogs, valid_data, err_counter } = e.data;
-            if (invalid) {
-                let errorMsg = err_counter > 1000 
-                    ? '⚠️ Too many errors detected. Please download the error log for details.'
-                    : errorLogs.join("<br>");
-                modal.content('Validation Error', 'error', errorMsg, '600px', () => { 
-                    read_xl_file();
-                    btn.prop("disabled", false);
-                });
-                createErrorLogFile(errorLogs, "Error " + formatReadableDate(new Date(), true));
-            } else if (valid_data && valid_data.length > 0) {
-                btn.prop("disabled", false);
-                updateSwalProgress("Validation Completed", 10);
-                setTimeout(() => saveValidatedData(valid_data), 500);
-            } else {
-                btn.prop("disabled", false);
-                modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
-            }
-        };
-
-        worker.onerror = function() {
-            modal.alert("Error processing data. Please try again.", "error", () => {});
-        };
-    }
-
-    function saveValidatedData(valid_data) {
-        const overallStart = new Date();
-        const parentId = parseInt($('#customerId').val(), 10) || 0;
-        let batch_size = 5000;
-        let total_batches = Math.ceil(valid_data.length / batch_size);
-        let batch_index = 0;
-        let retry_count = 0;
-        let max_retries = 5; 
-        let errorLogs = [];
-        let url = "<?= base_url('cms/global_controller');?>";
-        let table = 'tbl_customer_pricelist';
-        let selected_fields = ['id', 'customer_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];
-
-        //for lookup of duplicate recors
-        const matchFields = ['customer_id', 'brand_id', 'brand_label_type_id', 'label_type_category_id', 'category_1_id'];  
-        const matchType = "AND";  //use OR/AND depending on the condition
-        modal.loading_progress(true, "Validating and Saving data...");
-
-        // Fetch existing records
-        aJax.post(url, { table: table, event: "fetch_existing", selected_fields: selected_fields }, function(response) {
-            // let result = JSON.parse(response);
-            const result = JSON.parse(response);
-            const allEntries = result.existing || [];
-
-            // Build a Set of codes you're importing:
-            // const codeSet = new Set(valid_data.map(r => r.code));
-
-            // Keep only the rows whose code matches:
-           const originalEntries = allEntries.filter(rec => rec.customer_id == parentId);
-
-            let existingMap = new Map(); // Stores records using composite keys
-
-            (allEntries || []).forEach(record => {
-                // Normalize to string to avoid undefined/null/number mismatches
-                const key = matchFields.map(f => (record[f] ?? '') + '').join('|');
-                existingMap.set(key, record.id);
-            });
-
-            function updateOverallProgress(stepName, completed, total) {
-                let progress = Math.round((completed / total) * 100);
-                updateSwalProgress(stepName, progress);
-            }
-
-            function processNextBatch() {
-                if (batch_index >= total_batches) {
-                    modal.loading_progress(false);
-
-                    const overallEnd = new Date();
-                    const duration = formatDuration(overallStart, overallEnd);
-
-                    const remarks = `
-                       Action: Import Customer Details Pricelist
-                        <br>Processed ${valid_data.length} records
-                        <br>Errors: ${errorLogs.length}
-                        <br>Start: ${formatReadableDate(overallStart)}
-                        <br>End: ${formatReadableDate(overallEnd)}
-                        <br>Duration: ${duration}
-                    `;
-
-                    logActivity("import-customer-details-pricelist-module", "Import Batch", remarks, "-", JSON.stringify(valid_data), JSON.stringify(originalEntries));
-
-                    if (errorLogs.length > 0) {
-                        createErrorLogFile(errorLogs, "Update_Error_Log_" + formatReadableDate(new Date(), true));
-                        modal.alert("Some records encountered errors. Check the log.", 'info', () => {});
-                    } else {
-                        modal.alert("All records saved/updated successfully!", 'success', () => location.reload());
-                    }
-                    return;
-                }
-
-                let batch = valid_data.slice(batch_index * batch_size, (batch_index + 1) * batch_size);
-                let newRecords = [];
-                let updateRecords = [];
-
-                batch.forEach(row => {
-                    row.customer_id = parentId; // enforce the context list
-                    const rowKey = matchFields.map(f => (row[f] ?? '') + '').join('|');
-                    const matchedId = existingMap.get(rowKey) || null;
-
-                    if (matchedId) {
-                        row.id = matchedId;
-                        row.updated_date = formatDate(new Date());
-                        delete row.created_date;
-                        updateRecords.push(row);
-                    } else {
-                        row.created_by = user_id;
-                        row.created_date = formatDate(new Date());
-                        newRecords.push(row);
-                    }
-                });
-
-                function processUpdates() {
-                    return new Promise((resolve) => {
-                        if (updateRecords.length > 0) {
-                            batch_update(url, updateRecords, "tbl_customer_pricelist", "id", false, (response) => {
-                                if (response.message !== 'success') {
-                                    errorLogs.push(`Failed to update: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function processInserts() {
-                    return new Promise((resolve) => {
-                        if (newRecords.length > 0) {
-                            batch_insert(url, newRecords, "tbl_customer_pricelist", false, (response) => {
-                                if (response.message === 'success') {
-                                    updateOverallProgress("Saving Customer Details Pricelist..", batch_index + 1, total_batches);
-                                } else {
-                                    errorLogs.push(`Batch insert failed: ${JSON.stringify(response.error)}`);
-                                }
-                                resolve();
-                            });
-                        } else {
-                            resolve();
-                        }
-                    });
-                }
-
-                function handleSaveError() {
-                    if (retry_count < max_retries) {
-                        retry_count++;
-                        let wait_time = Math.pow(2, retry_count) * 1000;
-                        setTimeout(() => {
-                            processInserts().then(() => {
-                                batch_index++;
-                                retry_count = 0;
-                                processNextBatch();
-                            }).catch(handleSaveError);
-                        }, wait_time);
-                    } else {
-                        modal.alert('Failed to save data after multiple attempts. Please check your connection and try again.', 'error', () => {});
-                    }
-                }
-
-                processUpdates()
-                    .then(processInserts)
-                    .then(() => {
-                        batch_index++;
-                        setTimeout(processNextBatch, 300);
-                    })
-                    .catch(handleSaveError);
-            }
-
-            setTimeout(processNextBatch, 1000);
-        });
-    }
-
-    function read_xl_file() {
-        let btn = $(".btn.save");
-        btn.prop("disabled", false);
-        clear_import_table();
-
-        dataset = [];
-
-        const file = $("#file")[0].files[0];
-        if (!file) {
-            modal.loading_progress(false);
-            modal.alert('Please select a file to upload', 'error', () => {});
-            return;
-        }
-
-        const maxFileSize = 30 * 1024 * 1024; // 30MB limit
-        if (file.size > maxFileSize) {
-            modal.loading_progress(false);
-            modal.alert('The file size exceeds the 30MB limit. Please upload a smaller file.', 'error', () => {});
-            return;
-        }
-
-        modal.loading_progress(true, "Reviewing Data...");
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const data = e.target.result;
-            const workbook = XLSX.read(data, { type: "binary", raw: true });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            let jsonData = XLSX.utils.sheet_to_json(sheet, { raw: true });
-
-            jsonData = jsonData.map(row => {
-                let fixedRow = {};
-                Object.keys(row).forEach(key => {
-                    let value = row[key];
-                    if (typeof value === "number") {
-                        value = String(value);
-                    }
-
-                    fixedRow[key] = value !== null && value !== undefined ? value : "";
-                });
-                return fixedRow;
-            });
-
-            processInChunks(jsonData, 5000, () => {
-                paginateData(rowsPerPage);
-            });
-        };
-
-        reader.readAsBinaryString(file);
-    }
-
-
-    function processInChunks(data, chunkSize, callback) {
-        let index = 0;
-        let totalRecords = data.length;
-        let totalProcessed = 0;
-
-        function nextChunk() {
-            if (index >= data.length) {
-                modal.loading_progress(false);
-                callback(); 
-                return;
-            }
-
-            let chunk = data.slice(index, index + chunkSize);
-            dataset = dataset.concat(chunk);
-            totalProcessed += chunk.length; 
-            index += chunkSize;
-
-            let progress = Math.min(100, Math.round((totalProcessed / totalRecords) * 100));
-            updateSwalProgress("Preview Data", progress);
-            requestAnimationFrame(nextChunk);
-        }
-        nextChunk();
-    }
-
-    function paginateData(rowsPerPage) {
-        totalPages = Math.ceil(dataset.length / rowsPerPage);
-        currentPage = 1;
-        display_imported_data();
-    }
-
-    function display_imported_data() {
-        let start = (currentPage - 1) * rowsPerPage;
-        let end = start + rowsPerPage;
-        let paginatedData = dataset.slice(start, end);
-
-        let html = '';
-        let tr_counter = start;
-
-        paginatedData.forEach(row => {
-            let rowClass = (tr_counter % 2 === 0) ? "even-row" : "odd-row";
-            html += `<tr class="${rowClass}">`;
-            html += `<td>${tr_counter + 1}</td>`;
-
-            let lowerCaseRecord = Object.keys(row).reduce((acc, key) => {
-                acc[key.toLowerCase()] = row[key];
-                return acc;
-            }, {});
-
-            // 
-            let td_validator = ['brand', 'brand label type', 'label type category', 'category 1 (item classification mf)',
-            'category 2 (sub classification mf)', 'category 3 (department mf)', 'category 4 (merch. category mf)',
-            'item code', 'item description', 'customer item code', 'uom', 'selling price', 'discount in percent', 'effectivity date', 'status'];
-            td_validator.forEach(column => {
-                if (column === 'effectivity date') {
-                    lowerCaseRecord[column] = excel_date_to_readable_date(lowerCaseRecord[column]);
-                }
-                html += `<td>${lowerCaseRecord[column] !== undefined ? lowerCaseRecord[column] : ""}</td>`;
-            });
-
-            html += "</tr>";
-            tr_counter += 1;
-        });
-
-        modal.loading(false);
-        $(".import_table").html(html);
-        updatePaginationControls();
-    }
-
-    function updatePaginationControls() {
-        let paginationHtml = `
-            <button onclick="firstPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-double-left"></i></button>
-            <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}><i class="fas fa-angle-left"></i></button>
-            
-            <select onchange="goToPage(this.value)">
-                ${Array.from({ length: totalPages }, (_, i) => 
-                    `<option value="${i + 1}" ${i + 1 === currentPage ? "selected" : ""}>Page ${i + 1}</option>`
-                ).join('')}
-            </select>
-            
-            <button onclick="nextPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-right"></i></button>
-            <button onclick="lastPage()" ${currentPage === totalPages ? "disabled" : ""}><i class="fas fa-angle-double-right"></i></button>
-        `;
-
-        $(".import_pagination").html(paginationHtml);
-    }
-
-    function createErrorLogFile(errorLogs, filename) {
-        let errorText = errorLogs.join("\n");
-        let blob = new Blob([errorText], { type: "text/plain" });
-        let url = URL.createObjectURL(blob);
-
-        $(".import_buttons").find("a.download-error-log").remove();
-
-        let $downloadBtn = $("<a>", {
-            href: url,
-            download: filename+".txt",
-            text: "Download Error Logs",
-            class: "download-error-log",
-            css: {
-                border: "1px solid white",
-                borderRadius: "10px",
-                display: "inline-block",
-                padding: "10px",
-                lineHeight: 0.5,
-                background: "#990000",
-                color: "white",
-                textAlign: "center",
-                cursor: "pointer",
-                textDecoration: "none",
-                boxShadow: "6px 6px 15px rgba(0, 0, 0, 0.5)",
-            }
-        });
-
-        $(".import_buttons").append($downloadBtn);
-    }
-
-    // button beside add functions
-    // $(document).on('click', '.btn_status', function (e) {
-    //     var status = $(this).attr("data-status");
-    //     var modal_obj = "";
-    //     var modal_alert_success = "";
-    //     var hasExecuted = false; // Prevents multiple executions
-
-    //     var id = '';
-    //     id = $("input.select:checked");
-    //     var code = [];
-    //     var code_string = '';
-
-    //     id.each(function() {
-    //         code.push(parseInt($(this).attr('data-id')));
-    //     });
-
-    //     get_field_values('tbl_agency', 'code', 'id', code, function(res) {
-    //         if(code.length == 1) {
-    //             code_string = `Code <i><b>${res[code[0]]}</b></i>`;
-    //         } else {
-    //             code_string = 'selected data'
-    //         }
-    //     })
-
-    //     if (parseInt(status) === -2) {
-    //         message = is_json(confirm_delete_message);
-    //         message.message = `Delete ${code_string} from Agency Masterfile?`;  
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_delete_message;
-    //     } else if (parseInt(status) === 1) {
-    //         message = is_json(confirm_publish_message);
-    //         message.message = `Publish ${code_string} from Agency Masterfile?`;
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_publish_message;
-    //     } else {
-    //         message = is_json(confirm_unpublish_message);
-    //         message.message = `Unpublish ${code_string} from Agency Masterfile?`;  
-    //         modal_obj = JSON.stringify(message);
-    //         modal_alert_success = success_unpublish_message;
-    //     }
-    //     modal.confirm(modal_obj, function (result) {
-    //         if (result) {
-    //             var url = "<?= base_url('cms/global_controller');?>";
-    //             var dataList = [];
-                
-    //             $('.select:checked').each(function () {
-    //                 var id = $(this).attr('data-id');
-    //                 dataList.push({
-    //                     event: "update",
-    //                     table: "tbl_agency",
-    //                     field: "id",
-    //                     where: id,
-    //                     data: {
-    //                         status: status,
-    //                         updated_date: formatDate(new Date())
-    //                     }
-    //                 });
-    //             }); 
-
-    //             if (dataList.length === 0) return;
-
-    //             var processed = 0;
-    //             dataList.forEach(function (data, index) {
-    //                 aJax.post(url, data, function (result) {
-    //                     if (hasExecuted) return; 
-
-    //                     modal.loading(false);
-    //                     processed++;
-
-    //                     if (result === "success") {
-    //                         if (!hasExecuted) {
-    //                             hasExecuted = true;
-    //                             $('.btn_status').hide();
-    //                             modal.alert(modal_alert_success, 'success', function () {
-    //                                 location.reload();
-    //                             });
-    //                         }
-    //                     } else {
-    //                         if (!hasExecuted) {
-    //                             hasExecuted = true;
-    //                             modal.alert(failed_transaction_message, function () {});
-    //                         }
-    //                     }
-    //                 });
-    //             });
-    //         }
-    //     });
-    // });
 
     function download_template() {
         const headerData = [];
@@ -1941,25 +1347,6 @@
             }
         })
     })
-
-    const exportAgency = () => {
-        var ids = [];
-
-        $('.select:checked').each(function () {
-            var id = $(this).attr('data-id');
-            ids.push(`'${id}'`);
-        });
-
-        console.log(ids, 'ids');
-
-        const params = new URLSearchParams();
-        ids.length > 0 ? 
-            params.append('selectedids', ids.join(',')) :
-            params.append('selectedids', '0');
-
-        window.open("<?= base_url('cms/');?>" + 'agency/export-agency?'+ params.toString(), '_blank');
-        modal.loading_progress(false);
-   }
    
    function exportArrayToCSV(data, filename, headerData) {
        const worksheet = XLSX.utils.json_to_sheet(data, { origin: headerData.length });

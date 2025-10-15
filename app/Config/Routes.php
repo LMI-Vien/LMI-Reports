@@ -248,7 +248,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('/', 'Cms\PricelistMasterfile::index');
         $routes->get('pricelist-details/(:any)', 'Cms\PricelistMasterfile::pricelistDetails/$1');
         $routes->get('customer-details-pricelist/(:num)/(:num)', 'Cms\PricelistMasterfile::customerPricelistDetails/$1/$2');
-        $routes->post('pull-from-main',    'Cms\PricelistMasterfile::pullFromMain');
+       // $routes->post('pull-from-main',    'Cms\PricelistMasterfile::pullFromMain');
         $routes->post('refresh-from-main', 'Cms\PricelistMasterfile::refreshFromMain');
         $routes->match(['GET', 'POST'], 'merged-customers', 'Cms\PricelistMasterfile::getMergedCustomers');
         $routes->match(['GET', 'POST'], 'merged-items', 'Cms\PricelistMasterfile::getMergedItemFile');
