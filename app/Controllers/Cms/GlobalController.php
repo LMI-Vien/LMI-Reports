@@ -952,6 +952,28 @@ class GlobalController extends BaseController
 					echo json_encode(['message' => 'error', 'error' => $e->getMessage()]);
 				}
 				break;
+			case 'mergeUnique':
+				try { 
+					$tables = $this->request->getPost('tables');
+					$field  = $this->request->getPost('field');
+					
+					if (empty($tables) || empty($field)) {
+						return $this->response->setJSON(['message' => 'error', 'error' => 'Invalid request data']);
+					}
+					
+					$result = $this->Global_model->data_from_merged_table($tables, $field);
+
+					return $this->response->setJSON([
+						'message' => 'success',
+						'unique_fields' => $result
+					]);
+				} catch (Exception $e) {
+					return $this->response->setJSON([
+						'message' => 'error',
+						'error' => $e->getMessage()
+					]);
+				}
+				break;
 		}
 		
 	}

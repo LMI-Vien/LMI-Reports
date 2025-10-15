@@ -1639,6 +1639,23 @@ class Global_model extends Model
         }
     }
 
+    public function data_from_merged_table(array $tables, string $field) {
+        $field = $this->db->escapeString($field);
+        $unionQueries = [];
+
+        foreach ($tables as $table) {
+            $table = $this->db->escapeString($table);
+            $unionQueries[] = "SELECT {$field} FROM {$table}";
+        }
+
+        $sql = implode(" UNION ", $unionQueries);
+
+        $query = $this->db->query($sql);
+        $result = $query->getResultArray();
+
+        return $result; // ✅ just return data, not a Response
+    }
+
     function get_data(
         string $table,
         array $query = null,
