@@ -98,7 +98,7 @@ class SyncData extends BaseCommand
             'syncCusPaymentGroupRgdiData',
             'syncCusPaymentGroupLmiData',
             'syncCustomerLmiData',
-            'syncCustomerRgdiData',         
+            'syncCustomerRgdiData',   
             'syncSalesFile2AllData',
             'syncAllItemUnitFileLMIRGDIData',
             'syncSalesFileConsignmentAllData'

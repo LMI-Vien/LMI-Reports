@@ -1805,7 +1805,7 @@ class Sync_model extends Model
 
                     if (!empty($values)) {
                         $sql = "INSERT INTO tbl_item_unit_file_all 
-                                (recid, itmcde, conver, untmea, untprc, untcst, source_type, brand_id, brand_label_id, brand_category_id) 
+                                (recid, itmcde, conver, untmea, untprc, untcst, source_type, brand_id, brand_label_type_id, brand_category_id) 
                                 VALUES " . implode(',', $values) . "
                                 ON DUPLICATE KEY UPDATE 
                                   itmcde = VALUES(itmcde),
@@ -1815,7 +1815,7 @@ class Sync_model extends Model
                                   untcst = VALUES(untcst),
                                   source_type = VALUES(source_type),
                                   brand_id = VALUES(brand_id),
-                                  brand_label_id = VALUES(brand_label_id),
+                                  brand_label_type_id = VALUES(brand_label_type_id),
                                   brand_category_id = VALUES(brand_category_id)";
 
                         $this->sfaDB->query($sql);
@@ -1938,7 +1938,7 @@ class Sync_model extends Model
 
                     if (!empty($values)) {
                         $sql = "INSERT INTO tbl_item_salesfile2_all 
-                                (recid, source, pckitmcde, docnum, cusdsc, itmcde, itmdsc, itmqty, untprc, extprc, trncde, untmea, cuscde, warcde, prccde, sonum, conver1, cusgrpcde, cusitmcde, batchnum, binnum, dettyp, extprcfor, taxcde, vatamtfor, netvatamtfor, amtdisfor, trndte, cdrnum, brand_id, brand_label_id, brand_category_id) 
+                                (recid, source, pckitmcde, docnum, cusdsc, itmcde, itmdsc, itmqty, untprc, extprc, trncde, untmea, cuscde, warcde, prccde, sonum, conver1, cusgrpcde, cusitmcde, batchnum, binnum, dettyp, extprcfor, taxcde, vatamtfor, netvatamtfor, amtdisfor, trndte, cdrnum, brand_id, brand_label_type_id, brand_category_id) 
                                 VALUES " . implode(',', $values) . "
                                 ON DUPLICATE KEY UPDATE 
                                     source = VALUES(source),
@@ -1970,7 +1970,7 @@ class Sync_model extends Model
                                     trndte = VALUES(trndte),
                                     cdrnum = VALUES(cdrnum),
                                     brand_id = VALUES(brand_id),
-                                    brand_label_id = VALUES(brand_label_id),
+                                    brand_label_type_id = VALUES(brand_label_type_id),
                                     brand_category_id = VALUES(brand_category_id)";
 
                         $this->sfaDB->query($sql);
@@ -2121,7 +2121,7 @@ class Sync_model extends Model
 
                     if (!empty($values)) {
                         $sql = "INSERT INTO tbl_item_salesfile_consignment_all 
-                                (source, trndte, docnum, refnum, cusdsc, smncde, tinnum, cuscde, customer_desc, itmcde, itmdsc, itmqty, untmea, groprc, disper, disamt, totdisamt, untprc, groamt, vatable, nonvat, vatamt, amt, brand_id, brand_label_id, brand_category_id) 
+                                (source, trndte, docnum, refnum, cusdsc, smncde, tinnum, cuscde, customer_desc, itmcde, itmdsc, itmqty, untmea, groprc, disper, disamt, totdisamt, untprc, groamt, vatable, nonvat, vatamt, amt, brand_id, brand_label_type_id, brand_category_id) 
                                 VALUES " . implode(',', $values) . "
                                 ON DUPLICATE KEY UPDATE 
                                     cusdsc = VALUES(cusdsc),
@@ -2140,7 +2140,7 @@ class Sync_model extends Model
                                     vatamt = VALUES(vatamt),
                                     amt = VALUES(amt),
                                     brand_id = VALUES(brand_id),
-                                    brand_label_id = VALUES(brand_label_id),
+                                    brand_label_type_id = VALUES(brand_label_type_id),
                                     brand_category_id = VALUES(brand_category_id)";
 
                         $this->sfaDB->query($sql);
