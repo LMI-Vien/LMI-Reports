@@ -4664,7 +4664,7 @@ class Dashboard_model extends Model
 	    ];
 	}
 
-	public function getSellThroughBySkuCategory(
+	public function getSellThroughScannDataByCategory(
 	    $year = null, 
 	    $monthStart = null, 
 	    $monthEnd = null, 
@@ -4682,7 +4682,7 @@ class Dashboard_model extends Model
 	    $allowedOrderColumns = ['rank', 'brand_category', 'sell_in', 'sell_out', 'sell_out_ratio'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
-	    $searchColumns = ['LOWER(cl.item_class_description)'];
+	    $searchColumns = ['LOWER(brand_category)'];
 	    $searchClause = '';
 	    $searchParams = [];
 
@@ -4879,6 +4879,458 @@ class Dashboard_model extends Model
 	        // consignment
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
+	        $brandCategoryId, $brandCategoryId,
+	        $salesGroup, $salesGroup,
+	        $subSalesGroup, $subSalesGroup,
+	    ];
+
+	    $params = array_merge($params, $searchParams);
+	    $params[] = (int)$limit;
+	    $params[] = (int)$offset;
+
+	    $query = $this->db->query($sql, $params);
+	    $data = $query->getResult();
+	    $totalRecords = $data ? $data[0]->total_records : 0;
+
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $data
+	    ];
+	}
+
+	public function getSellThroughWeekOnWeekByCategory(
+	    $year = null, 
+	    $yearId = null, 
+	    $weekStart = null, 
+	    $weekEnd = null,
+		$weekStartDate = null,
+		$weekEndDate= null,
+	    $searchValue = null,
+	    $brandCategoryId = null,  
+	    $salesGroup = null, 
+	    $subSalesGroup = null, 
+	    $orderByColumn = 'rank', 
+	    $orderDirection = 'DESC', 
+	    $limit = 100, 
+	    $offset = 0, 
+	    $sellInType = 3,
+	    $measure = 'qty'
+	) {
+	    $allowedOrderColumns = ['rank', 'brand_category', 'sell_in', 'sell_out', 'sell_out_ratio'];
+	    $allowedOrderDirections = ['ASC', 'DESC'];
+
+	    $searchColumns = ['LOWER(brand_category)'];
+	    $searchClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchClause = 'WHERE ' . implode(' OR ', $likeConditions);
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . strtolower($searchValue) . '%';
+	        }
+	    }
+
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
+	        $orderByColumn = 'sell_out_ratio';
+	    }
+	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
+	        $orderDirection = 'DESC';
+	    }
+
+	    if($subSalesGroup){
+	    	$sellOutExpr = $measure === 'amount'
+	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
+	        : "ROUND(SUM(wow.quantity), 0)";
+
+	        $sellOutExpr2 = $measure === 'amount'
+	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
+	        : "ROUND(SUM(wow.quantity), 0)";
+	        
+	    }else{
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wow.quantity * wow.net_price), 2)"
+		        : "ROUND(SUM(wow.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+	    }
+	    
+	    $outrightExpr = $measure === 'amount'
+	        ? "ROUND(SUM(s.extprc), 2)"
+	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
+
+	    $consignmentExpr = $measure === 'amount'
+	        ? "ROUND(SUM(s.amt), 2)"
+	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
+
+	    if ($measure === "amount") {
+	        $sellInExpr = ($sellInType == 1 
+	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
+	            : ($sellInType == 0 
+	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
+	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+	        );
+	    } else {
+	        $sellInExpr = ($sellInType == 1 
+	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
+	            : ($sellInType == 0 
+	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
+	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+	        );
+	    }
+
+	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
+	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
+	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
+
+	    $sql = "
+	        WITH aggregated AS (
+	            SELECT
+	                wow.item_class_id AS brand_category_id,
+		            CASE
+		                WHEN mp.effectivity_date <= CURRENT_DATE()
+		                    THEN $sellOutExpr
+		                ELSE $sellOutExpr2
+		            END AS sell_out
+		        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
+		        INNER JOIN $pricelistTable mp
+		            ON wow.item_class_id = mp.category_1_id
+		        LEFT JOIN (
+		            SELECT 
+		                $pricelistHistoricalTablePref, 
+		                net_price
+		            FROM $pricelistHistoricalTable h1
+		            WHERE created_date = (
+		                SELECT MAX(created_date)
+		                FROM $pricelistHistoricalTable h2
+		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
+		            )
+		        ) hp
+		            ON mp.id = hp.$pricelistHistoricalTablePref
+	            WHERE (? IS NULL OR so.year = ?)
+	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
+	              AND (? IS NULL OR mp.category_1_id = ?)
+	            GROUP BY wow.item_class_id
+	        ),
+	        outright AS (
+	            SELECT 
+	                s.brand_category_id,
+	                $outrightExpr AS total_qty
+	            FROM tbl_item_salesfile2_all s
+	            LEFT JOIN (
+	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                FROM tbl_item_unit_file_all
+	                GROUP BY brand_category_id, untmea
+		            ) u 
+		              ON s.brand_category_id = u.brand_category_id
+		             AND s.untmea = u.untmea
+		            WHERE s.trncde = 'SAL'
+		              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
+		              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
+	              	  AND (? IS NULL OR s.brand_category_id = ?)
+		              AND (? IS NULL OR s.cusdsc = ?)
+		              AND (? IS NULL OR s.cuscde = ?)
+	              AND EXISTS (
+	                  SELECT 1 
+	                  FROM tbl_cus_sellout_indicator ci
+	                  WHERE ci.cus_code = s.cuscde
+	              )
+	            GROUP BY s.brand_category_id
+	        ),
+	        consignment AS (
+	            SELECT 
+	                s.brand_category_id,
+	                $consignmentExpr AS total_qty
+	            FROM tbl_item_salesfile_consignment_all s
+	            LEFT JOIN (
+	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                FROM tbl_item_unit_file_all
+	                GROUP BY brand_category_id, untmea
+		            ) u 
+		              ON s.brand_category_id = u.brand_category_id
+		             AND s.untmea = u.untmea
+		            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
+		              AND (? IS NULL OR s.brand_category_id = ?)
+					  AND (? IS NULL OR s.cusdsc = ?)
+					  AND (? IS NULL OR s.cuscde = ?)
+		              AND EXISTS (
+		                  SELECT 1 
+		                  FROM tbl_cus_sellout_indicator ci
+		                  WHERE ci.cus_code = s.cuscde
+		              )
+	            GROUP BY s.brand_category_id
+	        ),
+	        final_data AS (
+	            SELECT
+	                a.brand_category_id,
+	                cl.item_class_description AS brand_category,
+	                $sellInExpr AS sell_in,
+	                a.sell_out,
+	                CASE 
+	                    WHEN $sellInExpr > 0 
+	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    ELSE 0
+	                END AS sell_out_ratio,
+	                COUNT(*) OVER() AS total_records
+	            FROM aggregated a
+	            LEFT JOIN outright o
+	                ON a.brand_category_id = o.brand_category_id 
+	            LEFT JOIN consignment c
+	                ON a.brand_category_id = c.brand_category_id 
+	            LEFT JOIN tbl_classification cl
+	                ON a.brand_category_id = cl.id
+	        )
+	        SELECT 
+	            ROW_NUMBER() OVER(ORDER BY sell_out_ratio DESC) AS rank,
+	            brand_category,
+	            sell_in,
+	            sell_out,
+	            sell_out_ratio,
+	            total_records
+	        FROM final_data
+	        $searchClause
+	        ORDER BY {$orderByColumn} {$orderDirection}
+	        LIMIT ? OFFSET ?
+	    ";
+
+	    $params = [
+	        $year, $year,
+	        $weekStart, $weekStart, $weekEnd,
+
+	        // outright
+	        $weekStartDate, $weekStartDate, $weekEndDate,
+	        $brandCategoryId, $brandCategoryId,
+	        $salesGroup, $salesGroup,
+	        $subSalesGroup, $subSalesGroup,
+
+	        // consignment
+	        $weekStartDate, $weekStartDate, $weekEndDate,
+	        $brandCategoryId, $brandCategoryId,
+	        $salesGroup, $salesGroup,
+	        $subSalesGroup, $subSalesGroup,
+	    ];
+
+	    $params = array_merge($params, $searchParams);
+	    $params[] = (int)$limit;
+	    $params[] = (int)$offset;
+
+	    $query = $this->db->query($sql, $params);
+	    $data = $query->getResult();
+	    $totalRecords = $data ? $data[0]->total_records : 0;
+
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $data
+	    ];
+	}
+
+	public function getSellThroughWinsightByCategory(
+	    $year = null, 
+	    $yearId = null, 
+	    $weekStart = null, 
+	    $weekEnd = null,
+		$weekStartDate = null,
+		$weekEndDate= null,
+	    $searchValue = null,
+	    $brandCategoryId = null,  
+	    $salesGroup = null, 
+	    $subSalesGroup = null, 
+	    $orderByColumn = 'rank', 
+	    $orderDirection = 'DESC', 
+	    $limit = 100, 
+	    $offset = 0, 
+	    $sellInType = 3,
+	    $measure = 'qty'
+	) {
+	    $allowedOrderColumns = ['rank', 'brand_category', 'sell_in', 'sell_out', 'sell_out_ratio'];
+	    $allowedOrderDirections = ['ASC', 'DESC'];
+
+	    $searchColumns = ['LOWER(brand_category)'];
+	    $searchClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchClause = 'WHERE ' . implode(' OR ', $likeConditions);
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . strtolower($searchValue) . '%';
+	        }
+	    }
+
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
+	        $orderByColumn = 'sell_out_ratio';
+	    }
+	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
+	        $orderDirection = 'DESC';
+	    }
+
+	    if($subSalesGroup){
+	    	$sellOutExpr = $measure === 'amount'
+	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
+	        : "ROUND(SUM(wd.sales_qty), 0)";
+
+	        $sellOutExpr2 = $measure === 'amount'
+	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
+	        : "ROUND(SUM(wd.sales_qty), 0)";
+	        
+	    }else{
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
+		        : "ROUND(SUM(wd.sales_qty), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+	    }
+	    
+	    $outrightExpr = $measure === 'amount'
+	        ? "ROUND(SUM(s.extprc), 2)"
+	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
+
+	    $consignmentExpr = $measure === 'amount'
+	        ? "ROUND(SUM(s.amt), 2)"
+	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
+
+	    if ($measure === "amount") {
+	        $sellInExpr = ($sellInType == 1 
+	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
+	            : ($sellInType == 0 
+	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
+	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+	        );
+	    } else {
+	        $sellInExpr = ($sellInType == 1 
+	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
+	            : ($sellInType == 0 
+	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
+	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+	        );
+	    }
+
+	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
+	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
+	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
+
+	    $sql = "
+	        WITH aggregated AS (
+	            SELECT
+	                wd.category_1_id AS brand_category_id,
+		            CASE
+		                WHEN mp.effectivity_date <= CURRENT_DATE()
+		                    THEN $sellOutExpr
+		                ELSE $sellOutExpr2
+		            END AS sell_out
+	            FROM tbl_winsight_details wd
+		        INNER JOIN $pricelistTable mp
+		            ON wd.category_1_id = mp.category_1_id
+		        LEFT JOIN (
+		            SELECT 
+		                $pricelistHistoricalTablePref, 
+		                net_price
+		            FROM $pricelistHistoricalTable h1
+		            WHERE created_date = (
+		                SELECT MAX(created_date)
+		                FROM $pricelistHistoricalTable h2
+		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
+		            )
+		        ) hp
+		            ON mp.id = hp.$pricelistHistoricalTablePref
+	            WHERE (? IS NULL OR so.year = ?)
+	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
+	              AND (? IS NULL OR mp.category_1_id = ?)
+	            GROUP BY wd.category_1_id
+	        ),
+	        outright AS (
+	            SELECT 
+	                s.brand_category_id,
+	                $outrightExpr AS total_qty
+	            FROM tbl_item_salesfile2_all s
+	            LEFT JOIN (
+	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                FROM tbl_item_unit_file_all
+	                GROUP BY brand_category_id, untmea
+		            ) u 
+		              ON s.brand_category_id = u.brand_category_id
+		             AND s.untmea = u.untmea
+		            WHERE s.trncde = 'SAL'
+		              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
+		              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
+	              	  AND (? IS NULL OR s.brand_category_id = ?)
+		              AND (? IS NULL OR s.cusdsc = ?)
+		              AND (? IS NULL OR s.cuscde = ?)
+	              AND EXISTS (
+	                  SELECT 1 
+	                  FROM tbl_cus_sellout_indicator ci
+	                  WHERE ci.cus_code = s.cuscde
+	              )
+	            GROUP BY s.brand_category_id
+	        ),
+	        consignment AS (
+	            SELECT 
+	                s.brand_category_id,
+	                $consignmentExpr AS total_qty
+	            FROM tbl_item_salesfile_consignment_all s
+	            LEFT JOIN (
+	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                FROM tbl_item_unit_file_all
+	                GROUP BY brand_category_id, untmea
+		            ) u 
+		              ON s.brand_category_id = u.brand_category_id
+		             AND s.untmea = u.untmea
+		            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
+		              AND (? IS NULL OR s.brand_category_id = ?)
+					  AND (? IS NULL OR s.cusdsc = ?)
+					  AND (? IS NULL OR s.cuscde = ?)
+		              AND EXISTS (
+		                  SELECT 1 
+		                  FROM tbl_cus_sellout_indicator ci
+		                  WHERE ci.cus_code = s.cuscde
+		              )
+	            GROUP BY s.brand_category_id
+	        ),
+	        final_data AS (
+	            SELECT
+	                a.brand_category_id,
+	                cl.item_class_description AS brand_category,
+	                $sellInExpr AS sell_in,
+	                a.sell_out,
+	                CASE 
+	                    WHEN $sellInExpr > 0 
+	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    ELSE 0
+	                END AS sell_out_ratio,
+	                COUNT(*) OVER() AS total_records
+	            FROM aggregated a
+	            LEFT JOIN outright o
+	                ON a.brand_category_id = o.brand_category_id 
+	            LEFT JOIN consignment c
+	                ON a.brand_category_id = c.brand_category_id 
+	            LEFT JOIN tbl_classification cl
+	                ON a.brand_category_id = cl.id
+	        )
+	        SELECT 
+	            ROW_NUMBER() OVER(ORDER BY sell_out_ratio DESC) AS rank,
+	            brand_category,
+	            sell_in,
+	            sell_out,
+	            sell_out_ratio,
+	            total_records
+	        FROM final_data
+	        $searchClause
+	        ORDER BY {$orderByColumn} {$orderDirection}
+	        LIMIT ? OFFSET ?
+	    ";
+
+	    $params = [
+	        $year, $year,
+	        $weekStart, $weekStart, $weekEnd,
+
+	        // outright
+	        $weekStartDate, $weekStartDate, $weekEndDate,
+	        $brandCategoryId, $brandCategoryId,
+	        $salesGroup, $salesGroup,
+	        $subSalesGroup, $subSalesGroup,
+
+	        // consignment
+	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $brandCategoryId, $brandCategoryId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
