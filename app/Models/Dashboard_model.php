@@ -3369,8 +3369,6 @@ class Dashboard_model extends Model
 	            ROW_NUMBER() OVER(ORDER BY sell_out_ratio DESC) AS rank,
 	            brand_id,
 	            customer_payment_group,
-	            -- pricelist_masterfile_id,
-	            -- pricelist_group,
 	            brand,
 	            brand_label,
 	            brand_category,

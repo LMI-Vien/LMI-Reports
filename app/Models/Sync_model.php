@@ -1229,12 +1229,12 @@ class Sync_model extends Model
                     SELECT h1.*
                     FROM tbl_historical_main_pricelist h1
                     INNER JOIN (
-                        SELECT pricelist_masterfile_id, MAX(effectivity_date) AS max_effectivity_date
+                        SELECT main_pricelist_id, MAX(effectivity_date) AS max_effectivity_date
                         FROM tbl_historical_main_pricelist
                         WHERE effectivity_date <= CURRENT_DATE()
-                        GROUP BY pricelist_masterfile_id
-                    ) h2 ON h1.pricelist_masterfile_id = h2.pricelist_masterfile_id AND h1.effectivity_date = h2.max_effectivity_date
-                ) hmp ON hmp.pricelist_masterfile_id = mp.id
+                        GROUP BY main_pricelist_id
+                    ) h2 ON h1.main_pricelist_id = h2.main_pricelist_id AND h1.effectivity_date = h2.max_effectivity_date
+                ) hmp ON hmp.main_pricelist_id = mp.id
                 GROUP BY
                     aso.id
             )
@@ -1644,12 +1644,12 @@ class Sync_model extends Model
                         SELECT h1.*
                         FROM tbl_historical_main_pricelist h1
                         INNER JOIN (
-                            SELECT pricelist_masterfile_id, MAX(effectivity_date) AS max_effectivity_date
+                            SELECT main_pricelist_id, MAX(effectivity_date) AS max_effectivity_date
                             FROM tbl_historical_main_pricelist
                             WHERE effectivity_date <= CURRENT_DATE()
-                            GROUP BY pricelist_masterfile_id
-                        ) h2 ON h1.pricelist_masterfile_id = h2.pricelist_masterfile_id AND h1.effectivity_date = h2.max_effectivity_date
-                    ) hmp ON hmp.pricelist_masterfile_id = mp.id
+                            GROUP BY main_pricelist_id
+                        ) h2 ON h1.main_pricelist_id = h2.main_pricelist_id AND h1.effectivity_date = h2.max_effectivity_date
+                    ) hmp ON hmp.main_pricelist_id = mp.id
                 ),
                 final_data AS (
                     SELECT

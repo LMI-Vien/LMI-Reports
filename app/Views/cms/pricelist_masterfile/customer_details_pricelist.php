@@ -375,12 +375,12 @@
     var base_url = '<?= base_url();?>';
     var pricelistId = '<?=$uri->getSegment(4);?>';
     var customerId = '<?=$uri->getSegment(5);?>';
-    var query = "mp.status > 0 AND cl.id = "+customerId+" AND mp.pricelist_id = "+pricelistId;
-    console.log(pricelistId);
+    var query = "mp.status >= 0 AND cl.id = "+customerId+" AND mp.pricelist_id = "+pricelistId;
+
     $(document).ready(function() {
        // var query = "pl.status >= 0 AND pl.customer_id = " + pricelistId;
         get_data(query);
-      //  get_pagination(query);
+        get_pagination(query);
 
         let brands = <?= json_encode($brands); ?>;
         let brandLabelType = <?= json_encode($brandLabelType); ?>;
@@ -647,7 +647,6 @@
         aJax.post(url,data,function(result){
             var result = JSON.parse(result);
             var html = '';
-            console.log(result);
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
@@ -697,65 +696,80 @@
         });
     }
 
-    function get_pagination(query, field = "pl.customer_id", order = "asc") {
+    function get_pagination(query, field = "cl.id", order = "asc") {
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
-            event : "pagination",
-            select : `pl.id, pl.customer_id, 
-                    pl.brand_id, brnd.brand_code AS brand_code, 
-                    pl.brand_label_type_id, brlbltyp.label AS brand_label_type, 
-                    pl.label_type_category_id, catlist.code AS catlist_code, 
-                    pl.category_1_id, class.item_class_code AS labeltype_code,
-                    pl.category_2_id, sclass.item_sub_class_code AS item_subclass, 
-                    pl.category_3_id, idept.item_department_code AS item_department,
-                    pl.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
-                    pl.item_code, pl.item_description, 
-                    pl.cust_item_code, pl.uom, 
-                    pl.selling_price, pl.disc_in_percent, 
-                    pl.net_price, pl.effectivity_date, 
-                    pl.status, pl.updated_date, pl.created_date`,
+            event : "list",
+            select : `mp.id, mp.id AS main_pricelist_id,
+                    mp.brand_id, brnd.brand_code AS brand_code, 
+                    mp.brand_label_type_id, brlbltyp.label AS brand_label_type, 
+                    mp.label_type_category_id, catlist.code AS catlist_code, 
+                    mp.category_1_id, class.item_class_code AS labeltype_code,
+                    mp.category_2_id, sclass.item_sub_class_code AS item_subclass, 
+                    mp.category_3_id, idept.item_department_code AS item_department,
+                    mp.category_4_id, mcat.item_mech_cat_code AS merchandise_cat,
+                    mp.item_code, mp.item_description,
+                    mp.cust_item_code, mp.uom, 
+                    mp.item_code,
+                    mp.item_description,
+                    mp.status, mp.updated_date, mp.created_date,
+                    COALESCE(cp.selling_price, mp.selling_price) AS selling_price,
+                    COALESCE(cp.disc_in_percent, mp.disc_in_percent) AS disc_in_percent,
+                    COALESCE(cp.net_price, mp.net_price) AS net_price,
+                    COALESCE(cp.effectivity_date, mp.effectivity_date) AS effectivity_date,
+                    IF(cp.id IS NOT NULL, 1, 0) AS is_customer_override`,
             query : query,
             offset : offset,
             limit : limit,
-            table : "tbl_customer_pricelist pl",
+            table : "tbl_main_pricelist mp",
             order : {
                 field : field,
                 order : order 
             },
             join : [
                 {
+                    table: "tbl_customer_list cl",
+                    query: "mp.pricelist_id = cl.pricelist_id",
+                    type: "inner"
+                },
+                {
+                    table: "tbl_customer_pricelist cp",
+                    query: "cp.customer_id = cl.id AND cp.main_pricelist_id = mp.id",
+                    type: "left"
+                },
+                {
                     table: "tbl_brand brnd",
-                    query: "brnd.id = pl.brand_id",
+                    query: "brnd.id = mp.brand_id",
                     type: "left"
                 },
                 {
                     table: "tbl_label_category_list catlist",
-                    query: "catlist.id = pl.label_type_category_id",
+                    query: "catlist.id = mp.label_type_category_id",
                     type: "left"
                 },
                 {
                     table: "tbl_classification class",
-                    query: "class.id = pl.category_1_id",
+                    query: "class.id = mp.category_1_id",
                     type: "left"
                 },
                 {
                     table: "tbl_brand_label_type brlbltyp",
-                    query: "brlbltyp.id = pl.brand_label_type_id",
+                    query: "brlbltyp.id = mp.brand_label_type_id",
                     type: "left"
                 },
                 {
                     table: "tbl_sub_classification sclass",
-                    query: "sclass.id = pl.category_2_id",
+                    query: "sclass.id = mp.category_2_id",
                     type: "left"
                 },
                 {
                     table: "tbl_item_department idept",
-                    query: "idept.id = pl.category_3_id",
+                    query: "idept.id = mp.category_3_id",
                     type: "left"
                 },
                 {
                     table: "tbl_item_merchandise_category mcat",
-                    query: "mcat.id = pl.category_4_id",
+                    query: "mcat.id = mp.category_4_id",
                     type: "left"
                 }
             ]
@@ -784,7 +798,7 @@
             search_input = $('#search_query').val();
             var escaped_keyword = search_input.replace(/'/g, "''"); 
             offset = 1;
-            new_query = "pl.status >= 0 AND pl.customer_id = " + pricelistId;
+            new_query = "mp.status >= 0 AND cl.id = "+customerId+" AND mp.pricelist_id = "+pricelistId;
             new_query += " AND (" +
                 "brnd.brand_code LIKE '%" + escaped_keyword + "%' OR " +
                 "brlbltyp.label LIKE '%" + escaped_keyword + "%' OR " +
@@ -793,9 +807,9 @@
                 "sclass.item_sub_class_code LIKE '%" + escaped_keyword + "%' OR " +
                 "idept.item_department_code LIKE '%" + escaped_keyword + "%' OR " +
                 "mcat.item_mech_cat_code LIKE '%" + escaped_keyword + "%' OR " +
-                "pl.item_code LIKE '%" + escaped_keyword + "%' OR " +
-                "pl.item_description LIKE '%" + escaped_keyword + "%' OR " +
-                "pl.cust_item_code LIKE '%" + escaped_keyword + "%'" +
+                "mp.item_code LIKE '%" + escaped_keyword + "%' OR " +
+                "mp.item_description LIKE '%" + escaped_keyword + "%' OR " +
+                "mp.cust_item_code LIKE '%" + escaped_keyword + "%'" +
                 ")";
 
             get_data(new_query);
@@ -999,7 +1013,7 @@
         const proceed = (typeof next === 'function') ? next : function() {};
 
         fetchCurrentPricelistRowByKey(customerId, mainPricelistId, itemCode, function (currentRow) {
-            if (!currentRow) return proceed(true); // No current row, allow insert
+            if (!currentRow) return proceed(true);
 
             const oldVals = {
                 selling_price: currentRow.selling_price,
