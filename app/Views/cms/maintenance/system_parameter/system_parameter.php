@@ -722,35 +722,45 @@
     let watsons_payment_group_list = [];
     function get_merged_data() {
         modal.loading(true);
-        var url = "<?= base_url("cms/global_controller");?>";
-        var data = {
-            event : "mergeUnique",
-            tables : ["tbl_cus_payment_group_lmi", "tbl_cus_payment_group_rgdi"],
-            field : "customer_group_code"
-        };
+        $.ajax({
+            url: "<?= base_url('cms/global_controller'); ?>",
+            type: "POST",
+            data: {
+                event: "mergeUnique",
+                tables: ["tbl_cus_payment_group_lmi", "tbl_cus_payment_group_rgdi"],
+                field: "customer_group_code"
+            },
+            dataType: "json",
+            success: function (response) {
+                console.log(response, 'get_merged_data');
+                
+                if (response.message === "success") {
+                    console.log(response.unique_fields);
 
-        aJax.post(url, data, function(result) {
-            let obj = is_json(result);
-            console.log(obj, 'get_merged_data');
+                    watsons_payment_group_list = 
+                        response.unique_fields.map(
+                            item => item.customer_group_code || 
+                            item.field || 
+                            item
+                        );
 
-            watsons_payment_group_list = obj.unique_fields.map(item => item.customer_group_code || item.field || item);
-
-            if (!obj || obj.message !== 'success' || !obj.unique_fields) {
-                alert("Failed to load payment groups");
-                return;
-            }
-
-            let values = obj.unique_fields.map(item => item.customer_group_code || item.field || item);
-
-            $("#watsons_payment_group").autocomplete({
-                source: values,
-                minLength: 3,
-                select: function(event, ui) {
-                    console.log("Selected:", ui.item.value);
+                    $("#watsons_payment_group").autocomplete({
+                        source: watsons_payment_group_list,
+                        minLength: 3,
+                        select: function(event, ui) {
+                            console.log("Selected:", ui.item.value);
+                        }
+                    }).focus(function(){
+                        $(this).autocomplete("search", "");
+                    });
+                } else {
+                    console.error(response.error || "Unknown error");
                 }
-            }).focus(function(){
-                $(this).autocomplete("search", "");
-            });
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", status, error);
+                console.log(xhr.responseText);
+            }
         });
     }
 
