@@ -77,8 +77,6 @@ class SyncData extends BaseCommand
             'syncCusPaymentGroupLmiData' => ['Watsons Personal Care Stores', 5000],
             'syncCustomerLmiData'        => ['Watsons', 5000],
             'syncCustomerRgdiData'       => ['Watsons', 5000],
-            'syncItemUnitFileLmiData'        => [5000],
-            'syncItemUnitFileRgdiData'       => [5000],
             'syncSalesFile2AllData' => [5000],
             'syncAllItemUnitFileLMIRGDIData' => [5000],
             'syncSalesFileConsignmentAllData' => [5000]
@@ -100,9 +98,7 @@ class SyncData extends BaseCommand
             'syncCusPaymentGroupRgdiData',
             'syncCusPaymentGroupLmiData',
             'syncCustomerLmiData',
-            'syncCustomerRgdiData',
-            'syncItemUnitFileLmiData',
-            'syncItemUnitFileRgdiData',            
+            'syncCustomerRgdiData',         
             'syncSalesFile2AllData',
             'syncAllItemUnitFileLMIRGDIData',
             'syncSalesFileConsignmentAllData'
