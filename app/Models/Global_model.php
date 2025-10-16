@@ -1651,7 +1651,7 @@ class Global_model extends Model
 
         foreach ($tables as $table) {
             $table = $this->db->escapeString($table);
-            $unionQueries[] = "SELECT {$field} FROM {$table}";
+            $unionQueries[] = "SELECT {$field}, '{$table}' AS source_table FROM {$table}";
         }
 
         $sql = implode(" UNION ", $unionQueries);

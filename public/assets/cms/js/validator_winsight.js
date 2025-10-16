@@ -19,7 +19,7 @@ self.onmessage = async function(e) {
             `${BASE_URL}cms/global_controller/get_valid_ba_data?`
             +`main_pricelist=1`
             +`&pricelist_masterfile=1`
-            +`&payment_group_lmi=1`
+            +`&payment_group_merged=1`
             +`&store_segment=1`
             +`&brands=1`
             +`&classification=1`
@@ -39,25 +39,45 @@ self.onmessage = async function(e) {
 
         const watsons_payment_group = ba_data?.system_parameter?.[0]?.watsons_payment_group;
 
-        if (!watsons_payment_group || !Array.isArray(ba_data?.payment_group_lmi)) {
+        if (!watsons_payment_group || !Array.isArray(ba_data?.payment_group_merged)) {
             throw new Error("Missing or invalid data: System Parameter or Payment Group");
         }
 
-        const foundGroup = ba_data.payment_group_lmi.find(
-            g => g?.customer_group_code?.toLowerCase() === watsons_payment_group.toLowerCase()
-        );
+        let foundGroup = null;
 
-        if (!foundGroup) {
-            throw new Error(`No payment group found for ${watsons_payment_group}. Please check in System Parameter or Payment Group`);
+        for (const g of ba_data.payment_group_merged) {
+            if (g?.customer_group_code?.toLowerCase() === watsons_payment_group.toLowerCase()) {
+                // If first match or higher priority
+                if (!foundGroup || g.source_table === 'tbl_cus_payment_group_lmi') {
+                    foundGroup = g;
+                    if (g.source_table === 'tbl_cus_payment_group_lmi') break; // stop early
+                }
+            }
         }
 
-        const watsonsId = foundGroup.id;
+        if (!foundGroup) {
+            throw new Error(
+                `No payment group found for ${watsons_payment_group}. 
+                Please check in System Parameter or Payment Group`
+            );
+        }
+
+        const watsonsId = parseInt(foundGroup.id, 10);
 
         const watsonPricelist = ba_data.pricelist_masterfile.find(
         p =>
             p.description.toLowerCase() === watsons_payment_group.toLowerCase() &&
-            p.description_id === watsonsId
+            parseInt(p.description_id, 10) === watsonsId
         );
+
+
+        // additional warning pag mismatch yung payment group description tsaka id
+        if (!watsonPricelist) {
+            throw new Error(
+                `No payment group found for ${watsons_payment_group}. 
+                Please check in System Parameter or Payment Group : Mismatch`
+            );
+        }
 
         let main_pricelist_lookup = {};
         ba_data.main_pricelist.forEach(

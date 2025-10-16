@@ -1106,6 +1106,14 @@ class GlobalController extends BaseController
 	        $responseData['payment_group_rgdi'] = $this->Global_model->get_valid_records("tbl_cus_payment_group_rgdi", 'customer_group_code');
 	    }
 
+		if (!empty($request['payment_group_merged'])) {
+	        $responseData['payment_group_merged'] = 
+				$this->Global_model->data_from_merged_table(
+					["tbl_cus_payment_group_lmi", "tbl_cus_payment_group_rgdi"], 
+					"id, customer_group_code"
+				);
+	    }
+
 	    //for sell out
 	    if (!empty($request['customer_sku_code_lmi'])) {
 	        $responseData['customer_sku_code_lmi'] = $this->Global_model->get_valid_records_tracc_data("tbl_price_code_file_2_lmi", 'cusitmcde');
@@ -1189,11 +1197,10 @@ class GlobalController extends BaseController
 		}
 		if (!empty($request['historical_main_pricelist'])) {
 			$responseData['historical_main_pricelist'] = 
-			// "hello?";
 			$this->Global_model->get_valid_records_as_of_today(
 				"tbl_historical_main_pricelist", 
 				[
-					'main_pricelist_id',
+					'pricelist_id',
 					'net_price',
 					'effectivity_date'
 				]
