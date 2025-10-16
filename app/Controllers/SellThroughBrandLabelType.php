@@ -127,6 +127,11 @@ class SellThroughBrandLabelType extends BaseController
 				
 	            break;
 	        case 'winsight':
+				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
+			    $weekStart = $year.$weekStart;
+
+			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
+			    $weekEnd = $year.$weekEnd;
 			    $data = $this->Dashboard_model->getSellThroughWinsightBrandLabel($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandTypeIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 				break;

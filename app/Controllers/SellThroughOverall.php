@@ -77,15 +77,30 @@ class SellThroughOverall extends BaseController
 		$year = trim($this->request->getPost('year') ?? '');
 		$year = $year === '' ? null : $year;
 
+		$yearId = trim($this->request->getPost('year_id') ?? '');
+		$yearId = $yearId === '' ? null : $yearId;
+
 		$monthStart = trim($this->request->getPost('month_start') ?? '');
 		$monthStart = $monthStart === '' ? null : $monthStart;
 
 		$monthEnd = trim($this->request->getPost('month_end') ?? '');
 		$monthEnd = $monthEnd === '' ? null : $monthEnd;
 
+		$weekStart = trim($this->request->getPost('week_start') ?? '');
+		$weekStart = $weekStart === '' ? null : $weekStart;
+
+		$weekEnd = trim($this->request->getPost('week_end') ?? '');
+		$weekEnd = $weekEnd === '' ? null : $weekEnd;
+
+		$weekStartDate = trim($this->request->getPost('week_start_date') ?? '');
+		$weekStartDate = $weekStartDate === '' ? null : $weekStartDate;
+
+		$weekEndDate = trim($this->request->getPost('week_end_date') ?? '');
+		$weekEndDate = $weekEndDate === '' ? null : $weekEndDate;
+
 		$salesGroup = trim($this->request->getPost('sales_group') ?? '');
 		$salesGroup = $salesGroup === '' ? null : $salesGroup;
-
+		
 		$subSalesGroup = trim($this->request->getPost('sub_sales_group') ?? '');
 		$subSalesGroup = $subSalesGroup === '' ? null : $subSalesGroup;
 
@@ -119,6 +134,11 @@ class SellThroughOverall extends BaseController
 				
 	            break;
 	        case 'winsight':
+				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
+			    $weekStart = $year.$weekStart;
+
+			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
+			    $weekEnd = $year.$weekEnd;
 			    $data = $this->Dashboard_model->getSellThroughWinsightBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 				break;

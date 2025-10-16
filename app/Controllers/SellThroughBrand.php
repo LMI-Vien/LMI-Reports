@@ -127,8 +127,7 @@ class SellThroughBrand extends BaseController
 	    // $yearId = 6;
     	// $monthStart = 1;
     	// $monthEnd = 11;
-
-		// print_r($source);
+		// print_r($weekStart);
 		// die();
 		// tapos na double checking nalang then confirm kay CK yung value nung sell in if parehas talaga sa ibang source
 		// tapos yung customer payment group if auto select ba
@@ -142,6 +141,11 @@ class SellThroughBrand extends BaseController
 				
 	            break;
 	        case 'winsight':
+				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
+			    $weekStart = $year.$weekStart;
+
+			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
+			    $weekEnd = $year.$weekEnd;
 			    $data = $this->Dashboard_model->getSellThroughWinsightByBrand($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 
 				break;
