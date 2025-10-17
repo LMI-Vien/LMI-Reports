@@ -272,6 +272,36 @@
         </div>
     </div>
 
+    <div class="modal" tabindex="-1" id="historicalModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title">
+                        <b>Historical Data</b>
+                    </h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered table-sm" id="historicalTable">
+                        <thead>
+                            <tr>
+                            <th>Effectivity Date</th>
+                            <th>Selling Price</th>
+                            <th>Discount %</th>
+                            <th>Net Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historicalTbody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- IMPORT MODAL -->
     <div class="modal" tabindex="-1" id="import_modal">
         <div class="modal-dialog modal-xl">
@@ -683,6 +713,8 @@
                             +y.status+"' id='"+y.id+"' title='Delete Details'><span class='glyphicon glyphicon-pencil'>Delete</span>";
                           html+="<a class='btn-sm btn view' onclick=\"view_data('"+y.id+"')\" data-status='"
                             +y.status+"' id='"+y.id+"' title='Show Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+                          html+="<a class='btn-sm btn view' onclick=\"view_historical_data('"+y.id+"')\" data-status='"
+                          +y.status+"' id='"+y.id+"' title='Show Historical'><span class='glyphicon glyphicon-pencil'>Historical</span>";
                           html+="</td>";
                         }
                         
@@ -1960,5 +1992,111 @@
        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
        saveAs(blob, filename + ".csv");
    }
+
+    let histCurrentPage   = 1;
+    const HIST_PAGE_SIZE  = 10;
+    let histLimit         = HIST_PAGE_SIZE;
+    let histTotalRecords  = 0;
+    let histTotalPages    = 1;
+
+    function view_historical_data() {
+        const $tbody = $('#historicalTbody');
+        if ($tbody.length) $tbody.html('<tr><td colspan="4" style="text-align:center">Loading…</td></tr>');
+        $('#historicalModal').modal('show');
+
+        histCurrentPage = 1;
+        runHistorical(pricelistId);
+    }
+
+    function runHistorical(plId) {
+        const histOffset = histCurrentPage;
+        renderHistorical(plId, histOffset, histLimit);
+    }
+
+    function renderHistorical(plId, histOffset, histLimit) {
+        const $tbody  = $('#historicalTbody');
+        const $footer = $('#historicalModal .modal-footer');
+
+            var data = {
+            event : "list",
+            select : `id, pricelist_id, main_pricelist_id,
+                    customer_payment_group, selling_price, disc_in_percent,
+                    net_price, effectivity_date, created_date, created_by`,
+            query  : `pricelist_id = '${plId}'`,
+            offset : offset,
+            limit : limit,
+            table : "tbl_historical_main_pricelist",
+            order : {
+                field : "effectivity_date",
+                order : "desc" 
+            },
+        }
+
+        aJax.post(url, data, function (result) {
+            let parsed = {};
+            try { parsed = (typeof result === 'string') ? JSON.parse(result) : result; }
+            catch (e) { parsed = []; }
+
+            const rows =
+                Array.isArray(parsed?.list) ? parsed.list :
+                Array.isArray(parsed?.data) ? parsed.data :
+                Array.isArray(parsed)       ? parsed       :
+                [];
+
+            histTotalRecords = parsed?.pagination?.total_record ?? rows.length;
+            histTotalPages   = Math.max(1, Math.ceil(histTotalRecords / histLimit));
+
+            if (!rows.length) {
+                $tbody.html('<tr><td colspan="4" style="text-align:center">No history found.</td></tr>');
+            } else {
+                const html = rows.map(r => `
+                    <tr>
+                    <td>${r.effectivity_date ?? ''}</td>
+                    <td class="text-right">${r.selling_price ?? ''}</td>
+                    <td class="text-right">${r.disc_in_percent ?? ''}</td>
+                    <td class="text-right">${r.net_price ?? ''}</td>
+                    </tr>
+                `).join('');
+                $tbody.html(html);
+            }
+
+            const footerHtml = `
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>Page ${histCurrentPage} of ${histTotalPages}</div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-warning" onclick="firstHistoricalPage('${plId}')" ${histCurrentPage === 1 ? 'disabled' : ''}>&laquo; First</button>
+                    <button type="button" class="btn btn-warning" onclick="backHistoricalPage('${plId}')"  ${histCurrentPage <= 1 ? 'disabled' : ''}>&lsaquo; Prev</button>
+                    <button type="button" class="btn btn-warning" onclick="nextHistoricalPage('${plId}')"  ${histCurrentPage >= histTotalPages ? 'disabled' : ''}>Next &rsaquo;</button>
+                    <button type="button" class="btn btn-warning" onclick="lastHistoricalPage('${plId}')"  ${histCurrentPage === histTotalPages ? 'disabled' : ''}>Last &raquo;</button>
+                </div>
+            </div>
+            `;
+            $footer.html(footerHtml);
+        });
+    }
+
+    function backHistoricalPage(plId) {
+        if (histCurrentPage > 1) {
+            histCurrentPage--;
+            runHistorical(plId);
+        }
+    }
+
+    function nextHistoricalPage(plId) {
+        if (histCurrentPage < histTotalPages) {
+            histCurrentPage++;
+            runHistorical(plId);
+        }
+    }
+
+    function firstHistoricalPage(plId) {
+        histCurrentPage = 1;
+        runHistorical(plId);
+    }
+
+    function lastHistoricalPage(plId) {
+        histCurrentPage = histTotalPages;
+        runHistorical(plId);
+    }
 
 </script>
