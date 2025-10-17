@@ -35,7 +35,9 @@ class PricelistMasterfile extends BaseController
 		$query = [
 		    'status' => 1
 		];
-		$data['cusPayGroup'] = $this->Global_model->get_data_list('tbl_cus_payment_group_lmi', $query, 99, 0, 'id, customer_group_code', 'customer_group_code', 'ASC', null, null);
+		$limit = '9999999';
+		$data['cusPayGroup'] = $this->Global_model->get_data_list('tbl_cus_payment_group_lmi', $query, $limit, 0, 'id, customer_group_code', 'customer_group_code', 'ASC', null, null);
+
 		$data['js'] = array(
 				"assets/js/bootstrap.min.js",
 				"assets/js/adminlte.min.js",
@@ -86,13 +88,14 @@ class PricelistMasterfile extends BaseController
 		$query = [
 		    'status' => 1
 		];
-		$data['brands'] = $this->Global_model->get_data_list('tbl_brand', $query, 99, 0, 'id, brand_code, brand_description', 'brand_code', 'ASC', null, null);
-		$data['brandLabelType'] = $this->Global_model->get_data_list('tbl_brand_label_type', null, 99, 0, 'id, label', 'label', 'ASC', null, null);
-		$data['labelCategory'] = $this->Global_model->get_data_list('tbl_label_category_list', $query, 99, 0, 'id, code, description', 'code', 'ASC', null, null);
-		$data['itemClass'] = $this->Global_model->get_data_list('tbl_classification', $query, 99, 0, 'id, item_class_code, item_class_description', 'item_class_code', 'ASC', null, null);
-		$data['subClass'] = $this->Global_model->get_data_list('tbl_sub_classification', $query, 99, 0, 'id, item_sub_class_code', 'item_sub_class_code', 'ASC', null, null);
-		$data['itemDepartment'] = $this->Global_model->get_data_list('tbl_item_department', $query, 99, 0, 'id, item_department_code', 'item_department_code', 'ASC', null, null);
-		$data['merchCategory'] = $this->Global_model->get_data_list('tbl_item_merchandise_category', $query, 99, 0, 'id, item_mech_cat_code', 'item_mech_cat_code', 'ASC', null, null);
+		$limit = '9999999';
+		$data['brands'] = $this->Global_model->get_data_list('tbl_brand', $query, $limit, 0, 'id, brand_code, brand_description', 'brand_code', 'ASC', null, null);
+		$data['brandLabelType'] = $this->Global_model->get_data_list('tbl_brand_label_type', null, $limit, 0, 'id, label', 'label', 'ASC', null, null);
+		$data['labelCategory'] = $this->Global_model->get_data_list('tbl_label_category_list', $query, $limit, 0, 'id, code, description', 'code', 'ASC', null, null);
+		$data['itemClass'] = $this->Global_model->get_data_list('tbl_classification', $query, $limit, 0, 'id, item_class_code, item_class_description', 'item_class_code', 'ASC', null, null);
+		$data['subClass'] = $this->Global_model->get_data_list('tbl_sub_classification', $query, $limit, 0, 'id, item_sub_class_code', 'item_sub_class_code', 'ASC', null, null);
+		$data['itemDepartment'] = $this->Global_model->get_data_list('tbl_item_department', $query, $limit, 0, 'id, item_department_code', 'item_department_code', 'ASC', null, null);
+		$data['merchCategory'] = $this->Global_model->get_data_list('tbl_item_merchandise_category', $query, $limit, 0, 'id, item_mech_cat_code', 'item_mech_cat_code', 'ASC', null, null);
 		
 		$data['standard'] = config('Standard');
 		$data['js'] = array(
@@ -138,13 +141,14 @@ class PricelistMasterfile extends BaseController
 		$query = [
 		    'status' => 1
 		];
-		$data['brands'] = $this->Global_model->get_data_list('tbl_brand', $query, 99, 0, 'id, brand_code, brand_description', 'brand_code', 'ASC', null, null);
-		$data['brandLabelType'] = $this->Global_model->get_data_list('tbl_brand_label_type', null, 99, 0, 'id, label', 'label', 'ASC', null, null);
-		$data['labelCategory'] = $this->Global_model->get_data_list('tbl_label_category_list', $query, 99, 0, 'id, code, description', 'code', 'ASC', null, null);
-		$data['itemClass'] = $this->Global_model->get_data_list('tbl_classification', $query, 99, 0, 'id, item_class_code, item_class_description', 'item_class_code', 'ASC', null, null);
-		$data['subClass'] = $this->Global_model->get_data_list('tbl_sub_classification', $query, 99, 0, 'id, item_sub_class_code', 'item_sub_class_code', 'ASC', null, null);
-		$data['itemDepartment'] = $this->Global_model->get_data_list('tbl_item_department', $query, 99, 0, 'id, item_department_code', 'item_department_code', 'ASC', null, null);
-		$data['merchCategory'] = $this->Global_model->get_data_list('tbl_item_merchandise_category', $query, 99, 0, 'id, item_mech_cat_code', 'item_mech_cat_code', 'ASC', null, null);
+		$limit = '9999999';
+		$data['brands'] = $this->Global_model->get_data_list('tbl_brand', $query, $limit, 0, 'id, brand_code, brand_description', 'brand_code', 'ASC', null, null);
+		$data['brandLabelType'] = $this->Global_model->get_data_list('tbl_brand_label_type', null, $limit, 0, 'id, label', 'label', 'ASC', null, null);
+		$data['labelCategory'] = $this->Global_model->get_data_list('tbl_label_category_list', $query, $limit, 0, 'id, code, description', 'code', 'ASC', null, null);
+		$data['itemClass'] = $this->Global_model->get_data_list('tbl_classification', $query, $limit, 0, 'id, item_class_code, item_class_description', 'item_class_code', 'ASC', null, null);
+		$data['subClass'] = $this->Global_model->get_data_list('tbl_sub_classification', $query, $limit, 0, 'id, item_sub_class_code', 'item_sub_class_code', 'ASC', null, null);
+		$data['itemDepartment'] = $this->Global_model->get_data_list('tbl_item_department', $query, $limit, 0, 'id, item_department_code', 'item_department_code', 'ASC', null, null);
+		$data['merchCategory'] = $this->Global_model->get_data_list('tbl_item_merchandise_category', $query, $limit, 0, 'id, item_mech_cat_code', 'item_mech_cat_code', 'ASC', null, null);
 		
 
 		$data['standard'] = config('Standard');
