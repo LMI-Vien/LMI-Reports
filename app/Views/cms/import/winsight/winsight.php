@@ -205,6 +205,11 @@
                           +y.status+"' id='"
                           +y.id+"' title='Export Details'><span class='glyphicon glyphicon-pencil'>Export</span>";
 
+                          html+="<a class='btn-sm btn view' onclick=\"view_data('"
+                          +y.id+"')\" data-status='"
+                          +y.status+"' id='"
+                          +y.id+"' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
+
                           html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.id+"','"+y.year+"','"+y.month+"','"+y.week+
                             "')\" data-status='"
                           +y.status+"' id='"
@@ -284,13 +289,18 @@
             if (result) {
                 modal.loading_progress(true, "Reviewing Data...");
                 setTimeout(() => {
-                    handleExport(id)
+                    const start_time = new Date();
+                    handleExport(id, start_time)
                 }, 500);
             }
         })
     }
 
-    function handleExport(id) {
+    function view_data(id) {
+        window.open("<?= base_url('cms/import-winsight/view') ?>/" + id, '_blank');
+    }
+
+    function handleExport(id, start_time) {
         modal.loading(true);
         let expurl = "<?= base_url()?>"+`cms/import-winsight/export-winsight-data`;
         $.ajax({
@@ -314,6 +324,19 @@
                 a.click();
                 a.remove();
                 URL.revokeObjectURL(blobUrl);
+
+                const end_time = new Date();
+                const duration = formatDuration(start_time, end_time);
+                
+                let remarks = 
+                `Export Completed Successfully!
+                <br>Start Time: ${formatReadableDate(start_time)}
+                <br>End Time: ${formatReadableDate(end_time)}
+                <br>Duration: ${duration}`;
+                
+                let link = '';
+
+                logActivity('Import Winsight Module', 'Export Data', remarks, link, null, null);
             },
             error: function(xhr, status, error) {
                 alert(xhr+' - '+status+' - '+error);
@@ -330,6 +353,7 @@
         modal.confirm(confirm_delete_message,function(result){
             if(result){ 
                 modal.loading(true);
+                const start_time = new Date();
                 var url = "<?= base_url('cms/global_controller');?>";
 
                 const header_conditions = [
@@ -348,6 +372,19 @@
 
                 batch_delete_with_conditions(url, "tbl_winsight_header", header_conditions, function(resp) {
                     batch_delete_with_conditions(url, "tbl_winsight_details", details_conditions, function(resp) {
+                        const end_time = new Date();
+                        const duration = formatDuration(start_time, end_time);
+                        
+                        let remarks = 
+                        `Selected records deleted successfully!
+                        <br>Start Time: ${formatReadableDate(start_time)}
+                        <br>End Time: ${formatReadableDate(end_time)}
+                        <br>Duration: ${duration}`;
+                        
+                        let link = '';
+
+                        logActivity('Import Winsight Module', 'Delete Data', remarks, link, null, null);
+
                         modal.loading(false);
                         modal.alert("Selected records deleted successfully!", 'success', () => location.reload());
                     });
@@ -886,7 +923,7 @@
 
             let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
 
-            logActivity('Add Winsight Module', 'Import Data', remarks, link, null, null);
+            logActivity('Import Winsight Module', 'Import Data', remarks, link, null, null);
         });
     }
 </script>

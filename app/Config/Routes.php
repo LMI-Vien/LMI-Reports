@@ -216,6 +216,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->match(['GET', 'POST'], 'import-temp-winsight-data', 'Cms\ImportWinsight::importTempWinsight');
         $routes->match(['GET', 'POST'], 'fetch-temp-winsight-data', 'Cms\ImportWinsight::fetchTempWinsight');
         $routes->match(['GET', 'POST'], 'delete-temp-winsight-data', 'Cms\ImportWinsight::deleteTempWinsight');
+        $routes->match(['GET', 'POST'], 'view/(:any)', 'Cms\ImportWinsight::view');
         $routes->match(['GET', 'POST'], 'export-winsight-data', 'Cms\ImportWinsight::exportWinsight');
     }); 
 

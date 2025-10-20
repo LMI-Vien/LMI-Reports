@@ -53,6 +53,64 @@ class ImportWinsight extends BaseController
 		return view("cms/layout/template", $data);		
 	}
 
+	public function view()
+	{
+		$data['meta'] = array(
+			"title"         =>  "Import Winsight",
+			"description"   =>  "Import Winsight",
+			"keyword"       =>  ""
+		);
+		$data['title'] = "Import Winsight";
+		$data['PageName'] = 'Import Winsight';
+		$data['PageUrl'] = 'Import Winsight';
+		$data['content'] = "cms/import/winsight/view_winsight.php";
+		$data['buttons'] = ['search'];
+		$data['session'] = session();
+		$data['standard'] = config('Standard');
+
+		$uri = current_url(true);
+		$id = $uri->getSegment(4);
+		$data['id'] = $id;
+		$data['headers'] = $this->Global_model->get_data_list(
+			'tbl_winsight_header as a', 
+			"a.status >= 0 AND a.id = '$id'", 
+			0, 
+			1, 
+			'a.id, a.created_date, b.username, a.file_name, a.status, a.year, c.month, a.week', 
+			'a.created_date', 
+			'desc', 
+			[ 
+				[
+					'table' => 'cms_users as b',
+					'query' => 'a.created_by = b.id',
+					'type'  => 'left'
+				],
+				[
+					'table' => 'tbl_month as c',
+					'query' => 'a.month = c.id',
+					'type'  => 'left'
+				]
+			],
+			null 
+		);
+
+		$data['js'] = array(
+			"assets/js/xlsx.full.min.js",
+			"assets/js/bootstrap.min.js",
+			"assets/js/adminlte.min.js",
+			"assets/js/moment.js",
+			"assets/js/xlsx.full.min.js"
+		);
+        $data['css'] = array(
+			"assets/css/bootstrap.min.css",
+			"assets/css/adminlte.min.css",
+			"assets/css/all.min.css",
+			"assets/cms/css/main_style.css",
+			"assets/css/style.css"
+		);
+		return view("cms/layout/template", $data);		
+	}
+
     public function importTempWinsight() {
         try {
             $file = $this->request->getFile('file');
