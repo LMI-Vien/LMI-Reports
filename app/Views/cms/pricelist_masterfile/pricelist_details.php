@@ -2007,13 +2007,13 @@
     let histTotalRecords  = 0;
     let histTotalPages    = 1;
 
-    function view_historical_data() {
+    function view_historical_data(plId) {
         const $tbody = $('#historicalTbody');
         if ($tbody.length) $tbody.html('<tr><td colspan="4" style="text-align:center">Loading…</td></tr>');
         $('#historicalModal').modal('show');
 
         histCurrentPage = 1;
-        runHistorical(pricelistId);
+        runHistorical(plId);
     }
 
     function runHistorical(plId) {
@@ -2030,7 +2030,7 @@
             select : `id, pricelist_id, main_pricelist_id,
                     customer_payment_group, selling_price, disc_in_percent,
                     net_price, effectivity_date, created_date, created_by`,
-            query  : `pricelist_id = '${plId}'`,
+            query  : `main_pricelist_id = '${plId}'`,
             offset : offset,
             limit : limit,
             table : "tbl_historical_main_pricelist",
