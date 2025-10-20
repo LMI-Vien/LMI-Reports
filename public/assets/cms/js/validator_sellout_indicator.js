@@ -66,21 +66,23 @@ self.onmessage = async function(e) {
                 const baMatch    = baLookup[lookupKey];
 
                 if (!baMatch) {
-                    errorLogs.push(`⚠️ No BA match for Code & Description at line #: ${tr_count}`);
+                    invalid = true;
+                    rowInvalid = true;
+                    errorLogs.push(`⚠️ Code or Description does not exist in Mastefile at line #: ${tr_count}`);
                     err_counter++;
-                    continue;
                 }
-                
-                var custId = baMatch.id;
-                var source = (baMatch.source_label || baMatch.source || '').toString();
 
                 if (!["active", "inactive"].includes(status)) {
                     invalid = true;
+                    rowInvalid = true;
                     errorLogs.push(`⚠️ Invalid Status at line #: ${tr_count}`);
                     err_counter++;
                 }
 
-                if (!invalid) {
+                if (!rowInvalid) {
+                    var custId = baMatch.id;
+                    var source = (baMatch.source_label || baMatch.source || '').toString();
+
                     valid_data.push({
                         cus_id: custId,
                         cus_code: customerCode,
