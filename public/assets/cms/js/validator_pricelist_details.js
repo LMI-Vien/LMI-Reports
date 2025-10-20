@@ -6,7 +6,8 @@ self.onmessage = async function(e) {
     let unique_description = new Set();
     let valid_data = [];
     let err_counter = 0;
-    let parentId = e.data.parentId;
+    let parentId = e.data.pricelistId;
+    let paymentGroup = e.data.customerPaymentGroup;
 
     try {
         let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?brands=1&label_category=1&classification=1&label_type=1&sub_classification=1&item_department=1&item_merchandise_category=1&itemfile_lmi=1&itemfile_rgdi=1`);
@@ -239,7 +240,7 @@ self.onmessage = async function(e) {
                     err_counter++;
                 }
 
-                let normalize_category3_records = [];
+                let normalize_category3_records = {};
                 for (let key in item_department_lookup) {
                     normalize_category3_records[key.toLowerCase()] = item_department_lookup[key];
                 }
@@ -253,7 +254,7 @@ self.onmessage = async function(e) {
                     err_counter++;
                 }
 
-                let normalize_category4_records = [];
+                let normalize_category4_records = {};
                 for (let key in item_merch_cat_lookup) {
                     normalize_category4_records[key.toLowerCase()] = item_merch_cat_lookup[key];
                 }
@@ -297,9 +298,10 @@ self.onmessage = async function(e) {
                     errorLogs.push(`⚠️ Item not found in LMI or RGDI at line #${tr_count}`);
                 }
 
-                if (!invalid) {
+                if (!rowInvalid) {
                     valid_data.push({
                         pricelist_id: parentId,
+                        customer_payment_group: paymentGroup,
                         brand_id: brandId,
                         brand_label_type_id: brandLabelType,
                         label_type_category_id: labelTypeCategory,

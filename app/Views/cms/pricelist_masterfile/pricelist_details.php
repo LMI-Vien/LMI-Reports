@@ -1469,7 +1469,7 @@
         });
 
         let worker = new Worker(base_url + "assets/cms/js/validator_pricelist_details.js");
-        worker.postMessage({ data: jsonData, base_url: base_url, pricelistId, });
+        worker.postMessage({ data: jsonData, base_url: base_url, pricelistId, paymentGroup,});
 
         worker.onmessage = function(e) {
             modal.loading_progress(false);
@@ -1487,7 +1487,7 @@
             } else if (valid_data && valid_data.length > 0) {
                 btn.prop("disabled", false);
                 updateSwalProgress("Validation Completed", 10);
-                setTimeout(() => saveValidatedData(valid_data), 500);
+                setTimeout(() => saveValidatedData(valid_data, paymentGroup), 500);
             } else {
                 btn.prop("disabled", false);
                 modal.alert("No valid data returned. Please check the file and try again.", "error", () => {});
@@ -1499,7 +1499,7 @@
         };
     }
 
-    function saveValidatedData(valid_data) {
+    function saveValidatedData(valid_data, paymentGroup) {
         const overallStart = new Date();
         let batch_size = 5000;
         let total_batches = Math.ceil(valid_data.length / batch_size);
@@ -1663,7 +1663,7 @@
                     effectivity_date: row.effectivity_date ?? row["Effectivity Date"],
                     status: row.status ?? row["Status"],
                     pricelist_id: pricelistId,
-                    customer_payment_group: customerPaymentGroup
+                    customer_payment_group: customerPaymentGroup ?? paymentGroup  
                 };
 
                 const key = `${pricelistId}|${itemCode.toUpperCase()}`;
