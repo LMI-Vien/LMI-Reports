@@ -402,7 +402,6 @@
     var base_url = '<?= base_url();?>';
     var pricelistId = '<?= $pricelistId; ?>';
     var paymentGroup = '<?= $paymentGroup; ?>';
-    console.log(paymentGroup);
     //for importing
     let currentPage = 1;
     let rowsPerPage = 1000;
@@ -1313,6 +1312,13 @@
             });
         }); 
     }
+    
+    function setOriginalNoPastDates() {
+        $(".no-past-date").each(function () {
+            var v = ($(this).val() || "").trim();
+            $(this).data("original", v).attr("data-original", v);
+        });
+    }
 
     function populate_modal(inp_id) {
         var query = "pl.status >= 0 and pl.id = " + inp_id;
@@ -1424,6 +1430,8 @@
                         $('#status').prop('checked', false)
                     }
                 }); 
+
+                setOriginalNoPastDates();
             }
         });
     }

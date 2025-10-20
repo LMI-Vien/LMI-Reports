@@ -259,7 +259,7 @@ var validate = {
 
 		// passing no previous date 
 
-		if ($(element).hasClass("no-past-date")) {
+		if ($(element).hasClass("fix-no-past-date")) {
 			$(".no-past-date").each(function(){
 				var val = ($(this).val() || "").trim();
 
@@ -298,6 +298,45 @@ var validate = {
 			});
 		}
 
+		// passing no previous date but if it is the same date, it can be edited
+		
+		if ($(element).hasClass("no-past-date")) {
+			$(".no-past-date").each(function () {
+				var $el = $(this);
+				var val = ($el.val() || "").trim();
+				var original = ($el.data("original") || "").trim();
+
+				$el.next(".validate_error_message").remove();
+
+				if (val === "") { $el.css("border-color", "#ccc"); return; }
+
+				if (val === original) { $el.css("border-color", "#ccc"); return; }
+
+				var now = new Date();
+				var today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+				var d = /^\d{4}-\d{2}-\d{2}$/.test(val)
+				? (parts => new Date(+parts[0], +parts[1]-1, +parts[2]))(val.split("-"))
+				: new Date(val);
+
+				if (isNaN(d.getTime())) {
+					counter++;
+					$el.css("border-color","red");
+					$("<span class='validate_error_message' style='color: red;'>Invalid date format.<br></span>").insertAfter($el);
+					return;
+				}
+
+				var cand = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+				if (cand < today) {
+					counter++;
+					$el.css("border-color","red");
+					$("<span class='validate_error_message' style='color: red;'>Date cannot be in the past.<br></span>").insertAfter($el);
+				} else {
+					$el.css("border-color","#ccc");
+				}
+			});
+		}
 
 		//validate script tags
 
