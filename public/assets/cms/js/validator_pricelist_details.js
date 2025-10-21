@@ -58,6 +58,13 @@ self.onmessage = async function(e) {
         // console.log(item_merch_cat_records);
         // return;
 
+        // Track CIC duplicates within the uploaded file
+        const seenCustCodes = new Set();
+
+        // (Optional) pass DB CIC keys from main thread; format `${pricelistId}|${CIC}`
+        const existingCustKeys = new Set(Array.isArray(e.data.existingCustKeys) ? e.data.existingCustKeys : []);
+
+
         const itemsLmi  = Array.isArray(ba_data.itemfile_lmi)  ? ba_data.itemfile_lmi  : [];
         const itemsRgdi = Array.isArray(ba_data.itemfile_rgdi) ? ba_data.itemfile_rgdi : [];
 
@@ -296,6 +303,29 @@ self.onmessage = async function(e) {
                     invalid = true;
                     err_counter++;
                     errorLogs.push(`⚠️ Item not found in LMI or RGDI at line #${tr_count}`);
+                }
+
+                const custNorm = norm(customerItemCode);
+                if (custNorm) {
+                    const keyCust = `${parentId}|${custNorm}`;
+
+                    // In-file duplicate CIC
+                    if (seenCustCodes.has(keyCust)) {
+                        rowInvalid = true;
+                        invalid = true;
+                        err_counter++;
+                        errorLogs.push(`⚠️ Duplicate Customer Item Code in file at line #${tr_count}`);
+                    } else {
+                        seenCustCodes.add(keyCust);
+                    }
+
+                    // DB collision (if existingCustKeys was passed from main thread)
+                    if (existingCustKeys.has(keyCust)) {
+                        rowInvalid = true;
+                        invalid = true;
+                        err_counter++;
+                        errorLogs.push(`⚠️ Customer Item Code already exists in this Pricelist at line #${tr_count}`);
+                    }
                 }
 
                 if (!rowInvalid) {

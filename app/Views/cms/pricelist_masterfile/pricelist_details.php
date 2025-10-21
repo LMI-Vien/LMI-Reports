@@ -1138,41 +1138,55 @@
                     return; 
                 }
 
-                if (id !== undefined && id !== null && id !== '') { 
-                    modal.confirm(confirm_update_message, function(result){
-                        if(result){ 
-                            modal.loading(true);
+                if (customerItemCode) {
+                    check_current_db("tbl_main_pricelist", ["pricelist_id", "cust_item_code"], [pricelistId, customerItemCode], "status", "id", id, false,
+                        function (custCodeExists) {
+                            if (custCodeExists) {
+                                modal.alert('Customer Item Code already exists in this Pricelist.', 'warning');
+                                return;
+                            }
+                            proceedSaveOrUpdate();
+                        }
+                    );
+                } else {
+                    proceedSaveOrUpdate();
+                }
+            }
+        );
 
-                            const newValsForCompare = {
-                                selling_price: sellingPrice,
-                                disc_in_percent: discountInPercent,
-                                net_price: netPrice,
-                                effectivity_date: effectDate
-                            };
-                            
-                            stashHistoryIfNeeded(id, newValsForCompare, function () {
+        function proceedSaveOrUpdate() {
+            if (id !== undefined && id !== null && id !== '') {
+                modal.confirm(confirm_update_message, function(result){
+                    if(result){
+                        modal.loading(true);
+                        const newValsForCompare = {
+                            selling_price: sellingPrice,
+                            disc_in_percent: discountInPercent,
+                            net_price: netPrice,
+                            effectivity_date: effectDate
+                        };
+                        stashHistoryIfNeeded(id, newValsForCompare, function () {
                             save_to_db(
                                 pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
                                 itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
                                 netPrice, effectDate, status_val, id
                             );
-                            });
-                        }
-                    });
-                } else {
-                    modal.confirm(confirm_add_message, function(result){
-                        if(result){ 
-                            modal.loading(true);
-                            save_to_db(
-                                pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
-                                itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
-                                netPrice, effectDate, status_val, null
-                            );
-                        }
-                    }); 
-                }
+                        });
+                    }
+                });
+            } else {
+                modal.confirm(confirm_add_message, function(result){
+                    if(result){
+                        modal.loading(true);
+                        save_to_db(
+                            pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
+                            itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
+                            netPrice, effectDate, status_val, null
+                        );
+                    }
+                });
             }
-        );
+        }
     }
 
     function save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
