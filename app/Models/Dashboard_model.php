@@ -2313,7 +2313,7 @@ class Dashboard_model extends Model
 		          $brandFilter
 		          $brandCategoryFilter
 		          AND (? IS NULL OR so.brand_type_id = ?)
-		          AND (? IS NULL OR so.customer_payment_group = ?)
+		          AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
 
 		        GROUP BY so.itmcde, cp.item_code, hp.customer_payment_group
 		    ),
@@ -2443,7 +2443,7 @@ class Dashboard_model extends Model
 	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
 	    $params = array_merge($params, [
 	        $brandTypeId, $brandTypeId,
-	        $salesGroup, $salesGroup,
+	        $salesGroup, $salesGroup, $salesGroup,
 	        // outright
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
@@ -3236,7 +3236,7 @@ class Dashboard_model extends Model
 	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 	              $brandFilter
 	              AND (? IS NULL OR so.brand_type_id = ?)
-	              AND (? IS NULL OR so.customer_payment_group = ?)
+	              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
 	            GROUP BY so.brand_id, cp.brand_id, so.customer_payment_group, hp.customer_payment_group
 	        ),
 	        outright AS (
@@ -3347,7 +3347,7 @@ class Dashboard_model extends Model
 	    $params = array_merge($params, $brandParams);
 	    $params = array_merge($params, [
 	        $brandTypeId, $brandTypeId,
-	        $salesGroup, $salesGroup,
+	        $salesGroup, $salesGroup, $salesGroup,
 	        // outright
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
@@ -4007,7 +4007,7 @@ class Dashboard_model extends Model
 	            WHERE (? IS NULL OR so.year = ?)
 	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 	              $brandTypeFilter
-	              AND (? IS NULL OR so.customer_payment_group = ?)
+	              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
 	            GROUP BY so.brand_type_id, cp.brand_label_type_id, hp.customer_payment_group
 	        ),
 	        outright AS (
@@ -4095,7 +4095,7 @@ class Dashboard_model extends Model
 	    ];
 	    $params = array_merge($params, $brandTypeParams);
 	    $params = array_merge($params, [
-	        $salesGroup, $salesGroup,
+	        $salesGroup, $salesGroup, $salesGroup,
 	        // outright
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
@@ -4685,7 +4685,7 @@ class Dashboard_model extends Model
 	            WHERE (? IS NULL OR so.year = ?)
 	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 	              AND (? IS NULL OR so.item_class_id = ?)
-	              AND (? IS NULL OR so.customer_payment_group = ?)
+	              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
 	            GROUP BY mp.category_1_id, so.customer_payment_group, cp.category_1_id, hp.customer_payment_group
 	        ),
 	        outright AS (
@@ -4777,7 +4777,7 @@ class Dashboard_model extends Model
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	        $brandCategoryId, $brandCategoryId,
-	        $salesGroup, $salesGroup,
+	        $salesGroup, $salesGroup, $salesGroup,
 
 	        // outright
 	        $year, $year,
