@@ -403,8 +403,8 @@
     var user_id = '<?=$session->sess_uid;?>';
     var url = "<?= base_url("cms/global_controller");?>";
     var base_url = '<?= base_url();?>';
-    var pricelistId = '<?=$uri->getSegment(4);?>';
-    var customerId = '<?=$uri->getSegment(5);?>';
+    var customerId = '<?=$uri->getSegment(4);?>';
+    var pricelistId = '<?=$uri->getSegment(5);?>';
     var query = "mp.status >= 0 AND cl.id = "+customerId+" AND mp.pricelist_id = "+pricelistId;
 
     $(document).ready(function() {
@@ -721,7 +721,7 @@
                         html += "</tr>";   
                     });
                 } else {
-                    html = '<tr><td colspan=12 class="center-align-format">'+ no_records +'</td></tr>';
+                    html = '<tr><td colspan=20 class="center-align-format">'+ no_records +'</td></tr>';
                 }
             }
             $('.table_body').html(html);
