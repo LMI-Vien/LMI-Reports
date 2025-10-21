@@ -1432,7 +1432,7 @@ class Global_model extends Model
     }
 
     function getSysPar() {
-        $query = $this->db->query("CALL SearchDynamic('tbl_system_parameter', null, 'id, sm_sku_min, sm_sku_max, overstock_sku, new_item_sku, hero_sku, sales_incentives, cus_grp_code_lmi, cus_grp_code_rgdi, brand_code_included, brand_code_excluded, brand_label_type, tba_amount_per_ba, tba_num_days', 1, 0, 'status:EQ=1', 'id', null)");
+        $query = $this->db->query("CALL SearchDynamic('tbl_system_parameter', null, 'id, sm_sku_min, sm_sku_max, overstock_sku, new_item_sku, hero_sku, sales_incentives, cus_grp_code_lmi, cus_grp_code_rgdi, brand_code_included, brand_code_excluded, brand_label_type, tba_amount_per_ba, tba_num_days, watsons_payment_group', 1, 0, 'status:EQ=1', 'id', null)");
         return $query->getResultArray(); // Return data as an array
     }
 

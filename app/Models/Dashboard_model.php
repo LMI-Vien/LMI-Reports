@@ -2242,23 +2242,26 @@ class Dashboard_model extends Model
 	        $brandCategoryFilterConsignment = "AND s.brand_category_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * so.net_price), 2)"
+		        ? "ROUND(SUM(so.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(so.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
-	    
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
+		        : "ROUND(SUM(so.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
+			    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
@@ -2283,10 +2286,6 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 		$sql = "
 		    WITH aggregated AS (
 		        SELECT
@@ -2297,26 +2296,16 @@ class Dashboard_model extends Model
 		            mp.item_description,
 		            mp.cust_item_code,
 		            so.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+					$sellOutExpr AS sell_out
 		        FROM tbl_sell_out_pre_aggregated_data so
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON so.itmcde = mp.item_code
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON so.itmcde = cp.item_code
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
 
 		        WHERE (? IS NULL OR so.year = ?)
 		          AND (? IS NULL OR so.month BETWEEN ? AND ?)
@@ -2326,7 +2315,7 @@ class Dashboard_model extends Model
 		          AND (? IS NULL OR so.brand_type_id = ?)
 		          AND (? IS NULL OR so.customer_payment_group = ?)
 
-		        GROUP BY so.itmcde, so.customer_payment_group, so.brand_id
+		        GROUP BY so.itmcde, cp.item_code, hp.customer_payment_group
 		    ),
 	        outright AS (
 	            SELECT 
@@ -2422,7 +2411,7 @@ class Dashboard_model extends Model
 	            LEFT JOIN tbl_brand br
 	                ON a.brand_id = br.id
 	            LEFT JOIN tbl_classification cl
-	                ON a.brand_type_id = cl.id
+	                ON a.brand_category_id = cl.id
 	            LEFT JOIN tbl_brand_label_type blt
 	                ON br.category_id = blt.id
 	        )
@@ -2502,7 +2491,8 @@ class Dashboard_model extends Model
 	    $brandTypeId = null, 
 	    $brandCategoryIds = [], 
 	    $salesGroup = null, 
-	    $subSalesGroup = null, 
+	    $subSalesGroup = null,
+	    $watsonsPaymentGroup = null,
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -2585,22 +2575,25 @@ class Dashboard_model extends Model
 	        $brandCategoryFilterConsignment = "AND s.brand_category_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * wow.net_price), 2)"
+		        ? "ROUND(SUM(wow.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(wow.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
+		        : "ROUND(SUM(wow.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -2626,10 +2619,6 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 		$sql = "
 		    WITH aggregated AS (
 		        SELECT
@@ -2639,35 +2628,25 @@ class Dashboard_model extends Model
 		            mp.item_description,
 		            mp.cust_item_code,
 		            wow.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 		        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON wow.itmcde = mp.item_code
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wow.itmcde = cp.item_code
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
 
 		        WHERE (? IS NULL OR wow.year = ?)
 		          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
+		          AND (? IS NULL OR wow.brand_type_id = ?)
+		          AND (? IS NULL OR mp.customer_payment_group = ?)
 		          $skuFilter
 		          $brandFilter
 		          $brandCategoryFilter
-		          AND (? IS NULL OR wow.brand_type_id = ?)
-
-		        GROUP BY wow.itmcde
+		        GROUP BY wow.itmcde, cp.item_code, hp.customer_payment_group
 		    ),
 	        outright AS (
 	            SELECT 
@@ -2756,7 +2735,7 @@ class Dashboard_model extends Model
 	            LEFT JOIN tbl_brand br
 	                ON a.brand_id = br.id
 	            LEFT JOIN tbl_classification cl
-	                ON a.brand_type_id = cl.id
+	                ON a.brand_category_id = cl.id
 	            LEFT JOIN tbl_brand_label_type blt
 	                ON br.category_id = blt.id
 	        )
@@ -2781,10 +2760,11 @@ class Dashboard_model extends Model
 	    $params = [
 	        $yearId, $yearId,
 	        $weekStart, $weekStart, $weekEnd,
+	        $brandTypeId, $brandTypeId,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	    ];
 	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
 	    $params = array_merge($params, [
-	        $brandTypeId, $brandTypeId,
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
@@ -2818,7 +2798,7 @@ class Dashboard_model extends Model
 	        'data' => $data
 	    ];
 	}
-
+	
 	public function getSellThroughWinsightBySku(
 	    $year = null, 
 	    $yearId = null, 
@@ -2833,6 +2813,7 @@ class Dashboard_model extends Model
 	    $brandCategoryIds = [], 
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
+	    $watsonsPaymentGroup = null, 
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -2840,6 +2821,7 @@ class Dashboard_model extends Model
 	    $sellInType = 3,
 	    $measure = 'qty'
 	) {
+
 	    $allowedOrderColumns = ['rank', 'itmcde', 'customer_sku', 'item_description', 'brand_category', 'brand', 'sell_in', 'sell_out', 'sell_out_ratio'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
@@ -2915,22 +2897,25 @@ class Dashboard_model extends Model
 	        $brandCategoryFilterConsignment = "AND s.brand_category_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
+		        ? "ROUND(SUM(wd.sales_qty * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
+		            )
+		        ), 2)"
+		        : "ROUND(SUM(wd.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
 		        : "ROUND(SUM(wd.sales_qty), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -2956,48 +2941,34 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 		$sql = "
 		    WITH aggregated AS (
 		        SELECT
 		            wd.item_code AS itmcde,
 		            wd.brand_id,
-		            wd.brand_label_type AS brand_type_id,
+		            wd.brand_label_type_id AS brand_type_id,
 		            mp.item_description,
 		            mp.cust_item_code,
 		            wd.category_1_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 		        FROM tbl_winsight_details wd
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON wd.item_code = mp.item_code
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wd.item_code = cp.item_code
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
 
 		        WHERE (? IS NULL OR wd.year = ?)
 		          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
+		          AND (? IS NULL OR wd.brand_label_type_id = ?)
+		          AND (? IS NULL OR mp.customer_payment_group = ?)
 		          $skuFilter
 		          $brandFilter
-		          $brandCategoryFilter
-		          AND (? IS NULL OR wd.brand_label_type = ?)
-
-		        GROUP BY wd.item_code
+		          $brandCategoryFilter 
+		        GROUP BY wd.item_code, mp.item_code, cp.item_code, hp.customer_payment_group, mp.customer_payment_group
 		    ),
 	        outright AS (
 	            SELECT 
@@ -3086,7 +3057,7 @@ class Dashboard_model extends Model
 	            LEFT JOIN tbl_brand br
 	                ON a.brand_id = br.id
 	            LEFT JOIN tbl_classification cl
-	                ON a.brand_type_id = cl.id
+	                ON a.brand_category_id = cl.id
 	            LEFT JOIN tbl_brand_label_type blt
 	                ON br.category_id = blt.id
 	        )
@@ -3111,10 +3082,11 @@ class Dashboard_model extends Model
 	    $params = [
 	        $year, $year,
 	        $weekStart, $weekStart, $weekEnd,
+	        $brandTypeId, $brandTypeId,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	    ];
 	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
 	    $params = array_merge($params, [
-	        $brandTypeId, $brandTypeId,
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
@@ -3140,9 +3112,9 @@ class Dashboard_model extends Model
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
-		$finalQuery = $this->interpolateQuery($sql, $params);
-		// echo $finalQuery; // Review it in your logs or browser
-		// die();	   
+		//$finalQuery = $this->interpolateQuery($sql, $params);
+		//echo $finalQuery; // Review it in your logs or browser
+		//die();	   
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data
@@ -3198,22 +3170,25 @@ class Dashboard_model extends Model
 	        $brandFilterConsignment = "AND s.brand_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * so.net_price), 2)"
+		        ? "ROUND(SUM(so.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(so.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
+		        : "ROUND(SUM(so.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -3239,10 +3214,6 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
@@ -3250,36 +3221,23 @@ class Dashboard_model extends Model
 	                so.customer_payment_group,
 	                so.brand_type_id,
 	                so.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 	            FROM tbl_sell_out_pre_aggregated_data so
-		        INNER JOIN $pricelistTable mp
+	            INNER JOIN tbl_main_pricelist mp
 		            ON so.brand_id = mp.brand_id
-		           -- AND so.brand_type_id = mp.brand_label_type_id
-		           AND so.customer_payment_group = mp.customer_payment_group
-		           -- AND so.item_class_id = mp.category_1_id
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON so.brand_id = cp.brand_id
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
 
 	            WHERE (? IS NULL OR so.year = ?)
 	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 	              $brandFilter
 	              AND (? IS NULL OR so.brand_type_id = ?)
 	              AND (? IS NULL OR so.customer_payment_group = ?)
-	            GROUP BY so.brand_id, so.customer_payment_group
+	            GROUP BY so.brand_id, cp.brand_id, so.customer_payment_group, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -3432,7 +3390,8 @@ class Dashboard_model extends Model
 	    $brandIds = [],
 	    $brandTypeId = null, 
 	    $salesGroup = null, 
-	    $subSalesGroup = null, 
+	    $subSalesGroup = null,
+	    $watsonsPaymentGroup = null,
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -3473,22 +3432,25 @@ class Dashboard_model extends Model
 	        $brandFilterConsignment = "AND s.brand_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * wow.net_price), 2)"
+		        ? "ROUND(SUM(wow.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(wow.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
+		        : "ROUND(SUM(wow.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -3514,42 +3476,29 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 	                wow.tracc_brand_id AS brand_id,
 	                wow.brand_type_id,
 	                wow.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 	            FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		        INNER JOIN $pricelistTable mp
+	            INNER JOIN tbl_main_pricelist mp
 		            ON wow.tracc_brand_id = mp.brand_id
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wow.tracc_brand_id = cp.brand_id
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
 
 	            WHERE (? IS NULL OR wow.year = ?)
 	              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
 	              $brandFilter
 	              AND (? IS NULL OR wow.brand_type_id = ?)
-	            GROUP BY wow.tracc_brand_id
+	              AND (? IS NULL OR mp.customer_payment_group = ?)
+	            GROUP BY wow.tracc_brand_id, cp.brand_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -3655,6 +3604,7 @@ class Dashboard_model extends Model
 	    $params = array_merge($params, $brandParams);
 	    $params = array_merge($params, [
 	        $brandTypeId, $brandTypeId,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
@@ -3698,6 +3648,7 @@ class Dashboard_model extends Model
 	    $brandTypeId = null, 
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
+	    $watsonsPaymentGroup = null,
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -3738,22 +3689,25 @@ class Dashboard_model extends Model
 	        $brandFilterConsignment = "AND s.brand_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
+		        ? "ROUND(SUM(wd.sales_qty * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(wd.sales_qty), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
+		        : "ROUND(SUM(wd.sales_qty), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -3779,42 +3733,29 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 					wd.brand_id,
 		            wd.brand_label_type AS brand_type_id,
 	                wd.category_1_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+					$sellOutExpr AS sell_out
 	            FROM tbl_winsight_details wd
-		        INNER JOIN $pricelistTable mp
+	            INNER JOIN tbl_main_pricelist mp
 		            ON wd.brand_id = mp.brand_id
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wd.brand_id = cp.brand_id
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
 
 	            WHERE (? IS NULL OR wd.year = ?)
 	              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
 	              $brandFilter
-	              AND (? IS NULL OR wd.brand_label_type = ?)
-	            GROUP BY wd.brand_id
+	              AND (? IS NULL OR wd.brand_label_type_id = ?)
+	              AND (? IS NULL OR mp.customer_payment_group = ?)
+	            GROUP BY wd.brand_id, cp.brand_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -3920,6 +3861,7 @@ class Dashboard_model extends Model
 	    $params = array_merge($params, $brandParams);
 	    $params = array_merge($params, [
 	        $brandTypeId, $brandTypeId,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
@@ -3999,22 +3941,25 @@ class Dashboard_model extends Model
 	        $brandTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * so.net_price), 2)"
+		        ? "ROUND(SUM(so.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(so.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
+		        : "ROUND(SUM(so.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -4040,42 +3985,30 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 	                so.brand_type_id,
 	                so.customer_payment_group,
 	                so.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 	            FROM tbl_sell_out_pre_aggregated_data so
-		        INNER JOIN $pricelistTable mp
+	            INNER JOIN tbl_main_pricelist mp
 		            ON so.brand_type_id = mp.brand_label_type_id
-		           AND so.customer_payment_group = mp.customer_payment_group
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+		            AND so.customer_payment_group = mp.customer_payment_group
+
+		        LEFT JOIN tbl_customer_pricelist cp
+					ON so.brand_type_id = cp.brand_label_type_id
+		           AND so.customer_payment_group = cp.customer_payment_group
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
+
 	            WHERE (? IS NULL OR so.year = ?)
 	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 	              $brandTypeFilter
 	              AND (? IS NULL OR so.customer_payment_group = ?)
-	            GROUP BY so.brand_type_id, so.customer_payment_group
+	            GROUP BY so.brand_type_id, cp.brand_label_type_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -4202,7 +4135,8 @@ class Dashboard_model extends Model
 	    $searchValue = null,
 	    $brandTypeIds = [],
 	    $salesGroup = null, 
-	    $subSalesGroup = null, 
+	    $subSalesGroup = null,
+	    $watsonsPaymentGroup = null,
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -4243,23 +4177,26 @@ class Dashboard_model extends Model
 	        $brandTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * wow.net_price), 2)"
+		        ? "ROUND(SUM(wow.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(wow.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
-	    
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
+		        : "ROUND(SUM(wow.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
+
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
@@ -4284,39 +4221,27 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 	                wow.brand_type_id,
 	                wow.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 		        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON wow.brand_type_id = mp.brand_label_type_id
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wow.brand_type_id = cp.brand_label_type_id
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
+
 	            WHERE (? IS NULL OR wow.year = ?)
 	              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
+	              AND (? IS NULL OR mp.customer_payment_group = ?)
 	              $brandTypeFilter
-	            GROUP BY wow.brand_type_id
+	            GROUP BY wow.brand_type_id, cp.brand_label_type_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -4396,6 +4321,7 @@ class Dashboard_model extends Model
 	    $params = [
 	        $yearId, $yearId,
 	        $weekStart, $weekStart, $weekEnd,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	    ];
 	    $params = array_merge($params, $brandTypeParams);
 	    $params = array_merge($params, [
@@ -4439,6 +4365,7 @@ class Dashboard_model extends Model
 	    $brandTypeIds = [],
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
+	    $watsonsPaymentGroup = null,
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -4479,23 +4406,26 @@ class Dashboard_model extends Model
 	        $brandTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
+		        ? "ROUND(SUM(wd.sales_qty * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(wd.sales_qty), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
-	    
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
+		        : "ROUND(SUM(wd.sales_qty), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
+
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
@@ -4520,39 +4450,27 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 	                wd.brand_label_type AS brand_type_id,
 	                wd.category_1_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 	            FROM tbl_winsight_details wd
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON wd.brand_label_type = mp.brand_label_type_id
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wd.brand_label_type = cp.brand_label_type_id
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
+
 	            WHERE (? IS NULL OR wd.year = ?)
 	              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
+	              AND (? IS NULL OR mp.customer_payment_group = ?)
 	              $brandTypeFilter
-	            GROUP BY wd.brand_label_type
+	            GROUP BY wd.brand_label_type, cp.brand_label_type_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -4632,6 +4550,7 @@ class Dashboard_model extends Model
 	    $params = [
 	        $year, $year,
 	        $weekStart, $weekStart, $weekEnd,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	    ];
 	    $params = array_merge($params, $brandTypeParams);
 	    $params = array_merge($params, [
@@ -4701,22 +4620,25 @@ class Dashboard_model extends Model
 	        $orderDirection = 'DESC';
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(so.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(so.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * so.net_price), 2)"
+		        ? "ROUND(SUM(so.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(so.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
+		        : "ROUND(SUM(so.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -4742,41 +4664,29 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 	                so.customer_payment_group,
 	                so.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 	            FROM tbl_sell_out_pre_aggregated_data so
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON so.item_class_id = mp.category_1_id
 		           AND so.customer_payment_group = mp.customer_payment_group
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON so.item_class_id = cp.category_1_id
+		           AND so.customer_payment_group = cp.customer_payment_group
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
+
 	            WHERE (? IS NULL OR so.year = ?)
 	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
-	              AND (? IS NULL OR mp.category_1_id = ?)
+	              AND (? IS NULL OR so.item_class_id = ?)
 	              AND (? IS NULL OR so.customer_payment_group = ?)
-	            GROUP BY mp.category_1_id, so.customer_payment_group
+	            GROUP BY mp.category_1_id, so.customer_payment_group, cp.category_1_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -4908,7 +4818,8 @@ class Dashboard_model extends Model
 	    $searchValue = null,
 	    $brandCategoryId = null,  
 	    $salesGroup = null, 
-	    $subSalesGroup = null, 
+	    $subSalesGroup = null,
+	    $watsonsPaymentGroup = null,
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -4938,22 +4849,25 @@ class Dashboard_model extends Model
 	        $orderDirection = 'DESC';
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wow.quantity * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wow.quantity), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * wow.net_price), 2)"
+		        ? "ROUND(SUM(wow.quantity * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(wow.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
+		        : "ROUND(SUM(wow.quantity), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -4979,38 +4893,26 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 	                wow.item_class_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 		        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON wow.item_class_id = mp.category_1_id
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
-	            WHERE (? IS NULL OR so.year = ?)
-	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
-	              AND (? IS NULL OR mp.category_1_id = ?)
-	            GROUP BY wow.item_class_id
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wow.item_class_id = cp.category_1_id
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
+		       
+	            WHERE (? IS NULL OR wow.year = ?)
+	              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
+	              AND (? IS NULL OR wow.item_class_id = ?)
+	              AND (? IS NULL OR mp.customer_payment_group = ?)
+	            GROUP BY wow.item_class_id, cp.category_1_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -5094,9 +4996,10 @@ class Dashboard_model extends Model
 	    ";
 
 	    $params = [
-	        $year, $year,
+	        $yearId, $yearId,
 	        $weekStart, $weekStart, $weekEnd,
-
+	        $brandCategoryId, $brandCategoryId,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $brandCategoryId, $brandCategoryId,
@@ -5117,7 +5020,10 @@ class Dashboard_model extends Model
 	    $query = $this->db->query($sql, $params);
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
-
+	   
+	    // $finalQuery = $this->interpolateQuery($sql, $params);
+	    // echo $finalQuery;
+	    // die();
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data
@@ -5135,6 +5041,7 @@ class Dashboard_model extends Model
 	    $brandCategoryId = null,  
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
+	    $watsonsPaymentGroup = null,
 	    $orderByColumn = 'rank', 
 	    $orderDirection = 'DESC', 
 	    $limit = 100, 
@@ -5164,22 +5071,25 @@ class Dashboard_model extends Model
 	        $orderDirection = 'DESC';
 	    }
 
-	    if($subSalesGroup){
-	    	$sellOutExpr = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-
-	        $sellOutExpr2 = $measure === 'amount'
-	        ? "ROUND(SUM(wd.sales_qty * IFNULL(mp.net_price, 0)), 2)"
-	        : "ROUND(SUM(wd.sales_qty), 0)";
-	        
-	    }else{
+		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * wd.net_price), 2)"
+		        ? "ROUND(SUM(wd.sales_qty * 
+		            IF(
+		                mp.effectivity_date <= CURRENT_DATE(),
+		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
+		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
+		            )
+		        ), 2)"
 		        : "ROUND(SUM(wd.sales_qty), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
-	    }
+		} else {
+		    $sellOutExpr = $measure === 'amount'
+		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
+		        : "ROUND(SUM(wd.sales_qty), 0)";
+
+		    $sellOutExpr2 = $sellOutExpr;
+		}
 	    
 	    $outrightExpr = $measure === 'amount'
 	        ? "ROUND(SUM(s.extprc), 2)"
@@ -5205,38 +5115,26 @@ class Dashboard_model extends Model
 	        );
 	    }
 
-	    $pricelistTable = $subSalesGroup ? 'tbl_customer_pricelist' : 'tbl_main_pricelist';
-	    $pricelistHistoricalTable = $subSalesGroup ? 'tbl_historical_sub_pricelist' : 'tbl_historical_main_pricelist';
-	    $pricelistHistoricalTablePref = $subSalesGroup ? 'sub_pricelist_id' : 'main_pricelist_id';
-
 	    $sql = "
 	        WITH aggregated AS (
 	            SELECT
 	                wd.category_1_id AS brand_category_id,
-		            CASE
-		                WHEN mp.effectivity_date <= CURRENT_DATE()
-		                    THEN $sellOutExpr
-		                ELSE $sellOutExpr2
-		            END AS sell_out
+		            $sellOutExpr AS sell_out
 	            FROM tbl_winsight_details wd
-		        INNER JOIN $pricelistTable mp
+		        INNER JOIN tbl_main_pricelist mp
 		            ON wd.category_1_id = mp.category_1_id
-		        LEFT JOIN (
-		            SELECT 
-		                $pricelistHistoricalTablePref, 
-		                net_price
-		            FROM $pricelistHistoricalTable h1
-		            WHERE created_date = (
-		                SELECT MAX(created_date)
-		                FROM $pricelistHistoricalTable h2
-		                WHERE h2.$pricelistHistoricalTablePref = h1.$pricelistHistoricalTablePref
-		            )
-		        ) hp
-		            ON mp.id = hp.$pricelistHistoricalTablePref
-	            WHERE (? IS NULL OR so.year = ?)
-	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
-	              AND (? IS NULL OR mp.category_1_id = ?)
-	            GROUP BY wd.category_1_id
+
+		        LEFT JOIN tbl_customer_pricelist cp
+		            ON wd.category_1_id = cp.category_1_id
+
+		        LEFT JOIN tbl_historical_sub_pricelist hp
+		            ON cp.id = hp.customer_id
+
+	            WHERE (? IS NULL OR wd.year = ?)
+	              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
+	              AND (? IS NULL OR wd.category_1_id = ?)
+	              AND (? IS NULL OR mp.customer_payment_group = ?)
+	            GROUP BY wd.category_1_id, cp.category_1_id, hp.customer_payment_group
 	        ),
 	        outright AS (
 	            SELECT 
@@ -5322,7 +5220,8 @@ class Dashboard_model extends Model
 	    $params = [
 	        $year, $year,
 	        $weekStart, $weekStart, $weekEnd,
-
+	        $brandCategoryId, $brandCategoryId,
+	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $brandCategoryId, $brandCategoryId,

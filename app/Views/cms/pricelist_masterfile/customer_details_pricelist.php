@@ -1068,8 +1068,8 @@
 
             const paymentGroup = $('#paymentGroup').val();
             const historyRow = {
-                pricelist_id: currentRow.id,
-                customer_id: customerId,
+                pricelist_id: pricelistId,
+                customer_id: currentRow.id,
                 customer_payment_group: paymentGroup,
                 selling_price: oldVals.selling_price,
                 disc_in_percent: oldVals.disc_in_percent,

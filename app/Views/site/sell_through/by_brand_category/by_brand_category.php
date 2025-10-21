@@ -78,8 +78,8 @@
                                         <tr>
                                             <th class="tbl-title-field text-center">Rank</th>
                                             <th class="tbl-title-field text-center">Brand Category</th>
-                                            <th class="tbl-title-field text-center">Sell In</th>
-                                            <th class="tbl-title-field text-center">Sell Out</th>
+                                            <th class="tbl-title-field text-center">Sell In <span class="tblMeasure">(qty)</span></th>
+                                            <th class="tbl-title-field text-center">Sell Out <span class="tblMeasure">(qty)</span></th>
                                             <th class="tbl-title-field text-center">Sell Out Ratio
                                                 <span class="tooltip-text">
                                                     FORMULA:

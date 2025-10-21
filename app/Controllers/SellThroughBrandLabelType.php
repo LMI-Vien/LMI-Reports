@@ -97,6 +97,12 @@ class SellThroughBrandLabelType extends BaseController
 		$subSalesGroup = trim($this->request->getPost('sub_sales_group') ?? '');
 		$subSalesGroup = $subSalesGroup === '' ? null : $subSalesGroup;
 
+		$sysPar = $this->Global_model->getSysPar();
+		$watsonsPaymentGroup = '';
+		if($sysPar){
+			$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'];
+		}
+
 		$type = $this->request->getPost('type');
 		$type = $type === '' ? null : $type;
 
@@ -123,7 +129,7 @@ class SellThroughBrandLabelType extends BaseController
 			
 	            break;
 	        case 'week_on_week':
-			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBrandLabel($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandTypeIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBrandLabel($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'winsight':
@@ -132,7 +138,7 @@ class SellThroughBrandLabelType extends BaseController
 
 			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 			    $weekEnd = $year.$weekEnd;
-			    $data = $this->Dashboard_model->getSellThroughWinsightBrandLabel($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandTypeIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWinsightBrandLabel($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 				break;
 	        default:

@@ -97,6 +97,12 @@ class SellThroughBrandCategory extends BaseController
 		$subSalesGroup = trim($this->request->getPost('sub_sales_group') ?? '');
 		$subSalesGroup = $subSalesGroup === '' ? null : $subSalesGroup;
 
+		$sysPar = $this->Global_model->getSysPar();
+		$watsonsPaymentGroup = '';
+		if($sysPar){
+			$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'];
+		}
+
 		$type = $this->request->getPost('type');
 		$type = $type === '' ? null : $type;
 
@@ -123,7 +129,7 @@ class SellThroughBrandCategory extends BaseController
 				
 	            break;
 	        case 'week_on_week':
-			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'winsight':
@@ -132,7 +138,7 @@ class SellThroughBrandCategory extends BaseController
 
 			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 			    $weekEnd = $year.$weekEnd;
-			    $data = $this->Dashboard_model->getSellThroughWinsightByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWinsightByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 				break;
 	        default:
@@ -212,26 +218,6 @@ class SellThroughBrandCategory extends BaseController
         }
 
         return null;
-    }
-
-    public function getSubSalesGroup(){
-    	$pricelist_id = $this->request->getPost('sales_group');
-    	//$pricelist_id = 1;
-    	if($pricelist_id){
-			$query = "c.status > 0 AND c.pricelist_id = ".$pricelist_id;
-			$select = "c.code, c.description";
-
-	        $join = [
-	        	[
-		            'table' => 'tbl_cus_sellout_indicator si',
-		            'query' => 'c.code = si.cus_code',
-		            'type'  => 'INNER'
-	        	]
-	    	];
-
-			$data = $this->Global_model->get_data_list('tbl_customer_list c', $query, 99999, 0, $select,'','', $join, '');
-			echo json_encode($data);
-	    }
     }
 	
 }

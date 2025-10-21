@@ -42,6 +42,12 @@
 
         $('#itmCode').select2({ placeholder: 'Select Item' });
 
+
+        $("input[name='measure']").on("change", function () {
+            let selectedMeasure = $('input[name="measure"]:checked').val();
+            $('.tblMeasure').text( ' ('+selectedMeasure+')');
+        });
+
         $("input[name='ytd']").on("change", function () {
             const isYtd = $(this).val() === 'yes';
 
@@ -63,10 +69,19 @@
                     getTextOrDash("#monthFrom") +
                     " to " +
                     getTextOrDash("#monthTo")
-                );
+                );    
 
                 updateWeeks('weekfrom', getCurrentWeek()); 
                 updateWeeks('weekto', getCurrentWeek()); 
+
+                if(source !== "scann_data"){
+                    $('#sourceDate').text(
+                        getTextOrDash("#year") + " " +
+                        getTextOrDash("#weekfrom") +
+                        " to " +
+                        getTextOrDash("#weekto")
+                    );
+                }    
             }else {
                 const htmlFrom = buildMonthDropdown(1, 12);
                 const htmlTo = buildMonthDropdown(1, 12);
@@ -84,56 +99,46 @@
 
         $("#quarter").on("change", function () {
             const quarter = $(this).val();
-            let from = 1;
-            let to = 12;
-
-            if (quarter === "Q1") {
-                from = 1; to = 3;
-            } else if (quarter === "Q2") {
-                from = 4; to = 6;
-            } else if (quarter === "Q3") {
-                from = 7; to = 9;
-            } else if (quarter === "Q4") {
-                from = 10; to = 12;
+            let from = 1, to = 12;
+            let weekFrom = 1, weekTo = 52;
+            var year = $("#year").val();
+            if(year === 'Please select...'){
+                modal.alert('Please select "Year" before filtering.', "warning");
+                return;
+            }
+            updateWeeks('weekfrom', getCurrentWeek()); 
+            updateWeeks('weekto', getCurrentWeek()); 
+            switch (quarter) {
+                case "Q1":
+                    from = 1; to = 3;
+                    weekFrom = 1; weekTo = 13;
+                    break;
+                case "Q2":
+                    from = 4; to = 6;
+                    weekFrom = 14; weekTo = 26;
+                    break;
+                case "Q3":
+                    from = 7; to = 9;
+                    weekFrom = 27; weekTo = 39;
+                    break;
+                case "Q4":
+                    from = 10; to = 12;
+                    weekFrom = 40; weekTo = 52;
+                    break;
             }
 
             const html = buildMonthDropdown(from, to);
             $("#monthFrom").html(html).val(from);
             $("#monthTo").html(html).val(to);
 
-            $('#sourceDate').text(
-                getTextOrDash("#year") + " " +
-                getTextOrDash("#monthFrom") +
-                " to " +
-                getTextOrDash("#monthTo")
-            );
-        });
-
-        $("#quarter").on("change", function () {
-            const quarter = $(this).val();
-            let from = 1;
-            let to = 12;
-
-            if (quarter === "Q1") {
-                from = 1; to = 3;
-            } else if (quarter === "Q2") {
-                from = 4; to = 6;
-            } else if (quarter === "Q3") {
-                from = 7; to = 9;
-            } else if (quarter === "Q4") {
-                from = 10; to = 12;
+            $("#weekfrom").val(weekFrom);
+            $("#weekto").val(weekTo);
+            $('#source').text(" "+ $("#dataSource option:selected").text());
+            $('#sourceDate').text(`${getTextOrDash("#year")} ${getTextOrDash("#monthFrom")} to ${getTextOrDash("#monthTo")}`);
+            if(source !== "scann_data"){
+                $('#sourceDate').text(`${getTextOrDash("#year")} ${getTextOrDash("#weekfrom")} to ${getTextOrDash("#weekto")}`);
             }
-
-            const html = buildMonthDropdown(from, to);
-            $("#monthFrom").html(html).val(from);
-            $("#monthTo").html(html).val(to);
-
-            $('#sourceDate').text(
-                getTextOrDash("#year") + " " +
-                getTextOrDash("#monthFrom") +
-                " to " +
-                getTextOrDash("#monthTo")
-            );
+            
         });
 
         $("#dataSource").on("change", function () {
@@ -219,13 +224,12 @@
         }
 
         $('#salesGroup').on('change', function () {
-            const selected = $(this).find('option:selected').data('id');
-            //console.log(selected);
+            const selected = $('#salesGroup').val();
+            $('#subGroup').val('');
             if (selected) {
                 get_sub_sales_group(selected);
             } else {
                 $('#subGroupWrapper').slideUp();
-                $('#subGroup').val('');
             }
         });
     });
@@ -440,11 +444,7 @@
             ].filter(Boolean),
             columnDefs: [
                 {
-                     targets: [2, 3],
-                    orderable: false
-                },
-                {
-                    targets: [0, 1, 4, 5, 6],
+                    targets: [0, 1, 2, 3, 4, 5, 6],
                     orderable: true
                 }
             ],
@@ -466,16 +466,26 @@
           data: { sales_group: sub_group },
         }).done( function(data){
           var obj = JSON.parse(data);
-          var htm = '';
-          htm += '<option value="">--Select--</option>';
-          $.each(obj, function(index, row){
-              htm += '<option value="'+row.code+'">'+row.description+'</option>';
+          var htm1 = '';
+          var htm2 = '';
+          var items_per_group =  obj.items;
+          var sub_payment_group = obj.sub_payment_group; 
+          htm1 += '<option value="">--Select--</option>';
+          
+          $.each(sub_payment_group, function(index, row){
+              htm1 += '<option value="'+row.code+'">'+row.description+'</option>';
           });
-          //console.log(obj);
-          $('#subGroup').html(htm);
+
+            $.each(items_per_group, function(index, row){
+              htm2 += '<option value="'+row.item_code+'">'+row.item_code+'</option>';
+          });
+
+          $('#subGroup').html(htm1);
+          $('#itmCode').val(null).trigger('change');
+          $('#itmCode').html(htm2);
           $('#subGroupWrapper').slideDown();
         });
-    }    
+    }  
 
     function updateWeeks(id, targetWeek) {
         let selectedYear = $('#year option:selected').text();

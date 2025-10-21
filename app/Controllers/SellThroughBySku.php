@@ -109,6 +109,12 @@ class SellThroughBySku extends BaseController
 		$subSalesGroup = trim($this->request->getPost('sub_sales_group') ?? '');
 		$subSalesGroup = $subSalesGroup === '' ? null : $subSalesGroup;
 
+		$sysPar = $this->Global_model->getSysPar();
+		$watsonsPaymentGroup = '';
+		if($sysPar){
+			$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'];
+		}
+
 		$type = $this->request->getPost('type');
 		$type = $type === '' ? null : $type;
 
@@ -144,7 +150,7 @@ class SellThroughBySku extends BaseController
 				
 	            break;
 	        case 'week_on_week':
-			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'winsight':
@@ -153,7 +159,7 @@ class SellThroughBySku extends BaseController
 
 			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 			    $weekEnd = $year.$weekEnd;
-			    $data = $this->Dashboard_model->getSellThroughWinsightBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWinsightBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 				break;
 	        default:
@@ -165,7 +171,7 @@ class SellThroughBySku extends BaseController
 	        	//$monthEnd = 11;
 	        	//$brandIds = [3];
 	        	// $subSalesGroup = '010202012001';
-	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	    }
 
@@ -239,21 +245,34 @@ class SellThroughBySku extends BaseController
     }
 
     public function getSubSalesGroup(){
-    	$pricelist_id = $this->request->getPost('sales_group');
-    	//$pricelist_id = 1;
-    	if($pricelist_id){
-			$query = "c.status > 0 AND c.pricelist_id = ".$pricelist_id;
-			$select = "c.code, c.description";
+    	//included the items per payment group
+    	$paymentGroup = $this->request->getPost('sales_group');
+    	//$paymentGroup = 'Ace Pharmaceuticals Inc';
+    	if($paymentGroup){
+			$query_payment_group = "si.status = 1 AND pm.description = ". $this->db->escape($paymentGroup);
+			$select_payment_group = "c.code, c.description";
 
-	        $join = [
+	        $join_payment_group = [
 	        	[
 		            'table' => 'tbl_cus_sellout_indicator si',
 		            'query' => 'c.code = si.cus_code',
 		            'type'  => 'INNER'
+	        	],
+	        	[
+		            'table' => 'tbl_pricelist_masterfile pm',
+		            'query' => 'c.pricelist_id = pm.id',
+		            'type'  => 'LEFT'
 	        	]
 	    	];
 
-			$data = $this->Global_model->get_data_list('tbl_customer_list c', $query, 99999, 0, $select,'','', $join, '');
+			$query_item_per_payment_group = "mp.status = 1 AND mp.customer_payment_group = ". $this->db->escape($paymentGroup);
+			$select_item_per_payment_group = "mp.item_code, mp.customer_payment_group";
+
+	        $join_item_per_payment_group = [];
+
+			$data['sub_payment_group'] = $this->Global_model->get_data_list('tbl_customer_list c', $query_payment_group, 99999, 0, $select_payment_group,'','', $join_payment_group, '');
+
+			$data['items'] = $this->Global_model->get_data_list('tbl_main_pricelist mp', $query_item_per_payment_group, 99999, 0, $select_item_per_payment_group,'','', $join_item_per_payment_group, 'mp.item_code, mp.customer_payment_group');
 			echo json_encode($data);
 	    }
     }

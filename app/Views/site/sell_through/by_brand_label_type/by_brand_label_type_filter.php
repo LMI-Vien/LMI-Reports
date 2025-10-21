@@ -213,7 +213,7 @@
               </div>
 
               <div class="form-group card-dark mb-3 p-2">
-                  <label class="mb-2"><i class="fas fa-tags mr-1"></i> BA Type</label>
+                  <label class="mb-2"><i class="fas fa-tags mr-1"></i> Outright/Consignment</label>
                   <div class="btn-group btn-group-toggle d-flex flex-wrap gap-2" data-toggle="buttons">
                       <label class="btn btn-outline-light btn-sm active main_all">
                           <input type="radio" name="filterType" value="3" checked> All
