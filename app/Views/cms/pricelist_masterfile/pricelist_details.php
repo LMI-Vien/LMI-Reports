@@ -402,7 +402,6 @@
     var base_url = '<?= base_url();?>';
     var pricelistId = '<?= $pricelistId; ?>';
     var paymentGroup = '<?= $paymentGroup; ?>';
-    console.log(paymentGroup);
     //for importing
     let currentPage = 1;
     let rowsPerPage = 1000;
@@ -1139,41 +1138,55 @@
                     return; 
                 }
 
-                if (id !== undefined && id !== null && id !== '') { 
-                    modal.confirm(confirm_update_message, function(result){
-                        if(result){ 
-                            modal.loading(true);
+                if (customerItemCode) {
+                    check_current_db("tbl_main_pricelist", ["pricelist_id", "cust_item_code"], [pricelistId, customerItemCode], "status", "id", id, false,
+                        function (custCodeExists) {
+                            if (custCodeExists) {
+                                modal.alert('Customer Item Code already exists in this Pricelist.', 'warning');
+                                return;
+                            }
+                            proceedSaveOrUpdate();
+                        }
+                    );
+                } else {
+                    proceedSaveOrUpdate();
+                }
+            }
+        );
 
-                            const newValsForCompare = {
-                                selling_price: sellingPrice,
-                                disc_in_percent: discountInPercent,
-                                net_price: netPrice,
-                                effectivity_date: effectDate
-                            };
-                            
-                            stashHistoryIfNeeded(id, newValsForCompare, function () {
+        function proceedSaveOrUpdate() {
+            if (id !== undefined && id !== null && id !== '') {
+                modal.confirm(confirm_update_message, function(result){
+                    if(result){
+                        modal.loading(true);
+                        const newValsForCompare = {
+                            selling_price: sellingPrice,
+                            disc_in_percent: discountInPercent,
+                            net_price: netPrice,
+                            effectivity_date: effectDate
+                        };
+                        stashHistoryIfNeeded(id, newValsForCompare, function () {
                             save_to_db(
                                 pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
                                 itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
                                 netPrice, effectDate, status_val, id
                             );
-                            });
-                        }
-                    });
-                } else {
-                    modal.confirm(confirm_add_message, function(result){
-                        if(result){ 
-                            modal.loading(true);
-                            save_to_db(
-                                pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
-                                itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
-                                netPrice, effectDate, status_val, null
-                            );
-                        }
-                    }); 
-                }
+                        });
+                    }
+                });
+            } else {
+                modal.confirm(confirm_add_message, function(result){
+                    if(result){
+                        modal.loading(true);
+                        save_to_db(
+                            pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour,
+                            itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent,
+                            netPrice, effectDate, status_val, null
+                        );
+                    }
+                });
             }
-        );
+        }
     }
 
     function save_to_db(pricelistId, brand, brandLabelType, labelTypeCat, catOneId, catTwo, catThree, catFour, itemCode, itemDescription, customerItemCode, uom, sellingPrice, discountInPercent, netPrice, effectDate, status_val, id) {
@@ -1313,6 +1326,13 @@
             });
         }); 
     }
+    
+    function setOriginalNoPastDates() {
+        $(".no-past-date").each(function () {
+            var v = ($(this).val() || "").trim();
+            $(this).data("original", v).attr("data-original", v);
+        });
+    }
 
     function populate_modal(inp_id) {
         var query = "pl.status >= 0 and pl.id = " + inp_id;
@@ -1424,6 +1444,8 @@
                         $('#status').prop('checked', false)
                     }
                 }); 
+
+                setOriginalNoPastDates();
             }
         });
     }
@@ -1999,13 +2021,13 @@
     let histTotalRecords  = 0;
     let histTotalPages    = 1;
 
-    function view_historical_data() {
+    function view_historical_data(plId) {
         const $tbody = $('#historicalTbody');
         if ($tbody.length) $tbody.html('<tr><td colspan="4" style="text-align:center">Loading…</td></tr>');
         $('#historicalModal').modal('show');
 
         histCurrentPage = 1;
-        runHistorical(pricelistId);
+        runHistorical(plId);
     }
 
     function runHistorical(plId) {
@@ -2022,7 +2044,7 @@
             select : `id, pricelist_id, main_pricelist_id,
                     customer_payment_group, selling_price, disc_in_percent,
                     net_price, effectivity_date, created_date, created_by`,
-            query  : `pricelist_id = '${plId}'`,
+            query  : `main_pricelist_id = '${plId}'`,
             offset : offset,
             limit : limit,
             table : "tbl_historical_main_pricelist",
