@@ -130,6 +130,7 @@
         }
 
         if (counter >= 1) {
+            logActivity("Store Sales Performance per Month", "Refresh", "User refreshed store sales performance per month.", "", "", "" );
             fetchData();
             $('.table-empty').hide();
             $('.data-graph').show();

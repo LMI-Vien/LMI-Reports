@@ -92,7 +92,9 @@
         if (counter >= 1) {
             const generationPeriod = getTodayDateTime();
             $('#generationPeriod').text(generationPeriod.display);
-            
+
+            logActivity("Overall Stock Data of all Stores", "Refresh", "User refreshed overall stock data of all stores.", "", "", "" );
+                        
             fetchData();
             $('.table-empty').hide();
             } else {

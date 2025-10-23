@@ -152,6 +152,8 @@
             const generationPeriod = getTodayDateTime();
             $('#generationPeriod').text(generationPeriod.display);
 
+            logActivity("Week by Week Stock Data of all Stores", "Refresh", "User refreshed week by week stock data of all stores.", "", "", "" );
+
             fetchData();
             $('.table-empty').hide();
         } else {

@@ -360,6 +360,7 @@
         if (counter >= 1) {
             const generationPeriod = getTodayDateTime();
             //$('#generationPeriod').text(generationPeriod.display);
+            logActivity("Sell Through Overall", "Refresh", "User refreshed sell through overall.", "", "", "" );
             fetchData();
             $('.table-empty').hide();
             $('.hide-div').show();

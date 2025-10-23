@@ -340,6 +340,7 @@
 
         const generationPeriod = getTodayDateTime();
         //$('#generationPeriod').text(generationPeriod.display);
+        logActivity("Sell Through By Brand Category", "Refresh", "User refreshed sell through by brand category.", "", "", "" );
         fetchData();
         $('.table-empty').hide();
         $('.hide-div').show();

@@ -235,6 +235,7 @@
         }
     });
 
+    // galaw ka rito
     $(document).on('click', '#refreshButton', function () {
         const fields = [
             { input: '#inventoryStatus', target: '#inventoryStatus' },
@@ -278,6 +279,8 @@
         if (counter >= 1) {
             const generationPeriod = getTodayDateTime();
             $('#generationPeriod').text(generationPeriod.display);
+
+            logActivity("Stock Data per Area or Store", "Refresh", "User refreshed stock data.", "", "", "" );
 
             fetchData();
             $('.table-empty').hide();
