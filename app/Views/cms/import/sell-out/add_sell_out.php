@@ -427,9 +427,6 @@
                     ...record
                 }));
                 checkDataSalesPerStore(parts, valid_data);
-                // saveHeaderData(parts, function(header_id, headers) {
-                //     checkDataSalesPerStore(valid_data, header_id, headers);
-                // });
             } else {
                 modal.alert("No valid data found. Please check the file.", "error");
             }
@@ -442,12 +439,14 @@
     }
     var counter = 0;
     function checkDataSalesPerStore(parts, valid_data) {
+        console.log(parts[1], 'parts[1]')
         counter++;
         const month = getMonthIdByName($("#month").val());
         const year = $("#year").val();
         const company = parts[0];
 
-        const new_query = `h.month = ${month} AND h.company = ${company} AND h.year = ${year}`;
+        var new_query = `h.month = ${month} AND h.company = ${company} AND h.year = ${year}`;
+        new_query += ` AND h.customer_payment_group = '${parts[1]}'`;
         
         const data = {
             event: "list",
@@ -641,7 +640,7 @@
         let header_data = [];
         dynamic_search(
             "'tbl_sell_out_template_header'", "''",
-            "'id, import_file_code, file_type, template_column_count, first_line_is_header, line_header, customer_payment_group, remarks'",
+            "'customer_payment_group, import_file_code, file_type'",
             1, 0,
             "'import_file_code:EQ=" + parts[4] + "'", "''", "''",
             (res) => {
@@ -651,7 +650,7 @@
                     company : parts[0],
                     month: getMonthIdByName($("#month").val()),
                     year: $("#year").val(),
-                    customer_payment_group: header_data[0].customer_payment_group,
+                    customer_payment_group: parts[1],
                     template_id: header_data[0].import_file_code,
                     created_date: formatDate(new Date()),
                     created_by: '<?=$session->sess_uid;?>',

@@ -17,23 +17,24 @@ self.onmessage = async function(e) {
 
         let get_ba_valid_response = await fetch(
             `${BASE_URL}cms/global_controller/get_valid_ba_data?`
-            +`main_pricelist=1`
-            +`&pricelist_masterfile=1`
-            +`&payment_group_merged=1`
-            +`&store_segment=1`
-            +`&brands=1`
-            +`&classification=1`
-            +`&sub_classification=1`
-            +`&item_department=1`
-            +`&item_merchandise_category=1`
-            +`&itemfile_lmi=1`
-            +`&itemfile_rgdi=1`
-            +`&label_type=1`
-            +`&label_category=1`
-            +`&years=1`
-            +`&months=1`
-            +`&system_parameter=1`
-            +`&historical_main_pricelist=1`
+            +`main_pricelist=1`                 // tbl_main_pricelist - sfa pricelist (price details)
+            +`&pricelist_masterfile=1`          // tbl_pricelist_masterfile -  sfa pricelist (header)
+            +`&payment_group_merged=1`          // tbl_cus_payment_group_lmi + tbl_cus_payment_group_rgdi
+                                                // merged payment group
+            +`&store_segment=1`                 // tbl_store_segment_list
+            +`&brands=1`                        // tbl_brand
+            +`&classification=1`                // tbl_classification
+            +`&sub_classification=1`            // tbl_sub_classification
+            +`&item_department=1`               // tbl_item_department
+            +`&item_merchandise_category=1`     // tbl_item_merchandise_category
+            +`&itemfile_lmi=1`                  // tbl_itemfile_lmi
+            +`&itemfile_rgdi=1`                 // tbl_itemfile_rgdi
+            +`&label_type=1`                    // tbl_brand_label_type
+            +`&label_category=1`                // tbl_label_category_list
+            +`&years=1`                         // tbl_year
+            +`&months=1`                        // tbl_month
+            +`&system_parameter=1`              // tbl_system_parameter
+            +`&historical_main_pricelist=1`     // tbl_historical_main_pricelist
         );
         let ba_data = await get_ba_valid_response.json();
 
@@ -320,7 +321,7 @@ self.onmessage = async function(e) {
                     brand_label_type_id = sfa_pricelist["brand_label_type_id"]; 
                     // brand_label_type_id -> tbl_main_pricelist -> tbl_brand_label_type
                     if (label_type_lookup[brand_label_type_id] == undefined) {
-                        addErrorLog("Label Type not found: "+ brand_label_type_id);
+                        addErrorLog("Label Type not found. It may be inactive or does not exist.");
                     } else {
                         brand_label_type = label_type_lookup[brand_label_type_id]
                     }
@@ -365,7 +366,7 @@ self.onmessage = async function(e) {
                     label_type_category_id = sfa_pricelist["label_type_category_id"]; 
                     // label_type_category_id -> tbl_main_pricelist -> tbl_label_category_list
                     if (label_category_lookup[label_type_category_id] == undefined) {
-                        addErrorLog("Label Category not found: "+ label_type_category_id);
+                        addErrorLog("Label Category not found. It may be inactive or does not exist.");
                     } else {
                         label_type_category = label_category_lookup[label_type_category_id]
                     }
@@ -509,6 +510,7 @@ self.onmessage = async function(e) {
         processBatch();
     }
     catch (error) {
+        console.log(error)
         self.postMessage({ invalid: true, errorLogs: [`Validation failed: ${error.message}`], err_counter: 1 });
     }
 }
