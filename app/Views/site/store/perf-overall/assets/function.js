@@ -149,6 +149,7 @@
         }
 
         if (counter >= 1) {
+            logActivity("Overall Stores Sales Growth", "Refresh", "User refreshed overall stores sales growth.", "", "", "" );
             fetchData();
             $('.table-empty').hide();
             $('.hide-div').show();

@@ -123,6 +123,7 @@
         }
 
         if (counter >= 1) {
+            logActivity("Store Sales Performance per Area", "Refresh", "User refreshed store sales performance per area.", "", "", "" );
             fetchData();
             $('.table-empty').hide();
             $('.hide-div').show();

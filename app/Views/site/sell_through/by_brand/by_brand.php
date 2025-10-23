@@ -72,7 +72,7 @@
                                                 style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                                 class="static-header"
                                             >
-                                                SELL THROUGH BY SKU
+                                                SELL THROUGH BY BRAND
                                             </th>
                                         </tr>
                                         <tr>

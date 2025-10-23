@@ -468,8 +468,8 @@
         initAuto($('#brand'),           $('#brandId'),            brandOptions,             'display', 'id', row => { $('#brandId').val(row.id); });
         initAuto($('#brandLabelType'),  $('#brandLabelTypeId'),   brandLabelTypeOptions,    'display', 'id', row => { $('#brandLabelTypeId').val(row.id); });
         initAuto($('#labelTypeCat'),    $('#labelTypeCatId'),     labelCategoryOptions,     'display', 'id', row => { $('#labelTypeCatId').val(row.id); });
-        initAuto($('#catOne'),          $('#catOneId'),           catOneCategoryOptions,    'display', 'id', row => { $('#catOneId').val(row.id); });
-        initAuto($('#catTwo'),          $('#catTwoId'),           catTwoCategoryOptions,    'display', 'id', row => { $('#catTwoId').val(row.id); });
+        initAuto($('#catOne'),          $('#catOneId'),           catOneCategoryOptions,    'display', 'id', row => { $('#catOneId').val(row.id).trigger('change'); });
+        // initAuto($('#catTwo'),          $('#catTwoId'),           catTwoCategoryOptions,    'display', 'id', row => { $('#catTwoId').val(row.id); });
         initAuto($('#catThree'),        $('#catThreeId'),         catThreeCategoryOptions,  'display', 'id', row => { $('#catThreeId').val(row.id); });
         initAuto($('#catFour'),         $('#catFourId'),          catFourCategoryOptions,   'display', 'id', row => { $('#catFourId').val(row.id); });
 
@@ -478,7 +478,7 @@
         enforceValidPick($('#brandLabelType'),  $('#brandLabelTypeId'),     brandLabelTypeToId);
         enforceValidPick($('#labelTypeCat'),    $('#labelTypeCatId'),       labelCatLabelToId);
         enforceValidPick($('#catOne'),          $('#catOneId'),             catOneLabelToId);
-        enforceValidPick($('#catTwo'),          $('#catTwoId'),             catTwoLabelToId);
+        // enforceValidPick($('#catTwo'),          $('#catTwoId'),             catTwoLabelToId);
         enforceValidPick($('#catThree'),        $('#catThreeId'),           catThreeLabelToId);
         enforceValidPick($('#catFour'),         $('#catFourId'),            catFourLabelToId);
 
@@ -564,6 +564,115 @@
         });
 
         enforceNumeric('#sellingPrice, #discountInPercent', { decimals: 2 });
+
+        const classIdToCode = new Map(
+            itemClass.map(ic => [String(ic.id), ic.item_class_code || ''])
+        );
+
+        // Group subClass rows by their item_class_code
+        const subClassByClassCode = subClass.reduce((acc, sc) => {
+            const c = sc.item_class_code || '';
+            (acc[c] ||= []).push(sc);
+            return acc;
+        }, {});
+
+        // Helper: (re)wire Sub Class autocomplete + validation to a filtered list
+        function setSubClassOptions(options) {
+            options = options || [];
+
+            const opts = options.map(sc => ({
+                id: sc.id,
+                label: sc.item_sub_class_code || '',
+                value: sc.item_sub_class_code || ''
+            }));
+
+            const labelToId = new Map(opts.map(o => [o.label, String(o.id)]));
+            const $input  = $('#catTwo');
+            const $hidden = $('#catTwoId');
+
+            // if autocomplete already exists, just update the source
+            if ($input.data('ui-autocomplete')) {
+                $input.autocomplete('option', 'source', opts);
+            } else {
+                // first-time init
+                $input.autocomplete({
+                    source: opts,
+                    minLength: 0,
+                    appendTo: '#popup_modal',
+                    select: function (evt, ui) {
+                        evt.preventDefault();
+                        if (ui && ui.item && ui.item.id) {
+                            $hidden.val(ui.item.id);
+                            $input.val(ui.item.label);
+                        }
+                    }
+                });
+            }
+
+            // always refresh the select handler to guarantee correct binding
+            $input.off('autocompleteselect.catTwo').on('autocompleteselect.catTwo', function (evt, ui) {
+                if (ui && ui.item && ui.item.id) {
+                    $hidden.val(ui.item.id);
+                }
+            });
+
+            // clear hidden field if text manually erased
+            $input.off('input.catTwo').on('input.catTwo', function () {
+                if (!$(this).val().trim()) $hidden.val('');
+            });
+
+            // optional: open suggestions on focus
+            $input.off('focus.catTwo').on('focus.catTwo', function () {
+                $(this).autocomplete('search', '');
+            });
+
+            // adding or deleting will reset the textbox
+            $input.off('input.catTwo change.catTwo').on('input.catTwo change.catTwo', function () {
+                $input.val('');
+                $hidden.val('');  
+            });
+        }
+
+
+        const subClassByClassDesc = subClass.reduce((acc, sc) => {
+            const key = (sc.item_class_description || sc.item_class_code || '').trim();
+            if (!key) return acc;
+            (acc[key] ||= []).push(sc);
+            return acc;
+        }, {});
+
+        // When Item Class changes, filter Sub Class
+        function onItemClassPicked() {
+            const classLabel = ($('#catOne').val() || '').trim();
+
+            if (classLabel !== lastClassValue) {
+                // only clear when the class actually changed
+                $('#catTwo').val('');
+                $('#catTwoId').val('');
+                lastClassValue = classLabel;    
+            }
+
+            if (!classLabel) {
+                setSubClassOptions([]);
+                return;
+            }
+
+            const subs = subClassByClassDesc[classLabel] || [];
+            setSubClassOptions(subs);
+        }
+
+        let lastClassValue = '';
+
+        $('#catOneId').on('change', function () {
+            const newValue = ($('#catOne').val() || '').trim();
+            if (newValue !== lastClassValue) {
+                lastClassValue = newValue;
+                onItemClassPicked();
+            }
+        });
+
+        // Initial state: empty until a class is chosen
+        setSubClassOptions([]);
     });
 
     function clearItemPair() {

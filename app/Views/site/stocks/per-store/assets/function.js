@@ -279,6 +279,8 @@
             const generationPeriod = getTodayDateTime();
             $('#generationPeriod').text(generationPeriod.display);
 
+            logActivity("Stock Data per Area or Store", "Refresh", "User refreshed stock data.", "", "", "" );
+
             fetchData();
             $('.table-empty').hide();
         } else {

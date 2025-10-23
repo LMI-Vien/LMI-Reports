@@ -358,6 +358,7 @@
         if (counter >= 1) {
             const generationPeriod = getTodayDateTime();
             //$('#generationPeriod').text(generationPeriod.display);
+            logActivity("Sell Through By Sku", "Refresh", "User refreshed sell through by sku.", "", "", "" );
             fetchData();
             $('.table-empty').hide();
             $('.hide-div').show();

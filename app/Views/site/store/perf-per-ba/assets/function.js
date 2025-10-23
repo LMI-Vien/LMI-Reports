@@ -154,6 +154,7 @@
         }
 
         if (counter >= 1) {
+            logActivity("Store Sales Performance per Brand Ambassador", "Refresh", "User refreshed store sales performance per brand ambassador.", "", "", "" );
             fetchData();
             $('.table-empty').hide();
             $('.hide-div').show();
