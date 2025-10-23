@@ -46,6 +46,7 @@
                 </div>
             </div>
             <div class="box">
+                <?php echo view("cms/layout/buttons",$buttons); ?><br>
                 <table class= "table table-bordered listdata" style="width: 100%">
                     <thead>
                         <tr>
@@ -79,15 +80,14 @@
     var url = "<?= base_url('cms/global_controller');?>";
     var import_sellout_id = "<?=$uri->getSegment(4);?>";
     var limit = 10;
-    var query = "";
+    var query = `data_header_id = ${import_sellout_id}`;
 
     $(document).ready(function() {
         $("#sell_out_title").html(addNbsp("VIEW SELLOUT DATA"));
 
         renderHeader(import_sellout_id);
-        // renderDetails(import_sellout_id)
-        renderDetails(import_sellout_id);
-        get_pagination(import_sellout_id);
+        renderDetails(query);
+        get_pagination(query);
     });
 
     function renderHeader(header_id) {
@@ -119,13 +119,13 @@
     }
 
     function renderDetails(new_query) {
-        query = 'data_header_id = '+new_query;
+        // query = 'data_header_id = '+new_query;
         var data = {
             event: "list",
             select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales, gross_sales",
             limit: limit,
             table: "tbl_sell_out_data_details",
-            query: query,
+            query: new_query,
             offset: offset,
             order: {},
         }
@@ -170,12 +170,12 @@
 	
 	
 	function get_pagination(new_query) {
-        query = 'data_header_id = '+new_query;
+        // query = 'data_header_id = '+new_query;
         var url = "<?= base_url("cms/global_controller");?>";
         var data = {
             event : "pagination",
             select: "data_header_id, id, file_name, line_number, store_code, store_description, sku_code, sku_description, quantity, net_sales",
-            query: query,
+            query: new_query,
             offset: offset,
             limit: limit,
             table : "tbl_sell_out_data_details",
@@ -192,7 +192,7 @@
 
     pagination.onchange(function(){
         offset = $(this).val();
-        renderDetails(import_sellout_id);
+        renderDetails(query);
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
         $("#search_query").val("");
@@ -206,7 +206,35 @@
         limit = parseInt(record_entries);
         offset = 1;
         modal.loading(true); 
-        renderDetails(import_sellout_id);
+        renderDetails(query);
+        modal.loading(false);
+    });
+
+    $(document).on('keypress', '#search_query', function(e) {               
+        if (e.keyCode === 13) {
+            var keyword = $(this).val().trim();
+            var escaped_keyword = keyword.replace(/'/g, "''"); 
+            offset = 1;
+            var new_query = "("+query+" AND line_number like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND store_code like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND store_description like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND sku_code like '%" + escaped_keyword + "%') OR "+
+            "("+query+" AND sku_description like '%" + escaped_keyword + "%')"
+            renderDetails(new_query);
+            get_pagination(new_query);
+        }
+    });
+
+    $(document).on("change", ".record-entries", function(e) {
+        $(".record-entries option").removeAttr("selected");
+        $(".record-entries").val($(this).val());
+        $(".record-entries option:selected").attr("selected","selected");
+        var record_entries = $(this).prop( "selected",true ).val();
+        limit = parseInt(record_entries);
+        offset = 1;
+        modal.loading(true); 
+        renderDetails(new_query);
+        get_pagination(new_query);
         modal.loading(false);
     });
 </script>
