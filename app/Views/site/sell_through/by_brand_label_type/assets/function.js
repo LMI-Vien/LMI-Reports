@@ -58,7 +58,7 @@
 
                 $("#monthFrom").html(htmlFrom).val(1);
                 $("#monthTo").html(htmlTo).val(currentMonth);
-
+                
                 $('#sourceDate').text(
                     getTextOrDash("#year") + " " +
                     getTextOrDash("#monthFrom") +
@@ -68,7 +68,7 @@
 
                 updateWeeks('weekfrom', getCurrentWeek()); 
                 updateWeeks('weekto', getCurrentWeek()); 
-
+                source = $('#dataSource').val();
                 if(source !== "scann_data"){
                     $('#sourceDate').text(
                         getTextOrDash("#year") + " " +

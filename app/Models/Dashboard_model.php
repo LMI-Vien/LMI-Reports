@@ -2244,20 +2244,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * 
+		        ? "ROUND(so.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        , 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        ? "ROUND(so.quantity * IFNULL(so.net_price, 0), 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -2287,35 +2287,44 @@ class Dashboard_model extends Model
 	    }
 
 		$sql = "
-		    WITH aggregated AS (
-		        SELECT
-		            so.itmcde,
-		            so.brand_id,
-		            so.customer_payment_group,
-		            so.brand_type_id,
-		            mp.item_description,
-		            mp.cust_item_code,
-		            so.item_class_id AS brand_category_id,
-					$sellOutExpr AS sell_out
-		        FROM tbl_sell_out_pre_aggregated_data so
-		        INNER JOIN tbl_main_pricelist mp
-		            ON so.itmcde = mp.item_code
+	        WITH aggregated AS (
+			    SELECT
+			        sub.itmcde,
+			        sub.brand_id,
+			        sub.customer_payment_group,
+			        sub.item_description,
+			        sub.cust_item_code,
+			        GROUP_CONCAT(DISTINCT sub.brand_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+			            so.itmcde,
+			            so.brand_id,
+			            so.customer_payment_group,
+			            so.brand_type_id,
+			            mp.item_description,
+			            mp.cust_item_code,
+			            so.item_class_id,
+						$sellOutExpr AS quantity
+			        FROM tbl_sell_out_pre_aggregated_data so
+			        INNER JOIN tbl_main_pricelist mp
+			            ON so.itmcde = mp.item_code
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON so.itmcde = cp.item_code
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON so.itmcde = cp.item_code
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN tbl_historical_sub_pricelist hp
 		            ON cp.id = hp.customer_id
-
-		        WHERE (? IS NULL OR so.year = ?)
-		          AND (? IS NULL OR so.month BETWEEN ? AND ?)
-		          $skuFilter
-		          $brandFilter
-		          $brandCategoryFilter
-		          AND (? IS NULL OR so.brand_type_id = ?)
-		          AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
-
-		        GROUP BY so.itmcde, cp.item_code, hp.customer_payment_group
+			        WHERE (? IS NULL OR so.year = ?)
+			          AND (? IS NULL OR so.month BETWEEN ? AND ?)
+			          $skuFilter
+			          $brandFilter
+			          $brandCategoryFilter
+			          AND (? IS NULL OR so.brand_type_id = ?)
+			          AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
+				    ) AS sub
+			    GROUP BY sub.itmcde
 		    ),
 	        outright AS (
 	            SELECT 
@@ -2336,7 +2345,7 @@ class Dashboard_model extends Model
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterOutright
@@ -2366,7 +2375,7 @@ class Dashboard_model extends Model
 	              AND s.untmea = u.untmea
 	            WHERE (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterConsignment
@@ -2577,20 +2586,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * 
+		        ? "ROUND(wow.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(wow.quantity), 0)";
+		        , 2)"
+		        : "ROUND(wow.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
-		        : "ROUND(SUM(wow.quantity), 0)";
+		        ? "ROUND(wow.quantity * IFNULL(wow.net_price, 0), 2)"
+		        : "ROUND(wow.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -2620,34 +2629,44 @@ class Dashboard_model extends Model
 	    }
 
 		$sql = "
-		    WITH aggregated AS (
-		        SELECT
-		            wow.itmcde,
-		            wow.tracc_brand_id AS brand_id,
-		            wow.brand_type_id,
-		            mp.item_description,
-		            mp.cust_item_code,
-		            wow.item_class_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-		        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		        INNER JOIN tbl_main_pricelist mp
-		            ON wow.itmcde = mp.item_code
+	        WITH aggregated AS (
+			    SELECT
+			        sub.itmcde,
+			        sub.tracc_brand_id AS brand_id,
+			        sub.item_description,
+			        sub.cust_item_code,
+			        GROUP_CONCAT(DISTINCT sub.brand_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+			            wow.itmcde,
+			            wow.tracc_brand_id,
+			            wow.brand_type_id,
+			            mp.item_description,
+			            mp.cust_item_code,
+			            wow.item_class_id,
+			            $sellOutExpr AS quantity
+			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
+			        INNER JOIN tbl_main_pricelist mp
+			            ON wow.itmcde = mp.item_code
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wow.itmcde = cp.item_code
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wow.itmcde = cp.item_code
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
 
-		        WHERE (? IS NULL OR wow.year = ?)
-		          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
-		          AND (? IS NULL OR wow.brand_type_id = ?)
-		          AND (? IS NULL OR mp.customer_payment_group = ?)
+			        WHERE (? IS NULL OR wow.year = ?)
+			          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
+			          AND (? IS NULL OR wow.brand_type_id = ?)
+			          AND (? IS NULL OR mp.customer_payment_group = ?)
 		          $skuFilter
 		          $brandFilter
 		          $brandCategoryFilter
-		        GROUP BY wow.itmcde, cp.item_code, hp.customer_payment_group
-		    ),
+			    ) AS sub
+			    GROUP BY sub.itmcde
+			),
 	        outright AS (
 	            SELECT 
 	                s.itmcde,
@@ -2666,7 +2685,7 @@ class Dashboard_model extends Model
 	            WHERE s.trncde = 'SAL'
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterOutright
@@ -2695,7 +2714,7 @@ class Dashboard_model extends Model
 	              ON s.itmcde = u.itmcde
 	              AND s.untmea = u.untmea
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterConsignment
@@ -2899,20 +2918,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * 
+		        ? "ROUND(wd.sales_qty * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(wd.quantity), 0)";
+		        , 2)"
+		        : "ROUND(wd.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
-		        : "ROUND(SUM(wd.sales_qty), 0)";
+		        ? "ROUND(wd.sales_qty * IFNULL(wd.net_price, 0), 2)"
+		        : "ROUND(wd.sales_qty, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -2942,34 +2961,44 @@ class Dashboard_model extends Model
 	    }
 
 		$sql = "
-		    WITH aggregated AS (
-		        SELECT
-		            wd.item_code AS itmcde,
-		            wd.brand_id,
-		            wd.brand_label_type_id AS brand_type_id,
-		            mp.item_description,
-		            mp.cust_item_code,
-		            wd.category_1_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-		        FROM tbl_winsight_details wd
-		        INNER JOIN tbl_main_pricelist mp
-		            ON wd.item_code = mp.item_code
+	        WITH aggregated AS (
+			    SELECT
+			        sub.item_code AS itmcde,
+			        sub.brand_id,
+			        sub.item_description,
+			        sub.cust_item_code,
+			        GROUP_CONCAT(DISTINCT sub.brand_label_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
+			        SUM(sub.sales_qty) AS sell_out
+			    FROM (
+				    SELECT DISTINCT
+			            wd.item_code,
+			            wd.brand_id,
+			            wd.brand_label_type_id,
+			            mp.item_description,
+			            mp.cust_item_code,
+			            wd.category_1_id,
+			            $sellOutExpr AS sales_qty
+			        FROM tbl_winsight_details wd
+			        INNER JOIN tbl_main_pricelist mp
+			            ON wd.item_code = mp.item_code
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wd.item_code = cp.item_code
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wd.item_code = cp.item_code
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
 
-		        WHERE (? IS NULL OR wd.year = ?)
-		          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
-		          AND (? IS NULL OR wd.brand_label_type_id = ?)
-		          AND (? IS NULL OR mp.customer_payment_group = ?)
-		          $skuFilter
-		          $brandFilter
-		          $brandCategoryFilter 
-		        GROUP BY wd.item_code, mp.item_code, cp.item_code, hp.customer_payment_group, mp.customer_payment_group
-		    ),
+			        WHERE (? IS NULL OR wd.year = ?)
+			          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
+			          AND (? IS NULL OR wd.brand_label_type_id = ?)
+			          AND (? IS NULL OR mp.customer_payment_group = ?)
+			          $skuFilter
+			          $brandFilter
+			          $brandCategoryFilter 
+			    ) AS sub
+			    GROUP BY sub.item_code
+			),
 	        outright AS (
 	            SELECT 
 	                s.itmcde,
@@ -2988,7 +3017,7 @@ class Dashboard_model extends Model
 	            WHERE s.trncde = 'SAL'
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterOutright
@@ -3017,7 +3046,7 @@ class Dashboard_model extends Model
 	              ON s.itmcde = u.itmcde
 	              AND s.untmea = u.untmea
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterConsignment
@@ -3172,20 +3201,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * 
+		        ? "ROUND(so.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        , 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        ? "ROUND(so.quantity * IFNULL(so.net_price, 0), 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -3216,29 +3245,37 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                so.brand_id,
-	                so.customer_payment_group,
-	                so.brand_type_id,
-	                so.item_class_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-	            FROM tbl_sell_out_pre_aggregated_data so
-	            INNER JOIN tbl_main_pricelist mp
-		            ON so.brand_id = mp.brand_id
+			    SELECT
+			        sub.brand_id,
+			        sub.customer_payment_group,
+			        GROUP_CONCAT(DISTINCT sub.brand_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+		                so.brand_id,
+		                so.customer_payment_group,
+		                so.brand_type_id,
+		                so.item_class_id,
+			            $sellOutExpr AS quantity
+		            FROM tbl_sell_out_pre_aggregated_data so
+		            INNER JOIN tbl_main_pricelist mp
+			            ON so.brand_id = mp.brand_id
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON so.brand_id = cp.brand_id
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON so.brand_id = cp.brand_id
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN tbl_historical_sub_pricelist hp
 		            ON cp.id = hp.customer_id
 
-	            WHERE (? IS NULL OR so.year = ?)
-	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
-	              $brandFilter
-	              AND (? IS NULL OR so.brand_type_id = ?)
-	              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
-	            GROUP BY so.brand_id, cp.brand_id, so.customer_payment_group, hp.customer_payment_group
-	        ),
+	            	WHERE (? IS NULL OR so.year = ?)
+		              AND (? IS NULL OR so.month BETWEEN ? AND ?)
+		              $brandFilter
+		              AND (? IS NULL OR so.brand_type_id = ?)
+		              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
+			    ) AS sub
+			    GROUP BY sub.brand_id
+			),
 	        outright AS (
 	            SELECT 
 	                s.brand_id,
@@ -3259,7 +3296,7 @@ class Dashboard_model extends Model
 	              AND (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterOutright
 	              AND EXISTS (
@@ -3286,7 +3323,7 @@ class Dashboard_model extends Model
 	            WHERE (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterConsignment
 	              AND EXISTS (
@@ -3434,20 +3471,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * 
+		        ? "ROUND(wow.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(wow.quantity), 0)";
+		        , 2)"
+		        : "ROUND(wow.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
-		        : "ROUND(SUM(wow.quantity), 0)";
+		        ? "ROUND(wow.quantity * IFNULL(wow.net_price, 0), 2)"
+		        : "ROUND(wow.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -3478,27 +3515,33 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                wow.tracc_brand_id AS brand_id,
-	                wow.brand_type_id,
-	                wow.item_class_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-	            FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-	            INNER JOIN tbl_main_pricelist mp
-		            ON wow.tracc_brand_id = mp.brand_id
+			    SELECT
+			        sub.tracc_brand_id AS brand_id,
+			        GROUP_CONCAT(DISTINCT sub.brand_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+		            SELECT DISTINCT
+		                wow.tracc_brand_id,
+		                wow.brand_type_id,
+		                wow.item_class_id,
+			            $sellOutExpr AS quantity
+		            FROM tbl_week_on_week_vmi_pre_aggregated_data wow
+		            INNER JOIN tbl_main_pricelist mp
+			            ON wow.tracc_brand_id = mp.brand_id
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wow.tracc_brand_id = cp.brand_id
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wow.tracc_brand_id = cp.brand_id
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
-
-	            WHERE (? IS NULL OR wow.year = ?)
-	              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
-	              $brandFilter
-	              AND (? IS NULL OR wow.brand_type_id = ?)
-	              AND (? IS NULL OR mp.customer_payment_group = ?)
-	            GROUP BY wow.tracc_brand_id, cp.brand_id, hp.customer_payment_group
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
+			        WHERE (? IS NULL OR wow.year = ?)
+			          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
+			          $brandFilter
+			          AND (? IS NULL OR wow.brand_type_id = ?)
+			          AND (? IS NULL OR mp.customer_payment_group = ?)
+			    ) AS sub
+	            GROUP BY sub.tracc_brand_id
 	        ),
 	        outright AS (
 	            SELECT 
@@ -3519,7 +3562,7 @@ class Dashboard_model extends Model
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterOutright
 	              AND EXISTS (
@@ -3545,7 +3588,7 @@ class Dashboard_model extends Model
 
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterConsignment
 	              AND EXISTS (
@@ -3691,20 +3734,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * 
+		        ? "ROUND(wd.sales_qty * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(wd.sales_qty), 0)";
+		        , 2)"
+		        : "ROUND(wd.sales_qty, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
-		        : "ROUND(SUM(wd.sales_qty), 0)";
+		        ? "ROUND(wd.sales_qty * IFNULL(wd.net_price, 0), 2)"
+		        : "wd.sales_qty";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -3735,28 +3778,32 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-					wd.brand_id,
-		            wd.brand_label_type AS brand_type_id,
-	                wd.category_1_id AS brand_category_id,
-					$sellOutExpr AS sell_out
-	            FROM tbl_winsight_details wd
-	            INNER JOIN tbl_main_pricelist mp
-		            ON wd.brand_id = mp.brand_id
-
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wd.brand_id = cp.brand_id
-
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
-
-	            WHERE (? IS NULL OR wd.year = ?)
-	              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
-	              $brandFilter
-	              AND (? IS NULL OR wd.brand_label_type_id = ?)
-	              AND (? IS NULL OR mp.customer_payment_group = ?)
-	            GROUP BY wd.brand_id, cp.brand_id, hp.customer_payment_group
-	        ),
+			    SELECT
+			        sub.brand_id,
+			        GROUP_CONCAT(DISTINCT sub.brand_label_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
+			        SUM(sub.sales_qty) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+			            wd.brand_id,
+			            wd.brand_label_type_id,
+			            wd.category_1_id,
+			            $sellOutExpr AS sales_qty
+			        FROM tbl_winsight_details wd
+			        INNER JOIN tbl_main_pricelist mp
+			            ON wd.brand_id = mp.brand_id
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wd.brand_id = cp.brand_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
+			        WHERE (? IS NULL OR wd.year = ?)
+			          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
+			          $brandFilter
+			          AND (? IS NULL OR wd.brand_label_type_id = ?)
+			          AND (? IS NULL OR mp.customer_payment_group = ?)
+			    ) AS sub
+			    GROUP BY sub.brand_id
+			),
 	        outright AS (
 	            SELECT 
 	                s.brand_id,
@@ -3776,7 +3823,7 @@ class Dashboard_model extends Model
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterOutright
 	              AND EXISTS (
@@ -3802,7 +3849,7 @@ class Dashboard_model extends Model
 
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.brand_label_type_id = ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterConsignment
 	              AND EXISTS (
@@ -3943,20 +3990,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * 
+		        ? "ROUND(so.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        , 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        ? "ROUND(so.quantity * IFNULL(so.net_price, 0), 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -3987,29 +4034,36 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                so.brand_type_id,
-	                so.customer_payment_group,
-	                so.item_class_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-	            FROM tbl_sell_out_pre_aggregated_data so
-	            INNER JOIN tbl_main_pricelist mp
-		            ON so.brand_type_id = mp.brand_label_type_id
-		            AND so.customer_payment_group = mp.customer_payment_group
+			    SELECT
+			        sub.customer_payment_group,
+			        GROUP_CONCAT(DISTINCT sub.brand_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+		                so.brand_type_id,
+		                so.customer_payment_group,
+		                so.item_class_id,
+			            $sellOutExpr AS quantity
+		            FROM tbl_sell_out_pre_aggregated_data so
+		            INNER JOIN tbl_main_pricelist mp
+			            ON so.brand_type_id = mp.brand_label_type_id
+			            AND so.customer_payment_group = mp.customer_payment_group
 
-		        LEFT JOIN tbl_customer_pricelist cp
-					ON so.brand_type_id = cp.brand_label_type_id
-		           AND so.customer_payment_group = cp.customer_payment_group
+			        LEFT JOIN tbl_customer_pricelist cp
+						ON so.brand_type_id = cp.brand_label_type_id
+			           AND so.customer_payment_group = cp.customer_payment_group
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
 
-	            WHERE (? IS NULL OR so.year = ?)
-	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
-	              $brandTypeFilter
-	              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
-	            GROUP BY so.brand_type_id, cp.brand_label_type_id, hp.customer_payment_group
-	        ),
+		            WHERE (? IS NULL OR so.year = ?)
+		              AND (? IS NULL OR so.month BETWEEN ? AND ?)
+		              $brandTypeFilter
+		              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
+			    ) AS sub
+			    GROUP BY sub.brand_type_id
+			),
 	        outright AS (
 	            SELECT 
 	                s.brand_label_type_id AS brand_type_id,
@@ -4027,7 +4081,7 @@ class Dashboard_model extends Model
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandTypeFilterOutright
 	              AND EXISTS (SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde)
@@ -4048,7 +4102,7 @@ class Dashboard_model extends Model
 	             AND s.untmea = u.untmea
 	            WHERE (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandTypeFilterConsignment
 	              AND EXISTS (SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde)
@@ -4179,20 +4233,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * 
+		        ? "ROUND(wow.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
 		            )
-		        ), 2)"
+		        , 2)"
 		        : "ROUND(SUM(wow.quantity), 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
-		        : "ROUND(SUM(wow.quantity), 0)";
+		        ? "ROUND(wow.quantity * IFNULL(wow.net_price, 0), 2)"
+		        : "ROUND(wow.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -4223,26 +4277,32 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                wow.brand_type_id,
-	                wow.item_class_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-		        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		        INNER JOIN tbl_main_pricelist mp
-		            ON wow.brand_type_id = mp.brand_label_type_id
+			    SELECT
+			        GROUP_CONCAT(DISTINCT sub.brand_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+		                wow.brand_type_id,
+		                wow.item_class_id,
+			            $sellOutExpr AS quantity
+			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
+			        INNER JOIN tbl_main_pricelist mp
+			            ON wow.brand_type_id = mp.brand_label_type_id
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wow.brand_type_id = cp.brand_label_type_id
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wow.brand_type_id = cp.brand_label_type_id
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
 
-	            WHERE (? IS NULL OR wow.year = ?)
-	              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
-	              AND (? IS NULL OR mp.customer_payment_group = ?)
-	              $brandTypeFilter
-	            GROUP BY wow.brand_type_id, cp.brand_label_type_id, hp.customer_payment_group
-	        ),
+		            WHERE (? IS NULL OR wow.year = ?)
+		              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
+		              AND (? IS NULL OR mp.customer_payment_group = ?)
+		              $brandTypeFilter
+			    ) AS sub
+			    GROUP BY sub.brand_type_id
+			),
 	        outright AS (
 	            SELECT 
 	                s.brand_label_type_id AS brand_type_id,
@@ -4259,7 +4319,7 @@ class Dashboard_model extends Model
 	            WHERE s.trncde = 'SAL'
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandTypeFilterOutright
 	              AND EXISTS (SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde)
@@ -4279,7 +4339,7 @@ class Dashboard_model extends Model
 	              ON s.brand_label_type_id = u.brand_label_type_id 
 	             AND s.untmea = u.untmea
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandTypeFilterConsignment
 	              AND EXISTS (SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde)
@@ -4395,7 +4455,7 @@ class Dashboard_model extends Model
 	    $brandTypeParams = [];
 	    if (!empty($brandTypeIds)) {
 	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
-	        $brandTypeFilter = "AND wd.brand_label_type IN ($placeholders)";
+	        $brandTypeFilter = "AND wd.brand_label_type_id IN ($placeholders)";
 	        $brandTypeParams = $brandTypeIds;
 	    }
 
@@ -4408,20 +4468,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * 
+		        ? "ROUND(wd.sales_qty * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(wd.sales_qty), 0)";
+		        , 2)"
+		        : "ROUND(wd.sales_qty, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
-		        : "ROUND(SUM(wd.sales_qty), 0)";
+		        ? "ROUND(wd.sales_qty * IFNULL(wd.net_price, 0), 2)"
+		        : "ROUND(wd.sales_qty, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -4452,26 +4512,32 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                wd.brand_label_type AS brand_type_id,
-	                wd.category_1_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-	            FROM tbl_winsight_details wd
-		        INNER JOIN tbl_main_pricelist mp
-		            ON wd.brand_label_type = mp.brand_label_type_id
+			    SELECT
+			        GROUP_CONCAT(DISTINCT sub.brand_label_type_id) AS brand_type_id,
+			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
+			        SUM(sub.sales_qty) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+		                wd.brand_label_type_id,
+		                wd.category_1_id,
+			            $sellOutExpr AS sales_qty
+		            FROM tbl_winsight_details wd
+			        INNER JOIN tbl_main_pricelist mp
+			            ON wd.brand_label_type_id = mp.brand_label_type_id
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wd.brand_label_type = cp.brand_label_type_id
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wd.brand_label_type_id = cp.brand_label_type_id
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
 
-	            WHERE (? IS NULL OR wd.year = ?)
-	              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
-	              AND (? IS NULL OR mp.customer_payment_group = ?)
-	              $brandTypeFilter
-	            GROUP BY wd.brand_label_type, cp.brand_label_type_id, hp.customer_payment_group
-	        ),
+		            WHERE (? IS NULL OR wd.year = ?)
+		              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
+		              AND (? IS NULL OR mp.customer_payment_group = ?)
+		              $brandTypeFilter
+			    ) AS sub
+			    GROUP BY sub.brand_label_type_id
+			),
 	        outright AS (
 	            SELECT 
 	                s.brand_label_type_id AS brand_type_id,
@@ -4488,7 +4554,7 @@ class Dashboard_model extends Model
 	            WHERE s.trncde = 'SAL'
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandTypeFilterOutright
 	              AND EXISTS (SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde)
@@ -4508,7 +4574,7 @@ class Dashboard_model extends Model
 	              ON s.brand_label_type_id = u.brand_label_type_id 
 	             AND s.untmea = u.untmea
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.cusdsc = ?)
+	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandTypeFilterConsignment
 	              AND EXISTS (SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde)
@@ -4589,6 +4655,10 @@ class Dashboard_model extends Model
 	    $monthEnd = null, 
 	    $searchValue = null,
 	    $brandCategoryId = null,  
+	    $subBrandCategoryId = null,  
+	    $categoryId = null,  
+	    $itemDeptId = null,  
+	    $merchCatId = null,  
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
 	    $orderByColumn = 'rank', 
@@ -4598,10 +4668,17 @@ class Dashboard_model extends Model
 	    $sellInType = 3,
 	    $measure = 'qty'
 	) {
-	    $allowedOrderColumns = ['rank', 'brand_category', 'sell_in', 'sell_out', 'sell_out_ratio'];
+		//brand_category = item classfication
+	    $allowedOrderColumns = ['rank', 'brand_category', 'label_category', 'sub_classification', 'item_department', 'item_merchandise', 'sell_in', 'sell_out', 'sell_out_ratio'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
-	    $searchColumns = ['LOWER(brand_category)'];
+	    $searchColumns = [
+	    	'LOWER(brand_category)',
+	    	'LOWER(label_category)',
+	    	'LOWER(sub_classification)',
+	    	'LOWER(item_department)',
+	    	'LOWER(item_merchandise)'
+	    	];
 	    $searchClause = '';
 	    $searchParams = [];
 
@@ -4622,20 +4699,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * 
+		        ? "ROUND(so.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(so.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(so.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        , 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(so.quantity * IFNULL(so.net_price, 0)), 2)"
-		        : "ROUND(SUM(so.quantity), 0)";
+		        ? "ROUND(so.quantity * IFNULL(so.net_price, 0), 2)"
+		        : "ROUND(so.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -4666,53 +4743,87 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                so.customer_payment_group,
-	                so.item_class_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-	            FROM tbl_sell_out_pre_aggregated_data so
-		        INNER JOIN tbl_main_pricelist mp
-		            ON so.item_class_id = mp.category_1_id
-		           AND so.customer_payment_group = mp.customer_payment_group
+			    SELECT
+			        sub.customer_payment_group,
+			        sub.label_type_category_id,
+			        sub.category_2_id,
+			        sub.category_3_id,
+			        sub.category_4_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+		                so.customer_payment_group,
+		                so.label_type_category_id,
+		                so.item_class_id,
+		                so.category_2_id,
+		                so.category_3_id,
+		                so.category_4_id,
+			            $sellOutExpr AS quantity
+		            FROM tbl_sell_out_pre_aggregated_data so
+			        INNER JOIN tbl_main_pricelist mp
+			            ON so.item_class_id = mp.category_1_id
+			            AND so.customer_payment_group = mp.customer_payment_group
+			            AND so.label_type_category_id = mp.label_type_category_id
+			            AND so.category_2_id = mp.category_2_id
+			            AND so.category_3_id = mp.category_3_id
+			            AND so.category_4_id = mp.category_4_id
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON so.item_class_id = cp.category_1_id
-		           AND so.customer_payment_group = cp.customer_payment_group
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON so.item_class_id = cp.category_1_id
+			           AND so.customer_payment_group = cp.customer_payment_group
+					   AND so.label_type_category_id = mp.label_type_category_id
+					   AND so.category_2_id = mp.category_2_id
+					   AND so.category_3_id = mp.category_3_id
+					   AND so.category_4_id = mp.category_4_id
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
 
-	            WHERE (? IS NULL OR so.year = ?)
-	              AND (? IS NULL OR so.month BETWEEN ? AND ?)
-	              AND (? IS NULL OR so.item_class_id = ?)
-	              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
-	            GROUP BY mp.category_1_id, so.customer_payment_group, cp.category_1_id, hp.customer_payment_group
-	        ),
+		            WHERE (? IS NULL OR so.year = ?)
+		              AND (? IS NULL OR so.month BETWEEN ? AND ?)
+		              AND (? IS NULL OR so.item_class_id = ?)
+		              AND (? IS NULL OR so.label_type_category_id = ?)
+		              AND (? IS NULL OR so.category_2_id = ?)
+		              AND (? IS NULL OR so.category_3_id = ?)
+		              AND (? IS NULL OR so.category_4_id = ?)
+		              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
+			    ) AS sub
+			    GROUP BY sub.item_class_id, sub.label_type_category_id, sub.category_2_id, sub.category_3_id, sub.category_4_id
+			),
 	        outright AS (
 	            SELECT 
 	                s.brand_category_id,
 	                $outrightExpr AS total_qty
 	            FROM tbl_item_salesfile2_all s
 	            LEFT JOIN (
-	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                SELECT untmea, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id, MAX(conver) AS conver
 	                FROM tbl_item_unit_file_all
-	                GROUP BY brand_category_id, untmea
+	                GROUP BY brand_category_id, untmea, label_type_category_id, category_2_id, category_3_id, category_4_id
 		            ) u 
 		              ON s.brand_category_id = u.brand_category_id
 		             AND s.untmea = u.untmea
+		             AND s.label_type_category_id = u.label_type_category_id
+		             AND s.category_2_id = u.category_2_id
+		             AND s.category_3_id = u.category_3_id
+		             AND s.category_4_id = u.category_4_id
 		            WHERE s.trncde = 'SAL'
 		              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 		              AND (? IS NULL OR YEAR(s.trndte) = ?)
 		              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
 	              	  AND (? IS NULL OR s.brand_category_id = ?)
-		              AND (? IS NULL OR s.cusdsc = ?)
+		              AND (? IS NULL OR s.label_type_category_id = ?)
+		              AND (? IS NULL OR s.category_2_id = ?)
+		              AND (? IS NULL OR s.category_3_id = ?)
+		              AND (? IS NULL OR s.category_4_id = ?)
+		              AND (? IS NULL OR s.customer_group = ?)
 		              AND (? IS NULL OR s.cuscde = ?)
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
 	                  WHERE ci.cus_code = s.cuscde
 	              )
-	            GROUP BY s.brand_category_id
+	            GROUP BY s.brand_category_id, s.label_type_category_id, s.category_2_id, s.category_3_id, s.category_4_id
 	        ),
 	        consignment AS (
 	            SELECT 
@@ -4720,28 +4831,40 @@ class Dashboard_model extends Model
 	                $consignmentExpr AS total_qty
 	            FROM tbl_item_salesfile_consignment_all s
 	            LEFT JOIN (
-	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                SELECT untmea, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id, MAX(conver) AS conver
 	                FROM tbl_item_unit_file_all
-	                GROUP BY brand_category_id, untmea
+	                GROUP BY brand_category_id, untmea, label_type_category_id, category_2_id, category_3_id, category_4_id
 		            ) u 
 		              ON s.brand_category_id = u.brand_category_id
 		             AND s.untmea = u.untmea
+		             AND s.label_type_category_id = u.label_type_category_id
+		             AND s.category_2_id = u.category_2_id
+		             AND s.category_3_id = u.category_3_id
+		             AND s.category_4_id = u.category_4_id
 		            WHERE (? IS NULL OR YEAR(s.trndte) = ?)
 		              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
 		              AND (? IS NULL OR s.brand_category_id = ?)
-					  AND (? IS NULL OR s.cusdsc = ?)
+		              AND (? IS NULL OR s.label_type_category_id = ?)
+		              AND (? IS NULL OR s.category_2_id = ?)
+		              AND (? IS NULL OR s.category_3_id = ?)
+		              AND (? IS NULL OR s.category_4_id = ?)
+					  AND (? IS NULL OR s.customer_group = ?)
 					  AND (? IS NULL OR s.cuscde = ?)
 		              AND EXISTS (
 		                  SELECT 1 
 		                  FROM tbl_cus_sellout_indicator ci
 		                  WHERE ci.cus_code = s.cuscde
 		              )
-	            GROUP BY s.brand_category_id
+	            GROUP BY s.brand_category_id, s.label_type_category_id, s.category_2_id, s.category_3_id, s.category_4_id
 	        ),
 	        final_data AS (
 	            SELECT
 	                a.customer_payment_group,
 	                a.brand_category_id,
+	                lcl.description AS label_category,
+	                sc.item_sub_class_code AS sub_classification,
+	                id.item_department_code AS item_department,
+	                imc.item_mech_cat_code AS item_merchandise,
 	                cl.item_class_description AS brand_category,
 	                $sellInExpr AS sell_in,
 	                a.sell_out,
@@ -4758,9 +4881,23 @@ class Dashboard_model extends Model
 	                ON a.brand_category_id = c.brand_category_id 
 	            LEFT JOIN tbl_classification cl
 	                ON a.brand_category_id = cl.id
+	            LEFT JOIN tbl_label_category_list lcl
+	                ON a.label_type_category_id = lcl.id
+	            LEFT JOIN tbl_sub_classification sc
+	                ON a.category_2_id = sc.id
+	            LEFT JOIN tbl_item_department id
+	                ON a.category_3_id = id.id
+	            LEFT JOIN tbl_item_merchandise_category imc
+	                ON a.category_4_id = imc.id
+
+
 	        )
 	        SELECT 
 	            ROW_NUMBER() OVER(ORDER BY sell_out_ratio DESC) AS rank,
+	            label_category,
+	            sub_classification,
+	            item_department,
+	            item_merchandise,
 	            customer_payment_group,
 	            brand_category,
 	            sell_in,
@@ -4777,12 +4914,20 @@ class Dashboard_model extends Model
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $salesGroup, $salesGroup, $salesGroup,
 
 	        // outright
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 
@@ -4790,6 +4935,10 @@ class Dashboard_model extends Model
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ];
@@ -4817,6 +4966,10 @@ class Dashboard_model extends Model
 		$weekEndDate= null,
 	    $searchValue = null,
 	    $brandCategoryId = null,  
+	    $subBrandCategoryId = null,  
+	    $categoryId = null,  
+	    $itemDeptId = null,  
+	    $merchCatId = null,  
 	    $salesGroup = null, 
 	    $subSalesGroup = null,
 	    $watsonsPaymentGroup = null,
@@ -4827,10 +4980,16 @@ class Dashboard_model extends Model
 	    $sellInType = 3,
 	    $measure = 'qty'
 	) {
-	    $allowedOrderColumns = ['rank', 'brand_category', 'sell_in', 'sell_out', 'sell_out_ratio'];
+	    $allowedOrderColumns = ['rank', 'brand_category', 'label_category', 'sub_classification', 'item_department', 'item_merchandise', 'sell_in', 'sell_out', 'sell_out_ratio'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
-	    $searchColumns = ['LOWER(brand_category)'];
+	    $searchColumns = [
+	    	'LOWER(brand_category)',
+	    	'LOWER(label_category)',
+	    	'LOWER(sub_classification)',
+	    	'LOWER(item_department)',
+	    	'LOWER(item_merchandise)'
+	    	];
 	    $searchClause = '';
 	    $searchParams = [];
 
@@ -4851,20 +5010,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * 
+		        ? "ROUND(wow.quantity * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wow.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wow.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(wow.quantity), 0)";
+		        , 2)"
+		        : "ROUND(wow.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wow.quantity * IFNULL(wow.net_price, 0)), 2)"
-		        : "ROUND(SUM(wow.quantity), 0)";
+		        ? "ROUND(wow.quantity * IFNULL(wow.net_price, 0), 2)"
+		        : "ROUND(wow.quantity, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -4895,24 +5054,49 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                wow.item_class_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-		        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		        INNER JOIN tbl_main_pricelist mp
-		            ON wow.item_class_id = mp.category_1_id
+			    SELECT
+			        sub.label_type_category_id,
+			        sub.category_2_id,
+			        sub.category_3_id,
+			        sub.category_4_id,
+			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        SUM(sub.quantity) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+			        	wow.label_type_category_id,
+		                wow.item_class_id,
+		                wow.category_2_id,
+		                wow.category_3_id,
+		                wow.category_4_id,
+			            $sellOutExpr AS quantity
+			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
+			        INNER JOIN tbl_main_pricelist mp
+			            ON wow.item_class_id = mp.category_1_id
+					   AND wow.label_type_category_id = mp.label_type_category_id
+					   AND wow.category_2_id = mp.category_2_id
+					   AND wow.category_3_id = mp.category_3_id
+					   AND wow.category_4_id = mp.category_4_id
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wow.item_class_id = cp.category_1_id
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wow.item_class_id = cp.category_1_id
+			           AND wow.label_type_category_id = mp.label_type_category_id
+					   AND wow.category_2_id = mp.category_2_id
+					   AND wow.category_3_id = mp.category_3_id
+					   AND wow.category_4_id = mp.category_4_id
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
-		       
-	            WHERE (? IS NULL OR wow.year = ?)
-	              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
-	              AND (? IS NULL OR wow.item_class_id = ?)
-	              AND (? IS NULL OR mp.customer_payment_group = ?)
-	            GROUP BY wow.item_class_id, cp.category_1_id, hp.customer_payment_group
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
+			       
+		            WHERE (? IS NULL OR wow.year = ?)
+		              AND (? IS NULL OR wow.week BETWEEN ? AND ?)
+		              AND (? IS NULL OR wow.item_class_id = ?)
+		              AND (? IS NULL OR wow.label_type_category_id = ?)
+		              AND (? IS NULL OR wow.category_2_id = ?)
+		              AND (? IS NULL OR wow.category_3_id = ?)
+		              AND (? IS NULL OR wow.category_4_id = ?)
+		              AND (? IS NULL OR mp.customer_payment_group = ?)
+			    ) AS sub
+			    GROUP BY sub.item_class_id, sub.label_type_category_id, sub.category_2_id, sub.category_3_id, sub.category_4_id
 	        ),
 	        outright AS (
 	            SELECT 
@@ -4920,7 +5104,7 @@ class Dashboard_model extends Model
 	                $outrightExpr AS total_qty
 	            FROM tbl_item_salesfile2_all s
 	            LEFT JOIN (
-	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                SELECT untmea, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id, MAX(conver) AS conver
 	                FROM tbl_item_unit_file_all
 	                GROUP BY brand_category_id, untmea
 		            ) u 
@@ -4930,14 +5114,18 @@ class Dashboard_model extends Model
 		              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 		              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              	  AND (? IS NULL OR s.brand_category_id = ?)
-		              AND (? IS NULL OR s.cusdsc = ?)
+	              	  AND (? IS NULL OR s.label_type_category_id = ?)
+		              AND (? IS NULL OR s.category_2_id = ?)
+		              AND (? IS NULL OR s.category_3_id = ?)
+		              AND (? IS NULL OR s.category_4_id = ?)
+		              AND (? IS NULL OR s.customer_group = ?)
 		              AND (? IS NULL OR s.cuscde = ?)
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
 	                  WHERE ci.cus_code = s.cuscde
 	              )
-	            GROUP BY s.brand_category_id
+	            GROUP BY s.brand_category_id, s.label_type_category_id, s.category_2_id, s.category_3_id, s.category_4_id
 	        ),
 	        consignment AS (
 	            SELECT 
@@ -4945,26 +5133,34 @@ class Dashboard_model extends Model
 	                $consignmentExpr AS total_qty
 	            FROM tbl_item_salesfile_consignment_all s
 	            LEFT JOIN (
-	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                SELECT untmea, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id, MAX(conver) AS conver
 	                FROM tbl_item_unit_file_all
-	                GROUP BY brand_category_id, untmea
+	                GROUP BY brand_category_id, untmea, label_type_category_id, category_2_id, category_3_id, category_4_id
 		            ) u 
 		              ON s.brand_category_id = u.brand_category_id
 		             AND s.untmea = u.untmea
 		            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
 		              AND (? IS NULL OR s.brand_category_id = ?)
-					  AND (? IS NULL OR s.cusdsc = ?)
+		              AND (? IS NULL OR s.label_type_category_id = ?)
+		              AND (? IS NULL OR s.category_2_id = ?)
+		              AND (? IS NULL OR s.category_3_id = ?)
+		              AND (? IS NULL OR s.category_4_id = ?)
+					  AND (? IS NULL OR s.customer_group = ?)
 					  AND (? IS NULL OR s.cuscde = ?)
 		              AND EXISTS (
 		                  SELECT 1 
 		                  FROM tbl_cus_sellout_indicator ci
 		                  WHERE ci.cus_code = s.cuscde
 		              )
-	            GROUP BY s.brand_category_id
+	            GROUP BY s.brand_category_id, s.label_type_category_id, s.category_2_id, s.category_3_id, s.category_4_id
 	        ),
 	        final_data AS (
 	            SELECT
 	                a.brand_category_id,
+	                lcl.description AS label_category,
+	                sc.item_sub_class_code AS sub_classification,
+	                id.item_department_code AS item_department,
+	                imc.item_mech_cat_code AS item_merchandise,
 	                cl.item_class_description AS brand_category,
 	                $sellInExpr AS sell_in,
 	                a.sell_out,
@@ -4981,9 +5177,21 @@ class Dashboard_model extends Model
 	                ON a.brand_category_id = c.brand_category_id 
 	            LEFT JOIN tbl_classification cl
 	                ON a.brand_category_id = cl.id
+	            LEFT JOIN tbl_label_category_list lcl
+	                ON a.label_type_category_id = lcl.id
+	            LEFT JOIN tbl_sub_classification sc
+	                ON a.category_2_id = sc.id
+	            LEFT JOIN tbl_item_department id
+	                ON a.category_3_id = id.id
+	            LEFT JOIN tbl_item_merchandise_category imc
+	                ON a.category_4_id = imc.id
 	        )
 	        SELECT 
 	            ROW_NUMBER() OVER(ORDER BY sell_out_ratio DESC) AS rank,
+	            label_category,
+	            sub_classification,
+	            item_department,
+	            item_merchandise,
 	            brand_category,
 	            sell_in,
 	            sell_out,
@@ -4999,16 +5207,28 @@ class Dashboard_model extends Model
 	        $yearId, $yearId,
 	        $weekStart, $weekStart, $weekEnd,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 
 	        // consignment
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ];
@@ -5039,6 +5259,10 @@ class Dashboard_model extends Model
 		$weekEndDate= null,
 	    $searchValue = null,
 	    $brandCategoryId = null,  
+	    $subBrandCategoryId = null,  
+	    $categoryId = null,  
+	    $itemDeptId = null,  
+	    $merchCatId = null,  
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
 	    $watsonsPaymentGroup = null,
@@ -5049,10 +5273,16 @@ class Dashboard_model extends Model
 	    $sellInType = 3,
 	    $measure = 'qty'
 	) {
-	    $allowedOrderColumns = ['rank', 'brand_category', 'sell_in', 'sell_out', 'sell_out_ratio'];
+	    $allowedOrderColumns = ['rank', 'brand_category', 'label_category', 'sub_classification', 'item_department', 'item_merchandise', 'sell_in', 'sell_out', 'sell_out_ratio'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
-	    $searchColumns = ['LOWER(brand_category)'];
+	    $searchColumns = [
+	    	'LOWER(brand_category)',
+	    	'LOWER(label_category)',
+	    	'LOWER(sub_classification)',
+	    	'LOWER(item_department)',
+	    	'LOWER(item_merchandise)'
+	    	];
 	    $searchClause = '';
 	    $searchParams = [];
 
@@ -5073,20 +5303,20 @@ class Dashboard_model extends Model
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * 
+		        ? "ROUND(wd.sales_qty * 
 		            IF(
 		                mp.effectivity_date <= CURRENT_DATE(),
 		                IFNULL(cp.net_price, IFNULL(wd.net_price, 0)),
 		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
 		            )
-		        ), 2)"
-		        : "ROUND(SUM(wd.sales_qty), 0)";
+		        , 2)"
+		        : "ROUND(wd.sales_qty, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
 		    $sellOutExpr = $measure === 'amount'
-		        ? "ROUND(SUM(wd.sales_qty * IFNULL(wd.net_price, 0)), 2)"
-		        : "ROUND(SUM(wd.sales_qty), 0)";
+		        ? "ROUND(wd.sales_qty * IFNULL(wd.net_price, 0), 2)"
+		        : "ROUND(wd.sales_qty, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		}
@@ -5117,24 +5347,48 @@ class Dashboard_model extends Model
 
 	    $sql = "
 	        WITH aggregated AS (
-	            SELECT
-	                wd.category_1_id AS brand_category_id,
-		            $sellOutExpr AS sell_out
-	            FROM tbl_winsight_details wd
-		        INNER JOIN tbl_main_pricelist mp
-		            ON wd.category_1_id = mp.category_1_id
+			    SELECT
+			    	sub.label_type_category_id,
+			        sub.category_2_id,
+			        sub.category_3_id,
+			        sub.category_4_id,
+			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
+			        SUM(sub.sales_qty) AS sell_out
+			    FROM (
+			        SELECT DISTINCT
+		                wd.category_1_id,
+		                wd.label_type_category_id,
+		                wd.category_2_id,
+		                wd.category_3_id,
+		                wd.category_4_id,
+			            $sellOutExpr AS sales_qty
+		            FROM tbl_winsight_details wd
+			        INNER JOIN tbl_main_pricelist mp
+			            ON wd.category_1_id = mp.category_1_id
+			            AND wd.label_type_category_id = mp.label_type_category_id
+			            AND wd.category_2_id = mp.category_2_id
+			            AND wd.category_3_id = mp.category_3_id
+			            AND wd.category_4_id = mp.category_4_id
+			        LEFT JOIN tbl_customer_pricelist cp
+			            ON wd.category_1_id = cp.category_1_id
+			            AND wd.label_type_category_id = mp.label_type_category_id
+			            AND wd.category_2_id = mp.category_2_id
+			            AND wd.category_3_id = mp.category_3_id
+			            AND wd.category_4_id = mp.category_4_id
 
-		        LEFT JOIN tbl_customer_pricelist cp
-		            ON wd.category_1_id = cp.category_1_id
+			        LEFT JOIN tbl_historical_sub_pricelist hp
+			            ON cp.id = hp.customer_id
 
-		        LEFT JOIN tbl_historical_sub_pricelist hp
-		            ON cp.id = hp.customer_id
-
-	            WHERE (? IS NULL OR wd.year = ?)
-	              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
-	              AND (? IS NULL OR wd.category_1_id = ?)
-	              AND (? IS NULL OR mp.customer_payment_group = ?)
-	            GROUP BY wd.category_1_id, cp.category_1_id, hp.customer_payment_group
+		            WHERE (? IS NULL OR wd.year = ?)
+		              AND (? IS NULL OR wd.week BETWEEN ? AND ?)
+		              AND (? IS NULL OR wd.category_1_id = ?)
+		              AND (? IS NULL OR wd.label_type_category_id = ?)
+		              AND (? IS NULL OR wd.category_2_id = ?)
+		              AND (? IS NULL OR wd.category_3_id = ?)
+		              AND (? IS NULL OR wd.category_4_id = ?)
+		              AND (? IS NULL OR mp.customer_payment_group = ?)
+			    ) AS sub
+			    GROUP BY sub.category_1_id, sub.label_type_category_id, sub.category_2_id, sub.category_3_id, sub.category_4_id
 	        ),
 	        outright AS (
 	            SELECT 
@@ -5142,24 +5396,32 @@ class Dashboard_model extends Model
 	                $outrightExpr AS total_qty
 	            FROM tbl_item_salesfile2_all s
 	            LEFT JOIN (
-	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                SELECT untmea, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id, MAX(conver) AS conver
 	                FROM tbl_item_unit_file_all
-	                GROUP BY brand_category_id, untmea
+	                GROUP BY brand_category_id, untmea, label_type_category_id, category_2_id, category_3_id, category_4_id
 		            ) u 
 		              ON s.brand_category_id = u.brand_category_id
 		             AND s.untmea = u.untmea
+		             AND s.label_type_category_id = u.label_type_category_id
+		             AND s.category_2_id = u.category_2_id
+		             AND s.category_3_id = u.category_3_id
+		             AND s.category_4_id = u.category_4_id
 		            WHERE s.trncde = 'SAL'
 		              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 		              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              	  AND (? IS NULL OR s.brand_category_id = ?)
-		              AND (? IS NULL OR s.cusdsc = ?)
+		              AND (? IS NULL OR s.label_type_category_id = ?)
+		              AND (? IS NULL OR s.category_2_id = ?)
+		              AND (? IS NULL OR s.category_3_id = ?)
+		              AND (? IS NULL OR s.category_4_id = ?)
+		              AND (? IS NULL OR s.customer_group = ?)
 		              AND (? IS NULL OR s.cuscde = ?)
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
 	                  WHERE ci.cus_code = s.cuscde
 	              )
-	            GROUP BY s.brand_category_id
+	            GROUP BY s.brand_category_id, s.label_type_category_id, s.category_2_id, s.category_3_id, s.category_4_id
 	        ),
 	        consignment AS (
 	            SELECT 
@@ -5167,26 +5429,38 @@ class Dashboard_model extends Model
 	                $consignmentExpr AS total_qty
 	            FROM tbl_item_salesfile_consignment_all s
 	            LEFT JOIN (
-	                SELECT untmea, brand_category_id, MAX(conver) AS conver
+	                SELECT untmea, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id, MAX(conver) AS conver
 	                FROM tbl_item_unit_file_all
-	                GROUP BY brand_category_id, untmea
+	                GROUP BY brand_category_id, untmea, label_type_category_id, category_2_id, category_3_id, category_4_id
 		            ) u 
 		              ON s.brand_category_id = u.brand_category_id
 		             AND s.untmea = u.untmea
+		             AND s.label_type_category_id = u.label_type_category_id
+		             AND s.category_2_id = u.category_2_id
+		             AND s.category_3_id = u.category_3_id
+		             AND s.category_4_id = u.category_4_id
 		            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
 		              AND (? IS NULL OR s.brand_category_id = ?)
-					  AND (? IS NULL OR s.cusdsc = ?)
+		              AND (? IS NULL OR s.label_type_category_id = ?)
+		              AND (? IS NULL OR s.category_2_id = ?)
+		              AND (? IS NULL OR s.category_3_id = ?)
+		              AND (? IS NULL OR s.category_4_id = ?)
+					  AND (? IS NULL OR s.customer_group = ?)
 					  AND (? IS NULL OR s.cuscde = ?)
 		              AND EXISTS (
 		                  SELECT 1 
 		                  FROM tbl_cus_sellout_indicator ci
 		                  WHERE ci.cus_code = s.cuscde
 		              )
-	            GROUP BY s.brand_category_id
+	            GROUP BY s.brand_category_id, s.label_type_category_id, s.category_2_id, s.category_3_id, s.category_4_id
 	        ),
 	        final_data AS (
 	            SELECT
 	                a.brand_category_id,
+	                lcl.description AS label_category,
+	                sc.item_sub_class_code AS sub_classification,
+	                id.item_department_code AS item_department,
+	                imc.item_mech_cat_code AS item_merchandise,
 	                cl.item_class_description AS brand_category,
 	                $sellInExpr AS sell_in,
 	                a.sell_out,
@@ -5203,9 +5477,21 @@ class Dashboard_model extends Model
 	                ON a.brand_category_id = c.brand_category_id 
 	            LEFT JOIN tbl_classification cl
 	                ON a.brand_category_id = cl.id
+	            LEFT JOIN tbl_label_category_list lcl
+	                ON a.label_type_category_id = lcl.id
+	            LEFT JOIN tbl_sub_classification sc
+	                ON a.category_2_id = sc.id
+	            LEFT JOIN tbl_item_department id
+	                ON a.category_3_id = id.id
+	            LEFT JOIN tbl_item_merchandise_category imc
+	                ON a.category_4_id = imc.id
 	        )
 	        SELECT 
 	            ROW_NUMBER() OVER(ORDER BY sell_out_ratio DESC) AS rank,
+	            label_category,
+	            sub_classification,
+	            item_department,
+	            item_merchandise,
 	            brand_category,
 	            sell_in,
 	            sell_out,
@@ -5221,16 +5507,28 @@ class Dashboard_model extends Model
 	        $year, $year,
 	        $weekStart, $weekStart, $weekEnd,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 
 	        // consignment
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $brandCategoryId, $brandCategoryId,
+	        $categoryId, $categoryId,
+	        $subBrandCategoryId, $subBrandCategoryId,
+	        $itemDeptId, $itemDeptId,
+	        $merchCatId, $merchCatId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ];

@@ -33,17 +33,36 @@ class SellThroughBrandCategory extends BaseController
 		$data['PageName'] = 'Sell Through By Brand Category';
 		$data['PageUrl'] = 'Sell Through By Brand Category';
 		$data["breadcrumb"] = array('Sell Through' => base_url('sell-through/by-brand-category'),'Sell Through By Brand Category' => '');
-		$data["source"] = "Actual Sales Report, Scan Data, and Target Sales";
-		$data["source_date"] = '';	
+		$data["source"] = "Scan Data";
+		$data["source_date"] = '<span id="sourceDate">N / A</span>';
 		$data["foot_note"] = '';	
 
 		$data['content'] = "site/sell_through/by_brand_category/by_brand_category";
 		$sales_query = "status > 0";
 		$data['sales_group'] = $this->Global_model->get_data_list('tbl_pricelist_masterfile', $sales_query, 0, 0, 'id, description','','', '', '');
 		$data['sales_group'] = json_decode(json_encode($data['sales_group']), true);
-		$brand_cat_query = "status > 0";
+		
+		$brand_cat_query = "status > 0"; //classification table
 		$data['brand_categories'] = $this->Global_model->get_data_list('tbl_classification', $brand_cat_query, 0, 0, 'id, item_class_description','','', '', '');
 		$data['brand_categories'] = json_decode(json_encode($data['brand_categories']), true);
+
+		$brand_sub_cat_query = "status > 0"; //sub classification table
+		$data['brand_sub_categories'] = $this->Global_model->get_data_list('tbl_sub_classification', $brand_sub_cat_query, 0, 0, 'id, item_sub_class_code','','', '', '');
+		$data['brand_sub_categories'] = json_decode(json_encode($data['brand_sub_categories']), true);
+
+		$dept_query = "status > 0"; //item department table
+		$data['item_department'] = $this->Global_model->get_data_list('tbl_item_department', $dept_query, 0, 0, 'id, item_department_code','','', '', '');
+		$data['item_department'] = json_decode(json_encode($data['item_department']), true);
+
+		$merh_cat_query = "status > 0"; //merchandise category table 
+		$data['merch_categories'] = $this->Global_model->get_data_list('tbl_item_merchandise_category', $merh_cat_query, 0, 0, 'id, item_mech_cat_code','','', '', '');
+		$data['merch_categories'] = json_decode(json_encode($data['merch_categories']), true);
+
+		$cat_query = "status > 0"; //label category table 
+		$data['categories'] = $this->Global_model->get_data_list('tbl_label_category_list', $cat_query, 0, 0, 'id, description','','', '', '');
+		$data['categories'] = json_decode(json_encode($data['categories']), true);
+
+
 		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
 		$data['session'] = session();
@@ -66,6 +85,18 @@ class SellThroughBrandCategory extends BaseController
 
 		$brandCategoryId = $this->request->getPost('brand_category');
 		$brandCategoryId = $brandCategoryId === '' ? null : $brandCategoryId;
+
+		$subBrandCategoryId = $this->request->getPost('sub_brand_category');
+		$subBrandCategoryId = $subBrandCategoryId === '' ? null : $subBrandCategoryId;
+
+		$categoryId = $this->request->getPost('category');
+		$categoryId = $categoryId === '' ? null : $categoryId;
+
+		$itemDeptId = $this->request->getPost('item_department');
+		$itemDeptId = $itemDeptId === '' ? null : $itemDeptId;
+
+		$merchCatId = $this->request->getPost('merch_category');
+		$merchCatId = $merchCatId === '' ? null : $merchCatId;
 
 		$year = trim($this->request->getPost('year') ?? '');
 		$year = $year === '' ? null : $year;
@@ -125,11 +156,11 @@ class SellThroughBrandCategory extends BaseController
 
 	    switch ($source) {
 	        case 'scann_data':
-			    $data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'week_on_week':
-			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'winsight':
@@ -138,7 +169,7 @@ class SellThroughBrandCategory extends BaseController
 
 			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 			    $weekEnd = $year.$weekEnd;
-			    $data = $this->Dashboard_model->getSellThroughWinsightByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWinsightByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 				break;
 	        default:
@@ -148,7 +179,7 @@ class SellThroughBrandCategory extends BaseController
 	        	// $year = 2025;
 	        	// $monthStart = 1;
 	        	// $monthEnd = 11;
-	        	$data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+	        	$data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	    }
 

@@ -67,7 +67,7 @@
 
                 updateWeeks('weekfrom', getCurrentWeek()); 
                 updateWeeks('weekto', getCurrentWeek()); 
-
+                source = $('#dataSource').val();
                 if(source !== "scann_data"){
                     $('#sourceDate').text(
                         getTextOrDash("#year") + " " +

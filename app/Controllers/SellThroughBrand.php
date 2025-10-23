@@ -33,9 +33,9 @@ class SellThroughBrand extends BaseController
 		$data['PageName'] = 'Sell Through By Brand';
 		$data['PageUrl'] = 'Sell Through By Brand';
 		$data["breadcrumb"] = array('Sell Through' => base_url('sell-through/by-brand'),'Sell Through By Brand' => '');
-		$data["source"] = "Actual Sales Report, Scan Data, and Target Sales";
-		$data["source_date"] = '';	
-		$data["foot_note"] = '';	
+		$data["source"] = "Scan Data";
+		$data["source_date"] = '<span id="sourceDate">N / A</span>';
+		$data["foot_note"] = '';		
 
 		$data['content'] = "site/sell_through/by_brand/by_brand";
 		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
@@ -139,7 +139,7 @@ class SellThroughBrand extends BaseController
 	    switch ($source) {
 	        case 'scann_data':
 			    $data = $this->Dashboard_model->getSellThroughScannDataByBrand($year, $monthStart, $monthEnd, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
-				
+				break;	
 	        case 'week_on_week':
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByBrand($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				

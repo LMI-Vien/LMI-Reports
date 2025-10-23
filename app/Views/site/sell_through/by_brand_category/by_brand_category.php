@@ -68,7 +68,7 @@
                                     <thead>
                                         <tr>
                                             <th 
-                                                colspan="5"
+                                                colspan="9"
                                                 style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
                                                 class="static-header"
                                             >
@@ -77,7 +77,11 @@
                                         </tr>
                                         <tr>
                                             <th class="tbl-title-field text-center">Rank</th>
-                                            <th class="tbl-title-field text-center">Brand Category</th>
+                                            <th class="tbl-title-field text-center">Label Type Category</th>
+                                            <th class="tbl-title-field text-center">Category 1 (Item Classification)</th>
+                                            <th class="tbl-title-field text-center">Category 2 (Item Sub Classification)</th>
+                                            <th class="tbl-title-field text-center">Category 3 (Item Department)</th>
+                                            <th class="tbl-title-field text-center">Category 4 (Item Merchandise Category)</th>
                                             <th class="tbl-title-field text-center">Sell In <span class="tblMeasure">(qty)</span></th>
                                             <th class="tbl-title-field text-center">Sell Out <span class="tblMeasure">(qty)</span></th>
                                             <th class="tbl-title-field text-center">Sell Out Ratio
@@ -91,16 +95,16 @@
                                     </thead>
                                       <tbody>
                                           <tr>
-                                              <td colspan="5" class="text-center py-4 text-muted">
+                                              <td colspan="9" class="text-center py-4 text-muted">
                                               </td>
                                           </tr>
                                           <tr>
-                                              <td colspan="5" class="text-center py-4 text-muted">
+                                              <td colspan="9" class="text-center py-4 text-muted">
                                                   No data available
                                               </td>
                                           </tr>
                                           <tr>
-                                              <td colspan="5" class="text-center py-4 text-muted">
+                                              <td colspan="9" class="text-center py-4 text-muted">
                                               </td>
                                           </tr>
                                       </tbody>
@@ -135,4 +139,8 @@
     let months = <?= json_encode($months); ?>;
     let sales_group = <?= json_encode($sales_group); ?>;
     let brand_categories = <?= json_encode($brand_categories); ?>;
+    let brand_sub_categories = <?= json_encode($brand_sub_categories); ?>;
+    let item_department = <?= json_encode($item_department); ?>;
+    let merch_categories = <?= json_encode($merch_categories); ?>;
+    let categories = <?= json_encode($categories); ?>;
 </script>

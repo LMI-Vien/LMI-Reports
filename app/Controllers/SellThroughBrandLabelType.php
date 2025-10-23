@@ -33,9 +33,9 @@ class SellThroughBrandLabelType extends BaseController
 		$data['PageName'] = 'Sell Through By Brand Label Type';
 		$data['PageUrl'] = 'Sell Through By Brand Label Type';
 		$data["breadcrumb"] = array('Sell Through' => base_url('sell-through/by-brand-label-type'),'Sell Through By Brand Label Type' => '');
-		$data["source"] = "Actual Sales Report, Scan Data, and Target Sales";
-		$data["source_date"] = '';	
-		$data["foot_note"] = '';	
+		$data["source"] = "Scan Data";
+		$data["source_date"] = '<span id="sourceDate">N / A</span>';
+		$data["foot_note"] = '';		
 
 		$data['content'] = "site/sell_through/by_brand_label_type/by_brand_label_type";
 		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);

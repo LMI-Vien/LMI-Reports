@@ -1,5 +1,5 @@
 <style>
-  #additionalFiltersPanel {
+  #additionalCategoryFiltersPanel, #additionalFiltersPanel {
     position: fixed;
     top: 80px; /* below navbar */
     left: -490px; /* hidden initially */
@@ -14,26 +14,26 @@
     overflow-y: auto;
   }
 
-  #additionalFiltersPanel.open {
+  #additionalCategoryFiltersPanel.open, #additionalFiltersPanel.open {
     left: 260px; 
   }
 
-  #additionalFiltersPanel label {
+  #additionalCategoryFiltersPanel, #additionalFiltersPanel label {
     font-weight: 500;
   }
 
-  #additionalFiltersPanel select,
-  #additionalFiltersPanel .form-control {
+  #additionalCategoryFiltersPanel, #additionalFiltersPanel select,
+  #additionalCategoryFiltersPanel, #additionalFiltersPanel .form-control {
   background-color: #fff;
     border: 1px solid #6c757d;
   }
 
-  #additionalFiltersPanel .btn {
+  #additionalCategoryFiltersPanel, #additionalFiltersPanel .btn {
     color: white;
   }
 
 @media (max-width: 767.98px) {
-  #additionalFiltersPanel {
+  #additionalCategoryFiltersPanel, #additionalFiltersPanel {
     width: 67vw;
     left: -67vw;
     top: 56px;
@@ -42,7 +42,7 @@
     border-radius: 0;
   }
 
-  #additionalFiltersPanel.open {
+  #additionalCategoryFiltersPanel.open, #additionalFiltersPanel.open {
     left: 0;
   }
 }
@@ -189,16 +189,6 @@
               </div>  
 
               <div class="form-group card-dark mb-3 p-2">
-                  <label for="brandCategory" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Brand Category</label>
-                  <select id="brandCategory" name="brandCategory" class="form-control">
-                      <option value="">Please select...</option>
-                      <?php foreach ($brand_categories as $key => $value) {
-                          echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_class_description']) . '</option>';
-                      } ?>
-                  </select>
-              </div>
-
-              <div class="form-group card-dark mb-3 p-2">
                   <label for="salesGroup" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Choose Sales Group</label>
                       <select id="salesGroup" name="salesGroup" class="form-control">
                           <option value=''>Please select...</option>
@@ -228,6 +218,92 @@
                       </label>
                   </div>
               </div>
+
+              <div class="form-group text-center">
+                <button id="toggleAdditionalCategoryFilters" type="button" class="btn btn-sm btn-outline-warning w-100">
+                  <i class="fas fa-angle-double-right mr-1"></i> More Category Filters
+                </button>
+              </div> 
+
+              <div id="additionalCategoryFiltersPanel" class="card">
+                <div class="filter-header d-flex justify-content-between align-items-center p-2 text-white">
+                  <h6 class="mb-0"><i class="fas fa-sliders-h mr-2"></i> Additional Category Filters</h6>
+                  <button id="closeAdditionalCategoryFilters" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+
+                <div class="filter-body text-white p-3">
+                  <div class="row">
+
+
+                    <div class="col-12 col-md-6 mb-3">
+                      <div class="form-group card-dark mb-3 p-2">
+                          <label for="category" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Label Type Category</label>
+                          <select id="category" name="category" class="form-control">
+                              <option value="">Please select...</option>
+                              <?php foreach ($categories as $key => $value) {
+                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['description']) . '</option>';
+                              } ?>
+                          </select>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-3">
+                      <div class="form-group card-dark mb-3 p-2">
+                          <label for="brandCategory" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 1 (Item Classification)</label>
+                          <select id="brandCategory" name="brandCategory" class="form-control">
+                              <option value="">Please select...</option>
+                              <?php foreach ($brand_categories as $key => $value) {
+                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_class_description']) . '</option>';
+                              } ?>
+                          </select>
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-6 mb-3">
+                      <div class="form-group card-dark mb-3 p-2">
+                          <label for="brandSubCategory" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 2 (Item Sub Classification)</label>
+                          <select id="brandSubCategory" name="brandSubCategory" class="form-control">
+                              <option value="">Please select...</option>
+                              <?php foreach ($brand_sub_categories as $key => $value) {
+                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_sub_class_code']) . '</option>';
+                              } ?>
+                          </select>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-3">
+                      <div class="form-group card-dark mb-3 p-2">
+                          <label for="itemDepartment" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 3 (Item Department)</label>
+                          <select id="itemDepartment" name="itemDepartment" class="form-control">
+                              <option value="">Please select...</option>
+                              <?php foreach ($item_department as $key => $value) {
+                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_department_code']) . '</option>';
+                              } ?>
+                          </select>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-3">
+                      <div class="form-group card-dark mb-3 p-2">
+                          <label for="merchCategory" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 4 (Item Merchandise Category)</label>
+                          <select id="merchCategory" name="merchCategory" class="form-control">
+                              <option value="">Please select...</option>
+                              <?php foreach ($merch_categories as $key => $value) {
+                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_mech_cat_code']) . '</option>';
+                              } ?>
+                          </select>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-3">
+                     
+                    </div>
+
+                  </div>
+                </div>
+              </div>  
 
               <div class="form-group">
                 <div class="row g-2">

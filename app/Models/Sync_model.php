@@ -1105,7 +1105,7 @@ class Sync_model extends Model
         // $month = 2;
         // $year = 2025;
         //brand_ids brands handled by BA NOT the actual brand_id of the itmcde
-
+        $whereClause = '';
         if ($data_header_id && $month && $year) {
             $whereClause = "WHERE so.data_header_id = {$data_header_id} AND so.month = {$month} AND so.year = {$year}";
         }
@@ -1162,11 +1162,6 @@ class Sync_model extends Model
                     aso.store_code,
                     aso.customer_payment_group,
                     cl.id AS item_class_id,
-                    CASE 
-                      WHEN mp.effectivity_date <= CURRENT_DATE() THEN mp.net_price
-                      WHEN hmp.net_price IS NOT NULL THEN hmp.net_price
-                      ELSE 0
-                    END AS net_price
                     blt.id AS brand_type_id,
                     bbt.sfa_filter AS brand_term_id,
                     b.id AS brand_id,
@@ -1187,7 +1182,16 @@ class Sync_model extends Model
                     CONCAT(MIN(aso.store_code), ' - ', s.description) AS store_name,
                     MIN(DISTINCT aso.sku_code) AS sku_codes,
                     COALESCE(itmunitall.untprc, 0) AS unit_price,
-                    COALESCE(itmunitall.untprc, 0) * SUM(aso.quantity) AS amount
+                    COALESCE(itmunitall.untprc, 0) * SUM(aso.quantity) AS amount,
+                    CASE 
+                      WHEN mp.effectivity_date <= CURRENT_DATE() THEN mp.net_price
+                      WHEN hmp.net_price IS NOT NULL THEN hmp.net_price
+                      ELSE 0
+                    END AS net_price,
+                    mp.label_type_category_id,
+                    mp.category_2_id,
+                    mp.category_3_id,
+                    mp.category_4_id
                 FROM aggregated_so aso
                 LEFT JOIN tbl_store s ON aso.store_code = s.code
 
@@ -1207,8 +1211,6 @@ class Sync_model extends Model
                                                    WHEN aso.company = '2' THEN 'lmi' 
                                                    ELSE 'rgdi' 
                                                END
-    
-
                 LEFT JOIN tbl_brand b ON 
                     (aso.company = '2' AND pitmlmi.brncde = b.brand_code) OR
                     (aso.company != '2' AND itmrgdi.brncde = b.brand_code)
@@ -1242,7 +1244,8 @@ class Sync_model extends Model
         ";
 
         $allData = $this->sfaDB->query($sql)->getResultArray();
-
+        log_message('debug', 'refreshScanData - SQL executed');
+        log_message('debug', 'Row count: ' . count($allData));
         if (empty($allData)) {
             //log_message('error', 'No data found during refreshScanData copy.');
             return ['error' => 'No data found.'];
@@ -1251,6 +1254,14 @@ class Sync_model extends Model
         if (!$data_header_id || !$month || !$year) {
             $this->sfaDB->table('tbl_sell_out_pre_aggregated_data')->truncate();
         }
+        //only enable this for manual testing
+        // else{
+        //     $this->sfaDB->table('tbl_sell_out_pre_aggregated_data')
+        //     //->where('data_header_id', $data_header_id)
+        //     ->where('month', $month)
+        //     ->where('year', $year)
+        //     ->delete();
+        // }
 
         $batchSize = 2000;
         $inserted  = 0;
@@ -1610,7 +1621,11 @@ class Sync_model extends Model
                           WHEN mp.effectivity_date <= CURRENT_DATE() THEN mp.net_price
                           WHEN hmp.net_price IS NOT NULL THEN hmp.net_price
                           ELSE 0
-                        END AS net_price
+                        END AS net_price,
+                        mp.label_type_category_id,
+                        mp.category_2_id,
+                        mp.category_3_id,
+                        mp.category_4_id
                     FROM aggregated_week_vmi avmi
 
                     LEFT JOIN dedup_pclmi pclmi ON avmi.item = pclmi.cusitmcde
@@ -1674,7 +1689,11 @@ class Sync_model extends Model
                         jd.item_name,
                         jd.item_class,
                         jd.item_class_id,
-                        jd.net_price
+                        jd.net_price,
+                        jd.label_type_category_id,
+                        jd.category_2_id,
+                        jd.category_3_id,
+                        jd.category_4_id
                     FROM joined_data jd
                     GROUP BY
                         jd.year,
@@ -1690,7 +1709,6 @@ class Sync_model extends Model
                         jd.itmclacde,
                         jd.item_name,
                         jd.item_class_id,
-                        jd.net_price,
                         jd.status,
                         jd.brand_type_id,
                         jd.brand_term_id,
@@ -1756,6 +1774,11 @@ class Sync_model extends Model
                         $brandId = 'NULL';
                         $brandLabelId = 'NULL';
                         $brandCategoryId = 'NULL';
+                        $labelTypeCategoryId = 'NULL';
+                        $category2Id = 'NULL';
+                        $category3Id = 'NULL';
+                        $category4Id = 'NULL';
+
                         $untprc = $sourceInfo['untprcFn']($row['itmcde'], $row['untmea']);
                         
                         $itemFileTable = $sourceType === 'lmi' ? 'tbl_itemfile_lmi' : 'tbl_itemfile_rgdi';
@@ -1789,6 +1812,21 @@ class Sync_model extends Model
                                 $brandCategoryId = (int) $category['id'];
                             }
                         }
+
+                        $pricelist = $this->sfaDB->table('tbl_main_pricelist')
+                            ->select('label_type_category_id, category_2_id, category_3_id, category_4_id')
+                            ->where('item_code', $row['itmcde'])
+                            ->get()
+                            ->getRowArray();
+
+                        if ($pricelist) {
+                            $labelTypeCategoryId = (int) $pricelist['label_type_category_id'];
+                            $category2Id = (int) $pricelist['category_2_id'];
+                            $category3Id = (int) $pricelist['category_3_id'];
+                            $category4Id = (int) $pricelist['category_4_id'];
+                        }
+
+
                         $values[] = "(
                             '" . $this->esc($row['recid']) . "',
                             '" . $this->esc($row['itmcde']) . "',
@@ -1797,15 +1835,21 @@ class Sync_model extends Model
                             '" . $this->esc($untprc) . "',
                             '" . $this->esc($row['untcst']) . "',
                             '" . $sourceType . "',
-                            " . $brandId . ",
-                            " . $brandLabelId . ",
-                            " . $brandCategoryId . "
+                            $brandId,
+                            $brandLabelId,
+                            $brandCategoryId,
+                            $labelTypeCategoryId,
+                            $category2Id,
+                            $category3Id,
+                            $category4Id
+
                         )";
                     }
 
                     if (!empty($values)) {
                         $sql = "INSERT INTO tbl_item_unit_file_all 
-                                (recid, itmcde, conver, untmea, untprc, untcst, source_type, brand_id, brand_label_type_id, brand_category_id) 
+                                (recid, itmcde, conver, untmea, untprc, untcst, source_type, brand_id, brand_label_type_id, brand_category_id,
+                             label_type_category_id, category_2_id, category_3_id, category_4_id)
                                 VALUES " . implode(',', $values) . "
                                 ON DUPLICATE KEY UPDATE 
                                   itmcde = VALUES(itmcde),
@@ -1816,7 +1860,11 @@ class Sync_model extends Model
                                   source_type = VALUES(source_type),
                                   brand_id = VALUES(brand_id),
                                   brand_label_type_id = VALUES(brand_label_type_id),
-                                  brand_category_id = VALUES(brand_category_id)";
+                                  brand_category_id = VALUES(brand_category_id),
+                                  label_type_category_id = VALUES(label_type_category_id),
+                                  category_2_id = VALUES(category_2_id),
+                                  category_3_id = VALUES(category_3_id),
+                                  category_4_id = VALUES(category_4_id)";
 
                         $this->sfaDB->query($sql);
                         $totalRecordsSynced += count($sourceData);
@@ -1853,10 +1901,64 @@ class Sync_model extends Model
                 $offset = 0;
 
                 while (true) {
-                    $sourceData = $dbConn->table('salesfile2')
-                        ->limit($batchSize, $offset)
-                        ->get()
-                        ->getResultArray();
+                    $sql = "
+                        SELECT 
+                            c.cuscde,
+                            c.cusdsc,
+                            c.cusgrpcde AS customer_group,
+                            s.trndte,
+                            s.docnum,
+                            s.refnum,
+                            s.smncde,
+                            COALESCE(s.trncde, 'SAL') AS trncde,
+                            s.itmcde,
+                            s.itmdsc,
+                            s.itmqty, 
+                            s.recid,
+                            s.dettyp,
+                            s.untmea,
+                            s.groprcfor,
+                            s.disper,
+                            s.disamtfor,
+                            s.untprcfor,
+                            s.extprc,
+                            (s.disamtfor + s.netvatamtfor) AS gross_vatable,
+                            CASE 
+                                WHEN s.taxcde IS NULL OR s.taxcde = 'VAT EXEMPT' THEN 0
+                                ELSE s.netvatamtfor
+                            END AS vatable_amount,
+                            CASE 
+                                WHEN s.taxcde IS NULL OR s.taxcde = 'VAT EXEMPT' THEN s.netvatamtfor
+                                ELSE 0
+                            END AS non_vat_amount,
+                            s.vatamtfor,
+                            s.extprcfor,
+                            sf1.remarks AS remarks
+                        FROM customerfile c
+                        LEFT JOIN (
+                            SELECT 
+                                recid, trndte, docnum, refnum, smncde, cuscde, cusdsc, itmcde, itmdsc,
+                                itmqty, untmea, groprcfor, disper, disamtfor, untprcfor,
+                                netvatamtfor, vatamtfor, extprcfor, extprc, taxcde, dettyp, trncde
+                            FROM salesfile2
+                            WHERE (dettyp <> 'C' OR dettyp IS NULL OR dettyp = '')
+                              AND trncde = 'SAL'
+                            UNION ALL
+                            SELECT 
+                                recid, trndte, docnum, refnum, smncde, cuscde, cusdsc, itmcde, itmdsc,
+                                itmqty, untmea, groprcfor, disper, disamtfor, untprcfor,
+                                netvatamtfor, vatamtfor, extprcfor, extprc, taxcde, dettyp, trncde
+                            FROM salesreturnfile2
+                            WHERE (dettyp <> 'C' OR dettyp IS NULL OR dettyp = '')
+                              AND trncde = 'SRT'
+                        ) AS s ON c.cuscde = s.cuscde
+                        LEFT JOIN salesfile1 sf1 ON s.docnum = sf1.docnum
+                        WHERE 1=1
+                        ORDER BY c.cusdsc, s.trndte, s.docnum, s.itmcde
+                        LIMIT $batchSize OFFSET $offset
+                    ";
+
+                    $sourceData = $dbConn->query($sql)->getResultArray();
 
                     if (empty($sourceData)) {
                         break;
@@ -1867,6 +1969,11 @@ class Sync_model extends Model
                         $brandId = 'NULL';
                         $brandLabelId = 'NULL';
                         $brandCategoryId = 'NULL';
+                        $labelTypeCategoryId = 'NULL';
+                        $category2Id = 'NULL';
+                        $category3Id = 'NULL';
+                        $category4Id = 'NULL';
+
                         $itemFileTable = $sourceName === 'LMI' ? 'tbl_itemfile_lmi' : 'tbl_itemfile_rgdi';
                         $item = $this->sfaDB->table($itemFileTable)
                             ->select('brncde, itmclacde')
@@ -1899,81 +2006,104 @@ class Sync_model extends Model
                             }
                         }
 
+                        $pricelist = $this->sfaDB->table('tbl_main_pricelist')
+                            ->select('label_type_category_id, category_2_id, category_3_id, category_4_id')
+                            ->where('customer_payment_group', $row['customer_group'])
+                            ->where('item_code', $row['itmcde'])
+                            ->get()
+                            ->getRowArray();
+
+                        if ($pricelist) {
+                            $labelTypeCategoryId = (int) $pricelist['label_type_category_id'];
+                            $category2Id = (int) $pricelist['category_2_id'];
+                            $category3Id = (int) $pricelist['category_3_id'];
+                            $category4Id = (int) $pricelist['category_4_id'];
+                        }
+
                         $values[] = "(
                             '" . $this->esc($row['recid']) . "',
                             '" . $this->esc($sourceName) . "',
-                            '" . $this->esc($row['PckItmCde']) . "',
-                            '" . $this->esc($row['docnum']) . "',
+                            '" . $this->esc($row['cuscde']) . "',
                             '" . $this->esc($row['cusdsc']) . "',
+                            '" . $this->esc($row['customer_group']) . "',
+                            '" . $this->esc($row['trndte']) . "',
+                            '" . $this->esc($row['docnum']) . "',
+                            '" . $this->esc($row['refnum']) . "',
+                            '" . $this->esc($row['smncde']) . "',
+                            '" . $this->esc($row['trncde']) . "',
                             '" . $this->esc($row['itmcde']) . "',
                             '" . $this->esc($row['itmdsc']) . "',
                             '" . $this->esc($row['itmqty']) . "',
-                            '" . $this->esc($row['untprc']) . "',
-                            '" . $this->esc($row['extprc']) . "',
-                            '" . $this->esc($row['trncde']) . "',
                             '" . $this->esc($row['untmea']) . "',
-                            '" . $this->esc($row['cuscde']) . "',
-                            '" . $this->esc($row['warcde']) . "',
-                            '" . $this->esc($row['prccde']) . "',
-                            '" . $this->esc($row['sonum']) . "',
-                            '" . $this->esc($row['conver1']) . "',
-                            '" . $this->esc($row['cusgrpcde']) . "',
-                            '" . $this->esc($row['cusitmcde']) . "',
-                            '" . $this->esc($row['batchnum']) . "',
-                            '" . $this->esc($row['binnum']) . "',
                             '" . $this->esc($row['dettyp']) . "',
-                            '" . $this->esc($row['extprcfor']) . "',
-                            '" . $this->esc($row['taxcde']) . "',
+                            '" . $this->esc($row['groprcfor']) . "',
+                            '" . $this->esc($row['disper']) . "',
+                            '" . $this->esc($row['disamtfor']) . "',
+                            '" . $this->esc($row['untprcfor']) . "',
+                            '" . $this->esc($row['gross_vatable']) . "',
+                            '" . $this->esc($row['vatable_amount']) . "',
+                            '" . $this->esc($row['non_vat_amount']) . "',
                             '" . $this->esc($row['vatamtfor']) . "',
-                            '" . $this->esc($row['netvatamtfor']) . "',
-                            '" . $this->esc($row['amtdisfor']) . "',
-                            '" . $this->esc($row['trndte']) . "',
-                            '" . $this->esc($row['cdrnum']) . "',
-                            " . $brandId . ",
-                            " . $brandLabelId . ",
-                            " . $brandCategoryId . "
-                            
+                            '" . $this->esc($row['extprcfor']) . "',
+                            '" . $this->esc($row['extprc']) . "',
+                            '" . $this->esc($row['remarks']) . "',
+                            $brandId,
+                            $brandLabelId,
+                            $brandCategoryId,
+                            $labelTypeCategoryId,
+                            $category2Id,
+                            $category3Id,
+                            $category4Id
                         )";
                     }
 
                     if (!empty($values)) {
-                        $sql = "INSERT INTO tbl_item_salesfile2_all 
-                                (recid, source, pckitmcde, docnum, cusdsc, itmcde, itmdsc, itmqty, untprc, extprc, trncde, untmea, cuscde, warcde, prccde, sonum, conver1, cusgrpcde, cusitmcde, batchnum, binnum, dettyp, extprcfor, taxcde, vatamtfor, netvatamtfor, amtdisfor, trndte, cdrnum, brand_id, brand_label_type_id, brand_category_id) 
-                                VALUES " . implode(',', $values) . "
-                                ON DUPLICATE KEY UPDATE 
-                                    source = VALUES(source),
-                                    pckitmcde = VALUES(pckitmcde),
-                                    docnum = VALUES(docnum),
-                                    cusdsc = VALUES(cusdsc),
-                                    itmcde = VALUES(itmcde),
-                                    itmdsc = VALUES(itmdsc),
-                                    itmqty = VALUES(itmqty),
-                                    untprc = VALUES(untprc),
-                                    extprc = VALUES(extprc),
-                                    trncde = VALUES(trncde),
-                                    untmea = VALUES(untmea),
-                                    cuscde = VALUES(cuscde),
-                                    warcde = VALUES(warcde),
-                                    prccde = VALUES(prccde),
-                                    sonum = VALUES(sonum),
-                                    conver1 = VALUES(conver1),
-                                    cusgrpcde = VALUES(cusgrpcde),
-                                    cusitmcde = VALUES(cusitmcde),
-                                    batchnum = VALUES(batchnum),
-                                    binnum = VALUES(binnum),
-                                    dettyp = VALUES(dettyp),
-                                    extprcfor = VALUES(extprcfor),
-                                    taxcde = VALUES(taxcde),
-                                    vatamtfor = VALUES(vatamtfor),
-                                    netvatamtfor = VALUES(netvatamtfor),
-                                    amtdisfor = VALUES(amtdisfor),
-                                    trndte = VALUES(trndte),
-                                    cdrnum = VALUES(cdrnum),
-                                    brand_id = VALUES(brand_id),
-                                    brand_label_type_id = VALUES(brand_label_type_id),
-                                    brand_category_id = VALUES(brand_category_id)";
+                        $sqlInsert = "
+                            INSERT INTO tbl_item_salesfile2_all (
+                                recid, source, cuscde, cusdsc, customer_group,
+                                trndte, docnum, refnum, smncde,
+                                trncde, itmcde, itmdsc, itmqty, dettyp,
+                                untmea, groprcfor, disper, disamtfor,
+                                untprcfor, gross_vatable, vatable_amount, non_vat_amount,
+                                vatamtfor, extprcfor, extprc, remarks, brand_id, brand_label_type_id, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id
+                            )
+                            VALUES " . implode(',', $values) . "
+                            ON DUPLICATE KEY UPDATE 
+                                source = VALUES(source),
+                                cuscde = VALUES(cuscde),
+                                cusdsc = VALUES(cusdsc),
+                                customer_group = VALUES(customer_group),
+                                trndte = VALUES(trndte),
+                                docnum = VALUES(docnum),
+                                refnum = VALUES(refnum),
+                                smncde = VALUES(smncde),
+                                trncde = VALUES(trncde),
+                                itmcde = VALUES(itmcde),
+                                itmdsc = VALUES(itmdsc),
+                                itmqty = VALUES(itmqty),
+                                untmea = VALUES(untmea),
+                                dettyp = VALUES(dettyp),
+                                groprcfor = VALUES(groprcfor),
+                                disper = VALUES(disper),
+                                disamtfor = VALUES(disamtfor),
+                                untprcfor = VALUES(untprcfor),
+                                gross_vatable = VALUES(gross_vatable),
+                                vatable_amount = VALUES(vatable_amount),
+                                non_vat_amount = VALUES(non_vat_amount),
+                                vatamtfor = VALUES(vatamtfor),
+                                extprcfor = VALUES(extprcfor),
+                                extprc = VALUES(extprc),
+                                remarks = VALUES(remarks),
+                                brand_id = VALUES(brand_id),
+                                brand_label_type_id = VALUES(brand_label_type_id),
+                                brand_category_id = VALUES(brand_category_id),
+                                label_type_category_id = VALUES(label_type_category_id),
+                                category_2_id = VALUES(category_2_id),
+                                category_3_id = VALUES(category_3_id),
+                                category_4_id = VALUES(category_4_id)
+                        ";
 
-                        $this->sfaDB->query($sql);
+                        $this->sfaDB->query($sqlInsert);
                         $totalRecordsSynced += count($sourceData);
                     }
 
@@ -1986,10 +2116,10 @@ class Sync_model extends Model
         }
 
         return $status === 'success'
-            ? "Data sync completed for Sales File 2 ALL with $totalRecordsSynced records."
+            ? "Data sync completed for consolidated Sales Data with $totalRecordsSynced records."
             : "Sync failed. $errorMessage.";
     }
-
+    
     public function syncSalesFileConsignmentAllData($batchSize = 5000)
     {
         $sources = [
@@ -2016,6 +2146,7 @@ class Sync_model extends Model
                             h.cusdsc,
                             d.smncde,
                             c.tinnum,
+                            c.cusgrpcde AS customer_group,
                             d.cuscde,
                             d.cusdsc AS customer_desc,
                             d.itmcde,
@@ -2055,6 +2186,10 @@ class Sync_model extends Model
                         $brandId = 'NULL';
                         $brandLabelId = 'NULL';
                         $brandCategoryId = 'NULL';
+                        $labelTypeCategoryId = 'NULL';
+                        $category2Id = 'NULL';
+                        $category3Id = 'NULL';
+                        $category4Id = 'NULL';
 
                         $itemFileTable = $sourceName === 'LMI' ? 'tbl_itemfile_lmi' : 'tbl_itemfile_rgdi';
                         
@@ -2089,6 +2224,20 @@ class Sync_model extends Model
                             }
                         }
 
+                        $pricelist = $this->sfaDB->table('tbl_main_pricelist')
+                            ->select('label_type_category_id, category_2_id, category_3_id, category_4_id')
+                            ->where('customer_payment_group', $row['customer_group'])
+                            ->where('item_code', $row['itmcde'])
+                            ->get()
+                            ->getRowArray();
+
+                        if ($pricelist) {
+                            $labelTypeCategoryId = (int) $pricelist['label_type_category_id'];
+                            $category2Id = (int) $pricelist['category_2_id'];
+                            $category3Id = (int) $pricelist['category_3_id'];
+                            $category4Id = (int) $pricelist['category_4_id'];
+                        }
+
                         $values[] = "(
                             '" . $this->esc($sourceName) . "',
                             '" . $this->esc($row['trndte']) . "',
@@ -2098,7 +2247,7 @@ class Sync_model extends Model
                             '" . $this->esc($row['smncde']) . "',
                             '" . $this->esc($row['tinnum']) . "',
                             '" . $this->esc($row['cuscde']) . "',
-                            '" . $this->esc($row['customer_desc']) . "',
+                            '" . $this->esc($row['customer_group']) . "',
                             '" . $this->esc($row['itmcde']) . "',
                             '" . $this->esc($row['itmdsc']) . "',
                             '" . $this->esc($row['itmqty']) . "',
@@ -2115,18 +2264,23 @@ class Sync_model extends Model
                             '" . $this->esc($row['amt']) . "',
                             $brandId,
                             $brandLabelId,
-                            $brandCategoryId
+                            $brandCategoryId,
+                            $labelTypeCategoryId,
+                            $category2Id,
+                            $category3Id,
+                            $category4Id
                         )";
                     }
 
                     if (!empty($values)) {
                         $sql = "INSERT INTO tbl_item_salesfile_consignment_all 
-                                (source, trndte, docnum, refnum, cusdsc, smncde, tinnum, cuscde, customer_desc, itmcde, itmdsc, itmqty, untmea, groprc, disper, disamt, totdisamt, untprc, groamt, vatable, nonvat, vatamt, amt, brand_id, brand_label_type_id, brand_category_id) 
+                                (source, trndte, docnum, refnum, cusdsc, smncde, tinnum, cuscde, customer_group, itmcde, itmdsc, itmqty, untmea, groprc, disper, disamt, totdisamt, untprc, groamt, vatable, nonvat, vatamt, amt, brand_id, brand_label_type_id, brand_category_id, label_type_category_id, category_2_id, category_3_id, category_4_id) 
                                 VALUES " . implode(',', $values) . "
                                 ON DUPLICATE KEY UPDATE 
                                     cusdsc = VALUES(cusdsc),
                                     itmcde = VALUES(itmcde),
                                     itmdsc = VALUES(itmdsc),
+                                    customer_group = VALUES(customer_group),
                                     itmqty = VALUES(itmqty),
                                     untmea = VALUES(untmea),
                                     groprc = VALUES(groprc),
@@ -2141,7 +2295,11 @@ class Sync_model extends Model
                                     amt = VALUES(amt),
                                     brand_id = VALUES(brand_id),
                                     brand_label_type_id = VALUES(brand_label_type_id),
-                                    brand_category_id = VALUES(brand_category_id)";
+                                    brand_category_id = VALUES(brand_category_id),
+                                    label_type_category_id = VALUES(label_type_category_id),
+                                    category_2_id = VALUES(category_2_id),
+                                    category_3_id = VALUES(category_3_id),
+                                    category_4_id = VALUES(category_4_id)";
 
                         $this->sfaDB->query($sql);
                         $totalRecordsSynced += count($sourceData);

@@ -4,6 +4,8 @@
 
         const $toggleBtn = $('#toggleAdditionalFilters');
         const $filterPanel = $('#additionalFiltersPanel');
+        const $toggleCategoryFilterBtn = $('#toggleAdditionalCategoryFilters');
+        const $filterCategoryPanel = $('#additionalCategoryFiltersPanel');
 
         $toggleBtn.on('click', function () {
           const isOpen = $filterPanel.hasClass('open');
@@ -21,6 +23,25 @@
           $filterPanel.removeClass('open');
           $toggleBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
         });
+
+        $toggleCategoryFilterBtn.on('click', function () {
+          const isOpen = $filterCategoryPanel.hasClass('open');
+
+          if (isOpen) {
+            $filterCategoryPanel.removeClass('open');
+            $toggleCategoryFilterBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
+          } else {
+            $filterCategoryPanel.addClass('open');
+            $toggleCategoryFilterBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Category Filters');
+          }
+        });
+
+        $('#closeAdditionalCategoryFilters').on('click', function () {
+            console.log('asd');
+          $filterCategoryPanel.removeClass('open');
+          $toggleCategoryFilterBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
+        });
+
         const currentWeek = getCurrentWeek();
         if (currentWeek) {
             $('#currentWeek').text(currentWeek.display);
@@ -63,7 +84,7 @@
 
                 $("#monthFrom").html(htmlFrom).val(1);
                 $("#monthTo").html(htmlTo).val(currentMonth);
-
+                source = $('#dataSource').val();
                 $('#sourceDate').text(
                     getTextOrDash("#year") + " " +
                     getTextOrDash("#monthFrom") +
@@ -247,7 +268,9 @@
         $('#subGroupWrapper').slideUp();
         $('#subGroup').val('');
         $('#additionalFiltersPanel').removeClass('open');
-        $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
+        $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
+        $('#additionalCategoryFiltersPanel').removeClass('open');
+        $('#toggleAdditionalCategoryFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
         $('#source').text(" "+ $("#dataSource option:selected").text());
         $('#sourceDate').text(" N / A");
         $('.hide-div').hide();
@@ -344,8 +367,9 @@
         $('.table-empty').hide();
         $('.hide-div').show();
         $('#additionalFiltersPanel').removeClass('open');
-        $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
-    
+        $('#toggleAdditionalCategoryFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
+        $('#additionalCategoryFiltersPanel').removeClass('open');
+        $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
         // else {
         //     $('#generationPeriod').text('N/A');
         // }
@@ -353,7 +377,6 @@
 
     function fetchData() {
         let selectedSource = $('#dataSource').val();
-        let selectedBrandCategory = $('#brandCategory').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -369,6 +392,11 @@
         let weekToOption = $("#weekto option:selected");
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
+        let selectedCategory = $('#category').val();
+        let selectedBrandCategory = $('#brandCategory').val();
+        let selectedSubBrandCategory = $('#brandSubCategory').val();
+        let selectedDepartment = $('#itemDepartment').val();
+        let selectedMerch = $('#merchCategory').val();
 
         if (!selectedSource || !selectedSalesGroup) {
             $('.table-empty').show();
@@ -394,6 +422,10 @@
                 data: function(d) {
                     d.source = selectedSource === "" ? null : selectedSource;
                     d.brand_category = selectedBrandCategory || null;
+                    d.sub_brand_category = selectedSubBrandCategory || null;
+                    d.category = selectedCategory || null;
+                    d.item_department = selectedDepartment || null;
+                    d.merch_category = selectedMerch || null;
                     d.year = selectedYear === "0" ? null : selectedYear;
                     d.year_id = selectedYearId === "0" ? null : selectedYearId;
                     d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
@@ -415,7 +447,11 @@
             },
             columns: [
                 { data: 'rank' },
+                { data: 'label_category' },
                 { data: 'brand_category' },
+                { data: 'sub_classification' },
+                { data: 'item_department' },
+                { data: 'item_merchandise' },
                 { data: 'sell_in', render: formatNumberWithCommas},
                 { data: 'sell_out', render: formatNumberWithCommas},
                 { data: 'sell_out_ratio', render: formatNumberWithCommas}
