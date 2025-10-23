@@ -139,7 +139,7 @@ class SellThroughBrand extends BaseController
 	    switch ($source) {
 	        case 'scann_data':
 			    $data = $this->Dashboard_model->getSellThroughScannDataByBrand($year, $monthStart, $monthEnd, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
-				
+				break;
 	        case 'week_on_week':
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByBrand($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
@@ -586,8 +586,8 @@ class SellThroughBrand extends BaseController
 		$sheet       = $spreadsheet->getActiveSheet();
 
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-		$sheet->setCellValue('A2', 'Report: Store Sales Performance per Brand Ambassador');
-		$sheet->setCellValue('A4', 'Source: Actual Sales Report, Scan Data and Target Sales Per Store (LMI/RGDI)');
+		$sheet->setCellValue('A2', 'Report: Sell-Through by Brand');
+		$sheet->setCellValue('A4', 'Source: '        . ($source ?: 'NONE'));
 		$sheet->mergeCells('A1:C1');
 		$sheet->mergeCells('A2:C2');
 
@@ -603,8 +603,7 @@ class SellThroughBrand extends BaseController
 		$sheet->setCellValue('D6', 'Measure: ' . ($measure ?: 'NONE'));
 		$sheet->setCellValue('D7', 'Brands: ' . (is_array($brandIds) ? implode(', ', $brandIds) : ($brandIds ?: 'NONE')));
 
-		$sheet->setCellValue('E6', 'Source: '        . ($source ?: 'NONE'));
-		$sheet->setCellValue('E7', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		$sheet->setCellValue('E6', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 
 		$headers = [
 			"Rank",

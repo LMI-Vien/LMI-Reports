@@ -524,7 +524,7 @@
         $('#' + selected_class).html(html);
     };
 
-     function handleAction(action) {
+    function handleAction(action) {
         modal.loading(true);
         let selectedSource = $('#dataSource').val();
         let selectedBrands = $('#brands').val();
