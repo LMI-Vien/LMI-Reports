@@ -435,6 +435,7 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
+                    console.log(json, 'json')
                     return json.data.length ? json.data : [];
                 }
             },
@@ -530,3 +531,89 @@
         
         $('#' + selected_class).html(html);
     };
+
+    function handleAction(action) {
+        let endpoint = (action === 'exportPdf') ? 'by-overall-generate-pdf' : 'by-overall-generate-excel-ba';
+        let url = `${base_url}sell-through/${endpoint}`;
+
+        let selectedSource = $('#dataSource').val();
+        let selectedBrands = $('#brands').val();
+        let selectedBrandCategories = $('#brandCategory').val();
+        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedYear = $('#year').val();
+        let yearOption = $("#year option:selected");
+        let selectedYearId = yearOption.data("year");
+        let selectedMonthStart = $('#monthFrom').val();
+        let selectedMonthEnd = $('#monthTo').val();
+        let selectedSalesGroup = $('#salesGroup').val();
+        let selectedSubSalesGroup = $('#subGroup').val();
+        let selectedType = $('input[name="filterType"]:checked').val();
+        let selectedMeasure = $('input[name="measure"]:checked').val();
+        let weekFromOption = $("#weekfrom option:selected");
+        let selectedWeekStartDate = weekFromOption.data("start-date");
+        let selectedWeekStart =  $('#weekfrom').val();
+        let weekToOption = $("#weekto option:selected");
+        let selectedWeekEndDate = weekToOption.data("end-date"); 
+        let selectedWeekEnd =  $('#weekto').val();
+        let searchValue = $('#dt-search-0').val();
+
+        let postData = {
+            source : selectedSource === "" ? null : selectedSource,
+            brands : selectedBrands.length ? selectedBrands : null,
+            brand_categories : selectedBrandCategories.length ? selectedBrandCategories : null,
+            brand_label : selectedBrandLabel === "" ? null : selectedBrandLabel,
+            year : selectedYear === "0" ? null : selectedYear,
+            year_id : selectedYearId === "0" ? null : selectedYearId,
+            month_start : selectedMonthStart === "0" ? null : selectedMonthStart,
+            month_end : selectedMonthEnd === "0" ? null : selectedMonthEnd,
+            week_start : selectedWeekStart === "0" ? null : selectedWeekStart,
+            week_end : selectedWeekEnd === "0" ? null : selectedWeekEnd,
+            week_start_date : selectedWeekStartDate === "0" ? null : selectedWeekStartDate,
+            week_end_date : selectedWeekEndDate === "0" ? null : selectedWeekEndDate,
+            sales_group : selectedSalesGroup === "" ? null : selectedSalesGroup,
+            sub_sales_group : selectedSubSalesGroup === "" ? null : selectedSubSalesGroup,
+            type : selectedType === "" ? null : selectedType,
+            measure : selectedMeasure === "" ? null : selectedMeasure,
+            limit : 9999,
+            offset : 0,
+            search : searchValue,
+        }
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            // success : (res) => {
+            //     console.log(JSON.parse(res), 'res')
+            // },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Week by Week Stock Data of All Stores.pdf'
+                        : 'Week by Week Stock Data of All Stores.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
+    }
