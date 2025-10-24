@@ -1,4 +1,9 @@
     const start_time = new Date();
+    let isGraphMode = false;
+    let chartInstance = null;
+    let currentPage = 1;
+    const chartLimit = 10;
+    let totalRecords = 0;
     
     $(document).ready(function() {
 
@@ -95,7 +100,7 @@
         $("#quarter").on("change", function () {
             const quarter = $(this).val();
             let from = 1, to = 12;
-            let weekFrom = 1, weekTo = 52;
+            let weekFrom = 1, weekTo = 53;
             var year = $("#year").val();
             if(year === 'Please select...'){
                 modal.alert('Please select "Year" before filtering.', "warning");
@@ -118,7 +123,7 @@
                     break;
                 case "Q4":
                     from = 10; to = 12;
-                    weekFrom = 40; weekTo = 52;
+                    weekFrom = 40; weekTo = 53;
                     break;
             }
 
@@ -359,7 +364,28 @@
             const generationPeriod = getTodayDateTime();
             //$('#generationPeriod').text(generationPeriod.display);
             logActivity("Sell Through By Brand Label Type", "Refresh", "User refreshed sell through by brand label type.", "", "", "" );
-            fetchData();
+            let mode = $('#toggleGraphMode').text().trim();
+            if (mode === 'Graph View') {
+                $('#chartContainer').hide();
+                $('#tableContainer').fadeIn(200);
+                fetchData();
+                $('#toggleGraphMode').html('<i class="fas fa-chart-bar"></i> Graph View');
+                isGraphMode = false;
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                    chartInstance = null;
+                }
+
+            } else {
+                $('#tableContainer').hide();
+                $('#chartContainer').fadeIn(200);
+                $('#toggleGraphMode').html('<i class="fas fa-table"></i> Table View');
+                isGraphMode = true;
+                setTimeout(() => {
+                    renderSellThroughChart();
+                }, 150);
+            }
             $('.table-empty').hide();
             $('.hide-div').show();
             $('#additionalFiltersPanel').removeClass('open');
@@ -369,6 +395,30 @@
         //     $('#generationPeriod').text('N/A');
         // }
     });
+
+    $(document).on('click', '#toggleGraphMode', async function () {
+        if (isGraphMode) {
+            $('#chartContainer').hide();
+            $('#tableContainer').fadeIn(200);
+            fetchData();
+            $(this).html('<i class="fas fa-chart-bar"></i> Graph View');
+            isGraphMode = false;
+
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+
+        } else {
+            $('#tableContainer').hide();
+            $('#chartContainer').fadeIn(200);
+            $(this).html('<i class="fas fa-table"></i> Table View');
+            isGraphMode = true;
+            setTimeout(() => {
+                renderSellThroughChart();
+            }, 150);
+        }
+    });  
 
     function fetchData() {
         let selectedSource = $('#dataSource').val();
@@ -455,8 +505,159 @@
             // colReorder: true,
             lengthChange: false
         });
-        
     }
+
+    function renderSellThroughChart(page = 1) {
+        let selectedSource = $('#dataSource').val();
+        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedYear = $('#year').val();
+        let yearOption = $("#year option:selected");
+        let selectedYearId = yearOption.data("year");
+        let selectedMonthStart = $('#monthFrom').val();
+        let selectedMonthEnd = $('#monthTo').val();
+        let selectedSalesGroup = $('#salesGroup').val();
+        let selectedSubSalesGroup = $('#subGroup').val();
+        let selectedType = $('input[name="filterType"]:checked').val();
+        let selectedMeasure = $('input[name="measure"]:checked').val();
+        let weekFromOption = $("#weekfrom option:selected");
+        let selectedWeekStartDate = weekFromOption.data("start-date");
+        let selectedWeekStart =  $('#weekfrom').val();
+        let weekToOption = $("#weekto option:selected");
+        let selectedWeekEndDate = weekToOption.data("end-date"); 
+        let selectedWeekEnd =  $('#weekto').val();
+        const offset = (page - 1) * chartLimit;
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        $.ajax({
+            url: base_url + 'sell-through/get-by-brand-label-type',
+            type: 'POST',
+            data: {
+                source : selectedSource === "" ? null : selectedSource,
+                brand_labels : selectedBrandLabel === "" ? null : selectedBrandLabel,
+                year : selectedYear === "0" ? null : selectedYear,
+                year_id : selectedYearId === "0" ? null : selectedYearId,
+                month_start : selectedMonthStart === "0" ? null : selectedMonthStart,
+                month_end : selectedMonthEnd === "0" ? null : selectedMonthEnd,
+                week_start : selectedWeekStart === "0" ? null : selectedWeekStart,
+                week_end : selectedWeekEnd === "0" ? null : selectedWeekEnd,
+                week_start_date : selectedWeekStartDate === "0" ? null : selectedWeekStartDate,
+                week_end_date : selectedWeekEndDate === "0" ? null : selectedWeekEndDate,
+                sales_group : selectedSalesGroup === "" ? null : selectedSalesGroup,
+                sub_sales_group : selectedSubSalesGroup === "" ? null : selectedSubSalesGroup,
+                type : selectedType === "" ? null : selectedType,
+                measure : selectedMeasure === "" ? null : selectedMeasure,
+                limit: chartLimit,
+                offset: offset
+            },
+            beforeSend: function() {
+                modal.loading(true);
+            },
+            success: function(response) {
+                modal.loading(false);
+
+                if (!response.data || response.data.length === 0) {
+                    modal.alert('No data available to display chart.', 'warning');
+                    return;
+                }
+
+                // store total records (you must return this from backend)
+                totalRecords = response.recordsTotal || 0;
+                let labels = response.data.map(item => item.brand_type);
+                let sellIn = response.data.map(item => parseFloat(item.sell_in) || 0);
+                let sellOut = response.data.map(item => parseFloat(item.sell_out) || 0);
+                let sellOutRatio = response.data.map(item => parseFloat(item.sell_out_ratio) || 0);
+
+                let ctx = document.getElementById("sellThroughChart").getContext("2d");
+
+                chartInstance = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "Sell In",
+                                backgroundColor: "#ffc107",
+                                borderColor: "#d39e00",
+                                borderWidth: 1,
+                                data: sellIn
+                            },
+                            {
+                                label: "Sell Out",
+                                backgroundColor: "#990000",
+                                borderColor: "#770000",
+                                borderWidth: 1,
+                                data: sellOut
+                            },
+                            {
+                                label: "Sell Out Ratio",
+                                backgroundColor: "#339933",
+                                borderColor: "#267326",
+                                borderWidth: 1,
+                                data: sellOutRatio
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: "top" },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(tooltipItem) {
+                                        return tooltipItem.dataset.label + ": " + tooltipItem.raw.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: "SKU", font: { weight: "bold" } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: "Values", font: { weight: "bold" } }
+                            }
+                        },
+                        animation: {
+                            duration: 800,
+                            easing: "easeOutBounce"
+                        }
+                    }
+                });
+
+                updatePaginationUI();
+            },
+            error: function() {
+                modal.loading(false);
+                modal.alert('Failed to load chart data.', 'danger');
+            }
+        });
+    }
+
+    function updatePaginationUI() {
+        const totalPages = Math.ceil(totalRecords / chartLimit);
+
+        $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
+
+        $('#prevPage').prop('disabled', currentPage === 1);
+        $('#nextPage').prop('disabled', currentPage === totalPages || totalPages === 0);
+    }
+
+    $(document).on('click', '#nextPage', function () {
+        currentPage++;
+        renderSellThroughChart(currentPage);
+    });
+
+    $(document).on('click', '#prevPage', function () {
+        if (currentPage > 1) {
+            currentPage--;
+            renderSellThroughChart(currentPage);
+        }
+    });
 
     function get_sub_sales_group(sub_group){
         $.ajax({

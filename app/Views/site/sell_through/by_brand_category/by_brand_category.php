@@ -63,7 +63,22 @@
                         </div>
 
                         <div class="card mt-4 p-4 shadow-sm hide-div">
-                            <div class="mb-3" style="overflow-x: auto; height: 600px; padding: 0px;">
+                            <div class="align-items-center mb-3">
+                                <button id="toggleGraphMode" class="btn btn-warning">
+                                  <i class="fas fa-chart-bar"></i> Graph View
+                                </button>
+                            </div>
+
+                            <div id="chartContainer" class="mb-3" style="display: none; height: 600px;">
+                                <canvas id="sellThroughChart" width="400"></canvas>
+                                <div class="align-items-center mb-3">
+                                    <button id="prevPage" class="btn btn-sm btn-secondary">Prev</button>
+                                    <button id="nextPage" class="btn btn-sm btn-secondary">Next</button>
+                                    <span id="pageInfo" class="fw-bold"></span>
+                                </div>
+                            </div>
+
+                            <div id="tableContainer" class="mb-3" style="overflow-x: auto; height: 600px; padding: 0px;">
                                 <table id="sellThroughByBrandCategory" class="table table-bordered" style="width: 100% !important;">
                                     <thead>
                                         <tr>
