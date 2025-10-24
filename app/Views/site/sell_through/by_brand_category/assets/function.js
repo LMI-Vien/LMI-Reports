@@ -747,3 +747,119 @@
         
         $('#' + selected_class).html(html);
     };
+
+    function handleAction(action) {
+        modal.loading(true);
+        let selectedSource = $('#dataSource').val();
+        let selectedYear = $('#year').val();
+        let yearOption = $("#year option:selected");
+        let selectedYearId = yearOption.data("year");
+        let selectedMonthStart = $('#monthFrom').val();
+        let selectedMonthEnd = $('#monthTo').val();
+        let selectedSalesGroup = $('#salesGroup').val();
+        let selectedSalesGroupText = $('#salesGroup option:selected').text();
+
+        let selectedSubSalesGroup = $('#subGroup').val();
+        let selectedType = $('input[name="filterType"]:checked').val();
+        let selectedMeasure = $('input[name="measure"]:checked').val();
+        let weekFromOption = $("#weekfrom option:selected");
+        let selectedWeekStartDate = weekFromOption.data("start-date");
+        let selectedWeekStart =  $('#weekfrom').val();
+        let weekToOption = $("#weekto option:selected");
+        let selectedWeekEndDate = weekToOption.data("end-date"); 
+        let selectedWeekEnd =  $('#weekto').val();
+        let selectedCategory = $('#category').val();
+        let selectedCategoryText = $('#category option:selected').text();
+
+        let selectedBrandCategory = $('#brandCategory').val();
+        let selectedBrandCategoryText = $('#brandCategory option:selected').text();
+
+        let selectedSubBrandCategory = $('#brandSubCategory').val();
+        let selectedSubBrandCategoryText = $('#brandSubCategory option:selected').text();
+
+        let selectedDepartment = $('#itemDepartment').val();
+        let selectedDepartmentText = $('#itemDepartment option:selected').text();
+
+        let selectedMerch = $('#merchCategory').val();
+        let selectedMerchText = $('#merchCategory option:selected').text()
+
+        let postData = {
+            source: selectedSource,
+            brand_category: selectedBrandCategory,
+            brand_category_text: selectedBrandCategoryText,
+
+            sub_brand_category: selectedSubBrandCategory,
+            sub_brand_category_text: selectedSubBrandCategoryText,
+
+            category: selectedCategory,
+            category_text: selectedCategoryText,
+
+            item_department: selectedDepartment,
+            item_department_text: selectedDepartmentText,
+
+            merch_category: selectedMerch,
+            merch_category_text: selectedMerchText,
+
+            year: selectedYear,
+            year_id: selectedYearId,
+            month_start: selectedMonthStart,
+            month_end: selectedMonthEnd,
+            week_start: selectedWeekStart,
+            week_end: selectedWeekEnd,
+            week_start_date: selectedWeekStartDate,
+            week_end_date: selectedWeekEndDate,
+            sales_group: selectedSalesGroup,
+            sales_group_text: selectedSalesGroupText,
+            sub_sales_grouptype: selectedSubSalesGroup,
+            type: selectedType,
+            measure: selectedMeasure
+        }
+        let endpoint = action === 'exportPdf' ? 'by-brand-category-generate-pdf' : 'by-brand-category-generate-excel-ba';
+        let url = `${base_url}sell-through/${endpoint}`; 
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Sell Through by Brand Category.pdf'
+                        : 'Sell Through by Brand Category.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
+
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
+
+        const remarks = `
+            Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Sell Through By Brand Category', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null)
+    }
