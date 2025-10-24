@@ -1903,17 +1903,18 @@ class Sync_model extends Model
                 while (true) {
                     $sql = "
                         SELECT 
-                            c.cuscde,
-                            c.cusdsc,
-                            c.cusgrpcde AS customer_group,
+                            s.cuscde,
+                            s.cusdsc,
+                            s.cusgrpcde AS customer_group,
                             s.trndte,
                             s.docnum,
                             s.refnum,
                             s.smncde,
-                            COALESCE(s.trncde, 'SAL') AS trncde,
+                            s.trncde,
                             s.itmcde,
-                            s.itmdsc,
-                            s.itmqty, 
+                            i.itmdsc,
+                            i.itmclacde,
+                            s.itmqty,
                             s.recid,
                             s.dettyp,
                             s.untmea,
@@ -1934,27 +1935,28 @@ class Sync_model extends Model
                             s.vatamtfor,
                             s.extprcfor,
                             sf1.remarks AS remarks
-                        FROM customerfile c
+                        FROM itemfile i
                         LEFT JOIN (
                             SELECT 
-                                recid, trndte, docnum, refnum, smncde, cuscde, cusdsc, itmcde, itmdsc,
-                                itmqty, untmea, groprcfor, disper, disamtfor, untprcfor,
-                                netvatamtfor, vatamtfor, extprcfor, extprc, taxcde, dettyp, trncde
+                                recid, trndte, docnum, refnum, smncde, cuscde, cusdsc, cusgrpcde,
+                                itmcde, itmqty, groprcfor, disper, disamtfor, untprcfor,
+                                netvatamtfor, vatamtfor, extprcfor, extprc, taxcde, dettyp, untmea, trncde, curcde
                             FROM salesfile2
                             WHERE (dettyp <> 'C' OR dettyp IS NULL OR dettyp = '')
                               AND trncde = 'SAL'
                             UNION ALL
                             SELECT 
-                                recid, trndte, docnum, refnum, smncde, cuscde, cusdsc, itmcde, itmdsc,
-                                itmqty, untmea, groprcfor, disper, disamtfor, untprcfor,
-                                netvatamtfor, vatamtfor, extprcfor, extprc, taxcde, dettyp, trncde
+                                recid, trndte, docnum, refnum, smncde, cuscde, cusdsc, cusgrpcde,
+                                itmcde, itmqty, groprcfor, disper, disamtfor, untprcfor,
+                                netvatamtfor, vatamtfor, extprcfor, extprc, taxcde, dettyp, untmea, trncde, curcde
                             FROM salesreturnfile2
                             WHERE (dettyp <> 'C' OR dettyp IS NULL OR dettyp = '')
                               AND trncde = 'SRT'
-                        ) AS s ON c.cuscde = s.cuscde
+                        ) AS s ON i.itmcde = s.itmcde
+                        LEFT JOIN currencyfile c ON s.curcde = c.curcde
                         LEFT JOIN salesfile1 sf1 ON s.docnum = sf1.docnum
-                        WHERE 1=1
-                        ORDER BY c.cusdsc, s.trndte, s.docnum, s.itmcde
+                        WHERE i.recid > 0
+                        ORDER BY s.cusdsc, s.trndte, s.docnum, s.itmcde
                         LIMIT $batchSize OFFSET $offset
                     ";
 
@@ -2034,8 +2036,8 @@ class Sync_model extends Model
                             '" . $this->esc($row['itmcde']) . "',
                             '" . $this->esc($row['itmdsc']) . "',
                             '" . $this->esc($row['itmqty']) . "',
-                            '" . $this->esc($row['untmea']) . "',
                             '" . $this->esc($row['dettyp']) . "',
+                            '" . $this->esc($row['untmea']) . "',
                             '" . $this->esc($row['groprcfor']) . "',
                             '" . $this->esc($row['disper']) . "',
                             '" . $this->esc($row['disamtfor']) . "',
@@ -2081,8 +2083,8 @@ class Sync_model extends Model
                                 itmcde = VALUES(itmcde),
                                 itmdsc = VALUES(itmdsc),
                                 itmqty = VALUES(itmqty),
-                                untmea = VALUES(untmea),
                                 dettyp = VALUES(dettyp),
+                                untmea = VALUES(untmea),
                                 groprcfor = VALUES(groprcfor),
                                 disper = VALUES(disper),
                                 disamtfor = VALUES(disamtfor),
