@@ -253,7 +253,9 @@ class SellThroughBrandLabelType extends BaseController
 		$json = $this->request->getJSON(true);
 
 		$source        = ($json['source']          ?? null) ?: null;
+
 		$brandTypeIds  = ($json['brand_labels']    ?? null) ?: null;
+		$brandTypeText  = ($json['brand_labels_text']    ?? null) ?: null;
 
 		$year          = trim($json['year']        ?? '') ?: null;
 		$yearId        = trim($json['year_id']     ?? '') ?: null;
@@ -362,6 +364,14 @@ class SellThroughBrandLabelType extends BaseController
 		if ($source === 'week_on_week') $title .= ' (Week-on-Week)';
 		if ($source === 'winsight')     $title .= ' (Winsight)';
 
+		if (is_array($brandTypeText)) {
+			$brandTypeDisplay = implode(', ', array_filter($brandTypeText)); 
+		} elseif (is_string($brandTypeText)) {
+			$brandTypeDisplay = $brandTypeText;
+		} else {
+			$brandTypeDisplay = 'NONE';
+		}
+
 		$filterData = [
 			'Source'          => $source ?? 'None',
 			'Year'            => $year   ?? 'None',
@@ -371,7 +381,7 @@ class SellThroughBrandLabelType extends BaseController
 			'Sales Group'     => $salesGroup    ?? 'None',
 			'Sub Sales Group' => $subSalesGroup ?? 'None',
 			'Measure'		  => $measure ?? 'None',
-			'Brands'		  => $brandIds ?? 'None',
+			'Label Type'	  => $brandTypeDisplay ?? 'None',
 		];
 
 		$pdf = new \App\Libraries\TCPDFLib('L','mm','A4', true, 'UTF-8', false, false);
@@ -464,7 +474,9 @@ class SellThroughBrandLabelType extends BaseController
 		$json = $this->request->getJSON(true);
 
 		$source        = ($json['source']          ?? null) ?: null;
+
 		$brandTypeIds  = ($json['brand_labels']    ?? null) ?: null;
+		$brandTypeText  = ($json['brand_labels_text']    ?? null) ?: null;
 
 		$year          = trim($json['year']        ?? '') ?: null;
 		$yearId        = trim($json['year_id']     ?? '') ?: null;
@@ -569,6 +581,14 @@ class SellThroughBrandLabelType extends BaseController
 		$rows = $data['data'] ?? [];
 		$title = 'Sell-Through by Brand Label Type';
 
+		if (is_array($brandTypeText)) {
+			$brandTypeDisplay = implode(', ', array_filter($brandTypeText)); 
+		} elseif (is_string($brandTypeText)) {
+			$brandTypeDisplay = $brandTypeText;
+		} else {
+			$brandTypeDisplay = 'NONE';
+		}
+
 		$spreadsheet = new Spreadsheet();
 		$sheet       = $spreadsheet->getActiveSheet();
 
@@ -588,7 +608,7 @@ class SellThroughBrandLabelType extends BaseController
 		$sheet->setCellValue('C7', 'Sub Sales Group: ' . ($subSalesGroup ?: 'NONE'));
 
 		$sheet->setCellValue('D6', 'Measure: ' . ($measure ?: 'NONE'));
-		$sheet->setCellValue('D7', 'Brands: ' . (is_array($brandTypeIds) ? implode(', ', $brandTypeIds) : ($brandTypeIds ?: 'NONE')));
+		$sheet->setCellValue('D7', 'Label Type: ' . $brandTypeDisplay);
 
 		$sheet->setCellValue('E6', 'Date Generated: ' . date('M d, Y, h:i:s A'));
 

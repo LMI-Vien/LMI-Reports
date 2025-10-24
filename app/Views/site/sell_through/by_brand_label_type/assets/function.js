@@ -727,7 +727,10 @@
     function handleAction(action) {
         modal.loading(true);
         let selectedSource = $('#dataSource').val();
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabel = $('#itemLabel').val(); 
+        let selectedBrandLabelText = $('#itemLabel option:selected').map(function() {
+            return $(this).text();
+        }).get(); 
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -747,6 +750,7 @@
         let postData = {
             source: selectedSource,
             brand_labels: selectedBrandLabel,
+            brand_labels_text: selectedBrandLabelText,
             year: selectedYear,
             year_id: selectedYearId,
             month_start: selectedMonthStart,
@@ -757,7 +761,7 @@
             week_end_date: selectedWeekEndDate,
             sales_group: selectedSalesGroup,
             sub_sales_group: selectedSubSalesGroup,
-
+            measure: selectedMeasure,
         }
 
         let endpoint = action === 'exportPdf' ? 'by-brand-label-type-generate-pdf' : 'by-brand-label-type-generate-excel-ba';
