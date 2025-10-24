@@ -729,6 +729,9 @@
         modal.loading(true);
         let selectedSource = $('#dataSource').val();
         let selectedBrands = $('#brands').val();
+        let selectedBrandsText = $('#brands option:selected').map(function() {
+            return $(this).text();
+        }).get();
         let selectedBrandLabel = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
@@ -749,6 +752,7 @@
         let postData = {
             source: selectedSource,
             brands: selectedBrands,
+            brand_text: selectedBrandsText,
             brand_label: selectedBrandLabel,
             year: selectedYear,
             year_id: selectedYearId,
