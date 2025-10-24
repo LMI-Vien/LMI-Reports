@@ -427,8 +427,10 @@
                     d.measure = selectedMeasure === "" ? null : selectedMeasure;
                     d.limit = d.length;
                     d.offset = d.start;
+                    console.log(d);
                 },
                 dataSrc: function(json) {
+                    console.log(json);
                     return json.data.length ? json.data : [];
                 }
             },
@@ -520,3 +522,89 @@
         
         $('#' + selected_class).html(html);
     };
+
+    function handleAction(action) {
+        modal.loading(true);
+        let selectedSource = $('#dataSource').val();
+        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedYear = $('#year').val();
+        let yearOption = $("#year option:selected");
+        let selectedYearId = yearOption.data("year");
+        let selectedMonthStart = $('#monthFrom').val();
+        let selectedMonthEnd = $('#monthTo').val();
+        let selectedSalesGroup = $('#salesGroup').val();
+        let selectedSubSalesGroup = $('#subGroup').val();
+        let selectedType = $('input[name="filterType"]:checked').val();
+        let selectedMeasure = $('input[name="measure"]:checked').val();
+        let weekFromOption = $("#weekfrom option:selected");
+        let selectedWeekStartDate = weekFromOption.data("start-date");
+        let selectedWeekStart =  $('#weekfrom').val();
+        let weekToOption = $("#weekto option:selected");
+        let selectedWeekEndDate = weekToOption.data("end-date"); 
+        let selectedWeekEnd =  $('#weekto').val();
+
+        let postData = {
+            source: selectedSource,
+            brand_labels: selectedBrandLabel,
+            year: selectedYear,
+            year_id: selectedYearId,
+            month_start: selectedMonthStart,
+            month_end: selectedMonthEnd,
+            week_start: selectedWeekStart,
+            week_end: selectedWeekEnd,
+            week_start_date: selectedWeekStartDate,
+            week_end_date: selectedWeekEndDate,
+            sales_group: selectedSalesGroup,
+            sub_sales_group: selectedSubSalesGroup,
+
+        }
+
+        let endpoint = action === 'exportPdf' ? 'by-brand-label-type-generate-pdf' : 'by-brand-label-type-generate-excel-ba';
+        let url = `${base_url}sell-through/${endpoint}`; 
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(blob, status, xhr) {
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const match = cd && /filename="?([^"]+)"/.exec(cd);
+                let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
+                const filename = rawName
+                    || (action === 'exportPdf'
+                        ? 'Sell Through by Brand Label Type.pdf'
+                        : 'Sell Through by Brand Label Type.xlsx');
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            },
+            error: function(xhr, status, error) {
+                alert(xhr+' - '+status+' - '+error);
+                modal.loading(false);
+            },
+            complete: function() {
+                modal.loading(false);
+            }
+        });
+
+        const end_time = new Date();
+        const duration = formatDuration(start_time, end_time);
+
+        const remarks = `
+            Exported Successfully!
+            <br>Start Time: ${formatReadableDate(start_time)}
+            <br>End Time: ${formatReadableDate(end_time)}
+            <br>Duration: ${duration}
+        `;
+        logActivity('Sell Through By Brand Brand Label Type', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null)
+    }
