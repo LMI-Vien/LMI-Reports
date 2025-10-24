@@ -732,6 +732,7 @@
     };
 
     function handleAction(action) {
+        modal.loading(true);
         let endpoint = (action === 'exportPdf') ? 'by-sku-generate-pdf' : 'by-sku-generate-excel-ba';
         let url = `${base_url}sell-through/${endpoint}`;
 
