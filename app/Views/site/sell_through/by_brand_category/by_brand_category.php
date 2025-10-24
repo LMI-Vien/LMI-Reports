@@ -72,8 +72,8 @@
                             <div id="chartContainer" class="mb-3" style="display: none; height: 600px;">
                                 <canvas id="sellThroughChart" width="400"></canvas>
                                 <div class="align-items-center mb-3">
-                                    <button id="prevPage" class="btn btn-sm btn-secondary">Prev</button>
-                                    <button id="nextPage" class="btn btn-sm btn-secondary">Next</button>
+                                    <button id="prevPage" class="btn btn-sm btn-secondary"><<</button>
+                                    <button id="nextPage" class="btn btn-sm btn-secondary">>></button>
                                     <span id="pageInfo" class="fw-bold"></span>
                                 </div>
                             </div>

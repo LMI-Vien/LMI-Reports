@@ -665,7 +665,7 @@
     function updatePaginationUI() {
         const totalPages = Math.ceil(totalRecords / chartLimit);
 
-        $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
+        $('#pageInfo').text(`Graph ${currentPage} of ${totalPages}`);
 
         $('#prevPage').prop('disabled', currentPage === 1);
         $('#nextPage').prop('disabled', currentPage === totalPages || totalPages === 0);
