@@ -202,7 +202,68 @@ class SellThroughBrandCategory extends BaseController
 	}
 
 	// ================================= Display filters for pdf export ================================
-	private function printFilter($pdf, $filters, $itemBrandMap = '', $latestYear = null) {
+	private function printFilter($pdf, $filters) {
+		$pdf->SetFont('helvetica', 'B', 9);
+		$source = $filters['Source'] ?? 'None';
+		$pdf->MultiCell(0, 8, 'Source: ' . $source, 0, 'C', 0, 1, '', '', true);
+
+		// 2) Grid of remaining filters (two rows auto-spread)
+		$pdf->SetFont('helvetica', '', 9);
+		$pdf->Ln(2);
+
+		// Exclude Source from grid
+		$gridFilters = $filters;
+		unset($gridFilters['Source']);
+
+		if (!empty($gridFilters)) {
+			$pageWidth  = $pdf->getPageWidth();
+			$margins    = $pdf->getMargins();
+			$perRow     = ceil(count($gridFilters) / 2); // 2 rows
+			$colWidth   = ($pageWidth - $margins['left'] - $margins['right']) / $perRow;
+			$lineHeight = 5;
+
+			// chunk into two rows
+			$rows = array_chunk($gridFilters, $perRow, true);
+
+			foreach ($rows as $rowFilters) {
+				// a) compute required height
+				$maxLines = 0;
+				foreach ($rowFilters as $key => $value) {
+					$text = '<b>' . htmlspecialchars((string)$key) . ':</b> ' . htmlspecialchars(is_array($value) ? implode(', ', $value) : (string)$value);
+					$num  = $pdf->getNumLines($text, $colWidth);
+					$maxLines = max($maxLines, $num);
+				}
+
+				// b) render the row
+				foreach ($rowFilters as $key => $value) {
+					$text = '<b>' . htmlspecialchars((string)$key) . ':</b> ' . htmlspecialchars(is_array($value) ? implode(', ', $value) : (string)$value);
+					$pdf->MultiCell(
+						$colWidth, $lineHeight, $text,
+						0, 'L', 0, 0, '', '', true, 0, true
+					);
+				}
+
+				// c) move down by the computed height
+				$pdf->Ln($maxLines * $lineHeight);
+			}
+
+			// tighten spacing slightly
+			$pdf->SetY($pdf->GetY() - 3);
+		}
+
+		// 3) Footer: Generated Date on the very left
+		$pdf->SetFont('helvetica', '', 9);
+		$generatedAt = date('M d, Y, h:i:s A');
+		$pdf->writeHTMLCell(
+			0, 6, '', '',
+			'<b>Generated Date:</b> ' . htmlspecialchars($generatedAt),
+			0, 1, false, true, 'L', true
+		);
+
+		// Divider line
+		$pdf->Ln(2);
+		$pdf->Cell(0, 0, '', 'T');
+		$pdf->Ln(4);
 	}
 
 	// ================================= Header for pdf export =================================
@@ -220,10 +281,448 @@ class SellThroughBrandCategory extends BaseController
 	}
 
 	public function generatePdf() {	
+		$json = $this->request->getJSON(true);
+
+		$source              = ($json['source']              ?? null) ?: null;
+
+		$brandCategoryId     = ($json['brand_category']      ?? null) ?: null;
+		$brandCategoryText     = ($json['brand_category_text']      ?? null) ?: null;
+
+		$subBrandCategoryId  = ($json['sub_brand_category']  ?? null) ?: null;
+		$subBrandCategoryText  = ($json['sub_brand_category_text']  ?? null) ?: null;
+
+		$categoryId          = ($json['category']            ?? null) ?: null;
+		$categoryText          = ($json['category_text']            ?? null) ?: null;
+
+		$itemDeptId          = ($json['item_department']     ?? null) ?: null;
+		$itemDeptText          = ($json['item_department_text']     ?? null) ?: null;
+
+		$merchCatId          = ($json['merch_category']      ?? null) ?: null;
+		$merchCatText          = ($json['merch_category_text']      ?? null) ?: null;
+
+		$year                = trim($json['year']            ?? '') ?: null;
+		$yearId              = trim($json['year_id']         ?? '') ?: null;
+
+		$monthStart          = trim($json['month_start']     ?? '') ?: null;
+		$monthEnd            = trim($json['month_end']       ?? '') ?: null;
+
+		$weekStart           = trim($json['week_start']      ?? '') ?: null;
+		$weekEnd             = trim($json['week_end']        ?? '') ?: null;
+
+		$weekStartDate       = trim($json['week_start_date'] ?? '') ?: null;
+		$weekEndDate         = trim($json['week_end_date']   ?? '') ?: null;
+
+		$salesGroup          = trim($json['sales_group']     ?? '') ?: null;
+		$salesGroupText        = ($json['sales_group_text']         ?? null) ?: null;
+
+		$subSalesGroup       = trim($json['sub_sales_grouptype'] ?? '') ?: null;
+
+		$type                = ($json['type']                ?? null) ?: null;
+		$measure             = ($json['measure']             ?? null) ?: null;
+
+		// Sys params
+		$sysPar = $this->Global_model->getSysPar();
+		$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'] ?? '';
+
+		// Ordering (supports colData override just like your first function)
+		$orderParam       = $json['order'][0] ?? [];
+		$orderColumnIndex = $orderParam['column'] ?? 0;
+		$orderDirection   = strtoupper($orderParam['dir'] ?? 'DESC');
+
+		if (!empty($orderParam['colData'])) {
+			$orderByColumn = $orderParam['colData'];
+		} else {
+			$columnsParam  = $json['columns'] ?? [];
+			$orderByColumn = $columnsParam[$orderColumnIndex]['data'] ?? 'itmcde';
+		}
+
+		// Search
+		$searchValue = null;
+		if (!empty($json['search'])) {
+			if (is_array($json['search']) && array_key_exists('value', $json['search'])) {
+				$searchValue = trim((string)$json['search']['value']) ?: null;
+			} elseif (is_string($json['search'])) {
+				$searchValue = trim($json['search']) ?: null;
+			}
+		}
+
+		$sysPar = $this->Global_model->getSysPar();
+		$watsonsPaymentGroup = '';
+		if($sysPar){
+			$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'];
+		}
+
+		$type = $this->request->getPost('type');
+		$type = $type === '' ? null : $type;
+
+		$measure = $this->request->getPost('measure');
+		$measure = $measure === '' ? null : $measure;
+
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit  = 999999;
+		$offset = 0;
+
+		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
+	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'desc';
+	    $columns = $this->request->getVar('columns');
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'itmcde';
+
+	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+		$data = [];
+
+	    switch ($source) {
+	        case 'scann_data':
+			    $data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+	            break;
+	        case 'week_on_week':
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+	            break;
+	        case 'winsight':
+				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
+			    $weekStart = $year.$weekStart;
+
+			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
+			    $weekEnd = $year.$weekEnd;
+			    $data = $this->Dashboard_model->getSellThroughWinsightByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+				break;
+	        default:
+	        	$data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+	    }
+
+		$rows = $data['data'] ?? [];
+		
+		$title = 'Sell-Through by Brand Category';
+		if ($source === 'scann_data')   $title .= ' (Scan Data)';
+		if ($source === 'week_on_week') $title .= ' (Week-on-Week)';
+		if ($source === 'winsight')     $title .= ' (Winsight)';
+
+		$filterData = [
+			'Source'                 => $source ?? 'None',
+			'Year'                   => $year ?? 'None',
+			'Month Range'            => ($monthStart && $monthEnd) ? ($monthStart.' - '.$monthEnd) : 'None',
+			'Week Range'             => ($weekStart && $weekEnd) ? ($weekStart.' - '.$weekEnd) : 'None',
+			'Week Dates'             => ($weekStartDate && $weekEndDate) ? ($weekStartDate.' to '.$weekEndDate) : 'None',
+
+			// groups
+			'Sales Group'            => $salesGroupText ?: ($salesGroup ?: 'None'),
+			'Sub Sales Group'        => $subSalesGroup   ?: 'None',
+
+			// category breakdown
+			'Label Type Category'                    => $brandCategoryText     ?: ($brandCategoryId     ?: 'None'),
+			'Category 1 (Item Classification)'       => $categoryText          ?: ($categoryId          ?: 'None'),
+			'Category 2 (Item Sub Classification)'   => $subBrandCategoryText  ?: ($subBrandCategoryId  ?: 'None'),
+			'Category 3 (Item Department)'           => $itemDeptText          ?: ($itemDeptId          ?: 'None'),
+			'Category 4 (Item Merchandise Category)' => $merchCatText          ?: ($merchCatId          ?: 'None'),
+
+			// measure context
+			'Type'                   => $type ?? 'None',
+			'Measure'                => $measure ?? 'None',
+		];
+
+		$pdf = new \App\Libraries\TCPDFLib('L','mm','A4', true, 'UTF-8', false, false);
+		$pdf->SetCreator('LMI SFA');
+		$pdf->SetAuthor('LIFESTRONG MARKETING INC.');
+		$pdf->SetTitle($title);
+		$pdf->setPrintHeader(false);
+		$pdf->setPrintFooter(true);
+		$pdf->AddPage();
+
+		$this->printHeader($pdf, $title);
+		$this->printFilter($pdf, $filterData);
+
+		$pageWidth  = $pdf->getPageWidth();
+		$margins    = $pdf->getMargins();
+		$colWidth   = ($pageWidth - $margins['left'] - $margins['right']) / 9;
+
+		$headers = [
+			"Rank",
+			"Label Type Category",
+			"Category 1 (Item Classification)",
+			"Category 2 (Item Sub Classification)",
+			"Category 3 (Item Department)",
+			"Category 4 (Item Merchandise Category)",
+			"Sell In (Qty)",
+			"Sell Out (Qty)",
+			"Sell Out Ratio"
+		];
+
+		$pdf->SetFont('helvetica','B',9);
+		$headerHeight = 14;
+		foreach ($headers as $i => $h) {
+			$isLast = ($i === count($headers) - 1);
+			$pdf->MultiCell(
+				$colWidth,        // width
+				$headerHeight,    // height for the header cell
+				$h,               // text
+				1,                // border
+				'C',              // align
+				0,                // fill (0 = no background, avoids the black bar)
+				$isLast ? 1 : 0,  // line break after last header cell
+				'',               // x (auto)
+				'',               // y (auto)
+				true,             // reset height
+				0,                // stretch
+				false,            // isHTML
+				true,             // auto padding
+				$headerHeight,    // maxh (allows wrapping within header cell)
+				'M',              // vertical align
+				false             // fitcell (no shrink; wrap instead)
+			);
+		}
+		$pdf->SetFont('helvetica','',9);
+
+		$lineH = 4;  // mm per text line
+		$fixedRowHeight = 12;
+
+		foreach ($rows as $row) {
+			$cells = [
+				$row->rank,
+				$row->label_category,
+				$row->brand_category,
+				$row->sub_classification,
+				$row->item_department,
+				$row->item_merchandise,
+				$row->sell_in,
+				$row->sell_out,
+				$row->sell_out_ratio
+			];
+
+			$numLinesArray = array_map(function($text) use ($pdf, $colWidth) {
+				return $pdf->getNumLines($text, $colWidth);
+			}, $cells);
+
+			$maxLines = max($numLinesArray);
+			$rowHeight = $maxLines * $lineH;
+
+			$pageHeight = $pdf->getPageHeight();
+			$bottomMargin = $pdf->getBreakMargin();
+			$currentY = $pdf->GetY();
+
+			if ($currentY + $rowHeight > ($pageHeight - $bottomMargin)) {
+				$pdf->AddPage();
+			}
+
+			foreach ($cells as $colIndex => $text) {
+				$isLastCol = ($colIndex === count($cells) - 1);
+				$pdf->MultiCell(
+					$colWidth,          // width of the cell
+					$fixedRowHeight,    // *fixed* height
+					$text,              // content
+					1,                  // border
+					'C',                // horizontal align (C=center)
+					0,                  // fill?
+					$isLastCol ? 1 : 0, // ln: move to next line only at end of row
+					'',                 // x (auto)
+					'',                 // y (auto)
+					true,               // reset height (reseth)
+					0,                  // stretch mode (0 = disabled)
+					false,              // isHTML
+					true,               // auto padding
+					$fixedRowHeight,    // **maxh** = same as height
+					'M',                // **valign** middle
+					true                // **fitcell**: shrink text to fit
+				);
+			}
+		}
+
+		$pdf->Output($title . '.pdf', 'D');
 		exit;
 	}
 
 	public function generateExcel() {
+		$json = $this->request->getJSON(true);
+
+		$source              = ($json['source']              ?? null) ?: null;
+
+		$brandCategoryId     = ($json['brand_category']      ?? null) ?: null;
+		$brandCategoryText     = ($json['brand_category_text']      ?? null) ?: null;
+
+		$subBrandCategoryId  = ($json['sub_brand_category']  ?? null) ?: null;
+		$subBrandCategoryText  = ($json['sub_brand_category_text']  ?? null) ?: null;
+
+		$categoryId          = ($json['category']            ?? null) ?: null;
+		$categoryText          = ($json['category_text']            ?? null) ?: null;
+
+		$itemDeptId          = ($json['item_department']     ?? null) ?: null;
+		$itemDeptText          = ($json['item_department_text']     ?? null) ?: null;
+
+		$merchCatId          = ($json['merch_category']      ?? null) ?: null;
+		$merchCatText          = ($json['merch_category_text']      ?? null) ?: null;
+
+		$year                = trim($json['year']            ?? '') ?: null;
+		$yearId              = trim($json['year_id']         ?? '') ?: null;
+
+		$monthStart          = trim($json['month_start']     ?? '') ?: null;
+		$monthEnd            = trim($json['month_end']       ?? '') ?: null;
+
+		$weekStart           = trim($json['week_start']      ?? '') ?: null;
+		$weekEnd             = trim($json['week_end']        ?? '') ?: null;
+
+		$weekStartDate       = trim($json['week_start_date'] ?? '') ?: null;
+		$weekEndDate         = trim($json['week_end_date']   ?? '') ?: null;
+
+		$salesGroup          = trim($json['sales_group']     ?? '') ?: null;
+		$salesGroupText        = ($json['sales_group_text']         ?? null) ?: null;
+
+		$subSalesGroup       = trim($json['sub_sales_group'] ?? '') ?: null;
+
+		$type                = ($json['type']                ?? null) ?: null;
+		$measure             = ($json['measure']             ?? null) ?: null;
+
+		// Sys params
+		$sysPar = $this->Global_model->getSysPar();
+		$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'] ?? '';
+
+		// Ordering (supports colData override just like your first function)
+		$orderParam       = $json['order'][0] ?? [];
+		$orderColumnIndex = $orderParam['column'] ?? 0;
+		$orderDirection   = strtoupper($orderParam['dir'] ?? 'DESC');
+
+		if (!empty($orderParam['colData'])) {
+			$orderByColumn = $orderParam['colData'];
+		} else {
+			$columnsParam  = $json['columns'] ?? [];
+			$orderByColumn = $columnsParam[$orderColumnIndex]['data'] ?? 'itmcde';
+		}
+
+		// Search
+		$searchValue = null;
+		if (!empty($json['search'])) {
+			if (is_array($json['search']) && array_key_exists('value', $json['search'])) {
+				$searchValue = trim((string)$json['search']['value']) ?: null;
+			} elseif (is_string($json['search'])) {
+				$searchValue = trim($json['search']) ?: null;
+			}
+		}
+
+		$sysPar = $this->Global_model->getSysPar();
+		$watsonsPaymentGroup = '';
+		if($sysPar){
+			$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'];
+		}
+
+		$type = $this->request->getPost('type');
+		$type = $type === '' ? null : $type;
+
+		$measure = $this->request->getPost('measure');
+		$measure = $measure === '' ? null : $measure;
+
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit  = 999999;
+		$offset = 0;
+
+		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
+	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'desc';
+	    $columns = $this->request->getVar('columns');
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'itmcde';
+
+	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+		$data = [];
+
+	    switch ($source) {
+	        case 'scann_data':
+			    $data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+	            break;
+	        case 'week_on_week':
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+	            break;
+	        case 'winsight':
+				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
+			    $weekStart = $year.$weekStart;
+
+			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
+			    $weekEnd = $year.$weekEnd;
+			    $data = $this->Dashboard_model->getSellThroughWinsightByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+				break;
+	        default:
+	        	$data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+				
+	    }
+
+		$rows = $data['data'] ?? [];
+
+		$title = 'Sell-Through by Brand Category';
+
+		$spreadsheet = new Spreadsheet();
+		$sheet       = $spreadsheet->getActiveSheet();
+
+		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
+		$sheet->setCellValue('A2', 'Report: Sell-Through by Brand');
+		$sheet->setCellValue('A4', 'Source: '        . ($source ?: 'NONE'));
+		$sheet->mergeCells('A1:C1');
+		$sheet->mergeCells('A2:C2');
+
+		$sheet->setCellValue('A6', 'Year: ' . ($year ?: 'NONE'));
+		$sheet->setCellValue('A7', 'Month Range: ' . (($monthStart && $monthEnd) ? ($monthStart.' - '.$monthEnd) : 'None'));
+
+		$sheet->setCellValue('B6', 'Week Range: ' . (($weekStart && $weekEnd) ? ($weekStart.' - '.$weekEnd) : 'None'));
+		$sheet->setCellValue('B7', 'Week Dates: ' . (($weekStartDate && $weekEndDate) ? ($weekStartDate.' to '.$weekEndDate) : 'None'));
+
+		$sheet->setCellValue('C6', 'Sales Group: ' . ($salesGroupText ?: ($salesGroup ?: 'NONE')));
+		$sheet->setCellValue('C7', 'Sub Sales Group: ' . ($subSalesGroup ?: 'NONE'));
+
+		$sheet->setCellValue('D6', 'Measure: ' . ($measure ?: 'NONE'));
+		$sheet->setCellValue('D7', 'Label Type Category: ' . ($brandCategoryText ?: ($brandCategoryId ?: 'NONE')));
+
+		$sheet->setCellValue('E6', 'Category 1: ' . ($categoryText ?: ($categoryId ?: 'NONE')));
+		$sheet->setCellValue('E7', 'Category 2: ' . ($subBrandCategoryText ?: ($subBrandCategoryId ?: 'NONE')));
+
+		$sheet->setCellValue('F6', 'Category 3: ' . ($itemDeptText ?: ($itemDeptId ?: 'NONE')));
+		$sheet->setCellValue('F7', 'Category 4: ' . ($merchCatText ?: ($merchCatId ?: 'NONE')));
+
+		$sheet->setCellValue('G7', 'Date Generated: ' . date('M d, Y, h:i:s A'));
+		
+		$headers = [
+			"Rank",
+			"Label Type Category",
+			"Category 1 (Item Classification)",
+			"Category 2 (Item Sub Classification)",
+			"Category 3 (Item Department)",
+			"Category 4 (Item Merchandise Category)",
+			"Sell In (Qty)",
+			"Sell Out (Qty)",
+			"Sell Out Ratio"
+		];
+		$sheet->fromArray($headers, null, 'A9');
+		$sheet->getStyle('A9:I9')->getFont()->setBold(true);
+
+		$rowNum = 10;
+
+		foreach ($rows as $row) {
+			$sheet->setCellValue('A'.$rowNum,$row->rank);
+			$sheet->setCellValue('B'.$rowNum,$row->label_category);
+			$sheet->setCellValue('C'.$rowNum,$row->brand_category);
+			$sheet->setCellValue('D'.$rowNum,$row->sub_classification);
+			$sheet->setCellValue('E'.$rowNum,$row->item_department);
+			$sheet->setCellValue('F'.$rowNum,$row->item_merchandise);
+			$sheet->setCellValue('G'.$rowNum,$row->sell_in);
+			$sheet->setCellValue('H'.$rowNum,$row->sell_out);
+			$sheet->setCellValue('I'.$rowNum,$row->sell_out_ratio);
+
+			$rowNum++;
+		}
+
+		foreach (range('A','N') as $col) {
+			$sheet->getColumnDimension($col)->setAutoSize(true);
+		}
+
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
 		exit;
 	}
 
