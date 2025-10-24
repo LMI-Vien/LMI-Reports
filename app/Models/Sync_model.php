@@ -1737,13 +1737,13 @@ class Sync_model extends Model
 
     public function syncAllItemUnitFileLMIRGDIData($batchSize = 5000)
     {
-        $offset = 0;
         $totalRecordsSynced = 0;
         $errorMessage = null;
         $status = 'success';
 
         try {
             $this->sfaDB->query("TRUNCATE TABLE tbl_item_unit_file_all");
+
             $sources = [
                 'lmi' => [
                     'db' => $this->traccLmiDB,
@@ -1755,6 +1755,8 @@ class Sync_model extends Model
                 ],
             ];
 
+            $mergedData = [];
+
             foreach ($sources as $sourceType => $sourceInfo) {
                 $offset = 0;
 
@@ -1764,23 +1766,26 @@ class Sync_model extends Model
                         ->get()
                         ->getResultArray();
 
-                    if (empty($sourceData)) {
-                        break;
-                    }
+                    if (empty($sourceData)) break;
 
-                    $values = [];
                     foreach ($sourceData as $row) {
+                        $key = $row['itmcde'] . '|' . $row['untmea'];
 
-                        $brandId = 'NULL';
-                        $brandLabelId = 'NULL';
-                        $brandCategoryId = 'NULL';
-                        $labelTypeCategoryId = 'NULL';
-                        $category2Id = 'NULL';
-                        $category3Id = 'NULL';
-                        $category4Id = 'NULL';
+                        if (isset($mergedData[$key])) {
+                            if ($mergedData[$key]['source_type'] === 'lmi') {
+                                continue;
+                            }
+                            if ($sourceType === 'lmi') {
+                                unset($mergedData[$key]);
+                            } else {
+                                continue;
+                            }
+                        }
 
                         $untprc = $sourceInfo['untprcFn']($row['itmcde'], $row['untmea']);
-                        
+
+                        $brandId = $brandLabelId = $brandCategoryId = $labelTypeCategoryId = $category2Id = $category3Id = $category4Id = 'NULL';
+
                         $itemFileTable = $sourceType === 'lmi' ? 'tbl_itemfile_lmi' : 'tbl_itemfile_rgdi';
                         $item = $this->sfaDB->table($itemFileTable)
                             ->select('brncde, itmclacde')
@@ -1794,7 +1799,6 @@ class Sync_model extends Model
                                 ->where('brand_code', $item['brncde'])
                                 ->get()
                                 ->getRowArray();
-
                             if ($brand) {
                                 $brandId = (int) $brand['id'];
                                 $brandLabelId = (int) $brand['category_id'];
@@ -1807,7 +1811,6 @@ class Sync_model extends Model
                                 ->where('item_class_code', $item['itmclacde'])
                                 ->get()
                                 ->getRowArray();
-
                             if ($category) {
                                 $brandCategoryId = (int) $category['id'];
                             }
@@ -1826,62 +1829,69 @@ class Sync_model extends Model
                             $category4Id = (int) $pricelist['category_4_id'];
                         }
 
-
-                        $values[] = "(
-                            '" . $this->esc($row['recid']) . "',
-                            '" . $this->esc($row['itmcde']) . "',
-                            '" . $this->esc($row['conver']) . "',
-                            '" . $this->esc($row['untmea']) . "',
-                            '" . $this->esc($untprc) . "',
-                            '" . $this->esc($row['untcst']) . "',
-                            '" . $sourceType . "',
-                            $brandId,
-                            $brandLabelId,
-                            $brandCategoryId,
-                            $labelTypeCategoryId,
-                            $category2Id,
-                            $category3Id,
-                            $category4Id
-
-                        )";
-                    }
-
-                    if (!empty($values)) {
-                        $sql = "INSERT INTO tbl_item_unit_file_all 
-                                (recid, itmcde, conver, untmea, untprc, untcst, source_type, brand_id, brand_label_type_id, brand_category_id,
-                             label_type_category_id, category_2_id, category_3_id, category_4_id)
-                                VALUES " . implode(',', $values) . "
-                                ON DUPLICATE KEY UPDATE 
-                                  itmcde = VALUES(itmcde),
-                                  conver = VALUES(conver),
-                                  untmea = VALUES(untmea),
-                                  untprc = VALUES(untprc),
-                                  untcst = VALUES(untcst),
-                                  source_type = VALUES(source_type),
-                                  brand_id = VALUES(brand_id),
-                                  brand_label_type_id = VALUES(brand_label_type_id),
-                                  brand_category_id = VALUES(brand_category_id),
-                                  label_type_category_id = VALUES(label_type_category_id),
-                                  category_2_id = VALUES(category_2_id),
-                                  category_3_id = VALUES(category_3_id),
-                                  category_4_id = VALUES(category_4_id)";
-
-                        $this->sfaDB->query($sql);
-                        $totalRecordsSynced += count($sourceData);
+                        $mergedData[$key] = [
+                            'recid' => $this->esc($row['recid']),
+                            'itmcde' => $this->esc($row['itmcde']),
+                            'conver' => $this->esc($row['conver']),
+                            'untmea' => $this->esc($row['untmea']),
+                            'untprc' => $this->esc($untprc),
+                            'untcst' => $this->esc($row['untcst']),
+                            'source_type' => $sourceType,
+                            'brand_id' => $brandId,
+                            'brand_label_type_id' => $brandLabelId,
+                            'brand_category_id' => $brandCategoryId,
+                            'label_type_category_id' => $labelTypeCategoryId,
+                            'category_2_id' => $category2Id,
+                            'category_3_id' => $category3Id,
+                            'category_4_id' => $category4Id,
+                        ];
                     }
 
                     $offset += $batchSize;
                 }
             }
+
+            if (!empty($mergedData)) {
+                $values = [];
+                foreach ($mergedData as $row) {
+                    $values[] = "(
+                        '{$row['recid']}',
+                        '{$row['itmcde']}',
+                        '{$row['conver']}',
+                        '{$row['untmea']}',
+                        '{$row['untprc']}',
+                        '{$row['untcst']}',
+                        '{$row['source_type']}',
+                        {$row['brand_id']},
+                        {$row['brand_label_type_id']},
+                        {$row['brand_category_id']},
+                        {$row['label_type_category_id']},
+                        {$row['category_2_id']},
+                        {$row['category_3_id']},
+                        {$row['category_4_id']}
+                    )";
+                }
+
+                $sql = "INSERT INTO tbl_item_unit_file_all
+                        (recid, itmcde, conver, untmea, untprc, untcst, source_type,
+                         brand_id, brand_label_type_id, brand_category_id,
+                         label_type_category_id, category_2_id, category_3_id, category_4_id)
+                        VALUES " . implode(',', $values);
+
+                $this->sfaDB->query($sql);
+                $totalRecordsSynced = count($mergedData);
+            }
+
         } catch (\Exception $e) {
             $status = 'error';
             $errorMessage = $e->getMessage();
         }
 
         return $status === 'success'
-            ? "Data sync completed for ALL Item Unit with {$totalRecordsSynced} records."
+            ? "Data sync completed for ALL Item Unit with {$totalRecordsSynced} unique records."
             : "Sync failed. {$errorMessage}";
     }
+
 
     public function syncSalesFile2AllData($batchSize = 5000)
     {
