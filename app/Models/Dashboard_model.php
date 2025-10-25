@@ -2406,7 +2406,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -2742,7 +2742,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -3074,7 +3074,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -3344,7 +3344,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -3608,7 +3608,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -3869,7 +3869,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -4352,7 +4352,8 @@ class Dashboard_model extends Model
 			        SUM($sellInExpr) AS sell_in,
 			        SUM(a.sell_out) AS sell_out,
 			        CASE 
-			            WHEN SUM($sellInExpr) > 0 THEN ROUND((SUM(a.sell_out) / SUM($sellInExpr)) * 100, 2)
+			            WHEN SUM($sellInExpr) > 0
+			            THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 			            ELSE 0
 			        END AS sell_out_ratio,
 			        COUNT(*) OVER() AS total_records
@@ -4587,7 +4588,8 @@ class Dashboard_model extends Model
 			        SUM($sellInExpr) AS sell_in,
 			        SUM(a.sell_out) AS sell_out,
 			        CASE 
-			            WHEN SUM($sellInExpr) > 0 THEN ROUND((SUM(a.sell_out) / SUM($sellInExpr)) * 100, 2)
+			            WHEN SUM($sellInExpr) > 0 
+			            THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 			            ELSE 0
 			        END AS sell_out_ratio,
 			        COUNT(*) OVER() AS total_records
@@ -4870,7 +4872,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -5166,7 +5168,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
@@ -5466,7 +5468,7 @@ class Dashboard_model extends Model
 	                a.sell_out,
 	                CASE 
 	                    WHEN $sellInExpr > 0 
-	                    THEN FORMAT((a.sell_out / $sellInExpr) * 100, 2)
+	                    THEN CAST(ROUND((a.sell_out / $sellInExpr) * 100, 2) AS DECIMAL(10,2))
 	                    ELSE 0
 	                END AS sell_out_ratio,
 	                COUNT(*) OVER() AS total_records
