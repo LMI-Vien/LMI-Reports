@@ -786,7 +786,7 @@
         let postData = {
             source: selectedSource,
             brand_category: selectedBrandCategory,
-            brand_category_text: selectedBrandCategoryText,
+            brand_category_text: normalize(selectedBrandCategoryText),
 
             sub_brand_category: selectedSubBrandCategory,
             sub_brand_category_text: normalize(selectedSubBrandCategoryText),
@@ -809,7 +809,7 @@
             week_start_date: selectedWeekStartDate,
             week_end_date: selectedWeekEndDate,
             sales_group: selectedSalesGroup,
-            sales_group_text: selectedSalesGroupText,
+            sales_group_text: normalize(selectedSalesGroupText),
             sub_sales_grouptype: selectedSubSalesGroup,
             type: selectedType,
             measure: selectedMeasure
