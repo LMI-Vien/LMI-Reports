@@ -103,8 +103,8 @@ $routes->group('sell-through/', static function ($routes) {
     $routes->get('overall', 'SellThroughOverall::overall');
     $routes->post('get-overall', 'SellThroughOverall::getOverall');
     $routes->get('get-overall', 'SellThroughOverall::getOverall');
-    $routes->match(['GET', 'POST'], 'by-sku-generate-pdf', 'SellThroughOverall::generatePdf');
-    $routes->match(['GET', 'POST'], 'by-sku-generate-excel-ba', 'SellThroughOverall::generateExcel');
+    $routes->match(['GET', 'POST'], 'by-overall-generate-pdf', 'SellThroughOverall::generatePdf');
+    $routes->match(['GET', 'POST'], 'by-overall-generate-excel-ba', 'SellThroughOverall::generateExcel');
 });
 
 

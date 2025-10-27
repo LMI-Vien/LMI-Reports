@@ -538,14 +538,26 @@
         let url = `${base_url}sell-through/${endpoint}`;
 
         let selectedSource = $('#dataSource').val();
+
         let selectedBrands = $('#brands').val();
+        let selectedBrandsText = $('#brands option:selected')
+        .map(function() { return $(this).text(); }) .get() .join(', ');
+
         let selectedBrandCategories = $('#brandCategory').val();
+        let selectedBrandCategoriesText = $('#brandCategory option:selected')
+        .map(function() { return $(this).text(); }) .get() .join(', ');
+
         let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabelText = $('#itemLabel option:selected')
+        .map(function() { return $(this).text(); }) .get() .join(', ');
+
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
+        let selectedQuarter = $('#quarter').val();
         let selectedMonthStart = $('#monthFrom').val();
         let selectedMonthEnd = $('#monthTo').val();
+        let ytd = $('input[name="ytd"]:checked').val();
         let selectedSalesGroup = $('#salesGroup').val();
         let selectedSubSalesGroup = $('#subGroup').val();
         let selectedType = $('input[name="filterType"]:checked').val();
@@ -556,14 +568,18 @@
         let weekToOption = $("#weekto option:selected");
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
-        let searchValue = $('#dt-search-0').val();
+        let searchValue = $('.dt-input').val();
 
         let postData = {
             source : selectedSource === "" ? null : selectedSource,
             brands : selectedBrands.length ? selectedBrands : null,
+            brands_text : selectedBrandsText,
             brand_categories : selectedBrandCategories.length ? selectedBrandCategories : null,
+            brand_categories_text : selectedBrandCategoriesText,
             brand_label : selectedBrandLabel === "" ? null : selectedBrandLabel,
+            brands_label_text : selectedBrandLabelText,
             year : selectedYear === "0" ? null : selectedYear,
+            quarter : selectedQuarter === "0" ? null : selectedQuarter,
             year_id : selectedYearId === "0" ? null : selectedYearId,
             month_start : selectedMonthStart === "0" ? null : selectedMonthStart,
             month_end : selectedMonthEnd === "0" ? null : selectedMonthEnd,
@@ -571,6 +587,7 @@
             week_end : selectedWeekEnd === "0" ? null : selectedWeekEnd,
             week_start_date : selectedWeekStartDate === "0" ? null : selectedWeekStartDate,
             week_end_date : selectedWeekEndDate === "0" ? null : selectedWeekEndDate,
+            ytd : ytd === "0" ? null : ytd,
             sales_group : selectedSalesGroup === "" ? null : selectedSalesGroup,
             sub_sales_group : selectedSubSalesGroup === "" ? null : selectedSubSalesGroup,
             type : selectedType === "" ? null : selectedType,
@@ -597,8 +614,8 @@
                 let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
                 const filename = rawName
                     || (action === 'exportPdf'
-                        ? 'Week by Week Stock Data of All Stores.pdf'
-                        : 'Week by Week Stock Data of All Stores.xlsx');
+                        ? 'Sell Through - Overall.pdf'
+                        : 'Sell Through - Overall.xlsx');
 
                 const blobUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');

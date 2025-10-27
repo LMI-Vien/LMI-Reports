@@ -158,6 +158,7 @@ class SellThroughOverall extends BaseController
 
 	    if($data){
 	    	return $this->response->setJSON([
+				'debug' => $this->request->getPost(),
 		        'draw' => intval($this->request->getVar('draw')),
 		        'recordsTotal' => $data['total_records'],
 		        'recordsFiltered' => $data['total_records'],
@@ -165,6 +166,7 @@ class SellThroughOverall extends BaseController
 		    ]);
 	    }else{
 	    	return $this->response->setJSON([
+				'debug' => $this->request->getPost(),
 		        'draw' => intval($this->request->getVar('draw')),
 		        'recordsTotal' => 0,
 		        'recordsFiltered' => 0,
@@ -211,22 +213,42 @@ class SellThroughOverall extends BaseController
 		$searchValue = '';
 		$searchValue = trim($json['search'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
+
+		$quarter = '';
+		$quarter = trim($json['quarter'] ?? '');
+		$quarter = $quarter === '' ? null : $quarter;
+
+		$ytd = '';
+		$ytd = trim($json['ytd'] ?? '');
+		$ytd = $ytd === '' ? null : $ytd;
 		
 		$ItemIds = '';
 		$ItemIds = trim($json['items'] ?? '');
 		$ItemIds = $ItemIds === '' ? null : $ItemIds;
 		
 		$brandIds = '';
-		$brandIds = trim($json['brands'] ?? '');
+		$brandIds = $json['brands'] ?? '';
 		$brandIds = $brandIds === '' ? null : $brandIds;
 		
 		$brandTypeId = ''; 
-		$brandTypeId = trim($json['brand_label'] ?? '');
+		$brandTypeId = $json['brand_label'] ?? '';
 		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
 		
 		$brandCategoryIds = ''; 
-		$brandCategoryIds = trim($json['brand_categories'] ?? '');
+		$brandCategoryIds = $json['brand_categories'] ?? '';
 		$brandCategoryIds = $brandCategoryIds === '' ? null : $brandCategoryIds;
+
+		$brandsText = '';
+		$brandsText = trim($json['brands_text'] ?? '');
+		$brandsText = $brandsText === '' ? null : $brandsText;
+
+		$brandCategoriesText = '';
+		$brandCategoriesText = trim($json['brand_categories_text'] ?? '');
+		$brandCategoriesText = $brandCategoriesText === '' ? null : $brandCategoriesText;
+
+		$brandsLabelText = '';
+		$brandsLabelText = trim($json['brands_label_text'] ?? '');
+		$brandsLabelText = $brandsLabelText === '' ? null : $brandsLabelText;
 		
 		$salesGroup = ''; 
 		$salesGroup = trim($json['sales_group'] ?? '');
@@ -261,14 +283,17 @@ class SellThroughOverall extends BaseController
 
 		switch ($source) {
 	        case 'scann_data':
+				$source =  "SCAN DATA";
 			    $data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'week_on_week':
+				$source =  "WEEK ON WEEK";
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'winsight':
+				$source =  "WINSIGHT";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 			    $weekStart = $year.$weekStart;
 
@@ -281,11 +306,11 @@ class SellThroughOverall extends BaseController
 	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 	    }
-		// echo json_encode(['data' => $json]);
-		// echo json_encode($data);
-		// exit;
+		
+		// echo json_encode($data); exit;
+		// echo json_encode($json); exit;
 
-		$title = 'Stock_Data_per_Store_' . date('Ymd_His');
+		$title = 'Sell_Through_Overall' . date('Ymd_His');
 		
 		$pdf = new \App\Libraries\TCPDFLib('P','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
@@ -303,15 +328,49 @@ class SellThroughOverall extends BaseController
 		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
-		$pdf->Cell(0, 5, 'Report: SELL THROUGH BY SKU', 0, 1, 'C');
+		$pdf->Cell(0, 5, 'Report: Sell Through - Overall', 0, 1, 'C');
 		$pdf->Ln(5);
 
-		// $filterData = [
-		// 	'Item Classes'     => 'check',
-		// 	'Item Classes'     => 'check',
-		// 	'Item Classes'     => 'check',
-		// ];
-		// $this->printFilter($pdf, $filterData);
+		if ($brandsText === 'Please select...') { $brandsText = ''; }
+		if ($brandCategoriesText === 'Please select...') { $brandCategoriesText = ''; }
+		if ($brandsLabelText === 'Please select...') { $brandsLabelText = ''; }
+
+		if ($weekStart !== '') { $weekStart = 'Week ' . substr($weekStart, 4, 2); }
+		if ($weekEnd !== '') { $weekEnd = 'Week ' . substr($weekEnd, 4, 2); }
+
+		if ($source === 'SCAN DATA') {
+			$periodLabelStart = 'Month From';
+			$periodLabelEnd   = 'Month To';
+
+			$monthLookup = $this->Global_model->get_valid_records("tbl_month", ['month']);
+
+			$periodStart = $monthLookup[$monthStart-1]['month'];
+			$periodEnd   = $monthLookup[$monthEnd-1]['month'];
+		} else {
+			$periodLabelStart = 'Week From';
+			$periodLabelEnd   = 'Week To';
+
+			$periodStart = $weekStart;
+			$periodEnd   = $weekEnd;
+		}
+
+		$filterData = [
+			'Data Source' 				=> $source,
+			'Measure'					=> $measure === 'qty' ? 'Quantity' : 'Amount',
+			'Year' 						=> $year,
+			'Quarter' 					=> $quarter,
+			$periodLabelStart           => $periodStart,
+			$periodLabelEnd             => $periodEnd,
+			'YTD' 						=> $ytd === 'yes' ? 'YES' : 'NO',
+			'Brand' 					=> $brandsText,
+			'Brand Category' 			=> $brandCategoriesText,
+			'Label Type' 				=> $brandsLabelText,
+			'Sales Group' 				=> $salesGroup,
+			'Sub Sales Group' 			=> $subSalesGroup,
+			'Outright / Consignment' 	=> $type == 1 ? 'Outright' : ($type == 2 ? 'Consignment' : 'All'),
+		];
+		$this->printFilter($pdf, $filterData);
+		$pdf->Ln(2);
 
 		$pdf->SetFont('helvetica', 'B', 10);
 		$pdf->MultiCell(10, 6, 'Rank', 1, 'C', 0, 0, '', '', true, 0, false, true, 6, 'M', true);
@@ -326,6 +385,10 @@ class SellThroughOverall extends BaseController
 
 		$pdf->SetFont('helvetica', '', 10);
 		$allData = $data['data'];
+		if ($allData == []) {
+			$pdf->SetFont('helvetica', '', 10);
+			$pdf->MultiCell(195, 6, "No data available in table", 1, 'C', 0, 1, '', '', true, 0, false, true, 6, 'M', true);
+		}
 		foreach ($allData as $row) {
 			$row = (object) $row;
 			$pdf->SetFont('helvetica', '', 10);
@@ -392,15 +455,41 @@ class SellThroughOverall extends BaseController
 		$searchValue = trim($json['search'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
 
-		$ItemIds = [];
-		// $ItemIds = $json['items'];
+		$quarter = '';
+		$quarter = trim($json['quarter'] ?? '');
+		$quarter = $quarter === '' ? null : $quarter;
 
-		$brandIds = []; // 
-
-		$brandTypeId = trim($json['brand_label'] ?? '');
+		$ytd = '';
+		$ytd = trim($json['ytd'] ?? '');
+		$ytd = $ytd === '' ? null : $ytd;
+		
+		$ItemIds = '';
+		$ItemIds = trim($json['items'] ?? '');
+		$ItemIds = $ItemIds === '' ? null : $ItemIds;
+		
+		$brandIds = '';
+		$brandIds = $json['brands'] ?? '';
+		$brandIds = $brandIds === '' ? null : $brandIds;
+		
+		$brandTypeId = ''; 
+		$brandTypeId = $json['brand_label'] ?? '';
 		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
 		
-		$brandCategoryIds = []; //
+		$brandCategoryIds = ''; 
+		$brandCategoryIds = $json['brand_categories'] ?? '';
+		$brandCategoryIds = $brandCategoryIds === '' ? null : $brandCategoryIds;
+
+		$brandsText = '';
+		$brandsText = trim($json['brands_text'] ?? '');
+		$brandsText = $brandsText === '' ? null : $brandsText;
+
+		$brandCategoriesText = '';
+		$brandCategoriesText = trim($json['brand_categories_text'] ?? '');
+		$brandCategoriesText = $brandCategoriesText === '' ? null : $brandCategoriesText;
+
+		$brandsLabelText = '';
+		$brandsLabelText = trim($json['brands_label_text'] ?? '');
+		$brandsLabelText = $brandsLabelText === '' ? null : $brandsLabelText;
 
 		$salesGroup = trim($json['sales_group'] ?? '');
 		$salesGroup = $salesGroup === '' ? null : $salesGroup;
@@ -434,6 +523,7 @@ class SellThroughOverall extends BaseController
 		$data['data'] = null;
 		switch ($source) {
 	        case 'scann_data':
+				$source =  "SCAN DATA";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;
 
@@ -448,6 +538,7 @@ class SellThroughOverall extends BaseController
 				);
 	            break;
 	        case 'week_on_week':
+				$source =  "WEEK ON WEEK";
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
 					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
@@ -456,6 +547,7 @@ class SellThroughOverall extends BaseController
 				);
 	            break;
 	        case 'winsight':
+				$source =  "WINSIGHT";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;
 
@@ -491,21 +583,66 @@ class SellThroughOverall extends BaseController
 		$sheet = $spreadsheet->getActiveSheet();
 
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-		$sheet->setCellValue('A2', 'Report: SELL THROUGH BY SKU');
+		$sheet->setCellValue('A2', 'Report: Sell Through - Overall');
 		$sheet->mergeCells('A1:E1');
 		$sheet->mergeCells('A2:E2');
 		
-		$sheet->setCellValueExplicit('A' . 4, "Rank", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('B' . 4, "LMI/RGDI Code", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('C' . 4, "Customer SKU", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('D' . 4, "Item Description", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('E' . 4, "Brand", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('F' . 4, "Brand Category", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('G' . 4, "Sell In", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('H' . 4, "Sell Out", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('J' . 4, "Sell Out Ratio", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		if ($brandsText === 'Please select...') { $brandsText = ''; }
+		if ($brandCategoriesText === 'Please select...') { $brandCategoriesText = ''; }
+		if ($brandsLabelText === 'Please select...') { $brandsLabelText = ''; }
 
-		$rowNum = 5;
+		if ($weekStart !== '') { $weekStart = 'Week ' . substr($weekStart, 4, 2); }
+		if ($weekEnd !== '') { $weekEnd = 'Week ' . substr($weekEnd, 4, 2); }
+
+		$sheet->setCellValueExplicit('A3', "Data Source: $source", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+		if ($source === 'SCAN DATA') {
+			$periodLabelStart = 'Month From';
+			$periodLabelEnd   = 'Month To';
+
+			$monthLookup = $this->Global_model->get_valid_records("tbl_month", ['month']);
+
+			$periodStart = $monthLookup[$monthStart-1]['month'];
+			$periodEnd   = $monthLookup[$monthEnd-1]['month'];
+		} else {
+			$periodLabelStart = 'Week From';
+			$periodLabelEnd   = 'Week To';
+
+			$periodStart = $weekStart;
+			$periodEnd   = $weekEnd;
+		}
+
+		$filterData = [
+			// 'Data Source' 				=> $source,
+
+			'Measure'					=> $measure === 'qty' ? 'Quantity' : 'Amount',
+			'Year' 						=> $year,
+			'Quarter' 					=> $quarter,
+			$periodLabelStart            => $periodStart,
+			$periodLabelEnd              => $periodEnd,
+			'YTD' 						=> $ytd === 'yes' ? 'YES' : 'NO',
+
+			'Brand' 					=> $brandsText,
+			'Brand Category' 			=> $brandCategoriesText,
+			'Label Type' 				=> $brandsLabelText,
+			'Sales Group' 				=> $salesGroup,
+			'Sub Sales Group' 			=> $subSalesGroup,
+			'Outright / Consignment' 	=> $type == 1 ? 'Outright' : ($type == 2 ? 'Consignment' : 'All'),
+		];
+
+		$this->writeHeader($sheet, $filterData);
+		
+		$sheet->setCellValueExplicit('A8', "Rank", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('B8', "LMI/RGDI Code", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('C8', "Customer SKU", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('D8', "Item Description", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('E8', "Brand", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('F8', "Brand Category", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('G8', "Sell In", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('H8', "Sell Out", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('J8', "Sell Out Ratio", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+		$rowNum = 9;
 		
 		$allData = $data['data'];
 		foreach ($allData as $row) {
@@ -533,7 +670,7 @@ class SellThroughOverall extends BaseController
 			$rowNum+=1;
 		}
 
-		$title = 'SELL_THROUGH_BY_SKU' . date('Ymd_His');
+		$title = 'SELL_THROUGH_OVERALL' . date('Ymd_His');
 
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header("Content-Disposition: attachment; filename=\"{$title}.xlsx\"");
@@ -545,7 +682,6 @@ class SellThroughOverall extends BaseController
 		exit;
 	}
 
-	// ================================= Display filters for pdf export ================================
 	private function printFilter($pdf, $filters) {
 		$pageWidth  	= $pdf->getPageWidth();
 		$pageMargin 	= $pdf->getMargins();
@@ -601,42 +737,21 @@ class SellThroughOverall extends BaseController
 		}
 	}
 
-	// ================================= Header for pdf export =================================
-	private function printHeader($pdf, $title) {
-		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
-		if (file_exists($logoPath)) {
-			$pdf->Image($logoPath, 15, 5, 50);
+	private function writeHeader($sheet, $filterData, $columnsPerRow = 6, $startRow = 5, $startCol = 'A') {
+		$col = $startCol;
+		$row = $startRow;
+		$counter = 0;
+
+		foreach ($filterData as $key => $value) {
+			$sheet->setCellValue($col . $row, $key . ': ' . $value);
+
+			$counter++;
+			if ($counter % $columnsPerRow === 0) {
+				$row++;
+				$col = $startCol;
+			} else {
+				$col++;
+			}
 		}
-		
-		$pdf->SetFont('helvetica', 'B', 15);
-		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
-		$pdf->SetFont('helvetica', '', 10);
-		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
-		$pdf->Ln(5);
 	}
-
-	private function formatTwoDecimals($value): string {
-		if (is_null($value) || !is_numeric($value)) {
-			$value = 0;
-		}
-		return number_format((float)$value, 2, '.', ',');
-	}
-
-    private function getCurrentWeek($year = null) {
-        if ($year === null) {
-            $year = (int)date('Y');
-        }
-
-        $weeks = $this->getCalendarWeeks($year);
-        $today = date('Y-m-d');
-
-        foreach ($weeks as $week) {
-            if ($today >= $week['start'] && $today <= $week['end']) {
-                return $week;
-            }
-        }
-
-        return null;
-    }
-	
 }
