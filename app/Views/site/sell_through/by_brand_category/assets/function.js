@@ -789,16 +789,16 @@
             brand_category_text: selectedBrandCategoryText,
 
             sub_brand_category: selectedSubBrandCategory,
-            sub_brand_category_text: selectedSubBrandCategoryText,
+            sub_brand_category_text: normalize(selectedSubBrandCategoryText),
 
             category: selectedCategory,
-            category_text: selectedCategoryText,
+            category_text: normalize(selectedCategoryText),
 
             item_department: selectedDepartment,
-            item_department_text: selectedDepartmentText,
+            item_department_text: normalize(selectedDepartmentText),
 
             merch_category: selectedMerch,
-            merch_category_text: selectedMerchText,
+            merch_category_text: normalize(selectedMerchText),
 
             year: selectedYear,
             year_id: selectedYearId,
@@ -862,4 +862,17 @@
             <br>Duration: ${duration}
         `;
         logActivity('Sell Through By Brand Category', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null)
+    }
+
+     function normalize(val) {
+        if (
+            val === undefined ||
+            val === null ||
+            val === "" ||
+            val === "0" ||
+            (typeof val === "string" && val.toLowerCase().includes("please select"))
+        ) {
+            return null;
+        }
+        return val;
     }

@@ -762,6 +762,7 @@
             sales_group: selectedSalesGroup,
             sub_sales_group: selectedSubSalesGroup,
             measure: selectedMeasure,
+            type: selectedType,
         }
 
         let endpoint = action === 'exportPdf' ? 'by-brand-label-type-generate-pdf' : 'by-brand-label-type-generate-excel-ba';

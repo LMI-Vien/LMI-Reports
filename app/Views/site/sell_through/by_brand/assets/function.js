@@ -764,6 +764,8 @@
             week_end_date: selectedWeekEndDate,
             sales_group: selectedSalesGroup,
             sub_sales_group: selectedSubSalesGroup,
+            type: selectedType,
+            measure: selectedMeasure,
         }
 
         let endpoint = action === 'exportPdf' ? 'by-brand-generate-pdf' : 'by-brand-generate-excel-ba';
