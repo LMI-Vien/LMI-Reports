@@ -205,24 +205,6 @@ class SellThroughBySku extends BaseController
 	    }
 	}
 
-	// ================================= Display filters for pdf export ================================
-	private function printFilter($pdf, $filters, $itemBrandMap = '', $latestYear = null) {
-	}
-
-	// ================================= Header for pdf export =================================
-	private function printHeader($pdf, $title) {
-		$logoPath = FCPATH . 'assets/img/lifestrong_white_bg.webp';
-		if (file_exists($logoPath)) {
-			$pdf->Image($logoPath, 15, 5, 50);
-		}
-		
-		$pdf->SetFont('helvetica', 'B', 15);
-		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
-		$pdf->SetFont('helvetica', '', 10);
-		$pdf->Cell(0, 5, 'Report: ' . $title, 0, 1, 'C');
-		$pdf->Ln(5);
-	}
-
 	public function generatePdf() {	
 		$json = $this->request->getJSON(true);
 		$weekStart = trim($json['week_start'] ?? '');
@@ -246,15 +228,45 @@ class SellThroughBySku extends BaseController
 		$searchValue = trim($json['search'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
 
-		$ItemIds = [];
-		// $ItemIds = $json['items'];
+		$quarter = '';
+		$quarter = trim($json['quarter'] ?? '');
+		$quarter = $quarter === '' ? null : $quarter;
 
-		$brandIds = []; // 
+		$ytd = '';
+		$ytd = trim($json['ytd'] ?? '');
+		$ytd = $ytd === '' ? null : $ytd;
 
-		$brandTypeId = trim($json['brand_label'] ?? '');
+		$ItemIds = '';
+		$ItemIds =  $json['items'] ?? '';
+		$ItemIds = $ItemIds === '' ? null : $ItemIds;
+		
+		$brandIds = '';
+		$brandIds = $json['brands'] ?? '';
+		$brandIds = $brandIds === '' ? null : $brandIds;
+
+		$brandTypeId = ''; 
+		$brandTypeId = $json['brand_label'] ?? '';
 		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
 		
-		$brandCategoryIds = []; //
+		$brandCategoryIds = ''; 
+		$brandCategoryIds = $json['brand_categories'] ?? '';
+		$brandCategoryIds = $brandCategoryIds === '' ? null : $brandCategoryIds;
+
+		$itemsText = '';
+		$itemsText = trim($json['items_text'] ?? '');
+		$itemsText = $itemsText === '' ? null : $itemsText;
+
+		$brandsText = '';
+		$brandsText = trim($json['brands_text'] ?? '');
+		$brandsText = $brandsText === '' ? null : $brandsText;
+
+		$brandCategoriesText = '';
+		$brandCategoriesText = trim($json['brand_categories_text'] ?? '');
+		$brandCategoriesText = $brandCategoriesText === '' ? null : $brandCategoriesText;
+
+		$brandsLabelText = '';
+		$brandsLabelText = trim($json['brands_label_text'] ?? '');
+		$brandsLabelText = $brandsLabelText === '' ? null : $brandsLabelText;
 
 		$salesGroup = trim($json['sales_group'] ?? '');
 		$salesGroup = $salesGroup === '' ? null : $salesGroup;
@@ -288,6 +300,7 @@ class SellThroughBySku extends BaseController
 		$data['data'] = null;
 		switch ($source) {
 	        case 'scann_data':
+				$source =  "SCAN DATA";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;
 
@@ -301,6 +314,7 @@ class SellThroughBySku extends BaseController
 				);
 	            break;
 	        case 'week_on_week':
+				$source =  "WEEK ON WEEK";
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
 					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
@@ -309,6 +323,7 @@ class SellThroughBySku extends BaseController
 				);
 	            break;
 	        case 'winsight':
+				$source =  "WINSIGHT";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;
 
@@ -323,14 +338,23 @@ class SellThroughBySku extends BaseController
 
 				break;
 	        default:
-	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
-				
+				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
+				$weekStart = $year.$weekStart;
+
+				$weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
+				$weekEnd = $year.$weekEnd;
+	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku(
+					$year, $monthStart, $monthEnd, $searchValue, 
+					$ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
+					$salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, 
+					$limit, $offset, $type, $measure
+				);
 	    }
 
 		// echo json_encode($data); 
 		// exit;
 
-		$title = 'Stock_Data_per_Store_' . date('Ymd_His');
+		$title = 'Sell_Through_by_SKU' . date('Ymd_His');
 		
 		$pdf = new \App\Libraries\TCPDFLib('P','mm','A4', true, 'UTF-8', false, false);
 		$pdf->SetCreator('LMI SFA');
@@ -348,8 +372,51 @@ class SellThroughBySku extends BaseController
 		$pdf->SetFont('helvetica', 'B', 15);
 		$pdf->Cell(0, 10, 'LIFESTRONG MARKETING INC.', 0, 1, 'C');
 		$pdf->SetFont('helvetica', '', 10);
-		$pdf->Cell(0, 5, 'Report: SELL THROUGH BY SKU', 0, 1, 'C');
+		$pdf->Cell(0, 5, 'Report: Sell Through - by SKU', 0, 1, 'C');
 		$pdf->Ln(5);
+
+		if ($itemsText === 'Please select...') { $itemsText = ''; }
+		if ($brandsText === 'Please select...') { $brandsText = ''; }
+		if ($brandCategoriesText === 'Please select...') { $brandCategoriesText = ''; }
+		if ($brandsLabelText === 'Please select...') { $brandsLabelText = ''; }
+
+		if ($weekStart !== '') { $weekStart = 'Week ' . substr($weekStart, 4, 2); }
+		if ($weekEnd !== '') { $weekEnd = 'Week ' . substr($weekEnd, 4, 2); }
+
+		if ($source === 'SCAN DATA') {
+			$periodLabelStart = 'Month From';
+			$periodLabelEnd   = 'Month To';
+
+			$monthLookup = $this->Global_model->get_valid_records("tbl_month", ['month']);
+
+			$periodStart = $monthLookup[$monthStart-1]['month'];
+			$periodEnd   = $monthLookup[$monthEnd-1]['month'];
+		} else {
+			$periodLabelStart = 'Week From';
+			$periodLabelEnd   = 'Week To';
+
+			$periodStart = $weekStart;
+			$periodEnd   = $weekEnd;
+		}
+
+		$filterData = [
+			// 'Data Source' 				=> $source,
+
+			'Measure'					=> $measure === 'qty' ? 'Quantity' : 'Amount',
+			'Year' 						=> $year,
+			'Quarter' 					=> $quarter,
+			$periodLabelStart            => $periodStart,
+			$periodLabelEnd              => $periodEnd,
+			'YTD' 						=> $ytd === 'yes' ? 'YES' : 'NO',
+
+			'Item Code' 				=> $itemsText,
+			'Label Type' 				=> $brandsLabelText,
+			'Sales Group' 				=> $salesGroup,
+			'Sub Sales Group' 			=> $subSalesGroup,
+			'Outright / Consignment' 	=> $type == 1 ? 'Outright' : ($type == 2 ? 'Consignment' : 'All'),
+		];
+		$this->printFilter($pdf, $filterData);
+		$pdf->Ln(2);
 
 		$pdf->SetFont('helvetica', 'B', 10);
 		$pdf->MultiCell(10, 6, 'Rank', 1, 'C', 0, 0, '', '', true, 0, false, true, 6, 'M', true);
@@ -362,6 +429,10 @@ class SellThroughBySku extends BaseController
 
 		$pdf->SetFont('helvetica', '', 10);
 		$allData = $data['data'];
+		if ($allData == []) {
+			$pdf->SetFont('helvetica', '', 10);
+			$pdf->MultiCell(195, 6, "No data available in table", 1, 'C', 0, 1, '', '', true, 0, false, true, 6, 'M', true);
+		}
 		foreach ($allData as $row) {
 			$row = (object) $row;
 			$pdf->SetFont('helvetica', '', 10);
@@ -401,7 +472,6 @@ class SellThroughBySku extends BaseController
 		exit;
 	}
 
-
 	public function generateExcel() {
 		$json = $this->request->getJSON(true);
 		$weekStart = trim($json['week_start'] ?? '');
@@ -425,15 +495,45 @@ class SellThroughBySku extends BaseController
 		$searchValue = trim($json['search'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
 
-		$ItemIds = [];
-		// $ItemIds = $json['items'];
+		$quarter = '';
+		$quarter = trim($json['quarter'] ?? '');
+		$quarter = $quarter === '' ? null : $quarter;
 
-		$brandIds = []; // 
+		$ytd = '';
+		$ytd = trim($json['ytd'] ?? '');
+		$ytd = $ytd === '' ? null : $ytd;
 
-		$brandTypeId = trim($json['brand_label'] ?? '');
+		$ItemIds = '';
+		$ItemIds =  $json['items'] ?? '';
+		$ItemIds = $ItemIds === '' ? null : $ItemIds;
+		
+		$brandIds = '';
+		$brandIds = $json['brands'] ?? '';
+		$brandIds = $brandIds === '' ? null : $brandIds;
+
+		$brandTypeId = ''; 
+		$brandTypeId = $json['brand_label'] ?? '';
 		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
 		
-		$brandCategoryIds = []; //
+		$brandCategoryIds = ''; 
+		$brandCategoryIds = $json['brand_categories'] ?? '';
+		$brandCategoryIds = $brandCategoryIds === '' ? null : $brandCategoryIds;
+
+		$itemsText = '';
+		$itemsText = trim($json['items_text'] ?? '');
+		$itemsText = $itemsText === '' ? null : $itemsText;
+
+		$brandsText = '';
+		$brandsText = trim($json['brands_text'] ?? '');
+		$brandsText = $brandsText === '' ? null : $brandsText;
+
+		$brandCategoriesText = '';
+		$brandCategoriesText = trim($json['brand_categories_text'] ?? '');
+		$brandCategoriesText = $brandCategoriesText === '' ? null : $brandCategoriesText;
+
+		$brandsLabelText = '';
+		$brandsLabelText = trim($json['brands_label_text'] ?? '');
+		$brandsLabelText = $brandsLabelText === '' ? null : $brandsLabelText;
 
 		$salesGroup = trim($json['sales_group'] ?? '');
 		$salesGroup = $salesGroup === '' ? null : $salesGroup;
@@ -467,12 +567,12 @@ class SellThroughBySku extends BaseController
 		$data['data'] = null;
 		switch ($source) {
 	        case 'scann_data':
+				$source =  "SCAN DATA";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;
 
 				$weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 				$weekEnd = $year.$weekEnd;
-
 			    $data = $this->Dashboard_model->getSellThroughScannDataBySku(
 					$year, $monthStart, $monthEnd, $searchValue, 
 					$ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
@@ -481,6 +581,7 @@ class SellThroughBySku extends BaseController
 				);
 	            break;
 	        case 'week_on_week':
+				$source =  "WEEK ON WEEK";
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
 					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
@@ -489,18 +590,19 @@ class SellThroughBySku extends BaseController
 				);
 	            break;
 	        case 'winsight':
+				$source =  "WINSIGHT";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;
 
 				$weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 				$weekEnd = $year.$weekEnd;
-
 				$data = $this->Dashboard_model->getSellThroughWinsightBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
 					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds,
 					$salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
+
 				break;
 	        default:
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
@@ -508,7 +610,6 @@ class SellThroughBySku extends BaseController
 
 				$weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 				$weekEnd = $year.$weekEnd;
-
 	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku(
 					$year, $monthStart, $monthEnd, $searchValue, 
 					$ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
@@ -524,19 +625,63 @@ class SellThroughBySku extends BaseController
 		$sheet = $spreadsheet->getActiveSheet();
 
 		$sheet->setCellValue('A1', 'LIFESTRONG MARKETING INC.');
-		$sheet->setCellValue('A2', 'Report: SELL THROUGH BY SKU');
+		$sheet->setCellValue('A2', 'Report: Sell Through - By SKU');
 		$sheet->mergeCells('A1:E1');
 		$sheet->mergeCells('A2:E2');
-		
-		$sheet->setCellValueExplicit('A' . 4, "Rank", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('B' . 4, "LMI/RGDI Code", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('C' . 4, "Customer SKU", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('D' . 4, "Item Description", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('E' . 4, "Sell In", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('F' . 4, "Sell Out", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-		$sheet->setCellValueExplicit('G' . 4, "Sell Out Ratio", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
 
-		$rowNum = 5;
+		if ($brandsText === 'Please select...') { $brandsText = ''; }
+		if ($brandCategoriesText === 'Please select...') { $brandCategoriesText = ''; }
+		if ($brandsLabelText === 'Please select...') { $brandsLabelText = ''; }
+
+		if ($weekStart !== '') { $weekStart = 'Week ' . substr($weekStart, 4, 2); }
+		if ($weekEnd !== '') { $weekEnd = 'Week ' . substr($weekEnd, 4, 2); }
+
+		$sheet->setCellValueExplicit('A3', "Data Source: $source", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+		if ($source === 'SCAN DATA') {
+			$periodLabelStart = 'Month From';
+			$periodLabelEnd   = 'Month To';
+
+			$monthLookup = $this->Global_model->get_valid_records("tbl_month", ['month']);
+
+			$periodStart = $monthLookup[$monthStart-1]['month'];
+			$periodEnd   = $monthLookup[$monthEnd-1]['month'];
+		} else {
+			$periodLabelStart = 'Week From';
+			$periodLabelEnd   = 'Week To';
+
+			$periodStart = $weekStart;
+			$periodEnd   = $weekEnd;
+		}
+
+		$filterData = [
+			// 'Data Source' 				=> $source,
+
+			'Measure'					=> $measure === 'qty' ? 'Quantity' : 'Amount',
+			'Year' 						=> $year,
+			'Quarter' 					=> $quarter,
+			$periodLabelStart            => $periodStart,
+			$periodLabelEnd              => $periodEnd,
+			'YTD' 						=> $ytd === 'yes' ? 'YES' : 'NO',
+
+			'Item Code' 				=> $itemsText,
+			'Label Type' 				=> $brandsLabelText,
+			'Sales Group' 				=> $salesGroup,
+			'Sub Sales Group' 			=> $subSalesGroup,
+			'Outright / Consignment' 	=> $type == 1 ? 'Outright' : ($type == 2 ? 'Consignment' : 'All'),
+		];
+
+		$this->writeHeader($sheet, $filterData);
+		
+		$sheet->setCellValueExplicit('A8', "Rank", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('B8', "LMI/RGDI Code", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('C8', "Customer SKU", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('D8', "Item Description", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('E8', "Sell In", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('F8', "Sell Out", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+		$sheet->setCellValueExplicit('G8', "Sell Out Ratio", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+		$rowNum = 9;
 		
 		$allData = $data['data'];
 		foreach ($allData as $row) {
@@ -572,62 +717,76 @@ class SellThroughBySku extends BaseController
 		exit;
 	}
 
-	private function formatTwoDecimals($value): string {
-		if (is_null($value) || !is_numeric($value)) {
-			$value = 0;
+	private function printFilter($pdf, $filters) {
+		$pageWidth  	= $pdf->getPageWidth();
+		$pageMargin 	= $pdf->getMargins();
+		$usableWidth 	= $pageWidth - $pageMargin['left'] - $pageMargin['right'];
+
+		$perRow   = ceil(count($filters) / 2);
+		$colWidth = $usableWidth / $perRow;
+
+		$rows = array_chunk($filters, $perRow, true);
+
+		foreach ($rows as $rowFilters) {
+			$currentX = $pdf->GetX();
+			$currentY = $pdf->GetY();
+
+			$cellBaseHeight = 5;
+			$maxLines       = 1;
+
+			foreach ($rowFilters as $key => $value) {
+				$html     = "<b>{$key}:</b> {$value}";
+				$plainTxt = strip_tags($html);
+				$numLines = $pdf->getNumLines($plainTxt, $colWidth);
+				$maxLines = max($maxLines, $numLines);
+			}
+			$rowHeight = $cellBaseHeight * $maxLines;
+
+			$x = $currentX;
+			foreach ($rowFilters as $key => $value) {
+				$html = "<b>" . htmlspecialchars($key) . ":</b> " . htmlspecialchars($value);
+
+				$pdf->MultiCell(
+					$colWidth,        // width
+					$cellBaseHeight,  // nominal line height
+					$html,            // HTML text
+					0,                // no border
+					'L',              // left align
+					false,            // no fill
+					0,                // ln = stay on same line
+					$x,               // x position
+					$currentY,        // y position
+					true,             // reset height
+					0,                // stretch
+					true,             // **isHTML = true**  
+					true,             // autopadding
+					$rowHeight,       // max height
+					'T',              // valign = top
+					false             // fitcell
+				);
+
+				$x += $colWidth;
+			}
+
+			$pdf->Ln($rowHeight);
 		}
-		return number_format((float)$value, 2, '.', ',');
 	}
 
+	private function writeHeader($sheet, $filterData, $columnsPerRow = 6, $startRow = 5, $startCol = 'A') {
+		$col = $startCol;
+		$row = $startRow;
+		$counter = 0;
 
-    private function getCurrentWeek($year = null) {
-        if ($year === null) {
-            $year = (int)date('Y');
-        }
+		foreach ($filterData as $key => $value) {
+			$sheet->setCellValue($col . $row, $key . ': ' . $value);
 
-        $weeks = $this->getCalendarWeeks($year);
-        $today = date('Y-m-d');
-
-        foreach ($weeks as $week) {
-            if ($today >= $week['start'] && $today <= $week['end']) {
-                return $week;
-            }
-        }
-
-        return null;
-    }
-
-    public function getSubSalesGroup(){
-    	//included the items per payment group
-    	$paymentGroup = $this->request->getPost('sales_group');
-    	//$paymentGroup = 'Ace Pharmaceuticals Inc';
-    	if($paymentGroup){
-			$query_payment_group = "si.status = 1 AND pm.description = ". $this->db->escape($paymentGroup);
-			$select_payment_group = "c.code, c.description";
-
-	        $join_payment_group = [
-	        	[
-		            'table' => 'tbl_cus_sellout_indicator si',
-		            'query' => 'c.code = si.cus_code',
-		            'type'  => 'INNER'
-	        	],
-	        	[
-		            'table' => 'tbl_pricelist_masterfile pm',
-		            'query' => 'c.pricelist_id = pm.id',
-		            'type'  => 'LEFT'
-	        	]
-	    	];
-
-			$query_item_per_payment_group = "mp.status = 1 AND mp.customer_payment_group = ". $this->db->escape($paymentGroup);
-			$select_item_per_payment_group = "mp.item_code, mp.customer_payment_group";
-
-	        $join_item_per_payment_group = [];
-
-			$data['sub_payment_group'] = $this->Global_model->get_data_list('tbl_customer_list c', $query_payment_group, 99999, 0, $select_payment_group,'','', $join_payment_group, '');
-
-			$data['items'] = $this->Global_model->get_data_list('tbl_main_pricelist mp', $query_item_per_payment_group, 99999, 0, $select_item_per_payment_group,'','', $join_item_per_payment_group, 'mp.item_code, mp.customer_payment_group');
-			echo json_encode($data);
-	    }
-    }
-
+			$counter++;
+			if ($counter % $columnsPerRow === 0) {
+				$row++;
+				$col = $startCol;
+			} else {
+				$col++;
+			}
+		}
+	}
 }

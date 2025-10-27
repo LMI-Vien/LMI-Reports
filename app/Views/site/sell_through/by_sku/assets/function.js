@@ -738,6 +738,8 @@
 
         let selectedSource = $('#dataSource').val();
         let selectedItems = $('#itmCode').val();
+        let selectedItemsText = $('#itmCode option:selected')
+        .map(function() { return $(this).text(); }) .get() .join(', ');
         let selectedBrandLabel = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
@@ -754,11 +756,12 @@
         let weekToOption = $("#weekto option:selected");
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
-        let searchValue = $('#dt-search-0').val();
+        let searchValue = $('.dt-input').val();
 
         let postData = {
             source : selectedSource === "" ? null : selectedSource,
             items : selectedItems.length ? selectedItems : null,
+            items_text : selectedItemsText,
             brand_label : selectedBrandLabel === "" ? null : selectedBrandLabel,
             year : selectedYear === "0" ? null : selectedYear,
             year_id : selectedYearId === "0" ? null : selectedYearId,
@@ -794,8 +797,8 @@
                 let rawName = match?.[1] ? decodeURIComponent(match[1]) : null;
                 const filename = rawName
                     || (action === 'exportPdf'
-                        ? 'Week by Week Stock Data of All Stores.pdf'
-                        : 'Week by Week Stock Data of All Stores.xlsx');
+                        ? 'Sell Through - by SKU.pdf'
+                        : 'Sell Through - by SKU.xlsx');
 
                 const blobUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
