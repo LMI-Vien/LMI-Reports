@@ -2270,21 +2270,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 		$sql = "
 	        WITH aggregated AS (
@@ -2612,21 +2612,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 		$sql = "
 	        WITH aggregated AS (
@@ -2944,21 +2944,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 		$sql = "
 	        WITH aggregated AS (
@@ -3227,21 +3227,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -3497,21 +3497,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -3760,21 +3760,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -4016,21 +4016,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -4259,21 +4259,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -4495,21 +4495,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -4727,21 +4727,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -5038,21 +5038,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
@@ -5331,21 +5331,21 @@ class Dashboard_model extends Model
 	        ? "ROUND(SUM(s.amt), 2)"
 	        : "ROUND(SUM(s.itmqty * IFNULL(u.conver, 1)), 0)";
 
-	    if ($measure === "amount") {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "FORMAT(IFNULL(o.total_qty, 0), 2)" 
-	            : ($sellInType == 0 
-	                ? "FORMAT(IFNULL(c.total_qty, 0), 2)" 
-	                : "FORMAT(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
-	        );
-	    } else {
-	        $sellInExpr = ($sellInType == 1 
-	            ? "TRUNCATE(IFNULL(o.total_qty, 0), 0)" 
-	            : ($sellInType == 0 
-	                ? "TRUNCATE(IFNULL(c.total_qty, 0), 0)" 
-	                : "TRUNCATE(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
-	        );
-	    }
+		if ($measure === "amount") {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 2)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 2)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 2)")
+		    );
+		} else {
+		    $sellInExpr = ($sellInType == 1 
+		        ? "ROUND(IFNULL(o.total_qty, 0), 0)"
+		        : ($sellInType == 0
+		            ? "ROUND(IFNULL(c.total_qty, 0), 0)"
+		            : "ROUND(IFNULL(o.total_qty, 0) + IFNULL(c.total_qty, 0), 0)")
+		    );
+		}
 
 	    $sql = "
 	        WITH aggregated AS (
