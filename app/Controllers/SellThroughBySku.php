@@ -205,6 +205,38 @@ class SellThroughBySku extends BaseController
 	    }
 	}
 
+    public function getSubSalesGroup(){
+    	$paymentGroup = $this->request->getPost('sales_group');
+    	//$paymentGroup = 'Ace Pharmaceuticals Inc';
+    	if($paymentGroup){
+			$query_payment_group = "si.status = 1 AND pm.description = ". $this->db->escape($paymentGroup);
+			$select_payment_group = "c.code, c.description";
+
+	        $join_payment_group = [
+	        	[
+		            'table' => 'tbl_cus_sellout_indicator si',
+		            'query' => 'c.code = si.cus_code',
+		            'type'  => 'INNER'
+	        	],
+	        	[
+		            'table' => 'tbl_pricelist_masterfile pm',
+		            'query' => 'c.pricelist_id = pm.id',
+		            'type'  => 'LEFT'
+	        	]
+	    	];
+
+			$query_item_per_payment_group = "mp.status = 1 AND mp.customer_payment_group = ". $this->db->escape($paymentGroup);
+			$select_item_per_payment_group = "mp.item_code, mp.customer_payment_group";
+
+	        $join_item_per_payment_group = [];
+
+			$data['sub_payment_group'] = $this->Global_model->get_data_list('tbl_customer_list c', $query_payment_group, 99999, 0, $select_payment_group,'','', $join_payment_group, '');
+
+			$data['items'] = $this->Global_model->get_data_list('tbl_main_pricelist mp', $query_item_per_payment_group, 99999, 0, $select_item_per_payment_group,'','', $join_item_per_payment_group, 'mp.item_code, mp.customer_payment_group');
+			echo json_encode($data);
+	    }
+    }
+
 	public function generatePdf() {	
 		$json = $this->request->getJSON(true);
 		$weekStart = trim($json['week_start'] ?? '');
