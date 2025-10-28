@@ -749,6 +749,14 @@
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
 
+        let searchValue = $('#sellThroughByBrand').DataTable().search();
+        let dt = $('#sellThroughByBrand').DataTable();
+        let orderInfo = dt.order(); 
+        let orderColumnIdx = orderInfo[0][0];
+        let orderDir = orderInfo[0][1];
+        const columnMap = ['rank','brand','sell_in','sell_out','sell_out_ratio'];
+        let orderByField = columnMap[orderColumnIdx];
+
         let postData = {
             source: selectedSource,
             brands: selectedBrands,
@@ -766,6 +774,9 @@
             sub_sales_group: selectedSubSalesGroup,
             type: selectedType,
             measure: selectedMeasure,
+            search_value: searchValue,
+            order_by: orderByField,
+            order_dir: orderDir
         }
 
         let endpoint = action === 'exportPdf' ? 'by-brand-generate-pdf' : 'by-brand-generate-excel-ba';

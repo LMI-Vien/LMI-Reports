@@ -297,18 +297,11 @@ class SellThroughBrand extends BaseController
 		$type          = ($json['type']    ?? null) ?: null; 
 		$measure       = ($json['measure'] ?? null) ?: null;  
 
-		$orderParam        = $json['order'][0] ?? [];
-		$orderColumnIndex  = $orderParam['column'] ?? 0;
-		$orderDirection    = strtoupper($orderParam['dir'] ?? 'DESC');
+		$searchValue   = ($json['search_value'] ?? null) ?: null;
 
-		if (!empty($orderParam['colData'])) {
-			$orderByColumn = $orderParam['colData'];
-		} else {
-			$columnsParam = $json['columns'] ?? [];
-			$orderByColumn = $columnsParam[$orderColumnIndex]['data'] ?? 'itmcde';
-		}
+		$orderByColumn = $json['order_by'] ?? null;
+		$orderDirection = isset($json['order_dir']) ? strtoupper($json['order_dir']) : null;
 
-		$searchValue = null;
 		if (!empty($json['search'])) {
 			if (is_array($json['search']) && isset($json['search']['value'])) {
 				$searchValue = trim((string)$json['search']['value']) ?: null;
@@ -438,8 +431,8 @@ class SellThroughBrand extends BaseController
 			$cells = [
 				$row->rank,
 				$row->brand,
-				$row->sell_in,
-				$row->sell_out,
+				$this->formatComma($row->sell_in),
+				$this->formatComma($row->sell_out),
 				$row->sell_out_ratio
 			];
 
@@ -514,18 +507,11 @@ class SellThroughBrand extends BaseController
 		$type          = ($json['type']    ?? null) ?: null; 
 		$measure       = ($json['measure'] ?? null) ?: null;  
 
-		$orderParam        = $json['order'][0] ?? [];
-		$orderColumnIndex  = $orderParam['column'] ?? 0;
-		$orderDirection    = strtoupper($orderParam['dir'] ?? 'DESC');
+		$searchValue   = ($json['search_value'] ?? null) ?: null;
 
-		if (!empty($orderParam['colData'])) {
-			$orderByColumn = $orderParam['colData'];
-		} else {
-			$columnsParam = $json['columns'] ?? [];
-			$orderByColumn = $columnsParam[$orderColumnIndex]['data'] ?? 'itmcde';
-		}
+		$orderByColumn = $json['order_by'] ?? null;
+		$orderDirection = isset($json['order_dir']) ? strtoupper($json['order_dir']) : null;
 
-		$searchValue = null;
 		if (!empty($json['search'])) {
 			if (is_array($json['search']) && isset($json['search']['value'])) {
 				$searchValue = trim((string)$json['search']['value']) ?: null;
@@ -664,6 +650,13 @@ class SellThroughBrand extends BaseController
 			$value = 0;
 		}
 		return number_format((float)$value, 2, '.', ',');
+	}
+
+	private function formatComma($value): string {
+		if (!is_numeric($value)) {
+			return (string)$value;
+		}
+		return number_format((float)$value, 0, '.', ',');
 	}
 
 
