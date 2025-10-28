@@ -67,8 +67,8 @@ class SellThroughBrand extends BaseController
 		$brandIds = $this->request->getPost('brands');
 		$brandIds = $brandIds === '' ? null : $brandIds;
 
-		$brandTypeId = trim($this->request->getPost('brand_label') ?? '');
-		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
+		$brandTypeIds = $this->request->getPost('brands_label');
+		$brandTypeIds = $brandTypeIds === '' ? null : $brandTypeIds;
 
 		$year = trim($this->request->getPost('year') ?? '');
 		$year = $year === '' ? null : $year;
@@ -138,10 +138,10 @@ class SellThroughBrand extends BaseController
 
 	    switch ($source) {
 	        case 'scann_data':
-			    $data = $this->Dashboard_model->getSellThroughScannDataByBrand($year, $monthStart, $monthEnd, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughScannDataByBrand($year, $monthStart, $monthEnd, $searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				break;
 	        case 'week_on_week':
-			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByBrand($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByBrand($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'winsight':
@@ -150,7 +150,7 @@ class SellThroughBrand extends BaseController
 
 			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 			    $weekEnd = $year.$weekEnd;
-			    $data = $this->Dashboard_model->getSellThroughWinsightByBrand($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWinsightByBrand($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 
 				break;
 	        default:
@@ -160,10 +160,10 @@ class SellThroughBrand extends BaseController
 	        	// $year = 2025;
 	        	// $monthStart = 1;
 	        	// $monthEnd = 11;
-	        	//$brandTypeId = 10;
+	        	//$brandTypeIds = 10;
 	        	//$salesGroup = 'Watsons Personal Care Stores (Philippines) Inc.';
 	        	//$subSalesGroup = 'C01000035-001';
-	        	$data = $this->Dashboard_model->getSellThroughScannDataByBrand($year, $monthStart, $monthEnd, $searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+	        	$data = $this->Dashboard_model->getSellThroughScannDataByBrand($year, $monthStart, $monthEnd, $searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 			    
 		    return $this->response->setJSON([
 		        'draw' => intval($this->request->getVar('draw')),
@@ -275,9 +275,9 @@ class SellThroughBrand extends BaseController
 
 		$source        = ($json['source']         ?? null) ?: null;
 		$brandIds      = ($json['brands']         ?? null) ?: null;
-		$brandText     = ($json['brand_text']      ?? null) ?: null;
+		$brandText     = ($json['brands_label_text']      ?? null) ?: null;
 
-		$brandTypeId   = trim($json['brand_label']?? '') ?: null;
+		$brandTypeIds   = ($json['brands_label'] ?? null) ?: null;
 
 		$year          = trim($json['year']       ?? '') ?: null;
 		$yearId        = trim($json['year_id']    ?? '') ?: null;
@@ -341,7 +341,7 @@ class SellThroughBrand extends BaseController
 			case 'scann_data':
 				$data = $this->Dashboard_model->getSellThroughScannDataByBrand(
 					$year, $monthStart, $monthEnd, $searchValue,
-					$brandIds, $brandTypeId, $salesGroup, $subSalesGroup,
+					$brandIds, $brandTypeIds, $salesGroup, $subSalesGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;
@@ -349,7 +349,7 @@ class SellThroughBrand extends BaseController
 			case 'week_on_week':
 				$data = $this->Dashboard_model->getSellThroughWeekOnWeekByBrand(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate,
-					$searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
+					$searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;
@@ -357,7 +357,7 @@ class SellThroughBrand extends BaseController
 			case 'winsight':
 				$data = $this->Dashboard_model->getSellThroughWinsightByBrand(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate,
-					$searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
+					$searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;
@@ -366,7 +366,7 @@ class SellThroughBrand extends BaseController
 				// fallback to scann_data
 				$data = $this->Dashboard_model->getSellThroughScannDataByBrand(
 					$year, $monthStart, $monthEnd, $searchValue,
-					$brandIds, $brandTypeId, $salesGroup, $subSalesGroup,
+					$brandIds, $brandTypeIds, $salesGroup, $subSalesGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;
@@ -492,9 +492,9 @@ class SellThroughBrand extends BaseController
 
 		$source        = ($json['source']         ?? null) ?: null;
 		$brandIds      = ($json['brands']         ?? null) ?: null;
-		$brandText     = ($json['brand_text']      ?? null) ?: null;
+		$brandText     = ($json['brands_label_text']      ?? null) ?: null;
     
-		$brandTypeId   = trim($json['brand_label']?? '') ?: null;
+		$brandTypeIds   = ($json['brands_label'] ?? null) ?: null;
 
 		$year          = trim($json['year']       ?? '') ?: null;
 		$yearId        = trim($json['year_id']    ?? '') ?: null;
@@ -558,7 +558,7 @@ class SellThroughBrand extends BaseController
 			case 'scann_data':
 				$data = $this->Dashboard_model->getSellThroughScannDataByBrand(
 					$year, $monthStart, $monthEnd, $searchValue,
-					$brandIds, $brandTypeId, $salesGroup, $subSalesGroup,
+					$brandIds, $brandTypeIds, $salesGroup, $subSalesGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;
@@ -566,7 +566,7 @@ class SellThroughBrand extends BaseController
 			case 'week_on_week':
 				$data = $this->Dashboard_model->getSellThroughWeekOnWeekByBrand(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate,
-					$searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
+					$searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;
@@ -574,7 +574,7 @@ class SellThroughBrand extends BaseController
 			case 'winsight':
 				$data = $this->Dashboard_model->getSellThroughWinsightByBrand(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate,
-					$searchValue, $brandIds, $brandTypeId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
+					$searchValue, $brandIds, $brandTypeIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;
@@ -583,7 +583,7 @@ class SellThroughBrand extends BaseController
 				// fallback to scann_data
 				$data = $this->Dashboard_model->getSellThroughScannDataByBrand(
 					$year, $monthStart, $monthEnd, $searchValue,
-					$brandIds, $brandTypeId, $salesGroup, $subSalesGroup,
+					$brandIds, $brandTypeIds, $salesGroup, $subSalesGroup,
 					$orderByColumn, $orderDirection, $limit, $offset, $type, $measure
 				);
 				break;

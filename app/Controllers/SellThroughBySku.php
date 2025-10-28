@@ -73,8 +73,8 @@ class SellThroughBySku extends BaseController
 		$brandIds = $this->request->getPost('brands');
 		$brandIds = $brandIds === '' ? null : $brandIds;
 
-		$brandTypeId = trim($this->request->getPost('brand_label') ?? '');
-		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
+		$brandTypeIds = $this->request->getPost('brands_label');
+		$brandTypeIds = $brandTypeIds === '' ? null : $brandTypeIds;
 
 		$brandCategoryIds = $this->request->getPost('brand_categories');
 		$brandCategoryIds = $brandCategoryIds === '' ? null : $brandCategoryIds;
@@ -146,11 +146,11 @@ class SellThroughBySku extends BaseController
     	//die();
 	    switch ($source) {
 	        case 'scann_data':
-			    $data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'week_on_week':
-			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	            break;
 	        case 'winsight':
@@ -159,7 +159,7 @@ class SellThroughBySku extends BaseController
 
 			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
 			    $weekEnd = $year.$weekEnd;
-			    $data = $this->Dashboard_model->getSellThroughWinsightBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+			    $data = $this->Dashboard_model->getSellThroughWinsightBySku($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 				break;
 	        default:
@@ -171,19 +171,12 @@ class SellThroughBySku extends BaseController
 	        	//$monthEnd = 11;
 	        	//$brandIds = [3];
 	        	// $subSalesGroup = '010202012001';
-	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
+	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
 				
 	    }
 
 	    if($data){
 	    	return $this->response->setJSON([
-				'debug' => [
-					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
-					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
-					$salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, 
-					$limit, $offset, $type, $measure
-				],
-				// 'debugging' => $data['debugging'],
 		        'draw' => intval($this->request->getVar('draw')),
 		        'recordsTotal' => $data['total_records'],
 		        'recordsFiltered' => $data['total_records'],
@@ -191,12 +184,6 @@ class SellThroughBySku extends BaseController
 		    ]);
 	    }else{
 	    	return $this->response->setJSON([
-				'debug' => [
-					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
-					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
-					$salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, 
-					$limit, $offset, $type, $measure
-				],
 		        'draw' => intval($this->request->getVar('draw')),
 		        'recordsTotal' => 0,
 		        'recordsFiltered' => 0,
@@ -276,9 +263,9 @@ class SellThroughBySku extends BaseController
 		$brandIds = $json['brands'] ?? '';
 		$brandIds = $brandIds === '' ? null : $brandIds;
 
-		$brandTypeId = ''; 
-		$brandTypeId = $json['brand_label'] ?? '';
-		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
+		$brandTypeIds = ''; 
+		$brandTypeIds = $json['brands_label'] ?? '';
+		$brandTypeIds = $brandTypeIds === '' ? null : $brandTypeIds;
 		
 		$brandCategoryIds = ''; 
 		$brandCategoryIds = $json['brand_categories'] ?? '';
@@ -296,9 +283,9 @@ class SellThroughBySku extends BaseController
 		$brandCategoriesText = trim($json['brand_categories_text'] ?? '');
 		$brandCategoriesText = $brandCategoriesText === '' ? null : $brandCategoriesText;
 
-		$brandsLabelText = '';
-		$brandsLabelText = trim($json['brands_label_text'] ?? '');
-		$brandsLabelText = $brandsLabelText === '' ? null : $brandsLabelText;
+		$brandsLabelsText = '';
+		$brandsLabelsText = trim($json['brands_label_text'] ?? '');
+		$brandsLabelsText = $brandsLabelsText === '' ? null : $brandsLabelsText;
 
 		$salesGroup = trim($json['sales_group'] ?? '');
 		$salesGroup = $salesGroup === '' ? null : $salesGroup;
@@ -340,7 +327,7 @@ class SellThroughBySku extends BaseController
 				$weekEnd = $year.$weekEnd;
 			    $data = $this->Dashboard_model->getSellThroughScannDataBySku(
 					$year, $monthStart, $monthEnd, $searchValue, 
-					$ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
+					$ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, 
 					$salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
@@ -349,7 +336,7 @@ class SellThroughBySku extends BaseController
 				$source =  "WEEK ON WEEK";
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
-					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
+					$searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, 
 					$salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
@@ -363,7 +350,7 @@ class SellThroughBySku extends BaseController
 				$weekEnd = $year.$weekEnd;
 				$data = $this->Dashboard_model->getSellThroughWinsightBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
-					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds,
+					$searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds,
 					$salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
@@ -377,7 +364,7 @@ class SellThroughBySku extends BaseController
 				$weekEnd = $year.$weekEnd;
 	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku(
 					$year, $monthStart, $monthEnd, $searchValue, 
-					$ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
+					$ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, 
 					$salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
@@ -410,7 +397,7 @@ class SellThroughBySku extends BaseController
 		if ($itemsText === 'Please select...') { $itemsText = ''; }
 		if ($brandsText === 'Please select...') { $brandsText = ''; }
 		if ($brandCategoriesText === 'Please select...') { $brandCategoriesText = ''; }
-		if ($brandsLabelText === 'Please select...') { $brandsLabelText = ''; }
+		if ($brandsLabelsText === 'Please select...') { $brandsLabelsText = ''; }
 
 		if ($weekStart !== '') { $weekStart = 'Week ' . substr($weekStart, 4, 2); }
 		if ($weekEnd !== '') { $weekEnd = 'Week ' . substr($weekEnd, 4, 2); }
@@ -442,7 +429,7 @@ class SellThroughBySku extends BaseController
 			'YTD' 						=> $ytd === 'yes' ? 'YES' : 'NO',
 
 			'Item Code' 				=> $itemsText,
-			'Label Type' 				=> $brandsLabelText,
+			'Label Type' 				=> $brandsLabelsText,
 			'Sales Group' 				=> $salesGroup,
 			'Sub Sales Group' 			=> $subSalesGroup,
 			'Outright / Consignment' 	=> $type == 1 ? 'Outright' : ($type == 2 ? 'Consignment' : 'All'),
@@ -543,9 +530,9 @@ class SellThroughBySku extends BaseController
 		$brandIds = $json['brands'] ?? '';
 		$brandIds = $brandIds === '' ? null : $brandIds;
 
-		$brandTypeId = ''; 
-		$brandTypeId = $json['brand_label'] ?? '';
-		$brandTypeId = $brandTypeId === '' ? null : $brandTypeId;
+		$brandTypeIds = ''; 
+		$brandTypeIds = $json['brands_label'] ?? '';
+		$brandTypeIds = $brandTypeIds === '' ? null : $brandTypeIds;
 		
 		$brandCategoryIds = ''; 
 		$brandCategoryIds = $json['brand_categories'] ?? '';
@@ -563,9 +550,9 @@ class SellThroughBySku extends BaseController
 		$brandCategoriesText = trim($json['brand_categories_text'] ?? '');
 		$brandCategoriesText = $brandCategoriesText === '' ? null : $brandCategoriesText;
 
-		$brandsLabelText = '';
-		$brandsLabelText = trim($json['brands_label_text'] ?? '');
-		$brandsLabelText = $brandsLabelText === '' ? null : $brandsLabelText;
+		$brandsLabelsText = '';
+		$brandsLabelsText = trim($json['brands_label_text'] ?? '');
+		$brandsLabelsText = $brandsLabelsText === '' ? null : $brandsLabelsText;
 
 		$salesGroup = trim($json['sales_group'] ?? '');
 		$salesGroup = $salesGroup === '' ? null : $salesGroup;
@@ -607,7 +594,7 @@ class SellThroughBySku extends BaseController
 				$weekEnd = $year.$weekEnd;
 			    $data = $this->Dashboard_model->getSellThroughScannDataBySku(
 					$year, $monthStart, $monthEnd, $searchValue, 
-					$ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
+					$ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, 
 					$salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
@@ -616,12 +603,14 @@ class SellThroughBySku extends BaseController
 				$source =  "WEEK ON WEEK";
 			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
-					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
+					$searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, 
 					$salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
 	            break;
 	        case 'winsight':
+	        	print_r($brandTypeIds);
+	        	die();
 				$source =  "WINSIGHT";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;
@@ -630,7 +619,7 @@ class SellThroughBySku extends BaseController
 				$weekEnd = $year.$weekEnd;
 				$data = $this->Dashboard_model->getSellThroughWinsightBySku(
 					$year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, 
-					$searchValue, $ItemIds, $brandIds, $brandTypeId, $brandCategoryIds,
+					$searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds,
 					$salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
@@ -644,7 +633,7 @@ class SellThroughBySku extends BaseController
 				$weekEnd = $year.$weekEnd;
 	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku(
 					$year, $monthStart, $monthEnd, $searchValue, 
-					$ItemIds, $brandIds, $brandTypeId, $brandCategoryIds, 
+					$ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, 
 					$salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, 
 					$limit, $offset, $type, $measure
 				);
@@ -663,7 +652,7 @@ class SellThroughBySku extends BaseController
 
 		if ($brandsText === 'Please select...') { $brandsText = ''; }
 		if ($brandCategoriesText === 'Please select...') { $brandCategoriesText = ''; }
-		if ($brandsLabelText === 'Please select...') { $brandsLabelText = ''; }
+		if ($brandsLabelsText === 'Please select...') { $brandsLabelsText = ''; }
 
 		if ($weekStart !== '') { $weekStart = 'Week ' . substr($weekStart, 4, 2); }
 		if ($weekEnd !== '') { $weekEnd = 'Week ' . substr($weekEnd, 4, 2); }
@@ -697,7 +686,7 @@ class SellThroughBySku extends BaseController
 			'YTD' 						=> $ytd === 'yes' ? 'YES' : 'NO',
 
 			'Item Code' 				=> $itemsText,
-			'Label Type' 				=> $brandsLabelText,
+			'Label Type' 				=> $brandsLabelsText,
 			'Sales Group' 				=> $salesGroup,
 			'Sub Sales Group' 			=> $subSalesGroup,
 			'Outright / Consignment' 	=> $type == 1 ? 'Outright' : ($type == 2 ? 'Consignment' : 'All'),

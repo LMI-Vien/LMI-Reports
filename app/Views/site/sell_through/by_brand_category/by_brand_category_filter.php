@@ -267,7 +267,7 @@
                           <select id="brandSubCategory" name="brandSubCategory" class="form-control">
                               <option value="">Please select...</option>
                               <?php foreach ($brand_sub_categories as $key => $value) {
-                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_sub_class_code']) . '</option>';
+                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' .htmlspecialchars($value['item_class_code']) . '-' . htmlspecialchars($value['item_sub_class_code']) . '</option>';
                               } ?>
                           </select>
                       </div>

@@ -46,7 +46,7 @@
         }
 
         $('#itmCode').select2({ placeholder: 'Select Item' });
-
+        $('#itemLabel').select2({ placeholder: 'Select Label Type' });
 
         $("input[name='measure']").on("change", function () {
             let selectedMeasure = $('input[name="measure"]:checked').val();
@@ -261,7 +261,8 @@
 
     $(document).on('click', '#refreshButton', function () {
         const fields = [
-            { input: '#itmCode', target: '#itmCode' }
+            { input: '#itmCode', target: '#itmCode' },
+            { input: '#itemLabel', target: '#itemLabel' }
         ];
 
         let counter = 0;
@@ -423,7 +424,7 @@
     function fetchData() {
         let selectedSource = $('#dataSource').val();
         let selectedItems = $('#itmCode').val();
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabels = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -464,7 +465,7 @@
                 data: function(d) {
                     d.source = selectedSource === "" ? null : selectedSource;
                     d.items = selectedItems.length ? selectedItems : null;
-                    d.brand_label = selectedBrandLabel === "" ? null : selectedBrandLabel;
+                    d.brands_label = selectedBrandLabels.length ? selectedBrandLabels : null;
                     d.year = selectedYear === "0" ? null : selectedYear;
                     d.year_id = selectedYearId === "0" ? null : selectedYearId;
                     d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
@@ -481,8 +482,6 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log(json, 'json')
-                    // console.log(json.debugging, 'debugging')
                     return json.data.length ? json.data : [];
                 }
             },
@@ -515,7 +514,7 @@
     function renderSellThroughChart(page = 1) {
         let selectedSource = $('#dataSource').val();
         let selectedItems = $('#itmCode').val();
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabels = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -543,7 +542,7 @@
             data: {
                 source : selectedSource === "" ? null : selectedSource,
                 items : selectedItems.length ? selectedItems : null,
-                brand_label : selectedBrandLabel === "" ? null : selectedBrandLabel,
+                brands_label : selectedBrandLabels.length ? selectedBrandLabels : null,
                 year : selectedYear === "0" ? null : selectedYear,
                 year_id : selectedYearId === "0" ? null : selectedYearId,
                 month_start : selectedMonthStart === "0" ? null : selectedMonthStart,
@@ -740,7 +739,9 @@
         let selectedItems = $('#itmCode').val();
         let selectedItemsText = $('#itmCode option:selected')
         .map(function() { return $(this).text(); }) .get() .join(', ');
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabels = $('#itemLabel').val();  
+        let selectedBrandLabelsText = $('#itemLabel option:selected')
+        .map(function() { return $(this).text(); }) .get() .join(', ');
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -762,7 +763,8 @@
             source : selectedSource === "" ? null : selectedSource,
             items : selectedItems.length ? selectedItems : null,
             items_text : selectedItemsText,
-            brand_label : selectedBrandLabel === "" ? null : selectedBrandLabel,
+            brands_label : selectedBrandLabels.length ? selectedBrandLabels : null,
+            brands_label_text : selectedBrandLabelsText,
             year : selectedYear === "0" ? null : selectedYear,
             year_id : selectedYearId === "0" ? null : selectedYearId,
             month_start : selectedMonthStart === "0" ? null : selectedMonthStart,

@@ -46,6 +46,7 @@
         }
 
         $('#brands').select2({ placeholder: 'Select Brands' });
+        $('#itemLabel').select2({ placeholder: 'Select Select Label Type' });
 
         $("input[name='ytd']").on("change", function () {
             const isYtd = $(this).val() === 'yes';
@@ -260,7 +261,8 @@
 
     $(document).on('click', '#refreshButton', function () {
         const fields = [
-            { input: '#brands', target: '#brands' }
+            { input: '#brands', target: '#brands' },
+            { input: '#itemLabel', target: '#itemLabel' }
         ];
 
         let counter = 0;
@@ -422,7 +424,7 @@
     function fetchData() {
         let selectedSource = $('#dataSource').val();
         let selectedBrands = $('#brands').val();
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabels = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -463,7 +465,7 @@
                 data: function(d) {
                     d.source = selectedSource === "" ? null : selectedSource;
                     d.brands = selectedBrands.length ? selectedBrands : null;
-                    d.brand_label = selectedBrandLabel === "" ? null : selectedBrandLabel;
+                    d.brands_label = selectedBrandLabels.length ? selectedBrandLabels : null;
                     d.year = selectedYear === "0" ? null : selectedYear;
                     d.year_id = selectedYearId === "0" ? null : selectedYearId;
                     d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
@@ -509,7 +511,7 @@
     function renderSellThroughChart(page = 1) {
         let selectedSource = $('#dataSource').val();
         let selectedBrands = $('#brands').val();
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabels = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -537,7 +539,7 @@
             data: {
                 source : selectedSource === "" ? null : selectedSource,
                 brands : selectedBrands.length ? selectedBrands : null,
-                brand_label : selectedBrandLabel === "" ? null : selectedBrandLabel,
+                brands_label : selectedBrandLabels.length ? selectedBrandLabels : null,
                 year : selectedYear === "0" ? null : selectedYear,
                 year_id : selectedYearId === "0" ? null : selectedYearId,
                 month_start : selectedMonthStart === "0" ? null : selectedMonthStart,
@@ -732,7 +734,7 @@
         let selectedBrandsText = $('#brands option:selected').map(function() {
             return $(this).text();
         }).get();
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabels = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -752,8 +754,8 @@
         let postData = {
             source: selectedSource,
             brands: selectedBrands,
-            brand_text: selectedBrandsText,
-            brand_label: selectedBrandLabel,
+            brands_label_text: selectedBrandsText,
+            brands_label: selectedBrandLabels,
             year: selectedYear,
             year_id: selectedYearId,
             month_start: selectedMonthStart,

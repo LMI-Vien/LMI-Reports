@@ -42,6 +42,7 @@
 
         $('#brands').select2({ placeholder: 'Select Brands' });
         $('#brandCategory').select2({ placeholder: 'Select Brand Categories' });
+        $('#itemLabel').select2({ placeholder: 'Select Label Type' });
 
         $("input[name='measure']").on("change", function () {
             let selectedMeasure = $('input[name="measure"]:checked').val();
@@ -258,7 +259,8 @@
     $(document).on('click', '#refreshButton', function () {
         const fields = [
             { input: '#brands', target: '#brands' },
-            { input: '#brandCategory', target: '#brandCategory' }
+            { input: '#brandCategory', target: '#brandCategory' },
+            { input: '#itemLabel', target: '#itemLabel' }
         ];
 
         let counter = 0;
@@ -376,7 +378,7 @@
         let selectedSource = $('#dataSource').val();
         let selectedBrands = $('#brands').val();
         let selectedBrandCategories = $('#brandCategory').val();
-        let selectedBrandLabel = $('#itemLabel').val();  
+        let selectedBrandLabels = $('#itemLabel').val();  
         let selectedYear = $('#year').val();
         let yearOption = $("#year option:selected");
         let selectedYearId = yearOption.data("year");
@@ -418,7 +420,7 @@
                     d.source = selectedSource === "" ? null : selectedSource;
                     d.brands = selectedBrands.length ? selectedBrands : null;
                     d.brand_categories = selectedBrandCategories.length ? selectedBrandCategories : null;
-                    d.brand_label = selectedBrandLabel === "" ? null : selectedBrandLabel;
+                    d.brands_label = selectedBrandLabels.length ? selectedBrandLabels : null;
                     d.year = selectedYear === "0" ? null : selectedYear;
                     d.year_id = selectedYearId === "0" ? null : selectedYearId;
                     d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
@@ -547,8 +549,8 @@
         let selectedBrandCategoriesText = $('#brandCategory option:selected')
         .map(function() { return $(this).text(); }) .get() .join(', ');
 
-        let selectedBrandLabel = $('#itemLabel').val();  
-        let selectedBrandLabelText = $('#itemLabel option:selected')
+        let selectedBrandLabels = $('#itemLabel').val();  
+        let selectedBrandLabelsText = $('#itemLabel option:selected')
         .map(function() { return $(this).text(); }) .get() .join(', ');
 
         let selectedYear = $('#year').val();
@@ -576,8 +578,8 @@
             brands_text : selectedBrandsText,
             brand_categories : selectedBrandCategories.length ? selectedBrandCategories : null,
             brand_categories_text : selectedBrandCategoriesText,
-            brand_label : selectedBrandLabel === "" ? null : selectedBrandLabel,
-            brands_label_text : selectedBrandLabelText,
+            brands_label : selectedBrandLabels === "" ? null : selectedBrandLabels,
+            brands_label_text : selectedBrandLabelsText,
             year : selectedYear === "0" ? null : selectedYear,
             quarter : selectedQuarter === "0" ? null : selectedQuarter,
             year_id : selectedYearId === "0" ? null : selectedYearId,

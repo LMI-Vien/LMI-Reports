@@ -47,7 +47,7 @@ class SellThroughBrandCategory extends BaseController
 		$data['brand_categories'] = json_decode(json_encode($data['brand_categories']), true);
 
 		$brand_sub_cat_query = "status > 0"; //sub classification table
-		$data['brand_sub_categories'] = $this->Global_model->get_data_list('tbl_sub_classification', $brand_sub_cat_query, 0, 0, 'id, item_sub_class_code','','', '', '');
+		$data['brand_sub_categories'] = $this->Global_model->get_data_list('tbl_sub_classification', $brand_sub_cat_query, 0, 0, 'id, item_class_code, item_sub_class_code','','', '', '');
 		$data['brand_sub_categories'] = json_decode(json_encode($data['brand_sub_categories']), true);
 
 		$dept_query = "status > 0"; //item department table

@@ -2156,7 +2156,7 @@ class Dashboard_model extends Model
 	    $searchValue = null,
 	    $ItemIds = [],
 	    $brandIds = [],
-	    $brandTypeId = null, 
+	    $brandTypeIds = [], 
 	    $brandCategoryIds = [], 
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
@@ -2221,6 +2221,14 @@ class Dashboard_model extends Model
 	        $brandCategoryParams = $brandCategoryIds;
 	    }
 
+	    $brandLabelTypeFilter = '';
+	    $brandLabelTypeParams = [];
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilter = "AND so.brand_type_id IN ($placeholders)";
+	        $brandLabelTypeParams = $brandTypeIds;
+	    }	    
+
 	    $skuFilterOutright = $skuFilterConsignment = '';
 	    if (!empty($ItemIds)) {
 	        $placeholders = implode(',', array_fill(0, count($ItemIds), '?'));
@@ -2240,6 +2248,13 @@ class Dashboard_model extends Model
 	        $placeholders = implode(',', array_fill(0, count($brandCategoryIds), '?'));
 	        $brandCategoryFilterOutright = "AND s.brand_category_id IN ($placeholders)";
 	        $brandCategoryFilterConsignment = "AND s.brand_category_id IN ($placeholders)";
+	    }
+
+	    $brandLabelTypeFilterOutright = $brandLabelTypeFilterConsignment = '';
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilterOutright = "AND s.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
 	    }
 
 		if ($subSalesGroup) {
@@ -2321,7 +2336,7 @@ class Dashboard_model extends Model
 			          $skuFilter
 			          $brandFilter
 			          $brandCategoryFilter
-			          AND (? IS NULL OR so.brand_type_id = ?)
+			          $brandLabelTypeFilter
 			          AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
 				    ) AS sub
 			    GROUP BY sub.itmcde
@@ -2347,10 +2362,10 @@ class Dashboard_model extends Model
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterOutright
 	              $brandFilterOutright
 	              $brandCategoryFilterOutright
+	              $brandLabelTypeFilterOutright
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
@@ -2377,10 +2392,10 @@ class Dashboard_model extends Model
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterConsignment
 	              $brandFilterConsignment
 	              $brandCategoryFilterConsignment
+	              $brandLabelTypeFilterConsignment
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
@@ -2449,27 +2464,24 @@ class Dashboard_model extends Model
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	    ];
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup, $salesGroup,
 	        // outright
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
-	        $brandTypeId, $brandTypeId,
 	    ]);
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // consignment
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
-	        $brandTypeId, $brandTypeId,
 	    ]);
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, $searchParams);
 
 	    $params[] = (int)$limit;
@@ -2497,7 +2509,7 @@ class Dashboard_model extends Model
 	    $searchValue = null,
 	    $ItemIds = [],
 	    $brandIds = [],
-	    $brandTypeId = null, 
+	    $brandTypeIds = [], 
 	    $brandCategoryIds = [], 
 	    $salesGroup = null, 
 	    $subSalesGroup = null,
@@ -2563,6 +2575,14 @@ class Dashboard_model extends Model
 	        $brandCategoryParams = $brandCategoryIds;
 	    }
 
+	    $brandLabelTypeFilter = '';
+	    $brandLabelTypeParams = [];
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilter = "AND wow.brand_type_id IN ($placeholders)";
+	        $brandLabelTypeParams = $brandTypeIds;
+	    }	
+
 	    $skuFilterOutright = $skuFilterConsignment = '';
 	    if (!empty($ItemIds)) {
 	        $placeholders = implode(',', array_fill(0, count($ItemIds), '?'));
@@ -2582,6 +2602,13 @@ class Dashboard_model extends Model
 	        $placeholders = implode(',', array_fill(0, count($brandCategoryIds), '?'));
 	        $brandCategoryFilterOutright = "AND s.brand_category_id IN ($placeholders)";
 	        $brandCategoryFilterConsignment = "AND s.brand_category_id IN ($placeholders)";
+	    }
+
+	    $brandLabelTypeFilterOutright = $brandLabelTypeFilterConsignment = '';
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilterOutright = "AND s.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
 	    }
 
 		if ($subSalesGroup) {
@@ -2659,11 +2686,11 @@ class Dashboard_model extends Model
 
 			        WHERE (? IS NULL OR wow.year = ?)
 			          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
-			          AND (? IS NULL OR wow.brand_type_id = ?)
 			          AND (? IS NULL OR mp.customer_payment_group = ?)
 		          $skuFilter
 		          $brandFilter
 		          $brandCategoryFilter
+		          $brandLabelTypeFilter
 			    ) AS sub
 			    GROUP BY sub.itmcde
 			),
@@ -2687,10 +2714,10 @@ class Dashboard_model extends Model
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterOutright
 	              $brandFilterOutright
 	              $brandCategoryFilterOutright
+	              $brandLabelTypeFilterOutright
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
@@ -2716,10 +2743,10 @@ class Dashboard_model extends Model
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterConsignment
 	              $brandFilterConsignment
 	              $brandCategoryFilterConsignment
+	              $brandLabelTypeFilterConsignment
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
@@ -2779,28 +2806,25 @@ class Dashboard_model extends Model
 	    $params = [
 	        $yearId, $yearId,
 	        $weekStart, $weekStart, $weekEnd,
-	        $brandTypeId, $brandTypeId,
 	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	    ];
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
-	        $brandTypeId, $brandTypeId,
 	    ]);
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // consignment
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
-	        $brandTypeId, $brandTypeId,
 	    ]);
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, $searchParams);
 
 	    $params[] = (int)$limit;
@@ -2810,7 +2834,7 @@ class Dashboard_model extends Model
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
 		$finalQuery = $this->interpolateQuery($sql, $params);
-		// echo $finalQuery; // Review it in your logs or browser
+		// echo $finalQuery;
 		// die();	   
 	    return [
 	        'total_records' => $totalRecords,
@@ -2828,7 +2852,7 @@ class Dashboard_model extends Model
 	    $searchValue = null,
 	    $ItemIds = [],
 	    $brandIds = [],
-	    $brandTypeId = null, 
+	    $brandTypeIds = [],
 	    $brandCategoryIds = [], 
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
@@ -2895,6 +2919,14 @@ class Dashboard_model extends Model
 	        $brandCategoryParams = $brandCategoryIds;
 	    }
 
+		$brandLabelTypeFilter = '';
+	    $brandLabelTypeParams = [];
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilter = "AND wd.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeParams = $brandTypeIds;
+	    }	        
+
 	    $skuFilterOutright = $skuFilterConsignment = '';
 	    if (!empty($ItemIds)) {
 	        $placeholders = implode(',', array_fill(0, count($ItemIds), '?'));
@@ -2916,6 +2948,13 @@ class Dashboard_model extends Model
 	        $brandCategoryFilterConsignment = "AND s.brand_category_id IN ($placeholders)";
 	    }
 
+	    $brandLabelTypeFilterOutright = $brandLabelTypeFilterConsignment = '';
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilterOutright = "AND s.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
+	    }
+
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
 		        ? "ROUND(wd.sales_qty * 
@@ -2925,7 +2964,7 @@ class Dashboard_model extends Model
 		                IFNULL(hp.net_price, IFNULL(wd.net_price, 0))
 		            )
 		        , 2)"
-		        : "ROUND(wd.quantity, 0)";
+		        : "ROUND(wd.sales_qty, 0)";
 
 		    $sellOutExpr2 = $sellOutExpr;
 		} else {
@@ -2991,11 +3030,11 @@ class Dashboard_model extends Model
 
 			        WHERE (? IS NULL OR wd.year = ?)
 			          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
-			          AND (? IS NULL OR wd.brand_label_type_id = ?)
 			          AND (? IS NULL OR mp.customer_payment_group = ?)
 			          $skuFilter
 			          $brandFilter
 			          $brandCategoryFilter 
+			          $brandLabelTypeFilter
 			    ) AS sub
 			    GROUP BY sub.item_code
 			),
@@ -3019,10 +3058,10 @@ class Dashboard_model extends Model
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterOutright
 	              $brandFilterOutright
 	              $brandCategoryFilterOutright
+	              $brandLabelTypeFilterOutright
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
@@ -3048,10 +3087,10 @@ class Dashboard_model extends Model
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              $skuFilterConsignment
 	              $brandFilterConsignment
 	              $brandCategoryFilterConsignment
+	              $brandLabelTypeFilterConsignment
 	              AND EXISTS (
 	                  SELECT 1 
 	                  FROM tbl_cus_sellout_indicator ci
@@ -3111,28 +3150,25 @@ class Dashboard_model extends Model
 	    $params = [
 	        $year, $year,
 	        $weekStart, $weekStart, $weekEnd,
-	        $brandTypeId, $brandTypeId,
 	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	    ];
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
-	        $brandTypeId, $brandTypeId,
 	    ]);
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // consignment
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
-	        $brandTypeId, $brandTypeId,
 	    ]);
-	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams);
+	    $params = array_merge($params, $skuParams, $brandParams, $brandCategoryParams, $brandLabelTypeParams);
 	    $params = array_merge($params, $searchParams);
 
 	    $params[] = (int)$limit;
@@ -3142,7 +3178,7 @@ class Dashboard_model extends Model
 	    $data = $query->getResult();
 	    $totalRecords = $data ? $data[0]->total_records : 0;
 		//$finalQuery = $this->interpolateQuery($sql, $params);
-		//echo $finalQuery; // Review it in your logs or browser
+		//echo $finalQuery; 
 		//die();	   
 	    return [
 	        'total_records' => $totalRecords,
@@ -3156,7 +3192,7 @@ class Dashboard_model extends Model
 	    $monthEnd = null, 
 	    $searchValue = null,
 	    $brandIds = [],
-	    $brandTypeId = null, 
+	    $brandTypeIds = [], 
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
 	    $orderByColumn = 'rank', 
@@ -3192,12 +3228,27 @@ class Dashboard_model extends Model
 	        $brandParams = $brandIds;
 	    }
 
+	    $brandLabelTypeFilter = '';
+	    $brandLabelTypeParams = [];
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilter = "AND so.brand_type_id IN ($placeholders)";
+	        $brandLabelTypeParams = $brandTypeIds;
+	    }	  
+
 	    $brandFilterOutright = $brandFilterConsignment = '';
 	    if (!empty($brandIds)) {
 	        $placeholders = implode(',', array_fill(0, count($brandIds), '?'));
 	        $brandFilterOutright = "AND s.brand_id IN ($placeholders)";
 	        $brandFilterConsignment = "AND s.brand_id IN ($placeholders)";
 	    }
+
+	    $brandLabelTypeFilterOutright = $brandLabelTypeFilterConsignment = '';
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilterOutright = "AND s.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
+	    } 
 
 		if ($subSalesGroup) {
 		    $sellOutExpr = $measure === 'amount'
@@ -3271,7 +3322,7 @@ class Dashboard_model extends Model
 	            	WHERE (? IS NULL OR so.year = ?)
 		              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 		              $brandFilter
-		              AND (? IS NULL OR so.brand_type_id = ?)
+		              $brandLabelTypeFilter
 		              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
 			    ) AS sub
 			    GROUP BY sub.brand_id
@@ -3295,10 +3346,10 @@ class Dashboard_model extends Model
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterOutright
+	              $brandLabelTypeFilterOutright
 	              AND EXISTS (
 	                  SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde
 	              )
@@ -3322,10 +3373,10 @@ class Dashboard_model extends Model
 
 	            WHERE (? IS NULL OR YEAR(s.trndte) = ?)
 	              AND (? IS NULL OR MONTH(s.trndte) BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterConsignment
+	              $brandLabelTypeFilterConsignment
 	              AND EXISTS (
 	                  SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde
 	              )
@@ -3381,27 +3432,24 @@ class Dashboard_model extends Model
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
 	    ];
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup, $salesGroup,
 	        // outright
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ]);
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // consignment
 	        $year, $year,
 	        $monthStart, $monthStart, $monthEnd,
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ]);
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, $searchParams);
 	    $params[] = (int)$limit;
 	    $params[] = (int)$offset;
@@ -3425,7 +3473,7 @@ class Dashboard_model extends Model
 		$weekEndDate= null,
 	    $searchValue = null,
 	    $brandIds = [],
-	    $brandTypeId = null, 
+	    $brandTypeIds = [],
 	    $salesGroup = null, 
 	    $subSalesGroup = null,
 	    $watsonsPaymentGroup = null,
@@ -3462,11 +3510,26 @@ class Dashboard_model extends Model
 	        $brandParams = $brandIds;
 	    }
 
+	    $brandLabelTypeFilter = '';
+	    $brandLabelTypeParams = [];
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilter = "AND wow.brand_type_id IN ($placeholders)";
+	        $brandLabelTypeParams = $brandTypeIds;
+	    }	    
+
 	    $brandFilterOutright = $brandFilterConsignment = '';
 	    if (!empty($brandIds)) {
 	        $placeholders = implode(',', array_fill(0, count($brandIds), '?'));
 	        $brandFilterOutright = "AND s.brand_id IN ($placeholders)";
 	        $brandFilterConsignment = "AND s.brand_id IN ($placeholders)";
+	    }
+
+	    $brandLabelTypeFilterOutright = $brandLabelTypeFilterConsignment = '';
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilterOutright = "AND s.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
 	    }
 
 		if ($subSalesGroup) {
@@ -3538,7 +3601,7 @@ class Dashboard_model extends Model
 			        WHERE (? IS NULL OR wow.year = ?)
 			          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
 			          $brandFilter
-			          AND (? IS NULL OR wow.brand_type_id = ?)
+			          $brandLabelTypeFilter
 			          AND (? IS NULL OR mp.customer_payment_group = ?)
 			    ) AS sub
 	            GROUP BY sub.tracc_brand_id
@@ -3561,10 +3624,10 @@ class Dashboard_model extends Model
 	            WHERE s.trncde = 'SAL'
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterOutright
+	              $brandLabelTypeFilterOutright
 	              AND EXISTS (
 	                  SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde
 	              )
@@ -3587,10 +3650,10 @@ class Dashboard_model extends Model
 	             AND s.untmea = u.untmea
 
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterConsignment
+	              $brandLabelTypeFilterConsignment
 	              AND EXISTS (
 	                  SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde
 	              )
@@ -3644,27 +3707,24 @@ class Dashboard_model extends Model
 	        $yearId, $yearId,
 	        $weekStart, $weekStart, $weekEnd,
 	    ];
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
-	        $brandTypeId, $brandTypeId,
 	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ]);
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // consignment
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ]);
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, $searchParams);
 	    $params[] = (int)$limit;
 	    $params[] = (int)$offset;
@@ -3688,7 +3748,7 @@ class Dashboard_model extends Model
 		$weekEndDate= null,
 	    $searchValue = null,
 	    $brandIds = [],
-	    $brandTypeId = null, 
+	    $brandTypeIds = [],
 	    $salesGroup = null, 
 	    $subSalesGroup = null, 
 	    $watsonsPaymentGroup = null,
@@ -3725,11 +3785,26 @@ class Dashboard_model extends Model
 	        $brandParams = $brandIds;
 	    }
 
+	    $brandLabelTypeFilter = '';
+	    $brandLabelTypeParams = [];
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilter = "AND wd.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeParams = $brandTypeIds;
+	    }	    
+
 	    $brandFilterOutright = $brandFilterConsignment = '';
 	    if (!empty($brandIds)) {
 	        $placeholders = implode(',', array_fill(0, count($brandIds), '?'));
 	        $brandFilterOutright = "AND s.brand_id IN ($placeholders)";
 	        $brandFilterConsignment = "AND s.brand_id IN ($placeholders)";
+	    }
+
+	    $brandLabelTypeFilterOutright = $brandLabelTypeFilterConsignment = '';
+	    if (!empty($brandTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandTypeIds), '?'));
+	        $brandLabelTypeFilterOutright = "AND s.brand_label_type_id IN ($placeholders)";
+	        $brandLabelTypeFilterConsignment = "AND s.brand_label_type_id IN ($placeholders)";
 	    }
 
 		if ($subSalesGroup) {
@@ -3799,7 +3874,7 @@ class Dashboard_model extends Model
 			        WHERE (? IS NULL OR wd.year = ?)
 			          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
 			          $brandFilter
-			          AND (? IS NULL OR wd.brand_label_type_id = ?)
+			          $brandLabelTypeFilter
 			          AND (? IS NULL OR mp.customer_payment_group = ?)
 			    ) AS sub
 			    GROUP BY sub.brand_id
@@ -3822,10 +3897,10 @@ class Dashboard_model extends Model
 	            WHERE s.trncde = 'SAL'
 	              AND (s.dettyp <> 'C' OR s.dettyp IS NULL)
 	              AND (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterOutright
+	              $brandLabelTypeFilterOutright
 	              AND EXISTS (
 	                  SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde
 	              )
@@ -3848,10 +3923,10 @@ class Dashboard_model extends Model
 	             AND s.untmea = u.untmea
 
 	            WHERE (? IS NULL OR s.trndte BETWEEN ? AND ?)
-	              AND (? IS NULL OR s.brand_label_type_id = ?)
 	              AND (? IS NULL OR s.customer_group = ?)
 	              AND (? IS NULL OR s.cuscde = ?)
 	              $brandFilterConsignment
+	              $brandLabelTypeFilterConsignment
 	              AND EXISTS (
 	                  SELECT 1 FROM tbl_cus_sellout_indicator ci WHERE ci.cus_code = s.cuscde
 	              )
@@ -3905,27 +3980,24 @@ class Dashboard_model extends Model
 	        $year, $year,
 	        $weekStart, $weekStart, $weekEnd,
 	    ];
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
-	        $brandTypeId, $brandTypeId,
 	        $watsonsPaymentGroup, $watsonsPaymentGroup,
 	        // outright
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ]);
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, [
 	        // consignment
 	        //$year, $year,
 	        $weekStartDate, $weekStartDate, $weekEndDate,
-	        $brandTypeId, $brandTypeId,
 	        $salesGroup, $salesGroup,
 	        $subSalesGroup, $subSalesGroup,
 	    ]);
-	    $params = array_merge($params, $brandParams);
+	    $params = array_merge($params, $brandParams, $brandLabelTypeParams);
 	    $params = array_merge($params, $searchParams);
 	    $params[] = (int)$limit;
 	    $params[] = (int)$offset;
@@ -4751,7 +4823,7 @@ class Dashboard_model extends Model
 			        sub.category_2_id,
 			        sub.category_3_id,
 			        sub.category_4_id,
-			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        sub.item_class_id AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
 			        SELECT DISTINCT
@@ -4796,6 +4868,10 @@ class Dashboard_model extends Model
 	        outright AS (
 	            SELECT 
 	                s.brand_category_id,
+	                s.label_type_category_id,
+	                s.category_2_id,
+	                s.category_3_id,
+	                s.category_4_id,
 	                $outrightExpr AS total_qty
 	            FROM tbl_item_salesfile2_all s
 	            LEFT JOIN (
@@ -4830,6 +4906,10 @@ class Dashboard_model extends Model
 	        consignment AS (
 	            SELECT 
 	                s.brand_category_id,
+	                s.label_type_category_id,
+	                s.category_2_id,
+	                s.category_3_id,
+	                s.category_4_id,
 	                $consignmentExpr AS total_qty
 	            FROM tbl_item_salesfile_consignment_all s
 	            LEFT JOIN (
@@ -4878,9 +4958,17 @@ class Dashboard_model extends Model
 	                COUNT(*) OVER() AS total_records
 	            FROM aggregated a
 	            LEFT JOIN outright o
-	                ON a.brand_category_id = o.brand_category_id 
+	                  ON a.brand_category_id = o.brand_category_id
+					 AND a.label_type_category_id = o.label_type_category_id
+					 AND a.category_2_id = o.category_2_id
+					 AND a.category_3_id = o.category_3_id
+					 AND a.category_4_id = o.category_4_id
 	            LEFT JOIN consignment c
-	                ON a.brand_category_id = c.brand_category_id 
+					  ON a.brand_category_id = c.brand_category_id
+					 AND a.label_type_category_id = c.label_type_category_id
+					 AND a.category_2_id = c.category_2_id
+					 AND a.category_3_id = c.category_3_id
+					 AND a.category_4_id = c.category_4_id
 	            LEFT JOIN tbl_classification cl
 	                ON a.brand_category_id = cl.id
 	            LEFT JOIN tbl_label_category_list lcl
@@ -5061,7 +5149,7 @@ class Dashboard_model extends Model
 			        sub.category_2_id,
 			        sub.category_3_id,
 			        sub.category_4_id,
-			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
+			        sub.item_class_id AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
 			        SELECT DISTINCT
@@ -5103,6 +5191,10 @@ class Dashboard_model extends Model
 	        outright AS (
 	            SELECT 
 	                s.brand_category_id,
+	                s.label_type_category_id,
+	                s.category_2_id,
+	                s.category_3_id,
+	                s.category_4_id,
 	                $outrightExpr AS total_qty
 	            FROM tbl_item_salesfile2_all s
 	            LEFT JOIN (
@@ -5132,6 +5224,10 @@ class Dashboard_model extends Model
 	        consignment AS (
 	            SELECT 
 	                s.brand_category_id,
+	                s.label_type_category_id,
+	                s.category_2_id,
+	                s.category_3_id,
+	                s.category_4_id,
 	                $consignmentExpr AS total_qty
 	            FROM tbl_item_salesfile_consignment_all s
 	            LEFT JOIN (
@@ -5174,9 +5270,17 @@ class Dashboard_model extends Model
 	                COUNT(*) OVER() AS total_records
 	            FROM aggregated a
 	            LEFT JOIN outright o
-	                ON a.brand_category_id = o.brand_category_id 
+	                  ON a.brand_category_id = o.brand_category_id
+					 AND a.label_type_category_id = o.label_type_category_id
+					 AND a.category_2_id = o.category_2_id
+					 AND a.category_3_id = o.category_3_id
+					 AND a.category_4_id = o.category_4_id
 	            LEFT JOIN consignment c
-	                ON a.brand_category_id = c.brand_category_id 
+					  ON a.brand_category_id = c.brand_category_id
+					 AND a.label_type_category_id = c.label_type_category_id
+					 AND a.category_2_id = c.category_2_id
+					 AND a.category_3_id = c.category_3_id
+					 AND a.category_4_id = c.category_4_id
 	            LEFT JOIN tbl_classification cl
 	                ON a.brand_category_id = cl.id
 	            LEFT JOIN tbl_label_category_list lcl
@@ -5275,6 +5379,7 @@ class Dashboard_model extends Model
 	    $sellInType = 3,
 	    $measure = 'qty'
 	) {
+
 	    $allowedOrderColumns = ['rank', 'brand_category', 'label_category', 'sub_classification', 'item_department', 'item_merchandise', 'sell_in', 'sell_out', 'sell_out_ratio'];
 	    $allowedOrderDirections = ['ASC', 'DESC'];
 
@@ -5354,7 +5459,7 @@ class Dashboard_model extends Model
 			        sub.category_2_id,
 			        sub.category_3_id,
 			        sub.category_4_id,
-			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
+			        sub.category_1_id AS brand_category_id,
 			        SUM(sub.sales_qty) AS sell_out
 			    FROM (
 			        SELECT DISTINCT
@@ -5395,6 +5500,10 @@ class Dashboard_model extends Model
 	        outright AS (
 	            SELECT 
 	                s.brand_category_id,
+	                s.label_type_category_id,
+	                s.category_2_id,
+	                s.category_3_id,
+	                s.category_4_id,
 	                $outrightExpr AS total_qty
 	            FROM tbl_item_salesfile2_all s
 	            LEFT JOIN (
@@ -5428,6 +5537,10 @@ class Dashboard_model extends Model
 	        consignment AS (
 	            SELECT 
 	                s.brand_category_id,
+	                s.label_type_category_id,
+	                s.category_2_id,
+	                s.category_3_id,
+	                s.category_4_id,
 	                $consignmentExpr AS total_qty
 	            FROM tbl_item_salesfile_consignment_all s
 	            LEFT JOIN (
@@ -5474,9 +5587,17 @@ class Dashboard_model extends Model
 	                COUNT(*) OVER() AS total_records
 	            FROM aggregated a
 	            LEFT JOIN outright o
-	                ON a.brand_category_id = o.brand_category_id 
+	                  ON a.brand_category_id = o.brand_category_id
+					 AND a.label_type_category_id = o.label_type_category_id
+					 AND a.category_2_id = o.category_2_id
+					 AND a.category_3_id = o.category_3_id
+					 AND a.category_4_id = o.category_4_id
 	            LEFT JOIN consignment c
-	                ON a.brand_category_id = c.brand_category_id 
+					  ON a.brand_category_id = c.brand_category_id
+					 AND a.label_type_category_id = c.label_type_category_id
+					 AND a.category_2_id = c.category_2_id
+					 AND a.category_3_id = c.category_3_id
+					 AND a.category_4_id = c.category_4_id
 	            LEFT JOIN tbl_classification cl
 	                ON a.brand_category_id = cl.id
 	            LEFT JOIN tbl_label_category_list lcl
