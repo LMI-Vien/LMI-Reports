@@ -177,7 +177,6 @@ class SellThroughOverall extends BaseController
 
 	public function generatePdf() {
 		$json = $this->request->getJSON(true);
-		// echo json_encode(['data'=>$json]); exit;
 		$year = '';
 		$year = trim($json['year'] ?? '');
 		$year = $year === '' ? null : $year;
@@ -264,8 +263,12 @@ class SellThroughOverall extends BaseController
 			$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'];
 		}
 		
-		$orderByColumn = 'rank';
-		$orderDirection = 'ASC';
+		$orderByColumn = trim($json['order_by_column'] ?? '');
+		$orderByColumn = $orderByColumn === '' ? null : $orderByColumn;
+
+		$orderDirection = trim($json['order_direction'] ?? '');
+		$orderDirection = $orderDirection === '' ? null : $orderDirection;
+
 		$limit = 999999;
 		$offset = 0;
 		
@@ -306,9 +309,6 @@ class SellThroughOverall extends BaseController
 	        	$data = $this->Dashboard_model->getSellThroughScannDataBySku($year, $monthStart, $monthEnd, $searchValue, $ItemIds, $brandIds, $brandTypeIds, $brandCategoryIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection,  $limit, $offset, $type, $measure);
 				
 	    }
-		
-		// echo json_encode($data); exit;
-		// echo json_encode($json); exit;
 
 		$title = 'Sell_Through_Overall' . date('Ymd_His');
 		
@@ -506,8 +506,12 @@ class SellThroughOverall extends BaseController
 		$monthEnd = trim($json['month_end'] ?? '');
 		$monthEnd = $monthEnd === '' ? null : $monthEnd;
 		
-		$orderByColumn = 'rank';
-		$orderDirection = 'ASC';
+		$orderByColumn = trim($json['order_by_column'] ?? '');
+		$orderByColumn = $orderByColumn === '' ? null : $orderByColumn;
+
+		$orderDirection = trim($json['order_direction'] ?? '');
+		$orderDirection = $orderDirection === '' ? null : $orderDirection;
+
 		$limit = 999999;
 		$offset = 0;
 		$type = 3;
@@ -575,9 +579,6 @@ class SellThroughOverall extends BaseController
 					$limit, $offset, $type, $measure
 				);
 	    }
-
-		// echo json_encode($data); 
-		// exit;
 
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();

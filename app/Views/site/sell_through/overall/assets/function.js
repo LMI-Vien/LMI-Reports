@@ -437,7 +437,7 @@
                     d.offset = d.start;
                 },
                 dataSrc: function(json) {
-                    console.log(json, 'json')
+                    // console.log(json, 'json')
                     return json.data.length ? json.data : [];
                 }
             },
@@ -571,6 +571,21 @@
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
         let searchValue = $('.dt-input').val();
+        let order = $('#sellThroughOverall').DataTable().order();
+        let orderByColumn = '';
+        let orderDirection = '';
+        switch (order[0][0]) {
+            case 1: orderByColumn = 'itmcde'; break;
+            case 2: orderByColumn = 'customer_sku'; break;
+            case 3: orderByColumn = 'item_description'; break;
+            case 4: orderByColumn = 'brand'; break;
+            case 5: orderByColumn = 'brand_category'; break;
+            case 6: orderByColumn = 'sell_in'; break;
+            case 7: orderByColumn = 'sell_out'; break;
+            case 8: orderByColumn = 'sell_out_ratio'; break;
+            default: orderByColumn = 'rank'; break;
+        }
+        orderDirection = order[0][1].toUpperCase();
 
         let postData = {
             source : selectedSource === "" ? null : selectedSource,
@@ -597,6 +612,8 @@
             limit : 9999,
             offset : 0,
             search : searchValue,
+            order_by_column : orderByColumn,
+            order_direction : orderDirection,
         }
 
         $.ajax({
