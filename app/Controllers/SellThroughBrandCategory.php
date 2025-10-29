@@ -155,7 +155,6 @@ class SellThroughBrandCategory extends BaseController
 		$data = [];
 		// print_r($categoryIds);
 		// die();
-		$source = 'week_on_week';
 	    switch ($source) {
 	        case 'scann_data':
 			    $data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryIds ,$subBrandCategoryIds, $categoryIds, $itemDeptIds, $merchCatIds, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
