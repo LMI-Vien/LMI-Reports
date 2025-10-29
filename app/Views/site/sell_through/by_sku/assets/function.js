@@ -758,6 +758,19 @@
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
         let searchValue = $('.dt-input').val();
+        let order = $('#sellThroughBySku').DataTable().order();
+        let orderByColumn = '';
+        let orderDirection = '';
+        switch (order[0][0]) {
+            case 1: orderByColumn = 'itmcde'; break;
+            case 2: orderByColumn = 'customer_sku'; break;
+            case 3: orderByColumn = 'item_description'; break;
+            case 4: orderByColumn = 'sell_in'; break;
+            case 5: orderByColumn = 'sell_out'; break;
+            case 6: orderByColumn = 'sell_out_ratio'; break;
+            default: orderByColumn = 'rank'; break;
+        }
+        orderDirection = order[0][1].toUpperCase();
 
         let postData = {
             source : selectedSource === "" ? null : selectedSource,
@@ -780,6 +793,8 @@
             limit : 9999,
             offset : 0,
             search : searchValue,
+            order_by_column : orderByColumn,
+            order_direction : orderDirection,
         }
 
         $.ajax({

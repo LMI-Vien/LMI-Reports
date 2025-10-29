@@ -302,8 +302,12 @@ class SellThroughBySku extends BaseController
 		$monthEnd = trim($json['month_end'] ?? '');
 		$monthEnd = $monthEnd === '' ? null : $monthEnd;
 		
-		$orderByColumn = 'rank';
-		$orderDirection = 'ASC';
+		$orderByColumn = trim($json['order_by_column'] ?? '');
+		$orderByColumn = $orderByColumn === '' ? null : $orderByColumn;
+
+		$orderDirection = trim($json['order_direction'] ?? '');
+		$orderDirection = $orderDirection === '' ? null : $orderDirection;
+
 		$limit = 999999;
 		$offset = 0;
 		$type = 3;
@@ -369,9 +373,6 @@ class SellThroughBySku extends BaseController
 					$limit, $offset, $type, $measure
 				);
 	    }
-
-		// echo json_encode($data); 
-		// exit;
 
 		$title = 'Sell_Through_by_SKU' . date('Ymd_His');
 		
@@ -568,9 +569,13 @@ class SellThroughBySku extends BaseController
 
 		$monthEnd = trim($json['month_end'] ?? '');
 		$monthEnd = $monthEnd === '' ? null : $monthEnd;
-		
-		$orderByColumn = 'rank';
-		$orderDirection = 'ASC';
+
+		$orderByColumn = trim($json['order_by_column'] ?? '');
+		$orderByColumn = $orderByColumn === '' ? null : $orderByColumn;
+
+		$orderDirection = trim($json['order_direction'] ?? '');
+		$orderDirection = $orderDirection === '' ? null : $orderDirection;
+
 		$limit = 999999;
 		$offset = 0;
 		$type = 3;
@@ -638,9 +643,6 @@ class SellThroughBySku extends BaseController
 					$limit, $offset, $type, $measure
 				);
 	    }
-
-		// echo json_encode($data); 
-		// exit;
 
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();
