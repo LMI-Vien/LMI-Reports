@@ -503,17 +503,18 @@ class Sync_model extends Model
                     $values[] = "(
                         '" . $this->esc($row['id']) . "',
                         '" . $this->esc($row['label']) . "',
+                        1,
                         '" . $this->esc($row['created_date']) . "',
                         '" . $this->esc($row['modified_date']) . "'
                     )";
                 }
 
                 if (!empty($values)) {
-                    $sql = "INSERT INTO tbl_brand_label_type (id, label, created_date, modified_date) 
+                    $sql = "INSERT INTO tbl_brand_label_type (id, label, status, created_date, modified_date) 
                             VALUES " . implode(',', $values) . "
                             ON DUPLICATE KEY UPDATE 
                               label = VALUES(label),
-                              status = 1,
+                              status = status,
                               created_date = VALUES(created_date),
                               modified_date = VALUES(modified_date);";
 
