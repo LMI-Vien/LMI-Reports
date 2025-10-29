@@ -614,8 +614,6 @@ class SellThroughBySku extends BaseController
 				);
 	            break;
 	        case 'winsight':
-	        	print_r($brandTypeIds);
-	        	die();
 				$source =  "WINSIGHT";
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
 				$weekStart = $year.$weekStart;

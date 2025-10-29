@@ -2313,7 +2313,7 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 			            so.itmcde,
 			            so.brand_id,
 			            so.customer_payment_group,
@@ -2666,7 +2666,7 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 			            wow.itmcde,
 			            wow.tracc_brand_id,
 			            wow.brand_type_id,
@@ -3010,7 +3010,7 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
 			        SUM(sub.sales_qty) AS sell_out
 			    FROM (
-				    SELECT DISTINCT
+				    SELECT
 			            wd.item_code,
 			            wd.brand_id,
 			            wd.brand_label_type_id,
