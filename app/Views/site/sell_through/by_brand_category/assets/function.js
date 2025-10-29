@@ -781,7 +781,26 @@
         let selectedDepartmentText = $('#itemDepartment option:selected').text();
 
         let selectedMerch = $('#merchCategory').val();
-        let selectedMerchText = $('#merchCategory option:selected').text()
+        let selectedMerchText = $('#merchCategory option:selected').text();
+
+        let searchValue = $('#sellThroughByBrandCategory').DataTable().search();
+
+        let dt = $('#sellThroughByBrandCategory').DataTable();
+        let orderInfo = dt.order(); 
+        let orderColumnIdx = orderInfo[0][0];  
+        let orderDir = orderInfo[0][1];        
+        const columnMap = [
+            'rank',
+            'label_category',
+            'brand_category',
+            'sub_classification',
+            'item_department',
+            'item_merchandise',
+            'sell_in',
+            'sell_out',
+            'sell_out_ratio'
+        ];
+        let orderByField = columnMap[orderColumnIdx];
 
         let postData = {
             source: selectedSource,
@@ -811,8 +830,11 @@
             sales_group: selectedSalesGroup,
             sales_group_text: normalize(selectedSalesGroupText),
             sub_sales_grouptype: selectedSubSalesGroup,
+            search_value: searchValue,
             type: selectedType,
-            measure: selectedMeasure
+            measure: selectedMeasure,
+            order_by: orderByField,
+            order_dir: orderDir
         }
         let endpoint = action === 'exportPdf' ? 'by-brand-category-generate-pdf' : 'by-brand-category-generate-excel-ba';
         let url = `${base_url}sell-through/${endpoint}`; 

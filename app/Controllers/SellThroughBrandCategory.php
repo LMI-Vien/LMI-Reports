@@ -320,23 +320,16 @@ class SellThroughBrandCategory extends BaseController
 		$type              = ($json['type']    ?? null) ?: null;
 		$measure           = ($json['measure'] ?? null) ?: null;
 
+		$searchValue		 =($json['search_value'] 		 ?? null) ?: null;
+
+		$orderByColumn  = $json['order_by']  ?? null; 
+    	$orderDirection = isset($json['order_dir']) ? strtoupper($json['order_dir']) : null;
+
 		// Sys params
 		$sysPar = $this->Global_model->getSysPar();
 		$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'] ?? '';
 
-		$orderParam        = $json['order'][0] ?? [];
-		$orderColumnIndex  = $orderParam['column'] ?? 0;
-		$orderDirection    = strtoupper($orderParam['dir'] ?? 'DESC');
-
-		if (!empty($orderParam['colData'])) {
-			$orderByColumn = $orderParam['colData'];
-		} else {
-			$columnsParam  = $json['columns'] ?? [];
-			$orderByColumn = $columnsParam[$orderColumnIndex]['data'] ?? 'itmcde';
-		}
-
 		// Search
-		$searchValue = null;
 		if (!empty($json['search'])) {
 			if (is_array($json['search']) && array_key_exists('value', $json['search'])) {
 				$searchValue = trim((string)$json['search']['value']) ?: null;
@@ -516,8 +509,8 @@ class SellThroughBrandCategory extends BaseController
 				$row->sub_classification,
 				$row->item_department,
 				$row->item_merchandise,
-				$row->sell_in,
-				$row->sell_out,
+				$this->formatComma($row->sell_in),
+				$this->formatComma($row->sell_out),
 				$row->sell_out_ratio
 			];
 
@@ -569,19 +562,19 @@ class SellThroughBrandCategory extends BaseController
 		$source              = ($json['source']              ?? null) ?: null;
 
 		$brandCategoryId     = ($json['brand_category']      ?? null) ?: null;
-		$brandCategoryText     = ($json['brand_category_text']      ?? null) ?: null;
+		$brandCategoryText   = ($json['brand_category_text'] ?? null) ?: null;
 
-		$subBrandCategoryId  = ($json['sub_brand_category']  ?? null) ?: null;
-		$subBrandCategoryText  = ($json['sub_brand_category_text']  ?? null) ?: null;
+		$subBrandCategoryId    = ($json['sub_brand_category']      ?? null) ?: null;
+		$subBrandCategoryText  = ($json['sub_brand_category_text'] ?? null) ?: null;
 
 		$categoryId          = ($json['category']            ?? null) ?: null;
-		$categoryText          = ($json['category_text']            ?? null) ?: null;
+		$categoryText        = ($json['category_text']       ?? null) ?: null;
 
 		$itemDeptId          = ($json['item_department']     ?? null) ?: null;
-		$itemDeptText          = ($json['item_department_text']     ?? null) ?: null;
+		$itemDeptText        = ($json['item_department_text']?? null) ?: null;
 
 		$merchCatId          = ($json['merch_category']      ?? null) ?: null;
-		$merchCatText          = ($json['merch_category_text']      ?? null) ?: null;
+		$merchCatText        = ($json['merch_category_text'] ?? null) ?: null;
 
 		$year                = trim($json['year']            ?? '') ?: null;
 		$yearId              = trim($json['year_id']         ?? '') ?: null;
@@ -596,31 +589,23 @@ class SellThroughBrandCategory extends BaseController
 		$weekEndDate         = trim($json['week_end_date']   ?? '') ?: null;
 
 		$salesGroup          = trim($json['sales_group']     ?? '') ?: null;
-		$salesGroupText        = ($json['sales_group_text']         ?? null) ?: null;
+		$salesGroupText      = ($json['sales_group_text']    ?? null) ?: null;
 
-		$subSalesGroup       = trim($json['sub_sales_group'] ?? '') ?: null;
+		$subSalesGroup       = trim($json['sub_sales_grouptype'] ?? '') ?: null;
 
 		$type                = ($json['type']                ?? null) ?: null;
 		$measure             = ($json['measure']             ?? null) ?: null;
+
+		$searchValue		 =($json['search_value'] 		 ?? null) ?: null;
+
+		$orderByColumn  = $json['order_by']  ?? null;             
+		$orderDirection = isset($json['order_dir']) ? strtoupper($json['order_dir']) : null;
 
 		// Sys params
 		$sysPar = $this->Global_model->getSysPar();
 		$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'] ?? '';
 
-		// Ordering (supports colData override just like your first function)
-		$orderParam       = $json['order'][0] ?? [];
-		$orderColumnIndex = $orderParam['column'] ?? 0;
-		$orderDirection   = strtoupper($orderParam['dir'] ?? 'DESC');
-
-		if (!empty($orderParam['colData'])) {
-			$orderByColumn = $orderParam['colData'];
-		} else {
-			$columnsParam  = $json['columns'] ?? [];
-			$orderByColumn = $columnsParam[$orderColumnIndex]['data'] ?? 'itmcde';
-		}
-
-		// Search
-		$searchValue = null;
+		// $searchValue = null;
 		if (!empty($json['search'])) {
 			if (is_array($json['search']) && array_key_exists('value', $json['search'])) {
 				$searchValue = trim((string)$json['search']['value']) ?: null;
@@ -629,54 +614,79 @@ class SellThroughBrandCategory extends BaseController
 			}
 		}
 
-		$sysPar = $this->Global_model->getSysPar();
-		$watsonsPaymentGroup = '';
-		if($sysPar){
-			$watsonsPaymentGroup = $sysPar[0]['watsons_payment_group'];
-		}
-
-		$type = $this->request->getPost('type');
-		$type = $type === '' ? null : $type;
-
-		$measure = $this->request->getPost('measure');
-		$measure = $measure === '' ? null : $measure;
-
-		$limit = $this->request->getVar('limit');
-		$offset = $this->request->getVar('offset');
 		$limit  = 999999;
 		$offset = 0;
 
-		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
-	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'desc';
-	    $columns = $this->request->getVar('columns');
-	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'itmcde';
-
-	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
-		$searchValue = $searchValue === '' ? null : $searchValue;
-		$data = [];
-
-	    switch ($source) {
-	        case 'scann_data':
-			    $data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
-				
-	            break;
-	        case 'week_on_week':
-			    $data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
-				
-	            break;
-	        case 'winsight':
+		if ($source === 'winsight') {
+			if ($weekStart !== null && $year !== null) {
 				$weekStart = str_pad($weekStart, 2, '0', STR_PAD_LEFT);
-			    $weekStart = $year.$weekStart;
+				$weekStart = $year.$weekStart;
+			}
+			if ($weekEnd !== null && $year !== null) {
+				$weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
+				$weekEnd = $year.$weekEnd;
+			}
+		}
 
-			    $weekEnd = str_pad($weekEnd, 2, '0', STR_PAD_LEFT);
-			    $weekEnd = $year.$weekEnd;
-			    $data = $this->Dashboard_model->getSellThroughWinsightByCategory($year, $yearId, $weekStart, $weekEnd, $weekStartDate, $weekEndDate, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $watsonsPaymentGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
-				
+		switch ($source) {
+			case 'scann_data':
+				$data = $this->Dashboard_model->getSellThroughScannDataByCategory(
+					$year, $monthStart, $monthEnd,
+					$searchValue,
+					$brandCategoryId, $subBrandCategoryId,
+					$categoryId, $itemDeptId, $merchCatId,
+					$salesGroup, $subSalesGroup,
+					$orderByColumn, $orderDirection,
+					$limit, $offset,
+					$type, $measure
+				);
 				break;
-	        default:
-	        	$data = $this->Dashboard_model->getSellThroughScannDataByCategory($year, $monthStart, $monthEnd, $searchValue, $brandCategoryId ,$subBrandCategoryId, $categoryId, $itemDeptId, $merchCatId, $salesGroup, $subSalesGroup, $orderByColumn, $orderDirection, $limit, $offset, $type, $measure);
-				
-	    }
+
+			case 'week_on_week':
+				$data = $this->Dashboard_model->getSellThroughWeekOnWeekByCategory(
+					$year, $yearId,
+					$weekStart, $weekEnd,
+					$weekStartDate, $weekEndDate,
+					$searchValue,
+					$brandCategoryId, $subBrandCategoryId,
+					$categoryId, $itemDeptId, $merchCatId,
+					$salesGroup, $subSalesGroup,
+					$watsonsPaymentGroup,
+					$orderByColumn, $orderDirection,
+					$limit, $offset,
+					$type, $measure
+				);
+				break;
+
+			case 'winsight':
+				$data = $this->Dashboard_model->getSellThroughWinsightByCategory(
+					$year, $yearId,
+					$weekStart, $weekEnd,
+					$weekStartDate, $weekEndDate,
+					$searchValue,
+					$brandCategoryId, $subBrandCategoryId,
+					$categoryId, $itemDeptId, $merchCatId,
+					$salesGroup, $subSalesGroup,
+					$watsonsPaymentGroup,
+					$orderByColumn, $orderDirection,
+					$limit, $offset,
+					$type, $measure
+				);
+				break;
+
+			default:
+				$data = $this->Dashboard_model->getSellThroughScannDataByCategory(
+					$year, $monthStart, $monthEnd,
+					$searchValue,
+					$brandCategoryId, $subBrandCategoryId,
+					$categoryId, $itemDeptId, $merchCatId,
+					$salesGroup, $subSalesGroup,
+					$orderByColumn, $orderDirection,
+					$limit, $offset,
+					$type, $measure
+				);
+				break;
+		}
 
 		$rows = $data['data'] ?? [];
 
@@ -759,6 +769,13 @@ class SellThroughBrandCategory extends BaseController
 			$value = 0;
 		}
 		return number_format((float)$value, 2, '.', ',');
+	}
+
+	private function formatComma($value): string {
+		if (!is_numeric($value)) {
+			return (string)$value;
+		}
+		return number_format((float)$value, 0, '.', ',');
 	}
 
     private function getCurrentWeek($year = null) {

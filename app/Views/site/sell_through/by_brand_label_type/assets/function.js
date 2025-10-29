@@ -477,10 +477,8 @@
                     d.measure = selectedMeasure === "" ? null : selectedMeasure;
                     d.limit = d.length;
                     d.offset = d.start;
-                    console.log(d);
                 },
                 dataSrc: function(json) {
-                    console.log(json);
                     return json.data.length ? json.data : [];
                 }
             },
@@ -747,6 +745,20 @@
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
 
+        let searchValue = $('#sellThroughByBrandType').DataTable().search();
+        let dt = $('#sellThroughByBrandType').DataTable();
+        let orderInfo = dt.order();
+        let orderColumnIdx = orderInfo[0][0];     
+        let orderDir = orderInfo[0][1];
+        const columnMap = [
+            'rank',
+            'brand_type',
+            'sell_in',
+            'sell_out',
+            'sell_out_ratio'
+        ];
+        let orderByField = columnMap[orderColumnIdx];
+
         let postData = {
             source: selectedSource,
             brand_labels: selectedBrandLabel,
@@ -763,6 +775,9 @@
             sub_sales_group: selectedSubSalesGroup,
             measure: selectedMeasure,
             type: selectedType,
+            search_value: searchValue,
+            order_by: orderByField,
+            order_dir: orderDir
         }
 
         let endpoint = action === 'exportPdf' ? 'by-brand-label-type-generate-pdf' : 'by-brand-label-type-generate-excel-ba';
