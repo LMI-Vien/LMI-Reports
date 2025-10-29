@@ -240,8 +240,7 @@
                     <div class="col-12 col-md-6 mb-3">
                       <div class="form-group card-dark mb-3 p-2">
                           <label for="category" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Label Type Category</label>
-                          <select id="category" name="category" class="form-control">
-                              <option value="">Please select...</option>
+                          <select id="category" name="category[]" class="form-control select2" multiple>
                               <?php foreach ($categories as $key => $value) {
                                   echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['description']) . '</option>';
                               } ?>
@@ -252,8 +251,7 @@
                     <div class="col-12 col-md-6 mb-3">
                       <div class="form-group card-dark mb-3 p-2">
                           <label for="brandCategory" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 1 (Item Classification)</label>
-                          <select id="brandCategory" name="brandCategory" class="form-control">
-                              <option value="">Please select...</option>
+                          <select id="brandCategory" name="brandCategory[]" class="form-control select2" multiple>
                               <?php foreach ($brand_categories as $key => $value) {
                                   echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_class_description']) . '</option>';
                               } ?>
@@ -264,10 +262,9 @@
                     <div class="col-12 col-md-6 mb-3">
                       <div class="form-group card-dark mb-3 p-2">
                           <label for="brandSubCategory" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 2 (Item Sub Classification)</label>
-                          <select id="brandSubCategory" name="brandSubCategory" class="form-control">
-                              <option value="">Please select...</option>
+                          <select id="brandSubCategory" name="brandSubCategory[]" class="form-control select2" multiple>
                               <?php foreach ($brand_sub_categories as $key => $value) {
-                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' .htmlspecialchars($value['item_class_code']) . '-' . htmlspecialchars($value['item_sub_class_code']) . '</option>';
+                                  echo '<option value="' . htmlspecialchars($value['id']) . '">' .htmlspecialchars($value['item_class_code']) . ' - ' . htmlspecialchars($value['item_sub_class_code']) . '</option>';
                               } ?>
                           </select>
                       </div>
@@ -276,8 +273,7 @@
                     <div class="col-12 col-md-6 mb-3">
                       <div class="form-group card-dark mb-3 p-2">
                           <label for="itemDepartment" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 3 (Item Department)</label>
-                          <select id="itemDepartment" name="itemDepartment" class="form-control">
-                              <option value="">Please select...</option>
+                          <select id="itemDepartment" name="itemDepartment[]" class="form-control select2" multiple>
                               <?php foreach ($item_department as $key => $value) {
                                   echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_department_code']) . '</option>';
                               } ?>
@@ -288,8 +284,7 @@
                     <div class="col-12 col-md-6 mb-3">
                       <div class="form-group card-dark mb-3 p-2">
                           <label for="merchCategory" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Category 4 (Item Merchandise Category)</label>
-                          <select id="merchCategory" name="merchCategory" class="form-control">
-                              <option value="">Please select...</option>
+                          <select id="merchCategory" name="merchCategory[]" class="form-control select2" multiple>
                               <?php foreach ($merch_categories as $key => $value) {
                                   echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['item_mech_cat_code']) . '</option>';
                               } ?>

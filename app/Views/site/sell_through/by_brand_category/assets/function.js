@@ -14,7 +14,8 @@
 
         $toggleBtn.on('click', function () {
           const isOpen = $filterPanel.hasClass('open');
-
+          $filterCategoryPanel.removeClass('open');
+          $toggleCategoryFilterBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
           if (isOpen) {
             $filterPanel.removeClass('open');
             $toggleBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
@@ -31,7 +32,8 @@
 
         $toggleCategoryFilterBtn.on('click', function () {
           const isOpen = $filterCategoryPanel.hasClass('open');
-
+          $filterPanel.removeClass('open');
+          $toggleBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Filters');
           if (isOpen) {
             $filterCategoryPanel.removeClass('open');
             $toggleCategoryFilterBtn.html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
@@ -66,7 +68,11 @@
             $('#mostRecentImportWeekRange').text('N/A');
         }
 
-        $('#brands').select2({ placeholder: 'Select Brands' });
+        $('#category').select2({ placeholder: 'Select Label Type Category' });
+        $('#brandCategory').select2({ placeholder: 'Select Item Classification' });
+        $('#brandSubCategory').select2({ placeholder: 'Select Item Sub Classification' });
+        $('#itemDepartment').select2({ placeholder: 'Select Item Department' });
+        $('#merchCategory').select2({ placeholder: 'Select Item Merchandise Category' });
 
         $("input[name='measure']").on("change", function () {
             let selectedMeasure = $('input[name="measure"]:checked').val();
@@ -283,6 +289,29 @@
 
     $(document).on('click', '#refreshButton', function () {
 
+        const fields = [
+            { input: '#category', target: '#category' },
+            { input: '#brandCategory', target: '#brandCategory' },
+            { input: '#brandSubCategory', target: '#brandSubCategory' },
+            { input: '#itemDepartment', target: '#itemDepartment' },
+            { input: '#brandCategory', target: '#brandCategory' },
+            { input: '#merchCategory', target: '#merchCategory' }
+        ];
+
+        let counter = 0;
+
+        fields.forEach(({ input, target }) => {
+            const val = $(input).val();
+            if (val === "" || val === undefined) {
+                $(target).val('');
+            } else {
+                if ($(input).is('select')) {
+                    $(input).select2();
+                }
+                counter++;
+            }
+        });
+
         const weekFromOption = $("#weekfrom option:selected");
         const startDateFrom = weekFromOption.data("start-date");
         const weekToOption = $("#weekto option:selected");
@@ -365,37 +394,40 @@
             $('#sourceDate').text($("#year option:selected").text() + " - " + startDateFrom + " to " + endDateTo);
         }
 
-        const generationPeriod = getTodayDateTime();
-        //$('#generationPeriod').text(generationPeriod.display);
-        logActivity("Sell Through By Brand Category", "Refresh", "User refreshed sell through by brand category.", "", "", "" );
-        let mode = $('#toggleGraphMode').text().trim();
-        if (mode === 'Graph View') {
-            $('#chartContainer').hide();
-            $('#tableContainer').fadeIn(200);
-            fetchData();
-            $('#toggleGraphMode').html('<i class="fas fa-chart-bar"></i> Graph View');
-            isGraphMode = false;
 
-            if (chartInstance) {
-                chartInstance.destroy();
-                chartInstance = null;
+        if (counter >= 1) {
+            const generationPeriod = getTodayDateTime();
+            //$('#generationPeriod').text(generationPeriod.display);
+            logActivity("Sell Through By Brand Category", "Refresh", "User refreshed sell through by brand category.", "", "", "" );
+            let mode = $('#toggleGraphMode').text().trim();
+            if (mode === 'Graph View') {
+                $('#chartContainer').hide();
+                $('#tableContainer').fadeIn(200);
+                fetchData();
+                $('#toggleGraphMode').html('<i class="fas fa-chart-bar"></i> Graph View');
+                isGraphMode = false;
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                    chartInstance = null;
+                }
+
+            } else {
+                $('#tableContainer').hide();
+                $('#chartContainer').fadeIn(200);
+                $('#toggleGraphMode').html('<i class="fas fa-table"></i> Table View');
+                isGraphMode = true;
+                setTimeout(() => {
+                    renderSellThroughChart();
+                }, 150);
             }
-
-        } else {
-            $('#tableContainer').hide();
-            $('#chartContainer').fadeIn(200);
-            $('#toggleGraphMode').html('<i class="fas fa-table"></i> Table View');
-            isGraphMode = true;
-            setTimeout(() => {
-                renderSellThroughChart();
-            }, 150);
+            $('.table-empty').hide();
+            $('.hide-div').show();
+            $('#additionalFiltersPanel').removeClass('open');
+            $('#toggleAdditionalCategoryFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
+            $('#additionalCategoryFiltersPanel').removeClass('open');
+            $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
         }
-        $('.table-empty').hide();
-        $('.hide-div').show();
-        $('#additionalFiltersPanel').removeClass('open');
-        $('#toggleAdditionalCategoryFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
-        $('#additionalCategoryFiltersPanel').removeClass('open');
-        $('#toggleAdditionalFilters').html('<i class="fas fa-angle-double-right mr-1"></i> More Category Filters');
         // else {
         //     $('#generationPeriod').text('N/A');
         // }
@@ -442,11 +474,11 @@
         let weekToOption = $("#weekto option:selected");
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
-        let selectedCategory = $('#category').val();
-        let selectedBrandCategory = $('#brandCategory').val();
-        let selectedSubBrandCategory = $('#brandSubCategory').val();
-        let selectedDepartment = $('#itemDepartment').val();
-        let selectedMerch = $('#merchCategory').val();
+        let selectedCategories = $('#category').val();
+        let selectedBrandCategories = $('#brandCategory').val();
+        let selectedSubBrandCategories = $('#brandSubCategory').val();
+        let selectedDepartments = $('#itemDepartment').val();
+        let selectedMerchs = $('#merchCategory').val();
 
         if (!selectedSource || !selectedSalesGroup) {
             $('.table-empty').show();
@@ -471,11 +503,11 @@
                 type: 'POST',
                 data: function(d) {
                     d.source = selectedSource === "" ? null : selectedSource;
-                    d.brand_category = selectedBrandCategory || null;
-                    d.sub_brand_category = selectedSubBrandCategory || null;
-                    d.category = selectedCategory || null;
-                    d.item_department = selectedDepartment || null;
-                    d.merch_category = selectedMerch || null;
+                    d.brand_categories = selectedBrandCategories.length ? selectedBrandCategories : null;
+                    d.sub_brand_categories = selectedSubBrandCategories.length ? selectedSubBrandCategories : null;
+                    d.categories = selectedCategories.length ? selectedCategories : null;
+                    d.item_departments = selectedDepartments.length ? selectedDepartments : null;
+                    d.merch_categories = selectedMerchs.length ? selectedMerchs : null;
                     d.year = selectedYear === "0" ? null : selectedYear;
                     d.year_id = selectedYearId === "0" ? null : selectedYearId;
                     d.month_start = selectedMonthStart === "0" ? null : selectedMonthStart;
@@ -540,11 +572,11 @@
         let weekToOption = $("#weekto option:selected");
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
-        let selectedCategory = $('#category').val();
-        let selectedBrandCategory = $('#brandCategory').val();
-        let selectedSubBrandCategory = $('#brandSubCategory').val();
-        let selectedDepartment = $('#itemDepartment').val();
-        let selectedMerch = $('#merchCategory').val();
+        let selectedCategories = $('#category').val();
+        let selectedBrandCategories = $('#brandCategory').val();
+        let selectedSubBrandCategories = $('#brandSubCategory').val();
+        let selectedDepartments = $('#itemDepartment').val();
+        let selectedMerchs = $('#merchCategory').val();
         const offset = (page - 1) * chartLimit;
 
         if (chartInstance) {
@@ -556,11 +588,16 @@
             type: 'POST',
             data: {
                 source : selectedSource === "" ? null : selectedSource,
-                brand_category : selectedBrandCategory || null,
-                sub_brand_category : selectedSubBrandCategory || null,
-                category : selectedCategory || null,
-                item_department : selectedDepartment || null,
-                merch_category : selectedMerch || null,
+                brand_categories : selectedBrandCategories.length ? selectedBrandCategories : null,
+                sub_brand_categories : selectedSubBrandCategories.length ? selectedSubBrandCategories : null,
+                categories : selectedCategories.length ? selectedCategories : null,
+                item_departments : selectedDepartments.length ? selectedDepartments : null,
+                merch_categories : selectedMerchs.length ? selectedMerchs : null,
+                // brand_category : selectedBrandCategory || null,
+                // sub_brand_category : selectedSubBrandCategory || null,
+                // category : selectedCategory || null,
+                // item_department : selectedDepartment || null,
+                // merch_category : selectedMerch || null,
                 year : selectedYear === "0" ? null : selectedYear,
                 year_id : selectedYearId === "0" ? null : selectedYearId,
                 month_start : selectedMonthStart === "0" ? null : selectedMonthStart,
@@ -768,56 +805,47 @@
         let weekToOption = $("#weekto option:selected");
         let selectedWeekEndDate = weekToOption.data("end-date"); 
         let selectedWeekEnd =  $('#weekto').val();
-        let selectedCategory = $('#category').val();
-        let selectedCategoryText = $('#category option:selected').text();
-
-        let selectedBrandCategory = $('#brandCategory').val();
-        let selectedBrandCategoryText = $('#brandCategory option:selected').text();
-
-        let selectedSubBrandCategory = $('#brandSubCategory').val();
-        let selectedSubBrandCategoryText = $('#brandSubCategory option:selected').text();
-
-        let selectedDepartment = $('#itemDepartment').val();
-        let selectedDepartmentText = $('#itemDepartment option:selected').text();
-
-        let selectedMerch = $('#merchCategory').val();
-        let selectedMerchText = $('#merchCategory option:selected').text();
-
-        let searchValue = $('#sellThroughByBrandCategory').DataTable().search();
-
-        let dt = $('#sellThroughByBrandCategory').DataTable();
-        let orderInfo = dt.order(); 
-        let orderColumnIdx = orderInfo[0][0];  
-        let orderDir = orderInfo[0][1];        
-        const columnMap = [
-            'rank',
-            'label_category',
-            'brand_category',
-            'sub_classification',
-            'item_department',
-            'item_merchandise',
-            'sell_in',
-            'sell_out',
-            'sell_out_ratio'
-        ];
-        let orderByField = columnMap[orderColumnIdx];
-
+        let selectedCategories = $('#category').val();
+        //let selectedCategoriesText = $('#category option:selected').text();
+        let selectedCategoriesText = $('#category option:selected').map(function() {
+                    return $(this).text();
+                }).get(); 
+        let selectedBrandCategories = $('#brandCategory').val();
+        //let selectedBrandCategoriesText = $('#brandCategory option:selected').text();
+        let selectedBrandCategoriesText = $('#brandCategory option:selected').map(function() {
+                    return $(this).text();
+                }).get(); 
+        let selectedSubBrandCategories = $('#brandSubCategory').val();
+        //let selectedSubBrandCategoriesText = $('#brandSubCategory option:selected').text();
+        let selectedSubBrandCategoriesText = $('#brandSubCategory option:selected').map(function() {
+                    return $(this).text();
+                }).get(); 
+        let selectedDepartments = $('#itemDepartment').val();
+        //let selectedDepartmentsText = $('#itemDepartment option:selected').text();
+        let selectedDepartmentsText = $('#itemDepartment option:selected').map(function() {
+                    return $(this).text();
+                }).get(); 
+        let selectedMerchs = $('#merchCategory').val();
+        //let selectedMerchsText = $('#merchCategory option:selected').text();
+        let selectedMerchsText = $('#merchCategory option:selected').map(function() {
+                    return $(this).text();
+                }).get(); 
         let postData = {
             source: selectedSource,
-            brand_category: selectedBrandCategory,
-            brand_category_text: normalize(selectedBrandCategoryText),
+            brand_categories: selectedBrandCategories,
+            brand_categories_text: selectedBrandCategoriesText,
 
-            sub_brand_category: selectedSubBrandCategory,
-            sub_brand_category_text: normalize(selectedSubBrandCategoryText),
+            sub_brand_categories: selectedSubBrandCategories,
+            sub_brand_categories_text: selectedSubBrandCategoriesText,
 
-            category: selectedCategory,
-            category_text: normalize(selectedCategoryText),
+            categories: selectedCategories,
+            categories_text: selectedCategoriesText,
 
-            item_department: selectedDepartment,
-            item_department_text: normalize(selectedDepartmentText),
+            item_departments: selectedDepartments,
+            item_departments_text: selectedDepartmentsText,
 
-            merch_category: selectedMerch,
-            merch_category_text: normalize(selectedMerchText),
+            merch_categories: selectedMerchs,
+            merch_categories_text: selectedMerchsText,
 
             year: selectedYear,
             year_id: selectedYearId,

@@ -204,7 +204,6 @@
               <div class="form-group card-dark mb-3 p-2">
                   <label for="itemLabel" class="mb-2"><i class="fas fa-briefcase mr-1"></i> Choose Label Type</label>
                       <select id="itemLabel" name="itemLabel[]" class="form-control select2" multiple>
-                          <option value=''>Please select...</option>
                           <?php foreach ($brandLabel as $key => $value) {
                               echo '<option value="' . htmlspecialchars($value['id']) . '">' . htmlspecialchars($value['label']) . '</option>';
                           } ?>
