@@ -3303,20 +3303,20 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 		                so.brand_id,
 		                so.customer_payment_group,
 		                so.brand_type_id,
 		                so.item_class_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_sell_out_pre_aggregated_data so
-		            INNER JOIN tbl_main_pricelist mp
+		            INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON so.brand_id = mp.brand_id
 
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT brand_id, id FROM tbl_customer_pricelist) cp
 			            ON so.brand_id = cp.brand_id
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 		            ON cp.id = hp.customer_id
 
 	            	WHERE (? IS NULL OR so.year = ?)
@@ -3584,19 +3584,19 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-		            SELECT DISTINCT
+		            SELECT
 		                wow.tracc_brand_id,
 		                wow.brand_type_id,
 		                wow.item_class_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		            INNER JOIN tbl_main_pricelist mp
+		            INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON wow.tracc_brand_id = mp.brand_id
 
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT brand_id, id FROM tbl_customer_pricelist) cp
 			            ON wow.tracc_brand_id = cp.brand_id
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 			        WHERE (? IS NULL OR wow.year = ?)
 			          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
@@ -3859,17 +3859,17 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
 			        SUM(sub.sales_qty) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 			            wd.brand_id,
 			            wd.brand_label_type_id,
 			            wd.category_1_id,
 			            $sellOutExpr AS sales_qty
 			        FROM tbl_winsight_details wd
-			        INNER JOIN tbl_main_pricelist mp
+			        INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON wd.brand_id = mp.brand_id
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT brand_id, id FROM tbl_customer_pricelist) cp
 			            ON wd.brand_id = cp.brand_id
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 			        WHERE (? IS NULL OR wd.year = ?)
 			          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
@@ -4112,21 +4112,21 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 		                so.brand_type_id,
 		                so.customer_payment_group,
 		                so.item_class_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_sell_out_pre_aggregated_data so
-		            INNER JOIN tbl_main_pricelist mp
+		            INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON so.brand_type_id = mp.brand_label_type_id
 			            AND so.customer_payment_group = mp.customer_payment_group
 
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT brand_label_type_id, id, customer_payment_group FROM tbl_customer_pricelist) cp
 						ON so.brand_type_id = cp.brand_label_type_id
 			           AND so.customer_payment_group = cp.customer_payment_group
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 
 		            WHERE (? IS NULL OR so.year = ?)
@@ -4354,18 +4354,18 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.item_class_id) AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 		                wow.brand_type_id,
 		                wow.item_class_id,
 			            $sellOutExpr AS quantity
 			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-			        INNER JOIN tbl_main_pricelist mp
+			        INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON wow.brand_type_id = mp.brand_label_type_id
 
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT brand_label_type_id, id, customer_payment_group FROM tbl_customer_pricelist) cp
 			            ON wow.brand_type_id = cp.brand_label_type_id
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 
 		            WHERE (? IS NULL OR wow.year = ?)
@@ -4590,18 +4590,18 @@ class Dashboard_model extends Model
 			        GROUP_CONCAT(DISTINCT sub.category_1_id) AS brand_category_id,
 			        SUM(sub.sales_qty) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 		                wd.brand_label_type_id,
 		                wd.category_1_id,
 			            $sellOutExpr AS sales_qty
 		            FROM tbl_winsight_details wd
-			        INNER JOIN tbl_main_pricelist mp
+			        INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON wd.brand_label_type_id = mp.brand_label_type_id
 
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT brand_label_type_id, id, customer_payment_group FROM tbl_customer_pricelist) cp
 			            ON wd.brand_label_type_id = cp.brand_label_type_id
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 
 		            WHERE (? IS NULL OR wd.year = ?)
@@ -4901,7 +4901,7 @@ class Dashboard_model extends Model
 			        sub.item_class_id AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT 
 		                so.customer_payment_group,
 		                so.label_type_category_id,
 		                so.item_class_id,
@@ -4910,7 +4910,7 @@ class Dashboard_model extends Model
 		                so.category_4_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_sell_out_pre_aggregated_data so
-			        INNER JOIN tbl_main_pricelist mp
+			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON so.item_class_id = mp.category_1_id
 			            AND so.customer_payment_group = mp.customer_payment_group
 			            AND so.label_type_category_id = mp.label_type_category_id
@@ -4918,7 +4918,7 @@ class Dashboard_model extends Model
 			            AND so.category_3_id = mp.category_3_id
 			            AND so.category_4_id = mp.category_4_id
 
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, id, customer_payment_group FROM tbl_customer_pricelist) cp
 			            ON so.item_class_id = cp.category_1_id
 			           AND so.customer_payment_group = cp.customer_payment_group
 					   AND so.label_type_category_id = mp.label_type_category_id
@@ -4926,7 +4926,7 @@ class Dashboard_model extends Model
 					   AND so.category_3_id = mp.category_3_id
 					   AND so.category_4_id = mp.category_4_id
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 
 		            WHERE (? IS NULL OR so.year = ?)
@@ -5292,7 +5292,7 @@ class Dashboard_model extends Model
 			        sub.item_class_id AS brand_category_id,
 			        SUM(sub.quantity) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 			        	wow.label_type_category_id,
 		                wow.item_class_id,
 		                wow.category_2_id,
@@ -5300,21 +5300,21 @@ class Dashboard_model extends Model
 		                wow.category_4_id,
 			            $sellOutExpr AS quantity
 			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-			        INNER JOIN tbl_main_pricelist mp
+			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON wow.item_class_id = mp.category_1_id
 					   AND wow.label_type_category_id = mp.label_type_category_id
 					   AND wow.category_2_id = mp.category_2_id
 					   AND wow.category_3_id = mp.category_3_id
 					   AND wow.category_4_id = mp.category_4_id
 
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, id FROM tbl_customer_pricelist) cp
 			            ON wow.item_class_id = cp.category_1_id
 			           AND wow.label_type_category_id = mp.label_type_category_id
 					   AND wow.category_2_id = mp.category_2_id
 					   AND wow.category_3_id = mp.category_3_id
 					   AND wow.category_4_id = mp.category_4_id
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 			       
 		            WHERE (? IS NULL OR wow.year = ?)
@@ -5665,7 +5665,7 @@ class Dashboard_model extends Model
 			        sub.category_1_id AS brand_category_id,
 			        SUM(sub.sales_qty) AS sell_out
 			    FROM (
-			        SELECT DISTINCT
+			        SELECT
 		                wd.category_1_id,
 		                wd.label_type_category_id,
 		                wd.category_2_id,
@@ -5673,20 +5673,20 @@ class Dashboard_model extends Model
 		                wd.category_4_id,
 			            $sellOutExpr AS sales_qty
 		            FROM tbl_winsight_details wd
-			        INNER JOIN tbl_main_pricelist mp
+			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist) mp
 			            ON wd.category_1_id = mp.category_1_id
 			            AND wd.label_type_category_id = mp.label_type_category_id
 			            AND wd.category_2_id = mp.category_2_id
 			            AND wd.category_3_id = mp.category_3_id
 			            AND wd.category_4_id = mp.category_4_id
-			        LEFT JOIN tbl_customer_pricelist cp
+			        LEFT JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, id FROM tbl_customer_pricelist) cp
 			            ON wd.category_1_id = cp.category_1_id
 			            AND wd.label_type_category_id = mp.label_type_category_id
 			            AND wd.category_2_id = mp.category_2_id
 			            AND wd.category_3_id = mp.category_3_id
 			            AND wd.category_4_id = mp.category_4_id
 
-			        LEFT JOIN tbl_historical_sub_pricelist hp
+			        LEFT JOIN (SELECT DISTINCT customer_id FROM tbl_historical_sub_pricelist) hp
 			            ON cp.id = hp.customer_id
 
 		            WHERE (? IS NULL OR wd.year = ?)
