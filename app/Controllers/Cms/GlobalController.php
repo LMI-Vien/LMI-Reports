@@ -1152,7 +1152,10 @@ class GlobalController extends BaseController
 			$responseData['classification'] = $this->Global_model->get_valid_records("tbl_classification", ['item_class_code', 'item_class_description']);
 		}
 		if (!empty($request['sub_classification'])) {
-			$responseData['sub_classification'] = $this->Global_model->get_valid_records("tbl_sub_classification", ['item_sub_class_code', 'item_sub_class_description']);
+			$responseData['sub_classification'] = $this->Global_model->get_valid_records(
+				"tbl_sub_classification", 
+				['item_class_code', 'item_class_description', 'item_sub_class_code', 'item_sub_class_description']
+			);
 		}
 		if (!empty($request['item_department'])) {
 			$responseData['item_department'] = $this->Global_model->get_valid_records("tbl_item_department", ['item_department_code']);

@@ -191,6 +191,14 @@ self.onmessage = async function(e) {
                     sfa_pricelist = reverse_main_pricelist_lookup[main_pricelist_lookup[product_id]];
                 }
 
+                const cat1 = row.cat_1?.toLowerCase();
+                const cat2 = row.cat_2?.toLowerCase();
+
+                const match = ba_data.sub_classification.find(sc =>
+                    sc.item_class_code?.toLowerCase() === cat1 &&
+                    sc.item_sub_class_code?.toLowerCase() === cat2
+                );
+                
                 let brand_name = row["brand_name"]; 
                 // brand_id -> tbl_main_pricelist -> tbl_brand
                 let brand_id = null
@@ -218,9 +226,12 @@ self.onmessage = async function(e) {
                     category_1_id = validateField(
                         row["cat_1"], "Category 1 (Item Classification)", classification_lookup, sfa_pricelist, "category_1_id", product_id
                     );
-                    category_2_id = validateField(
-                        row["cat_2"], "Category 2 (Item Sub Classification)", sub_classification_lookup, sfa_pricelist, "category_2_id", product_id
-                    );  
+                    if (match?.id) {
+                        category_2_id = match.id;
+                    } else {
+                        addErrorLog(`Category 2 (Item Sub Classification) not found for Product ID ${product_id}: ${row["cat_2"]}`);
+                        category_2_id = null;
+                    }
                     category_3_id = validateField(
                         row["cat_3"], "Category 3 (Item Department)", item_department_lookup, sfa_pricelist, "category_3_id", product_id
                     );
