@@ -43,6 +43,7 @@
                         <input type="text" id="week" class="form-control p-2" disabled readonly>
                     </div>
                 </div>
+                <?php echo view("cms/layout/buttons",$buttons); ?><br>
             </div>
             <div class="box">
                 <table class= "table table-bordered listdata" style="width: 100%">
@@ -51,7 +52,7 @@
                             <td>Line #</td>
                             <td>BU Name</td>
                             <td>Supplier</td>
-                            <td>Brand ID</td>
+                            <td>Brand Name</td>
                             <td>Product ID</td>
                             <td>Category 1 (Item Classification)</td>
                             <td>Category 2 (Sub Classification)</td>
@@ -92,6 +93,7 @@
     var id = <?= $id; ?>;
     var limit = 10; 
     var offset = 1;
+    let query = `header_id = ${id}`;
 
     $(document).ready(function() {
         $("#winsight_title").html(addNbsp("VIEW WINSIGHT DATA"));
@@ -114,13 +116,13 @@
         $("#week").val(x.week)
     }
 
-    function renderDetails(new_query) {
+    function renderDetails() {
         // insert detail data
-        get_data();
-        get_pagination();
+        get_data(query);
+        get_pagination(query);
     }
 
-    const get_data = () => {
+    const get_data = (query) => {
         select = '';
 		select += 'a.header_id, a.file_name, a.line_number,';
 		select += 'a.bu_name, a.supplier, a.brand_name, a.product_id, a.product_name,';
@@ -131,7 +133,7 @@
         var data = {
             event : "list",
             select : select,
-            query : `header_id = ${id}`,
+            query : query,
             offset : offset,
             limit : 0,
             table : "tbl_winsight_details a",
@@ -148,8 +150,6 @@
             var result = JSON.parse(result);
             var html = '';
 
-            console.log(result, 'result')
-
             if(result) {
                 if (result.length > 0) {
                     $.each(result, function(x,y) {
@@ -157,26 +157,26 @@
                         var rowClass = (x % 2 === 0) ? "even-row" : "odd-row";
 
                         html += "<tr class='" + rowClass + "'>";
-                        html += "<td scope=\"col\">" + y.line_number + "</td>"; // <td>Line #</td>
-                        html += "<td scope=\"col\">" + y.bu_name + "</td>"; // <td>BU Name</td>
-                        html += "<td scope=\"col\">" + y.supplier + "</td>"; // <td>Supplier</td>
-                        html += "<td scope=\"col\">" + y.brand_name + "</td>"; // <td>Brand ID</td>
-                        html += "<td scope=\"col\">" + y.product_id + "</td>"; // <td>Product ID</td>
-                        html += "<td scope=\"col\">" + y.cat_1 + "</td>"; // <td>Category 1 (Item Classification)</td>
-                        html += "<td scope=\"col\">" + y.cat_2 + "</td>"; // <td>Category 2 (Sub Classification)</td>
-                        html += "<td scope=\"col\">" + y.cat_3 + "</td>"; // <td>Category 3 (Department)</td>
-                        html += "<td scope=\"col\">" + y.cat_4 + "</td>"; // <td>Category 4 (Merch. Category)</td>
-                        html += "<td scope=\"col\">" + y.year + "</td>"; // <td>Year</td>
-                        html += "<td scope=\"col\">" + y.month + "</td>"; // <td>Year Month</td>
-                        html += "<td scope=\"col\">" + y.week + "</td>"; // <td>Year Week</td>
-                        html += "<td scope=\"col\">" + y.date + "</td>"; // <td>Date</td>
-                        html += "<td scope=\"col\">" + y.online_offline + "</td>"; // <td>Online/ Offline</td>
-                        html += "<td scope=\"col\">" + y.store_format + "</td>"; // <td>Store Format</td>
-                        html += "<td scope=\"col\">" + y.store_segment + "</td>"; // <td>Store Segment</td>
-                        html += "<td scope=\"col\">" + y.gross_sales + "</td>"; // <td>Gross Sales</td>
-                        html += "<td scope=\"col\">" + y.net_sales + "</td>"; // <td>Net Sales</td>
-                        html += "<td scope=\"col\">" + y.sales_qty + "</td>"; // <td>Sales Qty</td>
-                        html += "<td scope=\"col\">" + y.barcode + "</td>"; // <td>Barcode</td>
+                        html +=     "<td scope=\"col\">" + y.line_number + "</td>";     // <td>Line #</td>
+                        html +=     "<td scope=\"col\">" + y.bu_name + "</td>";         // <td>BU Name</td>
+                        html +=     "<td scope=\"col\">" + y.supplier + "</td>";        // <td>Supplier</td>
+                        html +=     "<td scope=\"col\">" + y.brand_name + "</td>";      // <td>Brand Name</td>
+                        html +=     "<td scope=\"col\">" + y.product_id + "</td>";      // <td>Product ID</td>
+                        html +=     "<td scope=\"col\">" + y.cat_1 + "</td>";           // <td>Category 1 (Item Classification)</td>
+                        html +=     "<td scope=\"col\">" + y.cat_2 + "</td>";           // <td>Category 2 (Sub Classification)</td>
+                        html +=     "<td scope=\"col\">" + y.cat_3 + "</td>";           // <td>Category 3 (Department)</td>
+                        html +=     "<td scope=\"col\">" + y.cat_4 + "</td>";           // <td>Category 4 (Merch. Category)</td>
+                        html +=     "<td scope=\"col\">" + y.year + "</td>";            // <td>Year</td>
+                        html +=     "<td scope=\"col\">" + y.month + "</td>";           // <td>Year Month</td>
+                        html +=     "<td scope=\"col\">" + y.week + "</td>";            // <td>Year Week</td>
+                        html +=     "<td scope=\"col\">" + y.date + "</td>";            // <td>Date</td>
+                        html +=     "<td scope=\"col\">" + y.online_offline + "</td>";  // <td>Online/ Offline</td>
+                        html +=     "<td scope=\"col\">" + y.store_format + "</td>";    // <td>Store Format</td>
+                        html +=     "<td scope=\"col\">" + y.store_segment + "</td>";   // <td>Store Segment</td>
+                        html +=     "<td scope=\"col\">" + y.gross_sales + "</td>";     // <td>Gross Sales</td>
+                        html +=     "<td scope=\"col\">" + y.net_sales + "</td>";       // <td>Net Sales</td>
+                        html +=     "<td scope=\"col\">" + y.sales_qty + "</td>";       // <td>Sales Qty</td>
+                        html +=     "<td scope=\"col\">" + y.barcode + "</td>";         // <td>Barcode</td>
                         html += "</tr>";   
                     });
                 } else {
@@ -187,14 +187,21 @@
         });
     }
 
-    const get_pagination = () => {
+    const get_pagination = (query) => {
         var data = {
           event : "pagination",
             select : "a.id",
-            query : `header_id = ${id}`,
+            query : query,
             offset : offset,
             limit : limit,
             table : "tbl_winsight_details a",
+            join : [
+                {
+                    table : "tbl_month b",
+                    query : "a.month = b.id",
+                    type : "left"
+                }
+            ],
             order : {
                 field : "a.line_number",
                 order : "desc" 
@@ -213,5 +220,37 @@
         get_data();
         $('.selectall').prop('checked', false);
         $('.btn_status').hide();
+    });
+
+    $(document).on('keypress', '#search_query', function(e) {               
+        if (e.keyCode === 13) {
+            var keyword = $(this).val().trim();
+            var escaped_keyword = keyword.replace(/'/g, "''"); 
+            offset = 1;
+            let query = `header_id = ${id}`
+            var new_query = 
+            "("+query+" AND a.line_number = '" + escaped_keyword + "') OR "+            // Line Number
+            "("+query+" AND a.bu_name like '%" + escaped_keyword + "%') OR "+           // BU Name
+            "("+query+" AND a.supplier like '%" + escaped_keyword + "%') OR "+          // Supplier
+            "("+query+" AND a.brand_name like '%" + escaped_keyword + "%') OR "+        // Brand Name
+            "("+query+" AND a.product_id like '%" + escaped_keyword + "%') OR "+        // Product ID
+            "("+query+" AND a.cat_1 like '%" + escaped_keyword + "%') OR "+             // Category 1
+            "("+query+" AND a.cat_2 like '%" + escaped_keyword + "%') OR "+             // Category 2
+            "("+query+" AND a.cat_3 like '%" + escaped_keyword + "%') OR "+             // Category 3
+            "("+query+" AND a.cat_4 like '%" + escaped_keyword + "%') OR "+             // Category 4
+            "("+query+" AND a.year like '%" + escaped_keyword + "%') OR "+              // Year
+            "("+query+" AND b.month like '%" + escaped_keyword + "%') OR "+             // Month
+            "("+query+" AND a.week like '%" + escaped_keyword + "%') OR "+              // Week
+            "("+query+" AND a.date like '%" + escaped_keyword + "%') OR "+              // Date
+            "("+query+" AND a.online_offline like '%" + escaped_keyword + "%') OR "+    // Online or Offline
+            "("+query+" AND a.store_format like '%" + escaped_keyword + "%') OR "+      // Store Format
+            "("+query+" AND a.store_segment like '%" + escaped_keyword + "%') OR "+     // Store Segment
+            "("+query+" AND a.gross_sales like '%" + escaped_keyword + "%') OR "+       // Gross Sales
+            "("+query+" AND a.net_sales like '%" + escaped_keyword + "%') OR "+         // Net Sales
+            "("+query+" AND a.sales_qty like '%" + escaped_keyword + "%') OR "+         // Sales Qty
+            "("+query+" AND a.barcode like '%" + escaped_keyword + "%')"                // Barcode
+            get_data(new_query);
+            get_pagination(new_query);
+        }
     });
 </script>
