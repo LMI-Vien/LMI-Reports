@@ -2325,13 +2325,13 @@ class Dashboard_model extends Model
 			        FROM tbl_sell_out_pre_aggregated_data so
 			        INNER JOIN tbl_main_pricelist mp
 			            ON so.itmcde = mp.item_code
-
+			            
 			        LEFT JOIN tbl_customer_pricelist cp
 			            ON so.itmcde = cp.item_code
-
 			        LEFT JOIN tbl_historical_sub_pricelist hp
 		            ON cp.id = hp.customer_id
-			        WHERE (? IS NULL OR so.year = ?)
+			        WHERE mp.status = 1 
+			          AND (? IS NULL OR so.year = ?)
 			          AND (? IS NULL OR so.month BETWEEN ? AND ?)
 			          $skuFilter
 			          $brandFilter
@@ -2677,14 +2677,15 @@ class Dashboard_model extends Model
 			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
 			        INNER JOIN tbl_main_pricelist mp
 			            ON wow.itmcde = mp.item_code
-
+			            
 			        LEFT JOIN tbl_customer_pricelist cp
 			            ON wow.itmcde = cp.item_code
 
 			        LEFT JOIN tbl_historical_sub_pricelist hp
 			            ON cp.id = hp.customer_id
 
-			        WHERE (? IS NULL OR wow.year = ?)
+			        WHERE mp.status = 1
+			          AND (? IS NULL OR wow.year = ?)
 			          AND (? IS NULL OR wow.week BETWEEN ? AND ?)
 			          AND (? IS NULL OR mp.customer_payment_group = ?)
 		          $skuFilter
@@ -3021,14 +3022,15 @@ class Dashboard_model extends Model
 			        FROM tbl_winsight_details wd
 			        INNER JOIN tbl_main_pricelist mp
 			            ON wd.item_code = mp.item_code
-
+			            
 			        LEFT JOIN tbl_customer_pricelist cp
 			            ON wd.item_code = cp.item_code
 
 			        LEFT JOIN tbl_historical_sub_pricelist hp
 			            ON cp.id = hp.customer_id
 
-			        WHERE (? IS NULL OR wd.year = ?)
+			        WHERE mp.status = 1
+			          AND (? IS NULL OR wd.year = ?)
 			          AND (? IS NULL OR wd.week BETWEEN ? AND ?)
 			          AND (? IS NULL OR mp.customer_payment_group = ?)
 			          $skuFilter
@@ -3310,7 +3312,7 @@ class Dashboard_model extends Model
 		                so.item_class_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_sell_out_pre_aggregated_data so
-		            INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist) mp
+		            INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON so.brand_id = mp.brand_id
 
 			        LEFT JOIN (SELECT DISTINCT brand_id, id FROM tbl_customer_pricelist) cp
@@ -3323,7 +3325,7 @@ class Dashboard_model extends Model
 		              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 		              $brandFilter
 		              $brandLabelTypeFilter
-		              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
+		              AND (? IS NULL OR (so.customer_payment_group = ? AND mp.customer_payment_group = ?))
 			    ) AS sub
 			    GROUP BY sub.brand_id
 			),
@@ -3590,7 +3592,7 @@ class Dashboard_model extends Model
 		                wow.item_class_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-		            INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist) mp
+		            INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON wow.tracc_brand_id = mp.brand_id
 
 			        LEFT JOIN (SELECT DISTINCT brand_id, id FROM tbl_customer_pricelist) cp
@@ -3865,7 +3867,7 @@ class Dashboard_model extends Model
 			            wd.category_1_id,
 			            $sellOutExpr AS sales_qty
 			        FROM tbl_winsight_details wd
-			        INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist) mp
+			        INNER JOIN (SELECT DISTINCT brand_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON wd.brand_id = mp.brand_id
 			        LEFT JOIN (SELECT DISTINCT brand_id, id FROM tbl_customer_pricelist) cp
 			            ON wd.brand_id = cp.brand_id
@@ -4118,7 +4120,7 @@ class Dashboard_model extends Model
 		                so.item_class_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_sell_out_pre_aggregated_data so
-		            INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist) mp
+		            INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON so.brand_type_id = mp.brand_label_type_id
 			            AND so.customer_payment_group = mp.customer_payment_group
 
@@ -4132,7 +4134,7 @@ class Dashboard_model extends Model
 		            WHERE (? IS NULL OR so.year = ?)
 		              AND (? IS NULL OR so.month BETWEEN ? AND ?)
 		              $brandTypeFilter
-		              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
+		              AND (? IS NULL OR (so.customer_payment_group = ? AND mp.customer_payment_group = ?))
 			    ) AS sub
 			    GROUP BY sub.brand_type_id
 			),
@@ -4359,7 +4361,7 @@ class Dashboard_model extends Model
 		                wow.item_class_id,
 			            $sellOutExpr AS quantity
 			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-			        INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist) mp
+			        INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON wow.brand_type_id = mp.brand_label_type_id
 
 			        LEFT JOIN (SELECT DISTINCT brand_label_type_id, id, customer_payment_group FROM tbl_customer_pricelist) cp
@@ -4595,7 +4597,7 @@ class Dashboard_model extends Model
 		                wd.category_1_id,
 			            $sellOutExpr AS sales_qty
 		            FROM tbl_winsight_details wd
-			        INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist) mp
+			        INNER JOIN (SELECT DISTINCT brand_label_type_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON wd.brand_label_type_id = mp.brand_label_type_id
 
 			        LEFT JOIN (SELECT DISTINCT brand_label_type_id, id, customer_payment_group FROM tbl_customer_pricelist) cp
@@ -4910,7 +4912,7 @@ class Dashboard_model extends Model
 		                so.category_4_id,
 			            $sellOutExpr AS quantity
 		            FROM tbl_sell_out_pre_aggregated_data so
-			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist) mp
+			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON so.item_class_id = mp.category_1_id
 			            AND so.customer_payment_group = mp.customer_payment_group
 			            AND so.label_type_category_id = mp.label_type_category_id
@@ -4931,7 +4933,7 @@ class Dashboard_model extends Model
 
 		            WHERE (? IS NULL OR so.year = ?)
 		              AND (? IS NULL OR so.month BETWEEN ? AND ?)
-		              AND (? IS NULL OR so.customer_payment_group = ? AND mp.customer_payment_group = ?)
+		              AND (? IS NULL OR (so.customer_payment_group = ? AND mp.customer_payment_group = ?))
 		              	$brandCategoryFilter
 						$subBrandCategoryFilter
 						$categoryFilter
@@ -5300,7 +5302,7 @@ class Dashboard_model extends Model
 		                wow.category_4_id,
 			            $sellOutExpr AS quantity
 			        FROM tbl_week_on_week_vmi_pre_aggregated_data wow
-			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist) mp
+			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON wow.item_class_id = mp.category_1_id
 					   AND wow.label_type_category_id = mp.label_type_category_id
 					   AND wow.category_2_id = mp.category_2_id
@@ -5673,7 +5675,7 @@ class Dashboard_model extends Model
 		                wd.category_4_id,
 			            $sellOutExpr AS sales_qty
 		            FROM tbl_winsight_details wd
-			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist) mp
+			        INNER JOIN (SELECT DISTINCT category_1_id, label_type_category_id, category_2_id, category_3_id, category_4_id, customer_payment_group FROM tbl_main_pricelist WHERE status = 1) mp
 			            ON wd.category_1_id = mp.category_1_id
 			            AND wd.label_type_category_id = mp.label_type_category_id
 			            AND wd.category_2_id = mp.category_2_id
