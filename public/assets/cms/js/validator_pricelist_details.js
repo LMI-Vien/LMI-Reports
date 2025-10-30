@@ -99,6 +99,12 @@ self.onmessage = async function(e) {
         // Change this to true if the item must exist in BOTH sources
         const requireInBoth = false;
 
+        const subClassPairLookup = {};
+        for (const sc of sub_classification_records) {
+            const k = `${norm(sc.item_class_code)}|${norm(sc.item_sub_class_code)}`;
+            if (k) subClassPairLookup[k] = sc.id; // first-hit wins; adjust if you want last-hit
+        }
+
         function formatDateForDB(dateStr) {
             let [month, day, year] = dateStr.split('/');
             return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
@@ -233,17 +239,31 @@ self.onmessage = async function(e) {
                     err_counter++;
                 }
 
-                let normalize_category2_records = {};
-                for (let key in sub_classification_lookup) {
-                    normalize_category2_records[key.toLowerCase()] = sub_classification_lookup[key];
-                }
+                // let normalize_category2_records = {};
+                // for (let key in sub_classification_lookup) {
+                //     normalize_category2_records[key.toLowerCase()] = sub_classification_lookup[key];
+                // }
 
-                let category2_lower = category2.toLowerCase();
-                if (category2_lower in normalize_category2_records) {
-                    category2 = normalize_category2_records[category2_lower];
+                // let category2_lower = category2.toLowerCase();
+                // if (category2_lower in normalize_category2_records) {
+                //     category2 = normalize_category2_records[category2_lower];
+                // } else {
+                //     invalid = true;
+                //     errorLogs.push(`⚠️ Invalid Category 2 (Sub Classification) at line #: ${tr_count}`);
+                //     err_counter++;
+                // }
+
+                const cat1CodeRaw = row["Category 1 (Item Classification MF)"] ? row["Category 1 (Item Classification MF)"].trim() : "";
+                const cat2CodeRaw = row["Category 2 (Sub Classification MF)"] ? row["Category 2 (Sub Classification MF)"].trim() : "";
+
+                const pairKey = `${norm(cat1CodeRaw)}|${norm(cat2CodeRaw)}`;
+                const subIdFromPair = subClassPairLookup[pairKey];
+
+                if (subIdFromPair) {
+                    category2 = subIdFromPair;
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Category 2 (Sub Classification) at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Category 1/2 combination (Sub Classification not found for "${cat1CodeRaw}" + "${cat2CodeRaw}") at line #: ${tr_count}`);
                     err_counter++;
                 }
 
