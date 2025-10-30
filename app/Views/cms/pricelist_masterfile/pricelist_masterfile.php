@@ -841,6 +841,19 @@
                 }
             });
 
+            const norm = s => String(s || '').trim().toUpperCase();
+            const desiredCodes = new Set(desired.map(d => norm(d.code)));
+            const toDelete = existing.filter(ex => !desiredCodes.has(norm(ex.code)));
+
+            const toDeleteIds = toDelete.map(ex => ex.id);
+
+            function deleteIdsThenFinish(ids, i = 0) {
+                if (i >= ids.length) {
+                    return modal.alert(success_update_message, 'success', () => location.reload());
+                }
+                totalDeleteCb(url, table, { id: ids[i] }, () => deleteIdsThenFinish(ids, i + 1));
+            }
+
             // perform updates, then inserts
             function doInserts() {
                 if (toInsert.length) {
@@ -860,45 +873,68 @@
                                 <br>Duration: ${duration}
                             `;
 
-                            logActivity('Pricelist - Customers', 'Save', remarks, "-", JSON.stringify(toInsert), "");  
-                            modal.alert(success_save_message, 'success', function () { location.reload(); });
+                            logActivity('Pricelist - Customers', 'Save', remarks, "-", JSON.stringify(toInsert), ""); 
+                             
+                            if (toDeleteIds.length) {
+                                deleteIdsThenFinish(toDeleteIds);
+                            } else {
+                                modal.alert(success_save_message, 'success', function () { location.reload(); });
+                            }
                         } else {
                             modal.alert("Insert failed.", 'error');
                         }
                     });
                 } else {
                     modal.loading(false);
-                    modal.alert(success_save_message, 'success', function () { location.reload(); });
+                    if (toDeleteIds.length) {
+                        deleteIdsThenFinish(toDeleteIds);
+                    } else {
+                        modal.alert(success_save_message, 'success', function () { location.reload(); });
+                    }
                 }
             }
 
-            if (toUpdate.length) {
-                const updateStart = new Date();
+            function runUpdatesThenInserts() {
+                if (toUpdate.length) {
+                    const updateStart = new Date();
 
-                batchUpdateCustom(url, table, 'id', toUpdateIds, toUpdate, false, (resp) => {
-                    if (resp && resp.message === 'success') {
-                            const updateEnd = new Date();
-                            const duration = formatDuration(updateStart, updateEnd);
+                    batchUpdateCustom(url, table, 'id', toUpdateIds, toUpdate, false, (resp) => {
+                        if (resp && resp.message === 'success') {
+                                const updateEnd = new Date();
+                                const duration = formatDuration(updateStart, updateEnd);
 
-                            const remarks = `
-                                Action: Update Customer Pricelist
-                                <br>Success: inserted ${toInsert.length}, updated ${toUpdate.length} (pricelist ${pricelistId})
-                                <br>Start Time: ${formatReadableDate(updateStart)}
-                                <br>End Time: ${formatReadableDate(updateEnd)}
-                                <br>Duration: ${duration}
-                            `;
+                                const remarks = `
+                                    Action: Update Customer Pricelist
+                                    <br>Success: inserted ${toInsert.length}, updated ${toUpdate.length} (pricelist ${pricelistId})
+                                    <br>Start Time: ${formatReadableDate(updateStart)}
+                                    <br>End Time: ${formatReadableDate(updateEnd)}
+                                    <br>Duration: ${duration}
+                                `;
 
-                            logActivity('Pricelist - Customers', 'Save', remarks, "-", JSON.stringify(toUpdate), "");
+                                logActivity('Pricelist - Customers', 'Save', remarks, "-", JSON.stringify(toUpdate), "");
 
-                        doInserts();
-                    } else {
-                        modal.loading(false);
-                        modal.alert("Update failed.", 'error');
-                    }
-                });
-            } else {
-                doInserts();
+                            doInserts();
+                        } else {
+                            modal.loading(false);
+                            modal.alert("Update failed.", 'error');
+                        }
+                    });
+                } else {
+                    doInserts();
+                }
             }
+            runUpdatesThenInserts();
+        });
+    }
+
+    function totalDeleteCb(url, delete_table, conditions, cb) {
+        aJax.post(url, 
+            { 
+                event: "total_delete", 
+                table: delete_table,
+                conditions 
+            }, function (result) {
+            if (cb) cb(result);
         });
     }
 
