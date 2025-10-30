@@ -1418,10 +1418,9 @@
     function proceed_delete(id) {
         var url = "<?= base_url('cms/global_controller');?>";
         var data = {
-            event : "update",
+            event : "delete",
             table : "tbl_main_pricelist",
-            field : "id",
-            where : id, 
+            id : id, 
             data : {
                     updated_date : formatDate(new Date()),
                     updated_by : user_id,
