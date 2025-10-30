@@ -102,7 +102,7 @@ self.onmessage = async function(e) {
         const subClassPairLookup = {};
         for (const sc of sub_classification_records) {
             const k = `${norm(sc.item_class_code)}|${norm(sc.item_sub_class_code)}`;
-            if (k) subClassPairLookup[k] = sc.id; // first-hit wins; adjust if you want last-hit
+            if (k) subClassPairLookup[k] = sc.id;
         }
 
         function formatDateForDB(dateStr) {
@@ -263,7 +263,7 @@ self.onmessage = async function(e) {
                     category2 = subIdFromPair;
                 } else {
                     invalid = true;
-                    errorLogs.push(`⚠️ Invalid Category 1/2 combination (Sub Classification not found for "${cat1CodeRaw}" + "${cat2CodeRaw}") at line #: ${tr_count}`);
+                    errorLogs.push(`⚠️ Invalid Category combination (Sub Classification not found") at line #: ${tr_count}`);
                     err_counter++;
                 }
 
