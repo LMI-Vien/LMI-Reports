@@ -1125,6 +1125,73 @@
         return new_btn;
     }
 
+    function buildRelatedUpdates(pricelistId, newDescription, now, user_id) {
+        var updates = [];
+
+        // ---- 1) tbl_main_pricelist ----
+        updates.push({
+            event: "update",
+            table: "tbl_main_pricelist",
+            field: "pricelist_id",
+            where: pricelistId,
+            data: {
+                customer_payment_group: newDescription,
+                updated_date: formatDate(now),
+                updated_by: user_id
+            }
+        });
+
+        updates.push({
+            event: "update",
+            table: "tbl_customer_pricelist",
+            field: "pricelist_id",
+            where: pricelistId,
+            data: {
+                customer_payment_group: newDescription,
+                updated_date: formatDate(now),
+                updated_by: user_id
+            }
+        });
+
+        updates.push({
+            event: "update",
+            table: "tbl_historical_main_pricelist",
+            field: "pricelist_id",
+            where: pricelistId,
+            data: {
+                customer_payment_group: newDescription
+            }
+        });
+
+        updates.push({
+            event: "update",
+            table: "tbl_historical_sub_pricelist",
+            field: "pricelist_id",
+            where: pricelistId,
+            data: {
+                customer_payment_group: newDescription
+            }
+        });
+
+        return updates;
+    }
+
+    // Helper: run updates sequentially
+    function runSequentialUpdates(updates, onDone, onFail, index) {
+        index = index || 0;
+        if (index >= updates.length) return onDone();
+
+        console.log('[RelatedUpdate] starting', index + 1, 'of', updates.length, updates[index]);
+
+        aJax.post(url, updates[index], function (result) {
+            console.log('[RelatedUpdate] success', index + 1, 'response:', result);
+            runSequentialUpdates(updates, onDone, onFail, index + 1);
+        }, function (err) {
+            console.error('[RelatedUpdate] FAILED at', index + 1, 'payload:', updates[index], 'error:', err);
+            onFail(err, updates[index]);
+        });
+    }
+
     function save_data(action, id) {
         const description = $('#description').val().trim();
         const descriptionId = $('#descriptionId').val().trim();
@@ -1222,20 +1289,41 @@
         }
 
         aJax.post(url, data, function(result) {
-            const obj = is_json(result);
-            const end_time = new Date();
-            const duration = formatDuration(start_time, end_time);
+            if (isEdit) {
+                var updates = buildRelatedUpdates(id, inpDesc, now, user_id);
+
+                runSequentialUpdates(
+                    updates,
+                    function () {
+                        const end_time = new Date();
+                        const duration = formatDuration(start_time, end_time);
+                        modal.loading(false);
+                        modal.alert(modal_alert_success, 'success', function () {
+                            location.reload();
+                        });
+                    },
+                    function () {
+                        modal.loading(false);
+                        modal.alert("Failed to update related tables.", "error");
+                    }
+                );
+            } else {
+                const end_time = new Date();
+                const duration = formatDuration(start_time, end_time);
+                modal.loading(false);
+                modal.alert(modal_alert_success, 'success', function () {
+                    location.reload();
+                });
+            }
+        }, function () {
             modal.loading(false);
-            modal.alert(modal_alert_success, 'success', function () {
-                location.reload();
-            });
+            modal.alert("Failed to save pricelist masterfile.", "error");
         });
     }
 
     $(document).on("click", ".btn.delete", async function () {
         const code = $(this).attr('data-code');
-        const id = $(this).attr('data-id');    
-        console.log(code);
+        const id = $(this).attr('data-id');
 
         const message = {
             ...JSON.parse(confirm_delete_message),
@@ -1250,77 +1338,57 @@
 
         if (!confirmed) return;
 
-        const query = `lc.id = ${id}`;
-
-        const data = {
-            event: "list",
-            select: "lc.id, lc.code, lc.description, COUNT(mp.category_1_id) AS cat_count",
-            query,
-            offset: 1,
-            limit: 1,
-            table: "tbl_label_category_list lc",
-            join: [
-                { table: "tbl_main_pricelist mp", query: "mp.category_1_id = lc.id", type: "left" }
-            ],
-            group: "lc.id, lc.code, lc.description"
-        };
-
-        function ajaxPostPromise(url, data) {
-            return new Promise((resolve, reject) => {
-                aJax.post(url, data, function (result) {
-                    resolve(result);
-                }, function (error) {
-                    reject(error);
-                });
-            });
-        }
-
-        try {
-            const response = await ajaxPostPromise(url, data);
-            let obj;
-            try {
-                obj = JSON.parse(response);
-            } catch (e) {
-                throw new Error("Invalid JSON: " + response);
-            }
-
-            if (!Array.isArray(obj) || obj.length === 0) {
-                proceed_delete(id);
-                return;
-            }
-
-            const counts = [
-                Number(obj[0].cat_count) || 0
-            ];
-
-            if (counts.some(count => count > 0)) {
-                modal.alert("This item is in use and cannot be deleted.", "error");
-            } else {
-                proceed_delete(id);
-            }
-        } catch (error) {
-            modal.alert("Error processing response data.", "error");
-        }
+        proceed_delete(id);
     });
 
     function proceed_delete(id) {
-        var data = {
-            event : "update",
-            table : "tbl_pricelist_masterfile",
-            field : "id",
-            where : id, 
-            data : {
-                    updated_date : formatDate(new Date()),
-                    updated_by : user_id,
-                    status : -2
-            }  
+        const now = formatDate(new Date());
+
+        const updatePricelist = {
+            event: "update", 
+            table: "tbl_pricelist_masterfile",
+            field: "id", 
+            where: id,
+            data: { 
+                updated_date: now, 
+                updated_by: user_id, 
+                status: -2
+            }
+        };
+
+        const updateMain = {
+            event: "update", 
+            table: "tbl_main_pricelist",
+            field: "pricelist_id",
+            where: id,
+            data: { 
+                updated_date: now, 
+                updated_by: user_id, 
+                status: -2 
+            }
+        };
+
+        const updateCustomer = {
+            event: "update", 
+            table: "tbl_customer_pricelist",
+            field: "pricelist_id",
+            where: id,
+            data: { 
+                updated_date: now, 
+                updated_by: user_id, 
+                status: -2 
+            }
         }
-        aJax.post(url,data,function(result){
-            var obj = is_json(result);
-            modal.alert(success_delete_message, 'success', function() {
-                location.reload();
-            });
-        }); 
+
+        aJax.post(url, updatePricelist, function () {
+            aJax.post(url, updateMain, function () {
+                aJax.post(url, updateCustomer, function () {
+                    modal.alert(success_delete_message, 'success', function () {
+                        location.reload();
+                    });
+                }, function () { modal.alert("Failed to update customer pricelist.", "error"); });
+            }, function () { modal.alert("Failed to update main pricelist.", "error"); });
+        }, function () { modal.alert("Failed to update masterfile.", "error"); });
     }
 
     function populate_modal(inp_id) {
