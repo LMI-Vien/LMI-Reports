@@ -38,16 +38,16 @@ class PromoAnalysis extends BaseController
 		$data["foot_note"] = '';		
 
 		$data['content'] = "site/promo_analysis/promo_table/promo_table";
-		$data['brands'] = $this->Global_model->getBrandData("ASC", 99999, 0);
+		$data['brands'] = $this->Global_model->getBrandData("ASC", 4000, 0);
 		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
 		$query_items = "id > 0";
-		$data['sku_item'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 99999, 0, 'id, itmcde','','', '', 'itmcde');
+		$data['sku_item'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, itmcde','','', '', 'itmcde');
 
-		$data['variants'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 99999, 0, 'id, item_name','','', '', 'item_name');
+		$data['variants'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, item_name','','', '', 'item_name');
 
-		$data['stores'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 99999, 0, 'id, store_code, store_name','','', '', 'store_code');
+		$data['stores'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, store_code, store_name','','', '', 'store_code');
 		$data['sku_item'] = json_decode(json_encode($data['sku_item']), true);
 		$data['variants'] = json_decode(json_encode($data['variants']), true);
 		$data['stores'] = json_decode(json_encode($data['stores']), true);
@@ -212,6 +212,84 @@ class PromoAnalysis extends BaseController
 	    
 	}
 
+	public function searchSku()
+	{
+	    $term = $this->request->getGet('term');
+	    $limit = 30;
+	    $query_items = "id > 0";
+
+	    if (!empty($term)) {
+	        $query_items .= " AND itmcde LIKE '%" . esc($term) . "%'";
+	    }
+
+	    $result = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, $limit, 0, 'id, itmcde', '', '', '', 'itmcde');
+
+	    $data = [];
+	    foreach ($result as $row) {
+	        $data[] = [
+	            'id' => $row->itmcde,
+	            'text' => $row->itmcde
+	        ];
+	    }
+
+	    echo json_encode(['results' => $data]);
+	}
+
+	public function searchStore()
+	{
+	    $term = $this->request->getGet('term');
+	    $limit = 30;
+	    $query_items = "id > 0";
+
+	    if (!empty($term)) {
+	        $query_items .= " AND store_name LIKE '%" . esc($term) . "%'";
+	    }
+
+	    $result = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, $limit, 0, 'id, store_code, store_name', '', '', '', 'store_code');
+
+	    $data = [];
+	    foreach ($result as $row) {
+	        $data[] = [
+	            'id' => $row->store_code,
+	            'text' => $row->store_name
+	        ];
+	    }
+
+	    echo json_encode(['results' => $data]);
+	}
+
+	public function searchVariant()
+	{
+	    $term = $this->request->getGet('term');
+	    $limit = 30;
+	    $query_items = "id > 0";
+
+	    if (!empty($term)) {
+	        $query_items .= " AND item_name LIKE '%" . esc($term) . "%'";
+	    }
+
+	    $result = $this->Global_model->get_data_list(
+	        'tbl_vmi_pre_aggregated_data',
+	        $query_items,
+	        $limit,
+	        0,
+	        'id, item_name',
+	        '',
+	        '',
+	        '',
+	        'item_name'
+	    );
+
+	    $data = [];
+	    foreach ($result as $row) {
+	        $data[] = [
+	            'id' => $row->item_name,
+	            'text' => $row->item_name
+	        ];
+	    }
+
+	    return $this->response->setJSON(['results' => $data]);
+	}
 
 	public function generatePdf()
 	{	

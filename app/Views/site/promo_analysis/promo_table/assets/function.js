@@ -48,8 +48,61 @@
 
         $('#brands').select2({ placeholder: 'Select Brands' });
         $('#itemLabel').select2({ placeholder: 'Select Select Label Type' });
-        $('#itmCode').select2({ placeholder: 'Select Item' });
-        $('#storeName').select2({ placeholder: 'Select Store' });
+        // $('#itmCode').select2({ placeholder: 'Select Item' });
+        // $('#storeName').select2({ placeholder: 'Select Store' });
+
+        $('#itmCode').select2({
+            placeholder: 'Select Item',
+            minimumInputLength: 2,
+            ajax: {
+                url: base_url + 'promo-analysis/search-sku',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { term: params.term };
+                },
+                processResults: function (data) {
+                    return data;
+                },
+                cache: true
+            }
+        });
+
+        // Store dropdown with AJAX search
+        $('#storeName').select2({
+            placeholder: 'Select Store',
+            minimumInputLength: 2,
+            ajax: {
+                url: base_url + 'promo-analysis/search-store',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { term: params.term };
+                },
+                processResults: function (data) {
+                    return data;
+                },
+                cache: true
+            }
+        });
+
+        $('#variantName').select2({
+            placeholder: 'Select Variant',
+            minimumInputLength: 2,
+            ajax: {
+                url: base_url + 'promo-analysis/search-variant',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { term: params.term };
+                },
+                processResults: function (data) {
+                    return data;
+                },
+                cache: true
+            }
+        });
+
 
         $("#year").on("change", function () {
             const year = $(this).val();
@@ -398,8 +451,8 @@
                     d.post_week_end_date = selectedPostWeekEndDate === "0" ? null : selectedPostWeekEndDate;
                     d.post_week_end_date = selectedPostWeekEndDate === "0" ? null : selectedPostWeekEndDate;
                     d.post_week_end_date = selectedPostWeekEndDate === "0" ? null : selectedPostWeekEndDate;
-                    d.type = type;
-                    d.is_export = isExport;
+                    // d.type = type;
+                    // d.is_export = isExport;
                 },
                 dataSrc: function(json) {
                     if(json.data.length > 0){

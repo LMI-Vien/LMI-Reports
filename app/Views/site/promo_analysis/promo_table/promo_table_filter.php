@@ -185,7 +185,7 @@
 
             <div class="form-group card-dark mb-3 p-2">
                 <label for="variantName" class="mb-2"><i class="fas fa-store mr-1"></i> Variant</label>
-                    <select id="variantName" name="variantName" class="form-control">
+                    <select id="variantName" name="variantName" class="form-control select2">
                         <option value="">Please select...</option>
                         <?php foreach ($variants as $key => $value) {
                             echo '<option value="' . htmlspecialchars($value['item_name']) . '">' . htmlspecialchars($value['item_name']) . '</option>';
