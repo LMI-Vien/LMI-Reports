@@ -66,7 +66,6 @@ $routes->group('store/', static function ($routes) {
     $routes->post('overall-growth-generate-excel', 'StoreSalesPerfOverall::generateExcel');
 });
 
-
 $routes->group('sell-through/', static function ($routes) {
     //by brand
     $routes->get('by-brand', 'SellThroughBrand::byBrand');
@@ -107,6 +106,18 @@ $routes->group('sell-through/', static function ($routes) {
     $routes->match(['GET', 'POST'], 'by-overall-generate-excel-ba', 'SellThroughOverall::generateExcel');
 });
 
+$routes->group('promo-analysis/', static function ($routes) {
+    $routes->get('promo-table', 'PromoAnalysis::promoTable');
+    $routes->post('get-promo-table', 'PromoAnalysis::getPromoData');
+    $routes->get('get-promo-table', 'PromoAnalysis::getPromoData');
+
+    $routes->post('get-promo-table-scann-data', 'PromoAnalysis::getPromoDataScannData');
+    $routes->post('get-promo-table-vmi', 'PromoAnalysis::getPromoTableVmi');
+    $routes->post('get-promo-table-all', 'PromoAnalysis::getPromoDataAll');
+    $routes->get('get-promo-table-all', 'PromoAnalysis::getPromoDataAll');
+    $routes->match(['GET', 'POST'], 'promo-table-generate-pdf', 'PromoAnalysis::generatePdf');
+    $routes->match(['GET', 'POST'], 'promo-table-generate-excel-ba', 'PromoAnalysis::generateExcel');
+});
 
 //sample API 
 $routes->get('/api/send_system_info', 'Dashboard::send_system_info');

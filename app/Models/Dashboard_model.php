@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use DateTime;
 
 class Dashboard_model extends Model
 {
@@ -5864,6 +5865,400 @@ class Dashboard_model extends Model
 	    return [
 	        'total_records' => $totalRecords,
 	        'data' => $data
+	    ];
+	}
+
+	public function getPromoTableVmi(
+		$preWeekStart,
+		$preWeekEnd,
+		$postWeekStart,
+		$postWeekEnd,
+		$year,
+		$orderByColumn,
+		$orderDirection,
+		$pageLimit,
+		$pageOffset,
+		$skus = [],
+	    $variantName = null,
+	    $brandIds = [],
+	    $brandLabelTypeIds = [],
+	    $storeCodes = [], 
+		$searchValue = null
+	){
+
+	    $searchColumns = [
+	        'item',
+	        'itmdsc',
+	        'itmcde'
+	    ];
+    	$allowedOrderColumns = ['sum_total_qty', 'item', 'itmdsc', 'itmcde'];
+	    $allowedOrderDirections = ['ASC', 'DESC'];
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' AND (' . implode(' OR ', $likeConditions) . ')';
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
+
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
+	        $orderByColumn = 'itmcde';
+	    }
+
+	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
+	        $orderDirection = 'ASC';
+	    }
+
+	    $skuFilter = '';
+	    $skuParams = [];
+	    if (!empty($skus)) {
+	        $placeholders = implode(',', array_fill(0, count($skus), '?'));
+	        $skuFilter = "AND vmi.itmcde IN ($placeholders)";
+	        $skuParams = $skus;
+	    }
+
+	    $brandFilter = '';
+	    $brandParams = [];
+	    if (!empty($brandIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandIds), '?'));
+	        $brandFilter = "AND vmi.tracc_brand_id IN ($placeholders)";
+	        $brandParams = $brandIds;
+	    }
+
+	    $brandLabelFilter = '';
+	    $brandLabelParams = [];
+	    if (!empty($brandLabelTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandLabelTypeIds), '?'));
+	        $brandLabelFilter = "AND vmi.brand_type_id IN ($placeholders)";
+	        $brandLabelParams = $brandLabelTypeIds;
+	    }
+
+	    $storeCodeFilter = '';
+	    $storeCodeParams = [];
+	    if (!empty($storeCodes)) {
+	        $placeholders = implode(',', array_fill(0, count($storeCodes), '?'));
+	        $storeCodeFilter = "AND vmi.store_code IN ($placeholders)";
+	        $storeCodeParams = $storeCodes;
+	    }
+
+		$preDays = ($preWeekEnd - $preWeekStart + 1) * 7;
+	    $postDays = ($postWeekEnd - $postWeekStart + 1) * 7;
+
+    $sql = "
+        SELECT 
+            vmi.itmcde,
+            vmi.item_name AS item_name,
+            vmi.brand_type_id,
+            $preDays AS pre_week_days,
+            $postDays AS post_week_days,
+            ROUND(SUM(CASE 
+                WHEN vmi.week BETWEEN ? AND ? 
+                THEN vmi.on_hand 
+                ELSE 0 
+            END) / ?, 2) AS pre,
+
+            ROUND(SUM(CASE 
+                WHEN vmi.week BETWEEN ? AND ? 
+                THEN vmi.on_hand 
+                ELSE 0 
+            END) / ?, 2) AS post,
+            ROUND(
+                CASE 
+                    WHEN SUM(CASE WHEN vmi.week BETWEEN ? AND ? THEN vmi.on_hand ELSE 0 END) = 0 THEN 0
+                    ELSE 
+                        ((SUM(CASE WHEN vmi.week BETWEEN ? AND ? THEN vmi.on_hand ELSE 0 END) / ?) /
+                         (SUM(CASE WHEN vmi.week BETWEEN ? AND ? THEN vmi.on_hand ELSE 0 END) / ?)) * 100
+                END
+            , 2) AS adv,
+
+            COUNT(*) OVER() AS total_records
+	        FROM tbl_vmi_pre_aggregated_data vmi
+	        WHERE (? IS NULL OR vmi.year = ? AND vmi.itmcde IS NOT NULL)
+	        	AND (? IS NULL OR vmi.item_name = ?)
+	            $skuFilter
+	            $brandFilter
+	            $brandLabelFilter
+	            $storeCodeFilter
+	        GROUP BY vmi.itmcde
+	           {$searchHavingClause}
+	        ORDER BY {$orderByColumn} {$orderDirection}
+	        LIMIT ? OFFSET ?
+	    ";
+
+	    $params = [
+	        $preWeekStart, $preWeekEnd, $preDays,
+	        $postWeekStart, $postWeekEnd, $postDays,
+	        $postWeekStart, $postWeekEnd,
+	        $postWeekStart, $postWeekEnd, $postDays,
+	        $preWeekStart, $preWeekEnd, $preDays,
+	      
+	        $year, $year,
+	        $variantName, $variantName, 
+	    ];
+
+	    $params = array_merge($params, $skuParams, $brandParams, $brandLabelParams, $storeCodeParams);
+	    $params = array_merge($params, $searchParams);
+	    $params[] = (int)$pageLimit;
+	    $params[] = (int)$pageOffset;
+
+	    $query = $this->db->query($sql, $params);
+	    $data = $query->getResult();
+	    $totalRecords = isset($data[0]->total_records) ? $data[0]->total_records : 0;
+
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $data
+	    ];
+	}
+
+	public function getPromoTableScannData(
+	    $preMonthStart,
+	    $preMonthEnd,
+	    $postMonthStart,
+	    $postMonthEnd,
+	    $orderByColumn,
+	    $orderDirection,
+	    $year,
+	    $limit,
+	    $offset,
+	    $skus = [],
+	    $variantName = null,
+	    $brandIds = [],
+	    $brandLabelTypeIds = [],
+	    $storeCodes = [],
+	    $searchValue = null
+	) {
+
+	    $allowedOrderColumns = ['itmcde', 'itmdsc'];
+	    $allowedOrderDirections = ['ASC', 'DESC'];
+	    $searchColumns = ['itmcde', 'itmdsc'];
+	    $searchHavingClause = '';
+	    $searchParams = [];
+
+	    if (!empty($searchValue)) {
+	        $likeConditions = array_map(fn($col) => "$col LIKE ?", $searchColumns);
+	        $searchHavingClause = ' HAVING ' . implode(' OR ', $likeConditions);
+	        foreach ($searchColumns as $_) {
+	            $searchParams[] = '%' . $searchValue . '%';
+	        }
+	    }
+
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) {
+	        $orderByColumn = 'itmcde';
+	    }
+	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) {
+	        $orderDirection = 'ASC';
+	    }
+
+	    $skuFilter = '';
+	    $skuParams = [];
+	    if (!empty($skus)) {
+	        $placeholders = implode(',', array_fill(0, count($skus), '?'));
+	        $skuFilter = "AND so.itmcde IN ($placeholders)";
+	        $skuParams = $skus;
+	    }
+
+	    $brandFilter = '';
+	    $brandParams = [];
+	    if (!empty($brandIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandIds), '?'));
+	        $brandFilter = "AND so.brand_id IN ($placeholders)";
+	        $brandParams = $brandIds;
+	    }
+
+	    $brandLabelFilter = '';
+	    $brandLabelParams = [];
+	    if (!empty($brandLabelTypeIds)) {
+	        $placeholders = implode(',', array_fill(0, count($brandLabelTypeIds), '?'));
+	        $brandLabelFilter = "AND so.brand_type_id IN ($placeholders)";
+	        $brandLabelParams = $brandLabelTypeIds;
+	    }
+
+	    $storeCodeFilter = '';
+	    $storeCodeParams = [];
+	    if (!empty($storeCodes)) {
+	        $placeholders = implode(',', array_fill(0, count($storeCodes), '?'));
+	        $storeCodeFilter = "AND so.store_code IN ($placeholders)";
+	        $storeCodeParams = $storeCodes;
+	    }
+
+		$preStartDate  = new DateTime($year . '-' . str_pad($preMonthStart, 2, '0', STR_PAD_LEFT) . '-01');
+		$preEndDate    = new DateTime($year . '-' . str_pad($preMonthEnd, 2, '0', STR_PAD_LEFT) . '-' . cal_days_in_month(CAL_GREGORIAN, $preMonthEnd, $year));
+		$preDays       = $preStartDate->diff($preEndDate)->days + 1;
+	    
+		$postStartDate = new DateTime($year . '-' . str_pad($postMonthStart, 2, '0', STR_PAD_LEFT) . '-01');
+		$postEndDate   = new DateTime($year . '-' . str_pad($postMonthEnd, 2, '0', STR_PAD_LEFT) . '-' . cal_days_in_month(CAL_GREGORIAN, $postMonthEnd, $year));
+		$postDays      = $postStartDate->diff($postEndDate)->days + 1;
+
+	    $sql = "
+	        SELECT 
+			    so.itmcde,
+			    $preDays AS pre_month_days,
+			    $postDays AS post_month_days,	
+			    ROUND(SUM(CASE 
+			        WHEN so.year = ? AND so.month BETWEEN ? AND ? 
+			        THEN so.gross_sales ELSE 0 END) / ?, 2) AS pre,
+			    ROUND(SUM(CASE 
+			        WHEN so.year = ? AND so.month BETWEEN ? AND ? 
+			        THEN so.gross_sales ELSE 0 END) / ?, 2) AS post,
+			    ROUND(
+			        CASE 
+			            WHEN SUM(CASE WHEN so.year = ? AND so.month BETWEEN ? AND ? THEN so.gross_sales ELSE 0 END) = 0
+			            THEN 0
+			            ELSE (
+			                (SUM(CASE WHEN so.year = ? AND so.month BETWEEN ? AND ? THEN so.gross_sales ELSE 0 END) / ?) /
+			                (SUM(CASE WHEN so.year = ? AND so.month BETWEEN ? AND ? THEN so.gross_sales ELSE 0 END) / ?) * 100
+			            )
+			        END, 2
+			    ) AS ads,
+	            COUNT(*) OVER() AS total_records
+	        FROM tbl_sell_out_pre_aggregated_data so
+	        WHERE (? IS NULL OR so.year = ? AND so.itmcde IS NOT NULL)
+	            $skuFilter
+	            $brandFilter
+	            $brandLabelFilter
+	            $storeCodeFilter
+	        GROUP BY so.itmcde
+	        $searchHavingClause
+	        ORDER BY {$orderByColumn} {$orderDirection}
+	        LIMIT ? OFFSET ?;
+	    ";
+
+	    $params = [
+		    $year, $preMonthStart, $preMonthEnd, $preDays,
+		    $year, $postMonthStart, $postMonthEnd, $postDays,
+		    $year, $preMonthStart, $preMonthEnd,
+		    $year, $postMonthStart, $postMonthEnd, $postDays,
+    		$year, $preMonthStart, $preMonthEnd, $preDays,
+	        $year, $year
+	    ];
+
+	    $params = array_merge($params, $skuParams, $brandParams, $brandLabelParams, $storeCodeParams);
+	    $params = array_merge($params, $searchParams);
+
+	    $params[] = (int)$limit;
+	    $params[] = (int)$offset;
+
+	    $query = $this->db->query($sql, $params);
+	    $data = $query->getResult();
+	    $totalRecords = $data ? $data[0]->total_records : 0;
+		// $finalQuery = $this->interpolateQuery($sql, $params);
+		// echo $finalQuery;
+		// die();	
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $data
+	    ];
+	}
+
+	public function getPromoDataAll(
+	    $year,
+	    $yearId,
+	    $preWeekStart,
+	    $preWeekEnd,
+	    $postWeekStart,
+	    $postWeekEnd,
+	    $preMonthStart,
+	    $preMonthEnd,
+	    $postMonthStart,
+	    $postMonthEnd,
+	    $orderByColumn,
+	    $orderDirection,
+	    $pageLimit,
+	    $pageOffset,
+	    $skus = [],
+	    $variantName = null,
+	    $brandIds = [],
+	    $brandLabelTypeIds = [],
+	    $storeCodes = [],
+	    $searchValue = null
+	) {
+	    $vmiData = $this->getPromoTableVmi(
+			$preWeekStart,
+			$preWeekEnd,
+			$postWeekStart,
+			$postWeekEnd,
+			$yearId,
+			$orderByColumn,
+			$orderDirection,
+			$pageLimit,
+			$pageOffset,
+			$skus,
+		    $variantName,
+		    $brandIds,
+		    $brandLabelTypeIds,
+		    $storeCodes, 
+			$searchValue
+	    );
+
+	    $sellOutData = $this->getPromoTableScannData(
+		    $preMonthStart,
+		    $preMonthEnd,
+		    $postMonthStart,
+		    $postMonthEnd,
+		    $orderByColumn,
+		    $orderDirection,
+		    $year,
+		    $pageLimit,
+		    $pageOffset,
+		    $skus,
+		    $variantName,
+		    $brandIds,
+		    $brandLabelTypeIds,
+		    $storeCodes,
+		    $searchValue
+	    );
+
+	    $vmiMap = [];
+	    foreach ($vmiData['data'] as $row) {
+	        $vmiMap[$row->itmcde] = $row;
+	    }
+
+	    $combined = [];
+	    foreach ($sellOutData['data'] as $sRow) {
+	        $itmcde = $sRow->itmcde;
+	        if (isset($vmiMap[$itmcde])) {
+	            $vRow = $vmiMap[$itmcde];
+
+	            $combined[] = (object)[
+	                'itmcde' => $itmcde,
+	                'item_name' => $vRow->item_name ?? null,
+
+	                'pre_vmi'  => $vRow->pre ?? 0,
+	                'post_vmi' => $vRow->post ?? 0,
+	                'adv_vmi'  => $vRow->adv ?? 0,
+	                'pre_week_days'  => $vRow->pre_week_days ?? 0,
+	                'post_week_days'  => $vRow->post_week_days ?? 0,
+
+	                'pre_sales'  => $sRow->pre ?? 0,
+	                'post_sales' => $sRow->post ?? 0,
+	                'ads_sales'  => $sRow->ads ?? 0,
+	                'pre_month_days'  => $sRow->pre_month_days ?? 0,
+	                'post_month_days'  => $sRow->post_month_days ?? 0,
+	            ];
+	        }
+	    }
+
+	    usort($combined, function ($a, $b) use ($orderByColumn, $orderDirection) {
+	        $valA = $a->{$orderByColumn} ?? '';
+	        $valB = $b->{$orderByColumn} ?? '';
+
+	        $comparison = is_numeric($valA) && is_numeric($valB)
+	            ? ($valA <=> $valB)
+	            : strcmp($valA, $valB);
+
+	        return strtoupper($orderDirection) === 'DESC' ? -$comparison : $comparison;
+	    });
+
+	    $totalRecords = count($combined);
+	    $pagedData = array_slice($combined, $pageOffset, $pageLimit);
+
+	    return [
+	        'total_records' => $totalRecords,
+	        'data' => $pagedData
 	    ];
 	}
 
