@@ -6254,11 +6254,11 @@ class Dashboard_model extends Model
 	    });
 
 	    $totalRecords = count($combined);
-	    $pagedData = array_slice($combined, $pageOffset, $pageLimit);
+	    //$pagedData = array_slice($combined, $pageOffset, $pageLimit);
 
 	    return [
 	        'total_records' => $totalRecords,
-	        'data' => $pagedData
+	        'data' => $combined
 	    ];
 	}
 

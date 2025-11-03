@@ -248,6 +248,42 @@ class Global_model extends Model
         $q = $builder->get();
         return $q->getResult();
     }
+
+    public function getDistinctVmiData($type = 'sku', $limit = 50)
+    {
+        $builder = $this->db->table('tbl_vmi_pre_aggregated_data');
+
+        switch ($type) {
+            case 'sku':
+                // SELECT DISTINCT itmcde FROM ...
+                $builder->distinct(true)->select('itmcde');
+                $builder->where('itmcde IS NOT NULL');
+                $builder->orderBy('itmcde', 'ASC');
+                break;
+
+            case 'variant':
+                // SELECT DISTINCT item_name FROM ...
+                $builder->distinct(true)->select('item_name');
+                $builder->where('item_name IS NOT NULL');
+                $builder->orderBy('item_name', 'ASC');
+                break;
+
+            case 'store':
+                // SELECT DISTINCT store_code, store_name FROM ...
+                // Use distinct on tuple (store_code, store_name)
+                $builder->distinct(true)->select('store_code, store_name', false);
+                $builder->where('store_code IS NOT NULL');
+                $builder->orderBy('store_code', 'ASC');
+                break;
+
+            default:
+                throw new \InvalidArgumentException('Invalid type provided. Use: sku, variant, or store.');
+        }
+
+        $builder->limit($limit);
+        $query = $builder->get();
+        return $query->getResultArray();
+    }
     
     function get_data_list($table, $query = null, $limit = 99999, $start = 0, $select = "*", $order_field = null, $order_type = null, $join = null, $group = null)
     {

@@ -42,15 +42,19 @@ class PromoAnalysis extends BaseController
 		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
-		$query_items = "id > 0";
-		$data['sku_item'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, itmcde','','', '', 'itmcde');
+		// $query_items = "id > 0";
+		// $data['sku_item'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, itmcde','','', '', 'itmcde');
 
-		$data['variants'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, item_name','','', '', 'item_name');
+		// $data['variants'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, item_name','','', '', 'item_name');
 
-		$data['stores'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, store_code, store_name','','', '', 'store_code');
-		$data['sku_item'] = json_decode(json_encode($data['sku_item']), true);
-		$data['variants'] = json_decode(json_encode($data['variants']), true);
-		$data['stores'] = json_decode(json_encode($data['stores']), true);
+		// $data['stores'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, store_code, store_name','','', '', 'store_code');
+		// $data['sku_item'] = json_decode(json_encode($data['sku_item']), true);
+		// $data['variants'] = json_decode(json_encode($data['variants']), true);
+		// $data['stores'] = json_decode(json_encode($data['stores']), true);
+
+		$data['sku_item'] = $this->Global_model->getDistinctVmiData('sku', 50);
+		$data['variants'] = $this->Global_model->getDistinctVmiData('variant', 50);
+		$data['stores']   = $this->Global_model->getDistinctVmiData('store', 50);
 		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",
