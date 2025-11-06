@@ -63,7 +63,7 @@
                         </div>
 
                         <div class="card mt-4 p-4 shadow-sm hide-div">
-                            <div id="tableContainer" class="mb-3" style="overflow-x: auto; height: 600px; padding: 0px;">
+                            <div id="tableContainer" class="mb-3">
                                 <table id="PromoAnalysis" class="table table-bordered" style="width: 100% !important;">
                                     <thead>
                                         <tr>

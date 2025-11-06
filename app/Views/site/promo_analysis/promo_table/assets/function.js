@@ -46,10 +46,20 @@
             $('#mostRecentImportWeekRange').text('N/A');
         }
 
-        $('#brands').select2({ placeholder: 'Select Brands' });
+        $('#brands').select2({
+          placeholder: 'Select Brands',
+          width: '100%',
+          templateResult: function (data) {
+            return data.text;
+          },
+          templateSelection: function (data) {
+            if (!data.id) return data.text; 
+            const text = data.text || '';
+            return text.length > 10 ? text.substring(0, 10) + '…' : text;
+          }
+        });
+
         $('#itemLabel').select2({ placeholder: 'Select Select Label Type' });
-        // $('#itmCode').select2({ placeholder: 'Select Item' });
-        // $('#storeName').select2({ placeholder: 'Select Store' });
 
         $('#itmCode').select2({
             placeholder: 'Select Item',
@@ -68,7 +78,6 @@
             }
         });
 
-        // Store dropdown with AJAX search
         $('#storeName').select2({
             placeholder: 'Select Store',
             minimumInputLength: 2,
@@ -87,20 +96,31 @@
         });
 
         $('#variantName').select2({
-            placeholder: 'Select Variant',
-            minimumInputLength: 2,
-            ajax: {
-                url: base_url + 'promo-analysis/search-variant',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return { term: params.term };
-                },
-                processResults: function (data) {
-                    return data;
-                },
-                cache: true
-            }
+          placeholder: 'Please select...',
+          allowClear: true,
+          width: '100%',
+          minimumInputLength: 2,
+          ajax: {
+            url: base_url + 'promo-analysis/search-variant',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+              return { term: params.term };
+            },
+            processResults: function (data) {
+              return { results: data.results || data };
+            },
+            cache: true
+          },
+          templateResult: function (data) {
+            return data.text;
+          },
+          // Show ellipsis only in the selected item display
+          templateSelection: function (data) {
+            if (!data.id) return data.text; // placeholder or empty
+            const text = data.text || ''; 
+            return text.length > 15 ? text.substring(0, 15) + '…' : text;
+          }
         });
 
 
@@ -235,7 +255,7 @@
             { input: '#brands', target: '#brands' },
             { input: '#itemLabel', target: '#itemLabel' },
             { input: '#itmCode', target: '#itmCode' },
-            { input: '#itmCode', target: '#storeName' }
+            { input: '#storeName', target: '#storeName' }
             
         ];
 
@@ -347,8 +367,8 @@
             return;
         }  
 
-        if (postWeekFromFilter < preWeekToFilter) {
-            modal.alert('Must be greater than or equal to VMI Data PRE Period!', "warning");
+        if (parseInt(postWeekFromFilter) < parseInt(preWeekToFilter)) {
+            modal.alert('Post period must be greater than or equal to PRE period!', "warning");
             $filterPanel.addClass('open');
             $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
             return;
@@ -424,7 +444,10 @@
             ordering: true,
             info: false,
             lengthChange: false,
-            colReorder: true, 
+            colReorder: true,
+            scrollY: "500px",
+            //scrollX: true,       
+            scrollCollapse: true,
             ajax: {
                 url: base_url + 'promo-analysis/get-promo-table-all',
                 type: 'POST',

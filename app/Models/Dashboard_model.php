@@ -6262,6 +6262,186 @@ class Dashboard_model extends Model
 	    ];
 	}
 
+	public function getPromoDataAllClickhouse(
+	    $year,
+	    $yearId,
+	    $preWeekStart,
+	    $preWeekEnd,
+	    $postWeekStart,
+	    $postWeekEnd,
+	    $preMonthStart,
+	    $preMonthEnd,
+	    $postMonthStart,
+	    $postMonthEnd,
+	    $orderByColumn,
+	    $orderDirection,
+	    $pageLimit,
+	    $pageOffset,
+	    $skus = [],
+	    $variantName = null,
+	    $brandIds = [],
+	    $brandLabelTypeIds = [],
+	    $storeCodes = [],
+	    $searchValue = null
+	) {
+	    $allowedOrderColumns = ['itmcde', 'item_name', 'pre_sales', 'post_sales', 'ads_sales', 'pre_vmi', 'post_vmi', 'adv_vmi'];
+	    $allowedOrderDirections = ['ASC', 'DESC'];
+
+	    if (!in_array($orderByColumn, $allowedOrderColumns)) $orderByColumn = 'itmcde';
+	    if (!in_array(strtoupper($orderDirection), $allowedOrderDirections)) $orderDirection = 'ASC';
+
+	    $filters = [];
+
+	    // if (!empty($variantName)) {
+	    //     $filters[] = "vmi.item_name = '" . addslashes($variantName) . "'";
+	    // }
+
+		if (!empty($variantName)) {
+		    $filters[] = "item_name = {variant:String}";
+		    $params['variant'] = $variantName;
+		}
+
+	    if (!empty($searchValue)) {
+	        $searchEscaped = addslashes($searchValue);
+	        $filters[] = "(itmcde ILIKE '%$searchEscaped%' OR item_name ILIKE '%$searchEscaped%')";
+	    }
+
+	    $filterSql = !empty($filters) ? 'AND ' . implode(' AND ', $filters) : '';
+
+	    $skuFilter = '';
+	    if (!empty($skus)) {
+	        $cleanSkus = array_map('trim', $skus);
+	        $skuFilter = "AND itmcde IN ('" . implode("','", $cleanSkus) . "')";
+	    }
+
+	 	$brandFilter = '';
+	    if (!empty($brandIds)) {
+	    	$cleanBrands = array_map('trim', $brandIds);
+	        $brandFilter = "AND tracc_brand_id IN ('" . implode("','", $cleanBrands) . "')";
+	    }
+
+	    $brandLabelTypeFilter = '';
+	    if (!empty($brandLabelTypeIds)) {
+	    	$cleanBrandLabelTypes = array_map('trim', $brandLabelTypeIds);
+	        $brandLabelTypeFilter = "AND brand_type_id IN ('" . implode("','", $cleanBrandLabelTypes) . "')";
+	    }
+
+	    $storeCodeFilter = '';
+	    if (!empty($storeCodes)) {
+	    	$cleanStoreCodes = array_map('trim', $storeCodes);
+	        $storeCodeFilter = "AND store_code IN ('" . implode("','", $cleanStoreCodes) . "')";
+	    }
+
+	    $preDays = ($preWeekEnd - $preWeekStart + 1) * 7;
+	    $postDays = ($postWeekEnd - $postWeekStart + 1) * 7;
+
+	    $preStartDate  = new DateTime("$year-" . str_pad($preMonthStart, 2, '0', STR_PAD_LEFT) . "-01");
+	    $preEndDate    = new DateTime("$year-" . str_pad($preMonthEnd, 2, '0', STR_PAD_LEFT) . "-" . cal_days_in_month(CAL_GREGORIAN, $preMonthEnd, $year));
+	    $preMonthDays  = $preStartDate->diff($preEndDate)->days + 1;
+
+	    $postStartDate = new DateTime("$year-" . str_pad($postMonthStart, 2, '0', STR_PAD_LEFT) . "-01");
+	    $postEndDate   = new DateTime("$year-" . str_pad($postMonthEnd, 2, '0', STR_PAD_LEFT) . "-" . cal_days_in_month(CAL_GREGORIAN, $postMonthEnd, $year));
+	    $postMonthDays = $postStartDate->diff($postEndDate)->days + 1;
+
+	    $sql = "
+	    SELECT
+	        any(vmi.itmcde) AS itmcde,
+	        any(vmi.item_name_agg) AS item_name,
+	        any(vmi.pre_vmi) AS pre_vmi,
+	        any(vmi.post_vmi) AS post_vmi,
+	        any(vmi.adv_vmi) AS adv_vmi,
+	        any(so.pre_sales) AS pre_sales,
+	        any(so.post_sales) AS post_sales,
+	        any(so.ads_sales) AS ads_sales
+	    FROM
+	    (
+	        SELECT 
+	            itmcde,
+	            any(item_name) AS item_name_agg,
+	            round(SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32}, 2) AS pre_vmi,
+	            round(SUM(CASE WHEN week BETWEEN {postWeekStart:Int32} AND {postWeekEnd:Int32} THEN on_hand ELSE 0 END) / {postDays:Int32}, 2) AS post_vmi,
+	            round(
+	                IF(
+	                    SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) = 0,
+	                    0,
+	                    (
+	                        (SUM(CASE WHEN week BETWEEN {postWeekStart:Int32} AND {postWeekEnd:Int32} THEN on_hand ELSE 0 END) / {postDays:Int32})
+	                        /
+	                        (SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32})
+	                    ) * 100
+	                ),
+	            2) AS adv_vmi
+	        FROM testdb.tbl_vmi_pre_aggregated_data
+	        WHERE year = {yearId:Int32}
+	        AND itmcde IS NOT NULL AND itmcde != ''
+	        $skuFilter
+	        $brandFilter
+	        $brandLabelTypeFilter
+	        $storeCodeFilter
+	        $filterSql
+	        GROUP BY itmcde
+	    ) AS vmi
+	    LEFT JOIN
+	    (
+	        SELECT 
+	            itmcde,
+	            round(SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32}, 2) AS pre_sales,
+	            round(SUM(CASE WHEN month BETWEEN {postMonthStart:Int32} AND {postMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {postMonthDays:Int32}, 2) AS post_sales,
+	            round(
+	                IF(
+	                    SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) = 0,
+	                    0,
+	                    (
+	                        (SUM(CASE WHEN month BETWEEN {postMonthStart:Int32} AND {postMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {postMonthDays:Int32})
+	                        /
+	                        (SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32})
+	                    ) * 100
+	                ),
+	            2) AS ads_sales
+	        FROM testdb.tbl_sell_out_pre_aggregated_data
+	        WHERE year = {year:Int32}
+	        GROUP BY itmcde
+	    ) AS so
+	    ON vmi.itmcde = so.itmcde
+	    GROUP BY vmi.itmcde
+	    ORDER BY $orderByColumn $orderDirection
+	    LIMIT {limit:Int32} OFFSET {offset:Int32}
+	    FORMAT JSON
+	    ";
+
+	    $params = [
+	        'year' => (int)$year,
+	        'yearId' => (int)$yearId,
+	        'preWeekStart' => (int)$preWeekStart,
+	        'preWeekEnd' => (int)$preWeekEnd,
+	        'postWeekStart' => (int)$postWeekStart,
+	        'postWeekEnd' => (int)$postWeekEnd,
+	        'preMonthStart' => (int)$preMonthStart,
+	        'preMonthEnd' => (int)$preMonthEnd,
+	        'postMonthStart' => (int)$postMonthStart,
+	        'postMonthEnd' => (int)$postMonthEnd,
+	        'preDays' => (int)$preDays,
+	        'postDays' => (int)$postDays,
+	        'preMonthDays' => (int)$preMonthDays,
+	        'postMonthDays' => (int)$postMonthDays,
+	        'limit' => (int)$pageLimit,
+	        'offset' => (int)$pageOffset,
+
+	        'variant' => $variantName,
+	    ];
+
+	    $ch = new \App\Libraries\ClickhouseClient();
+	    $rows = $ch->query($sql, $params);
+
+	    return [
+	        'pre_week_days' => $preDays,
+	        'post_week_days'=> $postDays,
+	        'pre_month_days' => $preMonthDays,
+	        'post_month_days' => $postMonthDays,
+	        'data' => $rows
+	    ];
+	}
+
     public function getCounts()
     {
         $companyCount = $this->db->table('tbl_company')->countAllResults(); 

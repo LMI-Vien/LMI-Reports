@@ -115,6 +115,8 @@ $routes->group('promo-analysis/', static function ($routes) {
     $routes->post('get-promo-table-vmi', 'PromoAnalysis::getPromoTableVmi');
     $routes->post('get-promo-table-all', 'PromoAnalysis::getPromoDataAll');
     $routes->get('get-promo-table-all', 'PromoAnalysis::getPromoDataAll');
+    $routes->get('get-promo-table-all-old', 'PromoAnalysis::getPromoDataAllOld');
+    
     $routes->get('search-sku', 'PromoAnalysis::searchSku');
     $routes->get('search-store', 'PromoAnalysis::searchStore');
     $routes->get('search-variant', 'PromoAnalysis::searchVariant');

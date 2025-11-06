@@ -42,19 +42,10 @@ class PromoAnalysis extends BaseController
 		$data['brandLabel'] = $this->Global_model->getBrandLabelData(0);
 		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
-		// $query_items = "id > 0";
-		// $data['sku_item'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, itmcde','','', '', 'itmcde');
 
-		// $data['variants'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, item_name','','', '', 'item_name');
-
-		// $data['stores'] = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, 50, 0, 'id, store_code, store_name','','', '', 'store_code');
-		// $data['sku_item'] = json_decode(json_encode($data['sku_item']), true);
-		// $data['variants'] = json_decode(json_encode($data['variants']), true);
-		// $data['stores'] = json_decode(json_encode($data['stores']), true);
-
-		$data['sku_item'] = $this->Global_model->getDistinctVmiData('sku', 50);
-		$data['variants'] = $this->Global_model->getDistinctVmiData('variant', 50);
-		$data['stores']   = $this->Global_model->getDistinctVmiData('store', 50);
+		$data['sku_item'] = $this->Global_model->getDistinctVmiData('sku', 20);
+		$data['variants'] = $this->Global_model->getDistinctVmiData('variant', 20);
+		$data['stores']   = $this->Global_model->getDistinctVmiData('store', 20);
 		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",
@@ -112,16 +103,16 @@ class PromoAnalysis extends BaseController
 	public function getPromoDataAll()
 	{
 
-		$type = trim($this->request->getPost('type')); // get if pdf or excel
+		$type = $this->request->getPost('type'); // get if pdf or excel
 		$type = $type === '' ? null : $type;
 
-		$isExport = trim($this->request->getPost('is_export'));
+		$isExport = $this->request->getPost('is_export');
 		$isExport = $isExport === '' ? false : $isExport ;
 
 		$skus = $this->request->getPost('items');
 		$skus = $skus === '' ? null : $skus;
 
-		$variantName = trim($this->request->getPost('variant_name'));
+		$variantName = $this->request->getPost('variant_name');
 		$variantName = $variantName === '' ? null : $variantName ;
 
 		$brandIds = $this->request->getPost('brands');
@@ -182,21 +173,135 @@ class PromoAnalysis extends BaseController
 	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
 		
-		// $preWeekStart = 4;
-		// $preWeekEnd = 4;
-		// $postWeekStart = 6;
-		// $postWeekEnd = 7;
-		// $yearId = 6;
-		// $year = '2025';
-		// $preMonthId = 1;
-		// $preMonthEndId = 6;
-		// $postMonthId = 7;
-		// $postMonthEndId = 9;
+		$preWeekStart = 4;
+		$preWeekEnd = 4;
+		$postWeekStart = 6;
+		$postWeekEnd = 7;
+		$yearId = 6;
+		$year = '2025';
+		$preMonthId = 1;
+		$preMonthEndId = 6;
+		$postMonthId = 7;
+		$postMonthEndId = 9;
 		//print_r();
 
 		// var_dump($skus);
 		// die();
-		// $skus = ['WC002', 'WC001', 'DA001'];
+		//$skus = ['WC002', 'WC001', 'DA001'];
+		//$skus = "'" . implode("','", $skus) . "'";
+		// print_r($variantName);
+		// die();
+		//$variantName = "BODY TREATS FRMNG HYRDRGEL EYE PATCHX3S";
+	    $data = $this->Dashboard_model->getPromoDataAllClickhouse($year, $yearId, $preWeekStart, $preWeekEnd, $postWeekStart, $postWeekEnd, $preMonthId, $preMonthEndId, $postMonthId, $postMonthEndId, $orderByColumn, $orderDirection, 99999999, $offset, $skus, $variantName, $brandIds, $brandLabelTypeIds, $storeCodes, $searchValue);
+	    if($isExport){
+	    	//call the export function here(pdf/excel)
+	    	if($type === 'pdf'){
+	    		//generatePdf
+	    	}else{
+	    		//generateExcel
+	    	}
+	    }else{
+		    return $this->response->setJSON([
+				'pre_week_days' => $data['pre_week_days'],
+		        'post_week_days'=> $data['post_week_days'],
+		        'pre_month_days' => $data['pre_month_days'],
+		        'post_month_days' => $data['post_month_days'],
+		        'data' => $data['data']
+		    ]);	
+	    }
+	    
+	}
+
+
+	public function getPromoDataAllOld()
+	{
+
+		$type = $this->request->getPost('type'); // get if pdf or excel
+		$type = $type === '' ? null : $type;
+
+		$isExport = $this->request->getPost('is_export');
+		$isExport = $isExport === '' ? false : $isExport ;
+
+		$skus = $this->request->getPost('items');
+		$skus = $skus === '' ? null : $skus;
+
+		$variantName = $this->request->getPost('variant_name');
+		$variantName = $variantName === '' ? null : $variantName ;
+
+		$brandIds = $this->request->getPost('brands');
+		$brandIds = $brandIds === '' ? null : $brandIds;
+
+		$brandLabelTypeIds = $this->request->getPost('brands_label');
+		$brandLabelTypeIds = $brandLabelTypeIds === '' ? null : $brandLabelTypeIds;
+
+		$storeCodes = $this->request->getPost('store_codes');
+		$storeCodes = $storeCodes === '' ? null : $storeCodes;
+
+		$year = trim($this->request->getPost('year') ?? '');
+		$year = $year === '' ? null : $year;
+
+		$yearId = trim($this->request->getPost('year_id') ?? '');
+		$yearId = $yearId === '' ? null : $yearId;
+
+	    $preMonthId = $this->request->getVar('pre_month_start') ?? 1;
+	    $preMonthEndId = $this->request->getVar('pre_month_end') ?? 12;
+
+	    $postMonthId = $this->request->getVar('post_month_start') ?? 1;
+	    $postMonthEndId = $this->request->getVar('post_month_end') ?? 12;
+
+		$preWeekStart = trim($this->request->getPost('pre_week_start') ?? '');
+		$preWeekStart = $preWeekStart === '' ? null : $preWeekStart;
+
+		$preWeekEnd = trim($this->request->getPost('pre_week_end') ?? '');
+		$preWeekEnd = $preWeekEnd === '' ? null : $preWeekEnd;
+
+		$preWeekStartDate = trim($this->request->getPost('pre_week_start_date') ?? '');
+		$preWeekStartDate = $preWeekStartDate === '' ? null : $preWeekStartDate;
+
+		$preWeekEndDate = trim($this->request->getPost('pre_week_end_date') ?? '');
+		$preWeekEndDate = $preWeekEndDate === '' ? null : $preWeekEndDate;
+
+		$postWeekStart = trim($this->request->getPost('post_week_start') ?? '');
+		$postWeekStart = $postWeekStart === '' ? null : $postWeekStart;
+
+		$postWeekEnd = trim($this->request->getPost('post_week_end') ?? '');
+		$postWeekEnd = $postWeekEnd === '' ? null : $postWeekEnd;
+
+		$postWeekStartDate = trim($this->request->getPost('post_week_start_date') ?? '');
+		$postWeekStartDate = $postWeekStartDate === '' ? null : $postWeekStartDate;
+
+		$postWeekEndDate = trim($this->request->getPost('post_week_end_date') ?? '');
+		$postWeekEndDate = $postWeekEndDate === '' ? null : $postWeekEndDate;
+
+		$limit = $this->request->getVar('limit');
+		$offset = $this->request->getVar('offset');
+		$limit = is_numeric($limit) ? (int)$limit : 10;
+		$offset = is_numeric($offset) ? (int)$offset : 0;
+
+		$orderColumnIndex = $this->request->getVar('order')[0]['column'] ?? 0;
+	    $orderDirection = $this->request->getVar('order')[0]['dir'] ?? 'asc';
+	    $columns = $this->request->getVar('columns');
+	    $orderByColumn = $columns[$orderColumnIndex]['data'] ?? 'itmcde';
+
+	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
+		$searchValue = $searchValue === '' ? null : $searchValue;
+		
+		$preWeekStart = 4;
+		$preWeekEnd = 4;
+		$postWeekStart = 6;
+		$postWeekEnd = 7;
+		$yearId = 6;
+		$year = '2025';
+		$preMonthId = 1;
+		$preMonthEndId = 6;
+		$postMonthId = 7;
+		$postMonthEndId = 9;
+		//print_r();
+
+		// var_dump($skus);
+		// die();
+		$skus = ['WC002', 'WC001', 'DA001'];
+		//$skus = "'" . implode("','", $skus) . "'";
 	    $data = $this->Dashboard_model->getPromoDataAll($year, $yearId, $preWeekStart, $preWeekEnd, $postWeekStart, $postWeekEnd, $preMonthId, $preMonthEndId, $postMonthId, $postMonthEndId, $orderByColumn, $orderDirection, 99999999, $offset, $skus, $variantName, $brandIds, $brandLabelTypeIds, $storeCodes, $searchValue);
 	    if($isExport){
 	    	//call the export function here(pdf/excel)
@@ -207,9 +312,6 @@ class PromoAnalysis extends BaseController
 	    	}
 	    }else{
 		    return $this->response->setJSON([
-		        'draw' => intval($this->request->getVar('draw')),
-		        'recordsTotal' => $data['total_records'],
-		        'recordsFiltered' => $data['total_records'],
 		        'data' => $data['data']
 		    ]);	
 	    }
