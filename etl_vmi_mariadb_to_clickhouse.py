@@ -10,7 +10,7 @@ maria_conn = pymysql.connect(
     password="new_secure_password",
     database="sfa_prod_db",
     charset="utf8mb4",
-    cursorclass=pymysql.cursors.Cursor
+    cursorclass=pymysql.cursors.DictCursor
 )
 
 # ---------------- ClickHouse Connection ----------------
@@ -73,7 +73,7 @@ total_inserted = 0
 with maria_conn.cursor() as cursor:
     cursor.execute("SELECT COUNT(*) AS cnt FROM tbl_vmi_pre_aggregated_data")
     total_rows = cursor.fetchone()["cnt"]
-    print(f"🚀 Starting migration of {total_rows} rows...")
+    print(f" Starting migration of {total_rows} rows...")
 
     while True:
         cursor.execute(f"SELECT * FROM tbl_vmi_pre_aggregated_data LIMIT {BATCH_SIZE} OFFSET {offset}")
@@ -124,7 +124,7 @@ with maria_conn.cursor() as cursor:
                     str(r.get("uuid") or "00000000-0000-0000-0000-000000000000")
                 ))
             except Exception as e:
-                print(f"Skipping row ID {r.get('id')} due to error: {e}")
+                print(f" Skipping row ID {r.get('id')} due to error: {e}")
 
         if transformed:
             ch_client.insert(
@@ -143,4 +143,4 @@ with maria_conn.cursor() as cursor:
         offset += BATCH_SIZE
         print(f" Inserted {total_inserted}/{total_rows} rows...")
 
-print(f"🎉 Migration complete! Total rows inserted: {total_inserted}")
+print(f" Migration complete! Total rows inserted: {total_inserted}")

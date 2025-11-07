@@ -122,12 +122,12 @@
                     table: "tbl_year y",
                     query: "y.id = v.year",
                     type: "left"
+                },
+                {
+                    table: "tbl_week w",
+                    query: "w.id = v.week",
+                    type: "left"
                 }
-                // {
-                //     table: "tbl_week w",
-                //     query: "w.id = v.week",
-                //     type: "left"
-                // }
             ],
             order: {
                 field: "v.store",
