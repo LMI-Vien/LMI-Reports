@@ -173,16 +173,16 @@ class PromoAnalysis extends BaseController
 	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
 		
-		$preWeekStart = 4;
-		$preWeekEnd = 4;
-		$postWeekStart = 6;
-		$postWeekEnd = 7;
-		$yearId = 6;
-		$year = '2025';
-		$preMonthId = 1;
-		$preMonthEndId = 6;
-		$postMonthId = 7;
-		$postMonthEndId = 9;
+		// $preWeekStart = 4;
+		// $preWeekEnd = 4;
+		// $postWeekStart = 6;
+		// $postWeekEnd = 7;
+		// $yearId = 6;
+		// $year = '2025';
+		// $preMonthId = 1;
+		// $preMonthEndId = 6;
+		// $postMonthId = 7;
+		// $postMonthEndId = 9;
 		//print_r();
 
 		// var_dump($skus);
