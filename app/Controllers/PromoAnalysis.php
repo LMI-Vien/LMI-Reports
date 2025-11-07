@@ -286,21 +286,21 @@ class PromoAnalysis extends BaseController
 	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
 		
-		$preWeekStart = 4;
-		$preWeekEnd = 4;
-		$postWeekStart = 6;
-		$postWeekEnd = 7;
-		$yearId = 6;
-		$year = '2025';
-		$preMonthId = 1;
-		$preMonthEndId = 6;
-		$postMonthId = 7;
-		$postMonthEndId = 9;
+		// $preWeekStart = 4;
+		// $preWeekEnd = 4;
+		// $postWeekStart = 6;
+		// $postWeekEnd = 7;
+		// $yearId = 6;
+		// $year = '2025';
+		// $preMonthId = 1;
+		// $preMonthEndId = 6;
+		// $postMonthId = 7;
+		// $postMonthEndId = 9;
 		//print_r();
 
 		// var_dump($skus);
 		// die();
-		$skus = ['WC002', 'WC001', 'DA001'];
+		//$skus = ['WC002', 'WC001', 'DA001'];
 		//$skus = "'" . implode("','", $skus) . "'";
 	    $data = $this->Dashboard_model->getPromoDataAll($year, $yearId, $preWeekStart, $preWeekEnd, $postWeekStart, $postWeekEnd, $preMonthId, $preMonthEndId, $postMonthId, $postMonthEndId, $orderByColumn, $orderDirection, 99999999, $offset, $skus, $variantName, $brandIds, $brandLabelTypeIds, $storeCodes, $searchValue);
 	    if($isExport){
