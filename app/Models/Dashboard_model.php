@@ -6371,7 +6371,7 @@ class Dashboard_model extends Model
 	                    ) * 100
 	                ),
 	            2) AS adv_vmi
-	        FROM testdb.tbl_vmi_pre_aggregated_data
+	        FROM sfa_db.tbl_vmi_pre_aggregated_data
 	        WHERE year = {yearId:Int32}
 	        AND itmcde IS NOT NULL AND itmcde != ''
 	        $skuFilter
@@ -6398,7 +6398,7 @@ class Dashboard_model extends Model
 	                    ) * 100
 	                ),
 	            2) AS ads_sales
-	        FROM testdb.tbl_sell_out_pre_aggregated_data
+	        FROM sfa_db.tbl_sell_out_pre_aggregated_data
 	        WHERE year = {year:Int32}
 	        GROUP BY itmcde
 	    ) AS so

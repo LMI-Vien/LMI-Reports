@@ -1,12 +1,4 @@
 
-    th:nth-child(1), td:nth-child(1) { width: 15%; }
-    th:nth-child(2), td:nth-child(2) { width: 15%; }
-    th:nth-child(3), td:nth-child(3) { width: 10%; }
-    th:nth-child(4), td:nth-child(4) { width: 10%; } 
-    th:nth-child(5), td:nth-child(5) { width: 15%; } 
-    th:nth-child(6), td:nth-child(6) { width: 10%; } 
-    th:nth-child(7), td:nth-child(7) { width: 10%; } 
-    th:nth-child(8), td:nth-child(8) { width: 15%; } 
     .tooltip-text {
         visibility: hidden;
         width: 220px;
@@ -61,20 +53,64 @@
       padding: 0;
     }
 
-    #PromoAnalysis thead th {
-      position: sticky;
-      background-color: white;
-      border-bottom: 2px solid #dee2e6;
-    }
+  #PromoAnalysis {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+      font-family: 'Poppins', sans-serif;
+  }
 
-    #PromoAnalysis thead tr:first-child th {
-      top: 0;
-      z-index: 12;
-      background-color: #fff;
-    }
+  #PromoAnalysis th,
+  #PromoAnalysis td {
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+  }
 
-    #PromoAnalysis thead tr:nth-child(2) th {
-      top: 40px; 
-      z-index: 11;
-      background-color: #fff;
-    }
+  #PromoAnalysis th:nth-child(1),
+  #PromoAnalysis td:nth-child(1),
+  #PromoAnalysis th:nth-child(2),
+  #PromoAnalysis td:nth-child(2) {
+      text-align: left;
+  }
+
+  .static-header {
+      font-weight: bold;
+      text-align: center;
+      background-color: #ffc107 !important;
+      color: #000 !important;
+  }
+
+  .main-header {
+      background-color: #f8f9fa !important;
+      color: #000 !important;
+  }
+
+  .adv-header {
+      background-color: #ffc107 !important;
+      color: #000 !important;
+  }
+
+  #PromoAnalysis tfoot th {
+      text-align: center;
+      font-weight: bold;
+      background-color: #f8f9fa;
+  }
+
+  #PromoAnalysis tfoot th:first-child,
+  #PromoAnalysis tfoot th:nth-child(2) {
+      text-align: right;
+  }
+
+  .tooltip-text {
+      display: block;
+      font-size: 10px;
+      color: #6c757d;
+  }
+
+  #PromoAnalysis th:nth-child(2),
+  #PromoAnalysis td:nth-child(2) {
+      white-space: normal !important;
+      word-wrap: break-word;
+      text-align: left;
+  }

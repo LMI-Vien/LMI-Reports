@@ -65,6 +65,18 @@
                         <div class="card mt-4 p-4 shadow-sm hide-div">
                             <div id="tableContainer" class="mb-3">
                                 <table id="PromoAnalysis" class="table table-bordered" style="width: 100% !important;">
+                                    
+
+                                    <colgroup>
+                                        <col style="width:10%;">
+                                        <col style="width:20%;">
+                                        <col style="width:10%;">
+                                        <col style="width:10%;">
+                                        <col style="width:15%;">
+                                        <col style="width:10%;">
+                                        <col style="width:10%;">
+                                        <col style="width:15%;">
+                                    </colgroup>
                                     <thead>
                                         <tr>
 
