@@ -296,8 +296,7 @@ class PromoAnalysis extends BaseController
 		// $preMonthEndId = 6;
 		// $postMonthId = 7;
 		// $postMonthEndId = 9;
-		//print_r();
-
+  
 		// var_dump($skus);
 		// die();
 		//$skus = ['WC002', 'WC001', 'DA001'];
