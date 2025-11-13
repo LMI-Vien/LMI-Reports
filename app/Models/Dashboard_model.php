@@ -6315,6 +6315,7 @@ class Dashboard_model extends Model
 	    }
 
 	 	$brandFilter = '';
+	 	$brandFilter2 = '';
 	    if (!empty($brandIds)) {
 	    	$cleanBrands = array_map('trim', $brandIds);
 	        $brandFilter = "AND tracc_brand_id IN ('" . implode("','", $cleanBrands) . "')";
