@@ -387,7 +387,7 @@ class ImportSellOut extends BaseController
 		echo $result;
 	}
 
-	public function update_aggregated_scan_data()
+	public function update_aggregated_scan_data_old()
 	{
 	    $data_header_id = $this->request->getPost('data_header_id');
 	    $month = $this->request->getPost('month');
@@ -409,6 +409,64 @@ class ImportSellOut extends BaseController
 	        'status' => 'error',
 	        'message' => 'Missing parameters: data_header_id, month, or year',
 	        'results' => []
+	    ]);
+	}
+
+	public function update_aggregated_scan_data()
+	{
+	    $data_header_id = $this->request->getPost('data_header_id');
+	    $month = $this->request->getPost('month');
+	    $year = $this->request->getPost('year');
+	    $payment_group = $this->request->getPost('customer_payment_group');
+	    $company = $this->request->getPost('company');
+
+	    //testing data
+	    // $data_header_id = 17;
+	    // $month = 2;
+	    // $year = 2025;
+	    // $payment_group = "Watsons Personal Care Stores (Philippines) Inc.";
+	    // $company = 2;
+
+	    if (empty($data_header_id) || empty($month) || empty($year)) {
+	        return $this->response->setJSON([
+	            'status' => 'error',
+	            'message' => 'Missing parameters: data_header_id, month, or year',
+	            'results' => []
+	        ]);
+	    }
+
+	    $refresher = new Sync_model();
+	    $refreshResult = $refresher->refreshScanData($data_header_id, $month, $year);
+
+	    $pythonPath = "python3"; // Use "python3" on Linux / python on windows depending on what python version you installed
+
+	    $scriptPath = FCPATH . "../migrate_sellout_clickhouse.py"; 
+	    $yearArg = escapeshellarg($year);
+	    $companyArg = escapeshellarg($company);
+	    $monthArg = escapeshellarg($month);
+	    $paymentGroupArg = escapeshellarg($payment_group);
+
+	    $cmd = "$pythonPath $scriptPath --year $yearArg --company $companyArg --month $monthArg --payment_group $paymentGroupArg";
+
+	    $output = [];
+	    $returnVar = 0;
+
+	    exec($cmd, $output, $returnVar);
+
+	    if ($returnVar !== 0) {
+	        return $this->response->setJSON([
+	            'status' => 'error',
+	            'message' => 'ScanData migration failed',
+	            'results' => $refreshResult,
+	            'migration_output' => $output
+	        ]);
+	    }
+
+	    return $this->response->setJSON([
+	        'status' => 'success',
+	        'message' => 'Refresh and migration completed successfully',
+	        'results' => $refreshResult,
+	        'migration_output' => $output
 	    ]);
 	}
 

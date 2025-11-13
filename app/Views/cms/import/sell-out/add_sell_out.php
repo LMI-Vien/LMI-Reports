@@ -163,6 +163,7 @@
     })
 
     async function read_xl_file() {
+
         let btn = $(".btn.save");
         btn.prop("disabled", false);
         clear_import_table();
@@ -439,7 +440,7 @@
     }
     var counter = 0;
     function checkDataSalesPerStore(parts, valid_data) {
-        console.log(parts[1], 'parts[1]')
+
         counter++;
         const month = getMonthIdByName($("#month").val());
         const year = $("#year").val();
@@ -521,6 +522,8 @@
         const start_time = new Date();
         const month = getMonthIdByName($("#month").val());
         const year = $("#year").val();
+        const customer_payment_group = $("#paygrp").val();
+        const company_id = parts[0];
 
         modal.loading_progress(true, "Saving data...");
 
@@ -536,7 +539,7 @@
                 } else {
                     modal.loading_progress(true, "Finishing data...");
                     delete_temp_data();
-                    updateAggregatedScanData(data_header_id, month, year);
+                    updateAggregatedScanData(data_header_id, month, year, customer_payment_group, company_id);
                     logAll(start_time, valid_data);
                     setTimeout(() => {
                         modal.loading(true);
@@ -580,12 +583,14 @@
         setTimeout(processNextBatch, 1000);
     }
 
-    function updateAggregatedScanData(data_header_id, month, year){
+    function updateAggregatedScanData(data_header_id, month, year, customer_payment_group, company_id){
         const update_url = "<?= base_url('cms/import-sell-out/update-aggregated-scan-data');?>";
         const data = {
             data_header_id: data_header_id,
             month: month,
             year: year,
+            customer_payment_group: customer_payment_group,
+            company: company_id,
         };
 
         aJax.post(update_url, data, function (result) {

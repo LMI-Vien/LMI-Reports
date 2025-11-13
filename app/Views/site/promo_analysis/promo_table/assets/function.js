@@ -61,67 +61,159 @@
 
         $('#itemLabel').select2({ placeholder: 'Select Select Label Type' });
 
-        $('#itmCode').select2({
-            placeholder: 'Select Item',
-            minimumInputLength: 2,
-            ajax: {
-                url: base_url + 'promo-analysis/search-sku',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return { term: params.term };
-                },
-                processResults: function (data) {
-                    return data;
-                },
-                cache: true
+$('#itmCode').select2({
+    placeholder: 'Select Item',
+    minimumInputLength: 0, // 👈 allow dropdown to open immediately
+    ajax: {
+        url: base_url + 'promo-analysis/search-sku',
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return { term: params.term || '' }; // empty term loads default items
+        },
+        processResults: function (data) {
+            return { results: data.results || data };
+        },
+        cache: true
+    },
+    templateResult: function (data) {
+        return data.text;
+    },
+    templateSelection: function (data) {
+        if (!data.id) return data.text;
+        const text = data.text || '';
+        return text.length > 15 ? text.substring(0, 15) + '…' : text;
+    }
+});
+
+// Preload top 10 items when opening (without removing search)
+$('#itmCode').on('select2:open', function () {
+    const select = $(this);
+    const select2 = select.data('select2');
+
+    if (!select2.loadedOnce) {
+        $.ajax({
+            url: base_url + 'promo-analysis/search-sku',
+            dataType: 'json',
+            data: { term: '' }, // load default list
+            success: function (data) {
+                const results = data.results || data;
+                const firstItems = results.slice(0, 10); // 👈 show top 10
+                select.empty();
+                firstItems.forEach(item => {
+                    const option = new Option(item.text, item.id, false, false);
+                    select.append(option);
+                });
+                select.trigger('change.select2');
+                select2.loadedOnce = true;
             }
         });
+    }
+});
 
-        $('#storeName').select2({
-            placeholder: 'Select Store',
-            minimumInputLength: 2,
-            ajax: {
-                url: base_url + 'promo-analysis/search-store',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return { term: params.term };
-                },
-                processResults: function (data) {
-                    return data;
-                },
-                cache: true
+
+// =============== STORE NAME ===============
+$('#storeName').select2({
+    placeholder: 'Select Store',
+    minimumInputLength: 0,
+    ajax: {
+        url: base_url + 'promo-analysis/search-store',
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return { term: params.term || '' };
+        },
+        processResults: function (data) {
+            return { results: data.results || data };
+        },
+        cache: true
+    },
+    templateResult: function (data) {
+        return data.text;
+    },
+    templateSelection: function (data) {
+        if (!data.id) return data.text;
+        const text = data.text || '';
+        return text.length > 15 ? text.substring(0, 15) + '…' : text;
+    }
+});
+
+$('#storeName').on('select2:open', function () {
+    const select = $(this);
+    const select2 = select.data('select2');
+
+    if (!select2.loadedOnce) {
+        $.ajax({
+            url: base_url + 'promo-analysis/search-store',
+            dataType: 'json',
+            data: { term: '' },
+            success: function (data) {
+                const results = data.results || data;
+                const firstItems = results.slice(0, 10);
+                select.empty();
+                firstItems.forEach(item => {
+                    const option = new Option(item.text, item.id, false, false);
+                    select.append(option);
+                });
+                select.trigger('change.select2');
+                select2.loadedOnce = true;
             }
         });
+    }
+});
 
-        $('#variantName').select2({
-          placeholder: 'Please select...',
-          allowClear: true,
-          width: '100%',
-          minimumInputLength: 2,
-          ajax: {
+
+// =============== VARIANT NAME ===============
+$('#variantName').select2({
+    placeholder: 'Please select...',
+    allowClear: true,
+    width: '100%',
+    minimumInputLength: 0,
+    ajax: {
+        url: base_url + 'promo-analysis/search-variant',
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return { term: params.term || '' };
+        },
+        processResults: function (data) {
+            return { results: data.results || data };
+        },
+        cache: true
+    },
+    templateResult: function (data) {
+        return data.text;
+    },
+    templateSelection: function (data) {
+        if (!data.id) return data.text;
+        const text = data.text || '';
+        return text.length > 15 ? text.substring(0, 15) + '…' : text;
+    }
+});
+
+$('#variantName').on('select2:open', function () {
+    const select = $(this);
+    const select2 = select.data('select2');
+
+    if (!select2.loadedOnce) {
+        $.ajax({
             url: base_url + 'promo-analysis/search-variant',
             dataType: 'json',
-            delay: 250,
-            data: function (params) {
-              return { term: params.term };
-            },
-            processResults: function (data) {
-              return { results: data.results || data };
-            },
-            cache: true
-          },
-          templateResult: function (data) {
-            return data.text;
-          },
-          // Show ellipsis only in the selected item display
-          templateSelection: function (data) {
-            if (!data.id) return data.text; // placeholder or empty
-            const text = data.text || ''; 
-            return text.length > 15 ? text.substring(0, 15) + '…' : text;
-          }
+            data: { term: '' },
+            success: function (data) {
+                const results = data.results || data;
+                const firstItems = results.slice(0, 10);
+                select.empty();
+                firstItems.forEach(item => {
+                    const option = new Option(item.text, item.id, false, false);
+                    select.append(option);
+                });
+                select.trigger('change.select2');
+                select2.loadedOnce = true;
+            }
         });
+    }
+});
 
 
         $("#year").on("change", function () {
@@ -267,7 +359,7 @@
                 $(target).val('');
             } else {
                 if ($(input).is('select')) {
-                    $(input).select2();
+                    //$(input).select2();
                 }
                 counter++;
             }

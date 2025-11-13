@@ -720,9 +720,24 @@ class GlobalController extends BaseController
 			case 'batch_delete_with_conditions':
 			    try {
 			        $table = $this->request->getPost('table');
-			        $conditions = $this->request->getPost('conditions'); // Now an array
+			        $conditions = $this->request->getPost('conditions');
 
 			        $result_data = $this->Global_model->batch_delete_with_conditions($table, $conditions);
+			        echo $result_data;
+			    } catch (Exception $e) {
+			        echo json_encode(['error' => $e->getMessage()]);
+			    }
+			    break;
+			case 'clickhouse_batch_delete':
+			    try {
+			        $table = $this->request->getPost('table');
+			        $conditions = $this->request->getPost('conditions');
+
+			        if (empty($table) || empty($conditions) || !is_array($conditions)) {
+			            throw new Exception("Table name or conditions are missing or invalid.");
+			        }
+			        $result_data = $this->Global_model->clickhouse_batch_delete($table, $conditions);
+
 			        echo $result_data;
 			    } catch (Exception $e) {
 			        echo json_encode(['error' => $e->getMessage()]);

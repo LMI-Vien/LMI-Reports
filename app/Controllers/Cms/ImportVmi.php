@@ -265,7 +265,7 @@ class ImportVmi extends BaseController
 		echo $result;
 	}
 
-	public function update_aggregated_vmi_data()
+	public function update_aggregated_vmi_data_old()
 	{
 	    $week = $this->request->getPost('week');
 	    $company = $this->request->getPost('company');
@@ -289,6 +289,62 @@ class ImportVmi extends BaseController
 	        'results' => []
 	    ]);
 	}
+
+
+
+	public function update_aggregated_vmi_data()
+	{
+	    $week = $this->request->getPost('week');
+	    $company = $this->request->getPost('company');
+	    $year = $this->request->getPost('year');
+
+	    if (empty($week) || empty($company) || empty($year)) {
+	        return $this->response->setJSON([
+	            'status' => 'error',
+	            'message' => 'Missing parameters: week, company, or year',
+	            'results' => []
+	        ]);
+	    }
+
+	    $refresher = new Sync_model();
+	    $refreshResult = $refresher->refreshVmiData($week, $year, $company);
+
+		//test data
+	    // $week = 4;
+	    // $company = 2; 
+	    // $year = 2;
+
+	    $pythonPath = "python3"; // Use "python3" on Linux / python on windows depending on what python version you installed
+
+	    $scriptPath = FCPATH . "../migrate_vmi_clickhouse.py"; 
+	    $yearArg = escapeshellarg($year);
+	    $companyArg = escapeshellarg($company);
+	    $weekArg = escapeshellarg($week);
+
+	    $cmd = "$pythonPath $scriptPath --year $yearArg --week $weekArg --company $companyArg";
+
+	    $output = [];
+	    $returnVar = 0;
+
+	    exec($cmd, $output, $returnVar);
+
+	    if ($returnVar !== 0) {
+	        return $this->response->setJSON([
+	            'status' => 'error',
+	            'message' => 'Migration failed',
+	            'results' => 'result',
+	            'migration_output' => $output
+	        ]);
+	    }
+
+	    return $this->response->setJSON([
+	        'status' => 'success',
+	        'message' => 'Refresh and migration completed successfully',
+	        'results' => 'result',
+	        'migration_output' => $output
+	    ]);
+	}
+
 
 	public function generateExcel()
 	{

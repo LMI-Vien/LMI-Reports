@@ -1768,6 +1768,27 @@ function batch_delete_with_conditions(url, table, conditions, callback) {
     }, response => callback(JSON.parse(response)));
 }
 
+function clickhouseBatchDelete(url, table, conditions, callback) {
+    if (typeof conditions !== 'object' || conditions === null) {
+        console.error('Conditions must be a valid object.');
+        return;
+    }
+
+    aJax.post(url, {
+        event: "clickhouse_batch_delete",
+        table: table,
+        conditions: conditions
+    }, response => {
+        try {
+            const data = JSON.parse(response);
+            callback(data);
+        } catch (e) {
+            console.error('Failed to parse response:', response);
+            callback({ error: 'Invalid response from server' });
+        }
+    });
+}
+
 function batch_update(url, data, table, primaryKey, get_code, callback) {
     aJax.post(url, {
         event: "batch_update",

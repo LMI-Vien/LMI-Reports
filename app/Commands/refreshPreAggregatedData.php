@@ -21,10 +21,20 @@ class refreshPreAggregatedData extends BaseCommand
             CLI::write('Refreshing Scan Data...', 'yellow');
             $scan = $refresher->refreshScanData();
             CLI::write('Scan records inserted: ' . $scan['total_inserted'], 'green');
+        } elseif ($type === 'scan2') { //php spark refresh:preaggregated vmi
+            CLI::write('Refreshing Scan Data2...', 'yellow');
+            $scan = $refresher->refreshScanDataToClickhouse();
+            CLI::write('Scan records inserted: ' . $scan['total_inserted'], 'green');
+            
         } elseif ($type === 'vmi') { //php spark refresh:preaggregated vmi
             CLI::write('Refreshing VMI Data...', 'yellow');
             $vmi = $refresher->refreshVmiData();
             CLI::write('VMI records inserted: ' . $vmi['total_inserted'], 'green');
+        } elseif ($type === 'vmi2') { //php spark refresh:preaggregated vmi
+            CLI::write('Refreshing VMI2 Data...', 'yellow');
+            $vmi = $refresher->refreshVmiDataToClickhouse();
+            CLI::write('VMI records inserted: ' . $vmi['total_inserted'], 'green');
+    
         } elseif($type === 'weekvmi'){ //php spark refresh:preaggregated weekvmi
             CLI::write('Refreshing Week on Week VMI Data...', 'yellow');
             $vmi = $refresher->refreshVmiWoWData();

@@ -7,7 +7,7 @@ use ClickHouseDB\Exception\QueryException;
 
 class ClickhouseClient
 {
-    protected $client;
+    public $client;
 
     public function __construct()
     {
@@ -42,5 +42,10 @@ class ClickhouseClient
             log_message('critical', 'ClickHouse General Exception: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    public function getClient()
+    {
+        return $this->client;
     }
 }

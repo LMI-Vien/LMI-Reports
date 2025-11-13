@@ -43,9 +43,12 @@ class PromoAnalysis extends BaseController
 		$data['months'] = $this->Global_model->getMonths();
 		$data['year'] = $this->Global_model->getYears();
 
-		$data['sku_item'] = $this->Global_model->getDistinctVmiData('sku', 20);
-		$data['variants'] = $this->Global_model->getDistinctVmiData('variant', 20);
-		$data['stores']   = $this->Global_model->getDistinctVmiData('store', 20);
+		$data['sku_item'] = $this->Global_model->getDistinctVmiDataClickhouse('sku', 20);
+		$data['variants'] = $this->Global_model->getDistinctVmiDataClickhouse('variant', 20);
+		$data['stores']   = $this->Global_model->getDistinctVmiDataClickhouse('store', 20);
+
+		// print_r($data['stores']);
+		// die();
 		$data['session'] = session();
 		$data['js'] = array(
 			"assets/site/bundle/js/bundle.min.js",
@@ -189,7 +192,7 @@ class PromoAnalysis extends BaseController
 		// die();
 		//$skus = ['WC002', 'WC001', 'DA001'];
 		//$skus = "'" . implode("','", $skus) . "'";
-		// print_r($variantName);
+		// print_r($storeCodes);
 		// die();
 		//$variantName = "BODY TREATS FRMNG HYRDRGEL EYE PATCHX3S";
 	    $data = $this->Dashboard_model->getPromoDataAllClickhouse($year, $yearId, $preWeekStart, $preWeekEnd, $postWeekStart, $postWeekEnd, $preMonthId, $preMonthEndId, $postMonthId, $postMonthEndId, $orderByColumn, $orderDirection, 99999999, $offset, $skus, $variantName, $brandIds, $brandLabelTypeIds, $storeCodes, $searchValue);
@@ -320,76 +323,111 @@ class PromoAnalysis extends BaseController
 	public function searchSku()
 	{
 	    $term = $this->request->getGet('term');
-	    $limit = 30;
-	    $query_items = "id > 0";
+	    $limit = 20;
+
+	    $ch = new \App\Libraries\ClickhouseClient();
+
+	    $params = [
+	        'limit' => (int)$limit,
+	    ];
+
+	    $sql = "
+	        SELECT DISTINCT itmcde
+	        FROM sfa_db.tbl_vmi_pre_aggregated_data
+	        WHERE itmcde IS NOT NULL AND TRIM(itmcde) != ''
+	        " . (!empty($term) ? "AND itmcde ILIKE {term:String}" : "") . "
+	        ORDER BY itmcde ASC
+	        LIMIT {limit:Int32}
+	        FORMAT JSON
+	    ";
 
 	    if (!empty($term)) {
-	        $query_items .= " AND itmcde LIKE '%" . esc($term) . "%'";
+	        $params['term'] = '%' . $term . '%';
 	    }
 
-	    $result = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, $limit, 0, 'id, itmcde', '', '', '', 'itmcde');
+	    $rows = $ch->query($sql, $params);
 
 	    $data = [];
-	    foreach ($result as $row) {
+	    foreach ($rows as $row) {
 	        $data[] = [
-	            'id' => $row->itmcde,
-	            'text' => $row->itmcde
+	            'id' => $row['itmcde'],
+	            'text' => $row['itmcde']
 	        ];
 	    }
 
-	    echo json_encode(['results' => $data]);
+	    return $this->response->setJSON(['results' => $data]);
 	}
 
 	public function searchStore()
 	{
 	    $term = $this->request->getGet('term');
-	    $limit = 30;
-	    $query_items = "id > 0";
+	    $limit = 10;
+
+	    $ch = new \App\Libraries\ClickhouseClient();
+
+	    $params = [
+	        'limit' => (int)$limit,
+	    ];
+
+	    $sql = "
+	        SELECT DISTINCT store_code, store_name
+	        FROM sfa_db.tbl_vmi_pre_aggregated_data
+	        WHERE store_code IS NOT NULL AND TRIM(store_code) != ''
+	        " . (!empty($term) ? "AND store_name ILIKE {term:String}" : "") . "
+	        ORDER BY store_code ASC
+	        LIMIT {limit:Int32}
+	        FORMAT JSON
+	    ";
 
 	    if (!empty($term)) {
-	        $query_items .= " AND store_name LIKE '%" . esc($term) . "%'";
+	        $params['term'] = '%' . $term . '%';
 	    }
 
-	    $result = $this->Global_model->get_data_list('tbl_vmi_pre_aggregated_data', $query_items, $limit, 0, 'id, store_code, store_name', '', '', '', 'store_code');
+	    $rows = $ch->query($sql, $params);
 
 	    $data = [];
-	    foreach ($result as $row) {
+	    foreach ($rows as $row) {
 	        $data[] = [
-	            'id' => $row->store_code,
-	            'text' => $row->store_name
+	            'id' => $row['store_code'],
+	            'text' => $row['store_name']
 	        ];
 	    }
 
-	    echo json_encode(['results' => $data]);
+	    return $this->response->setJSON(['results' => $data]);
 	}
 
 	public function searchVariant()
 	{
 	    $term = $this->request->getGet('term');
-	    $limit = 30;
-	    $query_items = "id > 0";
+	    $limit = 20;
+
+	    $ch = new \App\Libraries\ClickhouseClient();
+
+	    $params = [
+	        'limit' => (int)$limit,
+	    ];
+
+	    $sql = "
+	        SELECT DISTINCT item_name
+	        FROM sfa_db.tbl_vmi_pre_aggregated_data
+	        WHERE item_name IS NOT NULL AND TRIM(item_name) != ''
+	        " . (!empty($term) ? "AND item_name ILIKE {term:String}" : "") . "
+	        ORDER BY item_name ASC
+	        LIMIT {limit:Int32}
+	        FORMAT JSON
+	    ";
 
 	    if (!empty($term)) {
-	        $query_items .= " AND item_name LIKE '%" . esc($term) . "%'";
+	        $params['term'] = '%' . $term . '%';
 	    }
 
-	    $result = $this->Global_model->get_data_list(
-	        'tbl_vmi_pre_aggregated_data',
-	        $query_items,
-	        $limit,
-	        0,
-	        'id, item_name',
-	        '',
-	        '',
-	        '',
-	        'item_name'
-	    );
+	    $rows = $ch->query($sql, $params);
 
 	    $data = [];
-	    foreach ($result as $row) {
+	    foreach ($rows as $row) {
 	        $data[] = [
-	            'id' => $row->item_name,
-	            'text' => $row->item_name
+	            'id' => $row['item_name'],
+	            'text' => $row['item_name']
 	        ];
 	    }
 

@@ -169,6 +169,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('view/(:any)', 'Cms\ImportSellOut::view');
         $routes->get('add/(:any)', 'Cms\ImportSellOut::add');
         $routes->post('update-aggregated-scan-data', 'Cms\ImportSellOut::update_aggregated_scan_data');
+        $routes->get('update-aggregated-scan-data', 'Cms\ImportSellOut::update_aggregated_scan_data');
         $routes->match(['GET', 'POST'], 'import-temp-scan-data', 'Cms\ImportSellOut::import_temp_scan_data');
         $routes->match(['GET', 'POST'], 'fetch-temp-scan-data', 'Cms\ImportSellOut::fetch_temp_scan_data');
         $routes->match(['GET', 'POST'], 'delete-temp-scan-data', 'Cms\ImportSellOut::delete_temp_scan_data');
@@ -201,6 +202,7 @@ $routes->group('cms/', static function ($routes) {
         $routes->get('fetch-temp-vmi-data', 'Cms\ImportVmi::fetch_temp_vmi_data');
         $routes->post('import-temp-vmi-data', 'Cms\ImportVmi::import_temp_vmi_data');
         $routes->post('update-aggregated-vmi-data', 'Cms\ImportVmi::update_aggregated_vmi_data');
+        $routes->get('update-aggregated-vmi-data', 'Cms\ImportVmi::update_aggregated_vmi_data');
         $routes->post('delete-temp-vmi-data', 'Cms\ImportVmi::delete_temp_vmi_data');
 
         $routes->post('generate-excel', 'Cms\ImportVmi::generateExcel');

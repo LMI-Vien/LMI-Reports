@@ -315,7 +315,7 @@
                         }
                         html += "<tr class='" + rowClass + "'>";
                         html += "<td scope=\"col\">" + (y.created_date ? ViewDateformat(y.created_date) : "N/A") + "</td>";
-                        html += "<td scope=\"col\">" + (y.imported_by) + "</td>";
+                        html += "<td scope=\"col\">" + (y.imported_by ? y.imported_by : '') + "</td>";
                         html += "<td scope=\"col\">" + (y.company) + "</td>";
                         html += "<td scope=\"col\">" + (y.year) + "</td>";
                         html += "<td scope=\"col\">" + (y.week) + "</td>";
@@ -1509,8 +1509,8 @@
             success: function (res) {
                 if (res.status === 'started') {
                     modal.loading(false);
-                    logActivity('VMI Module', 'Export Data', null, null, null, null);
                     modal.alert("Excel generation has started. Please wait 5–10 minutes for the VMI file to download automatically.", "success");
+                    logActivity('VMI Module', 'Export Data', null, null, null, null);
 
                     let pollInterval = setInterval(function () {
                         $.getJSON('<?= base_url('cms/import-vmi/pending');?>', function (response) {
@@ -1544,6 +1544,14 @@
                     { field: "week", values: [week] }
                 ];
 
+                const conditionsClickhouse = {
+                    year: [year],
+                    company: [company],
+                    week: [week]
+                };
+
+                clickhouseBatchDelete(url, "tbl_vmi_pre_aggregated_data", conditionsClickhouse, function(resp) {
+                });
                 batch_delete_with_conditions(url, "tbl_vmi_pre_aggregated_data", conditions, function(resp) {
                 });
                 batch_delete_with_conditions(url, "tbl_vmi_header", conditions, function(resp) {

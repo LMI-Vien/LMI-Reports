@@ -6318,6 +6318,7 @@ class Dashboard_model extends Model
 	    if (!empty($brandIds)) {
 	    	$cleanBrands = array_map('trim', $brandIds);
 	        $brandFilter = "AND tracc_brand_id IN ('" . implode("','", $cleanBrands) . "')";
+	        $brandFilter2 = "AND brand_id IN ('" . implode("','", $cleanBrands) . "')";
 	    }
 
 	    $brandLabelTypeFilter = '';
@@ -6355,22 +6356,27 @@ class Dashboard_model extends Model
 	        any(so.ads_sales) AS ads_sales
 	    FROM
 	    (
-	        SELECT 
-	            itmcde,
-	            any(item_name) AS item_name_agg,
-	            round(SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32}, 2) AS pre_vmi,
-	            round(SUM(CASE WHEN week BETWEEN {postWeekStart:Int32} AND {postWeekEnd:Int32} THEN on_hand ELSE 0 END) / {postDays:Int32}, 2) AS post_vmi,
-	            round(
-	                IF(
-	                    SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) = 0,
-	                    0,
-	                    (
-	                        (SUM(CASE WHEN week BETWEEN {postWeekStart:Int32} AND {postWeekEnd:Int32} THEN on_hand ELSE 0 END) / {postDays:Int32})
-	                        /
-	                        (SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32})
-	                    ) * 100
-	                ),
-	            2) AS adv_vmi
+		SELECT 
+		    itmcde,
+		    any(item_name) AS item_name_agg,
+
+		    round(SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32}, 2) AS pre_vmi,
+		    round(SUM(CASE WHEN week BETWEEN {postWeekStart:Int32} AND {postWeekEnd:Int32} THEN on_hand ELSE 0 END) / {postDays:Int32}, 2) AS post_vmi,
+		    round(
+		        IF(
+		            round(SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32}, 2) = 0,
+		            0,
+		            (
+		                (
+		                    round(SUM(CASE WHEN week BETWEEN {postWeekStart:Int32} AND {postWeekEnd:Int32} THEN on_hand ELSE 0 END) / {postDays:Int32}, 2)
+		                    -
+		                    round(SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32}, 2)
+		                )
+		                /
+		                round(SUM(CASE WHEN week BETWEEN {preWeekStart:Int32} AND {preWeekEnd:Int32} THEN on_hand ELSE 0 END) / {preDays:Int32}, 2)
+		            ) * 100
+		        ),
+		    2) AS adv_vmi
 	        FROM sfa_db.tbl_vmi_pre_aggregated_data
 	        WHERE year = {yearId:Int32}
 	        AND itmcde IS NOT NULL AND itmcde != ''
@@ -6383,23 +6389,30 @@ class Dashboard_model extends Model
 	    ) AS vmi
 	    LEFT JOIN
 	    (
-	        SELECT 
-	            itmcde,
-	            round(SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32}, 2) AS pre_sales,
-	            round(SUM(CASE WHEN month BETWEEN {postMonthStart:Int32} AND {postMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {postMonthDays:Int32}, 2) AS post_sales,
-	            round(
-	                IF(
-	                    SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) = 0,
-	                    0,
-	                    (
-	                        (SUM(CASE WHEN month BETWEEN {postMonthStart:Int32} AND {postMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {postMonthDays:Int32})
-	                        /
-	                        (SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32})
-	                    ) * 100
-	                ),
-	            2) AS ads_sales
+		SELECT 
+		    itmcde,
+		    round(SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32}, 2) AS pre_sales,
+		    round(SUM(CASE WHEN month BETWEEN {postMonthStart:Int32} AND {postMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {postMonthDays:Int32}, 2) AS post_sales,
+		    round(
+		        IF(
+		            round(SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32}, 2) = 0,
+		            0,
+		            (
+		                (
+		                    round(SUM(CASE WHEN month BETWEEN {postMonthStart:Int32} AND {postMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {postMonthDays:Int32}, 2)
+		                    -
+		                    round(SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32}, 2)
+		                )
+		                /
+		                round(SUM(CASE WHEN month BETWEEN {preMonthStart:Int32} AND {preMonthEnd:Int32} THEN gross_sales ELSE 0 END) / {preMonthDays:Int32}, 2)
+		            ) * 100
+		        ),
+		    2) AS ads_sales
 	        FROM sfa_db.tbl_sell_out_pre_aggregated_data
 	        WHERE year = {year:Int32}
+	        $brandFilter2
+	        $brandLabelTypeFilter
+	        $storeCodeFilter
 	        GROUP BY itmcde
 	    ) AS so
 	    ON vmi.itmcde = so.itmcde
@@ -6426,7 +6439,6 @@ class Dashboard_model extends Model
 	        'postMonthDays' => (int)$postMonthDays,
 	        'limit' => (int)$pageLimit,
 	        'offset' => (int)$pageOffset,
-
 	        'variant' => $variantName,
 	    ];
 

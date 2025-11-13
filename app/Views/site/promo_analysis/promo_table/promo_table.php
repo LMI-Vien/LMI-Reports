@@ -82,7 +82,7 @@
 
                                             <th 
                                                 colspan="2"
-                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center;"
+                                                style="font-weight: bold; font-family: 'Poppins', sans-serif; text-align: center; background-color: #301311 !important;"
                                                 class="static-header"
                                             >
                                             PROMO TABLE

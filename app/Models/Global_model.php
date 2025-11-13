@@ -4,6 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 use CodeIgniter\Database\Exceptions\DatabaseException;
+use App\Libraries\ClickhouseClient;
 
 class Global_model extends Model
 {
@@ -249,40 +250,56 @@ class Global_model extends Model
         return $q->getResult();
     }
 
-    public function getDistinctVmiData($type = 'sku', $limit = 50)
+    public function getDistinctVmiDataClickhouse($type = 'sku', $limit = 50)
     {
-        $builder = $this->db->table('tbl_vmi_pre_aggregated_data');
+        $ch = new \App\Libraries\ClickhouseClient();
+
+        $params = [
+            'limit' => (int)$limit,
+        ];
 
         switch ($type) {
             case 'sku':
-                // SELECT DISTINCT itmcde FROM ...
-                $builder->distinct(true)->select('itmcde');
-                $builder->where('itmcde IS NOT NULL');
-                $builder->orderBy('itmcde', 'ASC');
+                $sql = "
+                    SELECT DISTINCT itmcde
+                    FROM sfa_db.tbl_vmi_pre_aggregated_data
+                    WHERE itmcde IS NOT NULL AND TRIM(itmcde) != ''
+                    ORDER BY itmcde ASC
+                    LIMIT {limit:Int32}
+                    FORMAT JSON
+                ";
                 break;
 
             case 'variant':
-                // SELECT DISTINCT item_name FROM ...
-                $builder->distinct(true)->select('item_name');
-                $builder->where('item_name IS NOT NULL');
-                $builder->orderBy('item_name', 'ASC');
+                $sql = "
+                    SELECT DISTINCT item_name
+                    FROM sfa_db.tbl_vmi_pre_aggregated_data
+                    WHERE item_name IS NOT NULL AND TRIM(item_name) != ''
+                    ORDER BY item_name ASC
+                    LIMIT {limit:Int32}
+                    FORMAT JSON
+                ";
                 break;
 
             case 'store':
-                // SELECT DISTINCT store_code, store_name FROM ...
-                // Use distinct on tuple (store_code, store_name)
-                $builder->distinct(true)->select('store_code, store_name', false);
-                $builder->where('store_code IS NOT NULL');
-                $builder->orderBy('store_code', 'ASC');
+                $sql = "
+                    SELECT DISTINCT store_code, store_name
+                    FROM sfa_db.tbl_vmi_pre_aggregated_data
+                    WHERE store_code IS NOT NULL AND TRIM(store_code) != ''
+                    ORDER BY store_code ASC
+                    LIMIT {limit:Int32}
+                    FORMAT JSON
+                ";
                 break;
 
             default:
                 throw new \InvalidArgumentException('Invalid type provided. Use: sku, variant, or store.');
         }
 
-        $builder->limit($limit);
-        $query = $builder->get();
-        return $query->getResultArray();
+        // Execute ClickHouse query
+        $rows = $ch->query($sql, $params);
+
+        return $rows;
     }
     
     function get_data_list($table, $query = null, $limit = 99999, $start = 0, $select = "*", $order_field = null, $order_type = null, $join = null, $group = null)
@@ -1035,6 +1052,51 @@ class Global_model extends Model
             return json_encode(['message' => 'success']);
         } else {
             return json_encode(['message' => 'failed']);
+        }
+    }
+
+    public function clickhouse_batch_delete($table, $conditions = [])
+    {
+        $clickhouse = new ClickhouseClient();
+        $chClient = $clickhouse->client;
+
+        if (empty($conditions)) {
+            return json_encode(['message' => 'No conditions provided. Aborting delete.']);
+        }
+
+        $whereParts = [];
+
+        foreach ($conditions as $field => $value) {
+            if (is_array($value) && !empty($value)) {
+                $escapedValues = array_map(function ($v) {
+                    return is_numeric($v) ? $v : "'" . addslashes($v) . "'";
+                }, $value);
+                $whereParts[] = "{$field} IN (" . implode(',', $escapedValues) . ")";
+            } elseif ($value !== null) {
+                $val = is_numeric($value) ? $value : "'" . addslashes($value) . "'";
+                $whereParts[] = "{$field} = {$val}";
+            }
+        }
+
+        if (empty($whereParts)) {
+            return json_encode(['message' => 'No valid conditions found. Aborting delete.']);
+        }
+
+        $whereSql = implode(' AND ', $whereParts);
+        $sql = "ALTER TABLE {$table} DELETE WHERE {$whereSql}";
+
+        try {
+            $chClient->write($sql);
+            return json_encode([
+                'message' => 'success',
+                'sql' => $sql,
+                'conditions' => $conditions
+            ]);
+        } catch (\Exception $e) {
+            return json_encode([
+                'message' => 'failed',
+                'error' => $e->getMessage()
+            ]);
         }
     }
 

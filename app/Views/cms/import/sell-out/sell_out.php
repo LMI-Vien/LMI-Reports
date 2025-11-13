@@ -379,8 +379,14 @@
                             html += "<td><span class='glyphicon glyphicon-pencil'></span></td>";
                         } else {
                           html+="<td class='center-content' style='width: 25%'>";
-                          html+="<a class='btn-sm btn delete' onclick=\"delete_data('"+y.year+"','"+y.month_id+"','"+y.id+"','"+y.company_id+"')\" id='"+y.id+
-                            "' title='Delete Item'><span class='glyphicon glyphicon-pencil'>Delete</span>";
+                            html += "<a class=\"btn-sm btn delete\" " +
+                                    "data-year=\"" + y.year + "\" " +
+                                    "data-month=\"" + y.month_id + "\" " +
+                                    "data-id=\"" + y.id + "\" " +
+                                    "data-company=\"" + y.company_id + "\" " +
+                                    "data-customer_payment_group=\"" + encodeURIComponent(y.customer_payment_group) + "\" " +
+                                    "id=\"" + y.id + "\" title=\"Delete Item\">" +
+                                    "<span class='glyphicon glyphicon-pencil'>Delete</span></a>";
                           html+="<a class='btn-sm btn view' href='"+ href +"' target='_blank' id='"+y.id+
                           "' title='View Details'><span class='glyphicon glyphicon-pencil'>View</span>";
 
@@ -1216,9 +1222,20 @@
         });
     }
 
+    $(document).on('click', '.delete', function() {
+        const $btn = $(this);
+        const year = $btn.data('year');
+        const month = $btn.data('month');
+        const data_header_id = $btn.data('id');
+        const company_id = $btn.data('company');
+        const customer_payment_group = decodeURIComponent($btn.data('customer_payment_group'));
 
-    function delete_data(year, month, data_header_id, company_id) 
+        delete_data(year, month, data_header_id, company_id, customer_payment_group);
+    });
+
+    function delete_data(year, month, data_header_id, company_id, customer_payment_group) 
     {
+        customer_payment_group = decodeURIComponent(customer_payment_group);
         modal.confirm(confirm_delete_message,function(result){
             if(result){
                 modal.loading(true);
@@ -1238,6 +1255,16 @@
                     { field: "company", values: [company_id] }
                 ];
 
+                const conditionsClickhouse = {
+                    year: [year],
+                    company: [company_id],
+                    month: [month],
+                    customer_payment_group: [customer_payment_group],
+                };
+
+                clickhouseBatchDelete(url, "tbl_sell_out_pre_aggregated_data", conditionsClickhouse, function(resp) {
+                });
+
                 batch_delete_with_conditions(url, "tbl_sell_out_pre_aggregated_data", aggregated_conditions, function(resp) {
 
                 });
@@ -1250,4 +1277,5 @@
             }
         });
     }
+
 </script>
