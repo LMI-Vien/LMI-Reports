@@ -7,6 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 //$routes->get('/', 'Maintenance::index'); //Enable only for maintenance mode
 //$routes->get('cms', 'Maintenance::index'); //Enable only for maintenance mode
+//$routes->get('/login', 'Maintenance::index'); //Enable only for maintenance mode
 
 $routes->get('/', 'Login::login');
 $routes->get('/dashboard', 'Dashboard::index');

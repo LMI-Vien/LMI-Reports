@@ -8,6 +8,6 @@ class ErrorHandler extends Controller
 {
     public function show404()
     {
-        return view('site/layout/error_404');
+        return redirect()->to('/login');
     }
 }
