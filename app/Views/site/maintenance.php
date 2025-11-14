@@ -5,10 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site Under Maintenance</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="icon" href="<?= base_url('assets/img/lmi_logo.ico') ?>" type="image/x-icon">
+    <script type="text/javascript" src="<?= base_url();?>assets/js/jquery-3.7.1.min.js" ></script>
+    <script type="text/javascript" src="<?= base_url();?>assets/js/bootstrap.bundle.min.js" ></script>
     <style>
         body {
             background: #67665a;
@@ -56,8 +55,14 @@
 <body>
     <div class="text-center fade-slide">
         <div class="worker-container">
-        <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.5/dist/dotlottie-wc.js" type="module"></script>
-        <dotlottie-wc src="https://lottie.host/84285414-8d97-424b-b248-5838c4b2f27e/zkPzY8W1QD.lottie" style="width: 300px;height: 300px" autoplay loop></dotlottie-wc>
+        <script src="<?= base_url();?>assets/js/dotlottie-wc.js" type="module"></script>
+
+        <dotlottie-wc 
+            src="<?= base_url();?>assets/lottie/maintenance.lottie"
+            style="width: 300px; height: 300px"
+            autoplay
+            loop>
+        </dotlottie-wc>
         </div>
 
         <h1 class="fw-bold">We’re Fixing Things Up!</h1>
