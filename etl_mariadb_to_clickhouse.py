@@ -86,9 +86,9 @@ with maria_conn.cursor() as cursor:
 
         transformed = []
         for r in rows:
-            ba_ids = parse_array(r[5])
-            brand_ids = parse_array(r[6])
-            ba_types = parse_array(r[7])
+            # ba_ids = parse_array(r[5])
+            # brand_ids = parse_array(r[6])
+            # ba_types = parse_array(r[7])
 
             transformed.append((
                 int(r[0]),
@@ -96,7 +96,9 @@ with maria_conn.cursor() as cursor:
                 int(r[2]),  
                 str(r[3] or ""),
                 str(r[4] or ""),
-                ba_ids, brand_ids, ba_types,
+                str(r[5] or ""),
+                str(r[6] or ""),
+                str(r[7] or ""),
                 int(r[8] or 0),
                 int(r[9] or 0),
                 str(r[10] or ""),

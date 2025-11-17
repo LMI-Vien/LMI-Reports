@@ -551,18 +551,18 @@
         let num = parseFloat(value);
         if (isNaN(num)) return value;
 
-        let arrow = "";
-        let color = "black";
+        color = "black";
+        arrow = ' <i class="fas fa-arrow-up"></i> +';
 
-        if (num > 0) {
+        if (num >= 0) {
             color = "green";
-            arrow = ' <i class="fas fa-arrow-up"></i>';
+            arrow = ' <i class="fas fa-arrow-up"></i> +';
         } else if (num < 0) {
             color = "red";
             arrow = ' <i class="fas fa-arrow-down"></i>';
         }
 
-        return `<span style="color:${color}; font-weight:600;">${arrow} ${formatNumberWithCommas(num.toFixed(2))}</span>`;
+        return `<span style="color:${color}; font-weight:600;"> ${arrow}${formatNumberWithCommas(num.toFixed(2))} %</span>`;
     }
 
     function fetchData() {

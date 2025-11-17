@@ -507,17 +507,17 @@ class PromoAnalysis extends BaseController
 
 	    // Default
 	    $color = '000000';
-	    $arrow = "";
+	    $arrow = " ▲ +";
 
 	    if ($num > 0) {
 	        $color = '00A000';
-	        $arrow = " ▲";
+	        $arrow = " ▲ +";
 	    } elseif ($num < 0) {
 	        $color = 'FF0000';
 	        $arrow = " ▼";
 	    }
 
-	    $sheet->setCellValue($cell, $arrow. $display);
+	    $sheet->setCellValue($cell, $arrow. $display . "%");
 
 	    $sheet->getStyle($cell)->getFont()->getColor()->setARGB($color);
 	}
@@ -525,17 +525,17 @@ class PromoAnalysis extends BaseController
 	private function pdfColoredText($pdf, $value)
 	{
 	    $num = floatval($value);
-	    $arrow = "";
+	    $arrow = " ↑ +";
 
 		if ($num > 0) {
 		    $pdf->SetTextColor(0, 150, 0);
-		    $arrow = " ↑";
+		    $arrow = " ↑ +";
 		} elseif ($num < 0) {
 		    $pdf->SetTextColor(255, 0, 0);
 		    $arrow = " ↓";
 		}
 
-	    return $arrow . number_format($num, 2);
+	    return $arrow . number_format($num, 2) . "%";
 	}
 
 
