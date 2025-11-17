@@ -486,7 +486,7 @@
     
         if (counter >= 1) {
             const generationPeriod = getTodayDateTime();
-            logActivity("Sell Through By Brand", "Refresh", "User refreshed sell through by brand.", "", "", "" );
+            logActivity("Promo Analysis", "Refresh", "User refreshed promo analysis.", "", "", "" );
 
             fetchData();
             $('.table-empty').hide();
@@ -529,10 +529,40 @@
                 },
                 complete: () => modal.loading(false)
             });
+
+            const end_time = new Date();
+            const duration = formatDuration(start_time, end_time);
+
+            const remarks = `
+                Exported Successfully!
+                <br>Start Time: ${formatReadableDate(start_time)}
+                <br>End Time: ${formatReadableDate(end_time)}
+                <br>Duration: ${duration}
+            `;
+            logActivity('Promo Analysis', action === 'exportPdf' ? 'Export PDF' : 'Export Excel', remarks, '-', null, null)
+
         } else {
             fetchData(filters, action);
             modal.loading(false);
         }
+    }
+
+    function formatColoredValue(value) {
+        let num = parseFloat(value);
+        if (isNaN(num)) return value;
+
+        let arrow = "";
+        let color = "black";
+
+        if (num > 0) {
+            color = "green";
+            arrow = ' <i class="fas fa-arrow-up"></i>';
+        } else if (num < 0) {
+            color = "red";
+            arrow = ' <i class="fas fa-arrow-down"></i>';
+        }
+
+        return `<span style="color:${color}; font-weight:600;">${arrow} ${formatNumberWithCommas(num.toFixed(2))}</span>`;
     }
 
     function fetchData() {
@@ -548,10 +578,12 @@
             let existingTable = $('#PromoAnalysis').DataTable();
             existingTable.clear().destroy();
         }
+
         var preWeekDays = 0;
         var postWeekDays = 0;
         var preMonthDays = 0;
         var postMonthDays = 0;
+
         let table = $('#PromoAnalysis').DataTable({
             paging: false,
             searching: false,
@@ -560,18 +592,18 @@
             lengthChange: false,
             colReorder: true,
             scrollY: "500px",
-            //scrollX: true,       
             scrollCollapse: true,
+
             ajax: {
                 url: base_url + 'promo-analysis/get-promo-table-all',
                 type: 'POST',
                 data: function(d) {
-                    Object.assign(d, f);                    
+                    Object.assign(d, f);
                     d.type = type;
                     d.is_export = isExport;
                 },
                 dataSrc: function(json) {
-                    if(json.data.length > 0){
+                    if (json.data.length > 0) {
                         preWeekDays = json.pre_week_days;
                         postWeekDays = json.post_week_days;
                         preMonthDays = json.pre_month_days;
@@ -581,30 +613,48 @@
                         $('.postWeekDays').text(postWeekDays);
                         $('.preMonthDays').text(preMonthDays);
                         $('.postMonthDays').text(postMonthDays);
-                        $('.preWeek').text( ' (W'+f.pre_week_start+' - W'+f.pre_week_end+')');
-                        $('.postWeek').text( ' (W'+f.post_week_start+' - W'+f.post_week_end+')');
-                        $('.preMonth').text( ' ('+f.pre_month_start_text+' - '+f.pre_month_end_text+')');
-                        $('.postMonth').text( ' ('+f.post_month_start_text+' - '+f.post_month_end_text+')');    
-                    }
-                    
-                    return json.data.length ? json.data : [];
 
+                        $('.preWeek').text(' (W' + f.pre_week_start + ' - W' + f.pre_week_end + ')');
+                        $('.postWeek').text(' (W' + f.post_week_start + ' - W' + f.post_week_end + ')');
+                        $('.preMonth').text(' (' + f.pre_month_start_text + ' - ' + f.pre_month_end_text + ')');
+                        $('.postMonth').text(' (' + f.post_month_start_text + ' - ' + f.post_month_end_text + ')');
+                    }
+
+                    return json.data.length ? json.data : [];
                 }
             },
+
             columns: [
                 { data: 'itmcde' },
                 { data: 'item_name' },
-                { data: 'pre_vmi', render: formatNumberWithCommas},
-                { data: 'post_vmi', render: formatNumberWithCommas},
-                { data: 'adv_vmi', render: formatNumberWithCommas},
-                { data: 'pre_sales', render: formatNumberWithCommas},
-                { data: 'post_sales', render: formatNumberWithCommas},
-                { data: 'ads_sales', render: formatNumberWithCommas}
+
+                { data: 'pre_vmi', render: formatNumberWithCommas },
+                { data: 'post_vmi', render: formatNumberWithCommas },
+
+                // PRE vs POST VMI — COLORED
+                {
+                    data: 'adv_vmi',
+                    render: function(data) {
+                        return formatColoredValue(data);
+                    }
+                },
+
+                { data: 'pre_sales', render: formatNumberWithCommas },
+                { data: 'post_sales', render: formatNumberWithCommas },
+
+                // PRE vs POST SALES — COLORED
+                {
+                    data: 'ads_sales',
+                    render: function(data) {
+                        return formatColoredValue(data);
+                    }
+                }
             ].filter(Boolean),
-            footerCallback: function (row, data, start, end, display) {
+
+            footerCallback: function(row, data, start, end, display) {
                 let api = this.api();
 
-                let intVal = function (i) {
+                let intVal = function(i) {
                     return typeof i === 'string'
                         ? i.replace(/[\$,]/g, '') * 1
                         : typeof i === 'number'
@@ -617,33 +667,39 @@
 
                 let totalPreScan = api.column(5).data().reduce((a, b) => intVal(a) + intVal(b), 0);
                 let totalPostScan = api.column(6).data().reduce((a, b) => intVal(a) + intVal(b), 0);
-                let totalPrePostVMI = totalPreVMI !== 0 
+
+                let totalPrePostVMI = totalPreVMI !== 0
                     ? ((totalPostVMI - totalPreVMI) / totalPreVMI) * 100
                     : 0;
 
                 let totalPrePostScan = totalPreScan !== 0
                     ? ((totalPostScan - totalPreScan) / totalPreScan) * 100
                     : 0;
+
                 $(api.column(2).footer()).html(formatNumberWithCommas(totalPreVMI.toFixed(2)));
                 $(api.column(3).footer()).html(formatNumberWithCommas(totalPostVMI.toFixed(2)));
-                $(api.column(4).footer()).html(formatNumberWithCommas(totalPrePostVMI.toFixed(2)) + "%");
+
+                // footer colored
+                $(api.column(4).footer()).html(formatColoredValue(totalPrePostVMI));
 
                 $(api.column(5).footer()).html(formatNumberWithCommas(totalPreScan.toFixed(2)));
                 $(api.column(6).footer()).html(formatNumberWithCommas(totalPostScan.toFixed(2)));
-                $(api.column(7).footer()).html(formatNumberWithCommas(totalPrePostScan.toFixed(2)) + "%");
+
+                // footer colored
+                $(api.column(7).footer()).html(formatColoredValue(totalPrePostScan));
             },
+
             columnDefs: [
-                {
-                    targets: [0, 1, 2, 3, 4, 5, 6],
-                    orderable: true
-                }
+                { targets: [0, 1, 2, 3, 4, 5, 6], orderable: true }
             ],
+
             processing: true,
             serverSide: true,
             searching: true,
             lengthChange: false
         });
     }
+
 
     function collectFilters() {
 

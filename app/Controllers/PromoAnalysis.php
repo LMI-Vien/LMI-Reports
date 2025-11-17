@@ -298,10 +298,10 @@ class PromoAnalysis extends BaseController
 	        $sheet->setCellValue("B{$rowNum}", $row['item_name']);
 	        $sheet->setCellValue("C{$rowNum}", $row['pre_vmi']);
 	        $sheet->setCellValue("D{$rowNum}", $row['post_vmi']);
-	        $sheet->setCellValue("E{$rowNum}", $row['adv_vmi']);
+	        $this->styleValueWithColor($sheet, "E{$rowNum}", $row['adv_vmi']);
 	        $sheet->setCellValue("F{$rowNum}", $row['pre_sales']);
 	        $sheet->setCellValue("G{$rowNum}", $row['post_sales']);
-	        $sheet->setCellValue("H{$rowNum}", $row['ads_sales']);
+	        $this->styleValueWithColor($sheet, "H{$rowNum}", $row['ads_sales']);
 	        $rowNum++;
 	    }
 
@@ -312,10 +312,12 @@ class PromoAnalysis extends BaseController
 	    $sheet->mergeCells("A{$rowNum}:B{$rowNum}");
 	    $sheet->setCellValue("C{$rowNum}", number_format($totalPreVMI, 2));
 	    $sheet->setCellValue("D{$rowNum}", number_format($totalPostVMI, 2));
-	    $sheet->setCellValue("E{$rowNum}", number_format($totalPrePostVMI, 2) . "%");
+	    $this->styleValueWithColor($sheet, "E{$rowNum}", $totalPrePostVMI, true);
 	    $sheet->setCellValue("F{$rowNum}", number_format($totalPreScan, 2));
 	    $sheet->setCellValue("G{$rowNum}", number_format($totalPostScan, 2));
-	    $sheet->setCellValue("H{$rowNum}", number_format($totalPrePostScan, 2) . "%");
+	    $this->styleValueWithColor($sheet, "H{$rowNum}", $totalPrePostScan, true);
+
+
 
 	    foreach (range('A','H') as $col) {
 	        $sheet->getColumnDimension($col)->setAutoSize(true);
@@ -401,7 +403,7 @@ class PromoAnalysis extends BaseController
 	    $this->printHeader($pdf, $title);
 	    $this->printFilter($pdf, $filterData, $latest_year);
 
-	    $pdf->SetFont('helvetica', '', 9);
+	    $pdf->SetFont('dejavusans', '', 9);
 
 	    $rows = $data['data'] ?? [];
 
@@ -426,7 +428,7 @@ class PromoAnalysis extends BaseController
 	    ];
 
 	    $pdf->Ln(2);
-	    $pdf->SetFont('helvetica','B',9);
+	    $pdf->SetFont('dejavusans','B',9);
 	    $lineHeight = 4;
 	    $colWidths = [30,60,30,30,30,40,30,20];
 
@@ -438,7 +440,7 @@ class PromoAnalysis extends BaseController
 	    }
 	    $pdf->Ln($lineHeight * 3);
 
-	    $pdf->SetFont('helvetica','',9);
+	    $pdf->SetFont('dejavusans','',9);
 	    $totalPreVMI = $totalPostVMI = $totalPreScan = $totalPostScan = 0;
 
 	    foreach ($rows as $row) {
@@ -464,29 +466,76 @@ class PromoAnalysis extends BaseController
 
 	        $pdf->Cell($colWidths[2], $rowH, $preVMI, 1, 0, 'C');
 	        $pdf->Cell($colWidths[3], $rowH, $postVMI, 1, 0, 'C');
-	        $pdf->Cell($colWidths[4], $rowH, $dv($row['adv_vmi'], 0), 1, 0, 'C');
+	        $pdf->Cell($colWidths[4], $rowH, $this->pdfColoredText($pdf, $row['adv_vmi']), 1, 0, 'C');
+	        $pdf->SetTextColor(0,0,0);
 	        $pdf->Cell($colWidths[5], $rowH, $preSales, 1, 0, 'C');
 	        $pdf->Cell($colWidths[6], $rowH, $postSales, 1, 0, 'C');
-	        $pdf->Cell($colWidths[7], $rowH, $dv($row['ads_sales'], 0), 1, 1, 'C');
+	        $pdf->Cell($colWidths[7], $rowH, $this->pdfColoredText($pdf, $row['ads_sales']), 1, 1, 'C');
+	        $pdf->SetTextColor(0,0,0);
 	    }
 
 	    $totalPrePostVMI = $totalPreVMI ? (($totalPostVMI - $totalPreVMI) / $totalPreVMI) * 100 : 0;
 	    $totalPrePostScan = $totalPreScan ? (($totalPostScan - $totalPreScan) / $totalPreScan) * 100 : 0;
 
 	    $pdf->Ln(2);
-	    $pdf->SetFont('helvetica','B',9);
+	    $pdf->SetFont('dejavusans','B',9);
 	    $pdf->Cell($colWidths[0] + $colWidths[1], 10, "Total:", 1, 0, 'R');
 
 	    $pdf->Cell($colWidths[2], 10, number_format($totalPreVMI,2), 1, 0, 'C');
 	    $pdf->Cell($colWidths[3], 10, number_format($totalPostVMI,2), 1, 0, 'C');
-	    $pdf->Cell($colWidths[4], 10, number_format($totalPrePostVMI,2)."%", 1, 0, 'C');
+	    $pdf->Cell($colWidths[4], 10, $this->pdfColoredText($pdf, $totalPrePostVMI), 1, 0, 'C');
+		$pdf->SetTextColor(0,0,0);
 	    $pdf->Cell($colWidths[5], 10, number_format($totalPreScan,2), 1, 0, 'C');
 	    $pdf->Cell($colWidths[6], 10, number_format($totalPostScan,2), 1, 0, 'C');
-	    $pdf->Cell($colWidths[7], 10, number_format($totalPrePostScan,2)."%", 1, 1, 'C');
+	    $pdf->Cell($colWidths[7], 10, $this->pdfColoredText($pdf, $totalPrePostScan), 1, 1, 'C');
+		$pdf->SetTextColor(0,0,0);
 
-	    $pdf->SetFont('helvetica','',9);
+	    $pdf->SetFont('dejavusans','',9);
 	    $pdf->Output($title . '.pdf', 'D');
 	    exit;
+	}
+
+	private function styleValueWithColor($sheet, $cell, $value, $isPercent = false)
+	{
+	    $num = floatval($value);
+
+	    if ($isPercent) {
+	        $display = number_format($num, 2) . "%";
+	    } else {
+	        $display = number_format($num, 2);
+	    }
+
+	    // Default
+	    $color = '000000';
+	    $arrow = "";
+
+	    if ($num > 0) {
+	        $color = '00A000';
+	        $arrow = " ▲";
+	    } elseif ($num < 0) {
+	        $color = 'FF0000';
+	        $arrow = " ▼";
+	    }
+
+	    $sheet->setCellValue($cell, $arrow. $display);
+
+	    $sheet->getStyle($cell)->getFont()->getColor()->setARGB($color);
+	}
+
+	private function pdfColoredText($pdf, $value)
+	{
+	    $num = floatval($value);
+	    $arrow = "";
+
+		if ($num > 0) {
+		    $pdf->SetTextColor(0, 150, 0);
+		    $arrow = " ↑";
+		} elseif ($num < 0) {
+		    $pdf->SetTextColor(255, 0, 0);
+		    $arrow = " ↓";
+		}
+
+	    return $arrow . number_format($num, 2);
 	}
 
 
