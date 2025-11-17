@@ -461,14 +461,14 @@
             return;
         }  
 
-        if (parseInt(preWeekFromFilter) >= parseInt(preWeekToFilter)) {
+        if (parseInt(preWeekFromFilter) > parseInt(preWeekToFilter)) {
             modal.alert('Pre Week From must be less than or equal to Pre Week To.', "warning");
             $filterPanel.addClass('open');
             $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
             return;
         }
 
-        if (parseInt(postWeekFromFilter) >= parseInt(postWeekToFilter)) {
+        if (parseInt(postWeekFromFilter) > parseInt(postWeekToFilter)) {
             modal.alert('Post Week From must be less than or equal to Post Week To.', "warning");
             $filterPanel.addClass('open');
             $toggleBtn.html('<i class="fas fa-angle-double-left mr-1"></i> Hide Filters');
