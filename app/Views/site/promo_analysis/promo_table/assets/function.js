@@ -564,8 +564,19 @@
             arrow = ' <i class="fas fa-arrow-down"></i> ';
         }
 
-        return `<span style="color:${color}; font-weight:600;">${arrow}${formatNumberWithCommas(num.toFixed(2))} ${percent}</span>`;
+        return `
+            <span style="
+                color:${color};
+                font-weight:600;
+                display:inline-block;
+                width:100%;
+                text-align:right;
+            ">
+                ${arrow}${formatNumberWithCommas(num.toFixed(2))} ${percent}
+            </span>
+        `;
     }
+
 
 
     function fetchData() {
@@ -681,14 +692,9 @@
 
                 $(api.column(2).footer()).html(formatNumberWithCommas(totalPreVMI.toFixed(2)));
                 $(api.column(3).footer()).html(formatNumberWithCommas(totalPostVMI.toFixed(2)));
-
-                // footer colored
                 $(api.column(4).footer()).html(formatColoredValue(totalPrePostVMI));
-
                 $(api.column(5).footer()).html(formatNumberWithCommas(totalPreScan.toFixed(2)));
                 $(api.column(6).footer()).html(formatNumberWithCommas(totalPostScan.toFixed(2)));
-
-                // footer colored
                 $(api.column(7).footer()).html(formatColoredValue(totalPrePostScan));
             },
 
