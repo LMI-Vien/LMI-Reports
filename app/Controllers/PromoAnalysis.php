@@ -499,15 +499,18 @@ class PromoAnalysis extends BaseController
 	{
 	    $num = floatval($value);
 
-	    if ($isPercent) {
-	        $display = number_format($num, 2) . "%";
-	    } else {
-	        $display = number_format($num, 2);
+	    if ($num == 0) {
+	        $sheet->setCellValue($cell, "");
+	        $sheet->getStyle($cell)->getFont()->getColor()->setARGB('000000');
+	        return;
 	    }
 
-	    // Default
-	    $color = '000000';
-	    $arrow = " ▲ +";
+	    $display = $isPercent
+	        ? number_format($num, 2) . "%"
+	        : number_format($num, 2);
+
+	    $color = '';
+	    $arrow = "";
 
 	    if ($num > 0) {
 	        $color = '00A000';
@@ -517,26 +520,34 @@ class PromoAnalysis extends BaseController
 	        $arrow = " ▼";
 	    }
 
-	    $sheet->setCellValue($cell, $arrow. $display . "%");
+	    $sheet->setCellValue($cell, $arrow . $display);
 
 	    $sheet->getStyle($cell)->getFont()->getColor()->setARGB($color);
 	}
 
+
 	private function pdfColoredText($pdf, $value)
 	{
 	    $num = floatval($value);
-	    $arrow = " ↑ +";
 
-		if ($num > 0) {
-		    $pdf->SetTextColor(0, 150, 0);
-		    $arrow = " ↑ +";
-		} elseif ($num < 0) {
-		    $pdf->SetTextColor(255, 0, 0);
-		    $arrow = " ↓";
-		}
+	    if ($num == 0) {
+	        $pdf->SetTextColor(0, 0, 0);
+	        return "";
+	    }
+
+	    $arrow = "";
+
+	    if ($num > 0) {
+	        $pdf->SetTextColor(0, 150, 0); 
+	        $arrow = " ↑ +";
+	    } elseif ($num < 0) {
+	        $pdf->SetTextColor(255, 0, 0); 
+	        $arrow = " ↓";
+	    }
 
 	    return $arrow . number_format($num, 2) . "%";
 	}
+
 
 
 	public function searchSku()

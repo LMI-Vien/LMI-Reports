@@ -549,21 +549,24 @@
 
     function formatColoredValue(value) {
         let num = parseFloat(value);
-        if (isNaN(num)) return value;
 
-        color = "black";
-        arrow = ' <i class="fas fa-arrow-up"></i> +';
+        if (isNaN(num) || num === 0) return "";
 
-        if (num >= 0) {
+        let color = "";
+        let arrow = "";
+        let percent = "%";
+
+        if (num > 0) {
             color = "green";
             arrow = ' <i class="fas fa-arrow-up"></i> +';
         } else if (num < 0) {
             color = "red";
-            arrow = ' <i class="fas fa-arrow-down"></i>';
+            arrow = ' <i class="fas fa-arrow-down"></i> ';
         }
 
-        return `<span style="color:${color}; font-weight:600;"> ${arrow}${formatNumberWithCommas(num.toFixed(2))} %</span>`;
+        return `<span style="color:${color}; font-weight:600;">${arrow}${formatNumberWithCommas(num.toFixed(2))} ${percent}</span>`;
     }
+
 
     function fetchData() {
         const f = collectFilters();
