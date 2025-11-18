@@ -379,9 +379,11 @@
                     d.type = type;
                     d.limit = d.length;
                     d.offset = d.start;
+                    d.zero_qty = $(`#zero_qty_${type}`).is(':checked') ? 1 : 0;
                 },
                 dataSrc: json => json.data || []
             },
+            dom: `<"datatable-header d-flex justify-content-between align-items-center mb-2"<"table-filters-${type}">f>rtip`,
             columns: columns,
             order: [[defaultSortColumn, 'desc']],
             columnDefs: columnDefs,
@@ -391,7 +393,21 @@
             serverSide: true,
             searching: true,
             colReorder: true,
-            lengthChange: false
+            lengthChange: false,
+            initComplete: function () {
+                const api = this.api();
+
+                $(`.table-filters-${type}`).html(`
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input zero-checkbox" id="zero_qty_${type}">
+                        <label class="form-check-label" for="zero_qty_${type}" style="color:black;">Include Zero Quantity</label>
+                    </div>
+                `);
+
+                $(`#zero_qty_${type}`).on('change', function () {
+                    api.ajax.reload();
+                });
+            }
         });
     }
 
@@ -431,6 +447,11 @@
         var tableNpd = $('input[aria-controls="table_npd"]').val() || '';
         var tableOverStock = $('input[aria-controls="table_overStock"]').val() || '';
 
+        var zeroQtySlowMoving = $('#zero_qty_slowMoving').is(':checked') ? 1 : 0;
+        var zeroQtyHero = $('#zero_qty_hero').is(':checked') ? 1 : 0;
+        var zeroQtyNpd = $('#zero_qty_npd').is(':checked') ? 1 : 0;
+        var zeroQtyOverStock = $('#zero_qty_overStock').is(':checked') ? 1 : 0;
+
         const params = new URLSearchParams();
         params.append('area', $('#areaId').val() || '');
         params.append('areaText', $('#area').val() || '');
@@ -446,6 +467,11 @@
         params.append('table_hero', tableHero);
         params.append('table_npd', tableNpd);
         params.append('table_overStock', tableOverStock);
+
+        params.append('zero_slowMoving', zeroQtySlowMoving);
+        params.append('zero_hero', zeroQtyHero);
+        params.append('zero_npd', zeroQtyNpd);
+        params.append('zero_overStock', zeroQtyOverStock);
 
         const brands = $('#brands').val();
         params.append('brands', JSON.stringify(brands));

@@ -9,7 +9,12 @@ class Dashboard_model extends Model
 {
 
 	public function dataPerStore(
-	    $pageLimit, $pageOffset, $orderByColumn, $orderDirection, $minWeeks, $maxWeeks, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null) {
+	    $pageLimit, $pageOffset, $orderByColumn, $orderDirection, 
+		$minWeeks, $maxWeeks, $week, $year, $brands = null, 
+		$baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $companyId = 3, 
+		$ItemClasses = null, $itemCat = null, $searchValue = null, $hideZeroQty
+		) 
+	{
 	    $params = [];
 	    $where = "WHERE vmi.week = ? AND vmi.year = ?";
 	    $params[] = $week;
@@ -117,6 +122,12 @@ class Dashboard_model extends Model
 	        }
 	    }
 
+		if ($hideZeroQty) {
+			$pivoted = array_filter($pivoted, function ($item) {
+				return $item['sum_total_qty'] > 0;
+			});
+		}
+
 	    if (!empty($searchValue)) {
 	        $searchValue = strtolower($searchValue);
 	        $pivoted = array_filter($pivoted, function ($item) use ($searchValue) {
@@ -152,7 +163,12 @@ class Dashboard_model extends Model
 	}
 
 	public function getItemClassNPDHEROData(
-	    $pageLimit, $pageOffset, $orderByColumn, $orderDirection, $week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, $ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null) {
+	    $pageLimit, $pageOffset, $orderByColumn, $orderDirection, 
+		$week, $year, $brands = null, $baId = null, $baType = null, $areaId = null, $ascId = null, $storeId = null, 
+		$ItemClassIdsFilter = null, $companyId = 3, $ItemClasses = null, $itemCat = null, $searchValue = null,
+		$hideZeroQty
+	) 
+	{
 	    $params = [];
 	    $where = "WHERE vmi.week = ? AND vmi.year = ?";
 	    $params[] = $week;
@@ -257,6 +273,11 @@ class Dashboard_model extends Model
 	        ];
 	    }
 
+		if ($hideZeroQty) {
+			$pivoted = array_filter($pivoted, function ($item) {
+				return $item['sum_total_qty'] > 0;
+			});
+		}
 	    if (!empty($searchValue)) {
 	        $searchValue = strtolower($searchValue);
 	        $pivoted = array_filter($pivoted, function ($item) use ($searchValue) {
@@ -287,6 +308,7 @@ class Dashboard_model extends Model
 
 	    return [
 	        'total_records' => $totalRecords,
+			'debug'			=> $hideZeroQty,
 	        'data'          => $pagedData
 	    ];
 	}

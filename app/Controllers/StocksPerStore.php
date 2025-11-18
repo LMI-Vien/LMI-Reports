@@ -105,6 +105,9 @@ class StocksPerStore extends BaseController
 	    $searchValue = trim($this->request->getVar('search')['value'] ?? '');
 		$searchValue = $searchValue === '' ? null : $searchValue;
 
+		$hideZeroQty = trim($this->request->getVar('zero_qty') ?? '');
+		$hideZeroQty = $hideZeroQty === "0" ? true : false;
+
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar = $this->Global_model->getSysPar();
 		$npdSku = [];
@@ -145,21 +148,21 @@ class StocksPerStore extends BaseController
 		    $orderDirection = strtoupper($orderDirection);
 		    switch ($type) {
 		        case 'slowMoving':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId, $searchValue);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId, $searchValue, $hideZeroQty);
 		            break;
 		        case 'overStock':
-		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId, $searchValue);
+		            $data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection, $skuMax, null, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId, $searchValue, $hideZeroQty);
 		            break;
 		        case 'npd':
 					$itemClassFilter = $npdSku;
-		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId, $searchValue);
+		           $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId, $searchValue, $hideZeroQty);
 		            break;
 		        case 'hero':
         			$itemClassFilter = $heroSku;
-		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId, $searchValue);
+		            $data = $this->Dashboard_model->getItemClassNPDHEROData($limit, $offset, $orderByColumn, $orderDirection, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $itemClassFilter, $companyId, $ItemClasses, $itemCatId, $searchValue, $hideZeroQty);
 		            break;
 		        default:
-		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection,$skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId, $searchValue);
+		        	$data = $this->Dashboard_model->dataPerStore($limit, $offset, $orderByColumn, $orderDirection,$skuMin, $skuMax, $latestWeek, $latestYear, $brands, $baId, $baTypeId, $areaId, $ascId, $storeId, $companyId, $ItemClasses, $itemCatId, $searchValue, $hideZeroQty);
 		    }
 
 		    return $this->response->setJSON([
@@ -237,6 +240,17 @@ class StocksPerStore extends BaseController
 		$tableOverStock = trim($json['table_overStock'] ?? '');
 		$tableOverStock = $tableOverStock === '' ? null : $tableOverStock;
 
+		$slowMovinghideZeroQty = trim($json['zero_slowMoving'] ?? '');
+		$slowMovinghideZeroQty = $slowMovinghideZeroQty = $slowMovinghideZeroQty === "0" ? true : false;
+		
+		$herohideZeroQty = trim($json['zero_hero'] ?? '');
+		$herohideZeroQty = $herohideZeroQty = $herohideZeroQty === "0" ? true : false;
+		
+		$npdhideZeroQty = trim($json['zero_npd'] ?? '');
+		$npdhideZeroQty = $npdhideZeroQty = $npdhideZeroQty === "0" ? true : false;
+		
+		$overStockhideZeroQty = trim($json['zero_overStock'] ?? '');
+		$overStockhideZeroQty = $overStockhideZeroQty = $overStockhideZeroQty === "0" ? true : false;
 
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar = $this->Global_model->getSysPar();
@@ -281,7 +295,7 @@ class StocksPerStore extends BaseController
 							$skuMin, $skuMax, $latestWeek, $latestYear, 
 							$brands, $baId, $baTypeId, $areaId, 
 							$ascId, $storeId, $companyId, $ItemClasses, 
-							$itemCatId, $tableSlowMoving
+							$itemCatId, $tableSlowMoving, $slowMovinghideZeroQty
 						);
 						break;
 
@@ -292,7 +306,7 @@ class StocksPerStore extends BaseController
 							$skuMax, null, $latestWeek, $latestYear, 
 							$brands, $baId, $baTypeId, $areaId, 
 							$ascId, $storeId, $companyId, $ItemClasses, 
-							$itemCatId, $tableOverStock
+							$itemCatId, $tableOverStock, $overStockhideZeroQty
 						);
 						break;
 
@@ -304,7 +318,7 @@ class StocksPerStore extends BaseController
 							$latestWeek, $latestYear, $brands, $baId, 
 							$baTypeId, $areaId, $ascId, $storeId, 
 							$itemClassFilter, $companyId, $ItemClasses, $itemCatId, 
-							$tableNpd
+							$tableNpd, $npdhideZeroQty
 						);
 						break;
 
@@ -316,7 +330,7 @@ class StocksPerStore extends BaseController
 							$latestWeek, $latestYear, $brands, $baId, 
 							$baTypeId, $areaId, $ascId, $storeId, 
 							$itemClassFilter, $companyId, $ItemClasses, $itemCatId, 
-							$tableHero
+							$tableHero, $herohideZeroQty
 						);
 						break;
 
@@ -326,7 +340,7 @@ class StocksPerStore extends BaseController
 							$skuMin, $skuMax, $latestWeek, $latestYear, 
 							$brands, $baId, $baTypeId, $areaId, 
 							$ascId, $storeId, $companyId, $ItemClasses, 
-							$itemCatId, ""
+							$itemCatId, "", true
 						);
 						break;
 				}
@@ -569,6 +583,18 @@ class StocksPerStore extends BaseController
 		$tableOverStock = trim($json['table_overStock'] ?? '');
 		$tableOverStock = $tableOverStock === '' ? null : $tableOverStock;
 
+		$slowMovinghideZeroQty = trim($json['zero_slowMoving'] ?? '');
+		$slowMovinghideZeroQty = $slowMovinghideZeroQty = $slowMovinghideZeroQty === "0" ? true : false;
+		
+		$herohideZeroQty = trim($json['zero_hero'] ?? '');
+		$herohideZeroQty = $herohideZeroQty = $herohideZeroQty === "0" ? true : false;
+		
+		$npdhideZeroQty = trim($json['zero_npd'] ?? '');
+		$npdhideZeroQty = $npdhideZeroQty = $npdhideZeroQty === "0" ? true : false;
+		
+		$overStockhideZeroQty = trim($json['zero_overStock'] ?? '');
+		$overStockhideZeroQty = $overStockhideZeroQty = $overStockhideZeroQty === "0" ? true : false;
+
 		$latestVmiData = $this->Dashboard_model->getLatestVmi();
 		$sysPar = $this->Global_model->getSysPar();
 		$npdSku = [];
@@ -610,7 +636,7 @@ class StocksPerStore extends BaseController
 							$skuMin, $skuMax, $latestWeek, $latestYear, 
 							$brands, $baId, $baTypeId, $areaId, 
 							$ascId, $storeId, $companyId, $ItemClasses, 
-							$itemCatId, $tableSlowMoving
+							$itemCatId, $tableSlowMoving, $slowMovinghideZeroQty
 						);
 						break;
 
@@ -621,7 +647,7 @@ class StocksPerStore extends BaseController
 							$skuMax, null, $latestWeek, $latestYear, 
 							$brands, $baId, $baTypeId, $areaId, 
 							$ascId, $storeId, $companyId, $ItemClasses, 
-							$itemCatId, $tableOverStock
+							$itemCatId, $tableOverStock, $overStockhideZeroQty
 						);
 						break;
 
@@ -633,7 +659,7 @@ class StocksPerStore extends BaseController
 							$latestWeek, $latestYear, $brands, $baId, 
 							$baTypeId, $areaId, $ascId, $storeId, 
 							$itemClassFilter, $companyId, $ItemClasses, $itemCatId, 
-							$tableNpd
+							$tableNpd, $npdhideZeroQty
 						);
 						break;
 
@@ -645,7 +671,7 @@ class StocksPerStore extends BaseController
 							$latestWeek, $latestYear, $brands, $baId, 
 							$baTypeId, $areaId, $ascId, $storeId, 
 							$itemClassFilter, $companyId, $ItemClasses, $itemCatId, 
-							$tableHero
+							$tableHero, $herohideZeroQty
 						);
 						break;
 
@@ -655,7 +681,7 @@ class StocksPerStore extends BaseController
 							$skuMin, $skuMax, $latestWeek, $latestYear, 
 							$brands, $baId, $baTypeId, $areaId, 
 							$ascId, $storeId, $companyId, $ItemClasses, 
-							$itemCatId, ""
+							$itemCatId, "", true
 						);
 						break;
 				}
