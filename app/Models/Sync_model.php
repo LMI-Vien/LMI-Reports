@@ -1304,7 +1304,7 @@ class Sync_model extends Model
         $whereClause = !empty($where) ? "WHERE " . implode(' AND ', $where) : '';
 
         if ($data_header_id === null || $month === null || $year === null) {
-            $chClient->write("TRUNCATE TABLE sfa_db.tbl_sell_out_pre_aggregated_datav2");
+            $chClient->write("TRUNCATE TABLE sfa_db.tbl_sell_out_pre_aggregated_data");
         }
 
         while (true) {
@@ -1485,7 +1485,7 @@ class Sync_model extends Model
                 ];
             }
 
-            $chClient->insert('tbl_sell_out_pre_aggregated_datav2', $insertData);
+            $chClient->insert('tbl_sell_out_pre_aggregated_data', $insertData);
             $count = count($insertData);
             $totalInserted += $count;
             $offset += $batchSize;
@@ -1950,7 +1950,7 @@ class Sync_model extends Model
         $whereClause = !empty($where) ? "WHERE " . implode(' AND ', $where) : '';
 
         if (!$company || !$week || !$year) {
-            $chClient->write("TRUNCATE TABLE sfa_db.tbl_vmi_pre_aggregated_dataV2");
+            $chClient->write("TRUNCATE TABLE sfa_db.tbl_vmi_pre_aggregated_data");
         }
 
         while (true) {
@@ -2107,7 +2107,7 @@ class Sync_model extends Model
                 ];
             }
 
-            $chClient->insert('tbl_vmi_pre_aggregated_dataV2', $insertData);
+            $chClient->insert('tbl_vmi_pre_aggregated_data', $insertData);
 
             $count = count($insertData);
             $totalInserted += $count;
