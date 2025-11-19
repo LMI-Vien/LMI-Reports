@@ -383,7 +383,11 @@
                 },
                 dataSrc: json => json.data || []
             },
-            dom: `<"datatable-header d-flex justify-content-between align-items-center mb-2"<"table-filters-${type}">f>rtip`,
+            dom: 
+            `<"datatable-header d-flex justify-content-between align-items-center mb-2"
+                <"table-filters-${type}">
+                f
+            >rtip`,
             columns: columns,
             order: [[defaultSortColumn, 'desc']],
             columnDefs: columnDefs,
@@ -398,9 +402,19 @@
                 const api = this.api();
 
                 $(`.table-filters-${type}`).html(`
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input zero-checkbox" id="zero_qty_${type}">
-                        <label class="form-check-label" for="zero_qty_${type}" style="color:black;">Include Zero Quantity</label>
+                    <div class="form-check d-flex align-items-center gap-2">
+                        <input 
+                            type="checkbox" 
+                            class="custom-checkbox"
+                            id="zero_qty_${type}"
+                        >
+                        <label 
+                            class="form-check-label fw-bold fs-6 mb-0"
+                            for="zero_qty_${type}" 
+                            style="color:black;"
+                        >
+                            Include Zero Quantity
+                        </label>
                     </div>
                 `);
 
