@@ -34,7 +34,7 @@
 
             <div class="row my-3">
                 <div class="col-md-2 d-flex justify-content-start">
-                    <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px">
+                    <label for="file" class="custom-file-upload save" style="margin-left:10px; margin-top: 10px; margin-bottom: 10px; padding-left: 5px; padding-right: 5px;">
                         <i class="fa fa-file-import" style="margin-right: 5px;"></i>Custom Upload
                     </label>
                     <input
@@ -108,6 +108,7 @@
     $(document).ready(function() {
         decoded = decodeURIComponent(template_id);
         parts = decoded.split("-");
+        console.log(parts[4])
 
         dynamic_search("'tbl_company'", "''", "'name'", 1, 0, "'id:EQ="+parts[0]+"'", "''", "''", (res)=>{
             companyString = res[0].name
@@ -188,8 +189,13 @@
         modal.loading_progress(true, "Preparing Data");
         const chunkSize = 512 * 1024; // 512 KB
         const totalChunks = Math.ceil(file.size / chunkSize);
+        console.log(file.size, 'file.size')
+        console.log(chunkSize, 'chunkSize')
 
         for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+            console.log(chunkIndex, 'chunkIndex')
+            console.log(totalChunks, 'totalChunks')
+            console.log('=============================================')
             let start = chunkIndex * chunkSize;
             let end = Math.min(start + chunkSize, file.size);
             let chunk = file.slice(start, end);
@@ -203,7 +209,7 @@
             formData.append("month", getMonthIdByName($("#month").val()));
             formData.append("year", $("#year").val());
             formData.append("customer_payment_group", $('#paygrp').val());
-            formData.append("template_id", "1");
+            formData.append("template_id", <?= json_encode($template_id) ?>);
             formData.append("placeholder", JSON.stringify(dynamicPlaceholder));
 
             try {
@@ -220,6 +226,8 @@
             updateSwalProgress("Preview Data", progress);
         }
 
+        await new Promise(r => setTimeout(r, 300));
+
         fetchPaginatedData();
         modal.loading_progress(false);
     }
@@ -234,6 +242,7 @@
             data: {
                 page: currentPage,
                 limit: rowsPerPage,
+                template_id: <?= json_encode($template_id) ?>, 
                 file_name: file_name
             },
             dataType: "json",
@@ -376,7 +385,7 @@
                 url: "<?= base_url('cms/import-sell-out/fetch-temp-scan-data'); ?>",
                 method: "GET",
 
-                data: { page, limit: 5000, file_name}, // Fetch in larger chunks
+                data: { page, limit: 5000, file_name, template_id: parseInt(<?= json_encode($template_id) ?>)}, // Fetch in larger chunks
                 success: function(response) {
                     allData = allData.concat(response.data);
                     if (response.data.length === 5000) {

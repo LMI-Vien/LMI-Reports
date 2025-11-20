@@ -1134,7 +1134,11 @@
                                 return modal.alert_custom("Fill up the Fields.", "Company, Payment Group, Template, Month and Year cannot be empty", "error");
                             }
 
-                            href += `${encodeURIComponent(company)}-${encodeURIComponent(payGroup)}-${encodeURIComponent(year)}-${encodeURIComponent(month)}-${encodeURIComponent(template)}`;
+                            href += `${encodeURIComponent(company)}-`;
+                            href += `${encodeURIComponent(payGroup)}-`;
+                            href += `${encodeURIComponent(year)}-`;
+                            href += `${encodeURIComponent(month)}-`;
+                            href += `${encodeURIComponent(template)}`;
 
                             window.location.href = href;
                         }

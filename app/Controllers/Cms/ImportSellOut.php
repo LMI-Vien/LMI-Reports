@@ -94,6 +94,17 @@ class ImportSellOut extends BaseController
 	public function add() {
 		$uri = current_url(true);
 		$data['uri'] =$uri;
+		$lastSegment = $uri->getSegment($uri->getTotalSegments());
+		$lastSegment = urldecode($lastSegment);
+		$parts = explode('-', $lastSegment);
+		$query = [
+		    'import_file_code' => $parts[4]
+		];
+		$data['template_id'] = $this->Global_model->get_data(
+			'tbl_sell_out_template_header', $query, 1, 0, 
+			'id', 
+			'id', 'ASC', null, null
+		)[0]->id;
 
 		$data['meta'] = array(
 			"title"         =>  "Import Sell Out",
@@ -239,12 +250,6 @@ class ImportSellOut extends BaseController
 								$batchData = [];
 							}
 						}
-				
-						// Insert remaining data
-						if (!empty($batchData)) {
-							$this->Custom_model->batch_insert('tbl_sell_out_temp_space', $batchData);
-							$totalInserted += count($batchData);
-						}
 					}
 				} elseif (str_ends_with($fileName, '.xls') || str_ends_with($fileName, '.xlsx')) {
 	                $reader = IOFactory::createReaderForFile($finalFilePath);
@@ -371,8 +376,9 @@ class ImportSellOut extends BaseController
 		$page = $this->request->getGet('page') ?? 1;
 		$limit = $this->request->getGet('limit') ?? 1000;
 		$file_name = $this->request->getGet('file_name');
+		$template_id = $this->request->getGet('template_id');
 
-		$result = $this->Global_model->fetch_scan_data($limit, $page, $file_name, $this->session->get('sess_uid'));
+		$result = $this->Global_model->fetch_scan_data($limit, $page, $file_name, $template_id, $this->session->get('sess_uid'));
 		return $this->response->setJSON([
 			"success" => true,
 			"data" => $result['data'],

@@ -1604,13 +1604,14 @@ class Global_model extends Model
         }
     }
 
-    public function fetch_scan_data($limit, $page, $filename, $id)
+    public function fetch_scan_data($limit, $page, $filename, $template_id, $id)
     {
         $offset = ($page - 1) * $limit;
 
         $builder = $this->db->table('tbl_sell_out_temp_space')
                       ->where('file_name', $filename)
                       ->where('created_by', $id)
+                      ->where('template_id', $template_id)
                       ->orderBy('id', 'ASC')
                       ->limit($limit, $offset)
                       ->get();
