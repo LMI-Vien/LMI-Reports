@@ -5,7 +5,7 @@ from datetime import datetime
 def migrate_data(year=None, company=None, month=None, payment_group=None):
     # ---------------- MariaDB Connection ----------------
     maria_conn = pymysql.connect(
-        host="127.0.0.1",
+        host="192.168.1.232",
         user="root",
         password="new_secure_password",
         database="sfa_prod_db",
@@ -15,7 +15,7 @@ def migrate_data(year=None, company=None, month=None, payment_group=None):
 
     # ---------------- ClickHouse Connection ----------------
     ch_client = get_client(
-        host="localhost",
+        host="192.168.1.232",
         port=8123,
         username="default",
         password="LMI@123",
