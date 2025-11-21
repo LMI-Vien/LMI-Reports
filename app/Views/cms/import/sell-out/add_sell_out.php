@@ -639,7 +639,8 @@
             let link = filePath ? `<a href="<?= base_url() ?>${filePath}" target="_blank">View Details</a>` : null;
 
             logActivity('Add Sell Out Module', 'Import Data', remarks, link, null, null);
-            window.location.href = "<?=base_url('cms/import-sell-out/');?>";
+            let href = "<?= base_url() ?>" + "cms/import-sell-out/";
+            window.location.href = href;
         });
     }
 

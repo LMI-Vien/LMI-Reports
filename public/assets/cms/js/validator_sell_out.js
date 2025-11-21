@@ -43,6 +43,7 @@ self.onmessage = async function(e) {
         con_data.customer_sku_code_rgdi.forEach(group => customer_sku_code_lookup_rgdi[group.cusitmcde.toLowerCase()] = group.recid);
 
         let system_parameter = con_data.system_parameter[0]['watsons_payment_group'];
+        console.log(system_parameter, 'system_parameter')
 
         let ba_checklist = {};
         con_data.ba_area_store_brand.forEach(entry => {
@@ -110,6 +111,8 @@ self.onmessage = async function(e) {
                 if (customer_payment_group.toLowerCase() === system_parameter.toLowerCase()) {
                     let store = store_lookup[store_code.toLowerCase()];
                     if (!store) addErrorLog("Invalid Store");
+                    console.log(customer_payment_group.toLowerCase(), 'row')
+                    console.log(system_parameter.toLowerCase(), 'syspar')
                 }
 
                 let matched = ba_checklist[store_code?.toLowerCase()] || {};
