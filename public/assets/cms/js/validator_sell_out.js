@@ -12,7 +12,19 @@ self.onmessage = async function(e) {
     let index = 0;
 
     try {
-        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?stores=1&payment_group_lmi=1&payment_group_rgdi=1&customer_sku_code_lmi=1&customer_sku_code_rgdi=1&ba_area_store_brand=1`);
+        const params = new URLSearchParams({
+            stores: 1,
+            payment_group_lmi: 1,
+            payment_group_rgdi: 1,
+            customer_sku_code_lmi: 1,
+            customer_sku_code_rgdi: 1,
+            ba_area_store_brand: 1,
+            system_parameter: 1
+        });
+
+        const request_url = params.toString();
+
+        let get_ba_valid_response = await fetch(`${BASE_URL}cms/global_controller/get_valid_ba_data?${request_url}`);
         let con_data = await get_ba_valid_response.json();
 
         let store_lookup = {};
@@ -29,6 +41,8 @@ self.onmessage = async function(e) {
 
         let customer_sku_code_lookup_rgdi = {};
         con_data.customer_sku_code_rgdi.forEach(group => customer_sku_code_lookup_rgdi[group.cusitmcde.toLowerCase()] = group.recid);
+
+        let system_parameter = con_data.system_parameter[0]['watsons_payment_group'];
 
         let ba_checklist = {};
         con_data.ba_area_store_brand.forEach(entry => {
@@ -93,8 +107,10 @@ self.onmessage = async function(e) {
                     sku_code = sku_code;
                 }
 
-                let store = store_lookup[store_code.toLowerCase()];
-                if (!store) addErrorLog("Invalid Store");
+                if (customer_payment_group.toLowerCase() === system_parameter.toLowerCase()) {
+                    let store = store_lookup[store_code.toLowerCase()];
+                    if (!store) addErrorLog("Invalid Store");
+                }
 
                 let matched = ba_checklist[store_code?.toLowerCase()] || {};
 
